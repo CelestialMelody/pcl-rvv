@@ -1,0 +1,86 @@
+❯ make run_hot_compare
+make[1]: Entering directory '/root/pcl-test/app'
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/app/pipeline_hot_std  2>&1 | tee /root/pcl-test/app/output/run_hot_std.log
+======================================================================================================================
+ PCL pipeline_hot_rvv — common/norms/gaussConv/polygon[+__RVV10__ strip]，已去掉 voxel/法线KdTree/tf/2d/SAC。
+ Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-'] [OUT_PCD_BINARY|'-']
+ Image Size: 480 x 272
+ Dataset: pipeline_hot synth raw_pts=50000 seg_pts=512 norm_dim=128 norm_repeat=400 gaussian_float_image
+ raw cloud points: 50000
+ Iterations: 12
+ Warmup: 3
+ build: __RVV10__ OFF
+======================================================================================================================
+total_pipeline_hot_rvv_only (common+norms+gauss+poly[+strip])       : 15.1088 ms/iter
+--- 分阶段耗时（平均每迭代 ms；百分比为相对本节各阶段之和）；标签可多行，续行与首行左对齐 ---
+[HOT01] raw common 热区（无 voxel/法线/tf/2d/SAC）—    : 14.7571 ms/iter  (100.0% of staged)
+        common/centroid: compute3DCentroid, computeMeanAndCovarianceMatrix;
+        common/common: getMinMax3D, getMaxDistance;
+        common/norms: L2_Norm, L1_Norm (norm_repeat);
+        common/common: getMaxSegment;
+        common/gaussian: GaussianKernel::convolveRows, convolveCols;
+        common/common: calculatePolygonArea
+[HOT02] RVV 初等条带（仅 __RVV10__）—                  : 0.0001 ms/iter  (0.0% of staged)
+        common/common: expf_RVV_f32m2, logf_RVV_f32m2,
+        atan2_RVV_f32m2, acos_RVV_f32m2
+staged_sum                                                      : 14.7572 ms/iter
+[pipeline_hot] 完成 12 次计时迭代。
+======================================================================================================================
+make[1]: Leaving directory '/root/pcl-test/app'
+make[1]: Entering directory '/root/pcl-test/app'
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/app/pipeline_hot_rvv  2>&1 | tee /root/pcl-test/app/output/run_hot_rvv.log
+======================================================================================================================
+ PCL pipeline_hot_rvv — common/norms/gaussConv/polygon[+__RVV10__ strip]，已去掉 voxel/法线KdTree/tf/2d/SAC。
+ Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-'] [OUT_PCD_BINARY|'-']
+ Image Size: 480 x 272
+ Dataset: pipeline_hot synth raw_pts=50000 seg_pts=512 norm_dim=128 norm_repeat=400 gaussian_float_image
+ raw cloud points: 50000
+ Iterations: 12
+ Warmup: 3
+ build: __RVV10__ ON
+======================================================================================================================
+total_pipeline_hot_rvv_only (common+norms+gauss+poly[+strip])       : 8.3391 ms/iter
+--- 分阶段耗时（平均每迭代 ms；百分比为相对本节各阶段之和）；标签可多行，续行与首行左对齐 ---
+[HOT01] raw common 热区（无 voxel/法线/tf/2d/SAC）—    : 7.9662 ms/iter  (99.8% of staged)
+        common/centroid: compute3DCentroid, computeMeanAndCovarianceMatrix;
+        common/common: getMinMax3D, getMaxDistance;
+        common/norms: L2_Norm, L1_Norm (norm_repeat);
+        common/common: getMaxSegment;
+        common/gaussian: GaussianKernel::convolveRows, convolveCols;
+        common/common: calculatePolygonArea
+[HOT02] RVV 初等条带（仅 __RVV10__）—                  : 0.0149 ms/iter  (0.2% of staged)
+        common/common: expf_RVV_f32m2, logf_RVV_f32m2,
+        atan2_RVV_f32m2, acos_RVV_f32m2
+staged_sum                                                      : 7.9811 ms/iter
+[pipeline_hot] 完成 12 次计时迭代。
+======================================================================================================================
+make[1]: Leaving directory '/root/pcl-test/app'
+python3 /root/pcl-test/script/analyze_bench_compare.py \
+        --std-log /root/pcl-test/app/output/run_hot_std.log \
+        --rvv-log /root/pcl-test/app/output/run_hot_rvv.log \
+        --device "board rv64 (Milkv-Jupiter)" \
+        --vlen-desc "256 bits (hardware vlenb csr, 32 bytes)" \
+        2>&1 | tee /root/pcl-test/app/output/analyze_hot_compare.log
+===========================================================================================================================
+ Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-'] [OUT_PCD_BINARY|'-'] (Std vs RVV)
+===========================================================================================================================
+[Benchmark Context]
+  Device    : board rv64 (Milkv-Jupiter)
+  VLEN      : 256 bits (hardware vlenb csr, 32 bytes)
+  Dataset   : pipeline_hot synth raw_pts=50000 seg_pts=512 norm_dim=128 norm_repeat=400 gaussian_float_image
+  Iterations: 12 （每行 Total = Avg × 12）
+  Std log   : /root/pcl-test/app/output/run_hot_std.log
+  RVV log   : /root/pcl-test/app/output/run_hot_rvv.log
+
+---------------------------------------------------------------------------------------------------------------------------
+Benchmark Item                                                 | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+total_pipeline_hot_rvv_only (common+norms+gauss+poly[+strip])  | Std    |     15.1088 ms |    181.3056 ms |    [   1.00x ]
+                                                               | RVV    |      8.3391 ms |    100.0692 ms |    [   1.81x ]
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+staged_sum                                                     | Std    |     14.7572 ms |    177.0864 ms |    [   1.00x ]
+                                                               | RVV    |      7.9811 ms |     95.7732 ms |    [   1.85x ]
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+===========================================================================================================================

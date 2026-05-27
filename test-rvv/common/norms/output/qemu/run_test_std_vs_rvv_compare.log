@@ -1,0 +1,16 @@
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from NormsStdVsRvv
+[ RUN      ] NormsStdVsRvv.L1_L2sqr_Linf_L2_on_float_pointer
+[       OK ] NormsStdVsRvv.L1_L2sqr_Linf_L2_on_float_pointer (2 ms)
+[ RUN      ] NormsStdVsRvv.JM_B_Sublinear_CS_HIK_PF_K_nonnegative
+[       OK ] NormsStdVsRvv.JM_B_Sublinear_CS_HIK_PF_K_nonnegative (2 ms)
+[ RUN      ] NormsStdVsRvv.Div_KL_positive
+[       OK ] NormsStdVsRvv.Div_KL_positive (2 ms)
+[ RUN      ] NormsStdVsRvv.selectNorm_vector_matches_std_dispatch
+[       OK ] NormsStdVsRvv.selectNorm_vector_matches_std_dispatch (5 ms)
+[----------] 4 tests from NormsStdVsRvv (14 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (17 ms total)
+[  PASSED  ] 4 tests.

@@ -1,0 +1,114 @@
+❯ make run_pipeline_compare
+make[1]: Entering directory '/root/pcl-test/app'
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/app/pipeline_app_std  2>&1 | tee /root/pcl-test/app/output/run_pipeline_std.log
+======================================================================================================================
+ PCL RVV 综合流水线（生成/滤波/法线/变换/2d/SAC/common）
+ Workload: common(centroid..polygon,gaussian) + filters + features(normals) + transform + 2d + SAC + RVV intrinsic strip (common.hpp)
+ Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-'] [OUT_PCD_BINARY|'-']
+ Image Size: 400 x 224 (img2d master; gaussian float image 480 x 272)
+ Dataset: pipeline_app synth raw_pts=50000 SAC_pts=10000 norm_dim=128 norm_repeat=400
+ raw cloud: 50000  SAC planar: 10000
+ Iterations: 12
+ Warmup: 3
+ build: __RVV10__ OFF
+======================================================================================================================
+total_pipeline (full chain)                                         : 1229.7447 ms/iter
+--- 分阶段耗时（平均每迭代 ms；百分比为相对本节各阶段之和）；标签可多行，续行与首行左对齐 ---
+[PIP01] raw 点云：common 全段（含 RVV 初等条带）—    : 13.0820 ms/iter  (1.1% of staged)
+        common/centroid: compute3DCentroid, computeMeanAndCovarianceMatrix;
+        common/common: getMinMax3D, getMaxDistance;
+        common/norms: L2_Norm, L1_Norm;
+        common/common: getMaxSegment;
+        common/gaussian: GaussianKernel::convolveRows, convolveCols (gauss_gray);
+        common/common: calculatePolygonArea;
+        common/common: expf_RVV_f32m2, logf_RVV_f32m2, atan2_RVV_f32m2, acos_RVV_f32m2
+[PIP02] 标量占位 —                                           : 0.0001 ms/iter  (0.0% of staged)
+        common/common: getAngle3D
+[PIP03] 体素滤波 —                                           : 21.6087 ms/iter  (1.8% of staged)
+        filters: VoxelGrid::filter; copyPointCloud (sparse fallback)
+[PIP04] 半径法线 + 邻域 —                                  : 1086.0903 ms/iter  (88.3% of staged)
+        features: NormalEstimation::compute; search/KdTree (radius normals)
+[PIP05] 刚体变换 —                                           : 0.3096 ms/iter  (0.0% of staged)
+        transforms: transformPointCloud (rigid on filtered)
+[PIP06] 预制强度图上的 2d —                               : 100.3762 ms/iter  (8.2% of staged)
+        2d: copyPointCloud(img2d_master); Convolution::filter;
+        Morphology::erosionGray; Edge::detectEdgeSobel
+[PIP07] 专用 SAC 点云 —                                      : 7.8478 ms/iter  (0.6% of staged)
+        sample_consensus (cloud_sac): SampleConsensusModelPlane::countWithinDistance;
+        SampleConsensusModelNormalPlane::selectWithinDistance,
+        countWithinDistance, getDistancesToModel
+staged_sum                                                         : 1229.3147 ms/iter
+[pipeline] 完成 12 次计时迭代（不含 warmup）。
+======================================================================================================================
+make[1]: Leaving directory '/root/pcl-test/app'
+make[1]: Entering directory '/root/pcl-test/app'
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/app/pipeline_app_rvv  2>&1 | tee /root/pcl-test/app/output/run_pipeline_rvv.log
+======================================================================================================================
+ PCL RVV 综合流水线（生成/滤波/法线/变换/2d/SAC/common）
+ Workload: common(centroid..polygon,gaussian) + filters + features(normals) + transform + 2d + SAC + RVV intrinsic strip (common.hpp)
+ Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-'] [OUT_PCD_BINARY|'-']
+ Image Size: 400 x 224 (img2d master; gaussian float image 480 x 272)
+ Dataset: pipeline_app synth raw_pts=50000 SAC_pts=10000 norm_dim=128 norm_repeat=400
+ raw cloud: 50000  SAC planar: 10000
+ Iterations: 12
+ Warmup: 3
+ build: __RVV10__ ON
+======================================================================================================================
+total_pipeline (full chain)                                         : 1095.4222 ms/iter
+--- 分阶段耗时（平均每迭代 ms；百分比为相对本节各阶段之和）；标签可多行，续行与首行左对齐 ---
+[PIP01] raw 点云：common 全段（含 RVV 初等条带）—    : 6.7310 ms/iter  (0.6% of staged)
+        common/centroid: compute3DCentroid, computeMeanAndCovarianceMatrix;
+        common/common: getMinMax3D, getMaxDistance;
+        common/norms: L2_Norm, L1_Norm;
+        common/common: getMaxSegment;
+        common/gaussian: GaussianKernel::convolveRows, convolveCols (gauss_gray);
+        common/common: calculatePolygonArea;
+        common/common: expf_RVV_f32m2, logf_RVV_f32m2, atan2_RVV_f32m2, acos_RVV_f32m2
+[PIP02] 标量占位 —                                           : 0.0003 ms/iter  (0.0% of staged)
+        common/common: getAngle3D
+[PIP03] 体素滤波 —                                           : 19.5223 ms/iter  (1.8% of staged)
+        filters: VoxelGrid::filter; copyPointCloud (sparse fallback)
+[PIP04] 半径法线 + 邻域 —                                  : 1026.6479 ms/iter  (93.8% of staged)
+        features: NormalEstimation::compute; search/KdTree (radius normals)
+[PIP05] 刚体变换 —                                           : 0.3127 ms/iter  (0.0% of staged)
+        transforms: transformPointCloud (rigid on filtered)
+[PIP06] 预制强度图上的 2d —                               : 41.0174 ms/iter  (3.7% of staged)
+        2d: copyPointCloud(img2d_master); Convolution::filter;
+        Morphology::erosionGray; Edge::detectEdgeSobel
+[PIP07] 专用 SAC 点云 —                                      : 0.7721 ms/iter  (0.1% of staged)
+        sample_consensus (cloud_sac): SampleConsensusModelPlane::countWithinDistance;
+        SampleConsensusModelNormalPlane::selectWithinDistance,
+        countWithinDistance, getDistancesToModel
+staged_sum                                                         : 1095.0038 ms/iter
+[pipeline] 完成 12 次计时迭代（不含 warmup）。
+======================================================================================================================
+make[1]: Leaving directory '/root/pcl-test/app'
+python3 /root/pcl-test/script/analyze_bench_compare.py \
+        --std-log /root/pcl-test/app/output/run_pipeline_std.log \
+        --rvv-log /root/pcl-test/app/output/run_pipeline_rvv.log \
+        --device "board rv64 (Milkv-Jupiter)" \
+        --vlen-desc "256 bits (hardware vlenb csr, 32 bytes)" \
+        2>&1 | tee /root/pcl-test/app/output/analyze_pipeline_compare.log
+=========================================================================================
+ PCL RVV 综合流水线（生成/滤波/法线/变换/2d/SAC/common） (Std vs RVV)
+=========================================================================================
+[Benchmark Context]
+  Device    : board rv64 (Milkv-Jupiter)
+  VLEN      : 256 bits (hardware vlenb csr, 32 bytes)
+  Dataset   : common(centroid..polygon,gaussian) + filters + features(normals) + transform + 2d + SAC + RVV intrinsic strip (common.hpp)
+  Iterations: 12 （每行 Total = Avg × 12）
+  Std log   : /root/pcl-test/app/output/run_pipeline_std.log
+  RVV log   : /root/pcl-test/app/output/run_pipeline_rvv.log
+
+-----------------------------------------------------------------------------------------
+Benchmark Item               | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+-----------------------------|--------|----------------|----------------|----------------
+total_pipeline (full chain)  | Std    |   1229.7447 ms |  14756.9364 ms |    [   1.00x ]
+                             | RVV    |   1095.4222 ms |  13145.0664 ms |    [   1.12x ]
+-----------------------------|--------|----------------|----------------|----------------
+staged_sum                   | Std    |   1229.3147 ms |  14751.7764 ms |    [   1.00x ]
+                             | RVV    |   1095.0038 ms |  13140.0456 ms |    [   1.12x ]
+-----------------------------|--------|----------------|----------------|----------------
+=========================================================================================

@@ -1,0 +1,662 @@
+❯ make run_bench_compare
+[BOARD] Benchmark Std -> /root/pcl-test/common/norms/output/run_bench_std.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/norms/bench_norms_std 2>&1 | tee /root/pcl-test/common/norms/output/run_bench_std.log
+============================================================
+ PCL norms.hpp Benchmark
+ Iterations: 30
+ Dataset: norms dim={8,36,128,512,4096} iterations=30 unit=us/iter
+ build: __RVV10__ NOT defined
+============================================================
+
+--- dim=8 ---
+L1_Norm(float*),dim=8                                   : 0.0542 us/iter
+L2_Norm_SQR(float*),dim=8                               : 0.0445 us/iter
+L2_Norm(float*),dim=8                                   : 0.0722 us/iter
+Linf_Norm(float*),dim=8                                 : 0.1139 us/iter
+JM_Norm(float*),dim=8                                   : 0.7736 us/iter
+B_Norm(float*),dim=8                                    : 0.3111 us/iter
+Sublinear_Norm(float*),dim=8                            : 0.0625 us/iter
+CS_Norm(float*),dim=8                                   : 0.0694 us/iter
+Div_Norm(float*),dim=8                                  : 0.3417 us/iter
+KL_Norm(float*),dim=8                                   : 0.3681 us/iter
+HIK_Norm(float*),dim=8                                  : 0.0444 us/iter
+PF_Norm(float*),dim=8                                   : 0.0722 us/iter
+K_Norm(float*),dim=8                                    : 0.0680 us/iter
+selectNorm(vec,L1),dim=8                                : 0.7819 us/iter
+selectNorm(vec,L2_SQR),dim=8                            : 0.7778 us/iter
+selectNorm(vec,L2),dim=8                                : 1.0903 us/iter
+selectNorm(vec,LINF),dim=8                              : 0.8681 us/iter
+selectNorm(vec,JM),dim=8                                : 1.5278 us/iter
+selectNorm(vec,B),dim=8                                 : 1.0611 us/iter
+selectNorm(vec,SUBLINEAR),dim=8                         : 0.7959 us/iter
+selectNorm(vec,CS),dim=8                                : 0.8042 us/iter
+selectNorm(vec,DIV),dim=8                               : 1.1403 us/iter
+selectNorm(vec,KL),dim=8                                : 1.1195 us/iter
+selectNorm(vec,HIK),dim=8                               : 0.7861 us/iter
+
+--- dim=36 ---
+L1_Norm(float*),dim=36                                  : 0.1375 us/iter
+L2_Norm_SQR(float*),dim=36                              : 0.1375 us/iter
+L2_Norm(float*),dim=36                                  : 0.1611 us/iter
+Linf_Norm(float*),dim=36                                : 0.4653 us/iter
+JM_Norm(float*),dim=36                                  : 2.6778 us/iter
+B_Norm(float*),dim=36                                   : 1.4292 us/iter
+Sublinear_Norm(float*),dim=36                           : 0.2319 us/iter
+CS_Norm(float*),dim=36                                  : 0.2472 us/iter
+Div_Norm(float*),dim=36                                 : 1.3681 us/iter
+KL_Norm(float*),dim=36                                  : 1.4875 us/iter
+HIK_Norm(float*),dim=36                                 : 0.1361 us/iter
+PF_Norm(float*),dim=36                                  : 0.1750 us/iter
+K_Norm(float*),dim=36                                   : 0.1514 us/iter
+selectNorm(vec,L1),dim=36                               : 0.9847 us/iter
+selectNorm(vec,L2_SQR),dim=36                           : 0.9861 us/iter
+selectNorm(vec,L2),dim=36                               : 1.4209 us/iter
+selectNorm(vec,LINF),dim=36                             : 1.3194 us/iter
+selectNorm(vec,JM),dim=36                               : 3.4848 us/iter
+selectNorm(vec,B),dim=36                                : 2.2792 us/iter
+selectNorm(vec,SUBLINEAR),dim=36                        : 1.0639 us/iter
+selectNorm(vec,CS),dim=36                               : 1.1000 us/iter
+selectNorm(vec,DIV),dim=36                              : 2.3375 us/iter
+selectNorm(vec,KL),dim=36                               : 2.3681 us/iter
+selectNorm(vec,HIK),dim=36                              : 0.9834 us/iter
+
+--- dim=128 ---
+L1_Norm(float*),dim=128                                 : 0.3931 us/iter
+L2_Norm_SQR(float*),dim=128                             : 0.3931 us/iter
+L2_Norm(float*),dim=128                                 : 0.4139 us/iter
+Linf_Norm(float*),dim=128                               : 1.6181 us/iter
+JM_Norm(float*),dim=128                                 : 10.4973 us/iter
+B_Norm(float*),dim=128                                  : 5.3570 us/iter
+Sublinear_Norm(float*),dim=128                          : 0.6625 us/iter
+CS_Norm(float*),dim=128                                 : 0.7611 us/iter
+Div_Norm(float*),dim=128                                : 4.4792 us/iter
+KL_Norm(float*),dim=128                                 : 4.9139 us/iter
+HIK_Norm(float*),dim=128                                : 0.3903 us/iter
+PF_Norm(float*),dim=128                                 : 0.4556 us/iter
+K_Norm(float*),dim=128                                  : 0.4333 us/iter
+selectNorm(vec,L1),dim=128                              : 1.5334 us/iter
+selectNorm(vec,L2_SQR),dim=128                          : 1.5292 us/iter
+selectNorm(vec,L2),dim=128                              : 2.0611 us/iter
+selectNorm(vec,LINF),dim=128                            : 2.7736 us/iter
+selectNorm(vec,JM),dim=128                              : 11.5515 us/iter
+selectNorm(vec,B),dim=128                               : 6.5181 us/iter
+selectNorm(vec,SUBLINEAR),dim=128                       : 1.8070 us/iter
+selectNorm(vec,CS),dim=128                              : 1.9139 us/iter
+selectNorm(vec,DIV),dim=128                             : 5.9653 us/iter
+selectNorm(vec,KL),dim=128                              : 6.1973 us/iter
+selectNorm(vec,HIK),dim=128                             : 1.5361 us/iter
+
+--- dim=512 ---
+L1_Norm(float*),dim=512                                 : 1.5097 us/iter
+L2_Norm_SQR(float*),dim=512                             : 1.5014 us/iter
+L2_Norm(float*),dim=512                                 : 1.5431 us/iter
+Linf_Norm(float*),dim=512                               : 6.4293 us/iter
+JM_Norm(float*),dim=512                                 : 42.3519 us/iter
+B_Norm(float*),dim=512                                  : 21.8225 us/iter
+Sublinear_Norm(float*),dim=512                          : 2.5834 us/iter
+CS_Norm(float*),dim=512                                 : 2.9820 us/iter
+Div_Norm(float*),dim=512                                : 23.0281 us/iter
+KL_Norm(float*),dim=512                                 : 20.5641 us/iter
+HIK_Norm(float*),dim=512                                : 9.8362 us/iter
+PF_Norm(float*),dim=512                                 : 1.6986 us/iter
+K_Norm(float*),dim=512                                  : 1.6639 us/iter
+selectNorm(vec,L1),dim=512                              : 5.1334 us/iter
+selectNorm(vec,L2_SQR),dim=512                          : 4.6778 us/iter
+selectNorm(vec,L2),dim=512                              : 6.2820 us/iter
+selectNorm(vec,LINF),dim=512                            : 9.4876 us/iter
+selectNorm(vec,JM),dim=512                              : 50.9131 us/iter
+selectNorm(vec,B),dim=512                               : 24.8892 us/iter
+selectNorm(vec,SUBLINEAR),dim=512                       : 5.6070 us/iter
+selectNorm(vec,CS),dim=512                              : 6.0237 us/iter
+selectNorm(vec,DIV),dim=512                             : 23.1114 us/iter
+selectNorm(vec,KL),dim=512                              : 24.4808 us/iter
+selectNorm(vec,HIK),dim=512                             : 4.5723 us/iter
+
+--- dim=4096 ---
+L1_Norm(float*),dim=4096                                : 12.7002 us/iter
+L2_Norm_SQR(float*),dim=4096                            : 12.0793 us/iter
+L2_Norm(float*),dim=4096                                : 12.1043 us/iter
+Linf_Norm(float*),dim=4096                              : 51.5215 us/iter
+JM_Norm(float*),dim=4096                                : 378.7419 us/iter
+B_Norm(float*),dim=4096                                 : 178.3340 us/iter
+Sublinear_Norm(float*),dim=4096                         : 20.7641 us/iter
+CS_Norm(float*),dim=4096                                : 23.9447 us/iter
+Div_Norm(float*),dim=4096                               : 161.4297 us/iter
+KL_Norm(float*),dim=4096                                : 176.2840 us/iter
+HIK_Norm(float*),dim=4096                               : 12.2210 us/iter
+PF_Norm(float*),dim=4096                                : 13.4418 us/iter
+K_Norm(float*),dim=4096                                 : 13.6918 us/iter
+selectNorm(vec,L1),dim=4096                             : 39.7866 us/iter
+selectNorm(vec,L2_SQR),dim=4096                         : 39.5810 us/iter
+selectNorm(vec,L2),dim=4096                             : 48.9992 us/iter
+selectNorm(vec,LINF),dim=4096                           : 79.6787 us/iter
+selectNorm(vec,JM),dim=4096                             : 386.6254 us/iter
+selectNorm(vec,B),dim=4096                              : 206.1802 us/iter
+selectNorm(vec,SUBLINEAR),dim=4096                      : 48.2714 us/iter
+selectNorm(vec,CS),dim=4096                             : 51.5992 us/iter
+selectNorm(vec,DIV),dim=4096                            : 195.5065 us/iter
+selectNorm(vec,KL),dim=4096                             : 219.8970 us/iter
+selectNorm(vec,HIK),dim=4096                            : 40.5949 us/iter
+============================================================
+[BOARD] Benchmark RVV -> /root/pcl-test/common/norms/output/run_bench_rvv.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/norms/bench_norms_rvv 2>&1 | tee /root/pcl-test/common/norms/output/run_bench_rvv.log
+============================================================
+ PCL norms.hpp Benchmark
+ Iterations: 30
+ Dataset: norms dim={8,36,128,512,4096} iterations=30 unit=us/iter
+ build: __RVV10__ defined
+============================================================
+
+--- dim=8 ---
+L1_Norm(float*),dim=8                                   : 0.0528 us/iter
+L2_Norm_SQR(float*),dim=8                               : 0.0417 us/iter
+L2_Norm(float*),dim=8                                   : 0.0722 us/iter
+Linf_Norm(float*),dim=8                                 : 0.1083 us/iter
+JM_Norm(float*),dim=8                                   : 0.7681 us/iter
+B_Norm(float*),dim=8                                    : 0.3167 us/iter
+Sublinear_Norm(float*),dim=8                            : 0.0583 us/iter
+CS_Norm(float*),dim=8                                   : 0.0694 us/iter
+Div_Norm(float*),dim=8                                  : 0.3458 us/iter
+KL_Norm(float*),dim=8                                   : 0.3708 us/iter
+HIK_Norm(float*),dim=8                                  : 0.0431 us/iter
+PF_Norm(float*),dim=8                                   : 0.0695 us/iter
+K_Norm(float*),dim=8                                    : 0.0472 us/iter
+selectNorm(vec,L1),dim=8                                : 0.5556 us/iter
+selectNorm(vec,L2_SQR),dim=8                            : 0.5556 us/iter
+selectNorm(vec,L2),dim=8                                : 0.8181 us/iter
+selectNorm(vec,LINF),dim=8                              : 0.6250 us/iter
+selectNorm(vec,JM),dim=8                                : 1.3167 us/iter
+selectNorm(vec,B),dim=8                                 : 0.8347 us/iter
+selectNorm(vec,SUBLINEAR),dim=8                         : 0.5889 us/iter
+selectNorm(vec,CS),dim=8                                : 0.5861 us/iter
+selectNorm(vec,DIV),dim=8                               : 0.8875 us/iter
+selectNorm(vec,KL),dim=8                                : 0.9000 us/iter
+selectNorm(vec,HIK),dim=8                               : 0.5542 us/iter
+
+--- dim=36 ---
+L1_Norm(float*),dim=36                                  : 0.0889 us/iter
+L2_Norm_SQR(float*),dim=36                              : 0.1042 us/iter
+L2_Norm(float*),dim=36                                  : 0.0972 us/iter
+Linf_Norm(float*),dim=36                                : 0.0903 us/iter
+JM_Norm(float*),dim=36                                  : 0.3125 us/iter
+B_Norm(float*),dim=36                                   : 0.1806 us/iter
+Sublinear_Norm(float*),dim=36                           : 0.2014 us/iter
+CS_Norm(float*),dim=36                                  : 0.2181 us/iter
+Div_Norm(float*),dim=36                                 : 1.1736 us/iter
+KL_Norm(float*),dim=36                                  : 1.3097 us/iter
+HIK_Norm(float*),dim=36                                 : 0.0736 us/iter
+PF_Norm(float*),dim=36                                  : 0.1083 us/iter
+K_Norm(float*),dim=36                                   : 0.0917 us/iter
+selectNorm(vec,L1),dim=36                               : 0.6583 us/iter
+selectNorm(vec,L2_SQR),dim=36                           : 0.6556 us/iter
+selectNorm(vec,L2),dim=36                               : 0.9556 us/iter
+selectNorm(vec,LINF),dim=36                             : 0.6875 us/iter
+selectNorm(vec,JM),dim=36                               : 0.9167 us/iter
+selectNorm(vec,B),dim=36                                : 0.7972 us/iter
+selectNorm(vec,SUBLINEAR),dim=36                        : 0.7764 us/iter
+selectNorm(vec,CS),dim=36                               : 0.7931 us/iter
+selectNorm(vec,DIV),dim=36                              : 1.8375 us/iter
+selectNorm(vec,KL),dim=36                               : 2.0209 us/iter
+selectNorm(vec,HIK),dim=36                              : 0.6486 us/iter
+
+--- dim=128 ---
+L1_Norm(float*),dim=128                                 : 0.1375 us/iter
+L2_Norm_SQR(float*),dim=128                             : 0.1139 us/iter
+L2_Norm(float*),dim=128                                 : 0.1417 us/iter
+Linf_Norm(float*),dim=128                               : 0.2000 us/iter
+JM_Norm(float*),dim=128                                 : 0.8000 us/iter
+B_Norm(float*),dim=128                                  : 0.4528 us/iter
+Sublinear_Norm(float*),dim=128                          : 0.5028 us/iter
+CS_Norm(float*),dim=128                                 : 0.5458 us/iter
+Div_Norm(float*),dim=128                                : 3.5959 us/iter
+KL_Norm(float*),dim=128                                 : 4.1959 us/iter
+HIK_Norm(float*),dim=128                                : 0.1292 us/iter
+PF_Norm(float*),dim=128                                 : 0.1680 us/iter
+K_Norm(float*),dim=128                                  : 0.1667 us/iter
+selectNorm(vec,L1),dim=128                              : 0.9181 us/iter
+selectNorm(vec,L2_SQR),dim=128                          : 0.8945 us/iter
+selectNorm(vec,L2),dim=128                              : 1.2959 us/iter
+selectNorm(vec,LINF),dim=128                            : 1.0000 us/iter
+selectNorm(vec,JM),dim=128                              : 1.6042 us/iter
+selectNorm(vec,B),dim=128                               : 1.2611 us/iter
+selectNorm(vec,SUBLINEAR),dim=128                       : 1.2792 us/iter
+selectNorm(vec,CS),dim=128                              : 1.3195 us/iter
+selectNorm(vec,DIV),dim=128                             : 4.6431 us/iter
+selectNorm(vec,KL),dim=128                              : 5.2542 us/iter
+selectNorm(vec,HIK),dim=128                             : 0.8875 us/iter
+
+--- dim=512 ---
+L1_Norm(float*),dim=512                                 : 0.4139 us/iter
+L2_Norm_SQR(float*),dim=512                             : 1.5764 us/iter
+L2_Norm(float*),dim=512                                 : 0.3431 us/iter
+Linf_Norm(float*),dim=512                               : 0.7431 us/iter
+JM_Norm(float*),dim=512                                 : 3.0195 us/iter
+B_Norm(float*),dim=512                                  : 1.6431 us/iter
+Sublinear_Norm(float*),dim=512                          : 1.8722 us/iter
+CS_Norm(float*),dim=512                                 : 2.0209 us/iter
+Div_Norm(float*),dim=512                                : 15.4821 us/iter
+KL_Norm(float*),dim=512                                 : 17.7919 us/iter
+HIK_Norm(float*),dim=512                                : 0.3097 us/iter
+PF_Norm(float*),dim=512                                 : 0.4347 us/iter
+K_Norm(float*),dim=512                                  : 0.5097 us/iter
+selectNorm(vec,L1),dim=512                              : 2.4139 us/iter
+selectNorm(vec,L2_SQR),dim=512                          : 2.2972 us/iter
+selectNorm(vec,L2),dim=512                              : 3.3389 us/iter
+selectNorm(vec,LINF),dim=512                            : 2.7667 us/iter
+selectNorm(vec,JM),dim=512                              : 5.0389 us/iter
+selectNorm(vec,B),dim=512                               : 3.6959 us/iter
+selectNorm(vec,SUBLINEAR),dim=512                       : 3.8778 us/iter
+selectNorm(vec,CS),dim=512                              : 3.9959 us/iter
+selectNorm(vec,DIV),dim=512                             : 18.4308 us/iter
+selectNorm(vec,KL),dim=512                              : 21.9183 us/iter
+selectNorm(vec,HIK),dim=512                             : 2.3125 us/iter
+
+--- dim=4096 ---
+L1_Norm(float*),dim=4096                                : 3.2028 us/iter
+L2_Norm_SQR(float*),dim=4096                            : 2.4389 us/iter
+L2_Norm(float*),dim=4096                                : 2.4834 us/iter
+Linf_Norm(float*),dim=4096                              : 6.0654 us/iter
+JM_Norm(float*),dim=4096                                : 23.5794 us/iter
+B_Norm(float*),dim=4096                                 : 13.0988 us/iter
+Sublinear_Norm(float*),dim=4096                         : 14.8502 us/iter
+CS_Norm(float*),dim=4096                                : 16.1474 us/iter
+Div_Norm(float*),dim=4096                               : 129.5376 us/iter
+KL_Norm(float*),dim=4096                                : 144.6878 us/iter
+HIK_Norm(float*),dim=4096                               : 2.5028 us/iter
+PF_Norm(float*),dim=4096                                : 3.3792 us/iter
+K_Norm(float*),dim=4096                                 : 4.2278 us/iter
+selectNorm(vec,L1),dim=4096                             : 26.2211 us/iter
+selectNorm(vec,L2_SQR),dim=4096                         : 26.0878 us/iter
+selectNorm(vec,L2),dim=4096                             : 42.4616 us/iter
+selectNorm(vec,LINF),dim=4096                           : 26.9739 us/iter
+selectNorm(vec,JM),dim=4096                             : 44.2658 us/iter
+selectNorm(vec,B),dim=4096                              : 37.0560 us/iter
+selectNorm(vec,SUBLINEAR),dim=4096                      : 34.7143 us/iter
+selectNorm(vec,CS),dim=4096                             : 35.7879 us/iter
+selectNorm(vec,DIV),dim=4096                            : 157.1269 us/iter
+selectNorm(vec,KL),dim=4096                             : 174.9326 us/iter
+selectNorm(vec,HIK),dim=4096                            : 24.0642 us/iter
+============================================================
+python3 '/root/pcl-test/common/norms/script/analyze_bench_compare.py' \
+        --std-log /root/pcl-test/common/norms/output/run_bench_std.log \
+        --rvv-log /root/pcl-test/common/norms/output/run_bench_rvv.log \
+        --device "Milkv-Jupiter" \
+        --vlen-desc "see SoC / ELF (board)" \
+
+====================================================================================================
+ PCL norms.hpp Benchmark (Std vs RVV)
+====================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : norms dim={8,36,128,512,4096} iterations=30 unit=us/iter
+  Iterations: 30 （每行 Total = Avg × 30）
+  Std log   : /root/pcl-test/common/norms/output/run_bench_std.log
+  RVV log   : /root/pcl-test/common/norms/output/run_bench_rvv.log
+
+----------------------------------------------------------------------------------------------------
+Benchmark Item                      | Impl   |         Avg (us) |       Total (us) |        Speedup
+------------------------------------|--------|------------------|------------------|----------------
+L1_Norm(float*),dim=8               | Std    |        0.0542 us |        1.6260 us |    [   1.00x ]
+                                    | RVV    |        0.0528 us |        1.5840 us |    [   1.03x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm_SQR(float*),dim=8           | Std    |        0.0445 us |        1.3350 us |    [   1.00x ]
+                                    | RVV    |        0.0417 us |        1.2510 us |    [   1.07x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm(float*),dim=8               | Std    |        0.0722 us |        2.1660 us |    [   1.00x ]
+                                    | RVV    |        0.0722 us |        2.1660 us |    [   1.00x ]
+------------------------------------|--------|------------------|------------------|----------------
+Linf_Norm(float*),dim=8             | Std    |        0.1139 us |        3.4170 us |    [   1.00x ]
+                                    | RVV    |        0.1083 us |        3.2490 us |    [   1.05x ]
+------------------------------------|--------|------------------|------------------|----------------
+JM_Norm(float*),dim=8               | Std    |        0.7736 us |       23.2080 us |    [   1.00x ]
+                                    | RVV    |        0.7681 us |       23.0430 us |    [   1.01x ]
+------------------------------------|--------|------------------|------------------|----------------
+B_Norm(float*),dim=8                | Std    |        0.3111 us |        9.3330 us |    [   1.00x ]
+                                    | RVV    |        0.3167 us |        9.5010 us |    [   0.98x ]
+------------------------------------|--------|------------------|------------------|----------------
+Sublinear_Norm(float*),dim=8        | Std    |        0.0625 us |        1.8750 us |    [   1.00x ]
+                                    | RVV    |        0.0583 us |        1.7490 us |    [   1.07x ]
+------------------------------------|--------|------------------|------------------|----------------
+CS_Norm(float*),dim=8               | Std    |        0.0694 us |        2.0820 us |    [   1.00x ]
+                                    | RVV    |        0.0694 us |        2.0820 us |    [   1.00x ]
+------------------------------------|--------|------------------|------------------|----------------
+Div_Norm(float*),dim=8              | Std    |        0.3417 us |       10.2510 us |    [   1.00x ]
+                                    | RVV    |        0.3458 us |       10.3740 us |    [   0.99x ]
+------------------------------------|--------|------------------|------------------|----------------
+KL_Norm(float*),dim=8               | Std    |        0.3681 us |       11.0430 us |    [   1.00x ]
+                                    | RVV    |        0.3708 us |       11.1240 us |    [   0.99x ]
+------------------------------------|--------|------------------|------------------|----------------
+HIK_Norm(float*),dim=8              | Std    |        0.0444 us |        1.3320 us |    [   1.00x ]
+                                    | RVV    |        0.0431 us |        1.2930 us |    [   1.03x ]
+------------------------------------|--------|------------------|------------------|----------------
+PF_Norm(float*),dim=8               | Std    |        0.0722 us |        2.1660 us |    [   1.00x ]
+                                    | RVV    |        0.0695 us |        2.0850 us |    [   1.04x ]
+------------------------------------|--------|------------------|------------------|----------------
+K_Norm(float*),dim=8                | Std    |        0.0680 us |        2.0400 us |    [   1.00x ]
+                                    | RVV    |        0.0472 us |        1.4160 us |    [   1.44x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L1),dim=8            | Std    |        0.7819 us |       23.4570 us |    [   1.00x ]
+                                    | RVV    |        0.5556 us |       16.6680 us |    [   1.41x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2_SQR),dim=8        | Std    |        0.7778 us |       23.3340 us |    [   1.00x ]
+                                    | RVV    |        0.5556 us |       16.6680 us |    [   1.40x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2),dim=8            | Std    |        1.0903 us |       32.7090 us |    [   1.00x ]
+                                    | RVV    |        0.8181 us |       24.5430 us |    [   1.33x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,LINF),dim=8          | Std    |        0.8681 us |       26.0430 us |    [   1.00x ]
+                                    | RVV    |        0.6250 us |       18.7500 us |    [   1.39x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,JM),dim=8            | Std    |        1.5278 us |       45.8340 us |    [   1.00x ]
+                                    | RVV    |        1.3167 us |       39.5010 us |    [   1.16x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,B),dim=8             | Std    |        1.0611 us |       31.8330 us |    [   1.00x ]
+                                    | RVV    |        0.8347 us |       25.0410 us |    [   1.27x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,SUBLINEAR),dim=8     | Std    |        0.7959 us |       23.8770 us |    [   1.00x ]
+                                    | RVV    |        0.5889 us |       17.6670 us |    [   1.35x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,CS),dim=8            | Std    |        0.8042 us |       24.1260 us |    [   1.00x ]
+                                    | RVV    |        0.5861 us |       17.5830 us |    [   1.37x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,DIV),dim=8           | Std    |        1.1403 us |       34.2090 us |    [   1.00x ]
+                                    | RVV    |        0.8875 us |       26.6250 us |    [   1.28x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,KL),dim=8            | Std    |        1.1195 us |       33.5850 us |    [   1.00x ]
+                                    | RVV    |        0.9000 us |       27.0000 us |    [   1.24x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,HIK),dim=8           | Std    |        0.7861 us |       23.5830 us |    [   1.00x ]
+                                    | RVV    |        0.5542 us |       16.6260 us |    [   1.42x ]
+------------------------------------|--------|------------------|------------------|----------------
+L1_Norm(float*),dim=36              | Std    |        0.1375 us |        4.1250 us |    [   1.00x ]
+                                    | RVV    |        0.0889 us |        2.6670 us |    [   1.55x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm_SQR(float*),dim=36          | Std    |        0.1375 us |        4.1250 us |    [   1.00x ]
+                                    | RVV    |        0.1042 us |        3.1260 us |    [   1.32x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm(float*),dim=36              | Std    |        0.1611 us |        4.8330 us |    [   1.00x ]
+                                    | RVV    |        0.0972 us |        2.9160 us |    [   1.66x ]
+------------------------------------|--------|------------------|------------------|----------------
+Linf_Norm(float*),dim=36            | Std    |        0.4653 us |       13.9590 us |    [   1.00x ]
+                                    | RVV    |        0.0903 us |        2.7090 us |    [   5.15x ]
+------------------------------------|--------|------------------|------------------|----------------
+JM_Norm(float*),dim=36              | Std    |        2.6778 us |       80.3340 us |    [   1.00x ]
+                                    | RVV    |        0.3125 us |        9.3750 us |    [   8.57x ]
+------------------------------------|--------|------------------|------------------|----------------
+B_Norm(float*),dim=36               | Std    |        1.4292 us |       42.8760 us |    [   1.00x ]
+                                    | RVV    |        0.1806 us |        5.4180 us |    [   7.91x ]
+------------------------------------|--------|------------------|------------------|----------------
+Sublinear_Norm(float*),dim=36       | Std    |        0.2319 us |        6.9570 us |    [   1.00x ]
+                                    | RVV    |        0.2014 us |        6.0420 us |    [   1.15x ]
+------------------------------------|--------|------------------|------------------|----------------
+CS_Norm(float*),dim=36              | Std    |        0.2472 us |        7.4160 us |    [   1.00x ]
+                                    | RVV    |        0.2181 us |        6.5430 us |    [   1.13x ]
+------------------------------------|--------|------------------|------------------|----------------
+Div_Norm(float*),dim=36             | Std    |        1.3681 us |       41.0430 us |    [   1.00x ]
+                                    | RVV    |        1.1736 us |       35.2080 us |    [   1.17x ]
+------------------------------------|--------|------------------|------------------|----------------
+KL_Norm(float*),dim=36              | Std    |        1.4875 us |       44.6250 us |    [   1.00x ]
+                                    | RVV    |        1.3097 us |       39.2910 us |    [   1.14x ]
+------------------------------------|--------|------------------|------------------|----------------
+HIK_Norm(float*),dim=36             | Std    |        0.1361 us |        4.0830 us |    [   1.00x ]
+                                    | RVV    |        0.0736 us |        2.2080 us |    [   1.85x ]
+------------------------------------|--------|------------------|------------------|----------------
+PF_Norm(float*),dim=36              | Std    |        0.1750 us |        5.2500 us |    [   1.00x ]
+                                    | RVV    |        0.1083 us |        3.2490 us |    [   1.62x ]
+------------------------------------|--------|------------------|------------------|----------------
+K_Norm(float*),dim=36               | Std    |        0.1514 us |        4.5420 us |    [   1.00x ]
+                                    | RVV    |        0.0917 us |        2.7510 us |    [   1.65x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L1),dim=36           | Std    |        0.9847 us |       29.5410 us |    [   1.00x ]
+                                    | RVV    |        0.6583 us |       19.7490 us |    [   1.50x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2_SQR),dim=36       | Std    |        0.9861 us |       29.5830 us |    [   1.00x ]
+                                    | RVV    |        0.6556 us |       19.6680 us |    [   1.50x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2),dim=36           | Std    |        1.4209 us |       42.6270 us |    [   1.00x ]
+                                    | RVV    |        0.9556 us |       28.6680 us |    [   1.49x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,LINF),dim=36         | Std    |        1.3194 us |       39.5820 us |    [   1.00x ]
+                                    | RVV    |        0.6875 us |       20.6250 us |    [   1.92x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,JM),dim=36           | Std    |        3.4848 us |      104.5440 us |    [   1.00x ]
+                                    | RVV    |        0.9167 us |       27.5010 us |    [   3.80x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,B),dim=36            | Std    |        2.2792 us |       68.3760 us |    [   1.00x ]
+                                    | RVV    |        0.7972 us |       23.9160 us |    [   2.86x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,SUBLINEAR),dim=36    | Std    |        1.0639 us |       31.9170 us |    [   1.00x ]
+                                    | RVV    |        0.7764 us |       23.2920 us |    [   1.37x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,CS),dim=36           | Std    |        1.1000 us |       33.0000 us |    [   1.00x ]
+                                    | RVV    |        0.7931 us |       23.7930 us |    [   1.39x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,DIV),dim=36          | Std    |        2.3375 us |       70.1250 us |    [   1.00x ]
+                                    | RVV    |        1.8375 us |       55.1250 us |    [   1.27x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,KL),dim=36           | Std    |        2.3681 us |       71.0430 us |    [   1.00x ]
+                                    | RVV    |        2.0209 us |       60.6270 us |    [   1.17x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,HIK),dim=36          | Std    |        0.9834 us |       29.5020 us |    [   1.00x ]
+                                    | RVV    |        0.6486 us |       19.4580 us |    [   1.52x ]
+------------------------------------|--------|------------------|------------------|----------------
+L1_Norm(float*),dim=128             | Std    |        0.3931 us |       11.7930 us |    [   1.00x ]
+                                    | RVV    |        0.1375 us |        4.1250 us |    [   2.86x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm_SQR(float*),dim=128         | Std    |        0.3931 us |       11.7930 us |    [   1.00x ]
+                                    | RVV    |        0.1139 us |        3.4170 us |    [   3.45x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm(float*),dim=128             | Std    |        0.4139 us |       12.4170 us |    [   1.00x ]
+                                    | RVV    |        0.1417 us |        4.2510 us |    [   2.92x ]
+------------------------------------|--------|------------------|------------------|----------------
+Linf_Norm(float*),dim=128           | Std    |        1.6181 us |       48.5430 us |    [   1.00x ]
+                                    | RVV    |        0.2000 us |        6.0000 us |    [   8.09x ]
+------------------------------------|--------|------------------|------------------|----------------
+JM_Norm(float*),dim=128             | Std    |       10.4973 us |      314.9190 us |    [   1.00x ]
+                                    | RVV    |        0.8000 us |       24.0000 us |    [  13.12x ]
+------------------------------------|--------|------------------|------------------|----------------
+B_Norm(float*),dim=128              | Std    |        5.3570 us |      160.7100 us |    [   1.00x ]
+                                    | RVV    |        0.4528 us |       13.5840 us |    [  11.83x ]
+------------------------------------|--------|------------------|------------------|----------------
+Sublinear_Norm(float*),dim=128      | Std    |        0.6625 us |       19.8750 us |    [   1.00x ]
+                                    | RVV    |        0.5028 us |       15.0840 us |    [   1.32x ]
+------------------------------------|--------|------------------|------------------|----------------
+CS_Norm(float*),dim=128             | Std    |        0.7611 us |       22.8330 us |    [   1.00x ]
+                                    | RVV    |        0.5458 us |       16.3740 us |    [   1.39x ]
+------------------------------------|--------|------------------|------------------|----------------
+Div_Norm(float*),dim=128            | Std    |        4.4792 us |      134.3760 us |    [   1.00x ]
+                                    | RVV    |        3.5959 us |      107.8770 us |    [   1.25x ]
+------------------------------------|--------|------------------|------------------|----------------
+KL_Norm(float*),dim=128             | Std    |        4.9139 us |      147.4170 us |    [   1.00x ]
+                                    | RVV    |        4.1959 us |      125.8770 us |    [   1.17x ]
+------------------------------------|--------|------------------|------------------|----------------
+HIK_Norm(float*),dim=128            | Std    |        0.3903 us |       11.7090 us |    [   1.00x ]
+                                    | RVV    |        0.1292 us |        3.8760 us |    [   3.02x ]
+------------------------------------|--------|------------------|------------------|----------------
+PF_Norm(float*),dim=128             | Std    |        0.4556 us |       13.6680 us |    [   1.00x ]
+                                    | RVV    |        0.1680 us |        5.0400 us |    [   2.71x ]
+------------------------------------|--------|------------------|------------------|----------------
+K_Norm(float*),dim=128              | Std    |        0.4333 us |       12.9990 us |    [   1.00x ]
+                                    | RVV    |        0.1667 us |        5.0010 us |    [   2.60x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L1),dim=128          | Std    |        1.5334 us |       46.0020 us |    [   1.00x ]
+                                    | RVV    |        0.9181 us |       27.5430 us |    [   1.67x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2_SQR),dim=128      | Std    |        1.5292 us |       45.8760 us |    [   1.00x ]
+                                    | RVV    |        0.8945 us |       26.8350 us |    [   1.71x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2),dim=128          | Std    |        2.0611 us |       61.8330 us |    [   1.00x ]
+                                    | RVV    |        1.2959 us |       38.8770 us |    [   1.59x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,LINF),dim=128        | Std    |        2.7736 us |       83.2080 us |    [   1.00x ]
+                                    | RVV    |        1.0000 us |       30.0000 us |    [   2.77x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,JM),dim=128          | Std    |       11.5515 us |      346.5450 us |    [   1.00x ]
+                                    | RVV    |        1.6042 us |       48.1260 us |    [   7.20x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,B),dim=128           | Std    |        6.5181 us |      195.5430 us |    [   1.00x ]
+                                    | RVV    |        1.2611 us |       37.8330 us |    [   5.17x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,SUBLINEAR),dim=128   | Std    |        1.8070 us |       54.2100 us |    [   1.00x ]
+                                    | RVV    |        1.2792 us |       38.3760 us |    [   1.41x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,CS),dim=128          | Std    |        1.9139 us |       57.4170 us |    [   1.00x ]
+                                    | RVV    |        1.3195 us |       39.5850 us |    [   1.45x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,DIV),dim=128         | Std    |        5.9653 us |      178.9590 us |    [   1.00x ]
+                                    | RVV    |        4.6431 us |      139.2930 us |    [   1.28x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,KL),dim=128          | Std    |        6.1973 us |      185.9190 us |    [   1.00x ]
+                                    | RVV    |        5.2542 us |      157.6260 us |    [   1.18x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,HIK),dim=128         | Std    |        1.5361 us |       46.0830 us |    [   1.00x ]
+                                    | RVV    |        0.8875 us |       26.6250 us |    [   1.73x ]
+------------------------------------|--------|------------------|------------------|----------------
+L1_Norm(float*),dim=512             | Std    |        1.5097 us |       45.2910 us |    [   1.00x ]
+                                    | RVV    |        0.4139 us |       12.4170 us |    [   3.65x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm_SQR(float*),dim=512         | Std    |        1.5014 us |       45.0420 us |    [   1.00x ]
+                                    | RVV    |        1.5764 us |       47.2920 us |    [   0.95x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm(float*),dim=512             | Std    |        1.5431 us |       46.2930 us |    [   1.00x ]
+                                    | RVV    |        0.3431 us |       10.2930 us |    [   4.50x ]
+------------------------------------|--------|------------------|------------------|----------------
+Linf_Norm(float*),dim=512           | Std    |        6.4293 us |      192.8790 us |    [   1.00x ]
+                                    | RVV    |        0.7431 us |       22.2930 us |    [   8.65x ]
+------------------------------------|--------|------------------|------------------|----------------
+JM_Norm(float*),dim=512             | Std    |       42.3519 us |     1270.5570 us |    [   1.00x ]
+                                    | RVV    |        3.0195 us |       90.5850 us |    [  14.03x ]
+------------------------------------|--------|------------------|------------------|----------------
+B_Norm(float*),dim=512              | Std    |       21.8225 us |      654.6750 us |    [   1.00x ]
+                                    | RVV    |        1.6431 us |       49.2930 us |    [  13.28x ]
+------------------------------------|--------|------------------|------------------|----------------
+Sublinear_Norm(float*),dim=512      | Std    |        2.5834 us |       77.5020 us |    [   1.00x ]
+                                    | RVV    |        1.8722 us |       56.1660 us |    [   1.38x ]
+------------------------------------|--------|------------------|------------------|----------------
+CS_Norm(float*),dim=512             | Std    |        2.9820 us |       89.4600 us |    [   1.00x ]
+                                    | RVV    |        2.0209 us |       60.6270 us |    [   1.48x ]
+------------------------------------|--------|------------------|------------------|----------------
+Div_Norm(float*),dim=512            | Std    |       23.0281 us |      690.8430 us |    [   1.00x ]
+                                    | RVV    |       15.4821 us |      464.4630 us |    [   1.49x ]
+------------------------------------|--------|------------------|------------------|----------------
+KL_Norm(float*),dim=512             | Std    |       20.5641 us |      616.9230 us |    [   1.00x ]
+                                    | RVV    |       17.7919 us |      533.7570 us |    [   1.16x ]
+------------------------------------|--------|------------------|------------------|----------------
+HIK_Norm(float*),dim=512            | Std    |        9.8362 us |      295.0860 us |    [   1.00x ]
+                                    | RVV    |        0.3097 us |        9.2910 us |    [  31.76x ]
+------------------------------------|--------|------------------|------------------|----------------
+PF_Norm(float*),dim=512             | Std    |        1.6986 us |       50.9580 us |    [   1.00x ]
+                                    | RVV    |        0.4347 us |       13.0410 us |    [   3.91x ]
+------------------------------------|--------|------------------|------------------|----------------
+K_Norm(float*),dim=512              | Std    |        1.6639 us |       49.9170 us |    [   1.00x ]
+                                    | RVV    |        0.5097 us |       15.2910 us |    [   3.26x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L1),dim=512          | Std    |        5.1334 us |      154.0020 us |    [   1.00x ]
+                                    | RVV    |        2.4139 us |       72.4170 us |    [   2.13x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2_SQR),dim=512      | Std    |        4.6778 us |      140.3340 us |    [   1.00x ]
+                                    | RVV    |        2.2972 us |       68.9160 us |    [   2.04x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2),dim=512          | Std    |        6.2820 us |      188.4600 us |    [   1.00x ]
+                                    | RVV    |        3.3389 us |      100.1670 us |    [   1.88x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,LINF),dim=512        | Std    |        9.4876 us |      284.6280 us |    [   1.00x ]
+                                    | RVV    |        2.7667 us |       83.0010 us |    [   3.43x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,JM),dim=512          | Std    |       50.9131 us |     1527.3930 us |    [   1.00x ]
+                                    | RVV    |        5.0389 us |      151.1670 us |    [  10.10x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,B),dim=512           | Std    |       24.8892 us |      746.6760 us |    [   1.00x ]
+                                    | RVV    |        3.6959 us |      110.8770 us |    [   6.73x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,SUBLINEAR),dim=512   | Std    |        5.6070 us |      168.2100 us |    [   1.00x ]
+                                    | RVV    |        3.8778 us |      116.3340 us |    [   1.45x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,CS),dim=512          | Std    |        6.0237 us |      180.7110 us |    [   1.00x ]
+                                    | RVV    |        3.9959 us |      119.8770 us |    [   1.51x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,DIV),dim=512         | Std    |       23.1114 us |      693.3420 us |    [   1.00x ]
+                                    | RVV    |       18.4308 us |      552.9240 us |    [   1.25x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,KL),dim=512          | Std    |       24.4808 us |      734.4240 us |    [   1.00x ]
+                                    | RVV    |       21.9183 us |      657.5490 us |    [   1.12x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,HIK),dim=512         | Std    |        4.5723 us |      137.1690 us |    [   1.00x ]
+                                    | RVV    |        2.3125 us |       69.3750 us |    [   1.98x ]
+------------------------------------|--------|------------------|------------------|----------------
+L1_Norm(float*),dim=4096            | Std    |       12.7002 us |      381.0060 us |    [   1.00x ]
+                                    | RVV    |        3.2028 us |       96.0840 us |    [   3.97x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm_SQR(float*),dim=4096        | Std    |       12.0793 us |      362.3790 us |    [   1.00x ]
+                                    | RVV    |        2.4389 us |       73.1670 us |    [   4.95x ]
+------------------------------------|--------|------------------|------------------|----------------
+L2_Norm(float*),dim=4096            | Std    |       12.1043 us |      363.1290 us |    [   1.00x ]
+                                    | RVV    |        2.4834 us |       74.5020 us |    [   4.87x ]
+------------------------------------|--------|------------------|------------------|----------------
+Linf_Norm(float*),dim=4096          | Std    |       51.5215 us |     1545.6450 us |    [   1.00x ]
+                                    | RVV    |        6.0654 us |      181.9620 us |    [   8.49x ]
+------------------------------------|--------|------------------|------------------|----------------
+JM_Norm(float*),dim=4096            | Std    |      378.7419 us |    11362.2570 us |    [   1.00x ]
+                                    | RVV    |       23.5794 us |      707.3820 us |    [  16.06x ]
+------------------------------------|--------|------------------|------------------|----------------
+B_Norm(float*),dim=4096             | Std    |      178.3340 us |     5350.0200 us |    [   1.00x ]
+                                    | RVV    |       13.0988 us |      392.9640 us |    [  13.61x ]
+------------------------------------|--------|------------------|------------------|----------------
+Sublinear_Norm(float*),dim=4096     | Std    |       20.7641 us |      622.9230 us |    [   1.00x ]
+                                    | RVV    |       14.8502 us |      445.5060 us |    [   1.40x ]
+------------------------------------|--------|------------------|------------------|----------------
+CS_Norm(float*),dim=4096            | Std    |       23.9447 us |      718.3410 us |    [   1.00x ]
+                                    | RVV    |       16.1474 us |      484.4220 us |    [   1.48x ]
+------------------------------------|--------|------------------|------------------|----------------
+Div_Norm(float*),dim=4096           | Std    |      161.4297 us |     4842.8910 us |    [   1.00x ]
+                                    | RVV    |      129.5376 us |     3886.1280 us |    [   1.25x ]
+------------------------------------|--------|------------------|------------------|----------------
+KL_Norm(float*),dim=4096            | Std    |      176.2840 us |     5288.5200 us |    [   1.00x ]
+                                    | RVV    |      144.6878 us |     4340.6340 us |    [   1.22x ]
+------------------------------------|--------|------------------|------------------|----------------
+HIK_Norm(float*),dim=4096           | Std    |       12.2210 us |      366.6300 us |    [   1.00x ]
+                                    | RVV    |        2.5028 us |       75.0840 us |    [   4.88x ]
+------------------------------------|--------|------------------|------------------|----------------
+PF_Norm(float*),dim=4096            | Std    |       13.4418 us |      403.2540 us |    [   1.00x ]
+                                    | RVV    |        3.3792 us |      101.3760 us |    [   3.98x ]
+------------------------------------|--------|------------------|------------------|----------------
+K_Norm(float*),dim=4096             | Std    |       13.6918 us |      410.7540 us |    [   1.00x ]
+                                    | RVV    |        4.2278 us |      126.8340 us |    [   3.24x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L1),dim=4096         | Std    |       39.7866 us |     1193.5980 us |    [   1.00x ]
+                                    | RVV    |       26.2211 us |      786.6330 us |    [   1.52x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2_SQR),dim=4096     | Std    |       39.5810 us |     1187.4300 us |    [   1.00x ]
+                                    | RVV    |       26.0878 us |      782.6340 us |    [   1.52x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,L2),dim=4096         | Std    |       48.9992 us |     1469.9760 us |    [   1.00x ]
+                                    | RVV    |       42.4616 us |     1273.8480 us |    [   1.15x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,LINF),dim=4096       | Std    |       79.6787 us |     2390.3610 us |    [   1.00x ]
+                                    | RVV    |       26.9739 us |      809.2170 us |    [   2.95x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,JM),dim=4096         | Std    |      386.6254 us |    11598.7620 us |    [   1.00x ]
+                                    | RVV    |       44.2658 us |     1327.9740 us |    [   8.73x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,B),dim=4096          | Std    |      206.1802 us |     6185.4060 us |    [   1.00x ]
+                                    | RVV    |       37.0560 us |     1111.6800 us |    [   5.56x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,SUBLINEAR),dim=4096  | Std    |       48.2714 us |     1448.1420 us |    [   1.00x ]
+                                    | RVV    |       34.7143 us |     1041.4290 us |    [   1.39x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,CS),dim=4096         | Std    |       51.5992 us |     1547.9760 us |    [   1.00x ]
+                                    | RVV    |       35.7879 us |     1073.6370 us |    [   1.44x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,DIV),dim=4096        | Std    |      195.5065 us |     5865.1950 us |    [   1.00x ]
+                                    | RVV    |      157.1269 us |     4713.8070 us |    [   1.24x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,KL),dim=4096         | Std    |      219.8970 us |     6596.9100 us |    [   1.00x ]
+                                    | RVV    |      174.9326 us |     5247.9780 us |    [   1.26x ]
+------------------------------------|--------|------------------|------------------|----------------
+selectNorm(vec,HIK),dim=4096        | Std    |       40.5949 us |     1217.8470 us |    [   1.00x ]
+                                    | RVV    |       24.0642 us |      721.9260 us |    [   1.69x ]
+------------------------------------|--------|------------------|------------------|----------------
+====================================================================================================

@@ -1,0 +1,166 @@
+❯ make run_math
+[BOARD] atan2_test -> /root/pcl-test/common/common/output/run_atan2_test.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/common/atan2_test 2>&1 | tee /root/pcl-test/common/common/output/run_atan2_test.log
+=== atan2 核 vs std::atan2, n = 65536 ===
+=======================================================================================================
+| Case / kernel                                      |        max (rad) |      deg |       mean (rad) |
+-------------------------------------------------------------------------------------------------------
+| (1) 标量 mazzo.li 奇次核（系数同 pcl::atan2_RVV）  |     1.907349e-06 |   0.0001 |     1.064155e-06 |
+| (2) Remez1 交换点（parms_atan2）                   |     1.907349e-06 |   0.0001 |     1.064110e-06 |
+| (3) Remez2 + Powell 密栅（parms_atan2）            |     1.907349e-06 |   0.0001 |     1.068936e-06 |
+| (4) 离散 LP（parms_atan2）                         |     1.907349e-06 |   0.0001 |     1.069175e-06 |
+| (5) Sollya fpminimax，全次项 Horner（6 系数）      |     2.121925e-05 |   0.0012 |     1.328320e-05 |
+| (6) Sollya fpminimax，全次项 Horner（12 系数）     |     2.384186e-07 |   0.0000 |     4.369916e-08 |
+| (7) pcl::atan2_RVV_f32m2（系数同 (1)）             |     1.907349e-06 |   0.0001 |     1.064155e-06 |
+=======================================================================================================
+
+[pcl::atan2_RVV vs 标量 (1)]
+  max |diff| :  0.000000e+00
+
+=== Performance (n = 65536, iters = 100) ===
+==================================================
+| Kernel           | Time (ms) |         speedup |
+--------------------------------------------------
+| scalar mazzo     |   340.174 |    2.45x vs std |
+| pcl::atan2_RVV   |    61.451 |   13.54x vs std |
+==================================================
+[BOARD] acos_test -> /root/pcl-test/common/common/output/run_acos_test.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/common/acos_test 2>&1 | tee /root/pcl-test/common/common/output/run_acos_test.log
+=== acos 逼近 vs std::acos, n = 65536, x_hi = 0.999 ===
+======================================================================================================================
+| Case / kernel                                                     |        max (rad) |      deg |       mean (rad) |
+----------------------------------------------------------------------------------------------------------------------
+| (1) 标量 sqrt(1-x)*P 八常数（与 pcl::acos_RVV 同系，common.hpp）  |     7.749423e-04 |   0.0444 |     9.846493e-05 |
+| (2) 约化 deg11 + remez1（sqrt(1-x)*Q，稠密 float32 Horner）       |     2.384186e-07 |   0.0000 |     3.117731e-08 |
+| (3) 约化 deg11 + remez2（sqrt(1-x)*Q，float32 Horner）            |     2.384186e-07 |   0.0000 |     3.172073e-08 |
+| (4) 约化 deg11 + 离散 LP（sqrt(1-x)*Q）                           |     2.384186e-07 |   0.0000 |     3.172073e-08 |
+| (5) 约化 deg7 + remez1（sqrt(1-x)*Q）                             |     2.384186e-07 |   0.0000 |     2.988054e-08 |
+| (6) 约化 deg7 + remez2（sqrt(1-x)*Q）                             |     2.384186e-07 |   0.0000 |     3.241075e-08 |
+| (7) 约化 deg7 + 离散 LP（sqrt(1-x)*Q）                            |     2.384186e-07 |   0.0000 |     3.241075e-08 |
+| (8) 约化 deg5 + remez1（sqrt(1-x)*Q）                             |     1.654029e-06 |   0.0001 |     4.105161e-07 |
+| (9) 约化 deg5 + remez2（sqrt(1-x)*Q）                             |     1.311302e-06 |   0.0001 |     4.793266e-07 |
+| (10) 约化 deg5 + 离散 LP（sqrt(1-x)*Q）                           |     1.192093e-06 |   0.0001 |     4.762905e-07 |
+| (11) pcl::acos_RVV_f32m2（系数同 (1)）                            |     7.749423e-04 |   0.0444 |     9.846493e-05 |
+| (12) RVV 约化 deg7 remez2（sqrt(1-x)*Q）                          |     2.384186e-07 |   0.0000 |     3.241075e-08 |
+| (13) RVV 约化 deg5 remez2（sqrt(1-x)*Q）                          |     1.311302e-06 |   0.0001 |     4.793266e-07 |
+======================================================================================================================
+
+（RVV 与标量 max|diff| 说明）PCL：(1) 与 (11) 均为 float32 公式，预期 max|diff| 约为 0。约化 (2)–(10) 标量改为 float32 同构 Horner；(12)(13) 亦为 float32 RVV，故与对应标量应更接近（常见为 0 或低 ULP），与主表相对 std::acos 的误差是不同指标。
+
+[pcl::acos_RVV vs 标量 (1)]
+  max |diff| :  0.000000e+00
+[RVV-deg7 vs 标量 (6) deg7 remez2]
+  max |diff| :  0.000000e+00
+[RVV-deg5 vs 标量 (9) deg5 remez2]
+  max |diff| :  0.000000e+00
+
+=== Performance (n = 65536, iters = 100) ===
+=============================================================
+| Kernel                      | Time (ms) |         speedup |
+-------------------------------------------------------------
+| scalar PCL                  |   204.650 |    2.42x vs std |
+| scalar reduced d11 remez1   |   404.424 |    1.23x vs std |
+| scalar reduced d7 remez1    |   318.672 |    1.56x vs std |
+| scalar reduced d5 remez1    |   277.727 |    1.79x vs std |
+| scalar reduced d11 remez2   |   351.548 |    1.41x vs std |
+| scalar reduced d11 LP       |   351.561 |    1.41x vs std |
+| scalar reduced d7 remez2    |   318.768 |    1.56x vs std |
+| scalar reduced d7 LP        |   318.836 |    1.56x vs std |
+| scalar reduced d5 remez2    |   277.610 |    1.79x vs std |
+| scalar reduced d5 LP        |   277.613 |    1.79x vs std |
+| RVV PCL                     |    31.201 |   15.90x vs std |
+| RVV reduced d7 remez2       |    33.626 |   14.75x vs std |
+| RVV reduced d5 remez2       |    32.147 |   15.43x vs std |
+=============================================================
+
+=== RVV Tradeoff vs PCL RVV ===
+  baseline: RVV PCL       max err = 7.749423e-04 rad, time = 31.201 ms
+  candidate: RVV d7 remez2  max err = 2.384186e-07 rad (improve 3250.3x), speed = 0.93x of RVV PCL
+  candidate: RVV d5 remez2  max err = 1.311302e-06 rad (improve 591.0x), speed = 0.97x of RVV PCL
+  suggestion: use RVV d5 remez2 as balanced default.
+[BOARD] expf_test -> /root/pcl-test/common/common/output/run_expf_test.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/common/expf_test 2>&1 | tee /root/pcl-test/common/common/output/run_expf_test.log
+=== expf approximation vs std::expf (n = 10000) ===
+==============================================================================
+| Case / kernel                        |          max rel |         mean abs |
+------------------------------------------------------------------------------
+| (1) 标量 float（同 pcl::expf_RVV）   |     1.517213e-06 |     1.490027e+29 |
+| (2) 标量 remez1 abs                  |     2.234380e-07 |     6.638821e+27 |
+| (3) 标量 remez1-rel                  |     2.234380e-07 |     6.639316e+27 |
+| (4) 标量 remez2-rel                  |     2.234380e-07 |     1.010641e+28 |
+| (5) 标量 lp-rel                      |     2.234380e-07 |     1.010641e+28 |
+| (6) 标量 Sollya rel                  |     2.234380e-07 |     6.638820e+27 |
+| (7) pcl::expf_RVV_f32m2（同(1)）     |     1.517213e-06 |     1.490027e+29 |
+| (8) RVV remez1 abs                   |     2.234380e-07 |     6.638821e+27 |
+| (9) RVV remez1-rel                   |     2.234380e-07 |     6.639316e+27 |
+| (10) RVV remez2-rel                  |     2.234380e-07 |     1.010641e+28 |
+| (11) RVV lp-rel                      |     2.234380e-07 |     1.010641e+28 |
+| (12) RVV Sollya rel                  |     2.234380e-07 |     6.638820e+27 |
+==============================================================================
+[pcl::expf_RVV vs 标量 (1)] max |diff| : 0.000000e+00
+[RVV-r1   vs scalar-r1  ] max |diff| : 0.000000e+00
+[RVV-r1r  vs scalar-r1r ] max |diff| : 0.000000e+00
+[RVV-r2r  vs scalar-r2r ] max |diff| : 0.000000e+00
+[RVV-lpr  vs scalar-lpr ] max |diff| : 0.000000e+00
+[RVV-sol  vs scalar-sol ] max |diff| : 0.000000e+00
+
+=== Performance (n = 10000, iters = 100) ===
+=======================================================
+| Kernel                | Time (ms) |         speedup |
+-------------------------------------------------------
+| 标量（同 expf_RVV）   |    63.332 |    0.67x vs std |
+| 标量 remez1 abs       |    63.389 |    0.67x vs std |
+| 标量 remez1-rel       |    63.410 |    0.67x vs std |
+| 标量 remez2-rel       |    63.345 |    0.67x vs std |
+| 标量 lp-rel           |    63.386 |    0.67x vs std |
+| 标量 Sollya           |    63.382 |    0.67x vs std |
+| pcl::expf_RVV_f32m2   |     4.660 |    9.09x vs std |
+| RVV remez1 abs        |     4.566 |    9.28x vs std |
+| RVV remez1-rel        |     4.476 |    9.47x vs std |
+| RVV remez2-rel        |     4.383 |    9.67x vs std |
+| RVV lp-rel            |     4.568 |    9.28x vs std |
+| RVV Sollya            |     4.456 |    9.51x vs std |
+=======================================================
+[BOARD] logf_test -> /root/pcl-test/common/common/output/run_logf_test.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/common/logf_test 2>&1 | tee /root/pcl-test/common/common/output/run_logf_test.log
+=== logf approximation vs std::logf (n = 10000) ===
+==============================================================================
+| Case / kernel                        |          max rel |         mean abs |
+------------------------------------------------------------------------------
+| (1) 标量 float（同 pcl::logf_RVV）   |     6.739247e-05 |     1.585479e-07 |
+| (2) 标量 remez1 abs                  |     4.477345e-05 |     2.058984e-07 |
+| (3) 标量 remez2 abs                  |     7.554008e-05 |     1.577444e-07 |
+| (4) 标量 lp abs                      |     5.738253e-05 |     1.610150e-07 |
+| (5) 标量 Sollya abs                  |     7.041873e-05 |     1.558193e-07 |
+| (6) pcl::logf_RVV_f32m2（同(1)）     |     6.739247e-05 |     1.585479e-07 |
+| (7) RVV remez1 abs                   |     4.477345e-05 |     2.058984e-07 |
+| (8) RVV remez2 abs                   |     7.554008e-05 |     1.577444e-07 |
+| (9) RVV lp abs                       |     5.738253e-05 |     1.610150e-07 |
+| (10) RVV Sollya abs                  |     7.041873e-05 |     1.558193e-07 |
+==============================================================================
+[pcl::logf_RVV vs 标量 (1)] max |diff| : 0.000000e+00
+[RVV-r1   vs scalar-r1  ] max |diff| : 0.000000e+00
+[RVV-r2   vs scalar-r2  ] max |diff| : 0.000000e+00
+[RVV-lp   vs scalar-lp  ] max |diff| : 0.000000e+00
+[RVV-sol  vs scalar-sol ] max |diff| : 0.000000e+00
+
+=== Performance (n = 10000, iters = 100) ===
+=========================================================
+| Kernel                  | Time (ms) |         speedup |
+---------------------------------------------------------
+| 标量（同 logf_RVV）     |    58.954 |    0.61x vs std |
+| 标量 fast（正normal）   |     5.154 |    6.99x vs std |
+| 标量 remez1 abs         |    58.928 |    0.61x vs std |
+| 标量 remez2 abs         |    59.004 |    0.61x vs std |
+| 标量 lp abs             |    58.926 |    0.61x vs std |
+| 标量 Sollya             |    58.947 |    0.61x vs std |
+| pcl::logf_RVV_f32m2     |     9.158 |    3.93x vs std |
+| RVV remez1 abs          |     8.836 |    4.08x vs std |
+| RVV remez2 abs          |     8.784 |    4.10x vs std |
+| RVV lp abs              |     8.788 |    4.10x vs std |
+| RVV Sollya              |     9.095 |    3.96x vs std |
+=========================================================

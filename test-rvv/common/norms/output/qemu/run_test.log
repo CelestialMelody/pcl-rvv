@@ -1,0 +1,11 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from NormsTest
+[ RUN      ] NormsTest.L1_L2sqr_Linf_PointerAndVector
+[       OK ] NormsTest.L1_L2sqr_Linf_PointerAndVector (5 ms)
+[----------] 1 test from NormsTest (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (8 ms total)
+[  PASSED  ] 1 test.

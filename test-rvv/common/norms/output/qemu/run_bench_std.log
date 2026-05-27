@@ -1,0 +1,144 @@
+make[1]: 进入目录“/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/common/norms”
+rm -rf build/riscv/bench_norms
+[BUILD] Benchmark (riscv)...
+riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-04-23_15-18-12.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/RISCV/workspace/pcl/common/include -I/home/zoomin/codes/RISCV/workspace/pcl/test/include -I/home/zoomin/codes/RISCV/workspace/pcl -I/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/RISCV/workspace/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/RISCV/workspace/riscv/boost/include -I/home/zoomin/codes/RISCV/workspace/riscv/gtest/include  bench_norms.cpp -L/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -L/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -L/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib  -lpcl_common -lm -o build/riscv/bench_norms_std
+[RUN] Benchmark (USE_PCL_RVV10=0)...
+LD_LIBRARY_PATH=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib:/home/zoomin/codes/RISCV/workspace/riscv/boost/lib:/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_norms_std
+============================================================
+ PCL norms.hpp Benchmark
+ Iterations: 30
+ Dataset: norms dim={8,36,128,512,4096} iterations=30 unit=us/iter
+ build: __RVV10__ NOT defined
+============================================================
+
+--- dim=8 ---
+L1_Norm(float*),dim=8                                   : 1.7825 us/iter
+L2_Norm_SQR(float*),dim=8                               : 0.5376 us/iter
+L2_Norm(float*),dim=8                                   : 0.5847 us/iter
+Linf_Norm(float*),dim=8                                 : 0.9019 us/iter
+JM_Norm(float*),dim=8                                   : 2.0035 us/iter
+B_Norm(float*),dim=8                                    : 1.0299 us/iter
+Sublinear_Norm(float*),dim=8                            : 0.5395 us/iter
+CS_Norm(float*),dim=8                                   : 1.3466 us/iter
+Div_Norm(float*),dim=8                                  : 0.8681 us/iter
+KL_Norm(float*),dim=8                                   : 0.8645 us/iter
+HIK_Norm(float*),dim=8                                  : 0.5284 us/iter
+PF_Norm(float*),dim=8                                   : 1.3955 us/iter
+K_Norm(float*),dim=8                                    : 1.3167 us/iter
+selectNorm(vec,L1),dim=8                                : 1.7148 us/iter
+selectNorm(vec,L2_SQR),dim=8                            : 1.4140 us/iter
+selectNorm(vec,L2),dim=8                                : 1.7722 us/iter
+selectNorm(vec,LINF),dim=8                              : 1.9111 us/iter
+selectNorm(vec,JM),dim=8                                : 2.7279 us/iter
+selectNorm(vec,B),dim=8                                 : 1.6433 us/iter
+selectNorm(vec,SUBLINEAR),dim=8                         : 1.2957 us/iter
+selectNorm(vec,CS),dim=8                                : 2.0942 us/iter
+selectNorm(vec,DIV),dim=8                               : 1.4022 us/iter
+selectNorm(vec,KL),dim=8                                : 1.4213 us/iter
+selectNorm(vec,HIK),dim=8                               : 1.2261 us/iter
+
+--- dim=36 ---
+L1_Norm(float*),dim=36                                  : 1.3634 us/iter
+L2_Norm_SQR(float*),dim=36                              : 0.9680 us/iter
+L2_Norm(float*),dim=36                                  : 1.0109 us/iter
+Linf_Norm(float*),dim=36                                : 0.2931 us/iter
+JM_Norm(float*),dim=36                                  : 5.4076 us/iter
+B_Norm(float*),dim=36                                   : 2.8423 us/iter
+Sublinear_Norm(float*),dim=36                           : 0.9584 us/iter
+CS_Norm(float*),dim=36                                  : 3.0878 us/iter
+Div_Norm(float*),dim=36                                 : 2.2336 us/iter
+KL_Norm(float*),dim=36                                  : 1.8558 us/iter
+HIK_Norm(float*),dim=36                                 : 0.9082 us/iter
+PF_Norm(float*),dim=36                                  : 4.1229 us/iter
+K_Norm(float*),dim=36                                   : 4.0038 us/iter
+selectNorm(vec,L1),dim=36                               : 3.1312 us/iter
+selectNorm(vec,L2_SQR),dim=36                           : 2.7156 us/iter
+selectNorm(vec,L2),dim=36                               : 3.4510 us/iter
+selectNorm(vec,LINF),dim=36                             : 2.6797 us/iter
+selectNorm(vec,JM),dim=36                               : 7.5320 us/iter
+selectNorm(vec,B),dim=36                                : 4.9890 us/iter
+selectNorm(vec,SUBLINEAR),dim=36                        : 2.7367 us/iter
+selectNorm(vec,CS),dim=36                               : 4.9815 us/iter
+selectNorm(vec,DIV),dim=36                              : 4.0089 us/iter
+selectNorm(vec,KL),dim=36                               : 3.9690 us/iter
+selectNorm(vec,HIK),dim=36                              : 2.7962 us/iter
+
+--- dim=128 ---
+L1_Norm(float*),dim=128                                 : 1.5679 us/iter
+L2_Norm_SQR(float*),dim=128                             : 1.5528 us/iter
+L2_Norm(float*),dim=128                                 : 1.6093 us/iter
+Linf_Norm(float*),dim=128                               : 0.8921 us/iter
+JM_Norm(float*),dim=128                                 : 20.5009 us/iter
+B_Norm(float*),dim=128                                  : 10.8014 us/iter
+Sublinear_Norm(float*),dim=128                          : 2.3471 us/iter
+CS_Norm(float*),dim=128                                 : 7.1605 us/iter
+Div_Norm(float*),dim=128                                : 5.9212 us/iter
+KL_Norm(float*),dim=128                                 : 6.0480 us/iter
+HIK_Norm(float*),dim=128                                : 1.5828 us/iter
+PF_Norm(float*),dim=128                                 : 13.1067 us/iter
+K_Norm(float*),dim=128                                  : 12.5107 us/iter
+selectNorm(vec,L1),dim=128                              : 5.7202 us/iter
+selectNorm(vec,L2_SQR),dim=128                          : 6.0028 us/iter
+selectNorm(vec,L2),dim=128                              : 7.4568 us/iter
+selectNorm(vec,LINF),dim=128                            : 5.0263 us/iter
+selectNorm(vec,JM),dim=128                              : 26.9495 us/iter
+selectNorm(vec,B),dim=128                               : 16.2088 us/iter
+selectNorm(vec,SUBLINEAR),dim=128                       : 5.9151 us/iter
+selectNorm(vec,CS),dim=128                              : 11.5433 us/iter
+selectNorm(vec,DIV),dim=128                             : 10.2287 us/iter
+selectNorm(vec,KL),dim=128                              : 10.2492 us/iter
+selectNorm(vec,HIK),dim=128                             : 6.0327 us/iter
+
+--- dim=512 ---
+L1_Norm(float*),dim=512                                 : 5.3931 us/iter
+L2_Norm_SQR(float*),dim=512                             : 5.8358 us/iter
+L2_Norm(float*),dim=512                                 : 5.9430 us/iter
+Linf_Norm(float*),dim=512                               : 3.4912 us/iter
+JM_Norm(float*),dim=512                                 : 80.9383 us/iter
+B_Norm(float*),dim=512                                  : 42.5016 us/iter
+Sublinear_Norm(float*),dim=512                          : 5.9582 us/iter
+CS_Norm(float*),dim=512                                 : 28.7919 us/iter
+Div_Norm(float*),dim=512                                : 23.9945 us/iter
+KL_Norm(float*),dim=512                                 : 26.1383 us/iter
+HIK_Norm(float*),dim=512                                : 6.7038 us/iter
+PF_Norm(float*),dim=512                                 : 49.8815 us/iter
+K_Norm(float*),dim=512                                  : 48.5578 us/iter
+selectNorm(vec,L1),dim=512                              : 20.0669 us/iter
+selectNorm(vec,L2_SQR),dim=512                          : 21.1618 us/iter
+selectNorm(vec,L2),dim=512                              : 38.5707 us/iter
+selectNorm(vec,LINF),dim=512                            : 32.4813 us/iter
+selectNorm(vec,JM),dim=512                              : 128.6318 us/iter
+selectNorm(vec,B),dim=512                               : 62.1131 us/iter
+selectNorm(vec,SUBLINEAR),dim=512                       : 21.5039 us/iter
+selectNorm(vec,CS),dim=512                              : 43.1991 us/iter
+selectNorm(vec,DIV),dim=512                             : 38.7160 us/iter
+selectNorm(vec,KL),dim=512                              : 40.1212 us/iter
+selectNorm(vec,HIK),dim=512                             : 21.2113 us/iter
+
+--- dim=4096 ---
+L1_Norm(float*),dim=4096                                : 41.1641 us/iter
+L2_Norm_SQR(float*),dim=4096                            : 44.9128 us/iter
+L2_Norm(float*),dim=4096                                : 45.1445 us/iter
+Linf_Norm(float*),dim=4096                              : 26.5034 us/iter
+JM_Norm(float*),dim=4096                                : 648.2897 us/iter
+B_Norm(float*),dim=4096                                 : 329.1249 us/iter
+Sublinear_Norm(float*),dim=4096                         : 47.3252 us/iter
+CS_Norm(float*),dim=4096                                : 225.2798 us/iter
+Div_Norm(float*),dim=4096                               : 188.5159 us/iter
+KL_Norm(float*),dim=4096                                : 205.1670 us/iter
+HIK_Norm(float*),dim=4096                               : 55.4638 us/iter
+PF_Norm(float*),dim=4096                                : 394.6540 us/iter
+K_Norm(float*),dim=4096                                 : 187.8389 us/iter
+selectNorm(vec,L1),dim=4096                             : 148.7948 us/iter
+selectNorm(vec,L2_SQR),dim=4096                         : 150.9343 us/iter
+selectNorm(vec,L2),dim=4096                             : 188.8243 us/iter
+selectNorm(vec,LINF),dim=4096                           : 134.4940 us/iter
+selectNorm(vec,JM),dim=4096                             : 858.1985 us/iter
+selectNorm(vec,B),dim=4096                              : 489.2752 us/iter
+selectNorm(vec,SUBLINEAR),dim=4096                      : 151.6057 us/iter
+selectNorm(vec,CS),dim=4096                             : 342.6608 us/iter
+selectNorm(vec,DIV),dim=4096                            : 296.5721 us/iter
+selectNorm(vec,KL),dim=4096                             : 305.6965 us/iter
+selectNorm(vec,HIK),dim=4096                            : 156.7380 us/iter
+============================================================
+make[1]: 离开目录“/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/common/norms”

@@ -1,0 +1,15 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from NormsTest
+[ RUN      ] NormsTest.L1_L2sqr_Linf_PointerAndVector
+[       OK ] NormsTest.L1_L2sqr_Linf_PointerAndVector (5 ms)
+[ RUN      ] NormsTest.JM_B_Sublinear_CS_HIK_PF_K
+[       OK ] NormsTest.JM_B_Sublinear_CS_HIK_PF_K (6 ms)
+[ RUN      ] NormsTest.Div_KL_PositiveData
+[       OK ] NormsTest.Div_KL_PositiveData (3 ms)
+[----------] 3 tests from NormsTest (16 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (18 ms total)
+[  PASSED  ] 3 tests.

@@ -1,0 +1,120 @@
+❯ make run_dag_compare
+make[1]: Entering directory '/root/pcl-test/app'
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/app/pipeline_dag_std  2>&1 | tee /root/pcl-test/app/output/run_dag_std.log
+==============================================================================================================
+ PCL DAG 单链：raw → voxel → common → normals → transform → gauss+2d → SAC
+（与 pcl_pipeline_app 的多轨覆盖版并列；本程序强调数据依赖顺序。）
+ Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-']
+ Image Size: 400 x 224 (raster grids + 2d; 与 k2dW/k2dH 一致)
+ Dataset: pipeline_dag voxel+KdTree_radius_normals+raster_z_gauss_2d+SAC synthetic raw_pts=50000
+ raw cloud points: 50000
+ Iterations: 10
+ Warmup: 3
+ build: __RVV10__ OFF
+==============================================================================================================
+total_pipeline_dag (one full chain)                                 : 10134.4045 ms/iter
+--- 分阶段耗时（平均每迭代 ms；百分比为相对本节各阶段之和）；标签可多行，续行与首行左对齐 ---
+[DAG01] 体素滤波 —                                             : 21.4430 ms/iter  (0.2% of staged)
+        filters: VoxelGrid::filter; copyPointCloud (sparse fallback)
+[DAG02] 滤波后点云 cloud_f 上 common —                       : 8789.4825 ms/iter  (86.7% of staged)
+        common/centroid: compute3DCentroid, computeMeanAndCovarianceMatrix;
+        common/common: getMinMax3D, getMaxDistance, getMaxSegment;
+        common/norms: L2_Norm, L1_Norm (x32);
+        bench: makePolygonFromFilteredExtent; common/common: calculatePolygonArea
+[DAG03] RVV 初等条带（仅 __RVV10__ 且 scratch 非空）—    : 0.0001 ms/iter  (0.0% of staged)
+        common/common: expf_RVV_f32m2, logf_RVV_f32m2,
+        atan2_RVV_f32m2, acos_RVV_f32m2
+[DAG04] 半径法线 + 邻域 —                                    : 1167.4331 ms/iter  (11.5% of staged)
+        features: NormalEstimation::compute; search/KdTree (cloud_f)
+[DAG05] 变换点云并旋转法线 —                              : 4.8460 ms/iter  (0.0% of staged)
+        transforms: transformPointCloud; Eigen rotate+normalize normals
+        (normals_f -> normals_t)
+[DAG06] Z 栅格 + 可分高斯 —                                  : 18.5856 ms/iter  (0.2% of staged)
+        bench: rasterizeZToIntensityGrid(cloud_t)->zimg;
+        common/gaussian: GaussianKernel::convolveRows, convolveCols
+[DAG07] 强度栅格 + pcl::2d —                                   : 109.6831 ms/iter  (1.1% of staged)
+        bench: rasterizeZToIntensityGrid(cloud_t)->img2d;
+        2d: copyPointCloud; Convolution::filter; Morphology::erosionGray;
+        Edge::detectEdgeSobel
+[DAG08] 变换链末端 SAC（每迭代构造模型）—            : 22.3284 ms/iter  (0.2% of staged)
+        sample_consensus: per-iter SampleConsensusModelPlane,
+        SampleConsensusModelNormalPlane; countWithinDistance,
+        selectWithinDistance, getDistancesToModel (cloud_t, normals_t)
+staged_sum                                                           : 10133.8017 ms/iter
+[pipeline_dag] 完成 10 次计时迭代（不含 warmup）。
+==============================================================================================================
+make[1]: Leaving directory '/root/pcl-test/app'
+make[1]: Entering directory '/root/pcl-test/app'
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/app/pipeline_dag_rvv  2>&1 | tee /root/pcl-test/app/output/run_dag_rvv.log
+==============================================================================================================
+ PCL DAG 单链：raw → voxel → common → normals → transform → gauss+2d → SAC
+（与 pcl_pipeline_app 的多轨覆盖版并列；本程序强调数据依赖顺序。）
+ Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-']
+ Image Size: 400 x 224 (raster grids + 2d; 与 k2dW/k2dH 一致)
+ Dataset: pipeline_dag voxel+KdTree_radius_normals+raster_z_gauss_2d+SAC synthetic raw_pts=50000
+ raw cloud points: 50000
+ Iterations: 10
+ Warmup: 3
+ build: __RVV10__ ON
+==============================================================================================================
+total_pipeline_dag (one full chain)                                 : 2873.3181 ms/iter
+--- 分阶段耗时（平均每迭代 ms；百分比为相对本节各阶段之和）；标签可多行，续行与首行左对齐 ---
+[DAG01] 体素滤波 —                                             : 19.4100 ms/iter  (0.7% of staged)
+        filters: VoxelGrid::filter; copyPointCloud (sparse fallback)
+[DAG02] 滤波后点云 cloud_f 上 common —                       : 1656.2031 ms/iter  (57.7% of staged)
+        common/centroid: compute3DCentroid, computeMeanAndCovarianceMatrix;
+        common/common: getMinMax3D, getMaxDistance, getMaxSegment;
+        common/norms: L2_Norm, L1_Norm (x32);
+        bench: makePolygonFromFilteredExtent; common/common: calculatePolygonArea
+[DAG03] RVV 初等条带（仅 __RVV10__ 且 scratch 非空）—    : 0.0157 ms/iter  (0.0% of staged)
+        common/common: expf_RVV_f32m2, logf_RVV_f32m2,
+        atan2_RVV_f32m2, acos_RVV_f32m2
+[DAG04] 半径法线 + 邻域 —                                    : 1118.4629 ms/iter  (38.9% of staged)
+        features: NormalEstimation::compute; search/KdTree (cloud_f)
+[DAG05] 变换点云并旋转法线 —                              : 4.6055 ms/iter  (0.2% of staged)
+        transforms: transformPointCloud; Eigen rotate+normalize normals
+        (normals_f -> normals_t)
+[DAG06] Z 栅格 + 可分高斯 —                                  : 17.7401 ms/iter  (0.6% of staged)
+        bench: rasterizeZToIntensityGrid(cloud_t)->zimg;
+        common/gaussian: GaussianKernel::convolveRows, convolveCols
+[DAG07] 强度栅格 + pcl::2d —                                   : 52.9058 ms/iter  (1.8% of staged)
+        bench: rasterizeZToIntensityGrid(cloud_t)->img2d;
+        2d: copyPointCloud; Convolution::filter; Morphology::erosionGray;
+        Edge::detectEdgeSobel
+[DAG08] 变换链末端 SAC（每迭代构造模型）—            : 3.4061 ms/iter  (0.1% of staged)
+        sample_consensus: per-iter SampleConsensusModelPlane,
+        SampleConsensusModelNormalPlane; countWithinDistance,
+        selectWithinDistance, getDistancesToModel (cloud_t, normals_t)
+staged_sum                                                           : 2872.7492 ms/iter
+[pipeline_dag] 完成 10 次计时迭代（不含 warmup）。
+==============================================================================================================
+make[1]: Leaving directory '/root/pcl-test/app'
+python3 /root/pcl-test/script/analyze_bench_compare.py \
+        --std-log /root/pcl-test/app/output/run_dag_std.log \
+        --rvv-log /root/pcl-test/app/output/run_dag_rvv.log \
+        --device "board rv64 (Milkv-Jupiter)" \
+        --vlen-desc "256 bits (hardware vlenb csr, 32 bytes)" \
+        2>&1 | tee /root/pcl-test/app/output/analyze_dag_compare.log
+=================================================================================================
+ PCL DAG 单链：raw → voxel → common → normals → transform → gauss+2d → SAC (Std vs RVV)
+=================================================================================================
+[Benchmark Context]
+  Device    : board rv64 (Milkv-Jupiter)
+  VLEN      : 256 bits (hardware vlenb csr, 32 bytes)
+  Dataset   : pipeline_dag voxel+KdTree_radius_normals+raster_z_gauss_2d+SAC synthetic raw_pts=50000
+  Iterations: 10 （每行 Total = Avg × 10）
+  Std log   : /root/pcl-test/app/output/run_dag_std.log
+  RVV log   : /root/pcl-test/app/output/run_dag_rvv.log
+
+-------------------------------------------------------------------------------------------------
+Benchmark Item                       | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+-------------------------------------|--------|----------------|----------------|----------------
+total_pipeline_dag (one full chain)  | Std    |  10134.4045 ms | 101344.0450 ms |    [   1.00x ]
+                                     | RVV    |   2873.3181 ms |  28733.1810 ms |    [   3.53x ]
+-------------------------------------|--------|----------------|----------------|----------------
+staged_sum                           | Std    |  10133.8017 ms | 101338.0170 ms |    [   1.00x ]
+                                     | RVV    |   2872.7492 ms |  28727.4920 ms |    [   3.53x ]
+-------------------------------------|--------|----------------|----------------|----------------
+=================================================================================================
