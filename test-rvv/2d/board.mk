@@ -39,6 +39,11 @@ PYTHON      := $(shell test -x '$(VENV_PYTHON)' && echo '$(VENV_PYTHON)' || echo
 
 # 传给分析脚本的 --device（可覆盖，例如 BOARD_LABEL="Milkv-Jupiter"）
 BOARD_LABEL ?= Milkv-Jupiter
+# 可与 app deploy_read_vlen 共用同一路径（默认 app 目录下的 read_vlen）
+READ_VLEN ?= /root/pcl-test/app/read_vlen
+ifndef BOARD_VLEN_DESC
+BOARD_VLEN_DESC := $(shell test -x '$(READ_VLEN)' && '$(READ_VLEN)' 2>/dev/null || echo 'n/a (deploy read_vlen to $(READ_VLEN) from test-rvv/app: make deploy_read_vlen)')
+endif
 
 # 命令行参数按位置固定，顺序不能变
 REMOTE_PCD_FILES = \
@@ -81,7 +86,7 @@ analyze_bench_compare:
 		--std-log $(REMOTE_BENCH_STD_OUTPUT_FILE) \
 		--rvv-log $(REMOTE_BENCH_RVV_OUTPUT_FILE) \
 		--device "$(BOARD_LABEL)" \
-		--vlen-desc "see SoC / ELF (board)" \
+		--vlen-desc "$(BOARD_VLEN_DESC)" \
 		$(if $(BENCH_COMPARE_SAVE),| tee $(BENCH_COMPARE_SAVE),)
 
 # 一键：先 std 再 rvv 再出对比表（日志已分别 tee）

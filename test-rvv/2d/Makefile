@@ -337,14 +337,20 @@ COMMON_COMMON_DIR := ../common/common
 parms:
 	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) parms
 
-parms_remez_exp:
-	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) parms_remez_exp
+parms_expf:
+	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) parms_expf
 
-parms_remez_atan:
-	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) parms_remez_atan
+parms_atan2:
+	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) parms_atan2
+
+parms_acos:
+	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) parms_acos
 
 run_atan2_test:
 	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) run_atan2_test
+
+run_acos_test:
+	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) run_acos_test
 
 run_expf_test:
 	@$(MAKE) -C $(COMMON_COMMON_DIR) ARCH=$(ARCH) run_expf_test

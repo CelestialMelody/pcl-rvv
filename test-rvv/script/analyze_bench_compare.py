@@ -107,13 +107,22 @@ def _row_value_ms(m: re.Match[str]) -> tuple[str, float]:
     return name, value_ms
 
 
-def _collect_rows(lines: list[str]) -> list[tuple[str, float]]:
+def _collect_rows_with_unit(lines: list[str]) -> tuple[list[tuple[str, float]], str]:
+    """
+    收集计时行；avg 内部统一为毫秒（ms），与 _row_value_ms 一致。
+    返回 (rows, avg_display_unit)，后者为 'us' 或 'ms'，由首条计时行的原始单位决定。
+    """
     rows: list[tuple[str, float]] = []
+    display_unit = "ms"
+    first = True
     for line in lines:
         m = ROW_RE.match(line.rstrip("\n"))
         if m:
+            if first:
+                display_unit = "us" if m.group(3) == "u" else "ms"
+                first = False
             rows.append(_row_value_ms(m))
-    return rows
+    return rows, display_unit
 
 
 def extract_iterations(text: str) -> int | None:
@@ -125,10 +134,11 @@ def extract_iterations(text: str) -> int | None:
       - 常见缩写/变体：Iter / Iters / iteration / iterations / iter(s)
     """
     # 独占一行：Iterations: / iter: 等
+    # 独占一行或与 trailing 文案共存（例如旧版 “Iterations: 12 warmup: …”）
     m = re.search(
-        r"^\s*(?:iters?|iter(?:ation)?s?)\s*:\s*(\d+)\s*$",
+        r"(?m)^\s*(?:iters?|iter(?:ation)?s?)\s*:\s*(\d+)\b",
         text,
-        re.IGNORECASE | re.MULTILINE,
+        re.IGNORECASE,
     )
     return int(m.group(1)) if m else None
 
@@ -230,12 +240,17 @@ def parse_structured_header_block(text: str) -> dict:
             continue
 
         rows: list[tuple[str, float]] = []
+        avg_display_unit = "ms"
+        first_row = True
         for k in range(scan_from, len(lines)):
             lk = lines[k]
             if _line_is_equals_separator(lk) and rows:
                 break
             m_row = ROW_RE.match(lk)
             if m_row:
+                if first_row:
+                    avg_display_unit = "us" if m_row.group(3) == "u" else "ms"
+                    first_row = False
                 rows.append(_row_value_ms(m_row))
 
         if rows:
@@ -247,6 +262,7 @@ def parse_structured_header_block(text: str) -> dict:
                 "image_h": image_h,
                 "base_iterations": base_iters,
                 "rows": rows,
+                "avg_display_unit": avg_display_unit,
             }
 
     raise ValueError(
@@ -265,7 +281,7 @@ def parse_loose_ms_per_iter(text: str) -> dict:
     image_w = int(m_size.group(1)) if m_size else None
     image_h = int(m_size.group(2)) if m_size else None
 
-    rows = _collect_rows(text.splitlines())
+    rows, avg_display_unit = _collect_rows_with_unit(text.splitlines())
     if not rows:
         raise ValueError("未找到任何 '… : x ms / iter' 或 '… : x us / iter' 行")
 
@@ -288,6 +304,7 @@ def parse_loose_ms_per_iter(text: str) -> dict:
         "image_h": image_h,
         "base_iterations": base_iters,
         "rows": rows,
+        "avg_display_unit": avg_display_unit,
     }
 
 
@@ -310,7 +327,7 @@ def parse_one_log(text: str, fmt: str, iterations_override: int | None) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="对比 Std / RVV 两份 benchmark 日志（ms/iter 行 + Iterations）并打印表格"
+        description="对比 Std / RVV 两份 benchmark 日志（ms/iter 或 us/iter + Iterations）并打印表格"
     )
     ap.add_argument(
         "--std-log",
@@ -385,6 +402,16 @@ def main() -> int:
         base_iters = rvv_d.get("base_iterations")
     rvv_map = dict(rvv_d["rows"])
 
+    std_unit = std_d.get("avg_display_unit", "ms")
+    rvv_unit = rvv_d.get("avg_display_unit", "ms")
+    if std_unit != rvv_unit:
+        print(
+            f"[WARN] Std 日志计时单位={std_unit} 与 RVV={rvv_unit} 不一致，"
+            "表格列标题与数值以 Std 侧单位显示（内部仍按 ms 比 speedup）。",
+            file=sys.stderr,
+        )
+    display_unit = std_unit
+
     device, vlen_desc = parse_run_command(std_text + "\n" + rvv_text)
     if args.device.strip():
         device = args.device.strip()
@@ -397,7 +424,9 @@ def main() -> int:
 
     names_ordered = [n for n, _ in std_d["rows"]]
     w_item = max(24, max(len(n) for n in names_ordered) + 1)
-    total_width = w_item + W_IMPL + W_AVG + W_TOT + W_SPD + (4 * 3) + 1
+    w_avg = 16 if display_unit == "us" else W_AVG
+    w_tot = 16 if display_unit == "us" else W_TOT
+    total_width = w_item + W_IMPL + w_avg + w_tot + W_SPD + (4 * 3) + 1
 
     ds = resolve_dataset_description(
         args.dataset, std_text, rvv_text, std_d, rvv_d
@@ -424,12 +453,15 @@ def main() -> int:
     print_context_kv("RVV log", str(args.rvv_log))
     print()
 
+    avg_hdr = "Avg (us)" if display_unit == "us" else "Avg (ms)"
+    tot_hdr = "Total (us)" if display_unit == "us" else "Total (ms)"
+
     print_bar(SEP_CHAR, total_width)
     hdr = (
         f"{'Benchmark Item':<{w_item}} | "
         f"{'Impl':<{W_IMPL}} | "
-        f"{'Avg Time':>{W_AVG}} | "
-        f"{'Total Time':>{W_TOT}} | "
+        f"{avg_hdr:>{w_avg}} | "
+        f"{tot_hdr:>{w_tot}} | "
         f"{'Speedup':>{W_SPD}}"
     )
     print(hdr)
@@ -438,9 +470,9 @@ def main() -> int:
         + "|"
         + "-" * (W_IMPL + 2)
         + "|"
-        + "-" * (W_AVG + 2)
+        + "-" * (w_avg + 2)
         + "|"
-        + "-" * (W_TOT + 2)
+        + "-" * (w_tot + 2)
         + "|"
         + "-" * (W_SPD + 2)
     )
@@ -455,15 +487,27 @@ def main() -> int:
         rvv_tot = (rvv_avg * base_iters) if base_iters is not None else None
         speedup_rvv = (std_avg / rvv_avg) if rvv_avg > 0 else 0.0
 
+        def fmt_avg_ms(v_ms: float) -> str:
+            if display_unit == "us":
+                return f"{v_ms * 1000:.4f} us"
+            return f"{v_ms:.4f} ms"
+
+        def fmt_tot_ms(v_ms: float | None) -> str:
+            if v_ms is None:
+                return "n/a"
+            if display_unit == "us":
+                return f"{v_ms * 1000:.4f} us"
+            return f"{v_ms:.4f} ms"
+
         def row(item: str, impl: str, avg: float, tot: float | None, sp: float) -> None:
-            avg_s = f"{avg:.4f} ms"
-            tot_s = f"{tot:.4f} ms" if tot is not None else "n/a"
+            avg_s = fmt_avg_ms(avg)
+            tot_s = fmt_tot_ms(tot)
             spd_s = f"[ {sp:6.2f}x ]"
             print(
                 f"{item:<{w_item}} | "
                 f"{impl:<{W_IMPL}} | "
-                f"{avg_s:>{W_AVG}} | "
-                f"{tot_s:>{W_TOT}} | "
+                f"{avg_s:>{w_avg}} | "
+                f"{tot_s:>{w_tot}} | "
                 f"{spd_s:>{W_SPD}}"
             )
 
