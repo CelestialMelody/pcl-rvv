@@ -8,8 +8,10 @@
 
 接口声明位于 `common/include/pcl/common/common.h`，实现位于 `common/include/pcl/common/impl/common.hpp`，仅在 `__RVV10__` 下可用。`vl` 由调用方通过 `vsetvl_e32m2` 设定，支持 strip-mining 与尾部处理。
 
-```205:206:common/include/pcl/common/common.h
-  expf_RVV_f32m2(const vfloat32m2_t& x, const std::size_t vl);
+接口签名（摘自 `common/include/pcl/common/common.h`）：
+
+```cpp
+expf_RVV_f32m2(const vfloat32m2_t& x, const std::size_t vl);
 ```
 
 ---
@@ -26,9 +28,9 @@ e^x = e^{n\ln 2 + r} = 2^n\cdot e^r
 
 本实现依赖三类常量：\(\ln 2\) 的拆分常量（`kExpfLog2Inv/kExpfLog2Hi/kExpfLog2Lo`）、输入夹取区间（`kExpfXMin/kExpfXMax`）以及 Remez 多项式系数（`kExpfRemezC0..C7`）。这些常量在仓库内有对应脚本与 Makefile 入口，便于复现与校验。
 
-- **\(\ln 2\) 拆分与基础常量**：`test-rvv/common/common/script/parms.py` 使用 `decimal` 高精度计算 \(\ln 2\)，再将 `ln2` 的高位部分量化为 float32（脚本输出为 `kLog2Hi`），低位部分为 `kLog2Lo = ln2 - kLog2Hi`，并输出 `kLog2Inv = 1/ln2` 与 `kTwoToMinus127 = 2^-127` 等常量。对应 Makefile 目标为 `parms`。
+- \(\ln 2\) 拆分与基础常量：`test-rvv/common/common/script/parms.py` 使用 `decimal` 高精度计算 \(\ln 2\)，再将 `ln2` 的高位部分量化为 float32（脚本输出为 `kLog2Hi`），低位部分为 `kLog2Lo = ln2 - kLog2Hi`，并输出 `kLog2Inv = 1/ln2` 与 `kTwoToMinus127 = 2^-127` 等常量。对应 Makefile 目标为 `parms`。
 
-- **Remez 系数**：`test-rvv/common/common/script/parms_remez_exp.py` 在区间 \([0,\ln 2]\) 上用 Remez（exchange）生成 `exp(r)` 的 degree=7 minimax 多项式，并按 Horner 形式输出 `expf_remez_c0..c7`。对应 Makefile 目标为 `parms_remez_exp`。
+- Remez 系数：`test-rvv/common/common/script/parms_expf.py` 默认在区间 \([-\ln 2/2,\ln 2/2]\) 上输出 `exp(r)` 的 degree=7 多项式（与 `round` 约化一致；可用 `--r-lo/--r-hi` 覆盖）。默认 `report` 包含 `remez1`、`remez1-rel`、`remez2-rel`、`lp-rel` 与 Sollya 脚本。其中 `remez1` 为第一算法风格交换实现（绝对误差），`remez1-rel/remez2-rel/lp-rel` 以相对误差为目标。是否替换 `kExpfRemezC*` 请以真实链路相对误差与板卡测试为准；说明见 `doc-rvv/common/remez-coeffs.zh.md`。对应 Makefile 目标为 `parms_expf`。
 
 参数获取方式如下：
 
@@ -37,7 +39,7 @@ cd test-rvv/common/common
 python3 -m venv .venv
 source .venv/bin/activate
 pip install numpy
-make parms_remez_exp
+make parms_expf
 ```
 
 ### 2.2 范围约化

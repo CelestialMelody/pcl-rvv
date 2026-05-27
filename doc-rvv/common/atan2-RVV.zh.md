@@ -159,4 +159,5 @@ int main()
 ## 5. 参考
 
 - [`Speeding up atan2f by 50x`](https://mazzo.li/posts/vectorized-atan2.html)
+- 本仓库中 Remez、LP、Sollya 与 `parms_atan2.py` 的说明：[`remez-coeffs.zh.md`](remez-coeffs.zh.md)
 
