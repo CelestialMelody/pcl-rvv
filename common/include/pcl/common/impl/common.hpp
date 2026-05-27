@@ -230,7 +230,7 @@ pcl::atan2_RVV_f32m2 (const vfloat32m2_t& y, const vfloat32m2_t& x, const std::s
 // -----------------------------------------------------------------------------
 // 约化: x = n*ln2 + r, r ∈ [-ln2/2, ln2/2]. 逼近: exp(r) ≈ P(r) (Remez degree 7).
 // 重构: exp(x) = 2^n * P(r). 2^n 用查表 (vluxei32 字节偏移).
-// 误差: 相对 std::expf 最大相对误差约 1.5e-6. 系数见 test-rvv/2d/remez_exp.py
+// 误差: 相对 std::expf 最大相对误差约 1.5e-6. 系数见 test-rvv/common/common/script/parms_expf.py
 //
 // 2^n 计算说明:
 //   - 约化后 n = round(x/ln2) 是整数，范围约 [-127, 128]（对应 x ∈ [-88, 88]）
@@ -288,6 +288,101 @@ pcl::expf_RVV_f32m2 (const vfloat32m2_t& x, const std::size_t vl)
   vfloat32m2_t two_n_sub = __riscv_vfmv_v_f_f32m2 (kExpfTwoToMinus127, vl);
   vfloat32m2_t two_n = __riscv_vmerge_vvm_f32m2 (two_n_normal, two_n_sub, is_n_neg127, vl);
   return __riscv_vfmul_vv_f32m2 (exp_r, two_n, vl);  // exp(x) = 2^n * exp(r)
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------------------
+// logf_RVV_f32m2: log(x) via 尾数 约化到 [1,2) + Remez log(1+u), u = m-1. 与 expf 同源的 ln(2) 分解.
+// 系数见 test-rvv/common/common/script/parms_log1p.py
+// -----------------------------------------------------------------------------
+namespace {
+  // ln(2) 拆分与 expf 中 kExpfLog2Hi/Lo 一致
+  const float kLogfLog2Hi   = 0.6931471824645996f;
+  const float kLogfLog2Lo   = -1.904654290582768e-09f;
+  const float kLogfSubnormScale = 16777216.f; // 0x1p+24f，正次正规数乘此值变为正规数
+  // 离散 L∞ (LP on grid) / parms_log1p.py --method lp, degree 7; float Horner 后 max |err| 优于此前往返约 1/2.5
+  const float kLogfLog1pC0  = 1.8556080581e-07f;
+  const float kLogfLog1pC1  = 9.9997340558e-01f;
+  const float kLogfLog1pC2  = -4.9937887289e-01f;
+  const float kLogfLog1pC3  = 3.2776673211e-01f;
+  const float kLogfLog1pC4  = -2.2467442806e-01f;
+  const float kLogfLog1pC5  = 1.3301016232e-01f;
+  const float kLogfLog1pC6  = -5.4002504554e-02f;
+  const float kLogfLog1pC7  = 1.0452683404e-02f;
+
+/** 尾数约化后的核心 \c log 计算（不含 \c +0 / 负 / Inf / NaN 合并）；调用方用 \c 1.0f 填无效通道（见 \ref logf_RVV_f32m2 ）。 */
+inline vfloat32m2_t
+__core_logf_RVV_f32m2 (vfloat32m2_t x, const std::size_t vl)
+{
+  // 次正规：x * 2^24 正规化，指数补偿 -24
+  const vuint32m2_t ix0 = __riscv_vreinterpret_v_f32m2_u32m2 (x);
+  const vuint32m2_t e8_0 = __riscv_vand_vx_u32m2 (
+      __riscv_vsrl_vx_u32m2 (ix0, 23, vl), 255, vl);
+  const vuint32m2_t mbits0 = __riscv_vand_vx_u32m2 (ix0, 0x7fffffu, vl);
+  const vbool16_t is_sub = __riscv_vmand_mm_b16 (
+      __riscv_vmseq_vx_u32m2_b16 (e8_0, 0, vl),
+      __riscv_vmsne_vx_u32m2_b16 (mbits0, 0, vl), vl);
+  const vfloat32m2_t x_scaled = __riscv_vfmul_vf_f32m2 (x, kLogfSubnormScale, vl);
+  x = __riscv_vmerge_vvm_f32m2 (x, x_scaled, is_sub, vl);
+  const vuint32m2_t ix = __riscv_vreinterpret_v_f32m2_u32m2 (x);
+  const vuint32m2_t e8 = __riscv_vand_vx_u32m2 (
+      __riscv_vsrl_vx_u32m2 (ix, 23, vl), 255, vl);
+  const vint32m2_t e_bias = __riscv_vreinterpret_v_u32m2_i32m2 (e8);
+  vint32m2_t e = __riscv_vsub_vx_i32m2 (e_bias, 127, vl);
+  const vint32m2_t e_sub = __riscv_vsub_vx_i32m2 (e, 24, vl);
+  e = __riscv_vmerge_vvm_i32m2 (e, e_sub, is_sub, vl);
+  // m = 尾数|隐式前导 1.0，u = m-1
+  const vuint32m2_t mi = __riscv_vor_vx_u32m2 (
+      __riscv_vand_vx_u32m2 (ix, 0x7fffffu, vl), 0x3f800000, vl);
+  const vfloat32m2_t m = __riscv_vreinterpret_v_u32m2_f32m2 (mi);
+  vfloat32m2_t u = __riscv_vfsub_vf_f32m2 (m, 1.0f, vl);
+  // Horner: log(1+u)
+  vfloat32m2_t poly = __riscv_vfmv_v_f_f32m2 (kLogfLog1pC7, vl);
+  poly = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kLogfLog1pC6, vl), u, poly, vl);
+  poly = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kLogfLog1pC5, vl), u, poly, vl);
+  poly = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kLogfLog1pC4, vl), u, poly, vl);
+  poly = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kLogfLog1pC3, vl), u, poly, vl);
+  poly = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kLogfLog1pC2, vl), u, poly, vl);
+  poly = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kLogfLog1pC1, vl), u, poly, vl);
+  const vfloat32m2_t log1p = __riscv_vfmacc_vv_f32m2 (
+      __riscv_vfmv_v_f_f32m2 (kLogfLog1pC0, vl), u, poly, vl);
+  vfloat32m2_t fe = __riscv_vfcvt_f_x_v_f32m2 (e, vl);
+  vfloat32m2_t r = __riscv_vfmv_v_f_f32m2 (0.f, vl);
+  r = __riscv_vfmacc_vf_f32m2 (r, kLogfLog2Hi, fe, vl);
+  r = __riscv_vfmacc_vf_f32m2 (r, kLogfLog2Lo, fe, vl);
+  return __riscv_vfadd_vv_f32m2 (r, log1p, vl);
+}
+}
+
+inline vfloat32m2_t
+pcl::logf_RVV_f32m2 (const vfloat32m2_t& x, const std::size_t vl)
+{
+  const vfloat32m2_t v_one = __riscv_vfmv_v_f_f32m2 (1.0f, vl);
+  const vuint32m2_t ixu = __riscv_vreinterpret_v_f32m2_u32m2 (x);
+  const vbool16_t m_pos = __riscv_vmfgt_vf_f32m2_b16 (x, 0.0f, vl);
+  const vuint32m2_t absi = __riscv_vand_vx_u32m2 (ixu, 0x7fffffffu, vl);
+  const vbool16_t m_nzero = __riscv_vmsne_vx_u32m2_b16 (absi, 0, vl);
+  const vuint32m2_t e8 = __riscv_vand_vx_u32m2 (
+      __riscv_vsrl_vx_u32m2 (ixu, 23, vl), 255, vl);
+  const vbool16_t m_finite = __riscv_vmsne_vx_u32m2_b16 (e8, 255, vl);
+  vbool16_t m_ok = __riscv_vmand_mm_b16 (m_pos, m_nzero, vl);
+  m_ok = __riscv_vmand_mm_b16 (m_ok, m_finite, vl);
+  const vfloat32m2_t x_use = __riscv_vmerge_vvm_f32m2 (v_one, x, m_ok, vl);
+  vfloat32m2_t y = __core_logf_RVV_f32m2 (x_use, vl);
+  // log(+0) = -inf
+  const vbool16_t m_zero = __riscv_vmseq_vx_u32m2_b16 (absi, 0, vl);
+  y = __riscv_vmerge_vvm_f32m2 (y, __riscv_vfmv_v_f_f32m2 (-std::numeric_limits<float>::infinity (), vl), m_zero, vl);
+  // log(负) = qNaN
+  vbool16_t m_neg = __riscv_vmflt_vf_f32m2_b16 (x, 0.0f, vl);
+  y = __riscv_vmerge_vvm_f32m2 (y, __riscv_vfmv_v_f_f32m2 (std::nanf (""), vl), m_neg, vl);
+  // log(+inf) = +inf
+  const vfloat32m2_t v_inf = __riscv_vfmv_v_f_f32m2 (std::numeric_limits<float>::infinity (), vl);
+  const vbool16_t m_pinf = __riscv_vmfeq_vv_f32m2_b16 (x, v_inf, vl);
+  y = __riscv_vmerge_vvm_f32m2 (y, v_inf, m_pinf, vl);
+  // 保留 NaN
+  const vbool16_t m_nan = __riscv_vmfne_vv_f32m2_b16 (x, x, vl);
+  y = __riscv_vmerge_vvm_f32m2 (y, x, m_nan, vl);
+  return y;
 }
 #endif // ifdef __RVV10__
 

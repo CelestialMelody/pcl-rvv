@@ -206,6 +206,17 @@ namespace pcl
   expf_RVV_f32m2(const vfloat32m2_t& x, const std::size_t vl);
 
   /**
+   * \brief Compute logf(x) (natural log) for multiple float values using RISC-V Vector.
+   *
+   * Mantissa reduction to [1,2), then Remez polynomial for log(1+u) on u in [0,1).
+   * Returns -inf for +0, qNaN for x<0, +inf for +inf, and preserves input NaN.
+   * Max relative error vs \c std::logf in typical positive ranges is on the order of 1e-6.
+   * \see doc-rvv/common/logf-RVV.zh.md
+   */
+  inline vfloat32m2_t
+  logf_RVV_f32m2(const vfloat32m2_t& x, const std::size_t vl);
+
+  /**
    * \brief Compute exp(x) for multiple values at once using RISC-V Vector instructions.
    *
    * NOTE: exp_RVV_f64m1 (double) has been removed due to accuracy issues.

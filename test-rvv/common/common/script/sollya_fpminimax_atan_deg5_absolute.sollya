@@ -1,0 +1,7 @@
+// atan(x) on [0,1], full degree 5, absolute — 6 double slots (Horner 6 coeffs)
+// 与奇次 6 元组数量对齐；核为 P(t) 全次数，非 t*(odd(t^2))。
+display=decimal!;
+I = [0;1];
+p = fpminimax(atan(x), 5, [|D,D,D,D,D,D|], I, absolute);
+p;
+quit;

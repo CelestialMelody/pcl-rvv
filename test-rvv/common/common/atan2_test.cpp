@@ -1,22 +1,32 @@
 /*
- * atan2_test.cpp — Compare atan2 approximation (Hastings-style polynomial)
- * with std::atan2. Uses the same coefficients as pcl::atan2_RVV_f32m2.
+ * atan2_test.cpp — 与 std::atan2 对比六种标量 atan 核系数来源 + RVV。
  *
- * Build (standalone, scalar only):
- *   g++ -std=c++17 -O3 -o atan2_test atan2_test.cpp -lm
+ *  (1) 标量 mazzo.li 奇次核（系数同 pcl::atan2_RVV，common.hpp）
+ *  (2) Remez 第一算法风格（parms_atan2.py：交换参考点 + 线性方程组；区间 [0,1]）
+ *  (3) Remez 第二算法（parms_atan2.py：Powell 密栅 min max|err|，初值 LP）
+ *  (4) 离散 LP（parms_atan2.py --method lp）
+ *  (5) Sollya fpminimax 全次数 5（六常数 Horner；核为 P(t) 非 t*(a1+a3 t^2+…)）
+ *  (6) Sollya fpminimax 全次数 11（十二常数 Horner；与 report 第 (6) 节同源）
+ *  (7) __RVV10__: pcl::atan2_RVV_f32m2（系数同 (1)）
  *
- * Build (RVV path, with PCL common):
- *   make atan2_test ARCH=riscv
+ * 旧版「仅一种标量逼近 + 详细 printf」保留为同目录 atan2_test.bak.cpp。
  *
- * Run:
- *   ./atan2_test
- *   make run_atan2_test ARCH=riscv   # under QEMU when cross-building
+ * Build: g++ -std=c++17 -O3 -o atan2_test atan2_test.cpp -lm
+ *        make atan2_test ARCH=riscv
+ *
+ * 表格：误差段为「竖线表格」；性能段首列宽度仅按 kernel 英文名计，避免被中文 Case 列撑宽（对齐思路同 analyze_bench_compare 定宽列）。
+ * 表头量纲写作 max (rad)、mean (rad)。RVV 与标量 (1) 的 |diff| 单独一节，不插入前表。
+ * 终端表格见 ../../script/term_table.hpp（math_test 命名空间），其它数学测试可复用。
  */
+#include <algorithm>
+#include <chrono>
+#include <clocale>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <limits>
-#include <chrono>
+#include <cstring>
+
+#include "../../script/term_table.hpp"
 
 #if defined(__RVV10__)
 #include <riscv_vector.h>
@@ -27,44 +37,170 @@
 
 namespace {
 
-// Same coefficients as pcl::atan2_RVV_f32m2 (Hastings-style, ~0.001 deg max error)
-// parms form https://mazzo.li/posts/vectorized-atan2.html
-const float a1 = 0.99997726f;
-const float a3 = -0.33262347f;
-const float a5 = 0.19354346f;
-const float a7 = -0.11643287f;
-const float a9 = 0.05265332f;
-const float a11 = -0.01172120f;
-const float pi = 3.14159265358979323846f;
-const float pi_2 = 1.57079632679489661923f;
+using math_test::utf8_display_width;
 
+/** 与 ../../script/term_table.hpp 中默认一致的误差/性能列宽；其它测试可自定义 Table3NumCols / Perf2Cols。 */
+constexpr math_test::Table3NumCols k_err_tbl{};
+constexpr math_test::Perf2Cols k_perf_tbl{};
 
-// 使用 python parm_remez_atan2.py 得到的参数
+void print_err_table_header(std::size_t n_pts, int w_item_disp)
+{
+  std::printf("=== atan2 核 vs std::atan2, n = %zu ===\n", n_pts);
+  math_test::print_rule_chars('=', k_err_tbl.line_columns(w_item_disp));
+  math_test::print_pipe_table_3num_header_line(
+      "Case / kernel", w_item_disp, "max (rad)", "deg", "mean (rad)", k_err_tbl);
+  math_test::print_rule_chars('-', k_err_tbl.line_columns(w_item_disp));
+}
 
-// === atan2 approximation vs std::atan2 (n = 65536) ===
-//   Scalar approximation (same polynomial as RVV):
-//     max absolute error:  0.000232 rad  (0.0133 deg)
-//     mean absolute error: 0.000089 rad
-//   RVV (pcl::atan2_RVV_f32m2):
-//     max absolute error:  0.000002 rad  (0.0001 deg) --> 使用 https://mazzo.li/posts/vectorized-atan2.html 的参数精度更高
-//     mean absolute error: 0.000001 rad
-//   RVV vs scalar approx max diff: 2.326965e-04 (expect ~0)
+void print_err_table_row(int w_item_disp, const char* label, double max_r, double deg, double mean_r)
+{
+  math_test::print_pipe_table_3num_row(
+      w_item_disp,
+      label,
+      max_r,
+      true,
+      6,
+      deg,
+      false,
+      4,
+      mean_r,
+      true,
+      6,
+      k_err_tbl);
+}
 
+int err_table_line_columns(int w_item_disp)
+{
+  return k_err_tbl.line_columns(w_item_disp);
+}
 
-// const float a1 = 0.9985091188034383f;
-// const float a3 = -0.3223280401559811f;
-// const float a5 = 0.1642503213121442f;
-// const float a7 = -0.07457206137001779f;
-// const float a9 = 0.02284963045699147f;
-// const float a11 = -0.003310805664035673f;
+void print_perf_table_header(std::size_t n_pts, int iters, int w_kern_disp)
+{
+  math_test::print_perf_pipe_header(
+      n_pts, iters, w_kern_disp, "Kernel", "Time (ms)", "speedup", k_perf_tbl);
+}
 
-// const float pi = 3.141592653589793115998f;
-// const float pi_2 = 1.570796326794896557999f;
+void print_perf_table_row(int w_kern_disp, const char* label, double ms, const char* note)
+{
+  math_test::print_perf_pipe_row(w_kern_disp, label, ms, 3, note, k_perf_tbl);
+}
 
+void print_perf_table_close(int w_kern_disp)
+{
+  math_test::print_perf_pipe_close(w_kern_disp, k_perf_tbl);
+}
+
+const float k_pi = 3.141592653589793f;
+const float k_pi_2 = 1.5707963267948966f;
 const float tiny_f = 1e-20f;
 
-// Scalar atan2 approximation (same algorithm as RVV version)
-float atan2_approx(float y, float x)
+// --- (1) 文章 ---
+struct PolyMazzo {
+  static constexpr float a1 = 0.99997726f;
+  static constexpr float a3 = -0.33262347f;
+  static constexpr float a5 = 0.19354346f;
+  static constexpr float a7 = -0.11643287f;
+  static constexpr float a9 = 0.05265332f;
+  static constexpr float a11 = -0.01172120f;
+};
+
+// --- (2) remez1 / 交换点（parms_atan2.py remez_atan_odd_first，[0,1] 起点）---
+struct PolyRemez1 {
+  static constexpr float a1 = 0.9999772190799245f;
+  static constexpr float a3 = -0.3326228278409405f;
+  static constexpr float a5 = 0.1935403757741253f;
+  static constexpr float a7 = -0.1164264811875351f;
+  static constexpr float a9 = 0.05264735061895011f;
+  static constexpr float a11 = -0.01171913540713792f;
+};
+
+// --- (3) remez2 / Powell（与 parms_atan2 默认 report 第 (3) 节一致）---
+struct PolyRemez2 {
+  static constexpr float a1 = 0.9999775690468202f;
+  static constexpr float a3 = -0.3326270073651729f;
+  static constexpr float a5 = 0.1935518578599886f;
+  static constexpr float a7 = -0.1164322962576437f;
+  static constexpr float a9 = 0.05263769152193183f;
+  static constexpr float a11 = -0.01171128155647548f;
+};
+
+// --- (4) LP ---
+struct PolyLp {
+  static constexpr float a1 = 0.9999775803753757f;
+  static constexpr float a3 = -0.3326270971752202f;
+  static constexpr float a5 = 0.1935520249746597f;
+  static constexpr float a7 = -0.1164321024444021f;
+  static constexpr float a9 = 0.05263708887719762f;
+  static constexpr float a11 = -0.01171095541590521f;
+};
+
+// --- (5) Sollya deg5 Horner: P(t)=c0+t*(c1+t*(...))，与奇次核不同 ---
+struct PolySollyaDeg5 {
+  static constexpr float c0 = 2.093957818039105e-05f;
+  static constexpr float c1 = 0.9982532435543107f;
+  static constexpr float c2 = 0.02366052995707943f;
+  static constexpr float c3 = -0.4511472680586187f;
+  static constexpr float c4 = 0.2641312491225646f;
+  static constexpr float c5 = -0.04949959117788765f;
+  static float eval_abs(float t_abs)
+  {
+    float t = t_abs;
+    float p = c5;
+    p = c4 + t * p;
+    p = c3 + t * p;
+    p = c2 + t * p;
+    p = c1 + t * p;
+    return c0 + t * p;
+  }
+  /** atan 为奇函数：在 [-1,1] 上用 sign(t)*P(|t|)，P 仅在 [0,1] 上与 Sollya 拟合一致。 */
+  static float eval_atan_odd_extended(float t)
+  {
+    float a = std::fabs(t);
+    float p = eval_abs(a);
+    return (t >= 0.f) ? p : -p;
+  }
+};
+
+// --- (6) Sollya deg11 Horner: P(t)=c0+t*(c1+t*(…))，与 deg5 同形；十二常数 ---
+struct PolySollyaDeg11 {
+  static constexpr float c0 = 1.692908826312289e-09f;
+  static constexpr float c1 = 0.999999497998623f;
+  static constexpr float c2 = 2.462210154373695e-05f;
+  static constexpr float c3 = -0.33380530086035f;
+  static constexpr float c4 = 0.004653922613137158f;
+  static constexpr float c5 = 0.1731460010057108f;
+  static constexpr float c6 = 0.09664877047164804f;
+  static constexpr float c7 = -0.3642341265792391f;
+  static constexpr float c8 = 0.3129036457771687f;
+  static constexpr float c9 = -0.122116900202231f;
+  static constexpr float c10 = 0.01736722164089919f;
+  static constexpr float c11 = 0.0008108094305379294f;
+  static float eval_abs(float t_abs)
+  {
+    float t = t_abs;
+    float p = c11;
+    p = c10 + t * p;
+    p = c9 + t * p;
+    p = c8 + t * p;
+    p = c7 + t * p;
+    p = c6 + t * p;
+    p = c5 + t * p;
+    p = c4 + t * p;
+    p = c3 + t * p;
+    p = c2 + t * p;
+    p = c1 + t * p;
+    return c0 + t * p;
+  }
+  static float eval_atan_odd_extended(float t)
+  {
+    float a = std::fabs(t);
+    float p = eval_abs(a);
+    return (t >= 0.f) ? p : -p;
+  }
+};
+
+template <typename Coeffs>
+float atan2_poly_odd(float y, float x)
 {
   float abs_x = std::fabs(x);
   float abs_y = std::fabs(y);
@@ -76,36 +212,111 @@ float atan2_approx(float y, float x)
   float atan_input = num / den;
 
   float x2 = atan_input * atan_input;
-  float p = a11;
-  p = a9 + x2 * p;
-  p = a7 + x2 * p;
-  p = a5 + x2 * p;
-  p = a3 + x2 * p;
-  p = a1 + x2 * p;
+  float p = Coeffs::a11;
+  p = Coeffs::a9 + x2 * p;
+  p = Coeffs::a7 + x2 * p;
+  p = Coeffs::a5 + x2 * p;
+  p = Coeffs::a3 + x2 * p;
+  p = Coeffs::a1 + x2 * p;
   float result = atan_input * p;
 
   if (swap)
-    result = (atan_input >= 0.f ? pi_2 : -pi_2) - result;
+    result = (atan_input >= 0.f ? k_pi_2 : -k_pi_2) - result;
   if (x < 0.f)
-    result += (y >= 0.f ? pi : -pi);
-
+    result += (y >= 0.f ? k_pi : -k_pi);
   return result;
 }
 
-void run_scalar_vs_std(const float* ys, const float* xs, float* out_approx, std::size_t n)
+float atan2_poly_sollya5(float y, float x)
 {
-  for (std::size_t i = 0; i < n; ++i)
-    out_approx[i] = atan2_approx(ys[i], xs[i]);
+  float abs_x = std::fabs(x);
+  float abs_y = std::fabs(y);
+  bool swap = abs_x < abs_y;
+  float num = swap ? x : y;
+  float den = swap ? y : x;
+  if (std::fabs(den) < tiny_f)
+    den = (den >= 0.f) ? tiny_f : -tiny_f;
+  float t = num / den;
+  float result = PolySollyaDeg5::eval_atan_odd_extended(t);
+  if (swap)
+    result = (t >= 0.f ? k_pi_2 : -k_pi_2) - result;
+  if (x < 0.f)
+    result += (y >= 0.f ? k_pi : -k_pi);
+  return result;
 }
 
-void run_std_atan2(const float* ys, const float* xs, float* out_std, std::size_t n)
+float atan2_poly_sollya11(float y, float x)
+{
+  float abs_x = std::fabs(x);
+  float abs_y = std::fabs(y);
+  bool swap = abs_x < abs_y;
+  float num = swap ? x : y;
+  float den = swap ? y : x;
+  if (std::fabs(den) < tiny_f)
+    den = (den >= 0.f) ? tiny_f : -tiny_f;
+  float t = num / den;
+  float result = PolySollyaDeg11::eval_atan_odd_extended(t);
+  if (swap)
+    result = (t >= 0.f ? k_pi_2 : -k_pi_2) - result;
+  if (x < 0.f)
+    result += (y >= 0.f ? k_pi : -k_pi);
+  return result;
+}
+
+struct PolyCase {
+  const char* label;
+  float (*f)(float, float);
+};
+
+float run_mazzo(float y, float x) { return atan2_poly_odd<PolyMazzo>(y, x); }
+float run_remez1(float y, float x) { return atan2_poly_odd<PolyRemez1>(y, x); }
+float run_remez2(float y, float x) { return atan2_poly_odd<PolyRemez2>(y, x); }
+float run_lp(float y, float x) { return atan2_poly_odd<PolyLp>(y, x); }
+float run_sollya(float y, float x) { return atan2_poly_sollya5(y, x); }
+float run_sollya11(float y, float x) { return atan2_poly_sollya11(y, x); }
+
+const PolyCase kScalarCases[] = {
+    {"(1) 标量 mazzo.li 奇次核（系数同 pcl::atan2_RVV）", run_mazzo},
+    {"(2) Remez1 交换点（parms_atan2）", run_remez1},
+    {"(3) Remez2 + Powell 密栅（parms_atan2）", run_remez2},
+    {"(4) 离散 LP（parms_atan2）", run_lp},
+    {"(5) Sollya fpminimax，全次项 Horner（6 系数）", run_sollya},
+    {"(6) Sollya fpminimax，全次项 Horner（12 系数）", run_sollya11},
+};
+
+void run_batch(const float* ys, const float* xs, float* out, std::size_t n, float (*fn)(float, float))
 {
   for (std::size_t i = 0; i < n; ++i)
-    out_std[i] = std::atan2(ys[i], xs[i]);
+    out[i] = fn(ys[i], xs[i]);
+}
+
+void run_std(const float* ys, const float* xs, float* out, std::size_t n)
+{
+  for (std::size_t i = 0; i < n; ++i)
+    out[i] = std::atan2(ys[i], xs[i]);
+}
+
+// ---------------------------------------------------------------------------
+// Performance loop vs -O3:
+// If the outer loop repeatedly fills the same buffer from read-only inputs and
+// nothing in the loop reads that buffer back, the compiler may legally fold
+// iterations and execute only the last one (C++ as-if). That made the scalar
+// `run_batch` loop look ~100× faster than reality after inlining.
+//
+// After each timed iteration, fold a few output samples into a volatile double
+// so every iteration is observable; cost is negligible vs atan2 / poly work.
+// ---------------------------------------------------------------------------
+inline void bench_touch_output(const float* buf, std::size_t sz, volatile double* sink)
+{
+  if (sz == 0)
+    return;
+  *sink += static_cast<double>(buf[0]) + static_cast<double>(buf[sz - 1]);
+  if (sz > 2)
+    *sink += static_cast<double>(buf[sz / 2]);
 }
 
 #if defined(__RVV10__)
-void run_rvv_vs_std(const float* ys, const float* xs, float* out_rvv, std::size_t n)
+void run_rvv(const float* ys, const float* xs, float* out, std::size_t n)
 {
   std::size_t j = 0;
   while (j < n) {
@@ -113,14 +324,15 @@ void run_rvv_vs_std(const float* ys, const float* xs, float* out_rvv, std::size_
     vfloat32m2_t v_y = __riscv_vle32_v_f32m2(ys + j, vl);
     vfloat32m2_t v_x = __riscv_vle32_v_f32m2(xs + j, vl);
     vfloat32m2_t v_out = pcl::atan2_RVV_f32m2(v_y, v_x, vl);
-    __riscv_vse32_v_f32m2(out_rvv + j, v_out, vl);
+    __riscv_vse32_v_f32m2(out + j, v_out, vl);
     j += vl;
   }
 }
 #endif
 
-void compute_errors(const float* ref, const float* approx, std::size_t n,
-                    float& max_abs_rad, float& max_abs_deg, double& mean_abs_rad)
+void compute_errors(
+    const float* ref, const float* approx, std::size_t n,
+    float& max_abs_rad, float& max_abs_deg, double& mean_abs_rad)
 {
   max_abs_rad = 0.f;
   mean_abs_rad = 0.0;
@@ -131,7 +343,7 @@ void compute_errors(const float* ref, const float* approx, std::size_t n,
     mean_abs_rad += static_cast<double>(e);
   }
   mean_abs_rad /= static_cast<double>(n);
-  const float rad2deg = 180.f / pi;
+  const float rad2deg = 180.f / k_pi;
   max_abs_deg = max_abs_rad * rad2deg;
 }
 
@@ -139,28 +351,32 @@ void compute_errors(const float* ref, const float* approx, std::size_t n,
 
 int main()
 {
+  static const char* k_try_locales[] = { "", "C.UTF-8", "zh_CN.UTF-8", "en_US.UTF-8" };
+  for (const char* loc : k_try_locales) {
+    if (std::setlocale(LC_ALL, loc))
+      break;
+  }
+
   const std::size_t n = 256 * 256;
   float* ys = static_cast<float*>(std::malloc(n * sizeof(float)));
   float* xs = static_cast<float*>(std::malloc(n * sizeof(float)));
   float* ref = static_cast<float*>(std::malloc(n * sizeof(float)));
-  float* out_approx = static_cast<float*>(std::malloc(n * sizeof(float)));
+  float* out = static_cast<float*>(std::malloc(n * sizeof(float)));
 #if defined(__RVV10__)
   float* out_rvv = static_cast<float*>(std::malloc(n * sizeof(float)));
 #endif
 
-  if (!ys || !xs || !ref || !out_approx) {
+  if (!ys || !xs || !ref || !out) {
     std::fprintf(stderr, "malloc failed\n");
-    std::free(ys);
-    std::free(xs);
-    std::free(ref);
-    std::free(out_approx);
-#if defined(__RVV10__)
-    std::free(out_rvv);
-#endif
     return 1;
   }
+#if defined(__RVV10__)
+  if (!out_rvv) {
+    std::fprintf(stderr, "malloc failed (rvv)\n");
+    return 1;
+  }
+#endif
 
-  // Test grid: [-1,1] x [-1,1] plus edge cases
   std::size_t idx = 0;
   for (int iy = 0; iy < 256; ++iy) {
     float y = (iy == 0) ? -1.f : ((iy == 255) ? 1.f : (-1.f + 2.f * iy / 255.f));
@@ -173,109 +389,134 @@ int main()
     }
   }
 
-  run_scalar_vs_std(ys, xs, out_approx, n);
-  float max_abs_rad_s, max_abs_deg_s;
-  double mean_abs_rad_s;
-  compute_errors(ref, out_approx, n, max_abs_rad_s, max_abs_deg_s, mean_abs_rad_s);
+  /* 仅 (1)–(7) 误差表：|diff| 不计入标签列宽（单独小节） */
+  int w_item_disp = 24;
+  for (const PolyCase& pc : kScalarCases)
+    w_item_disp = std::max(w_item_disp, utf8_display_width(pc.label));
+#if defined(__RVV10__)
+  w_item_disp = std::max(
+      w_item_disp,
+      utf8_display_width("(7) pcl::atan2_RVV_f32m2（系数同 (1)）"));
+#endif
+  w_item_disp += 1;
 
-  std::printf("=== atan2 approximation vs std::atan2 (n = %zu) ===\n", n);
-  std::printf("  Scalar approximation (same polynomial as RVV):\n");
-  std::printf("    max absolute error:  %.6f rad  (%.4f deg)\n", max_abs_rad_s, max_abs_deg_s);
-  std::printf("    mean absolute error: %.6f rad\n", mean_abs_rad_s);
+  print_err_table_header(n, w_item_disp);
+  for (const PolyCase& pc : kScalarCases) {
+    run_batch(ys, xs, out, n, pc.f);
+    float max_r, max_d;
+    double mean_r;
+    compute_errors(ref, out, n, max_r, max_d, mean_r);
+    print_err_table_row(
+        w_item_disp,
+        pc.label,
+        static_cast<double>(max_r),
+        static_cast<double>(max_d),
+        mean_r);
+  }
 
 #if defined(__RVV10__)
-  run_rvv_vs_std(ys, xs, out_rvv, n);
-  float max_abs_rad_r, max_abs_deg_r;
-  double mean_abs_rad_r;
-  compute_errors(ref, out_rvv, n, max_abs_rad_r, max_abs_deg_r, mean_abs_rad_r);
-  std::printf("  RVV (pcl::atan2_RVV_f32m2):\n");
-  std::printf("    max absolute error:  %.6f rad  (%.4f deg)\n", max_abs_rad_r, max_abs_deg_r);
-  std::printf("    mean absolute error: %.6f rad\n", mean_abs_rad_r);
-
-  // RVV vs scalar approx (should match within float rounding)
-  float max_diff = 0.f;
-  for (std::size_t i = 0; i < n; ++i) {
-    float d = std::fabs(out_rvv[i] - out_approx[i]);
-    if (d > max_diff)
-      max_diff = d;
+  run_rvv(ys, xs, out_rvv, n);
+  {
+    float max_r, max_d;
+    double mean_r;
+    compute_errors(ref, out_rvv, n, max_r, max_d, mean_r);
+    print_err_table_row(
+        w_item_disp,
+        "(7) pcl::atan2_RVV_f32m2（系数同 (1)）",
+        static_cast<double>(max_r),
+        static_cast<double>(max_d),
+        mean_r);
   }
-  std::printf("  RVV vs scalar approx max diff: %.6e (expect ~0)\n", max_diff);
+  math_test::print_rule_chars('=', err_table_line_columns(w_item_disp));
+
+  {
+    run_batch(ys, xs, out, n, run_mazzo);
+    float max_diff = 0.f;
+    for (std::size_t i = 0; i < n; ++i) {
+      float d = std::fabs(out_rvv[i] - out[i]);
+      if (d > max_diff)
+        max_diff = d;
+    }
+    const int col0 = 6;
+    const char* diff_lbl = "max |diff| :";
+    std::printf("\n[pcl::atan2_RVV vs 标量 (1)]\n");
+    std::printf("  %-*s  %*.*e\n", col0, diff_lbl, col0, 6, static_cast<double>(max_diff));
+  }
+#else
+  math_test::print_rule_chars('=', err_table_line_columns(w_item_disp));
 #endif
 
-  // Performance benchmark
-  std::printf("\n=== Performance Benchmark (n = %zu, iterations = 100) ===\n", n);
-  const int iterations = 100;
-  float* out_std = static_cast<float*>(std::malloc(n * sizeof(float)));
-  if (!out_std) {
-    std::fprintf(stderr, "malloc failed for out_std\n");
+  const int iters = 100;
+
+  float* buf_std = static_cast<float*>(std::malloc(n * sizeof(float)));
+  if (!buf_std) {
     std::free(ys);
     std::free(xs);
     std::free(ref);
-    std::free(out_approx);
+    std::free(out);
 #if defined(__RVV10__)
     std::free(out_rvv);
 #endif
     return 1;
   }
 
-  // Warmup
-  run_std_atan2(ys, xs, out_std, n);
-  run_scalar_vs_std(ys, xs, out_approx, n);
+  volatile double bench_sink = 0.0;
+
+  run_std(ys, xs, buf_std, n);
+  run_batch(ys, xs, out, n, run_mazzo);
 #if defined(__RVV10__)
-  run_rvv_vs_std(ys, xs, out_rvv, n);
+  run_rvv(ys, xs, out_rvv, n);
 #endif
 
-  // Benchmark std::atan2
-  auto start = std::chrono::high_resolution_clock::now();
-  for (int iter = 0; iter < iterations; ++iter) {
-    run_std_atan2(ys, xs, out_std, n);
+  auto t0 = std::chrono::high_resolution_clock::now();
+  for (int t = 0; t < iters; ++t) {
+    run_std(ys, xs, buf_std, n);
+    bench_touch_output(buf_std, n, &bench_sink);
   }
-  auto end = std::chrono::high_resolution_clock::now();
-  double time_std = std::chrono::duration<double, std::milli>(end - start).count();
-  double throughput_std = (static_cast<double>(n) * iterations) / (time_std / 1000.0) / 1e6; // M elements/sec
-
-  // Benchmark scalar approximation
-  start = std::chrono::high_resolution_clock::now();
-  for (int iter = 0; iter < iterations; ++iter) {
-    run_scalar_vs_std(ys, xs, out_approx, n);
+  auto t1 = std::chrono::high_resolution_clock::now();
+  for (int t = 0; t < iters; ++t) {
+    run_batch(ys, xs, out, n, run_mazzo);
+    bench_touch_output(out, n, &bench_sink);
   }
-  end = std::chrono::high_resolution_clock::now();
-  double time_scalar = std::chrono::duration<double, std::milli>(end - start).count();
-  double throughput_scalar = (static_cast<double>(n) * iterations) / (time_scalar / 1000.0) / 1e6;
+  auto t2 = std::chrono::high_resolution_clock::now();
 
-  std::printf("  std::atan2:\n");
-  std::printf("    time:       %.3f ms (%.3f ms/iter)\n", time_std, time_std / iterations);
-  std::printf("    throughput: %.2f M elements/sec\n", throughput_std);
-  std::printf("  Scalar approximation:\n");
-  std::printf("    time:       %.3f ms (%.3f ms/iter)\n", time_scalar, time_scalar / iterations);
-  std::printf("    throughput: %.2f M elements/sec\n", throughput_scalar);
-  std::printf("    speedup:    %.2fx vs std::atan2\n", time_std / time_scalar);
-
+  /* 性能段首列只按英文 kernel 名定宽，避免与中文 Case 列同宽撑表（风格近 analyze_bench_compare） */
+  int w_perf_lab = 10;
+  w_perf_lab = std::max(w_perf_lab, utf8_display_width("scalar mazzo"));
 #if defined(__RVV10__)
-  // Benchmark RVV
-  start = std::chrono::high_resolution_clock::now();
-  for (int iter = 0; iter < iterations; ++iter) {
-    run_rvv_vs_std(ys, xs, out_rvv, n);
-  }
-  end = std::chrono::high_resolution_clock::now();
-  double time_rvv = std::chrono::duration<double, std::milli>(end - start).count();
-  double throughput_rvv = (static_cast<double>(n) * iterations) / (time_rvv / 1000.0) / 1e6;
-
-  std::printf("  RVV (pcl::atan2_RVV_f32m2):\n");
-  std::printf("    time:       %.3f ms (%.3f ms/iter)\n", time_rvv, time_rvv / iterations);
-  std::printf("    throughput: %.2f M elements/sec\n", throughput_rvv);
-  std::printf("    speedup:    %.2fx vs std::atan2, %.2fx vs scalar\n",
-              time_std / time_rvv, time_scalar / time_rvv);
+  w_perf_lab = std::max(w_perf_lab, utf8_display_width("pcl::atan2_RVV"));
 #endif
+  w_perf_lab += 2;
 
-  std::free(out_std);
+  print_perf_table_header(n, iters, w_perf_lab);
+
+  double ms_std = std::chrono::duration<double, std::milli>(t1 - t0).count();
+  double ms_scal = std::chrono::duration<double, std::milli>(t2 - t1).count();
+  char note_buf[64];
+  std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", ms_std / ms_scal);
+  print_perf_table_row(w_perf_lab, "scalar mazzo", ms_scal, note_buf);
 #if defined(__RVV10__)
+  auto t3 = std::chrono::high_resolution_clock::now();
+  for (int t = 0; t < iters; ++t) {
+    run_rvv(ys, xs, out_rvv, n);
+    bench_touch_output(out_rvv, n, &bench_sink);
+  }
+  auto t4 = std::chrono::high_resolution_clock::now();
+  double ms_r = std::chrono::duration<double, std::milli>(t4 - t3).count();
+  std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", ms_std / ms_r);
+  print_perf_table_row(w_perf_lab, "pcl::atan2_RVV", ms_r, note_buf);
+  print_perf_table_close(w_perf_lab);
   std::free(out_rvv);
+#else
+  print_perf_table_close(w_perf_lab);
 #endif
 
+  (void)bench_sink;
+
+  std::free(buf_std);
   std::free(ys);
   std::free(xs);
   std::free(ref);
-  std::free(out_approx);
+  std::free(out);
   return 0;
 }

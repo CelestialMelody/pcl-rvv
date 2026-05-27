@@ -1,0 +1,8 @@
+// Sollya 8: degree-7 minimax for exp(x) on [0, ln(2)] — 与 expf 约化区间一致
+// 运行: sollya sollya_fpminimax_exp.sollya
+// 输出为 Horner 可读形式；系数为双精度级，填入 float 前请再验 f32 Horner。
+display=decimal!;
+L = log(2);
+p = fpminimax(exp(x), 7, [|D,D,D,D,D,D,D,D|], [0;L], relative);
+p;
+quit;

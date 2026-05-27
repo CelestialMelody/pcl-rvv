@@ -1,0 +1,8 @@
+// fpminimax: atan(x) on [0,1], degree 11 full basis, absolute error.
+// 与 PCL/mazzo 奇次因式 t*(a1+a3 t^2+...) 不同，仅作连续 minimax 参照。
+// Run: sollya sollya_fpminimax_atan_deg11_absolute.sollya
+display=decimal!;
+I = [0;1];
+p = fpminimax(atan(x), 11, [|D,D,D,D,D,D,D,D,D,D,D,D|], I, absolute);
+p;
+quit;

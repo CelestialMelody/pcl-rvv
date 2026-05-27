@@ -43,8 +43,12 @@ TEST_OUTPUT_FILE      = $(OUTPUT_DIR_QEMU)/run_test.log
 ANALYZE_VEC_SCRIPT    = $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_vec_log.py
 BENCH_COMPARE_SCRIPT  = $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_bench_compare.py
 COMPARE_ASM_SCRIPT    = $(TEST_RVV_SHARED_SCRIPT_DIR)/compare_rvv_asm.py
-# 优先使用本目录 .venv（与 `source .venv/bin/activate` 等价）；否则退回系统 python3
-VENV_PYTHON           := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/.venv/bin/python)
+MAKEFILE_DIR          := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+UV_BIN               ?= uv
+# 参数脚本统一走本目录 .venv；由 uv 自动创建并安装依赖（numpy/scipy）
+VENV_DIR              := $(MAKEFILE_DIR)/.venv
+VENV_PYTHON           := $(VENV_DIR)/bin/python
+VENV_DEPS_STAMP       := $(VENV_DIR)/.deps-stamp
 PYTHON_BENCH_COMPARE  := $(shell test -x '$(VENV_PYTHON)' && echo '$(VENV_PYTHON)' || echo python3)
 
 # ================================================
@@ -65,6 +69,10 @@ TARGET_ATAN2_TEST = atan2_test
 SRCS_ATAN2_TEST = atan2_test.cpp
 TARGET_ATAN2_TEST_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_ATAN2_TEST)
 
+TARGET_ACOS_TEST = acos_test
+SRCS_ACOS_TEST = acos_test.cpp
+TARGET_ACOS_TEST_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_ACOS_TEST)
+
 TARGET_EXPF_TEST = expf_test
 SRCS_EXPF_TEST = expf_test.cpp
 TARGET_EXPF_TEST_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_EXPF_TEST)
@@ -72,6 +80,10 @@ TARGET_EXPF_TEST_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_EXPF_TEST)
 TARGET_EXPF_REMEZ_VS_TAYLOR = expf_remez_vs_taylor
 SRCS_EXPF_REMEZ_VS_TAYLOR = expf_remez_vs_taylor.cpp
 TARGET_EXPF_REMEZ_VS_TAYLOR_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_EXPF_REMEZ_VS_TAYLOR)
+
+TARGET_LOGF_TEST = logf_test
+SRCS_LOGF_TEST = logf_test.cpp
+TARGET_LOGF_TEST_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_LOGF_TEST)
 
 # 是否启用 PCL 手写 RVV 内核 -D__RVV10__（仅 riscv 时生效）；为 1 时 common 内热点走 RVV 内核
 USE_PCL_RVV10  ?= 1
@@ -198,7 +210,20 @@ $(OUTPUT_DIR_QEMU): $(OUTPUT_DIR)
 	mkdir -p $(OUTPUT_DIR_QEMU)
 
 $(OUTPUT_DIR_BOARD): $(OUTPUT_DIR)
-	mkdir -p $(OUTPUT_DIR_BOARD
+	mkdir -p $(OUTPUT_DIR_BOARD)
+
+# ================================================
+# Python venv（uv）
+# ================================================
+$(VENV_PYTHON):
+	@command -v $(UV_BIN) >/dev/null 2>&1 || (echo "缺少 uv，请先安装 uv" >&2; exit 1)
+	@echo "[VENV] create/update $(VENV_DIR)"
+	@$(UV_BIN) venv $(VENV_DIR)
+
+$(VENV_DEPS_STAMP): $(VENV_PYTHON)
+	@echo "[VENV] install numpy/scipy for parms scripts"
+	@$(UV_BIN) pip install --python "$(VENV_PYTHON)" numpy scipy
+	@touch "$(VENV_DEPS_STAMP)"
 
 # ================================================
 # 构建规则
@@ -211,9 +236,13 @@ $(TARGET_TEST_BIN): $(SRCS_TEST) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$
 	@echo "[BUILD] Compiling Unit Test ($(ARCH))..."
 	$(CXX) $(CXXFLAGS) $(SRCS_TEST) $(LDFLAGS) $(LIBS_TEST) -o $(TARGET_TEST_BIN)
 
-$(TARGET_ATAN2_TEST_BIN): $(SRCS_ATAN2_TEST) | $(BUILD_DIR)/$(ARCH)
+$(TARGET_ATAN2_TEST_BIN): $(SRCS_ATAN2_TEST) $(TEST_RVV_SHARED_SCRIPT_DIR)/term_table.hpp | $(BUILD_DIR)/$(ARCH)
 	@echo "[BUILD] Compiling atan2_test ($(ARCH))..."
 	$(CXX) -std=c++17 -O3 -g $(INCLUDES) $(if $(filter riscv,$(ARCH)),-march=rv64gcv -mabi=lp64d -D__RVV10__ $(EIGEN_RVV_FLAGS),) $(SRCS_ATAN2_TEST) -o $(TARGET_ATAN2_TEST_BIN) -lm
+
+$(TARGET_ACOS_TEST_BIN): $(SRCS_ACOS_TEST) $(TEST_RVV_SHARED_SCRIPT_DIR)/term_table.hpp | $(BUILD_DIR)/$(ARCH)
+	@echo "[BUILD] Compiling acos_test ($(ARCH))..."
+	$(CXX) -std=c++17 -O3 -g $(INCLUDES) $(if $(filter riscv,$(ARCH)),-march=rv64gcv -mabi=lp64d -D__RVV10__ $(EIGEN_RVV_FLAGS),) $(SRCS_ACOS_TEST) -o $(TARGET_ACOS_TEST_BIN) -lm
 
 $(TARGET_EXPF_TEST_BIN): $(SRCS_EXPF_TEST) | $(BUILD_DIR)/$(ARCH)
 	@echo "[BUILD] Compiling expf_test ($(ARCH))..."
@@ -223,17 +252,27 @@ $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN): $(SRCS_EXPF_REMEZ_VS_TAYLOR) | $(BUILD_DIR)/
 	@echo "[BUILD] Compiling expf_remez_vs_taylor ($(ARCH))..."
 	$(CXX) -std=c++17 -O3 -g $(INCLUDES) $(if $(filter riscv,$(ARCH)),-march=rv64gcv -mabi=lp64d -D__RVV10__,) $(if $(filter x86,$(ARCH)),,) $(SRCS_EXPF_REMEZ_VS_TAYLOR) -o $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) -lm
 
+$(TARGET_LOGF_TEST_BIN): $(SRCS_LOGF_TEST) | $(BUILD_DIR)/$(ARCH)
+	@echo "[BUILD] Compiling logf_test ($(ARCH))..."
+	$(CXX) -std=c++17 -O3 -g $(INCLUDES) $(if $(filter riscv,$(ARCH)),-march=rv64gcv -mabi=lp64d -D__RVV10__ $(EIGEN_RVV_FLAGS),) $(SRCS_LOGF_TEST) -o $(TARGET_LOGF_TEST_BIN) -lm
+
 # ================================================
 # 数学函数相关参数计算
 # ================================================
 parms:
-	python3 $(SCRIPT_DIR)/parms.py
+	$(VENV_PYTHON) $(SCRIPT_DIR)/parms.py
 
-parms_remez_exp:
-	python3 $(SCRIPT_DIR)/parms_remez_exp.py
+parms_expf: $(VENV_DEPS_STAMP)
+	$(VENV_PYTHON) $(SCRIPT_DIR)/parms_expf.py
 
-parms_remez_atan:
-	python3 $(SCRIPT_DIR)/parms_remez_atan.py
+parms_atan2: $(VENV_DEPS_STAMP)
+	$(VENV_PYTHON) $(SCRIPT_DIR)/parms_atan2.py
+
+parms_log1p: $(VENV_DEPS_STAMP)
+	$(VENV_PYTHON) $(SCRIPT_DIR)/parms_log1p.py
+
+parms_acos: $(VENV_DEPS_STAMP)
+	$(VENV_PYTHON) $(SCRIPT_DIR)/parms_acos.py
 
 # ================================================
 # 运行
@@ -250,6 +289,10 @@ run_atan2_test: $(TARGET_ATAN2_TEST_BIN) | $(BUILD_DIR)/$(ARCH)
 	@echo "[RUN] atan2 approximation vs std::atan2..."
 	$(RUN_CMD) ./$(TARGET_ATAN2_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_atan2_test.log
 
+run_acos_test: $(TARGET_ACOS_TEST_BIN) | $(BUILD_DIR)/$(ARCH)
+	@echo "[RUN] acos approximation vs std::acos..."
+	$(RUN_CMD) ./$(TARGET_ACOS_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_acos_test.log
+
 run_expf_test: $(TARGET_EXPF_TEST_BIN) | $(BUILD_DIR)/$(ARCH)
 	@echo "[RUN] expf approximation vs std::expf..."
 	$(RUN_CMD) ./$(TARGET_EXPF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_expf_test.log
@@ -257,6 +300,10 @@ run_expf_test: $(TARGET_EXPF_TEST_BIN) | $(BUILD_DIR)/$(ARCH)
 run_expf_remez_vs_taylor: $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) | $(BUILD_DIR)/$(ARCH)
 	@echo "[RUN] expf Remez/Taylor vs std::expf..."
 	$(RUN_CMD) ./$(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_expf_remez_vs_taylor.log
+
+run_logf_test: $(TARGET_LOGF_TEST_BIN) | $(BUILD_DIR)/$(ARCH)
+	@echo "[RUN] logf Remez+RVV vs std::logf..."
+	$(RUN_CMD) ./$(TARGET_LOGF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_logf_test.log
 
 # 三种 bench 运行目标（互不覆盖，对应下方三种 dump）
 # run_bench_rvv10: 与 PCL 安装的 Eigen 配置一致，避免 aligned malloc warning；热点仍由 __RVV10__ 手写 RVV 控制
@@ -345,7 +392,7 @@ compare_asm: dump_bench_rvv dump_bench_std $(COMPARE_ASM_SCRIPT) | $(ASM_DIR)/$(
 clean:
 	rm -f $(LATEST_VEC_LOG)
 	rm -f $(TARGET_BENCH_BIN) $(TARGET_TEST_BIN)
-	rm -f $(TARGET_ATAN2_TEST_BIN) $(TARGET_EXPF_TEST_BIN) $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN)
+	rm -f $(TARGET_ATAN2_TEST_BIN) $(TARGET_ACOS_TEST_BIN) $(TARGET_EXPF_TEST_BIN) $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) $(TARGET_LOGF_TEST_BIN)
 	rm -rf $(ASM_DIR)/$(ARCH)
 	rm -rf $(FILTER_REPORT) $(ANALYZE_REPORT) $(VEC_LOGS_DIR) $(LOG_VEC_MISS_DIR)
 
@@ -413,6 +460,13 @@ deploy_atan2_test: $(TARGET_ATAN2_TEST_BIN) deploy_files
 	@rm -f ./$(TARGET_ATAN2_TEST)_stripped
 	@echo "[DONE] $(TARGET_ATAN2_TEST) deployed."
 
+deploy_acos_test: $(TARGET_ACOS_TEST_BIN) deploy_files
+	@echo "[DEPLOY] Stripping and Syncing $(TARGET_ACOS_TEST)..."
+	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_ACOS_TEST_BIN) -o ./$(TARGET_ACOS_TEST)_stripped
+	@rsync -avzP ./$(TARGET_ACOS_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_ACOS_TEST)
+	@rm -f ./$(TARGET_ACOS_TEST)_stripped
+	@echo "[DONE] $(TARGET_ACOS_TEST) deployed."
+
 deploy_expf_test: $(TARGET_EXPF_TEST_BIN) deploy_files
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_EXPF_TEST)..."
 	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_EXPF_TEST_BIN) -o ./$(TARGET_EXPF_TEST)_stripped
@@ -427,8 +481,17 @@ deploy_expf_remez_vs_taylor: $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN)
 	@rm -f ./$(TARGET_EXPF_REMEZ_VS_TAYLOR)_stripped
 	@echo "[DONE] $(TARGET_EXPF_REMEZ_VS_TAYLOR) deployed."
 
-.PHONY: deploy_libs deploy_bench_rvv deploy_bench_std
+deploy_logf_test: $(TARGET_LOGF_TEST_BIN) deploy_files
+	@echo "[DEPLOY] Stripping and Syncing $(TARGET_LOGF_TEST)..."
+	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_LOGF_TEST_BIN) -o ./$(TARGET_LOGF_TEST)_stripped
+	@rsync -avzP ./$(TARGET_LOGF_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_LOGF_TEST)
+	@rm -f ./$(TARGET_LOGF_TEST)_stripped
+	@echo "[DONE] $(TARGET_LOGF_TEST) deployed."
 
-.PHONY: all bench test_build run_bench run_bench_rvv run_bench_std run_test run_atan2_test run_expf_test \
-		run_expf_remez_vs_taylor parms parms_remez_exp parms_remez_atan clean link_latest_log \
+deploy_math: deploy_files deploy_atan2_test deploy_acos_test deploy_expf_test deploy_expf_remez_vs_taylor deploy_logf_test
+
+.PHONY: deploy_libs deploy_bench_rvv deploy_bench_std deploy_test deploy_math
+
+.PHONY: all bench test_build run_bench run_bench_rvv run_bench_std run_test run_atan2_test run_acos_test run_expf_test \
+		run_expf_remez_vs_taylor run_logf_test parms parms_expf parms_atan2 parms_remez_atan parms_log1p parms_acos parms_remez_acos clean link_latest_log \
 		dump_bench dump_bench_inner dump_bench_rvv dump_bench_std compare_asm info

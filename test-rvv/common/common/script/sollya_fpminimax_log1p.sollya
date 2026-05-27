@@ -1,0 +1,7 @@
+// Sollya 8: degree-7 minimax for log(1+x) on [0, 1-eps]（绝对误差）
+// 端点 1 处 log1p 导数无界，relative 模式在闭区间 [0,1] 上易数值失败，故用上界略小于 1。
+// 运行: sollya sollya_fpminimax_log1p.sollya
+display=decimal!;
+p = fpminimax(log(1 + x), 7, [|D,D,D,D,D,D,D,D|], [0;0.999999], absolute);
+p;
+quit;
