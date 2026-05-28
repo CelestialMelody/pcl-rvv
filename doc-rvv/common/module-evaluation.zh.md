@@ -13,14 +13,13 @@
 ## 1. 优先处理
 
 
-| 目标             | 路径                                | 说明                                                                                                                                                                                                                 |
-| -------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 点云变换           | `impl/transforms.hpp`             | `transformPointCloud`、`transformPointCloudWithNormals`、`PointXY` 仿射等：外层对 `cloud.size()` 线性遍历；`detail::Transformer` 在 x86 上已有 SSE2/AVX 特化，RISC-V 可补 RVV 版矩阵-向量与批量点变换。`is_dense == false` 时需按 NaN 跳过，实现比 dense 分支复杂。 |
-| 质心 / 协方差 / 去均值 | `impl/centroid.hpp`               | `compute3DCentroid` 多重重载、`demeanPointCloud` 等：对点或 `indices` 的 `for`/`while`。与 `common.hpp` 已做条目同属点云规约，函数面更大（indices、非有限点分支）。                                                                                       |
-| 可分离高斯卷积        | `common/src/gaussian.cpp`（见 §3.4） | `PointCloud<float>` 的 `convolveRows` / `convolveCols`：`__RVV10__` 构建下为条带化 RVV 实现；核宽较小时条带启动与尾部仍有开销。`impl/gaussian.hpp` 中模板 + `std::function` 路径本仓库不做 RVV，见 §3.4。                                                    |
-| 最远点对           | `distances.h`（无对应 `impl/`）        | `getMaxSegment`：对全云或 `indices` 的 O(n²) 双重循环，内层为平方距离与取最大。可向量化「固定 `i`、扫描 `j`」的内层，或先改算法再考虑 SIMD。同文件内 `sqrPointToLineDistance`、`squaredEuclideanDistance` 等为单次或小批量运算，优先级低于 `getMaxSegment`。                            |
-| 向量范数           | `impl/norms.hpp`                  | `L1_Norm`、`L2_Norm_SQR`、`Linf_Norm` 等在 `dim` 上循环。`dim` 较大时 RVV 更有意义；`dim` 常为 3～数十时需 bench 验证。`CS_Norm`、`Div_Norm`、`KL_Norm` 等分支多、含 `log` 与除法，可先只做 L1 / L2² / Linf。                                                 |
-| 投影矩阵估计         | `impl/projection_matrix.hpp`      | `estimateProjectionMatrix`：对点集累加对称块统计量，循环体以乘加为主；含 `isfinite` 与像素索引推导，测试需与标量路径对齐。                                                                                                                                   |
+| 目标                   | 路径                                 | 说明                                                         |
+| ---------------------- | ------------------------------------ | ------------------------------------------------------------ |
+| 点云变换               | `impl/transforms.hpp`                | `transformPointCloud`、`transformPointCloudWithNormals`、`PointXY` 仿射等：外层对 `cloud.size()` 线性遍历；`detail::Transformer` 在 x86 上已有 SSE2/AVX 特化，RISC-V 可补 RVV 版矩阵-向量与批量点变换。`is_dense == false` 时需按 NaN 跳过，实现比 dense 分支复杂。 |
+| 质心 / 协方差 / 去均值 | `impl/centroid.hpp`                  | `compute3DCentroid` 多重重载、`demeanPointCloud` 等：对点或 `indices` 的 `for`/`while`。与 `common.hpp` 已做条目同属点云规约，函数面更大（indices、非有限点分支）。 |
+| 可分离高斯卷积         | `common/src/gaussian.cpp`（见 §3.4） | `PointCloud<float>` 的 `convolveRows` / `convolveCols`：`__RVV10__` 构建下为条带化 RVV 实现；核宽较小时条带启动与尾部仍有开销。`impl/gaussian.hpp` 中模板 + `std::function` 路径本仓库不做 RVV，见 §3.4。 |
+| 最远点对               | `distances.h`（无对应 `impl/`）      | `getMaxSegment`：对全云或 `indices` 的 O(n²) 双重循环，内层为平方距离与取最大。可向量化「固定 `i`、扫描 `j`」的内层，或先改算法再考虑 SIMD。同文件内 `sqrPointToLineDistance`、`squaredEuclideanDistance` 等为单次或小批量运算，优先级低于 `getMaxSegment`。 |
+| 向量范数               | `impl/norms.hpp`                     | `L1_Norm`、`L2_Norm_SQR`、`Linf_Norm` 等在 `dim` 上循环。`dim` 较大时 RVV 更有意义；`dim` 常为 3～数十时需 bench 验证。`CS_Norm`、`Div_Norm`、`KL_Norm` 等分支多、含 `log` 与除法，可先只做 L1 / L2² / Linf。 |
 
 
 ---
@@ -49,6 +48,7 @@
 | `impl/spring.hpp`                              | 容器 `insert` / 扩容，内存与搬运为主。                  |
 | `impl/transformation_from_correspondences.hpp` | 增量 3×3 与末尾 `JacobiSVD`。                    |
 | `impl/vector_average.hpp`                      | 增量协方差 + `SelfAdjointEigenSolver`，时间多在特征解算。 |
+| `impl/projection_matrix.hpp`                   | `estimateProjectionMatrix` 属于规约 / 累加 / 小矩阵求解混合路径；前半段可分析 RVV，但固定 `12x12` 特征分解与 residual 容差使收益边界不稳定，本批次暂缓。 |
 
 
 顶层 `.h`（声明为主、实现少量或一次性）：
