@@ -373,6 +373,16 @@ def main() -> int:
         default="",
         help="覆盖 Dataset 行（否则按日志中的 Dataset:/Workload:/Image Size/Cloud+Vector 推断）",
     )
+    ap.add_argument(
+        "--variant-label",
+        default="RVV",
+        help="对比侧实现标签，默认 RVV；x86 SIMD 对比可传 SIMD。",
+    )
+    ap.add_argument(
+        "--variant-log-label",
+        default="RVV log",
+        help="对比侧日志标签，默认 RVV log；x86 SIMD 对比可传 SIMD log。",
+    )
     args = ap.parse_args()
 
     std_text = args.std_log.read_text(encoding="utf-8", errors="replace")
@@ -418,9 +428,12 @@ def main() -> int:
     if args.vlen_desc.strip():
         vlen_desc = args.vlen_desc.strip()
 
+    variant_label = args.variant_label.strip() or "RVV"
+    variant_log_label = args.variant_log_label.strip() or f"{variant_label} log"
+
     heading = args.heading.strip()
     if not heading:
-        heading = f"{std_d['title']} (Std vs RVV)"
+        heading = f"{std_d['title']} (Std vs {variant_label})"
 
     names_ordered = [n for n, _ in std_d["rows"]]
     w_item = max(24, max(len(n) for n in names_ordered) + 1)
@@ -450,7 +463,7 @@ def main() -> int:
     else:
         print_context_kv("Iterations", f"{base_iters} （每行 Total = Avg × {base_iters}）")
     print_context_kv("Std log", str(args.std_log))
-    print_context_kv("RVV log", str(args.rvv_log))
+    print_context_kv(variant_log_label, str(args.rvv_log))
     print()
 
     avg_hdr = "Avg (us)" if display_unit == "us" else "Avg (ms)"
@@ -512,7 +525,7 @@ def main() -> int:
             )
 
         row(name, "Std", std_avg, std_tot, 1.00)
-        row("", "RVV", rvv_avg, rvv_tot, speedup_rvv)
+        row("", variant_label, rvv_avg, rvv_tot, speedup_rvv)
         print(sep)
 
     print_bar(BAR_CHAR, total_width)
