@@ -54,6 +54,15 @@
 #include <cstddef>
 #include <vector>
 
+#if defined(__RVV10__)
+#include <cstdint>
+#include <type_traits>
+#include <utility>
+#include <riscv_vector.h>
+#include <pcl/common/rvv_point_load.h>
+#include <pcl/common/rvv_point_store.h>
+#endif
+
 
 namespace pcl
 {
@@ -214,6 +223,151 @@ struct Transformer<double>
 #endif // !defined(__AVX__)
 #endif // defined(__SSE2__)
 
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kTransformRvvMinPoints = 16;
+
+template <typename PointT, typename = void>
+struct HasRvvNormalFields : std::false_type {};
+
+template <typename PointT>
+struct HasRvvNormalFields<
+    PointT,
+    std::void_t<decltype (std::declval<PointT> ().normal_x),
+                decltype (std::declval<PointT> ().normal_y),
+                decltype (std::declval<PointT> ().normal_z)>>
+: std::bool_constant<
+      std::is_standard_layout_v<PointT> &&
+      std::is_same_v<std::remove_cv_t<std::remove_reference_t<decltype (std::declval<PointT> ().normal_x)>>, float> &&
+      std::is_same_v<std::remove_cv_t<std::remove_reference_t<decltype (std::declval<PointT> ().normal_y)>>, float> &&
+      std::is_same_v<std::remove_cv_t<std::remove_reference_t<decltype (std::declval<PointT> ().normal_z)>>, float>> {};
+
+template <typename PointT>
+inline constexpr bool kTransformRvvNormalCompatible = HasRvvNormalFields<PointT>::value;
+
+template <typename PointT>
+inline void
+transformPointCloudXYZRVV (const pcl::PointCloud<PointT> &cloud_in,
+                           pcl::PointCloud<PointT> &cloud_out,
+                           const Eigen::Matrix4f &transform)
+{
+  const std::size_t n = cloud_out.size ();
+  if (n < kTransformRvvMinPoints)
+  {
+    pcl::detail::Transformer<float> tf (transform);
+    for (std::size_t i = 0; i < n; ++i)
+      tf.se3 (cloud_in[i].data, cloud_out[i].data);
+    return;
+  }
+
+  const auto* src_base = reinterpret_cast<const std::uint8_t*> (cloud_in.data ());
+  auto* dst_base = reinterpret_cast<std::uint8_t*> (cloud_out.data ());
+
+  std::size_t i = 0;
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    vfloat32m2_t vx, vy, vz;
+    pcl::rvv_load::strided_load3_f32m2<
+        sizeof (PointT), offsetof (PointT, x), offsetof (PointT, y), offsetof (PointT, z)> (
+        src_base + i * sizeof (PointT), vl, vx, vy, vz);
+
+    vfloat32m2_t tx = __riscv_vfmv_v_f_f32m2 (transform (0, 3), vl);
+    tx = __riscv_vfmacc_vf_f32m2 (tx, transform (0, 0), vx, vl);
+    tx = __riscv_vfmacc_vf_f32m2 (tx, transform (0, 1), vy, vl);
+    tx = __riscv_vfmacc_vf_f32m2 (tx, transform (0, 2), vz, vl);
+
+    vfloat32m2_t ty = __riscv_vfmv_v_f_f32m2 (transform (1, 3), vl);
+    ty = __riscv_vfmacc_vf_f32m2 (ty, transform (1, 0), vx, vl);
+    ty = __riscv_vfmacc_vf_f32m2 (ty, transform (1, 1), vy, vl);
+    ty = __riscv_vfmacc_vf_f32m2 (ty, transform (1, 2), vz, vl);
+
+    vfloat32m2_t tz = __riscv_vfmv_v_f_f32m2 (transform (2, 3), vl);
+    tz = __riscv_vfmacc_vf_f32m2 (tz, transform (2, 0), vx, vl);
+    tz = __riscv_vfmacc_vf_f32m2 (tz, transform (2, 1), vy, vl);
+    tz = __riscv_vfmacc_vf_f32m2 (tz, transform (2, 2), vz, vl);
+
+    pcl::rvv_store::strided_store3_f32m2<
+        sizeof (PointT), offsetof (PointT, x), offsetof (PointT, y), offsetof (PointT, z)> (
+        dst_base + i * sizeof (PointT), vl, tx, ty, tz);
+    i += vl;
+  }
+}
+
+template <typename PointT>
+inline void
+transformPointCloudNormalsRVV (const pcl::PointCloud<PointT> &cloud_in,
+                               pcl::PointCloud<PointT> &cloud_out,
+                               const Eigen::Matrix4f &transform)
+{
+  const std::size_t n = cloud_out.size ();
+  if (n < kTransformRvvMinPoints)
+  {
+    pcl::detail::Transformer<float> tf (transform);
+    for (std::size_t i = 0; i < n; ++i)
+    {
+      tf.se3 (cloud_in[i].data, cloud_out[i].data);
+      tf.so3 (cloud_in[i].data_n, cloud_out[i].data_n);
+    }
+    return;
+  }
+
+  const auto* src_base = reinterpret_cast<const std::uint8_t*> (cloud_in.data ());
+  auto* dst_base = reinterpret_cast<std::uint8_t*> (cloud_out.data ());
+
+  std::size_t i = 0;
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    vfloat32m2_t vx, vy, vz;
+    pcl::rvv_load::strided_load3_f32m2<
+        sizeof (PointT), offsetof (PointT, x), offsetof (PointT, y), offsetof (PointT, z)> (
+        src_base + i * sizeof (PointT), vl, vx, vy, vz);
+
+    vfloat32m2_t x_out = __riscv_vfmv_v_f_f32m2 (transform (0, 3), vl);
+    x_out = __riscv_vfmacc_vf_f32m2 (x_out, transform (0, 0), vx, vl);
+    x_out = __riscv_vfmacc_vf_f32m2 (x_out, transform (0, 1), vy, vl);
+    x_out = __riscv_vfmacc_vf_f32m2 (x_out, transform (0, 2), vz, vl);
+
+    vfloat32m2_t y_out = __riscv_vfmv_v_f_f32m2 (transform (1, 3), vl);
+    y_out = __riscv_vfmacc_vf_f32m2 (y_out, transform (1, 0), vx, vl);
+    y_out = __riscv_vfmacc_vf_f32m2 (y_out, transform (1, 1), vy, vl);
+    y_out = __riscv_vfmacc_vf_f32m2 (y_out, transform (1, 2), vz, vl);
+
+    vfloat32m2_t z_out = __riscv_vfmv_v_f_f32m2 (transform (2, 3), vl);
+    z_out = __riscv_vfmacc_vf_f32m2 (z_out, transform (2, 0), vx, vl);
+    z_out = __riscv_vfmacc_vf_f32m2 (z_out, transform (2, 1), vy, vl);
+    z_out = __riscv_vfmacc_vf_f32m2 (z_out, transform (2, 2), vz, vl);
+
+    vfloat32m2_t nx, ny, nz;
+    pcl::rvv_load::strided_load3_f32m2<
+        sizeof (PointT), offsetof (PointT, normal_x), offsetof (PointT, normal_y), offsetof (PointT, normal_z)> (
+        src_base + i * sizeof (PointT), vl, nx, ny, nz);
+
+    vfloat32m2_t normal_x_out = __riscv_vfmul_vf_f32m2 (nx, transform (0, 0), vl);
+    normal_x_out = __riscv_vfmacc_vf_f32m2 (normal_x_out, transform (0, 1), ny, vl);
+    normal_x_out = __riscv_vfmacc_vf_f32m2 (normal_x_out, transform (0, 2), nz, vl);
+
+    vfloat32m2_t normal_y_out = __riscv_vfmul_vf_f32m2 (nx, transform (1, 0), vl);
+    normal_y_out = __riscv_vfmacc_vf_f32m2 (normal_y_out, transform (1, 1), ny, vl);
+    normal_y_out = __riscv_vfmacc_vf_f32m2 (normal_y_out, transform (1, 2), nz, vl);
+
+    vfloat32m2_t normal_z_out = __riscv_vfmul_vf_f32m2 (nx, transform (2, 0), vl);
+    normal_z_out = __riscv_vfmacc_vf_f32m2 (normal_z_out, transform (2, 1), ny, vl);
+    normal_z_out = __riscv_vfmacc_vf_f32m2 (normal_z_out, transform (2, 2), nz, vl);
+
+    pcl::rvv_store::strided_store3_f32m2<
+        sizeof (PointT), offsetof (PointT, x), offsetof (PointT, y), offsetof (PointT, z)> (
+        dst_base + i * sizeof (PointT), vl, x_out, y_out, z_out);
+    pcl::rvv_store::strided_store3_f32m2<
+        sizeof (PointT), offsetof (PointT, normal_x), offsetof (PointT, normal_y), offsetof (PointT, normal_z)> (
+        dst_base + i * sizeof (PointT), vl, normal_x_out, normal_y_out, normal_z_out);
+    i += vl;
+  }
+}
+
+#endif
+
 } // namespace detail
 
 
@@ -236,15 +390,24 @@ transformPointCloud (const pcl::PointCloud<PointT> &cloud_in,
     cloud_out.sensor_origin_      = cloud_in.sensor_origin_;
   }
 
-  pcl::detail::Transformer<Scalar> tf (transform);
   if (cloud_in.is_dense)
   {
-    // If the dataset is dense, simply transform it!
+#if defined(__RVV10__)
+    if constexpr (std::is_same_v<Scalar, float> &&
+                  pcl::rvv_load::kRVVXYZPointCompatible<PointT> &&
+                  pcl::rvv_store::kRVVXYZPointCompatible<PointT>)
+    {
+      pcl::detail::transformPointCloudXYZRVV (cloud_in, cloud_out, transform);
+      return;
+    }
+#endif
+    pcl::detail::Transformer<Scalar> tf (transform);
     for (std::size_t i = 0; i < cloud_out.size (); ++i)
       tf.se3 (cloud_in[i].data, cloud_out[i].data);
   }
   else
   {
+    pcl::detail::Transformer<Scalar> tf (transform);
     // Dataset might contain NaNs and Infs, so check for them first,
     // otherwise we get errors during the multiplication (?)
     for (std::size_t i = 0; i < cloud_out.size (); ++i)
@@ -365,10 +528,20 @@ transformPointCloudWithNormals (const pcl::PointCloud<PointT> &cloud_in,
     cloud_out.sensor_origin_      = cloud_in.sensor_origin_;
   }
 
-  pcl::detail::Transformer<Scalar> tf (transform);
   // If the data is dense, we don't need to check for NaN
   if (cloud_in.is_dense)
   {
+#if defined(__RVV10__)
+    if constexpr (std::is_same_v<Scalar, float> &&
+                  pcl::rvv_load::kRVVXYZPointCompatible<PointT> &&
+                  pcl::rvv_store::kRVVXYZPointCompatible<PointT> &&
+                  pcl::detail::kTransformRvvNormalCompatible<PointT>)
+    {
+      pcl::detail::transformPointCloudNormalsRVV (cloud_in, cloud_out, transform);
+      return;
+    }
+#endif
+    pcl::detail::Transformer<Scalar> tf (transform);
     for (std::size_t i = 0; i < cloud_out.size (); ++i)
     {
       tf.se3 (cloud_in[i].data, cloud_out[i].data);
@@ -378,6 +551,7 @@ transformPointCloudWithNormals (const pcl::PointCloud<PointT> &cloud_in,
   // Dataset might contain NaNs and Infs, so check for them first.
   else
   {
+    pcl::detail::Transformer<Scalar> tf (transform);
     for (std::size_t i = 0; i < cloud_out.size (); ++i)
     {
       if (!std::isfinite (cloud_in[i].x) ||
