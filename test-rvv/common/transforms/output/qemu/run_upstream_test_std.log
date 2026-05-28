@@ -1,0 +1,66 @@
+[==========] Running 23 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 5 tests from Transforms/0, where TypeParam = Eigen::Transform<float,3,2,0>
+[ RUN      ] Transforms/0.PointCloudXYZDense
+[       OK ] Transforms/0.PointCloudXYZDense (3 ms)
+[ RUN      ] Transforms/0.PointCloudXYZDenseIndexed
+[       OK ] Transforms/0.PointCloudXYZDenseIndexed (2 ms)
+[ RUN      ] Transforms/0.PointCloudXYZSparse
+[       OK ] Transforms/0.PointCloudXYZSparse (0 ms)
+[ RUN      ] Transforms/0.PointCloudXYZRGBNormalDense
+[       OK ] Transforms/0.PointCloudXYZRGBNormalDense (1 ms)
+[ RUN      ] Transforms/0.PointCloudXYZRGBNormalDenseIndexed
+[       OK ] Transforms/0.PointCloudXYZRGBNormalDenseIndexed (0 ms)
+[----------] 5 tests from Transforms/0 (10 ms total)
+
+[----------] 5 tests from Transforms/1, where TypeParam = Eigen::Transform<double,3,2,0>
+[ RUN      ] Transforms/1.PointCloudXYZDense
+[       OK ] Transforms/1.PointCloudXYZDense (3 ms)
+[ RUN      ] Transforms/1.PointCloudXYZDenseIndexed
+[       OK ] Transforms/1.PointCloudXYZDenseIndexed (1 ms)
+[ RUN      ] Transforms/1.PointCloudXYZSparse
+[       OK ] Transforms/1.PointCloudXYZSparse (1 ms)
+[ RUN      ] Transforms/1.PointCloudXYZRGBNormalDense
+[       OK ] Transforms/1.PointCloudXYZRGBNormalDense (1 ms)
+[ RUN      ] Transforms/1.PointCloudXYZRGBNormalDenseIndexed
+[       OK ] Transforms/1.PointCloudXYZRGBNormalDenseIndexed (1 ms)
+[----------] 5 tests from Transforms/1 (9 ms total)
+
+[----------] 5 tests from Transforms/2, where TypeParam = Eigen::Matrix<float,4,4,0,4,4>
+[ RUN      ] Transforms/2.PointCloudXYZDense
+[       OK ] Transforms/2.PointCloudXYZDense (0 ms)
+[ RUN      ] Transforms/2.PointCloudXYZDenseIndexed
+[       OK ] Transforms/2.PointCloudXYZDenseIndexed (0 ms)
+[ RUN      ] Transforms/2.PointCloudXYZSparse
+[       OK ] Transforms/2.PointCloudXYZSparse (0 ms)
+[ RUN      ] Transforms/2.PointCloudXYZRGBNormalDense
+[       OK ] Transforms/2.PointCloudXYZRGBNormalDense (0 ms)
+[ RUN      ] Transforms/2.PointCloudXYZRGBNormalDenseIndexed
+[       OK ] Transforms/2.PointCloudXYZRGBNormalDenseIndexed (0 ms)
+[----------] 5 tests from Transforms/2 (3 ms total)
+
+[----------] 5 tests from Transforms/3, where TypeParam = Eigen::Matrix<double,4,4,0,4,4>
+[ RUN      ] Transforms/3.PointCloudXYZDense
+[       OK ] Transforms/3.PointCloudXYZDense (1 ms)
+[ RUN      ] Transforms/3.PointCloudXYZDenseIndexed
+[       OK ] Transforms/3.PointCloudXYZDenseIndexed (1 ms)
+[ RUN      ] Transforms/3.PointCloudXYZSparse
+[       OK ] Transforms/3.PointCloudXYZSparse (1 ms)
+[ RUN      ] Transforms/3.PointCloudXYZRGBNormalDense
+[       OK ] Transforms/3.PointCloudXYZRGBNormalDense (1 ms)
+[ RUN      ] Transforms/3.PointCloudXYZRGBNormalDenseIndexed
+[       OK ] Transforms/3.PointCloudXYZRGBNormalDenseIndexed (1 ms)
+[----------] 5 tests from Transforms/3 (7 ms total)
+
+[----------] 3 tests from PCL
+[ RUN      ] PCL.Matrix4Affine3Transform
+[       OK ] PCL.Matrix4Affine3Transform (1 ms)
+[ RUN      ] PCL.OrganizedTransform
+[       OK ] PCL.OrganizedTransform (0 ms)
+[ RUN      ] PCL.PointXY
+[       OK ] PCL.PointXY (1 ms)
+[----------] 3 tests from PCL (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 23 tests from 5 test suites ran. (37 ms total)
+[  PASSED  ] 23 tests.

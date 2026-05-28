@@ -1,0 +1,20 @@
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from PCL
+[ RUN      ] PCL.TransformPointCloudXYZDenseLarge
+[       OK ] PCL.TransformPointCloudXYZDenseLarge (1 ms)
+[ RUN      ] PCL.TransformPointCloudXYZDenseInPlace
+[       OK ] PCL.TransformPointCloudXYZDenseInPlace (1 ms)
+[ RUN      ] PCL.TransformPointCloudXYZSparseKeepsInvalidScalarPath
+[       OK ] PCL.TransformPointCloudXYZSparseKeepsInvalidScalarPath (0 ms)
+[ RUN      ] PCL.TransformPointCloudWithNormalsDenseLarge
+[       OK ] PCL.TransformPointCloudWithNormalsDenseLarge (1 ms)
+[ RUN      ] PCL.TransformPointCloudWithNormalsDenseNoCopy
+[       OK ] PCL.TransformPointCloudWithNormalsDenseNoCopy (1 ms)
+[ RUN      ] PCL.TransformPointCloudIndexedRemainsCovered
+[       OK ] PCL.TransformPointCloudIndexedRemainsCovered (0 ms)
+[----------] 6 tests from PCL (8 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (11 ms total)
+[  PASSED  ] 6 tests.

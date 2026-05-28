@@ -1,0 +1,138 @@
+❯ make run_bench_compare
+[BOARD] Benchmark Std -> /root/pcl-test/common/transforms/output/run_bench_std.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/transforms/bench_transforms_std 2>&1 | tee /root/pcl-test/common/transforms/output/run_bench_std.log
+================================================================================================
+ PCL transforms.hpp Benchmark
+ points: 1000000
+ Dataset: PointXYZ/PointXYZRGBNormal dense cloud, points=1000000
+ iterations: 20
+ mode: Standard (__RVV10__ disabled)
+------------------------------------------------------------------------------------------------
+transformPointCloud PointXYZ dense copy=true            : 40.1642 ms/iter
+transformPointCloud PointXYZ dense copy=false           : 34.4893 ms/iter
+transformPointCloud PointXYZ dense in-place             : 39.8902 ms/iter
+transformPointCloudWithNormals dense copy=true          : 75.8759 ms/iter
+transformPointCloudWithNormals dense copy=false         : 59.8734 ms/iter
+================================================================================================
+[BOARD] Benchmark RVV -> /root/pcl-test/common/transforms/output/run_bench_rvv.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/transforms/bench_transforms_rvv 2>&1 | tee /root/pcl-test/common/transforms/output/run_bench_rvv.log
+================================================================================================
+ PCL transforms.hpp Benchmark
+ points: 1000000
+ Dataset: PointXYZ/PointXYZRGBNormal dense cloud, points=1000000
+ iterations: 20
+ mode: RVV (__RVV10__ enabled)
+------------------------------------------------------------------------------------------------
+transformPointCloud PointXYZ dense copy=true            : 16.0070 ms/iter
+transformPointCloud PointXYZ dense copy=false           : 10.3247 ms/iter
+transformPointCloud PointXYZ dense in-place             : 12.2038 ms/iter
+transformPointCloudWithNormals dense copy=true          : 48.1360 ms/iter
+transformPointCloudWithNormals dense copy=false         : 33.2154 ms/iter
+================================================================================================
+python3 '/root/pcl-test/common/transforms/script/analyze_bench_compare.py' \
+        --std-log /root/pcl-test/common/transforms/output/run_bench_std.log \
+        --rvv-log /root/pcl-test/common/transforms/output/run_bench_rvv.log \
+        --device "Milkv-Jupiter" \
+        --vlen-desc "see SoC / ELF (board)" \
+
+=============================================================================================================
+ PCL transforms.hpp Benchmark (Std vs RVV)
+=============================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : PointXYZ/PointXYZRGBNormal dense cloud, points=1000000
+  Iterations: 20 （每行 Total = Avg × 20）
+  Std log   : /root/pcl-test/common/transforms/output/run_bench_std.log
+  RVV log   : /root/pcl-test/common/transforms/output/run_bench_rvv.log
+
+-------------------------------------------------------------------------------------------------------------
+Benchmark Item                                   | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloud PointXYZ dense copy=true     | Std    |     40.1642 ms |    803.2840 ms |    [   1.00x ]
+                                                 | RVV    |     16.0070 ms |    320.1400 ms |    [   2.51x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloud PointXYZ dense copy=false    | Std    |     34.4893 ms |    689.7860 ms |    [   1.00x ]
+                                                 | RVV    |     10.3247 ms |    206.4940 ms |    [   3.34x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloud PointXYZ dense in-place      | Std    |     39.8902 ms |    797.8040 ms |    [   1.00x ]
+                                                 | RVV    |     12.2038 ms |    244.0760 ms |    [   3.27x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloudWithNormals dense copy=true   | Std    |     75.8759 ms |   1517.5180 ms |    [   1.00x ]
+                                                 | RVV    |     48.1360 ms |    962.7200 ms |    [   1.58x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloudWithNormals dense copy=false  | Std    |     59.8734 ms |   1197.4680 ms |    [   1.00x ]
+                                                 | RVV    |     33.2154 ms |    664.3080 ms |    [   1.80x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+=============================================================================================================
+❯ make run_bench_compare
+[BOARD] Benchmark Std -> /root/pcl-test/common/transforms/output/run_bench_std.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/transforms/bench_transforms_std 2>&1 | tee /root/pcl-test/common/transforms/output/run_bench_std.log
+================================================================================================
+ PCL transforms.hpp Benchmark
+ points: 1000000
+ Dataset: PointXYZ/PointXYZRGBNormal dense cloud, points=1000000
+ iterations: 20
+ mode: Standard (__RVV10__ disabled)
+------------------------------------------------------------------------------------------------
+transformPointCloud PointXYZ dense copy=true            : 40.5023 ms/iter
+transformPointCloud PointXYZ dense copy=false           : 34.6585 ms/iter
+transformPointCloud PointXYZ dense in-place             : 40.3866 ms/iter
+transformPointCloudWithNormals dense copy=true          : 75.4194 ms/iter
+transformPointCloudWithNormals dense copy=false         : 59.5605 ms/iter
+================================================================================================
+[BOARD] Benchmark RVV -> /root/pcl-test/common/transforms/output/run_bench_rvv.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/common/transforms/bench_transforms_rvv 2>&1 | tee /root/pcl-test/common/transforms/output/run_bench_rvv.log
+================================================================================================
+ PCL transforms.hpp Benchmark
+ points: 1000000
+ Dataset: PointXYZ/PointXYZRGBNormal dense cloud, points=1000000
+ iterations: 20
+ mode: RVV (__RVV10__ enabled)
+------------------------------------------------------------------------------------------------
+transformPointCloud PointXYZ dense copy=true            : 16.2019 ms/iter
+transformPointCloud PointXYZ dense copy=false           : 10.3335 ms/iter
+transformPointCloud PointXYZ dense in-place             : 11.4018 ms/iter
+transformPointCloudWithNormals dense copy=true          : 47.6673 ms/iter
+transformPointCloudWithNormals dense copy=false         : 32.0457 ms/iter
+================================================================================================
+python3 '/root/pcl-test/common/transforms/script/analyze_bench_compare.py' \
+        --std-log /root/pcl-test/common/transforms/output/run_bench_std.log \
+        --rvv-log /root/pcl-test/common/transforms/output/run_bench_rvv.log \
+        --device "Milkv-Jupiter" \
+        --vlen-desc "see SoC / ELF (board)" \
+
+=============================================================================================================
+ PCL transforms.hpp Benchmark (Std vs RVV)
+=============================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : PointXYZ/PointXYZRGBNormal dense cloud, points=1000000
+  Iterations: 20 （每行 Total = Avg × 20）
+  Std log   : /root/pcl-test/common/transforms/output/run_bench_std.log
+  RVV log   : /root/pcl-test/common/transforms/output/run_bench_rvv.log
+
+-------------------------------------------------------------------------------------------------------------
+Benchmark Item                                   | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloud PointXYZ dense copy=true     | Std    |     40.5023 ms |    810.0460 ms |    [   1.00x ]
+                                                 | RVV    |     16.2019 ms |    324.0380 ms |    [   2.50x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloud PointXYZ dense copy=false    | Std    |     34.6585 ms |    693.1700 ms |    [   1.00x ]
+                                                 | RVV    |     10.3335 ms |    206.6700 ms |    [   3.35x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloud PointXYZ dense in-place      | Std    |     40.3866 ms |    807.7320 ms |    [   1.00x ]
+                                                 | RVV    |     11.4018 ms |    228.0360 ms |    [   3.54x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloudWithNormals dense copy=true   | Std    |     75.4194 ms |   1508.3880 ms |    [   1.00x ]
+                                                 | RVV    |     47.6673 ms |    953.3460 ms |    [   1.58x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+transformPointCloudWithNormals dense copy=false  | Std    |     59.5605 ms |   1191.2100 ms |    [   1.00x ]
+                                                 | RVV    |     32.0457 ms |    640.9140 ms |    [   1.86x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+=============================================================================================================
