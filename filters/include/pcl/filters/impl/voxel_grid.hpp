@@ -39,25 +39,32 @@
 #define PCL_FILTERS_IMPL_VOXEL_GRID_H_
 
 #include <limits>
+#include <cstdint>
+#include <cstring>
 
+#if defined(__RVV10__)
+#include <cstdint>
+#include <type_traits>
+#include <riscv_vector.h>
+#endif
 #include <pcl/common/centroid.h>
 #include <pcl/common/common.h>
 #include <pcl/common/io.h>
 #include <pcl/filters/voxel_grid.h>
 #include  <boost/sort/spreadsort/integer_sort.hpp>
 
-///////////////////////////////////////////////////////////////////////////////////////////
-template <typename T> void
-pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, int x_idx, int y_idx, int z_idx, Eigen::Matrix<T, 4, 1> &min_pt, Eigen::Matrix<T, 4, 1> &max_pt)
+namespace pcl
 {
-  if (pcl::traits::asEnum_v<T> != cloud->fields[x_idx].datatype ||
-      pcl::traits::asEnum_v<T> != cloud->fields[y_idx].datatype ||
-      pcl::traits::asEnum_v<T> != cloud->fields[z_idx].datatype)
-  {
-      PCL_ERROR("[pcl::getMinMax3D] Type of max_pt/min_pt does not match cloud type!\n");
-      return;
-  }
 
+template <typename T>
+inline void
+getMinMax3DStd(const pcl::PCLPointCloud2ConstPtr& cloud,
+               int x_idx,
+               int y_idx,
+               int z_idx,
+               Eigen::Matrix<T, 4, 1>& min_pt,
+               Eigen::Matrix<T, 4, 1>& max_pt)
+{
   T min_x = std::numeric_limits<T>::max();
   T min_y = std::numeric_limits<T>::max();
   T min_z = std::numeric_limits<T>::max();
@@ -126,19 +133,130 @@ pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, int x_idx, int y_idx
   max_pt << max_x, max_y, max_z, 0;
 }
 
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kVoxelGridMinMaxRvvMinPoints = 64;
+
+inline bool
+getMinMax3DFloatDenseRVV(const pcl::PCLPointCloud2ConstPtr& cloud,
+                         int x_idx,
+                         int y_idx,
+                         int z_idx,
+                         Eigen::Vector4f& min_pt,
+                         Eigen::Vector4f& max_pt)
+{
+  if (!cloud || !cloud->is_dense)
+    return false;
+
+  if (cloud->fields[x_idx].datatype != pcl::PCLPointField::FLOAT32 ||
+      cloud->fields[y_idx].datatype != pcl::PCLPointField::FLOAT32 ||
+      cloud->fields[z_idx].datatype != pcl::PCLPointField::FLOAT32)
+    return false;
+
+  const std::size_t nr_points = cloud->width * cloud->height;
+  if (nr_points < kVoxelGridMinMaxRvvMinPoints)
+    return false;
+
+  const std::uint32_t x_off = cloud->fields[x_idx].offset;
+  const std::uint32_t y_off = cloud->fields[y_idx].offset;
+  const std::uint32_t z_off = cloud->fields[z_idx].offset;
+  const std::uint32_t pt_step = cloud->point_step;
+  if (pt_step == 0 || x_off + sizeof(float) > pt_step || y_off + sizeof(float) > pt_step ||
+      z_off + sizeof(float) > pt_step)
+    return false;
+
+  const auto* base = cloud->data.data();
+  // RVV only uses byte-strided access described by PCLPointCloud2 metadata; paths
+  // that need NaN filtering, non-float fields, or invalid offsets stay on Std.
+  float min_x = std::numeric_limits<float>::max();
+  float min_y = std::numeric_limits<float>::max();
+  float min_z = std::numeric_limits<float>::max();
+  float max_x = std::numeric_limits<float>::lowest();
+  float max_y = std::numeric_limits<float>::lowest();
+  float max_z = std::numeric_limits<float>::lowest();
+
+  std::size_t i = 0;
+  while (i < nr_points)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
+    const auto* chunk = base + i * pt_step;
+    const auto* x_ptr = reinterpret_cast<const float*>(chunk + x_off);
+    const auto* y_ptr = reinterpret_cast<const float*>(chunk + y_off);
+    const auto* z_ptr = reinterpret_cast<const float*>(chunk + z_off);
+    const auto stride = static_cast<ptrdiff_t>(pt_step);
+
+    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2(x_ptr, stride, vl);
+    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2(y_ptr, stride, vl);
+    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2(z_ptr, stride, vl);
+
+    min_x = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmin_vs_f32m2_f32m1(vx, __riscv_vfmv_s_f_f32m1(min_x, 1), vl));
+    min_y = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmin_vs_f32m2_f32m1(vy, __riscv_vfmv_s_f_f32m1(min_y, 1), vl));
+    min_z = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmin_vs_f32m2_f32m1(vz, __riscv_vfmv_s_f_f32m1(min_z, 1), vl));
+    max_x = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmax_vs_f32m2_f32m1(vx, __riscv_vfmv_s_f_f32m1(max_x, 1), vl));
+    max_y = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmax_vs_f32m2_f32m1(vy, __riscv_vfmv_s_f_f32m1(max_y, 1), vl));
+    max_z = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmax_vs_f32m2_f32m1(vz, __riscv_vfmv_s_f_f32m1(max_z, 1), vl));
+
+    i += vl;
+  }
+
+  min_pt << min_x, min_y, min_z, 0.0f;
+  max_pt << max_x, max_y, max_z, 0.0f;
+  return true;
+}
+
+#endif
+
+} // namespace pcl
+
 ///////////////////////////////////////////////////////////////////////////////////////////
-template <typename T> void
-pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, const pcl::Indices &indices, int x_idx, int y_idx, int z_idx,
-                 Eigen::Matrix<T, 4, 1> &min_pt, Eigen::Matrix<T, 4, 1> &max_pt)
+template <typename T>
+void
+pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, int x_idx, int y_idx, int z_idx, Eigen::Matrix<T, 4, 1> &min_pt, Eigen::Matrix<T, 4, 1> &max_pt)
 {
   if (pcl::traits::asEnum_v<T> != cloud->fields[x_idx].datatype ||
       pcl::traits::asEnum_v<T> != cloud->fields[y_idx].datatype ||
       pcl::traits::asEnum_v<T> != cloud->fields[z_idx].datatype)
   {
-    PCL_ERROR("[pcl::getMinMax3D] Type of max_pt/min_pt does not match cloud type!\n");
-    return;
+      PCL_ERROR("[pcl::getMinMax3D] Type of max_pt/min_pt does not match cloud type!\n");
+      return;
   }
 
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<T, float>)
+  {
+    Eigen::Vector4f min_f;
+    Eigen::Vector4f max_f;
+    if (pcl::getMinMax3DFloatDenseRVV(cloud, x_idx, y_idx, z_idx, min_f, max_f))
+    {
+      min_pt = min_f.template cast<T>();
+      max_pt = max_f.template cast<T>();
+      return;
+    }
+  }
+#endif
+
+  pcl::getMinMax3DStd(cloud, x_idx, y_idx, z_idx, min_pt, max_pt);
+}
+
+namespace pcl
+{
+
+template <typename T>
+inline void
+getMinMax3DIndicesStd(const pcl::PCLPointCloud2ConstPtr& cloud,
+                       const pcl::Indices& indices,
+                       int x_idx,
+                       int y_idx,
+                       int z_idx,
+                       Eigen::Matrix<T, 4, 1>& min_pt,
+                       Eigen::Matrix<T, 4, 1>& max_pt)
+{
   T min_x = std::numeric_limits<T>::max();
   T min_y = std::numeric_limits<T>::max();
   T min_z = std::numeric_limits<T>::max();
@@ -205,11 +323,91 @@ pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, const pcl::Indices &
   max_pt << max_x, max_y, max_z, 0;
 }
 
+#if defined(__RVV10__)
+
+inline bool
+getMinMax3DFloatDenseIndicesRVV(const pcl::PCLPointCloud2ConstPtr& cloud,
+                                const pcl::Indices& indices,
+                                int x_idx,
+                                int y_idx,
+                                int z_idx,
+                                Eigen::Vector4f& min_pt,
+                                Eigen::Vector4f& max_pt)
+{
+  if (!cloud || !cloud->is_dense)
+    return false;
+
+  if (cloud->fields[x_idx].datatype != pcl::PCLPointField::FLOAT32 ||
+      cloud->fields[y_idx].datatype != pcl::PCLPointField::FLOAT32 ||
+      cloud->fields[z_idx].datatype != pcl::PCLPointField::FLOAT32)
+    return false;
+
+  if (indices.size() < kVoxelGridMinMaxRvvMinPoints)
+    return false;
+
+  const std::uint32_t x_off = cloud->fields[x_idx].offset;
+  const std::uint32_t y_off = cloud->fields[y_idx].offset;
+  const std::uint32_t z_off = cloud->fields[z_idx].offset;
+  const std::uint32_t pt_step = cloud->point_step;
+  if (pt_step == 0 || x_off + sizeof(float) > pt_step || y_off + sizeof(float) > pt_step ||
+      z_off + sizeof(float) > pt_step)
+    return false;
+
+  const auto* base = reinterpret_cast<const float*>(cloud->data.data());
+  float min_x = std::numeric_limits<float>::max();
+  float min_y = std::numeric_limits<float>::max();
+  float min_z = std::numeric_limits<float>::max();
+  float max_x = std::numeric_limits<float>::lowest();
+  float max_y = std::numeric_limits<float>::lowest();
+  float max_z = std::numeric_limits<float>::lowest();
+
+  const auto* indices_ptr = indices.data();
+  std::size_t i = 0;
+  while (i < indices.size())
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2(indices.size() - i);
+    const vint32m2_t vidx = __riscv_vle32_v_i32m2(indices_ptr + i, vl);
+    // Gather offsets are byte offsets from cloud->data.data(); keeping this in
+    // the RVV helper preserves the public entry's Std fallback for all other layouts.
+    const vuint32m2_t base_offsets = __riscv_vreinterpret_v_i32m2_u32m2(
+        __riscv_vmul_vx_i32m2(vidx, static_cast<std::int32_t>(pt_step), vl));
+    const vuint32m2_t x_offsets = __riscv_vadd_vx_u32m2(base_offsets, x_off, vl);
+    const vuint32m2_t y_offsets = __riscv_vadd_vx_u32m2(base_offsets, y_off, vl);
+    const vuint32m2_t z_offsets = __riscv_vadd_vx_u32m2(base_offsets, z_off, vl);
+
+    const vfloat32m2_t vx = __riscv_vluxei32_v_f32m2(base, x_offsets, vl);
+    const vfloat32m2_t vy = __riscv_vluxei32_v_f32m2(base, y_offsets, vl);
+    const vfloat32m2_t vz = __riscv_vluxei32_v_f32m2(base, z_offsets, vl);
+
+    min_x = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmin_vs_f32m2_f32m1(vx, __riscv_vfmv_s_f_f32m1(min_x, 1), vl));
+    min_y = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmin_vs_f32m2_f32m1(vy, __riscv_vfmv_s_f_f32m1(min_y, 1), vl));
+    min_z = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmin_vs_f32m2_f32m1(vz, __riscv_vfmv_s_f_f32m1(min_z, 1), vl));
+    max_x = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmax_vs_f32m2_f32m1(vx, __riscv_vfmv_s_f_f32m1(max_x, 1), vl));
+    max_y = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmax_vs_f32m2_f32m1(vy, __riscv_vfmv_s_f_f32m1(max_y, 1), vl));
+    max_z = __riscv_vfmv_f_s_f32m1_f32(
+        __riscv_vfredmax_vs_f32m2_f32m1(vz, __riscv_vfmv_s_f_f32m1(max_z, 1), vl));
+
+    i += vl;
+  }
+
+  min_pt << min_x, min_y, min_z, 0.0f;
+  max_pt << max_x, max_y, max_z, 0.0f;
+  return true;
+}
+
+#endif
+
+} // namespace pcl
+
 ///////////////////////////////////////////////////////////////////////////////////////////
-template <typename T, typename D> void
-pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, int x_idx, int y_idx, int z_idx,
-                 const std::string &distance_field_name, D min_distance, D max_distance,
-                 Eigen::Matrix<T, 4, 1> &min_pt, Eigen::Matrix<T, 4, 1> &max_pt, bool limit_negative)
+template <typename T> void
+pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, const pcl::Indices &indices, int x_idx, int y_idx, int z_idx,
+                 Eigen::Matrix<T, 4, 1> &min_pt, Eigen::Matrix<T, 4, 1> &max_pt)
 {
   if (pcl::traits::asEnum_v<T> != cloud->fields[x_idx].datatype ||
       pcl::traits::asEnum_v<T> != cloud->fields[y_idx].datatype ||
@@ -219,20 +417,40 @@ pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, int x_idx, int y_idx
     return;
   }
 
-  int distance_idx = pcl::getFieldIndex (*cloud, distance_field_name);
-
-  if (distance_idx < 0)
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<T, float>)
   {
-    PCL_ERROR("[pcl::getMinMax3D] The specified distance field name is not found in the cloud!\n");
-    return;
+    Eigen::Vector4f min_f;
+    Eigen::Vector4f max_f;
+    if (pcl::getMinMax3DFloatDenseIndicesRVV(cloud, indices, x_idx, y_idx, z_idx, min_f, max_f))
+    {
+      min_pt = min_f.template cast<T>();
+      max_pt = max_f.template cast<T>();
+      return;
+    }
   }
+#endif
 
-  if (cloud->fields[distance_idx].datatype != pcl::traits::asEnum_v<D>)
-  {
-    PCL_ERROR ("[pcl::getMinMax3D] min_distance/max_distance are incorrect type!\n");
-    return;
-  }
+  pcl::getMinMax3DIndicesStd(cloud, indices, x_idx, y_idx, z_idx, min_pt, max_pt);
 
+}
+
+namespace pcl
+{
+
+template <typename T, typename D>
+inline void
+getMinMax3DDistanceStd(const pcl::PCLPointCloud2ConstPtr& cloud,
+                       int x_idx,
+                       int y_idx,
+                       int z_idx,
+                       int distance_idx,
+                       D min_distance,
+                       D max_distance,
+                       Eigen::Matrix<T, 4, 1>& min_pt,
+                       Eigen::Matrix<T, 4, 1>& max_pt,
+                       bool limit_negative)
+{
   T min_x = std::numeric_limits<T>::max();
   T min_y = std::numeric_limits<T>::max();
   T min_z = std::numeric_limits<T>::max();
@@ -317,6 +535,153 @@ pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, int x_idx, int y_idx
 
   min_pt << min_x, min_y, min_z, 0;
   max_pt << max_x, max_y, max_z, 0;
+}
+
+#if defined(__RVV10__)
+
+inline bool
+getMinMax3DFloatDenseDistanceRVV(const pcl::PCLPointCloud2ConstPtr& cloud,
+                                 int x_idx,
+                                 int y_idx,
+                                 int z_idx,
+                                 int distance_idx,
+                                 float min_distance,
+                                 float max_distance,
+                                 Eigen::Vector4f& min_pt,
+                                 Eigen::Vector4f& max_pt,
+                                 bool limit_negative)
+{
+  if (!cloud || !cloud->is_dense)
+    return false;
+
+  if (cloud->fields[x_idx].datatype != pcl::PCLPointField::FLOAT32 ||
+      cloud->fields[y_idx].datatype != pcl::PCLPointField::FLOAT32 ||
+      cloud->fields[z_idx].datatype != pcl::PCLPointField::FLOAT32 ||
+      cloud->fields[distance_idx].datatype != pcl::PCLPointField::FLOAT32)
+    return false;
+
+  const std::size_t nr_points = cloud->width * cloud->height;
+  if (nr_points < kVoxelGridMinMaxRvvMinPoints)
+    return false;
+
+  const std::uint32_t x_off = cloud->fields[x_idx].offset;
+  const std::uint32_t y_off = cloud->fields[y_idx].offset;
+  const std::uint32_t z_off = cloud->fields[z_idx].offset;
+  const std::uint32_t distance_off = cloud->fields[distance_idx].offset;
+  const std::uint32_t pt_step = cloud->point_step;
+  if (pt_step == 0 || x_off + sizeof(float) > pt_step || y_off + sizeof(float) > pt_step ||
+      z_off + sizeof(float) > pt_step || distance_off + sizeof(float) > pt_step)
+    return false;
+
+  const auto* base = cloud->data.data();
+  float min_x = std::numeric_limits<float>::max();
+  float min_y = std::numeric_limits<float>::max();
+  float min_z = std::numeric_limits<float>::max();
+  float max_x = std::numeric_limits<float>::lowest();
+  float max_y = std::numeric_limits<float>::lowest();
+  float max_z = std::numeric_limits<float>::lowest();
+
+  std::size_t i = 0;
+  while (i < nr_points)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
+    const auto* chunk = base + i * pt_step;
+    const auto* x_ptr = reinterpret_cast<const float*>(chunk + x_off);
+    const auto* y_ptr = reinterpret_cast<const float*>(chunk + y_off);
+    const auto* z_ptr = reinterpret_cast<const float*>(chunk + z_off);
+    const auto* distance_ptr = reinterpret_cast<const float*>(chunk + distance_off);
+    const auto stride = static_cast<ptrdiff_t>(pt_step);
+
+    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2(x_ptr, stride, vl);
+    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2(y_ptr, stride, vl);
+    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2(z_ptr, stride, vl);
+    const vfloat32m2_t vd = __riscv_vlse32_v_f32m2(distance_ptr, stride, vl);
+
+    // Match the scalar condition exactly: limit_negative excludes points inside
+    // (min_distance, max_distance), otherwise only inside points participate.
+    const vbool16_t gt_min = __riscv_vmfgt_vf_f32m2_b16(vd, min_distance, vl);
+    const vbool16_t lt_max = __riscv_vmflt_vf_f32m2_b16(vd, max_distance, vl);
+    const vbool16_t inside = __riscv_vmand_mm_b16(gt_min, lt_max, vl);
+    const vbool16_t include = limit_negative ? __riscv_vmnot_m_b16(inside, vl) : inside;
+
+    min_x = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmin_vs_f32m2_f32m1_m(
+        include, vx, __riscv_vfmv_s_f_f32m1(min_x, 1), vl));
+    min_y = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmin_vs_f32m2_f32m1_m(
+        include, vy, __riscv_vfmv_s_f_f32m1(min_y, 1), vl));
+    min_z = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmin_vs_f32m2_f32m1_m(
+        include, vz, __riscv_vfmv_s_f_f32m1(min_z, 1), vl));
+    max_x = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmax_vs_f32m2_f32m1_m(
+        include, vx, __riscv_vfmv_s_f_f32m1(max_x, 1), vl));
+    max_y = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmax_vs_f32m2_f32m1_m(
+        include, vy, __riscv_vfmv_s_f_f32m1(max_y, 1), vl));
+    max_z = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmax_vs_f32m2_f32m1_m(
+        include, vz, __riscv_vfmv_s_f_f32m1(max_z, 1), vl));
+
+    i += vl;
+  }
+
+  min_pt << min_x, min_y, min_z, 0.0f;
+  max_pt << max_x, max_y, max_z, 0.0f;
+  return true;
+}
+
+#endif
+
+} // namespace pcl
+
+///////////////////////////////////////////////////////////////////////////////////////////
+template <typename T, typename D> void
+pcl::getMinMax3D (const pcl::PCLPointCloud2ConstPtr &cloud, int x_idx, int y_idx, int z_idx,
+                 const std::string &distance_field_name, D min_distance, D max_distance,
+                 Eigen::Matrix<T, 4, 1> &min_pt, Eigen::Matrix<T, 4, 1> &max_pt, bool limit_negative)
+{
+  if (pcl::traits::asEnum_v<T> != cloud->fields[x_idx].datatype ||
+      pcl::traits::asEnum_v<T> != cloud->fields[y_idx].datatype ||
+      pcl::traits::asEnum_v<T> != cloud->fields[z_idx].datatype)
+  {
+    PCL_ERROR("[pcl::getMinMax3D] Type of max_pt/min_pt does not match cloud type!\n");
+    return;
+  }
+
+  int distance_idx = pcl::getFieldIndex (*cloud, distance_field_name);
+
+  if (distance_idx < 0)
+  {
+    PCL_ERROR("[pcl::getMinMax3D] The specified distance field name is not found in the cloud!\n");
+    return;
+  }
+
+  if (cloud->fields[distance_idx].datatype != pcl::traits::asEnum_v<D>)
+  {
+    PCL_ERROR ("[pcl::getMinMax3D] min_distance/max_distance are incorrect type!\n");
+    return;
+  }
+
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<T, float> && std::is_same_v<D, float>)
+  {
+    Eigen::Vector4f min_f;
+    Eigen::Vector4f max_f;
+    if (pcl::getMinMax3DFloatDenseDistanceRVV(cloud,
+                                              x_idx,
+                                              y_idx,
+                                              z_idx,
+                                              distance_idx,
+                                              min_distance,
+                                              max_distance,
+                                              min_f,
+                                              max_f,
+                                              limit_negative))
+    {
+      min_pt = min_f.template cast<T>();
+      max_pt = max_f.template cast<T>();
+      return;
+    }
+  }
+#endif
+
+  pcl::getMinMax3DDistanceStd(cloud, x_idx, y_idx, z_idx, distance_idx, min_distance, max_distance, min_pt, max_pt, limit_negative);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
