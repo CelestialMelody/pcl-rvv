@@ -13,8 +13,8 @@
 [       OK ] PCL.TransformPointCloudWithNormalsDenseNoCopy (1 ms)
 [ RUN      ] PCL.TransformPointCloudIndexedRemainsCovered
 [       OK ] PCL.TransformPointCloudIndexedRemainsCovered (0 ms)
-[----------] 6 tests from PCL (8 ms total)
+[----------] 6 tests from PCL (9 ms total)
 
 [----------] Global test environment tear-down
-[==========] 6 tests from 1 test suite ran. (11 ms total)
+[==========] 6 tests from 1 test suite ran. (12 ms total)
 [  PASSED  ] 6 tests.
