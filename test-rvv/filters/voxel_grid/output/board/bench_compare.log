@@ -1,0 +1,70 @@
+❯ make run_bench_compare
+[BOARD] Benchmark Std -> /root/pcl-test/filters/voxel_grid/output/run_bench_std.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/filters/voxel_grid/bench_voxel_grid_std 2>&1 | tee /root/pcl-test/filters/voxel_grid/output/run_bench_std.log
+================================================================================================
+PCL filters/voxel_grid getMinMax3D benchmark [std]
+Dataset: synthetic dense PCLPointCloud2 float xyz; cases: 64K packed, 1M packed, 1M padded, 1M indexed, 1M distance
+Iterations: 30
+------------------------------------------------------------------------------------------------
+getMinMax3D dense packed xyz 64K                        : 2.7675 ms/iter
+getMinMax3D dense packed xyz 1M                         : 43.9617 ms/iter
+getMinMax3D dense padded xyz 1M                         : 44.6097 ms/iter
+getMinMax3D dense indexed xyz 1M                        : 25.1025 ms/iter
+getMinMax3D dense distance xyz 1M                       : 31.4692 ms/iter
+getMinMax3D dense distance negative xyz 1M              : 32.4347 ms/iter
+================================================================================================
+[BOARD] Benchmark RVV -> /root/pcl-test/filters/voxel_grid/output/run_bench_rvv.log
+LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
+/root/pcl-test/filters/voxel_grid/bench_voxel_grid_rvv 2>&1 | tee /root/pcl-test/filters/voxel_grid/output/run_bench_rvv.log
+================================================================================================
+PCL filters/voxel_grid getMinMax3D benchmark [RVV enabled]
+Dataset: synthetic dense PCLPointCloud2 float xyz; cases: 64K packed, 1M packed, 1M padded, 1M indexed, 1M distance
+Iterations: 30
+------------------------------------------------------------------------------------------------
+getMinMax3D dense packed xyz 64K                        : 0.7057 ms/iter
+getMinMax3D dense packed xyz 1M                         : 12.0485 ms/iter
+getMinMax3D dense padded xyz 1M                         : 9.7348 ms/iter
+getMinMax3D dense indexed xyz 1M                        : 6.9791 ms/iter
+getMinMax3D dense distance xyz 1M                       : 12.4194 ms/iter
+getMinMax3D dense distance negative xyz 1M              : 12.0233 ms/iter
+================================================================================================
+python3 '/root/pcl-test/filters/voxel_grid/script/analyze_bench_compare.py' \
+        --std-log /root/pcl-test/filters/voxel_grid/output/run_bench_std.log \
+        --rvv-log /root/pcl-test/filters/voxel_grid/output/run_bench_rvv.log \
+        --device "Milkv-Jupiter" \
+        --vlen-desc "see SoC / ELF (board)" \
+
+========================================================================================================
+ PCL filters/voxel_grid getMinMax3D benchmark [std] (Std vs RVV)
+========================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : synthetic dense PCLPointCloud2 float xyz; cases: 64K packed, 1M packed, 1M padded, 1M indexed, 1M distance
+  Iterations: 30 （每行 Total = Avg × 30）
+  Std log   : /root/pcl-test/filters/voxel_grid/output/run_bench_std.log
+  RVV log   : /root/pcl-test/filters/voxel_grid/output/run_bench_rvv.log
+
+--------------------------------------------------------------------------------------------------------
+Benchmark Item                              | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+--------------------------------------------|--------|----------------|----------------|----------------
+getMinMax3D dense packed xyz 64K            | Std    |      2.7675 ms |     83.0250 ms |    [   1.00x ]
+                                            | RVV    |      0.7057 ms |     21.1710 ms |    [   3.92x ]
+--------------------------------------------|--------|----------------|----------------|----------------
+getMinMax3D dense packed xyz 1M             | Std    |     43.9617 ms |   1318.8510 ms |    [   1.00x ]
+                                            | RVV    |     12.0485 ms |    361.4550 ms |    [   3.65x ]
+--------------------------------------------|--------|----------------|----------------|----------------
+getMinMax3D dense padded xyz 1M             | Std    |     44.6097 ms |   1338.2910 ms |    [   1.00x ]
+                                            | RVV    |      9.7348 ms |    292.0440 ms |    [   4.58x ]
+--------------------------------------------|--------|----------------|----------------|----------------
+getMinMax3D dense indexed xyz 1M            | Std    |     25.1025 ms |    753.0750 ms |    [   1.00x ]
+                                            | RVV    |      6.9791 ms |    209.3730 ms |    [   3.60x ]
+--------------------------------------------|--------|----------------|----------------|----------------
+getMinMax3D dense distance xyz 1M           | Std    |     31.4692 ms |    944.0760 ms |    [   1.00x ]
+                                            | RVV    |     12.4194 ms |    372.5820 ms |    [   2.53x ]
+--------------------------------------------|--------|----------------|----------------|----------------
+getMinMax3D dense distance negative xyz 1M  | Std    |     32.4347 ms |    973.0410 ms |    [   1.00x ]
+                                            | RVV    |     12.0233 ms |    360.6990 ms |    [   2.70x ]
+--------------------------------------------|--------|----------------|----------------|----------------
+========================================================================================================
