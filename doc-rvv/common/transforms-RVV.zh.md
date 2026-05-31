@@ -60,7 +60,7 @@ RVV 分发位于 dense、非 indexed 的整云入口内，分流条件分为三�
 - 类型期：`Scalar` 必须为 `float`；`PointT` 必须满足标准布局和字段类型兼容。
 - 运行期：`cloud_in.is_dense == true` 且点数不低于 `kTransformRvvMinPoints`；小点云直接回退标量，避免条带设置成本压过收益。
 
-xyz 字段兼容性复用已有 common RVV 点字段封装中的判断；normal 路径增加 `HasRvvNormalFields` / `kTransformRvvNormalCompatible`，确认 `normal_x/normal_y/normal_z` 均存在且为 `float`。
+xyz 字段兼容性复用已有 common RVV 点字段封装中的判断；normal 路径增加 `HasNormalFields` / `kTransformRvvNormalCompatible`，确认 `normal_x/normal_y/normal_z` 均存在且为 `float`。
 
 ### 3.2 数据访问组织
 

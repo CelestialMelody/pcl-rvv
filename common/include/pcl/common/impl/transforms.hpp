@@ -223,15 +223,42 @@ struct Transformer<double>
 #endif // !defined(__AVX__)
 #endif // defined(__SSE2__)
 
+} // namespace detail
+
+template <typename PointT, typename Scalar>
+inline void
+transformPointCloudXYZStd (const pcl::PointCloud<PointT> &cloud_in,
+                           pcl::PointCloud<PointT> &cloud_out,
+                           const Eigen::Matrix<Scalar, 4, 4> &transform)
+{
+  pcl::detail::Transformer<Scalar> tf (transform);
+  for (std::size_t i = 0; i < cloud_out.size (); ++i)
+    tf.se3 (cloud_in[i].data, cloud_out[i].data);
+}
+
+template <typename PointT, typename Scalar>
+inline void
+transformPointCloudNormalsStd (const pcl::PointCloud<PointT> &cloud_in,
+                               pcl::PointCloud<PointT> &cloud_out,
+                               const Eigen::Matrix<Scalar, 4, 4> &transform)
+{
+  pcl::detail::Transformer<Scalar> tf (transform);
+  for (std::size_t i = 0; i < cloud_out.size (); ++i)
+  {
+    tf.se3 (cloud_in[i].data, cloud_out[i].data);
+    tf.so3 (cloud_in[i].data_n, cloud_out[i].data_n);
+  }
+}
+
 #if defined(__RVV10__)
 
 inline constexpr std::size_t kTransformRvvMinPoints = 16;
 
 template <typename PointT, typename = void>
-struct HasRvvNormalFields : std::false_type {};
+struct HasNormalFields : std::false_type {};
 
 template <typename PointT>
-struct HasRvvNormalFields<
+struct HasNormalFields<
     PointT,
     std::void_t<decltype (std::declval<PointT> ().normal_x),
                 decltype (std::declval<PointT> ().normal_y),
@@ -243,7 +270,7 @@ struct HasRvvNormalFields<
       std::is_same_v<std::remove_cv_t<std::remove_reference_t<decltype (std::declval<PointT> ().normal_z)>>, float>> {};
 
 template <typename PointT>
-inline constexpr bool kTransformRvvNormalCompatible = HasRvvNormalFields<PointT>::value;
+inline constexpr bool kTransformRvvNormalCompatible = HasNormalFields<PointT>::value;
 
 template <typename PointT>
 inline void
@@ -253,12 +280,7 @@ transformPointCloudXYZRVV (const pcl::PointCloud<PointT> &cloud_in,
 {
   const std::size_t n = cloud_out.size ();
   if (n < kTransformRvvMinPoints)
-  {
-    pcl::detail::Transformer<float> tf (transform);
-    for (std::size_t i = 0; i < n; ++i)
-      tf.se3 (cloud_in[i].data, cloud_out[i].data);
-    return;
-  }
+    return transformPointCloudXYZStd (cloud_in, cloud_out, transform);
 
   const auto* src_base = reinterpret_cast<const std::uint8_t*> (cloud_in.data ());
   auto* dst_base = reinterpret_cast<std::uint8_t*> (cloud_out.data ());
@@ -302,15 +324,7 @@ transformPointCloudNormalsRVV (const pcl::PointCloud<PointT> &cloud_in,
 {
   const std::size_t n = cloud_out.size ();
   if (n < kTransformRvvMinPoints)
-  {
-    pcl::detail::Transformer<float> tf (transform);
-    for (std::size_t i = 0; i < n; ++i)
-    {
-      tf.se3 (cloud_in[i].data, cloud_out[i].data);
-      tf.so3 (cloud_in[i].data_n, cloud_out[i].data_n);
-    }
-    return;
-  }
+    return transformPointCloudNormalsStd (cloud_in, cloud_out, transform);
 
   const auto* src_base = reinterpret_cast<const std::uint8_t*> (cloud_in.data ());
   auto* dst_base = reinterpret_cast<std::uint8_t*> (cloud_out.data ());
@@ -368,8 +382,6 @@ transformPointCloudNormalsRVV (const pcl::PointCloud<PointT> &cloud_in,
 
 #endif
 
-} // namespace detail
-
 
 template <typename PointT, typename Scalar> void
 transformPointCloud (const pcl::PointCloud<PointT> &cloud_in,
@@ -396,14 +408,9 @@ transformPointCloud (const pcl::PointCloud<PointT> &cloud_in,
     if constexpr (std::is_same_v<Scalar, float> &&
                   pcl::rvv_load::kRVVXYZPointCompatible<PointT> &&
                   pcl::rvv_store::kRVVXYZPointCompatible<PointT>)
-    {
-      pcl::detail::transformPointCloudXYZRVV (cloud_in, cloud_out, transform);
-      return;
-    }
+      return pcl::transformPointCloudXYZRVV (cloud_in, cloud_out, transform);
 #endif
-    pcl::detail::Transformer<Scalar> tf (transform);
-    for (std::size_t i = 0; i < cloud_out.size (); ++i)
-      tf.se3 (cloud_in[i].data, cloud_out[i].data);
+    return pcl::transformPointCloudXYZStd (cloud_in, cloud_out, transform);
   }
   else
   {
@@ -470,9 +477,9 @@ transformPointCloud (const pcl::PointCloud<PointT> &cloud_in,
 
 
 inline void
-transformPointCloud(const pcl::PointCloud<pcl::PointXY> &cloud_in, 
-                    pcl::PointCloud<pcl::PointXY> &cloud_out, 
-                    const Eigen::Affine2f &transform, 
+transformPointCloud(const pcl::PointCloud<pcl::PointXY> &cloud_in,
+                    pcl::PointCloud<pcl::PointXY> &cloud_out,
+                    const Eigen::Affine2f &transform,
                     bool copy_all_fields)
   {
     if (&cloud_in != &cloud_out)
@@ -490,7 +497,7 @@ transformPointCloud(const pcl::PointCloud<pcl::PointXY> &cloud_in,
     if(cloud_in.is_dense)
     {
       for (std::size_t i = 0; i < cloud_out.size (); ++i)
-      { 
+      {
         cloud_out[i].getVector2fMap () = transform * cloud_in[i].getVector2fMap();
       }
     }
@@ -535,18 +542,10 @@ transformPointCloudWithNormals (const pcl::PointCloud<PointT> &cloud_in,
     if constexpr (std::is_same_v<Scalar, float> &&
                   pcl::rvv_load::kRVVXYZPointCompatible<PointT> &&
                   pcl::rvv_store::kRVVXYZPointCompatible<PointT> &&
-                  pcl::detail::kTransformRvvNormalCompatible<PointT>)
-    {
-      pcl::detail::transformPointCloudNormalsRVV (cloud_in, cloud_out, transform);
-      return;
-    }
+                  pcl::kTransformRvvNormalCompatible<PointT>)
+      return pcl::transformPointCloudNormalsRVV (cloud_in, cloud_out, transform);
 #endif
-    pcl::detail::Transformer<Scalar> tf (transform);
-    for (std::size_t i = 0; i < cloud_out.size (); ++i)
-    {
-      tf.se3 (cloud_in[i].data, cloud_out[i].data);
-      tf.so3 (cloud_in[i].data_n, cloud_out[i].data_n);
-    }
+    return pcl::transformPointCloudNormalsStd (cloud_in, cloud_out, transform);
   }
   // Dataset might contain NaNs and Infs, so check for them first.
   else
