@@ -1,0 +1,83 @@
+❯ make run_bench_compare
+[BOARD] Benchmark Std -> /root/pcl-test/filters/convolution/output/run_bench_std.log
+==============================================================================================================
+ PCL filters/convolution Benchmark (Convolution<PointXYZI, PointXYZI> dense boundary policies)
+Dataset: organized dense PointXYZI convolution; ignore baseline plus duplicate/mirror rows/cols cases
+Iterations: 20
+ Args: ITERS [full] (omit for QEMU smoke; pass `20 full` for board dataset)
+ Build: Std (__RVV10__ disabled)
+==============================================================================================================
+640x240-k7-rows                                     : 32.9047 ms/iter
+  Direction: rows; Border Policy: ignore; Image Size: 640 x 240; Kernel Width: 7; Total Time: 658.0941 ms; Checksum: 13.206316
+640x240-k7-cols                                     : 57.4873 ms/iter
+  Direction: cols; Border Policy: ignore; Image Size: 640 x 240; Kernel Width: 7; Total Time: 1149.7451 ms; Checksum: 13.010134
+1280x480-k15-rows                                   : 230.0258 ms/iter
+  Direction: rows; Border Policy: ignore; Image Size: 1280 x 480; Kernel Width: 15; Total Time: 4600.5169 ms; Checksum: 50.539406
+640x240-k7-rows-duplicate                           : 32.5289 ms/iter
+  Direction: rows; Border Policy: duplicate; Image Size: 640 x 240; Kernel Width: 7; Total Time: 650.5776 ms; Checksum: 13.331026
+640x240-k7-cols-duplicate                           : 57.4468 ms/iter
+  Direction: cols; Border Policy: duplicate; Image Size: 640 x 240; Kernel Width: 7; Total Time: 1148.9363 ms; Checksum: 13.331274
+640x240-k7-rows-mirror                              : 32.5159 ms/iter
+  Direction: rows; Border Policy: mirror; Image Size: 640 x 240; Kernel Width: 7; Total Time: 650.3170 ms; Checksum: 13.310587
+640x240-k7-cols-mirror                              : 57.6554 ms/iter
+  Direction: cols; Border Policy: mirror; Image Size: 640 x 240; Kernel Width: 7; Total Time: 1153.1082 ms; Checksum: 13.273028
+==============================================================================================================
+[BOARD] Benchmark RVV -> /root/pcl-test/filters/convolution/output/run_bench_rvv.log
+==============================================================================================================
+ PCL filters/convolution Benchmark (Convolution<PointXYZI, PointXYZI> dense boundary policies)
+Dataset: organized dense PointXYZI convolution; ignore baseline plus duplicate/mirror rows/cols cases
+Iterations: 20
+ Args: ITERS [full] (omit for QEMU smoke; pass `20 full` for board dataset)
+ Build: RVV (__RVV10__ enabled)
+==============================================================================================================
+640x240-k7-rows                                     : 11.0425 ms/iter
+  Direction: rows; Border Policy: ignore; Image Size: 640 x 240; Kernel Width: 7; Total Time: 220.8499 ms; Checksum: 13.206316
+640x240-k7-cols                                     : 15.9706 ms/iter
+  Direction: cols; Border Policy: ignore; Image Size: 640 x 240; Kernel Width: 7; Total Time: 319.4110 ms; Checksum: 13.010134
+1280x480-k15-rows                                   : 64.8247 ms/iter
+  Direction: rows; Border Policy: ignore; Image Size: 1280 x 480; Kernel Width: 15; Total Time: 1296.4932 ms; Checksum: 50.539406
+640x240-k7-rows-duplicate                           : 11.3815 ms/iter
+  Direction: rows; Border Policy: duplicate; Image Size: 640 x 240; Kernel Width: 7; Total Time: 227.6310 ms; Checksum: 13.331026
+640x240-k7-cols-duplicate                           : 14.9296 ms/iter
+  Direction: cols; Border Policy: duplicate; Image Size: 640 x 240; Kernel Width: 7; Total Time: 298.5911 ms; Checksum: 13.331274
+640x240-k7-rows-mirror                              : 11.4035 ms/iter
+  Direction: rows; Border Policy: mirror; Image Size: 640 x 240; Kernel Width: 7; Total Time: 228.0693 ms; Checksum: 13.310587
+640x240-k7-cols-mirror                              : 15.0609 ms/iter
+  Direction: cols; Border Policy: mirror; Image Size: 640 x 240; Kernel Width: 7; Total Time: 301.2175 ms; Checksum: 13.273028
+==============================================================================================================
+=======================================================================================
+ PCL filters/convolution Benchmark (Convolution<PointXYZI, PointXYZI> dense boundary policies) (Std vs RVV)
+=======================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : organized dense PointXYZI convolution; ignore baseline plus duplicate/mirror rows/cols cases
+  Iterations: 20 （每行 Total = Avg × 20）
+  Std log   : /root/pcl-test/filters/convolution/output/run_bench_std.log
+  RVV log   : /root/pcl-test/filters/convolution/output/run_bench_rvv.log
+
+---------------------------------------------------------------------------------------
+Benchmark Item             | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+---------------------------|--------|----------------|----------------|----------------
+640x240-k7-rows            | Std    |     32.9047 ms |    658.0940 ms |    [   1.00x ]
+                           | RVV    |     11.0425 ms |    220.8500 ms |    [   2.98x ]
+---------------------------|--------|----------------|----------------|----------------
+640x240-k7-cols            | Std    |     57.4873 ms |   1149.7460 ms |    [   1.00x ]
+                           | RVV    |     15.9706 ms |    319.4120 ms |    [   3.60x ]
+---------------------------|--------|----------------|----------------|----------------
+1280x480-k15-rows          | Std    |    230.0258 ms |   4600.5160 ms |    [   1.00x ]
+                           | RVV    |     64.8247 ms |   1296.4940 ms |    [   3.55x ]
+---------------------------|--------|----------------|----------------|----------------
+640x240-k7-rows-duplicate  | Std    |     32.5289 ms |    650.5780 ms |    [   1.00x ]
+                           | RVV    |     11.3815 ms |    227.6300 ms |    [   2.86x ]
+---------------------------|--------|----------------|----------------|----------------
+640x240-k7-cols-duplicate  | Std    |     57.4468 ms |   1148.9360 ms |    [   1.00x ]
+                           | RVV    |     14.9296 ms |    298.5920 ms |    [   3.85x ]
+---------------------------|--------|----------------|----------------|----------------
+640x240-k7-rows-mirror     | Std    |     32.5159 ms |    650.3180 ms |    [   1.00x ]
+                           | RVV    |     11.4035 ms |    228.0700 ms |    [   2.85x ]
+---------------------------|--------|----------------|----------------|----------------
+640x240-k7-cols-mirror     | Std    |     57.6554 ms |   1153.1080 ms |    [   1.00x ]
+                           | RVV    |     15.0609 ms |    301.2180 ms |    [   3.83x ]
+---------------------------|--------|----------------|----------------|----------------
+=======================================================================================

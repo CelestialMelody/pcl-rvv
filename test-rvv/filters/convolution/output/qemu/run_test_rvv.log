@@ -1,0 +1,25 @@
+Build: RVV (__RVV10__ enabled)
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from ConvolutionPointXYZI
+[ RUN      ] ConvolutionPointXYZI.DenseRowsIgnoreBoundary
+[       OK ] ConvolutionPointXYZI.DenseRowsIgnoreBoundary (14 ms)
+[ RUN      ] ConvolutionPointXYZI.DenseColsIgnoreBoundary
+[       OK ] ConvolutionPointXYZI.DenseColsIgnoreBoundary (17 ms)
+[ RUN      ] ConvolutionPointXYZI.DenseRowsDuplicateBoundary
+[       OK ] ConvolutionPointXYZI.DenseRowsDuplicateBoundary (23 ms)
+[ RUN      ] ConvolutionPointXYZI.DenseRowsMirrorBoundary
+[       OK ] ConvolutionPointXYZI.DenseRowsMirrorBoundary (23 ms)
+[ RUN      ] ConvolutionPointXYZI.DenseColsDuplicateBoundary
+[       OK ] ConvolutionPointXYZI.DenseColsDuplicateBoundary (17 ms)
+[ RUN      ] ConvolutionPointXYZI.DenseColsMirrorBoundary
+[       OK ] ConvolutionPointXYZI.DenseColsMirrorBoundary (16 ms)
+[ RUN      ] ConvolutionPointXYZI.SmallRowsFallbackKeepsBorders
+[       OK ] ConvolutionPointXYZI.SmallRowsFallbackKeepsBorders (0 ms)
+[ RUN      ] ConvolutionPointXYZI.NonDenseRowsFallbackRunsScalarSemantics
+[       OK ] ConvolutionPointXYZI.NonDenseRowsFallbackRunsScalarSemantics (1 ms)
+[----------] 8 tests from ConvolutionPointXYZI (116 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test suite ran. (119 ms total)
+[  PASSED  ] 8 tests.
