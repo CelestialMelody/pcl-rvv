@@ -31,108 +31,131 @@
 
 ### 1.2.1 高优先级，首批进入函数级筛选（2）
 
-| file_path | 说明 |
-| --- | --- |
-| `filters/include/pcl/filters/impl/voxel_grid.hpp` | 常用下采样入口；优先评估 `getMinMax3D` dense、float、非 indexed 路径，以及 `applyFilter` 前置扫描是否值得局部 RVV |
-| `filters/include/pcl/filters/impl/convolution.hpp` | organized 行列卷积；优先评估 dense 行方向卷积，暂缓 non-dense、RGB packed 和列方向 stride 路径 |
+| file_path                                            | 说明                                                                                                                  |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `filters/include/pcl/filters/impl/voxel_grid.hpp`  | 常用下采样入口；优先评估 `getMinMax3D` dense、float、非 indexed 路径，以及 `applyFilter` 前置扫描是否值得局部 RVV |
+| `filters/include/pcl/filters/impl/convolution.hpp` | organized 行列卷积；优先评估 dense 行方向卷积，暂缓 non-dense、RGB packed 和列方向 stride 路径                        |
 
 ### 1.2.2 中高优先级，首批进入函数级筛选（2）
 
-| file_path | 说明 |
-| --- | --- |
-| `filters/include/pcl/filters/impl/filter.hpp` | 通用 NaN / normal 清理入口；适合评估标准字段 non-dense 线性扫描 |
+| file_path                                               | 说明                                                                    |
+| ------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `filters/include/pcl/filters/impl/filter.hpp`         | 通用 NaN / normal 清理入口；适合评估标准字段 non-dense 线性扫描         |
 | `filters/include/pcl/filters/impl/filter_indices.hpp` | indices-only NaN 清理入口；语义清晰，适合作为 filters 中低风险 RVV 样本 |
 
 ### 1.2.3 中优先级，第二批靠前（5）
 
-| file_path | 说明 |
-| --- | --- |
-| `filters/include/pcl/filters/impl/passthrough.hpp` | 常用字段区间过滤；需先评估 mask 压缩写、removed_indices 和 negative 语义 |
-| `filters/include/pcl/filters/impl/crop_box.hpp` | 空间区间裁剪；identity transform 路径较规整，带变换路径后置 |
+| file_path                                                      | 说明                                                                     |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `filters/include/pcl/filters/impl/passthrough.hpp`           | 常用字段区间过滤；需先评估 mask 压缩写、removed_indices 和 negative 语义 |
+| `filters/include/pcl/filters/impl/crop_box.hpp`              | 空间区间裁剪；identity transform 路径较规整，带变换路径后置              |
 | `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp` | 前置扫描有潜在空间，但 covariance、eigen 和 searchable leaf 状态风险较高 |
-| `filters/include/pcl/filters/impl/fast_bilateral.hpp` | organized 图像式滤波，循环规模大；buffer 和 range 维度复杂，后续专项处理 |
-| `filters/include/pcl/filters/impl/fast_bilateral_omp.hpp` | OMP 版本 fast bilateral；需单独评估 RVV 与线程并行边界 |
+| `filters/include/pcl/filters/impl/fast_bilateral.hpp`        | organized 图像式滤波，循环规模大；buffer 和 range 维度复杂，后续专项处理 |
+| `filters/include/pcl/filters/impl/fast_bilateral_omp.hpp`    | OMP 版本 fast bilateral；需单独评估 RVV 与线程并行边界                   |
 
 ### 1.2.4 后续保留的直接实施候选（26）
 
 这些文件不是被删除，而是因为测试成本、访存形态、算法不规则性、外部依赖或收益不确定，排在首批和第二批靠前文件之后。
 
-| file_path | 二轮去向 | 主要原因 |
-| --- | --- | --- |
-| `filters/include/pcl/filters/impl/approximate_voxel_grid.hpp` | 后续保留 | voxel 类路径，需先完成标准 `voxel_grid` 后再比较数据流与收益 |
-| `filters/include/pcl/filters/impl/bilateral.hpp` | 后续保留 | 滤波计算存在空间，但邻域/权重组织比 NaN 清理和 min/max 规约复杂 |
-| `filters/include/pcl/filters/impl/box_clipper3D.hpp` | 后续保留 | 几何裁剪，适合后续与 `crop_box` 一起评估 |
-| `filters/include/pcl/filters/impl/conditional_removal.hpp` | 后续保留 | 条件组合和字段比较多，mask 逻辑复杂，先不作为首批样本 |
-| `filters/include/pcl/filters/impl/convolution_3d.hpp` | 后续保留 | 三维邻域/搜索关系更复杂，先完成二维/organized convolution 样本 |
-| `filters/include/pcl/filters/impl/covariance_sampling.hpp` | 后续保留 | 统计采样与矩阵相关路径，数值语义和测试成本高于首批 |
-| `filters/include/pcl/filters/impl/crop_hull.hpp` | 后续保留 / 暂缓靠后 | 多边形/多面体判定控制流不规则，SIMD 适配度较弱 |
-| `filters/include/pcl/filters/impl/extract_indices.hpp` | 后续保留 | 以索引拷贝/提取为主，可能受内存带宽和 copy 行为主导 |
-| `filters/include/pcl/filters/impl/farthest_point_sampling.hpp` | 后续保留 | 采样状态依赖较强，不适合作为 filters 首批 RVV 样本 |
-| `filters/include/pcl/filters/impl/frustum_culling.hpp` | 后续保留 | 几何判定较多，需单独拆分平面测试和输出压缩 |
-| `filters/include/pcl/filters/impl/grid_minimum.hpp` | 后续保留 | 网格最小值路径可评估，但热点和上游测试优先级低于首批 |
-| `filters/include/pcl/filters/impl/local_maximum.hpp` | 后续保留 | 局部邻域比较，访存不如线性扫描规整 |
-| `filters/include/pcl/filters/impl/median_filter.hpp` | 后续保留 | median/排序类局部操作不适合直接作为首批 RVV |
-| `filters/include/pcl/filters/impl/model_outlier_removal.hpp` | 后续保留 | 模型距离判定可能可向量化，但依赖模型类型，需单独评估 |
-| `filters/include/pcl/filters/impl/morphological_filter.hpp` | 后续保留 | 形态学邻域操作，需独立处理邻域访问和边界 |
-| `filters/include/pcl/filters/impl/normal_space.hpp` | 后续保留 | normal 空间分桶和索引状态较多，先不做首批 |
-| `filters/include/pcl/filters/impl/plane_clipper3D.hpp` | 后续保留 | 平面裁剪可向量化，但属于几何裁剪专项，排在 `crop_box` 后 |
-| `filters/include/pcl/filters/impl/project_inliers.hpp` | 后续保留 / 暂缓靠后 | 当前文件主要分派到 sample_consensus 模型，实际热点不在 filters 文件本身 |
-| `filters/include/pcl/filters/impl/pyramid.hpp` | 后续保留 | pyramid 数据流可能有收益，但需与 `filters/src/pyramid.cpp` 共同梳理 |
-| `filters/include/pcl/filters/impl/radius_outlier_removal.hpp` | 后续保留 | 依赖邻域搜索，RVV 覆盖点通常不在搜索主成本上 |
-| `filters/include/pcl/filters/impl/sampling_surface_normal.hpp` | 后续保留 | normal / surface sampling 逻辑复杂，测试和收益边界需后续拆分 |
-| `filters/include/pcl/filters/impl/shadowpoints.hpp` | 后续保留 | 几何关系判定为主，需单独评估 |
-| `filters/include/pcl/filters/impl/statistical_outlier_removal.hpp` | 后续保留 | 依赖邻域距离统计和搜索，RVV 覆盖面需进一步证明 |
-| `filters/include/pcl/filters/impl/uniform_sampling.hpp` | 后续保留 | 采样 / voxel 类路径，排在标准 voxel grid 之后 |
-| `filters/include/pcl/filters/impl/voxel_grid_occlusion_estimation.hpp` | 后续保留 | occlusion estimation 几何状态较多，先不作为首批 |
-| `filters/src/voxel_grid_label.cpp` | 后续保留 / 暂缓靠后 | 固定 `PointXYZRGBL`，含 sort、label 直方图和 `std::map`，只能局部 RVV |
+| file_path                                                                | 二轮去向            | 主要原因                                                                  |
+| ------------------------------------------------------------------------ | ------------------- | ------------------------------------------------------------------------- |
+| `filters/include/pcl/filters/impl/approximate_voxel_grid.hpp`          | 后续保留            | voxel 类路径，需先完成标准 `voxel_grid` 后再比较数据流与收益            |
+| `filters/include/pcl/filters/impl/bilateral.hpp`                       | 后续保留            | 滤波计算存在空间，但邻域/权重组织比 NaN 清理和 min/max 规约复杂           |
+| `filters/include/pcl/filters/impl/box_clipper3D.hpp`                   | 后续保留            | 几何裁剪，适合后续与 `crop_box` 一起评估                                |
+| `filters/include/pcl/filters/impl/conditional_removal.hpp`             | 后续保留            | 条件组合和字段比较多，mask 逻辑复杂，先不作为首批样本                     |
+| `filters/include/pcl/filters/impl/convolution_3d.hpp`                  | 后续保留            | 三维邻域/搜索关系更复杂，先完成二维/organized convolution 样本            |
+| `filters/include/pcl/filters/impl/covariance_sampling.hpp`             | 后续保留            | 统计采样与矩阵相关路径，数值语义和测试成本高于首批                        |
+| `filters/include/pcl/filters/impl/crop_hull.hpp`                       | 后续保留 / 暂缓靠后 | 多边形/多面体判定控制流不规则，SIMD 适配度较弱                            |
+| `filters/include/pcl/filters/impl/extract_indices.hpp`                 | 后续保留            | 以索引拷贝/提取为主，可能受内存带宽和 copy 行为主导                       |
+| `filters/include/pcl/filters/impl/farthest_point_sampling.hpp`         | 后续保留            | 采样状态依赖较强，不适合作为 filters 首批 RVV 样本                        |
+| `filters/include/pcl/filters/impl/frustum_culling.hpp`                 | 后续保留            | 几何判定较多，需单独拆分平面测试和输出压缩                                |
+| `filters/include/pcl/filters/impl/grid_minimum.hpp`                    | 后续保留            | 网格最小值路径可评估，但热点和上游测试优先级低于首批                      |
+| `filters/include/pcl/filters/impl/local_maximum.hpp`                   | 后续保留            | 局部邻域比较，访存不如线性扫描规整                                        |
+| `filters/include/pcl/filters/impl/median_filter.hpp`                   | 后续保留            | median/排序类局部操作不适合直接作为首批 RVV                               |
+| `filters/include/pcl/filters/impl/model_outlier_removal.hpp`           | 后续保留            | 模型距离判定可能可向量化，但依赖模型类型，需单独评估                      |
+| `filters/include/pcl/filters/impl/morphological_filter.hpp`            | 后续保留            | 形态学邻域操作，需独立处理邻域访问和边界                                  |
+| `filters/include/pcl/filters/impl/normal_space.hpp`                    | 后续保留            | normal 空间分桶和索引状态较多，先不做首批                                 |
+| `filters/include/pcl/filters/impl/plane_clipper3D.hpp`                 | 后续保留            | 平面裁剪可向量化，但属于几何裁剪专项，排在 `crop_box` 后                |
+| `filters/include/pcl/filters/impl/project_inliers.hpp`                 | 后续保留 / 暂缓靠后 | 当前文件主要分派到 sample_consensus 模型，实际热点不在 filters 文件本身   |
+| `filters/include/pcl/filters/impl/pyramid.hpp`                         | 后续保留            | pyramid 数据流可能有收益，但需与 `filters/src/pyramid.cpp` 共同梳理     |
+| `filters/include/pcl/filters/impl/radius_outlier_removal.hpp`          | 后续保留            | 依赖邻域搜索，RVV 覆盖点通常不在搜索主成本上                              |
+| `filters/include/pcl/filters/impl/sampling_surface_normal.hpp`         | 后续保留            | normal / surface sampling 逻辑复杂，测试和收益边界需后续拆分              |
+| `filters/include/pcl/filters/impl/shadowpoints.hpp`                    | 后续保留            | 几何关系判定为主，需单独评估                                              |
+| `filters/include/pcl/filters/impl/statistical_outlier_removal.hpp`     | 后续保留            | 依赖邻域距离统计和搜索，RVV 覆盖面需进一步证明                            |
+| `filters/include/pcl/filters/impl/uniform_sampling.hpp`                | 后续保留            | 采样 / voxel 类路径，排在标准 voxel grid 之后                             |
+| `filters/include/pcl/filters/impl/voxel_grid_occlusion_estimation.hpp` | 后续保留            | occlusion estimation 几何状态较多，先不作为首批                           |
+| `filters/src/voxel_grid_label.cpp`                                     | 后续保留 / 暂缓靠后 | 固定 `PointXYZRGBL`，含 sort、label 直方图和 `std::map`，只能局部 RVV |
 
 ### 1.2.5 合并到主题中、不单独作为 RVV 修改点的候选（41）
 
 这些文件来自第一轮 `76` 个候选，不是简单删除；二轮将其合并到对应实现主题，或判定为伴随文件。若后续修改对应主题，需要在测试和文档中同时考虑这些公开入口或实例化文件。
 
-| file_path | 二轮去向 | 理由 |
-| --- | --- | --- |
-| `filters/include/pcl/filters/approximate_voxel_grid.h` | 合并到 `impl/approximate_voxel_grid.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/bilateral.h` | 合并到 `impl/bilateral.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/box_clipper3D.h` | 合并到 `impl/box_clipper3D.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/conditional_removal.h` | 合并到 `impl/conditional_removal.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/convolution.h` | 合并到 `impl/convolution.hpp` | 公开声明头，首批主题已覆盖 impl |
-| `filters/include/pcl/filters/convolution_3d.h` | 合并到 `impl/convolution_3d.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/covariance_sampling.h` | 合并到 `impl/covariance_sampling.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/crop_box.h` | 合并到 `impl/crop_box.hpp` | 公开声明头，第二批靠前主题已覆盖 impl |
-| `filters/include/pcl/filters/crop_hull.h` | 合并到 `impl/crop_hull.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/extract_indices.h` | 合并到 `impl/extract_indices.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/fast_bilateral.h` | 合并到 `impl/fast_bilateral.hpp` | 公开声明头，第二批靠前主题已覆盖 impl |
-| `filters/include/pcl/filters/fast_bilateral_omp.h` | 合并到 `impl/fast_bilateral_omp.hpp` | 公开声明头，第二批靠前主题已覆盖 impl |
-| `filters/include/pcl/filters/filter.h` | 合并到 `impl/filter.hpp` | 公开声明头，首批主题已覆盖 impl |
-| `filters/include/pcl/filters/filter_indices.h` | 合并到 `impl/filter_indices.hpp` | 公开声明头，首批主题已覆盖 impl |
-| `filters/include/pcl/filters/frustum_culling.h` | 合并到 `impl/frustum_culling.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/grid_minimum.h` | 合并到 `impl/grid_minimum.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/median_filter.h` | 合并到 `impl/median_filter.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/model_outlier_removal.h` | 合并到 `impl/model_outlier_removal.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/normal_refinement.h` | 合并到 `impl/normal_refinement.hpp` | 公开声明头；impl 在第一轮为 low，二轮不单独提前 |
-| `filters/include/pcl/filters/normal_space.h` | 合并到 `impl/normal_space.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/passthrough.h` | 合并到 `impl/passthrough.hpp` | 公开声明头，第二批靠前主题已覆盖 impl |
-| `filters/include/pcl/filters/plane_clipper3D.h` | 合并到 `impl/plane_clipper3D.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/project_inliers.h` | 合并到 `impl/project_inliers.hpp` | 公开声明头，真实循环/分派在 impl |
-| `filters/include/pcl/filters/pyramid.h` | 合并到 `impl/pyramid.hpp` 和 `src/pyramid.cpp` 主题 | 公开声明头，需与 impl/src 共同看 |
-| `filters/include/pcl/filters/radius_outlier_removal.h` | 合并到 `impl/radius_outlier_removal.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/sampling_surface_normal.h` | 合并到 `impl/sampling_surface_normal.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/statistical_outlier_removal.h` | 合并到 `impl/statistical_outlier_removal.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/uniform_sampling.h` | 合并到 `impl/uniform_sampling.hpp` | 公开声明头，真实循环在 impl |
-| `filters/include/pcl/filters/voxel_grid.h` | 合并到 `impl/voxel_grid.hpp` | 公开声明头，首批主题已覆盖 impl |
-| `filters/include/pcl/filters/voxel_grid_covariance.h` | 合并到 `impl/voxel_grid_covariance.hpp` | 公开声明头，第二批靠前主题已覆盖 impl |
-| `filters/include/pcl/filters/voxel_grid_occlusion_estimation.h` | 合并到 `impl/voxel_grid_occlusion_estimation.hpp` | 公开声明头，真实循环在 impl |
-| `filters/src/convolution.cpp` | 合并到 `convolution` 主题 | 主要是特化/显式实例化伴随文件，真实模板主体在 impl |
-| `filters/src/crop_box.cpp` | 合并到 `crop_box` 主题 | 伴随实例化 / 非主实现文件，优先看 impl |
-| `filters/src/extract_indices.cpp` | 合并到 `extract_indices` 主题 | 伴随实例化 / 非主实现文件，优先看 impl |
-| `filters/src/passthrough.cpp` | 合并到 `passthrough` 主题 | 伴随实例化 / 非主实现文件，优先看 impl |
-| `filters/src/project_inliers.cpp` | 合并到 `project_inliers` 主题 | 伴随实例化 / 分派路径，优先看 impl 和 sample_consensus |
-| `filters/src/pyramid.cpp` | 合并到 `pyramid` 主题 | 需要与 `impl/pyramid.hpp` 共同筛选，不单独作为首批 |
-| `filters/src/radius_outlier_removal.cpp` | 合并到 `radius_outlier_removal` 主题 | 伴随实现，核心收益受 search/neighbor 影响 |
-| `filters/src/random_sample.cpp` | 合并到 random sampling 主题 / 后置 | 随机采样状态主导，暂不单独作为 RVV 首批 |
-| `filters/src/statistical_outlier_removal.cpp` | 合并到 statistical outlier 主题 | 伴随实现，核心收益受 search/neighbor 影响 |
-| `filters/src/voxel_grid.cpp` | 合并到 `voxel_grid` 主题 | PCLPointCloud2 / 实例化伴随文件，需随 `impl/voxel_grid.hpp` 一起验证 |
+| file_path                                                         | 二轮去向                                                | 理由                                                                   |
+| ----------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `filters/include/pcl/filters/approximate_voxel_grid.h`          | 合并到 `impl/approximate_voxel_grid.hpp`              | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/bilateral.h`                       | 合并到 `impl/bilateral.hpp`                           | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/box_clipper3D.h`                   | 合并到 `impl/box_clipper3D.hpp`                       | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/conditional_removal.h`             | 合并到 `impl/conditional_removal.hpp`                 | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/convolution.h`                     | 合并到 `impl/convolution.hpp`                         | 公开声明头，首批主题已覆盖 impl                                        |
+| `filters/include/pcl/filters/convolution_3d.h`                  | 合并到 `impl/convolution_3d.hpp`                      | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/covariance_sampling.h`             | 合并到 `impl/covariance_sampling.hpp`                 | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/crop_box.h`                        | 合并到 `impl/crop_box.hpp`                            | 公开声明头，第二批靠前主题已覆盖 impl                                  |
+| `filters/include/pcl/filters/crop_hull.h`                       | 合并到 `impl/crop_hull.hpp`                           | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/extract_indices.h`                 | 合并到 `impl/extract_indices.hpp`                     | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/fast_bilateral.h`                  | 合并到 `impl/fast_bilateral.hpp`                      | 公开声明头，第二批靠前主题已覆盖 impl                                  |
+| `filters/include/pcl/filters/fast_bilateral_omp.h`              | 合并到 `impl/fast_bilateral_omp.hpp`                  | 公开声明头，第二批靠前主题已覆盖 impl                                  |
+| `filters/include/pcl/filters/filter.h`                          | 合并到 `impl/filter.hpp`                              | 公开声明头，首批主题已覆盖 impl                                        |
+| `filters/include/pcl/filters/filter_indices.h`                  | 合并到 `impl/filter_indices.hpp`                      | 公开声明头，首批主题已覆盖 impl                                        |
+| `filters/include/pcl/filters/frustum_culling.h`                 | 合并到 `impl/frustum_culling.hpp`                     | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/grid_minimum.h`                    | 合并到 `impl/grid_minimum.hpp`                        | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/median_filter.h`                   | 合并到 `impl/median_filter.hpp`                       | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/model_outlier_removal.h`           | 合并到 `impl/model_outlier_removal.hpp`               | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/normal_refinement.h`               | 合并到 `impl/normal_refinement.hpp`                   | 公开声明头；impl 在第一轮为 low，二轮不单独提前                        |
+| `filters/include/pcl/filters/normal_space.h`                    | 合并到 `impl/normal_space.hpp`                        | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/passthrough.h`                     | 合并到 `impl/passthrough.hpp`                         | 公开声明头，第二批靠前主题已覆盖 impl                                  |
+| `filters/include/pcl/filters/plane_clipper3D.h`                 | 合并到 `impl/plane_clipper3D.hpp`                     | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/project_inliers.h`                 | 合并到 `impl/project_inliers.hpp`                     | 公开声明头，真实循环/分派在 impl                                       |
+| `filters/include/pcl/filters/pyramid.h`                         | 合并到 `impl/pyramid.hpp` 和 `src/pyramid.cpp` 主题 | 公开声明头，需与 impl/src 共同看                                       |
+| `filters/include/pcl/filters/radius_outlier_removal.h`          | 合并到 `impl/radius_outlier_removal.hpp`              | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/sampling_surface_normal.h`         | 合并到 `impl/sampling_surface_normal.hpp`             | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/statistical_outlier_removal.h`     | 合并到 `impl/statistical_outlier_removal.hpp`         | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/uniform_sampling.h`                | 合并到 `impl/uniform_sampling.hpp`                    | 公开声明头，真实循环在 impl                                            |
+| `filters/include/pcl/filters/voxel_grid.h`                      | 合并到 `impl/voxel_grid.hpp`                          | 公开声明头，首批主题已覆盖 impl                                        |
+| `filters/include/pcl/filters/voxel_grid_covariance.h`           | 合并到 `impl/voxel_grid_covariance.hpp`               | 公开声明头，第二批靠前主题已覆盖 impl                                  |
+| `filters/include/pcl/filters/voxel_grid_occlusion_estimation.h` | 合并到 `impl/voxel_grid_occlusion_estimation.hpp`     | 公开声明头，真实循环在 impl                                            |
+| `filters/src/convolution.cpp`                                   | 合并到 `convolution` 主题                             | 主要是特化/显式实例化伴随文件，真实模板主体在 impl                     |
+| `filters/src/crop_box.cpp`                                      | 合并到 `crop_box` 主题                                | 伴随实例化 / 非主实现文件，优先看 impl                                 |
+| `filters/src/extract_indices.cpp`                               | 合并到 `extract_indices` 主题                         | 伴随实例化 / 非主实现文件，优先看 impl                                 |
+| `filters/src/passthrough.cpp`                                   | 合并到 `passthrough` 主题                             | 伴随实例化 / 非主实现文件，优先看 impl                                 |
+| `filters/src/project_inliers.cpp`                               | 合并到 `project_inliers` 主题                         | 伴随实例化 / 分派路径，优先看 impl 和 sample_consensus                 |
+| `filters/src/pyramid.cpp`                                       | 合并到 `pyramid` 主题                                 | 需要与 `impl/pyramid.hpp` 共同筛选，不单独作为首批                   |
+| `filters/src/radius_outlier_removal.cpp`                        | 合并到 `radius_outlier_removal` 主题                  | 伴随实现，核心收益受 search/neighbor 影响                              |
+| `filters/src/random_sample.cpp`                                 | 合并到 random sampling 主题 / 后置                      | 随机采样状态主导，暂不单独作为 RVV 首批                                |
+| `filters/src/statistical_outlier_removal.cpp`                   | 合并到 statistical outlier 主题                         | 伴随实现，核心收益受 search/neighbor 影响                              |
+| `filters/src/voxel_grid.cpp`                                    | 合并到 `voxel_grid` 主题                              | PCLPointCloud2 / 实例化伴随文件，需随 `impl/voxel_grid.hpp` 一起验证 |
+
+## 1.3 filters RVV 主题执行清单
+
+| 执行顺序 | 主题                            | 主实现文件                                                                                               | 函数级评估文档                                                                    | 主题文档                                            | 当前状态                   | 下一步动作                                                                                                                                    |
+| -------- | ------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1        | `voxel_grid`                  | `filters/include/pcl/filters/impl/voxel_grid.hpp`                                                      | `test-rvv/filters/voxel_grid/voxel_grid-evaluation.zh.md`                       | `doc-rvv/filters/voxel_grid-RVV.zh.md`            | 已完成                     | 不再重复实施；仅在回归或板卡日志更新时同步文档                                                                                                |
+| 2        | `convolution`                 | `filters/include/pcl/filters/impl/convolution.hpp`                                                     | `test-rvv/filters/convolution/convolution-evaluation.zh.md`                     | `doc-rvv/filters/convolution-RVV.zh.md`           | 已完成                     | dense organized `PointXYZI` ignore / duplicate / mirror 行列方向 RVV 已完成；列方向旧 `0.36x` 问题已修正，新版板卡 ignore 列约 `3.60x`、duplicate/mirror 列约 `3.85x` / `3.83x`，上游 `test_convolution` std/RVV 对拍通过 |
+| 3        | `filter_indices` / `filter` | `filters/include/pcl/filters/impl/filter_indices.hpp`、`filters/include/pcl/filters/impl/filter.hpp` | `test-rvv/filters/filter_indices/filter_indices-evaluation.zh.md`               | `doc-rvv/filters/filter_indices-RVV.zh.md`        | 评估文档已存在，待检查完善 | 在 `convolution` closeout 后实施；优先 indices-only non-dense `removeNaNFromPointCloud(cloud_in, index)`，再评估点云压缩写和 normals 路径 |
+| 4        | `passthrough`                 | `filters/include/pcl/filters/impl/passthrough.hpp`                                                     | `test-rvv/filters/passthrough/passthrough-evaluation.zh.md`                     | `doc-rvv/filters/passthrough-RVV.zh.md`           | 待函数级筛选               | 在前 3 个主题后建立评估文档；重点评估 float 字段区间 mask、negative、removed_indices 与压缩写顺序                                             |
+| 5        | `crop_box`                    | `filters/include/pcl/filters/impl/crop_box.hpp`                                                        | `test-rvv/filters/crop_box/crop_box-evaluation.zh.md`                           | `doc-rvv/filters/crop_box-RVV.zh.md`              | 待函数级筛选               | 在 `passthrough` 后实施；优先 identity transform + dense xyz 区间裁剪，带 transform 路径后置                                                |
+| 6        | `voxel_grid_covariance`       | `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`                                           | `test-rvv/filters/voxel_grid_covariance/voxel_grid_covariance-evaluation.zh.md` | `doc-rvv/filters/voxel_grid_covariance-RVV.zh.md` | 待函数级筛选               | 只评估前置线性扫描或可局部条带化部分；covariance、eigen、searchable leaf 状态优先保持标量                                                     |
+| 7        | `fast_bilateral`              | `filters/include/pcl/filters/impl/fast_bilateral.hpp`                                                  | `test-rvv/filters/fast_bilateral/fast_bilateral-evaluation.zh.md`               | `doc-rvv/filters/fast_bilateral-RVV.zh.md`        | 待函数级筛选               | organized 图像式滤波专项；先确认 buffer/range 维度和边界，再决定是否实现                                                                      |
+| 8        | `fast_bilateral_omp`          | `filters/include/pcl/filters/impl/fast_bilateral_omp.hpp`                                              | `test-rvv/filters/fast_bilateral_omp/fast_bilateral_omp-evaluation.zh.md`       | `doc-rvv/filters/fast_bilateral_omp-RVV.zh.md`    | 待函数级筛选               | 在非 OMP fast bilateral 后评估；明确 RVV 与线程并行边界                                                                                       |
+
+## 1.4 首批已完成/待完成状态
+
+| 主题                            | 函数级评估 | RVV 实现 | 专项测试 | bench  | QEMU 对拍 | 反汇编 | 板卡闭环 | 主题文档 | 工作日志 |
+| ------------------------------- | ---------- | -------- | -------- | ------ | --------- | ------ | -------- | -------- | -------- |
+| `voxel_grid`                  | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
+| `convolution`                 | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
+| `filter_indices` / `filter` | 待完善     | 未开始   | 未开始   | 未开始 | 未开始    | 未开始 | 未开始   | 未开始   | 待追加   |
+| `passthrough`                 | 未开始     | 未开始   | 未开始   | 未开始 | 未开始    | 未开始 | 未开始   | 未开始   | 待追加   |
+| `crop_box`                    | 未开始     | 未开始   | 未开始   | 未开始 | 未开始    | 未开始 | 未开始   | 未开始   | 待追加   |
 
 ## 2. 原始 `76` 个候选的二轮去向说明
 
@@ -175,44 +198,44 @@
 
 ## 3. 二轮筛选口径
 
-| 维度 | 判断口径 |
-| --- | --- |
-| 数据布局 | 连续 PointCloud、AoS 点字段、PCLPointCloud2 字节步进、organized 图像式布局、indices gather |
-| 热点可能性 | 是否是常用滤波入口、是否已有 benchmark、是否在典型点云管线中反复调用 |
-| RVV 适配度 | 是否有大规模线性扫描、规整 float 字段、可条带化 load/store、可用 mask 表达分支 |
-| 测试可行性 | 是否已有上游单测，是否容易构造 std/RVV 对拍与 bench |
-| 风险 | 是否依赖 sort/map/search/eigen 分解、是否涉及公开模板头、是否改变 NaN/Inf 或字段拷贝语义 |
+| 维度       | 判断口径                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| 数据布局   | 连续 PointCloud、AoS 点字段、PCLPointCloud2 字节步进、organized 图像式布局、indices gather |
+| 热点可能性 | 是否是常用滤波入口、是否已有 benchmark、是否在典型点云管线中反复调用                       |
+| RVV 适配度 | 是否有大规模线性扫描、规整 float 字段、可条带化 load/store、可用 mask 表达分支             |
+| 测试可行性 | 是否已有上游单测，是否容易构造 std/RVV 对拍与 bench                                        |
+| 风险       | 是否依赖 sort/map/search/eigen 分解、是否涉及公开模板头、是否改变 NaN/Inf 或字段拷贝语义   |
 
 ## 3. 相对原始 triage 的增删改列表
 
 ### 3.1 合并处理
 
-| 原始条目 | 二轮结论 | 理由 |
-| --- | --- | --- |
-| `filters/include/pcl/filters/voxel_grid.h` + `filters/include/pcl/filters/impl/voxel_grid.hpp` + `filters/src/voxel_grid.cpp` | 合并为 `voxel_grid` 主题，执行文件以 `impl/voxel_grid.hpp` 为主 | `.h` 是公开声明，`src/voxel_grid.cpp` 主要实例化，真实热点循环在 `impl/voxel_grid.hpp`；实现 RVV 时必须保持公开 API 不变 |
-| `filters/include/pcl/filters/voxel_grid_covariance.h` + `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp` + `filters/src/voxel_grid_covariance.cpp` | 合并为 `voxel_grid_covariance` 主题，暂列后续队列 | `.h` 是声明，`.cpp` 偏实例化；核心在 `impl`，但涉及 covariance、eigen solver、searchable leaf 结构，风险高于普通 voxel grid |
-| `filters/include/pcl/filters/convolution.h` + `filters/include/pcl/filters/impl/convolution.hpp` + `filters/src/convolution.cpp` | 合并为 `convolution` 主题，执行文件以 `impl/convolution.hpp` 为主 | `src/convolution.cpp` 主要是特化/显式实例化补充；批量行列卷积路径在 `impl` |
+| 原始条目                                                                                                                                                             | 二轮结论                                                              | 理由                                                                                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `filters/include/pcl/filters/voxel_grid.h` + `filters/include/pcl/filters/impl/voxel_grid.hpp` + `filters/src/voxel_grid.cpp`                                  | 合并为 `voxel_grid` 主题，执行文件以 `impl/voxel_grid.hpp` 为主   | `.h` 是公开声明，`src/voxel_grid.cpp` 主要实例化，真实热点循环在 `impl/voxel_grid.hpp`；实现 RVV 时必须保持公开 API 不变    |
+| `filters/include/pcl/filters/voxel_grid_covariance.h` + `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp` + `filters/src/voxel_grid_covariance.cpp` | 合并为 `voxel_grid_covariance` 主题，暂列后续队列                   | `.h` 是声明，`.cpp` 偏实例化；核心在 `impl`，但涉及 covariance、eigen solver、searchable leaf 结构，风险高于普通 voxel grid |
+| `filters/include/pcl/filters/convolution.h` + `filters/include/pcl/filters/impl/convolution.hpp` + `filters/src/convolution.cpp`                               | 合并为 `convolution` 主题，执行文件以 `impl/convolution.hpp` 为主 | `src/convolution.cpp` 主要是特化/显式实例化补充；批量行列卷积路径在 `impl`                                                    |
 
 ### 3.2 删除 / 降级出首批执行队列
 
-| 文件 | 原始结论 | 二轮结论 | 理由 |
-| --- | --- | --- | --- |
-| `filters/src/voxel_grid_label.cpp` | high | 暂缓 | 固定 `PointXYZRGBL` 实现、含 sort 和 label 直方图/`std::map`，RVV 只能覆盖部分前置线性扫描；测试入口不如 `VoxelGrid<PointXYZ>` 直接，收益和风险不如首批队列 |
-| `filters/include/pcl/filters/voxel_grid.h` | high | 不单独作为实现文件 | 公开声明头，实际 RVV 修改应落在 `impl/voxel_grid.hpp` 或内部 helper；单独优化该文件没有意义 |
-| `filters/include/pcl/filters/voxel_grid_covariance.h` | high | 不单独作为实现文件 | 公开声明头，实际热点在 `impl/voxel_grid_covariance.hpp` |
-| `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp` | high | 第二批 | 第一遍扫描和 per-leaf 累加有潜在空间，但后半段包含 covariance、inverse covariance、eigen 分解和 searchable leaf 状态，函数级拆分后再决定是否只覆盖前置扫描 |
-| `filters/include/pcl/filters/impl/fast_bilateral.hpp` / `fast_bilateral_omp.hpp` | mid | 后续专项 | organized 图像式滤波有大规模循环，但三维 buffer、range 分层和 OMP 分支较复杂；更适合作为 convolution/voxel_grid 之后的专项 |
-| `filters/include/pcl/filters/impl/crop_hull.hpp` | mid | 暂缓 | 几何多边形/多面体判定，分支和不规则控制流多；SIMD 适配度不如简单线性过滤 |
-| `filters/include/pcl/filters/impl/project_inliers.hpp` | mid | 暂缓 | 当前文件主要分派到 sample_consensus 模型，实际投影热点不在 filters 文件本身 |
+| 文件                                                                                 | 原始结论 | 二轮结论           | 理由                                                                                                                                                              |
+| ------------------------------------------------------------------------------------ | -------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters/src/voxel_grid_label.cpp`                                                 | high     | 暂缓               | 固定 `PointXYZRGBL` 实现、含 sort 和 label 直方图/`std::map`，RVV 只能覆盖部分前置线性扫描；测试入口不如 `VoxelGrid<PointXYZ>` 直接，收益和风险不如首批队列 |
+| `filters/include/pcl/filters/voxel_grid.h`                                         | high     | 不单独作为实现文件 | 公开声明头，实际 RVV 修改应落在 `impl/voxel_grid.hpp` 或内部 helper；单独优化该文件没有意义                                                                     |
+| `filters/include/pcl/filters/voxel_grid_covariance.h`                              | high     | 不单独作为实现文件 | 公开声明头，实际热点在 `impl/voxel_grid_covariance.hpp`                                                                                                         |
+| `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`                       | high     | 第二批             | 第一遍扫描和 per-leaf 累加有潜在空间，但后半段包含 covariance、inverse covariance、eigen 分解和 searchable leaf 状态，函数级拆分后再决定是否只覆盖前置扫描        |
+| `filters/include/pcl/filters/impl/fast_bilateral.hpp` / `fast_bilateral_omp.hpp` | mid      | 后续专项           | organized 图像式滤波有大规模循环，但三维 buffer、range 分层和 OMP 分支较复杂；更适合作为 convolution/voxel_grid 之后的专项                                        |
+| `filters/include/pcl/filters/impl/crop_hull.hpp`                                   | mid      | 暂缓               | 几何多边形/多面体判定，分支和不规则控制流多；SIMD 适配度不如简单线性过滤                                                                                          |
+| `filters/include/pcl/filters/impl/project_inliers.hpp`                             | mid      | 暂缓               | 当前文件主要分派到 sample_consensus 模型，实际投影热点不在 filters 文件本身                                                                                       |
 
 ### 3.3 新增到首批执行队列
 
-| 文件 | 原始结论 | 二轮结论 | 理由 |
-| --- | --- | --- | --- |
-| `filters/include/pcl/filters/impl/filter_indices.hpp` | mid | 第一批 | `removeNaNFromPointCloud` 的 indices-only 路径是线性扫描，语义清晰，可作为 filters 中低风险 RVV 样本；已有上游测试覆盖基础行为 |
-| `filters/include/pcl/filters/impl/filter.hpp` | mid | 第一批 | `removeNaNFromPointCloud` / `removeNaNNormalsFromPointCloud` 是通用前处理入口，循环形态清晰；可先覆盖 `PointXYZ` / normal 标准字段、大规模 non-dense 路径 |
-| `filters/include/pcl/filters/impl/passthrough.hpp` | mid | 第一批候选补充 | 常用过滤入口，按指定 float 字段线性筛选；输出为 indices，适合 mask 压缩方向，但需要评估压缩写和 removed_indices 语义后再实现 |
-| `filters/include/pcl/filters/impl/crop_box.hpp` | mid | 第二批靠前 | 线性点筛选，identity transform 分支可规整化；已有 `test_clipper.cpp`，但变换矩阵分支和 removed_indices 语义需要单独拆分 |
+| 文件                                                    | 原始结论 | 二轮结论       | 理由                                                                                                                                                            |
+| ------------------------------------------------------- | -------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters/include/pcl/filters/impl/filter_indices.hpp` | mid      | 第一批         | `removeNaNFromPointCloud` 的 indices-only 路径是线性扫描，语义清晰，可作为 filters 中低风险 RVV 样本；已有上游测试覆盖基础行为                                |
+| `filters/include/pcl/filters/impl/filter.hpp`         | mid      | 第一批         | `removeNaNFromPointCloud` / `removeNaNNormalsFromPointCloud` 是通用前处理入口，循环形态清晰；可先覆盖 `PointXYZ` / normal 标准字段、大规模 non-dense 路径 |
+| `filters/include/pcl/filters/impl/passthrough.hpp`    | mid      | 第一批候选补充 | 常用过滤入口，按指定 float 字段线性筛选；输出为 indices，适合 mask 压缩方向，但需要评估压缩写和 removed_indices 语义后再实现                                    |
+| `filters/include/pcl/filters/impl/crop_box.hpp`       | mid      | 第二批靠前     | 线性点筛选，identity transform 分支可规整化；已有 `test_clipper.cpp`，但变换矩阵分支和 removed_indices 语义需要单独拆分                                       |
 
 ## 4. 文件级变化理由
 
@@ -272,16 +295,16 @@
 
 ## 5. 新的执行队列与优先级
 
-| 队列 | 优先级 | 主题 / 文件 | 当前动作 | 首轮 RVV 覆盖建议 |
-| --- | --- | --- | --- | --- |
-| 1 | 高 | `voxel_grid`：`filters/include/pcl/filters/impl/voxel_grid.hpp` | 立即做函数级筛选 | `getMinMax3D` dense、float x/y/z、非 indexed；`applyFilter` 仅评估 voxel index 生成，不直接承诺实现 |
-| 2 | 高 | `convolution`：`filters/include/pcl/filters/impl/convolution.hpp` | 立即做函数级筛选 | dense organized 行卷积优先；列卷积和 non-dense 暂缓 |
-| 3 | 中高 | `filter_indices`：`filters/include/pcl/filters/impl/filter.hpp`、`impl/filter_indices.hpp` | 立即做函数级筛选 | `removeNaNFromPointCloud` / `removeNaNNormalsFromPointCloud` 的标准字段非 dense 扫描 |
-| 4 | 中 | `passthrough`：`filters/include/pcl/filters/impl/passthrough.hpp` | 下一轮函数级筛选 | float 字段区间判断 + 顺序压缩输出；先评估 mask 压缩成本 |
-| 5 | 中 | `crop_box`：`filters/include/pcl/filters/impl/crop_box.hpp` | 第二批 | dense identity transform 的 xyz 区间判断 |
-| 6 | 中 | `voxel_grid_covariance`：`filters/include/pcl/filters/impl/voxel_grid_covariance.hpp` | 第二批 | 只评估前置扫描与 voxel index 生成；cov/eigen 保持标量 |
-| 7 | 中 | `fast_bilateral` / `fast_bilateral_omp` | 后续专项 | organized buffer 路径，需单独设计 |
-| 8 | 低 | `project_inliers`、`crop_hull`、`voxel_grid_label` 等 | 暂缓 | 当前文件内 RVV 覆盖面有限或风险高 |
+| 队列 | 优先级 | 主题 / 文件                                                                                      | 当前动作         | 首轮 RVV 覆盖建议                                                                                       |
+| ---- | ------ | ------------------------------------------------------------------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------- |
+| 1    | 高     | `voxel_grid`：`filters/include/pcl/filters/impl/voxel_grid.hpp`                              | 立即做函数级筛选 | `getMinMax3D` dense、float x/y/z、非 indexed；`applyFilter` 仅评估 voxel index 生成，不直接承诺实现 |
+| 2    | 高     | `convolution`：`filters/include/pcl/filters/impl/convolution.hpp`                            | 立即做函数级筛选 | dense organized 行卷积优先；列卷积和 non-dense 暂缓                                                     |
+| 3    | 中高   | `filter_indices`：`filters/include/pcl/filters/impl/filter.hpp`、`impl/filter_indices.hpp` | 立即做函数级筛选 | `removeNaNFromPointCloud` / `removeNaNNormalsFromPointCloud` 的标准字段非 dense 扫描                |
+| 4    | 中     | `passthrough`：`filters/include/pcl/filters/impl/passthrough.hpp`                            | 下一轮函数级筛选 | float 字段区间判断 + 顺序压缩输出；先评估 mask 压缩成本                                                 |
+| 5    | 中     | `crop_box`：`filters/include/pcl/filters/impl/crop_box.hpp`                                  | 第二批           | dense identity transform 的 xyz 区间判断                                                                |
+| 6    | 中     | `voxel_grid_covariance`：`filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`        | 第二批           | 只评估前置扫描与 voxel index 生成；cov/eigen 保持标量                                                   |
+| 7    | 中     | `fast_bilateral` / `fast_bilateral_omp`                                                      | 后续专项         | organized buffer 路径，需单独设计                                                                       |
+| 8    | 低     | `project_inliers`、`crop_hull`、`voxel_grid_label` 等                                      | 暂缓             | 当前文件内 RVV 覆盖面有限或风险高                                                                       |
 
 ## 6. 本轮进入函数级筛选的文件范围
 
