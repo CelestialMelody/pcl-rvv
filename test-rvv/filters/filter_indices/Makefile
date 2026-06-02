@@ -29,6 +29,7 @@ BENCH_COMPARE_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/analyze_bench_compare.log
 TEST_STD_OUTPUT_FILE      ?= $(OUTPUT_DIR_QEMU)/run_test_std.log
 TEST_RVV_OUTPUT_FILE      ?= $(OUTPUT_DIR_QEMU)/run_test_rvv.log
 TEST_OUTPUT_FILE          ?= $(OUTPUT_DIR_QEMU)/run_test.log
+UPSTREAM_TEST_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test.log
 UPSTREAM_TEST_STD_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test_std.log
 UPSTREAM_TEST_RVV_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test_rvv.log
 
@@ -51,6 +52,7 @@ TARGET_UPSTREAM_TEST ?= test_filter_indices_upstream
 TARGET_UPSTREAM_TEST_STD ?= test_filter_indices_upstream_std
 TARGET_UPSTREAM_TEST_RVV ?= test_filter_indices_upstream_rvv
 SRCS_UPSTREAM_TEST  = $(PCL_SOURCE_ROOT)/test/filters/test_filters.cpp
+UPSTREAM_TEST_ARGS ?= $(PCL_SOURCE_ROOT)/test/bun0.pcd $(PCL_SOURCE_ROOT)/test/milk_cartoon_all_small_clorox.pcd
 
 ARCH ?= riscv
 TARGET_BENCH_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH)
@@ -189,11 +191,11 @@ run_test_compare: run_test_std run_test_rvv
 
 run_upstream_test: clean_upstream_test $(TARGET_UPSTREAM_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] Upstream Unit Test on $(ARCH)..."
-	$(RUN_CMD) ./$(TARGET_UPSTREAM_TEST_BIN) 2>&1 | tee $(UPSTREAM_TEST_OUTPUT_FILE)
+	$(RUN_CMD) ./$(TARGET_UPSTREAM_TEST_BIN) $(UPSTREAM_TEST_ARGS) 2>&1 | tee $(UPSTREAM_TEST_OUTPUT_FILE)
 run_upstream_test_std: clean_upstream_test_std | $(OUTPUT_DIR_QEMU)
-	@$(MAKE) -C $(CURDIR) run_upstream_test USE_PCL_RVV10=0 TARGET_UPSTREAM_TEST=$(TARGET_UPSTREAM_TEST_STD) UPSTREAM_TEST_OUTPUT_FILE=$(UPSTREAM_TEST_STD_OUTPUT_FILE)
+	@$(MAKE) -C $(CURDIR) run_upstream_test USE_PCL_RVV10=0 TARGET_UPSTREAM_TEST=$(TARGET_UPSTREAM_TEST_STD) UPSTREAM_TEST_OUTPUT_FILE=$(UPSTREAM_TEST_STD_OUTPUT_FILE) UPSTREAM_TEST_ARGS="$(UPSTREAM_TEST_ARGS)"
 run_upstream_test_rvv: clean_upstream_test_rvv | $(OUTPUT_DIR_QEMU)
-	@$(MAKE) -C $(CURDIR) run_upstream_test USE_PCL_RVV10=1 TARGET_UPSTREAM_TEST=$(TARGET_UPSTREAM_TEST_RVV) UPSTREAM_TEST_OUTPUT_FILE=$(UPSTREAM_TEST_RVV_OUTPUT_FILE)
+	@$(MAKE) -C $(CURDIR) run_upstream_test USE_PCL_RVV10=1 TARGET_UPSTREAM_TEST=$(TARGET_UPSTREAM_TEST_RVV) UPSTREAM_TEST_OUTPUT_FILE=$(UPSTREAM_TEST_RVV_OUTPUT_FILE) UPSTREAM_TEST_ARGS="$(UPSTREAM_TEST_ARGS)"
 run_upstream_test_compare: run_upstream_test_std run_upstream_test_rvv
 run_test_all: run_test_compare run_upstream_test_compare
 

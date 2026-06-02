@@ -29,6 +29,7 @@ BENCH_COMPARE_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/analyze_bench_compare.log
 TEST_STD_OUTPUT_FILE      ?= $(OUTPUT_DIR_QEMU)/run_test_std.log
 TEST_RVV_OUTPUT_FILE      ?= $(OUTPUT_DIR_QEMU)/run_test_rvv.log
 TEST_OUTPUT_FILE          ?= $(OUTPUT_DIR_QEMU)/run_test.log
+UPSTREAM_TEST_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test.log
 UPSTREAM_TEST_STD_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test_std.log
 UPSTREAM_TEST_RVV_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test_rvv.log
 
@@ -52,6 +53,7 @@ TARGET_UPSTREAM_TEST ?= test_filters_upstream
 TARGET_UPSTREAM_TEST_STD ?= test_filters_upstream_std
 TARGET_UPSTREAM_TEST_RVV ?= test_filters_upstream_rvv
 SRCS_UPSTREAM_TEST  = $(PCL_SOURCE_ROOT)/test/filters/test_filters.cpp
+UPSTREAM_TEST_ARGS ?= $(PCL_SOURCE_ROOT)/test/bun0.pcd $(PCL_SOURCE_ROOT)/test/milk_cartoon_all_small_clorox.pcd
 
 ARCH ?= riscv
 TARGET_BENCH_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH)
@@ -78,9 +80,22 @@ RISCV_SYSROOT   := $(shell $(CC) -print-sysroot)
 BOOST_ROOT  = $(RISCV_DEPS)/boost
 EIGEN_ROOT  = $(RISCV_DEPS)/eigen-rvv
 GTEST_ROOT  = $(RISCV_DEPS)/gtest
+FLANN_ROOT  = $(RISCV_DEPS)/flann
+LZ4_ROOT    = $(RISCV_DEPS)/lz4
+HDF5_ROOT   = $(RISCV_DEPS)/hdf5
+ZLIB_ROOT   = $(RISCV_DEPS)/zlib
+LIBPNG_ROOT = $(RISCV_DEPS)/libpng
 
 EIGEN_RVV_FLAGS ?= -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl
-LIB_DIRS_LIST = $(PCL_INSTALL_ROOT)/lib $(BOOST_ROOT)/lib $(GTEST_ROOT)/lib
+LIB_DIRS_LIST = \
+	$(PCL_INSTALL_ROOT)/lib \
+	$(BOOST_ROOT)/lib \
+	$(GTEST_ROOT)/lib \
+	$(FLANN_ROOT)/lib \
+	$(LZ4_ROOT)/lib \
+	$(HDF5_ROOT)/lib \
+	$(ZLIB_ROOT)/lib \
+	$(LIBPNG_ROOT)/lib
 empty :=
 space := $(empty) $(empty)
 LIB_PATH_VAL := $(subst $(space),:,$(LIB_DIRS_LIST))
@@ -110,13 +125,30 @@ INCLUDES = \
 	-I$(PCL_INSTALL_ROOT)/include/pcl-1.15 \
 	-I$(EIGEN_ROOT)/include/eigen3 \
 	-I$(BOOST_ROOT)/include \
-	-I$(GTEST_ROOT)/include
+	-I$(GTEST_ROOT)/include \
+	-I$(FLANN_ROOT)/include \
+	-I$(LZ4_ROOT)/include \
+	-I$(HDF5_ROOT)/include \
+	-I$(ZLIB_ROOT)/include \
+	-I$(LIBPNG_ROOT)/include
 
 EXTRA_CXXFLAGS ?=
 EXTRA_LDFLAGS  ?=
 CXXFLAGS = -std=c++17 -O3 -g $(CXXFLAGS_ARCH) -DPCL_NO_PRECOMPILE $(INCLUDES) $(EXTRA_CXXFLAGS)
 LIBS_BENCH = -lpcl_common -lm
 LIBS_TEST  = -lpcl_common -lgtest -lgtest_main -lpthread -lm
+LIBS_UPSTREAM_TEST = \
+	-lpcl_filters \
+	-lpcl_io \
+	-lpcl_sample_consensus \
+	-lpcl_search \
+	-lpcl_kdtree \
+	-lpcl_octree \
+	-lpcl_common \
+	-lflann_cpp \
+	-lboost_filesystem -lboost_iostreams -lboost_system \
+	-lgtest -lgtest_main -lpthread \
+	-lz -lhdf5 -llz4 -lpng -lm
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -149,7 +181,7 @@ $(TARGET_TEST_BIN): $(SRCS_TEST) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$
 
 $(TARGET_UPSTREAM_TEST_BIN): $(SRCS_UPSTREAM_TEST) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
 	@echo "[BUILD] Compiling Upstream Unit Test ($(ARCH), USE_PCL_RVV10=$(USE_PCL_RVV10))..."
-	$(CXX) $(CXXFLAGS) $(SRCS_UPSTREAM_TEST) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIBS_TEST) -o $(TARGET_UPSTREAM_TEST_BIN)
+	$(CXX) $(CXXFLAGS) $(SRCS_UPSTREAM_TEST) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIBS_UPSTREAM_TEST) -o $(TARGET_UPSTREAM_TEST_BIN)
 
 run_test: clean_test $(TARGET_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] Unit Test on $(ARCH)..."
@@ -163,11 +195,11 @@ run_test_compare: run_test_std run_test_rvv
 
 run_upstream_test: clean_upstream_test $(TARGET_UPSTREAM_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] Upstream Unit Test on $(ARCH)..."
-	$(RUN_CMD) ./$(TARGET_UPSTREAM_TEST_BIN) 2>&1 | tee $(UPSTREAM_TEST_OUTPUT_FILE)
+	$(RUN_CMD) ./$(TARGET_UPSTREAM_TEST_BIN) $(UPSTREAM_TEST_ARGS) 2>&1 | tee $(UPSTREAM_TEST_OUTPUT_FILE)
 run_upstream_test_std: clean_upstream_test_std | $(OUTPUT_DIR_QEMU)
-	@$(MAKE) -C $(CURDIR) run_upstream_test USE_PCL_RVV10=0 TARGET_UPSTREAM_TEST=$(TARGET_UPSTREAM_TEST_STD) UPSTREAM_TEST_OUTPUT_FILE=$(UPSTREAM_TEST_STD_OUTPUT_FILE)
+	@$(MAKE) -C $(CURDIR) run_upstream_test USE_PCL_RVV10=0 TARGET_UPSTREAM_TEST=$(TARGET_UPSTREAM_TEST_STD) UPSTREAM_TEST_OUTPUT_FILE=$(UPSTREAM_TEST_STD_OUTPUT_FILE) UPSTREAM_TEST_ARGS="$(UPSTREAM_TEST_ARGS)"
 run_upstream_test_rvv: clean_upstream_test_rvv | $(OUTPUT_DIR_QEMU)
-	@$(MAKE) -C $(CURDIR) run_upstream_test USE_PCL_RVV10=1 TARGET_UPSTREAM_TEST=$(TARGET_UPSTREAM_TEST_RVV) UPSTREAM_TEST_OUTPUT_FILE=$(UPSTREAM_TEST_RVV_OUTPUT_FILE)
+	@$(MAKE) -C $(CURDIR) run_upstream_test USE_PCL_RVV10=1 TARGET_UPSTREAM_TEST=$(TARGET_UPSTREAM_TEST_RVV) UPSTREAM_TEST_OUTPUT_FILE=$(UPSTREAM_TEST_RVV_OUTPUT_FILE) UPSTREAM_TEST_ARGS="$(UPSTREAM_TEST_ARGS)"
 run_upstream_test_compare: run_upstream_test_std run_upstream_test_rvv
 run_test_all: run_test_compare run_upstream_test_compare
 
