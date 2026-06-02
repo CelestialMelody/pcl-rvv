@@ -141,7 +141,7 @@
 | 1        | `voxel_grid`                  | `filters/include/pcl/filters/impl/voxel_grid.hpp`                                                      | `test-rvv/filters/voxel_grid/voxel_grid-evaluation.zh.md`                       | `doc-rvv/filters/voxel_grid-RVV.zh.md`            | 已完成                     | 不再重复实施；仅在回归或板卡日志更新时同步文档                                                                                                |
 | 2        | `convolution`                 | `filters/include/pcl/filters/impl/convolution.hpp`                                                     | `test-rvv/filters/convolution/convolution-evaluation.zh.md`                     | `doc-rvv/filters/convolution-RVV.zh.md`           | 已完成                     | dense organized `PointXYZI` ignore / duplicate / mirror 行列方向 RVV 已完成；列方向旧 `0.36x` 问题已修正，新版板卡 ignore 列约 `3.60x`、duplicate/mirror 列约 `3.85x` / `3.83x`，上游 `test_convolution` std/RVV 对拍通过 |
 | 3        | `filter_indices` / `filter` | `filters/include/pcl/filters/impl/filter_indices.hpp`、`filters/include/pcl/filters/impl/filter.hpp` | `test-rvv/filters/filter_indices/filter_indices-evaluation.zh.md`               | `doc-rvv/filters/filter_indices-RVV.zh.md`        | 已完成                     | non-dense 标准 `float x/y/z` indices-only 与 cloud-out RVV 已完成；板卡约 `2.35x` / `2.21x` / `1.62x`，normals 已尝试但因退化回退 Std |
-| 4        | `passthrough`                 | `filters/include/pcl/filters/impl/passthrough.hpp`                                                     | `test-rvv/filters/passthrough/passthrough-evaluation.zh.md`                     | `doc-rvv/filters/passthrough-RVV.zh.md`           | 待函数级筛选               | 下一个主题；建立评估文档，重点评估 float 字段区间 mask、negative、removed_indices 与压缩写顺序                                             |
+| 4        | `passthrough`                 | `filters/include/pcl/filters/impl/passthrough.hpp`                                                     | `test-rvv/filters/passthrough/passthrough-evaluation.zh.md`                     | `doc-rvv/filters/passthrough-RVV.zh.md`           | 已完成                     | 已实现 `PointT` identity indices + FLOAT32 字段区间过滤 RVV；`PCLPointCloud2` 与显式 subset indices 暂缓并记录原因                      |
 | 5        | `crop_box`                    | `filters/include/pcl/filters/impl/crop_box.hpp`                                                        | `test-rvv/filters/crop_box/crop_box-evaluation.zh.md`                           | `doc-rvv/filters/crop_box-RVV.zh.md`              | 待函数级筛选               | 在 `passthrough` 后实施；优先 identity transform + dense xyz 区间裁剪，带 transform 路径后置                                                |
 | 6        | `voxel_grid_covariance`       | `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`                                           | `test-rvv/filters/voxel_grid_covariance/voxel_grid_covariance-evaluation.zh.md` | `doc-rvv/filters/voxel_grid_covariance-RVV.zh.md` | 待函数级筛选               | 只评估前置线性扫描或可局部条带化部分；covariance、eigen、searchable leaf 状态优先保持标量                                                     |
 | 7        | `fast_bilateral`              | `filters/include/pcl/filters/impl/fast_bilateral.hpp`                                                  | `test-rvv/filters/fast_bilateral/fast_bilateral-evaluation.zh.md`               | `doc-rvv/filters/fast_bilateral-RVV.zh.md`        | 待函数级筛选               | organized 图像式滤波专项；先确认 buffer/range 维度和边界，再决定是否实现                                                                      |
@@ -154,7 +154,7 @@
 | `voxel_grid`                  | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
 | `convolution`                 | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
 | `filter_indices` / `filter` | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
-| `passthrough`                 | 未开始     | 未开始   | 未开始   | 未开始 | 未开始    | 未开始 | 未开始   | 未开始   | 待追加   |
+| `passthrough`                 | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
 | `crop_box`                    | 未开始     | 未开始   | 未开始   | 未开始 | 未开始    | 未开始 | 未开始   | 未开始   | 待追加   |
 
 ## 2. 原始 `76` 个候选的二轮去向说明
@@ -205,6 +205,8 @@
 | RVV 适配度 | 是否有大规模线性扫描、规整 float 字段、可条带化 load/store、可用 mask 表达分支             |
 | 测试可行性 | 是否已有上游单测，是否容易构造 std/RVV 对拍与 bench                                        |
 | 风险       | 是否依赖 sort/map/search/eigen 分解、是否涉及公开模板头、是否改变 NaN/Inf 或字段拷贝语义   |
+
+上游原始测试不是每个 filters RVV 主题的强制项：若目标函数没有直接对应的上游测试，或上游测试覆盖范围远大于当前函数，可以在函数级评估中说明不强制新增。若上游测试源码或 CMake 已有运行参数要求，应优先复用仓库 `test/` 中已有 PCD / txt / xml 等数据，通过专项 Makefile 的 `UPSTREAM_TEST_ARGS` 指向原路径，不复制测试数据到每个 `test-rvv` 专项目录；若测试需要输出文件或临时目录，Makefile 应提供可覆盖变量并确保目录存在。缺少运行参数、裸 `tee` 日志文件或当前 Makefile 未补齐库路径，不应直接写成环境阻塞。
 
 ## 3. 相对原始 triage 的增删改列表
 
@@ -300,7 +302,7 @@
 | 1    | 高     | `voxel_grid`：`filters/include/pcl/filters/impl/voxel_grid.hpp`                              | 立即做函数级筛选 | `getMinMax3D` dense、float x/y/z、非 indexed；`applyFilter` 仅评估 voxel index 生成，不直接承诺实现 |
 | 2    | 高     | `convolution`：`filters/include/pcl/filters/impl/convolution.hpp`                            | 立即做函数级筛选 | dense organized 行卷积优先；列卷积和 non-dense 暂缓                                                     |
 | 3    | 中高   | `filter_indices`：`filters/include/pcl/filters/impl/filter.hpp`、`impl/filter_indices.hpp` | 已完成 | `removeNaNFromPointCloud` 标准字段 non-dense RVV 已完成；`removeNaNNormalsFromPointCloud` 已评估后回退 Std |
-| 4    | 中     | `passthrough`：`filters/include/pcl/filters/impl/passthrough.hpp`                            | 下一轮函数级筛选 | float 字段区间判断 + 顺序压缩输出；先评估 mask 压缩成本                                                 |
+| 4    | 中     | `passthrough`：`filters/include/pcl/filters/impl/passthrough.hpp`                            | 已完成 | `PointT` identity indices + FLOAT32 字段区间判断 + 顺序压缩输出已实现；显式 subset indices 与 `PCLPointCloud2` 路径暂缓 |
 | 5    | 中     | `crop_box`：`filters/include/pcl/filters/impl/crop_box.hpp`                                  | 第二批           | dense identity transform 的 xyz 区间判断                                                                |
 | 6    | 中     | `voxel_grid_covariance`：`filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`        | 第二批           | 只评估前置扫描与 voxel index 生成；cov/eigen 保持标量                                                   |
 | 7    | 中     | `fast_bilateral` / `fast_bilateral_omp`                                                      | 后续专项         | organized buffer 路径，需单独设计                                                                       |
