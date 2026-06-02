@@ -1,0 +1,23 @@
+Build: RVV (__RVV10__ enabled)
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from FilterIndicesRVV
+[ RUN      ] FilterIndicesRVV.RemoveNaNIndicesOnlyKeepsFiniteXYZInOrder
+[       OK ] FilterIndicesRVV.RemoveNaNIndicesOnlyKeepsFiniteXYZInOrder (0 ms)
+[ RUN      ] FilterIndicesRVV.DenseIndicesOnlyKeepsLegacyIdentityMapping
+[       OK ] FilterIndicesRVV.DenseIndicesOnlyKeepsLegacyIdentityMapping (0 ms)
+[ RUN      ] FilterIndicesRVV.RemoveNaNCloudCompressesPointsAndIndices
+[       OK ] FilterIndicesRVV.RemoveNaNCloudCompressesPointsAndIndices (0 ms)
+[ RUN      ] FilterIndicesRVV.RemoveNaNCloudSupportsInPlace
+[       OK ] FilterIndicesRVV.RemoveNaNCloudSupportsInPlace (0 ms)
+[ RUN      ] FilterIndicesRVV.LargeCloudPathMatchesScalarFormula
+[       OK ] FilterIndicesRVV.LargeCloudPathMatchesScalarFormula (0 ms)
+[ RUN      ] FilterIndicesRVV.RemoveNaNNormalsKeepsNormalFiniteAndDenseFlag
+[       OK ] FilterIndicesRVV.RemoveNaNNormalsKeepsNormalFiniteAndDenseFlag (0 ms)
+[ RUN      ] FilterIndicesRVV.LargeNormalPathMatchesScalarFormula
+[       OK ] FilterIndicesRVV.LargeNormalPathMatchesScalarFormula (0 ms)
+[----------] 7 tests from FilterIndicesRVV (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (0 ms total)
+[  PASSED  ] 7 tests.

@@ -1,0 +1,17 @@
+================================================================================================
+PCL filters/filter_indices removeNaN benchmark
+Build: RVV (__RVV10__ enabled)
+Dataset: synthetic PointXYZ/PointNormal non-dense clouds; cases: 64K and 1M with sparse invalid entries
+Iterations: 30
+------------------------------------------------------------------------------------------------
+removeNaN indices-only sparse xyz 64K                   : 0.8212 ms/iter
+  Total Time: 24.6365 ms, checksum: 3545053165512039295
+removeNaN indices-only sparse xyz 1M                    : 13.9112 ms/iter
+  Total Time: 417.3364 ms, checksum: 6319225810853566160
+removeNaN indices-only dense xyz 1M                     : 11.4960 ms/iter
+  Total Time: 344.8786 ms, checksum: 809534331754972035
+removeNaN cloud-out sparse xyz 1M                       : 22.0811 ms/iter
+  Total Time: 662.4340 ms, checksum: 6319225810851291847
+removeNaNNormals cloud-out sparse normal 1M             : 71.7044 ms/iter
+  Total Time: 2151.1312 ms, checksum: 4416901146150519299
+================================================================================================
