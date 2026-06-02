@@ -46,9 +46,49 @@
 #include <pcl/common/point_tests.h> // for isFinite
 #include <pcl/common/transforms.h> // for transformPoint
 
+#if defined(__RVV10__)
+#include <cstdint>
+#include <limits>
+#include <riscv_vector.h>
+#include <type_traits>
+#include <utility>
+#endif
+
+namespace pcl
+{
+
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kCropBoxIndicesMinPoints = 64;
+
+template <typename T>
+using CropBoxScalar = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename PointT, typename = void>
+struct CropBoxXYZCompatible : std::false_type {};
+
+template <typename PointT>
+struct CropBoxXYZCompatible<
+    PointT,
+    std::void_t<decltype(std::declval<PointT>().x),
+                decltype(std::declval<PointT>().y),
+                decltype(std::declval<PointT>().z)>>
+: std::bool_constant<
+      std::is_standard_layout_v<PointT> &&
+      std::is_same_v<CropBoxScalar<decltype(std::declval<PointT>().x)>, float> &&
+      std::is_same_v<CropBoxScalar<decltype(std::declval<PointT>().y)>, float> &&
+      std::is_same_v<CropBoxScalar<decltype(std::declval<PointT>().z)>, float>> {};
+
+template <typename PointT>
+inline constexpr bool kCropBoxXYZCompatible = CropBoxXYZCompatible<PointT>::value;
+
+#endif
+
+} // namespace pcl
+
 ///////////////////////////////////////////////////////////////////////////////
 template<typename PointT> void
-pcl::CropBox<PointT>::applyFilter (Indices &indices)
+pcl::CropBox<PointT>::applyFilterIndicesStd (Indices &indices)
 {
   indices.resize (input_->size ());
   removed_indices_->resize (input_->size ());
@@ -109,12 +149,104 @@ pcl::CropBox<PointT>::applyFilter (Indices &indices)
     {
       if (negative_ && extract_removed_indices_)
         (*removed_indices_)[removed_indices_count++] = index;
-      else if (!negative_) 
+      else if (!negative_)
         indices[indices_count++] = index;
     }
   }
   indices.resize (indices_count);
   removed_indices_->resize (removed_indices_count);
+}
+
+#if defined(__RVV10__)
+
+template<typename PointT> bool
+pcl::CropBox<PointT>::applyFilterIndicesRVV (Indices &indices)
+{
+  const std::size_t n = indices_->size ();
+  if (!fake_indices_ ||
+      !input_ ||
+      !input_->is_dense ||
+      n < pcl::kCropBoxIndicesMinPoints ||
+      n > static_cast<std::size_t> (std::numeric_limits<int>::max ()) ||
+      rotation_ != Eigen::Vector3f::Zero () ||
+      translation_ != Eigen::Vector3f::Zero () ||
+      !transform_.matrix ().isIdentity ())
+    return false;
+
+  indices.resize (n);
+  if (extract_removed_indices_)
+    removed_indices_->resize (n);
+  else
+    removed_indices_->clear ();
+
+  const auto* base = reinterpret_cast<const std::uint8_t*> (input_->data ());
+  int* out = indices.data ();
+  int* removed = extract_removed_indices_ ? removed_indices_->data () : nullptr;
+  std::size_t kept = 0;
+  std::size_t dropped = 0;
+  std::size_t i = 0;
+
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    const auto* chunk = base + i * sizeof (PointT);
+    const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
+
+    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, x)), stride, vl);
+    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, y)), stride, vl);
+    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, z)), stride, vl);
+
+    // Dense identity CropBox has no scalar finite check.  The RVV path mirrors
+    // the scalar six bound comparisons and uses vcompress to preserve index order.
+    vbool16_t inside = __riscv_vmnot_m_b16 (__riscv_vmflt_vf_f32m2_b16 (vx, min_pt_[0], vl), vl);
+    inside = __riscv_vmand_mm_b16 (inside, __riscv_vmnot_m_b16 (__riscv_vmflt_vf_f32m2_b16 (vy, min_pt_[1], vl), vl), vl);
+    inside = __riscv_vmand_mm_b16 (inside, __riscv_vmnot_m_b16 (__riscv_vmflt_vf_f32m2_b16 (vz, min_pt_[2], vl), vl), vl);
+    inside = __riscv_vmand_mm_b16 (inside, __riscv_vmnot_m_b16 (__riscv_vmfgt_vf_f32m2_b16 (vx, max_pt_[0], vl), vl), vl);
+    inside = __riscv_vmand_mm_b16 (inside, __riscv_vmnot_m_b16 (__riscv_vmfgt_vf_f32m2_b16 (vy, max_pt_[1], vl), vl), vl);
+    inside = __riscv_vmand_mm_b16 (inside, __riscv_vmnot_m_b16 (__riscv_vmfgt_vf_f32m2_b16 (vz, max_pt_[2], vl), vl), vl);
+
+    const vbool16_t keep = negative_ ? __riscv_vmnot_m_b16 (inside, vl) : inside;
+    const vbool16_t removed_mask = negative_ ? inside : __riscv_vmnot_m_b16 (inside, vl);
+
+    const vuint32m2_t local = __riscv_vid_v_u32m2 (vl);
+    const vuint32m2_t source = __riscv_vadd_vx_u32m2 (local, static_cast<std::uint32_t> (i), vl);
+    const vint32m2_t source_i32 = __riscv_vreinterpret_v_u32m2_i32m2 (source);
+
+    const vint32m2_t kept_i32 = __riscv_vcompress_vm_i32m2 (source_i32, keep, vl);
+    const std::size_t keep_count = __riscv_vcpop_m_b16 (keep, vl);
+    __riscv_vse32_v_i32m2 (out + kept, kept_i32, keep_count);
+    kept += keep_count;
+
+    if (extract_removed_indices_)
+    {
+      const vint32m2_t removed_i32 = __riscv_vcompress_vm_i32m2 (source_i32, removed_mask, vl);
+      const std::size_t removed_count = __riscv_vcpop_m_b16 (removed_mask, vl);
+      __riscv_vse32_v_i32m2 (removed + dropped, removed_i32, removed_count);
+      dropped += removed_count;
+    }
+
+    i += vl;
+  }
+
+  indices.resize (kept);
+  removed_indices_->resize (extract_removed_indices_ ? dropped : 0);
+  return true;
+}
+
+#endif
+
+template<typename PointT> void
+pcl::CropBox<PointT>::applyFilter (Indices &indices)
+{
+#if defined(__RVV10__)
+  if constexpr (pcl::kCropBoxXYZCompatible<PointT>)
+  {
+    if (applyFilterIndicesRVV (indices))
+      return;
+  }
+#endif
+
+  applyFilterIndicesStd (indices);
 }
 
 #define PCL_INSTANTIATE_CropBox(T) template class PCL_EXPORTS pcl::CropBox<T>;

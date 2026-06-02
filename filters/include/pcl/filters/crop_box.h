@@ -39,6 +39,9 @@
 
 #pragma once
 
+#if defined(__RVV10__)
+#include <cstddef>
+#endif
 #include <pcl/filters/filter_indices.h>
 
 namespace pcl
@@ -165,6 +168,7 @@ namespace pcl
     protected:
       using PCLBase<PointT>::input_;
       using PCLBase<PointT>::indices_;
+      using PCLBase<PointT>::fake_indices_;
       using Filter<PointT>::filter_name_;
       using FilterIndices<PointT>::negative_;
       using FilterIndices<PointT>::keep_organized_;
@@ -177,6 +181,14 @@ namespace pcl
         */
       void
       applyFilter (Indices &indices) override;
+
+      void
+      applyFilterIndicesStd (Indices &indices);
+
+#if defined(__RVV10__)
+      bool
+      applyFilterIndicesRVV (Indices &indices);
+#endif
     private:
       /** \brief The minimum point of the box. */
       Eigen::Vector4f min_pt_;
