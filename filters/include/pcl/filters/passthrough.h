@@ -39,6 +39,9 @@
 
 #pragma once
 
+#if defined(__RVV10__)
+#include <cstddef>
+#endif
 #include <limits>
 #include <pcl/pcl_macros.h>
 #include <pcl/filters/filter_indices.h>
@@ -159,6 +162,7 @@ namespace pcl
     protected:
       using PCLBase<PointT>::input_;
       using PCLBase<PointT>::indices_;
+      using PCLBase<PointT>::fake_indices_;
       using Filter<PointT>::filter_name_;
       using Filter<PointT>::getClassName;
       using FilterIndices<PointT>::negative_;
@@ -181,6 +185,14 @@ namespace pcl
         */
       void
       applyFilterIndices (Indices &indices);
+
+      void
+      applyFilterIndicesStd (Indices &indices);
+
+#if defined(__RVV10__)
+      bool
+      applyFilterIndicesRVV (Indices &indices, std::size_t field_offset);
+#endif
 
     private:
       /** \brief The name of the field that will be used for filtering. */
