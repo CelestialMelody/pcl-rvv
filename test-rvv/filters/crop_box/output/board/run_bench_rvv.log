@@ -1,0 +1,23 @@
+================================================================================================
+PCL filters/crop_box benchmark
+Build: RVV (__RVV10__ enabled)
+Dataset: synthetic PointXYZ clouds; dense identity CropBox RVV cases and fallback cases
+Iterations: 30
+------------------------------------------------------------------------------------------------
+crop_box indices identity 64K                             : 0.4514 ms/iter
+  Total Time: 13.5409 ms, checksum: 436806403086562635
+crop_box indices identity 1M                              : 7.2891 ms/iter
+  Total Time: 218.6731 ms, checksum: 6395470658558783535
+crop_box indices negative 1M                              : 11.5818 ms/iter
+  Total Time: 347.4553 ms, checksum: 5383944230370452337
+crop_box indices removed 1M                               : 14.9327 ms/iter
+  Total Time: 447.9819 ms, checksum: 1330490903423013726
+crop_box cloud-out identity 1M                            : 8.8406 ms/iter
+  Total Time: 265.2180 ms, checksum: 52328
+crop_box explicit subset fallback 1M                      : 11.8345 ms/iter
+  Total Time: 355.0348 ms, checksum: 10381555933082240775
+crop_box non-dense fallback 1M                            : 40.1955 ms/iter
+  Total Time: 1205.8654 ms, checksum: 205086950085835447
+crop_box translation fallback 1M                          : 23.6056 ms/iter
+  Total Time: 708.1673 ms, checksum: 17812529225773059046
+================================================================================================
