@@ -1,0 +1,21 @@
+Build: Std (__RVV10__ disabled)
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from PassThroughRVV
+[ RUN      ] PassThroughRVV.SmallCloudMatchesScalarFormula
+[       OK ] PassThroughRVV.SmallCloudMatchesScalarFormula (2 ms)
+[ RUN      ] PassThroughRVV.LargePositiveKeepsInclusiveRangeInOrder
+[       OK ] PassThroughRVV.LargePositiveKeepsInclusiveRangeInOrder (1 ms)
+[ RUN      ] PassThroughRVV.LargeNegativeKeepsOutsideRange
+[       OK ] PassThroughRVV.LargeNegativeKeepsOutsideRange (0 ms)
+[ RUN      ] PassThroughRVV.ExplicitIndicesFallbackPreservesSubsetValues
+[       OK ] PassThroughRVV.ExplicitIndicesFallbackPreservesSubsetValues (0 ms)
+[ RUN      ] PassThroughRVV.EmptyFieldOnlyFiltersFiniteXYZ
+[       OK ] PassThroughRVV.EmptyFieldOnlyFiltersFiniteXYZ (0 ms)
+[ RUN      ] PassThroughRVV.CloudOutputUsesFilteredIndices
+[       OK ] PassThroughRVV.CloudOutputUsesFilteredIndices (0 ms)
+[----------] 6 tests from PassThroughRVV (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (10 ms total)
+[  PASSED  ] 6 tests.

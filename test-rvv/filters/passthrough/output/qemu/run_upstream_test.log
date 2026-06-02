@@ -10,7 +10,7 @@
 [pcl::ExtractIndices::applyFilter] The indices size exceeds the size of the input.
 [pcl::ExtractIndices::applyFilter] The indices size exceeds the size of the input.
 [       OK ] ExtractIndices.Filters (7 ms)
-[----------] 1 test from ExtractIndices (8 ms total)
+[----------] 1 test from ExtractIndices (7 ms total)
 
 [----------] 1 test from PassThrough
 [ RUN      ] PassThrough.Filters
@@ -55,8 +55,8 @@
 
 [----------] 1 test from RadiusOutlierRemoval
 [ RUN      ] RadiusOutlierRemoval.Filters
-[       OK ] RadiusOutlierRemoval.Filters (2667 ms)
-[----------] 1 test from RadiusOutlierRemoval (2667 ms total)
+[       OK ] RadiusOutlierRemoval.Filters (2602 ms)
+[----------] 1 test from RadiusOutlierRemoval (2602 ms total)
 
 [----------] 1 test from StatisticalOutlierRemoval
 [ RUN      ] StatisticalOutlierRemoval.Filters
@@ -70,8 +70,8 @@
 
 [----------] 1 test from ConditionalRemovalSetIndices
 [ RUN      ] ConditionalRemovalSetIndices.Filters
-[       OK ] ConditionalRemovalSetIndices.Filters (2 ms)
-[----------] 1 test from ConditionalRemovalSetIndices (2 ms total)
+[       OK ] ConditionalRemovalSetIndices.Filters (1 ms)
+[----------] 1 test from ConditionalRemovalSetIndices (1 ms total)
 
 [----------] 1 test from SamplingSurfaceNormal
 [ RUN      ] SamplingSurfaceNormal.Filters
@@ -80,28 +80,28 @@
 
 [----------] 1 test from ShadowPoints
 [ RUN      ] ShadowPoints.Filters
-[       OK ] ShadowPoints.Filters (129 ms)
-[----------] 1 test from ShadowPoints (129 ms total)
+[       OK ] ShadowPoints.Filters (130 ms)
+[----------] 1 test from ShadowPoints (130 ms total)
 
 [----------] 1 test from FrustumCulling
 [ RUN      ] FrustumCulling.Filters
-[       OK ] FrustumCulling.Filters (53 ms)
-[----------] 1 test from FrustumCulling (53 ms total)
+[       OK ] FrustumCulling.Filters (52 ms)
+[----------] 1 test from FrustumCulling (52 ms total)
 
 [----------] 1 test from ConditionalRemovalTfQuadraticXYZComparison
 [ RUN      ] ConditionalRemovalTfQuadraticXYZComparison.Filters
-[       OK ] ConditionalRemovalTfQuadraticXYZComparison.Filters (1 ms)
+[       OK ] ConditionalRemovalTfQuadraticXYZComparison.Filters (2 ms)
 [----------] 1 test from ConditionalRemovalTfQuadraticXYZComparison (2 ms total)
 
 [----------] 1 test from MedianFilter
 [ RUN      ] MedianFilter.Filters
-[       OK ] MedianFilter.Filters (262 ms)
-[----------] 1 test from MedianFilter (262 ms total)
+[       OK ] MedianFilter.Filters (259 ms)
+[----------] 1 test from MedianFilter (259 ms total)
 
 [----------] 1 test from NormalRefinement
 [ RUN      ] NormalRefinement.Filters
-[       OK ] NormalRefinement.Filters (8577 ms)
-[----------] 1 test from NormalRefinement (8577 ms total)
+[       OK ] NormalRefinement.Filters (9409 ms)
+[----------] 1 test from NormalRefinement (9409 ms total)
 
 [----------] 1 test from VoxelGridOcclusionEstimation
 [ RUN      ] VoxelGridOcclusionEstimation.Filters
@@ -109,5 +109,5 @@
 [----------] 1 test from VoxelGridOcclusionEstimation (1 ms total)
 
 [----------] Global test environment tear-down
-[==========] 21 tests from 21 test suites ran. (11830 ms total)
+[==========] 21 tests from 21 test suites ran. (12594 ms total)
 [  PASSED  ] 21 tests.

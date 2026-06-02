@@ -40,12 +40,12 @@
 
 [----------] 1 test from VoxelGridCovariance
 [ RUN      ] VoxelGridCovariance.Filters
-[       OK ] VoxelGridCovariance.Filters (9 ms)
-[----------] 1 test from VoxelGridCovariance (9 ms total)
+[       OK ] VoxelGridCovariance.Filters (10 ms)
+[----------] 1 test from VoxelGridCovariance (10 ms total)
 
 [----------] 1 test from VoxelGridMinPoints
 [ RUN      ] VoxelGridMinPoints.Filters
-[       OK ] VoxelGridMinPoints.Filters (1 ms)
+[       OK ] VoxelGridMinPoints.Filters (2 ms)
 [----------] 1 test from VoxelGridMinPoints (2 ms total)
 
 [----------] 1 test from ProjectInliers
@@ -55,13 +55,13 @@
 
 [----------] 1 test from RadiusOutlierRemoval
 [ RUN      ] RadiusOutlierRemoval.Filters
-[       OK ] RadiusOutlierRemoval.Filters (2667 ms)
-[----------] 1 test from RadiusOutlierRemoval (2667 ms total)
+[       OK ] RadiusOutlierRemoval.Filters (2700 ms)
+[----------] 1 test from RadiusOutlierRemoval (2701 ms total)
 
 [----------] 1 test from StatisticalOutlierRemoval
 [ RUN      ] StatisticalOutlierRemoval.Filters
-[       OK ] StatisticalOutlierRemoval.Filters (71 ms)
-[----------] 1 test from StatisticalOutlierRemoval (71 ms total)
+[       OK ] StatisticalOutlierRemoval.Filters (74 ms)
+[----------] 1 test from StatisticalOutlierRemoval (74 ms total)
 
 [----------] 1 test from ConditionalRemoval
 [ RUN      ] ConditionalRemoval.Filters
@@ -80,8 +80,8 @@
 
 [----------] 1 test from ShadowPoints
 [ RUN      ] ShadowPoints.Filters
-[       OK ] ShadowPoints.Filters (129 ms)
-[----------] 1 test from ShadowPoints (129 ms total)
+[       OK ] ShadowPoints.Filters (134 ms)
+[----------] 1 test from ShadowPoints (134 ms total)
 
 [----------] 1 test from FrustumCulling
 [ RUN      ] FrustumCulling.Filters
@@ -91,17 +91,17 @@
 [----------] 1 test from ConditionalRemovalTfQuadraticXYZComparison
 [ RUN      ] ConditionalRemovalTfQuadraticXYZComparison.Filters
 [       OK ] ConditionalRemovalTfQuadraticXYZComparison.Filters (1 ms)
-[----------] 1 test from ConditionalRemovalTfQuadraticXYZComparison (2 ms total)
+[----------] 1 test from ConditionalRemovalTfQuadraticXYZComparison (1 ms total)
 
 [----------] 1 test from MedianFilter
 [ RUN      ] MedianFilter.Filters
-[       OK ] MedianFilter.Filters (262 ms)
-[----------] 1 test from MedianFilter (262 ms total)
+[       OK ] MedianFilter.Filters (268 ms)
+[----------] 1 test from MedianFilter (268 ms total)
 
 [----------] 1 test from NormalRefinement
 [ RUN      ] NormalRefinement.Filters
-[       OK ] NormalRefinement.Filters (8577 ms)
-[----------] 1 test from NormalRefinement (8577 ms total)
+[       OK ] NormalRefinement.Filters (9444 ms)
+[----------] 1 test from NormalRefinement (9444 ms total)
 
 [----------] 1 test from VoxelGridOcclusionEstimation
 [ RUN      ] VoxelGridOcclusionEstimation.Filters
@@ -109,5 +109,5 @@
 [----------] 1 test from VoxelGridOcclusionEstimation (1 ms total)
 
 [----------] Global test environment tear-down
-[==========] 21 tests from 21 test suites ran. (11830 ms total)
+[==========] 21 tests from 21 test suites ran. (12746 ms total)
 [  PASSED  ] 21 tests.

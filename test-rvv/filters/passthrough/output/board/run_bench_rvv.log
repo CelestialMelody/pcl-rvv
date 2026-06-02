@@ -1,0 +1,19 @@
+================================================================================================
+PCL filters/passthrough benchmark
+Build: RVV (__RVV10__ enabled)
+Dataset: synthetic PointXYZI clouds; identity indices RVV cases and explicit subset fallback
+Iterations: 30
+------------------------------------------------------------------------------------------------
+passthrough indices range 64K                             : 1.0174 ms/iter
+  Total Time: 30.5206 ms, checksum: 12708390518604352759
+passthrough indices range 1M                              : 19.4224 ms/iter
+  Total Time: 582.6708 ms, checksum: 14748196503104732992
+passthrough indices negative 1M                           : 18.4232 ms/iter
+  Total Time: 552.6956 ms, checksum: 1939280552132007872
+passthrough indices removed 1M invalid                    : 22.6989 ms/iter
+  Total Time: 680.9660 ms, checksum: 3213615580797602492
+passthrough cloud-out range 1M                            : 57.0853 ms/iter
+  Total Time: 1712.5587 ms, checksum: 137804
+passthrough explicit subset fallback 1M                   : 26.7630 ms/iter
+  Total Time: 802.8909 ms, checksum: 15759718792459624432
+================================================================================================
