@@ -1,0 +1,21 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from VoxelGridCovarianceRVV
+[ RUN      ] VoxelGridCovarianceRVV.DenseNegativeCoordinatesMatchScalarOutput
+[       OK ] VoxelGridCovarianceRVV.DenseNegativeCoordinatesMatchScalarOutput (6 ms)
+[ RUN      ] VoxelGridCovarianceRVV.SingleNegativeVoxelMatchesHandComputedCentroid
+[       OK ] VoxelGridCovarianceRVV.SingleNegativeVoxelMatchesHandComputedCentroid (1 ms)
+[ RUN      ] VoxelGridCovarianceRVV.SaveLeafLayoutAndSearchableRemainUsable
+[       OK ] VoxelGridCovarianceRVV.SaveLeafLayoutAndSearchableRemainUsable (5 ms)
+[ RUN      ] VoxelGridCovarianceRVV.DistanceFieldFallbackKeepsFilterSemantics
+[       OK ] VoxelGridCovarianceRVV.DistanceFieldFallbackKeepsFilterSemantics (5 ms)
+[ RUN      ] VoxelGridCovarianceRVV.NonDenseFallbackSkipsInvalidPoints
+[       OK ] VoxelGridCovarianceRVV.NonDenseFallbackSkipsInvalidPoints (7 ms)
+[ RUN      ] VoxelGridCovarianceRVV.SmallInputFallbackWorks
+[       OK ] VoxelGridCovarianceRVV.SmallInputFallbackWorks (0 ms)
+[----------] 6 tests from VoxelGridCovarianceRVV (27 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (30 ms total)
+[  PASSED  ] 6 tests.

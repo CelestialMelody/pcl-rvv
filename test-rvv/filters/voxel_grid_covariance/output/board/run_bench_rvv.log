@@ -1,0 +1,19 @@
+========================================================================================================
+PCL filters/voxel_grid_covariance benchmark
+Build: RVV (__RVV10__ enabled)
+Dataset: synthetic PointXYZ clouds; dense leaf-index RVV cases plus distance/non-dense fallback cases
+Iterations: 8
+--------------------------------------------------------------------------------------------------------
+vgcov dense leaf-index 64K                                      : 108.6677 ms/iter
+  Total Time: 869.3415 ms, checksum: 16873979133168490664
+vgcov dense leaf-index 256K                                     : 464.8946 ms/iter
+  Total Time: 3719.1571 ms, checksum: 11578983304961162696
+vgcov dense save-layout 256K                                    : 450.2459 ms/iter
+  Total Time: 3601.9673 ms, checksum: 11578983304961162696
+vgcov dense searchable 64K                                      : 109.1650 ms/iter
+  Total Time: 873.3201 ms, checksum: 16873979133168490664
+vgcov distance-field fallback 256K                              : 434.3232 ms/iter
+  Total Time: 3474.5853 ms, checksum: 1169329825437706792
+vgcov non-dense fallback 256K                                   : 610.2230 ms/iter
+  Total Time: 4881.7842 ms, checksum: 5717660375792973828
+========================================================================================================
