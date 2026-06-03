@@ -48,6 +48,134 @@
 #include <boost/random/normal_distribution.hpp> // for normal_distribution
 #include <boost/random/variate_generator.hpp> // for variate_generator
 
+#if defined(__RVV10__)
+#include <cstdint>
+#include <limits>
+#include <riscv_vector.h>
+#include <type_traits>
+#include <utility>
+#endif
+
+namespace pcl
+{
+
+template<typename PointT> int
+computeVoxelGridCovarianceLeafIndexStd (const PointT& point,
+                                        const Eigen::Array4f& inverse_leaf_size,
+                                        const Eigen::Vector4i& min_b,
+                                        const Eigen::Vector4i& divb_mul)
+{
+  // divb_mul[3] is zero in VoxelGridCovariance, matching the original dot product.
+  const Eigen::Vector4i ijk =
+      Eigen::floor(point.getArray4fMap() * inverse_leaf_size)
+          .template cast<int>();
+  return (ijk - min_b).dot(divb_mul);
+}
+
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kVoxelGridCovarianceIndexMinPoints = 64;
+inline constexpr unsigned int kRoundDownMode = 2;
+
+template <typename T>
+using VoxelGridCovarianceScalar = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename PointT, typename = void>
+struct VoxelGridCovarianceXYZCompatible : std::false_type {};
+
+template <typename PointT>
+struct VoxelGridCovarianceXYZCompatible<
+    PointT,
+    std::void_t<decltype(std::declval<PointT>().x),
+                decltype(std::declval<PointT>().y),
+                decltype(std::declval<PointT>().z)>>
+: std::bool_constant<
+      std::is_standard_layout_v<PointT> &&
+      std::is_same_v<VoxelGridCovarianceScalar<decltype(std::declval<PointT>().x)>, float> &&
+      std::is_same_v<VoxelGridCovarianceScalar<decltype(std::declval<PointT>().y)>, float> &&
+      std::is_same_v<VoxelGridCovarianceScalar<decltype(std::declval<PointT>().z)>, float>> {};
+
+template <typename PointT>
+inline constexpr bool kVoxelGridCovarianceXYZCompatible = VoxelGridCovarianceXYZCompatible<PointT>::value;
+
+inline unsigned int
+getVoxelGridCovarianceRoundingMode ()
+{
+  unsigned int mode = 0;
+  asm volatile ("frrm %0" : "=r" (mode));
+  return mode;
+}
+
+inline void
+setVoxelGridCovarianceRoundingMode (unsigned int mode)
+{
+  asm volatile ("fsrm %0" : : "r" (mode));
+}
+
+template<typename PointT> bool
+computeVoxelGridCovarianceLeafIndicesRVV (const pcl::PointCloud<PointT>& input,
+                                          const Eigen::Array4f& inverse_leaf_size,
+                                          const Eigen::Vector4i& min_b,
+                                          const Eigen::Vector4i& divb_mul,
+                                          std::vector<int>& leaf_indices)
+{
+  const std::size_t n = input.size ();
+  if (!input.is_dense ||
+      n < pcl::kVoxelGridCovarianceIndexMinPoints ||
+      n > static_cast<std::size_t> (std::numeric_limits<int>::max ()))
+    return false;
+
+  leaf_indices.resize (n);
+
+  const unsigned int saved_rounding_mode = pcl::getVoxelGridCovarianceRoundingMode ();
+  const auto* base = reinterpret_cast<const std::uint8_t*> (input.data ());
+  int* out = leaf_indices.data ();
+  std::size_t i = 0;
+
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    const auto* chunk = base + i * sizeof (PointT);
+    const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
+
+    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, x)), stride, vl);
+    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, y)), stride, vl);
+    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, z)), stride, vl);
+
+    // This RVV helper only precomputes the dense AoS leaf ids.  RDN conversion
+    // matches Eigen::floor for negative coordinates; map accumulation and all
+    // covariance/eigen semantics stay on the scalar path below.
+    const vfloat32m2_t sx = __riscv_vfmul_vf_f32m2 (vx, inverse_leaf_size[0], vl);
+    const vfloat32m2_t sy = __riscv_vfmul_vf_f32m2 (vy, inverse_leaf_size[1], vl);
+    const vfloat32m2_t sz = __riscv_vfmul_vf_f32m2 (vz, inverse_leaf_size[2], vl);
+
+    vint32m2_t ix = __riscv_vfcvt_x_f_v_i32m2_rm (sx, pcl::kRoundDownMode, vl);
+    vint32m2_t iy = __riscv_vfcvt_x_f_v_i32m2_rm (sy, pcl::kRoundDownMode, vl);
+    vint32m2_t iz = __riscv_vfcvt_x_f_v_i32m2_rm (sz, pcl::kRoundDownMode, vl);
+
+    ix = __riscv_vsub_vx_i32m2 (ix, min_b[0], vl);
+    iy = __riscv_vsub_vx_i32m2 (iy, min_b[1], vl);
+    iz = __riscv_vsub_vx_i32m2 (iz, min_b[2], vl);
+
+    vint32m2_t idx = __riscv_vmul_vx_i32m2 (ix, divb_mul[0], vl);
+    idx = __riscv_vmacc_vx_i32m2 (idx, divb_mul[1], iy, vl);
+    idx = __riscv_vmacc_vx_i32m2 (idx, divb_mul[2], iz, vl);
+    __riscv_vse32_v_i32m2 (out + i, idx, vl);
+
+    i += vl;
+  }
+
+  // The explicit-RM conversion may leave FRM in RDN on some toolchains/QEMU
+  // combinations.  Restore the caller's scalar FP environment so fallback
+  // paths that run later in the same process keep Eigen/std::floor semantics.
+  pcl::setVoxelGridCovarianceRoundingMode (saved_rounding_mode);
+  return true;
+}
+
+#endif
+
+} // namespace pcl
+
 //////////////////////////////////////////////////////////////////////////////////////////
 template<typename PointT> void
 pcl::VoxelGridCovariance<PointT>::applyFilter (PointCloud &output)
@@ -205,20 +333,38 @@ pcl::VoxelGridCovariance<PointT>::applyFilter (PointCloud &output)
   // No distance filtering, process all data
   else
   {
-    // First pass: go over all points and insert them into the right leaf
-    for (const auto& point: *input_)
+#if defined(__RVV10__)
+    std::vector<int> leaf_indices;
+    bool use_leaf_indices_rvv = false;
+    if constexpr (pcl::kVoxelGridCovarianceXYZCompatible<PointT>)
     {
+      use_leaf_indices_rvv =
+          !downsample_all_data_ &&
+          rgba_index < 0 &&
+          pcl::computeVoxelGridCovarianceLeafIndicesRVV (*input_, inverse_leaf_size_, min_b_, divb_mul_, leaf_indices);
+    }
+#endif
+    // First pass: go over all points and insert them into the right leaf
+    for (std::size_t point_index = 0; point_index < input_->size (); ++point_index)
+    {
+      const auto& point = (*input_)[point_index];
+
       if (!input_->is_dense)
         // Check if the point is invalid
         if (!isXYZFinite (point))
           continue;
 
-      // Compute the centroid leaf index
-      const Eigen::Vector4i ijk =
-          Eigen::floor(point.getArray4fMap() * inverse_leaf_size_.array())
-              .template cast<int>();
-      // divb_mul_[3] = 0 by assignment
-      int idx = (ijk - min_b_).dot(divb_mul_);
+      int idx;
+#if defined(__RVV10__)
+      if (use_leaf_indices_rvv)
+      {
+        idx = leaf_indices[point_index];
+      }
+      else
+#endif
+      {
+        idx = pcl::computeVoxelGridCovarianceLeafIndexStd (point, inverse_leaf_size_.array (), min_b_, divb_mul_);
+      }
 
       Leaf& leaf = leaves_[idx];
       if (leaf.nr_points == 0)
