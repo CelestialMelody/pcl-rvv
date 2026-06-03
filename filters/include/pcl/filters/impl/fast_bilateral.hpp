@@ -43,9 +43,161 @@
 
 #include <pcl/common/io.h>
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <limits>
+
+#if defined(__RVV10__)
+#include <cstdint>
+#include <riscv_vector.h>
+#include <type_traits>
+#include <utility>
+#endif
 
 namespace pcl
 {
+
+template <typename PointT> bool
+fastBilateralComputeBaseRangeStd (const pcl::PointCloud<PointT>& output,
+                                  float& base_min,
+                                  float& base_max)
+{
+  base_max = -std::numeric_limits<float>::max ();
+  base_min = std::numeric_limits<float>::max ();
+  bool found_finite = false;
+  for (const auto& pt: output)
+  {
+    if (std::isfinite (pt.z))
+    {
+      base_max = std::max<float> (pt.z, base_max);
+      base_min = std::min<float> (pt.z, base_min);
+      found_finite = true;
+    }
+  }
+  return found_finite;
+}
+
+template <typename PointT> void
+fastBilateralReplaceNonFiniteZStd (pcl::PointCloud<PointT>& output,
+                                   const float base_max)
+{
+  for (auto& pt: output)
+  {
+    if (!std::isfinite (pt.z))
+    {
+      pt.z = base_max;
+    }
+  }
+}
+
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kFastBilateralZMinPoints = 64;
+
+template <typename T>
+using FastBilateralScalar = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename PointT, typename = void>
+struct FastBilateralZCompatible : std::false_type {};
+
+template <typename PointT>
+struct FastBilateralZCompatible<
+    PointT,
+    std::void_t<decltype(std::declval<PointT>().z)>>
+: std::bool_constant<
+      std::is_standard_layout_v<PointT> &&
+      std::is_same_v<FastBilateralScalar<decltype(std::declval<PointT>().z)>, float>> {};
+
+template <typename PointT>
+inline constexpr bool kFastBilateralZCompatible = FastBilateralZCompatible<PointT>::value;
+
+template <typename PointT> bool
+fastBilateralComputeBaseRangeRVV (const pcl::PointCloud<PointT>& output,
+                                  float& base_min,
+                                  float& base_max,
+                                  bool& found_finite)
+{
+  const std::size_t n = output.size ();
+  if (n < pcl::kFastBilateralZMinPoints)
+    return false;
+
+  float min_z = std::numeric_limits<float>::max ();
+  float max_z = -std::numeric_limits<float>::max ();
+  std::size_t finite_count = 0;
+
+  const auto* base = reinterpret_cast<const std::uint8_t*> (output.data ());
+  const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
+  std::size_t i = 0;
+
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    const auto* z_ptr = reinterpret_cast<const float*> (base + i * sizeof (PointT) + offsetof (PointT, z));
+    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (z_ptr, stride, vl);
+
+    // FastBilateral only needs the finite z range before the lattice pass.  The
+    // AoS stride load plus finite mask preserves the scalar rule that NaN/Inf
+    // are ignored and later replaced by base_max.
+    vbool16_t finite = __riscv_vmfeq_vv_f32m2_b16 (vz, vz, vl);
+    finite = __riscv_vmand_mm_b16 (
+        finite,
+        __riscv_vmflt_vf_f32m2_b16 (
+            __riscv_vfabs_v_f32m2 (vz, vl), std::numeric_limits<float>::infinity (), vl),
+        vl);
+
+    finite_count += __riscv_vcpop_m_b16 (finite, vl);
+    min_z = __riscv_vfmv_f_s_f32m1_f32 (__riscv_vfredmin_vs_f32m2_f32m1_m (
+        finite, vz, __riscv_vfmv_s_f_f32m1 (min_z, 1), vl));
+    max_z = __riscv_vfmv_f_s_f32m1_f32 (__riscv_vfredmax_vs_f32m2_f32m1_m (
+        finite, vz, __riscv_vfmv_s_f_f32m1 (max_z, 1), vl));
+
+    i += vl;
+  }
+
+  found_finite = finite_count != 0;
+  if (found_finite)
+  {
+    base_min = min_z;
+    base_max = max_z;
+  }
+  return true;
+}
+
+template <typename PointT> bool
+fastBilateralReplaceNonFiniteZRVV (pcl::PointCloud<PointT>& output,
+                                   const float base_max)
+{
+  const std::size_t n = output.size ();
+  if (n < pcl::kFastBilateralZMinPoints)
+    return false;
+
+  auto* base = reinterpret_cast<std::uint8_t*> (output.data ());
+  const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
+  std::size_t i = 0;
+
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    auto* z_ptr = reinterpret_cast<float*> (base + i * sizeof (PointT) + offsetof (PointT, z));
+    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (z_ptr, stride, vl);
+
+    vbool16_t finite = __riscv_vmfeq_vv_f32m2_b16 (vz, vz, vl);
+    finite = __riscv_vmand_mm_b16 (
+        finite,
+        __riscv_vmflt_vf_f32m2_b16 (
+            __riscv_vfabs_v_f32m2 (vz, vl), std::numeric_limits<float>::infinity (), vl),
+        vl);
+    const vbool16_t replace = __riscv_vmnot_m_b16 (finite, vl);
+    const vfloat32m2_t vmax = __riscv_vfmv_v_f_f32m2 (base_max, vl);
+    __riscv_vsse32_v_f32m2_m (replace, z_ptr, stride, vmax, vl);
+
+    i += vl;
+  }
+  return true;
+}
+
+#endif
 
 template <typename PointT> void
 FastBilateralFilter<PointT>::applyFilter (PointCloud &output)
@@ -60,28 +212,38 @@ FastBilateralFilter<PointT>::applyFilter (PointCloud &output)
   float base_max = -std::numeric_limits<float>::max (),
         base_min = std::numeric_limits<float>::max ();
   bool found_finite = false;
-  for (const auto& pt: output)
+#if defined(__RVV10__)
+  if constexpr (pcl::kFastBilateralZCompatible<PointT>)
   {
-    if (std::isfinite(pt.z))
-    {
-      base_max = std::max<float>(pt.z, base_max);
-      base_min = std::min<float>(pt.z, base_min);
-      found_finite = true;
-    }
+    if (!pcl::fastBilateralComputeBaseRangeRVV<PointT> (output, base_min, base_max, found_finite))
+      found_finite = pcl::fastBilateralComputeBaseRangeStd<PointT> (output, base_min, base_max);
   }
+  else
+  {
+    found_finite = pcl::fastBilateralComputeBaseRangeStd<PointT> (output, base_min, base_max);
+  }
+#else
+  found_finite = pcl::fastBilateralComputeBaseRangeStd<PointT> (output, base_min, base_max);
+#endif
   if (!found_finite)
   {
     PCL_WARN ("[pcl::FastBilateralFilter] Given an empty cloud. Doing nothing.\n");
     return;
   }
 
-  for (auto& pt: output)
+#if defined(__RVV10__)
+  if constexpr (pcl::kFastBilateralZCompatible<PointT>)
   {
-    if (!std::isfinite(pt.z))
-    {
-      pt.z = base_max;
-    }
+    if (!pcl::fastBilateralReplaceNonFiniteZRVV<PointT> (output, base_max))
+      pcl::fastBilateralReplaceNonFiniteZStd<PointT> (output, base_max);
   }
+  else
+  {
+    pcl::fastBilateralReplaceNonFiniteZStd<PointT> (output, base_max);
+  }
+#else
+  pcl::fastBilateralReplaceNonFiniteZStd<PointT> (output, base_max);
+#endif
 
   const float base_delta = base_max - base_min;
 
@@ -215,4 +377,3 @@ FastBilateralFilter<PointT>::Array3D::trilinear_interpolation (const float x,
 } // namespace pcl
 
 #endif /* PCL_FILTERS_IMPL_FAST_BILATERAL_HPP_ */
-
