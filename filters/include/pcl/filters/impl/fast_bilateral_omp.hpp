@@ -41,6 +41,7 @@
 #define PCL_FILTERS_IMPL_FAST_BILATERAL_OMP_HPP_
 
 #include <pcl/filters/fast_bilateral_omp.h>
+#include <pcl/filters/impl/fast_bilateral.hpp>
 #include <pcl/common/io.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,27 +72,60 @@ pcl::FastBilateralFilterOMP<PointT>::applyFilter (PointCloud &output)
   float base_max = -std::numeric_limits<float>::max (),
         base_min = std::numeric_limits<float>::max ();
   bool found_finite = false;
-  for (const auto& pt: output)
+#if defined(__RVV10__)
+  if constexpr (pcl::kFastBilateralZCompatible<PointT>)
   {
-    if (std::isfinite(pt.z))
-    {
-      base_max = std::max<float>(pt.z, base_max);
-      base_min = std::min<float>(pt.z, base_min);
-      found_finite = true;
-    }
+    // The OMP filter reuses the scalar/RVV z pre-pass from FastBilateralFilter.
+    // Later lattice loops remain OpenMP scalar because their scatter/blur costs
+    // were not profitable in the non-OMP board experiment.
+    if (!pcl::fastBilateralComputeBaseRangeRVV<PointT> (output, base_min, base_max, found_finite))
+      found_finite = pcl::fastBilateralComputeBaseRangeStd<PointT> (output, base_min, base_max);
   }
+  else
+  {
+    found_finite = pcl::fastBilateralComputeBaseRangeStd<PointT> (output, base_min, base_max);
+  }
+#else
+  found_finite = pcl::fastBilateralComputeBaseRangeStd<PointT> (output, base_min, base_max);
+#endif
   if (!found_finite)
   {
     PCL_WARN ("[pcl::FastBilateralFilterOMP] Given an empty cloud. Doing nothing.\n");
     return;
   }
+#if defined(__RVV10__)
+  if constexpr (pcl::kFastBilateralZCompatible<PointT>)
+  {
+    if (!pcl::fastBilateralReplaceNonFiniteZRVV<PointT> (output, base_max))
+    {
 #pragma omp parallel for \
   default(none) \
   shared(base_min, base_max, output) \
   num_threads(threads_)
-  for (long int i = 0; i < static_cast<long int> (output.size ()); ++i)
-    if (!std::isfinite (output.at(i).z))
-      output.at(i).z = base_max;
+      for (long int i = 0; i < static_cast<long int> (output.size ()); ++i)
+        if (!std::isfinite (output.at(i).z))
+          output.at(i).z = base_max;
+    }
+  }
+  else
+  {
+#pragma omp parallel for \
+  default(none) \
+  shared(base_min, base_max, output) \
+  num_threads(threads_)
+    for (long int i = 0; i < static_cast<long int> (output.size ()); ++i)
+      if (!std::isfinite (output.at(i).z))
+        output.at(i).z = base_max;
+  }
+#else
+#pragma omp parallel for \
+  default(none) \
+  shared(base_min, base_max, output) \
+  num_threads(threads_)
+    for (long int i = 0; i < static_cast<long int> (output.size ()); ++i)
+      if (!std::isfinite (output.at(i).z))
+        output.at(i).z = base_max;
+#endif
 
   const float base_delta = base_max - base_min;
 
@@ -112,19 +146,19 @@ pcl::FastBilateralFilterOMP<PointT>::applyFilter (PointCloud &output)
 #pragma omp parallel for \
   default(none) \
   shared(base_min, data, output, small_height, small_width) \
-  num_threads(threads_)	
+  num_threads(threads_)
 #endif
   for (long int i = 0; i < static_cast<long int> (small_width * small_height); ++i)
   {
     auto small_x = static_cast<std::size_t> (i % small_width);
     auto small_y = static_cast<std::size_t> (i / small_width);
-    auto start_x = static_cast<std::size_t>( 
+    auto start_x = static_cast<std::size_t>(
         std::max ((static_cast<float> (small_x) - static_cast<float> (padding_xy) - 0.5f) * sigma_s_ + 1, 0.f));
-    auto end_x = static_cast<std::size_t>( 
+    auto end_x = static_cast<std::size_t>(
       std::max ((static_cast<float> (small_x) - static_cast<float> (padding_xy) + 0.5f) * sigma_s_ + 1, 0.f));
-    auto start_y = static_cast<std::size_t>( 
+    auto start_y = static_cast<std::size_t>(
       std::max ((static_cast<float> (small_y) - static_cast<float> (padding_xy) - 0.5f) * sigma_s_ + 1, 0.f));
-    auto end_y = static_cast<std::size_t>( 
+    auto end_y = static_cast<std::size_t>(
       std::max ((static_cast<float> (small_y) - static_cast<float> (padding_xy) + 0.5f) * sigma_s_ + 1, 0.f));
     for (std::size_t x = start_x; x < end_x && x < input_->width; ++x)
     {
@@ -145,7 +179,7 @@ pcl::FastBilateralFilterOMP<PointT>::applyFilter (PointCloud &output)
   offset[2] = &(data (0,0,1)) - &(data (0,0,0));
 
   Array3D buffer (small_width, small_height, small_depth);
-  
+
   for (std::size_t dim = 0; dim < 3; ++dim)
   {
     for (std::size_t n_iter = 0; n_iter < 2; ++n_iter)
@@ -176,7 +210,7 @@ pcl::FastBilateralFilterOMP<PointT>::applyFilter (PointCloud &output)
       }
     }
   }
-  // Note: this works because there are an even number of iterations. 
+  // Note: this works because there are an even number of iterations.
   // If there were an odd number, we would need to end with a:
   // std::swap (data, buffer);
 
@@ -222,4 +256,3 @@ pcl::FastBilateralFilterOMP<PointT>::applyFilter (PointCloud &output)
 
 
 #endif /* PCL_FILTERS_IMPL_FAST_BILATERAL_OMP_HPP_ */
-
