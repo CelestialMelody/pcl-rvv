@@ -1,0 +1,20 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 5 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 5 tests from FastBilateralOMPRVV
+[ RUN      ] FastBilateralOMPRVV.LargeOrganizedCloudProducesFiniteSmoothedDepth
+[       OK ] FastBilateralOMPRVV.LargeOrganizedCloudProducesFiniteSmoothedDepth (13 ms)
+[ RUN      ] FastBilateralOMPRVV.NonFiniteDepthIsReplacedBeforeFiltering
+[       OK ] FastBilateralOMPRVV.NonFiniteDepthIsReplacedBeforeFiltering (8 ms)
+[ RUN      ] FastBilateralOMPRVV.SmallCloudFallbackKeepsOrganizedOutput
+[       OK ] FastBilateralOMPRVV.SmallCloudFallbackKeepsOrganizedOutput (0 ms)
+[ RUN      ] FastBilateralOMPRVV.SingleThreadAfterRVVMainPathKeepsFallbackSemantics
+[       OK ] FastBilateralOMPRVV.SingleThreadAfterRVVMainPathKeepsFallbackSemantics (8 ms)
+[ RUN      ] FastBilateralOMPRVV.NonOrganizedInputReturnsEmptyOutput
+[pcl::FastBilateralFilterOMP] Input cloud needs to be organized.
+[       OK ] FastBilateralOMPRVV.NonOrganizedInputReturnsEmptyOutput (2 ms)
+[----------] 5 tests from FastBilateralOMPRVV (36 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 1 test suite ran. (38 ms total)
+[  PASSED  ] 5 tests.

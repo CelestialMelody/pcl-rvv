@@ -1,0 +1,16 @@
+==== PCL filters/fast_bilateral_omp RVV bench ====
+Dataset: synthetic organized PointXYZ depth images; OMP filter with finite and non-finite z cases
+Iterations: 8
+Build: RVV
+fast_bilateral_omp organized 64x48 finite t2 : 0.549230 ms/iter
+  Total Time: 4.393843 ms, checksum: 0, size: 64x48, sigma_s: 4.000000, sigma_r: 0.050000, nonfinite: no, threads: 2
+fast_bilateral_omp organized 160x120 finite t2 : 3.509484 ms/iter
+  Total Time: 28.075870 ms, checksum: 8, size: 160x120, sigma_s: 5.000000, sigma_r: 0.050000, nonfinite: no, threads: 2
+fast_bilateral_omp organized 160x120 nonfinite t2 : 3.183355 ms/iter
+  Total Time: 25.466840 ms, checksum: 0, size: 160x120, sigma_s: 5.000000, sigma_r: 0.050000, nonfinite: yes, threads: 2
+fast_bilateral_omp organized 320x240 finite t2 : 15.972213 ms/iter
+  Total Time: 127.777701 ms, checksum: 8, size: 320x240, sigma_s: 6.000000, sigma_r: 0.050000, nonfinite: no, threads: 2
+fast_bilateral_omp organized 320x240 nonfinite t2 : 14.474237 ms/iter
+  Total Time: 115.793894 ms, checksum: 0, size: 320x240, sigma_s: 6.000000, sigma_r: 0.050000, nonfinite: yes, threads: 2
+fast_bilateral_omp small fallback 7x5 t1 : 0.043521 ms/iter
+  Total Time: 0.348171 ms, checksum: 24, size: 7x5, sigma_s: 3.000000, sigma_r: 0.050000, nonfinite: yes, threads: 1

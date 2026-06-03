@@ -1,0 +1,17 @@
+Note: Google Test filter = FastBilateralFilterOMP.Filters_Bilateral
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FastBilateralFilterOMP
+[ RUN      ] FastBilateralFilterOMP.Filters_Bilateral
+[FastBilateralFilter] filtering took 1304.486578 ms
+[FastBilateralFilterOMP] filtering took 307.892442 ms
+[FastBilateralFilter] filtering took 290.524493 ms
+[FastBilateralFilterOMP] filtering took 104.471151 ms
+[FastBilateralFilter] filtering took 177.314950 ms
+[FastBilateralFilterOMP] filtering took 87.416858 ms
+[       OK ] FastBilateralFilterOMP.Filters_Bilateral (2411 ms)
+[----------] 1 test from FastBilateralFilterOMP (2412 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2416 ms total)
+[  PASSED  ] 1 test.
