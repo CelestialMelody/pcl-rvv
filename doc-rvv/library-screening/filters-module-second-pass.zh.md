@@ -144,7 +144,7 @@
 | 4        | `passthrough`                 | `filters/include/pcl/filters/impl/passthrough.hpp`                                                     | `test-rvv/filters/passthrough/passthrough-evaluation.zh.md`                     | `doc-rvv/filters/passthrough-RVV.zh.md`           | 已完成                     | 已实现 `PointT` identity indices + FLOAT32 字段区间过滤 RVV；`PCLPointCloud2` 与显式 subset indices 暂缓并记录原因                      |
 | 5        | `crop_box`                    | `filters/include/pcl/filters/impl/crop_box.hpp`                                                        | `test-rvv/filters/crop_box/crop_box-evaluation.zh.md`                           | `doc-rvv/filters/crop_box-RVV.zh.md`              | 已完成 | dense identity transform 的 xyz 区间裁剪已实现；板卡主路径约 `2.09x`~`3.08x`，fallback case 约 `1.00x`                                                |
 | 6        | `voxel_grid_covariance`       | `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`                                           | `test-rvv/filters/voxel_grid_covariance/voxel_grid_covariance-evaluation.zh.md` | `doc-rvv/filters/voxel_grid_covariance-RVV.zh.md` | 已完成                     | dense 标准 float xyz 的 first-pass leaf id 预计算 RVV 已完成；covariance、eigen、searchable leaf 状态保持标量；板卡主路径约 `1.46x`~`1.52x`，fallback case 保持语义一致 |
-| 7        | `fast_bilateral`              | `filters/include/pcl/filters/impl/fast_bilateral.hpp`                                                  | `test-rvv/filters/fast_bilateral/fast_bilateral-evaluation.zh.md`               | `doc-rvv/filters/fast_bilateral-RVV.zh.md`        | 待函数级筛选               | organized 图像式滤波专项；先确认 buffer/range 维度和边界，再决定是否实现                                                                      |
+| 7        | `fast_bilateral`              | `filters/include/pcl/filters/impl/fast_bilateral.hpp`                                                  | `test-rvv/filters/fast_bilateral/fast_bilateral-evaluation.zh.md`               | `doc-rvv/filters/fast_bilateral-RVV.zh.md`        | 已完成                     | organized `PointXYZ` depth z 预处理 RVV 已完成；finite z min/max 与 non-finite z 替换命中 RVV；放大到 320x240 后板卡主路径约 `1.04x`~`1.10x`；data/buffer blur bench-only RVV 实验为 `0.95x`，生产 blur 保持标量 |
 | 8        | `fast_bilateral_omp`          | `filters/include/pcl/filters/impl/fast_bilateral_omp.hpp`                                              | `test-rvv/filters/fast_bilateral_omp/fast_bilateral_omp-evaluation.zh.md`       | `doc-rvv/filters/fast_bilateral_omp-RVV.zh.md`    | 待函数级筛选               | 在非 OMP fast bilateral 后评估；明确 RVV 与线程并行边界                                                                                       |
 
 ## 1.4 首批已完成/待完成状态
@@ -157,6 +157,7 @@
 | `passthrough`                 | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
 | `crop_box`                    | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
 | `voxel_grid_covariance`       | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
+| `fast_bilateral`              | 完成       | 完成     | 完成     | 完成   | 完成      | 完成   | 完成     | 完成     | 完成     |
 
 ## 2. 原始 `76` 个候选的二轮去向说明
 
