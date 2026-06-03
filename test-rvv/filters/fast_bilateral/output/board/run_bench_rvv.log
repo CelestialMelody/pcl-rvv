@@ -1,0 +1,18 @@
+==== PCL filters/fast_bilateral RVV bench ====
+Dataset: synthetic organized PointXYZ depth images; finite and non-finite z cases
+Iterations: 8
+Build: RVV
+fast_bilateral organized 64x48 finite : 0.721920 ms/iter
+  Total Time: 5.775360 ms, checksum: 8, size: 64x48, sigma_s: 4.000000, sigma_r: 0.050000, nonfinite: no
+fast_bilateral organized 160x120 finite : 5.343620 ms/iter
+  Total Time: 42.748960 ms, checksum: 8, size: 160x120, sigma_s: 5.000000, sigma_r: 0.050000, nonfinite: no
+fast_bilateral organized 160x120 nonfinite : 4.870760 ms/iter
+  Total Time: 38.966082 ms, checksum: 0, size: 160x120, sigma_s: 5.000000, sigma_r: 0.050000, nonfinite: yes
+fast_bilateral organized 320x240 finite : 30.976416 ms/iter
+  Total Time: 247.811324 ms, checksum: 8, size: 320x240, sigma_s: 6.000000, sigma_r: 0.050000, nonfinite: no
+fast_bilateral organized 320x240 nonfinite : 29.496393 ms/iter
+  Total Time: 235.971143 ms, checksum: 0, size: 320x240, sigma_s: 6.000000, sigma_r: 0.050000, nonfinite: yes
+fast_bilateral small fallback 7x5 : 0.030454 ms/iter
+  Total Time: 0.243628 ms, checksum: 24, size: 7x5, sigma_s: 3.000000, sigma_r: 0.050000, nonfinite: yes
+fast_bilateral blur lattice 96x72x64 : 69.493992 ms/iter
+  Total Time: 555.951938 ms, checksum: 8, lattice: 96x72x64, kernel: RVV experimental blur
