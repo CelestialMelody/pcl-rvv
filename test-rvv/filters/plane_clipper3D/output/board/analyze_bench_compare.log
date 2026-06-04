@@ -1,0 +1,30 @@
+=====================================================================================================
+ PCL filters/plane_clipper3D Benchmark (PlaneClipper3D<PointXYZ> full-cloud RVV path) (Std vs RVV)
+=====================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : synthetic PointXYZ clouds; full-cloud plane clipping RVV cases and subset/type fallback cases
+  Iterations: 30 （每行 Total = Avg × 30）
+  Std log   : /root/pcl-test/filters/plane_clipper3D/output/run_bench_std.log
+  RVV log   : /root/pcl-test/filters/plane_clipper3D/output/run_bench_rvv.log
+
+-----------------------------------------------------------------------------------------------------
+Benchmark Item                           | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+-----------------------------------------|--------|----------------|----------------|----------------
+plane_clipper3D pointxyz balanced 64K    | Std    |      1.6313 ms |     48.9390 ms |    [   1.00x ]
+                                         | RVV    |      0.5439 ms |     16.3170 ms |    [   3.00x ]
+-----------------------------------------|--------|----------------|----------------|----------------
+plane_clipper3D pointxyz balanced 1M     | Std    |     25.8590 ms |    775.7700 ms |    [   1.00x ]
+                                         | RVV    |      8.9499 ms |    268.4970 ms |    [   2.89x ]
+-----------------------------------------|--------|----------------|----------------|----------------
+plane_clipper3D pointxyz mostly-keep 1M  | Std    |     32.7247 ms |    981.7410 ms |    [   1.00x ]
+                                         | RVV    |     13.1726 ms |    395.1780 ms |    [   2.48x ]
+-----------------------------------------|--------|----------------|----------------|----------------
+plane_clipper3D subset fallback 1M       | Std    |     12.6639 ms |    379.9170 ms |    [   1.00x ]
+                                         | RVV    |     12.6789 ms |    380.3670 ms |    [   1.00x ]
+-----------------------------------------|--------|----------------|----------------|----------------
+plane_clipper3D pointxyzi fallback 1M    | Std    |     26.4751 ms |    794.2530 ms |    [   1.00x ]
+                                         | RVV    |     25.7216 ms |    771.6480 ms |    [   1.03x ]
+-----------------------------------------|--------|----------------|----------------|----------------
+=====================================================================================================

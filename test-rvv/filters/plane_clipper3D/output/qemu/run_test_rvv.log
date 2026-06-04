@@ -1,0 +1,19 @@
+Build: RVV (__RVV10__ enabled)
+[==========] Running 5 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 5 tests from PlaneClipper3DRVV
+[ RUN      ] PlaneClipper3DRVV.SmallCloudMatchesScalarFormula
+[       OK ] PlaneClipper3DRVV.SmallCloudMatchesScalarFormula (0 ms)
+[ RUN      ] PlaneClipper3DRVV.LargeDensePointXYZKeepsOrder
+[       OK ] PlaneClipper3DRVV.LargeDensePointXYZKeepsOrder (0 ms)
+[ RUN      ] PlaneClipper3DRVV.AppendsToExistingOutput
+[       OK ] PlaneClipper3DRVV.AppendsToExistingOutput (0 ms)
+[ RUN      ] PlaneClipper3DRVV.ExplicitIndicesFallbackPreservesSubsetValues
+[       OK ] PlaneClipper3DRVV.ExplicitIndicesFallbackPreservesSubsetValues (0 ms)
+[ RUN      ] PlaneClipper3DRVV.PointXYZIFallbackPreservesGenericSemantics
+[       OK ] PlaneClipper3DRVV.PointXYZIFallbackPreservesGenericSemantics (0 ms)
+[----------] 5 tests from PlaneClipper3DRVV (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 1 test suite ran. (7 ms total)
+[  PASSED  ] 5 tests.

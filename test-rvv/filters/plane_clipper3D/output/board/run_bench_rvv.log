@@ -1,0 +1,16 @@
+================================================================================================
+ PCL filters/plane_clipper3D Benchmark (PlaneClipper3D<PointXYZ> full-cloud RVV path)
+================================================================================================
+Build: RVV (__RVV10__ enabled)
+Dataset: synthetic PointXYZ clouds; full-cloud plane clipping RVV cases and subset/type fallback cases
+Iterations: 30
+plane_clipper3D pointxyz balanced 64K                     : 0.5439 ms/iter
+  Total Time: 16.3162 ms, checksum: 16770285366861427123
+plane_clipper3D pointxyz balanced 1M                      : 8.9499 ms/iter
+  Total Time: 268.4958 ms, checksum: 2665923431757500315
+plane_clipper3D pointxyz mostly-keep 1M                   : 13.1726 ms/iter
+  Total Time: 395.1788 ms, checksum: 809534331754972035
+plane_clipper3D subset fallback 1M                        : 12.6789 ms/iter
+  Total Time: 380.3663 ms, checksum: 9439171608013280989
+plane_clipper3D pointxyzi fallback 1M                     : 25.7216 ms/iter
+  Total Time: 771.6472 ms, checksum: 17646610460761291830
