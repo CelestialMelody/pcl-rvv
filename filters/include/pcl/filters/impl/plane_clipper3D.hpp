@@ -36,6 +36,135 @@
 #define PCL_FILTERS_IMPL_PLANE_CLIPPER3D_HPP
 
 #include <pcl/filters/plane_clipper3D.h>
+#include <pcl/point_types.h>
+
+#if defined(__RVV10__)
+#include <cstdint>
+#include <limits>
+#include <riscv_vector.h>
+#include <type_traits>
+#endif
+
+namespace pcl
+{
+
+template<typename PointT> void
+clipPointCloud3DStd (const pcl::PointCloud<PointT>& cloud_in,
+                     Indices& clipped,
+                     const Indices& indices,
+                     const pcl::PlaneClipper3D<PointT>& clipper)
+{
+  if (indices.empty ())
+  {
+    clipped.reserve (cloud_in.size ());
+
+// #if 0
+//     Eigen::MatrixXf points = cloud_in.getMatrixXfMap (4, sizeof (PointT) / sizeof (float), offsetof(PointT,x) / sizeof (float));
+//     Eigen::VectorXf distances = plane_params_.transpose () * points;
+//     for (unsigned rIdx = 0; rIdx < cloud_in.size (); ++ rIdx)
+//     {
+//       if (distances (rIdx, 0) >= -plane_params_[3])
+//         clipped.push_back (rIdx);
+//     }
+// #else
+//     Eigen::Matrix4Xf points (4, cloud_in.size ());
+//     for (unsigned rIdx = 0; rIdx < cloud_in.size (); ++ rIdx)
+//     {
+//       points (0, rIdx) = cloud_in[rIdx].x;
+//       points (1, rIdx) = cloud_in[rIdx].y;
+//       points (2, rIdx) = cloud_in[rIdx].z;
+//       points (3, rIdx) = 1;
+//     }
+//     Eigen::VectorXf distances = plane_params_.transpose () * points;
+//     for (unsigned rIdx = 0; rIdx < cloud_in.size (); ++ rIdx)
+//     {
+//       if (distances (rIdx, 0) >= 0)
+//         clipped.push_back (rIdx);
+//     }
+//
+// #endif
+//
+//     //std::cout << "points   : " << points.rows () << " x " << points.cols () << " * " << plane_params_.transpose ().rows () << " x " << plane_params_.transpose ().cols () << std::endl;
+//
+//     //std::cout << "distances: " << distances.rows () << " x " << distances.cols () << std::endl;
+
+    for (unsigned pIdx = 0; pIdx < cloud_in.size (); ++pIdx)
+      if (clipper.clipPoint3D (cloud_in[pIdx]))
+        clipped.push_back (pIdx);
+  }
+  else
+  {
+    for (const auto& index : indices)
+      if (clipper.clipPoint3D (cloud_in[index]))
+        clipped.push_back (index);
+  }
+}
+
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kPlaneClipper3DMinPoints = 64;
+
+template<typename PointT> bool
+clipPointCloud3DRVV (const pcl::PointCloud<PointT>& cloud_in,
+                     Indices& clipped,
+                     const Indices& indices,
+                     const Eigen::Vector4f& plane_params)
+{
+  const std::size_t n = cloud_in.size ();
+  if (!indices.empty () ||
+      n < pcl::kPlaneClipper3DMinPoints ||
+      n > static_cast<std::size_t> (std::numeric_limits<int>::max ()))
+    return false;
+
+  const std::size_t old_size = clipped.size ();
+  clipped.resize (old_size + n);
+
+  const auto* base = reinterpret_cast<const std::uint8_t*> (cloud_in.data ());
+  int* out = clipped.data () + old_size;
+  std::size_t kept = 0;
+  std::size_t i = 0;
+
+  const float a = plane_params[0];
+  const float b = plane_params[1];
+  const float c = plane_params[2];
+  const float neg_d = -plane_params[3];
+
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    const auto* chunk = base + i * sizeof (PointT);
+    const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
+
+    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, x)), stride, vl);
+    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, y)), stride, vl);
+    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, z)), stride, vl);
+
+    // Full-cloud PointXYZ is an AoS scan: strided loads gather x/y/z for each
+    // VL chunk, and vcompress keeps the scalar output index order.  Subset
+    // indices stay scalar because they would require an extra gather layer.
+    vfloat32m2_t distance = __riscv_vfmul_vf_f32m2 (vx, a, vl);
+    distance = __riscv_vfmacc_vf_f32m2 (distance, b, vy, vl);
+    distance = __riscv_vfmacc_vf_f32m2 (distance, c, vz, vl);
+    const vbool16_t keep = __riscv_vmfge_vf_f32m2_b16 (distance, neg_d, vl);
+
+    const vuint32m2_t local = __riscv_vid_v_u32m2 (vl);
+    const vuint32m2_t source = __riscv_vadd_vx_u32m2 (local, static_cast<std::uint32_t> (i), vl);
+    const vint32m2_t source_i32 = __riscv_vreinterpret_v_u32m2_i32m2 (source);
+    const vint32m2_t compact = __riscv_vcompress_vm_i32m2 (source_i32, keep, vl);
+    const std::size_t count = __riscv_vcpop_m_b16 (keep, vl);
+    __riscv_vse32_v_i32m2 (out + kept, compact, count);
+
+    kept += count;
+    i += vl;
+  }
+
+  clipped.resize (old_size + kept);
+  return true;
+}
+
+#endif
+
+} // namespace pcl
 
 template<typename PointT>
 pcl::PlaneClipper3D<PointT>::PlaneClipper3D (const Eigen::Vector4f& plane_params)
@@ -174,49 +303,11 @@ pcl::PlaneClipper3D<PointT>::clipPlanarPolygon3D (std::vector<PointT, Eigen::ali
 template<typename PointT> void
 pcl::PlaneClipper3D<PointT>::clipPointCloud3D (const pcl::PointCloud<PointT>& cloud_in, Indices& clipped, const Indices& indices) const
 {
-  if (indices.empty ())
-  {
-    clipped.reserve (cloud_in.size ());
-
-// #if 0
-//     Eigen::MatrixXf points = cloud_in.getMatrixXfMap (4, sizeof (PointT) / sizeof (float), offsetof(PointT,x) / sizeof (float));
-//     Eigen::VectorXf distances = plane_params_.transpose () * points;
-//     for (unsigned rIdx = 0; rIdx < cloud_in.size (); ++ rIdx)
-//     {
-//       if (distances (rIdx, 0) >= -plane_params_[3])
-//         clipped.push_back (rIdx);
-//     }
-// #else
-//     Eigen::Matrix4Xf points (4, cloud_in.size ());
-//     for (unsigned rIdx = 0; rIdx < cloud_in.size (); ++ rIdx)
-//     {
-//       points (0, rIdx) = cloud_in[rIdx].x;
-//       points (1, rIdx) = cloud_in[rIdx].y;
-//       points (2, rIdx) = cloud_in[rIdx].z;
-//       points (3, rIdx) = 1;
-//     }
-//     Eigen::VectorXf distances = plane_params_.transpose () * points;
-//     for (unsigned rIdx = 0; rIdx < cloud_in.size (); ++ rIdx)
-//     {
-//       if (distances (rIdx, 0) >= 0)
-//         clipped.push_back (rIdx);
-//     }
-//
-// #endif
-//
-//     //std::cout << "points   : " << points.rows () << " x " << points.cols () << " * " << plane_params_.transpose ().rows () << " x " << plane_params_.transpose ().cols () << std::endl;
-//
-//     //std::cout << "distances: " << distances.rows () << " x " << distances.cols () << std::endl;
-
-    for (unsigned pIdx = 0; pIdx < cloud_in.size (); ++pIdx)
-      if (clipPoint3D (cloud_in[pIdx]))
-        clipped.push_back (pIdx);
-  }
-  else
-  {
-    for (const auto& index : indices)
-      if (clipPoint3D (cloud_in[index]))
-        clipped.push_back (index);
-  }
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<PointT, pcl::PointXYZ>)
+    if (pcl::clipPointCloud3DRVV (cloud_in, clipped, indices, plane_params_))
+      return;
+#endif
+  pcl::clipPointCloud3DStd (cloud_in, clipped, indices, *this);
 }
 #endif //PCL_FILTERS_IMPL_PLANE_CLIPPER3D_HPP
