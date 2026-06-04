@@ -50,7 +50,7 @@ namespace pcl
    * Code example:
    *
    * \code
-   * pcl::PointCloud <pcl::PointXYZ>::Ptr source; 
+   * pcl::PointCloud <pcl::PointXYZ>::Ptr source;
    * // .. read or fill the source cloud
    *
    * pcl::FrustumCulling<pcl::PointXYZ> fc;
@@ -87,7 +87,7 @@ namespace pcl
 
       using Filter<PointT>::getClassName;
 
-      FrustumCulling (bool extract_removed_indices = false) 
+      FrustumCulling (bool extract_removed_indices = false)
         : FilterIndices<PointT> (extract_removed_indices)
         , camera_pose_ (Eigen::Matrix4f::Identity ())
       {
@@ -97,8 +97,8 @@ namespace pcl
       /** \brief Set the pose of the camera w.r.t the origin
         * \param[in] camera_pose the camera pose
         *
-        * Note: This assumes a coordinate system where X is forward, 
-        * Y is up, and Z is right. To convert from the traditional camera 
+        * Note: This assumes a coordinate system where X is forward,
+        * Y is up, and Z is right. To convert from the traditional camera
         * coordinate system (X right, Y down, Z forward), one can use:
         *
         * \code
@@ -112,7 +112,7 @@ namespace pcl
         * fc.setCameraPose (pose_new);
         * \endcode
         */
-      void 
+      void
       setCameraPose (const Eigen::Matrix4f& camera_pose)
       {
         camera_pose_ = camera_pose;
@@ -129,7 +129,7 @@ namespace pcl
         * \param[in] hfov the field of view
         * Note: setHorizontalFOV(60.0) is equivalent to setHorizontalFOV(-30.0, 30.0).
         */
-      void 
+      void
       setHorizontalFOV (float hfov)
       {
         if (hfov <= 0 || hfov >= 180)
@@ -189,7 +189,7 @@ namespace pcl
         * \param[in] vfov the field of view
         * Note: setVerticalFOV(60.0) is equivalent to setVerticalFOV(-30.0, 30.0).
         */
-      void 
+      void
       setVerticalFOV (float vfov)
       {
         if (vfov <= 0 || vfov >= 180)
@@ -248,7 +248,7 @@ namespace pcl
       /** \brief Set the near plane distance
         * \param[in] np_dist the near plane distance. You can set this to 0 to disable near-plane filtering and extract a rectangular pyramid instead of a frustum.
         */
-      void 
+      void
       setNearPlaneDistance (float np_dist)
       {
         if (np_dist < 0.0f)
@@ -270,7 +270,7 @@ namespace pcl
         * \param[in] fp_dist the far plane distance.
         * You can set this to std::numeric_limits<float>::max(), then points will not be filtered by the far plane.
         */
-      void 
+      void
       setFarPlaneDistance (float fp_dist)
       {
         if (fp_dist <= 0.0f)
@@ -282,24 +282,24 @@ namespace pcl
       }
 
       /** \brief Get the far plane distance */
-      float 
+      float
       getFarPlaneDistance () const
       {
         return (fp_dist_);
       }
-      
+
       /** \brief Set the region of interest (ROI) in normalized values
-        *  
+        *
         * Default value of ROI: roi_{x, y} = 0.5, roi_{w, h} = 1.0
         * This corresponds to maximal FoV and returns all the points in the frustum
         * Can be used to cut out objects based on 2D bounding boxes by object detection.
-        * 
+        *
         * \param[in] roi_x X center position of ROI
         * \param[in] roi_y Y center position of ROI
         * \param[in] roi_w Width of ROI
         * \param[in] roi_h Height of ROI
         */
-      void 
+      void
       setRegionOfInterest (float roi_x, float roi_y, float roi_w, float roi_h)
       {
         if ((roi_x > 1.0f) || (roi_x < 0.0f) ||
@@ -307,8 +307,8 @@ namespace pcl
             (roi_w <= 0.0f) || (roi_w > 1.0f) ||
             (roi_h <= 0.0f) || (roi_h > 1.0f))
         {
-          throw PCLException ("ROI X-Y values should be between 0 and 1. " 
-            "Width and height must not be zero.", 
+          throw PCLException ("ROI X-Y values should be between 0 and 1. "
+            "Width and height must not be zero.",
             "frustum_culling.h", "setRegionOfInterest");
         }
         roi_x_ = roi_x;
@@ -316,14 +316,14 @@ namespace pcl
         roi_w_ = roi_w;
         roi_h_ = roi_h;
       }
-      
+
       /** \brief Get the region of interest (ROI) in normalized values
         * \param[in] roi_x X center position of ROI
         * \param[in] roi_y Y center position of ROI
-        * \param[in] roi_w Width of ROI 
+        * \param[in] roi_w Width of ROI
         * \param[in] roi_h Height of ROI
         */
-      void 
+      void
       getRegionOfInterest (float &roi_x, float &roi_y, float &roi_w, float &roi_h) const
       {
         roi_x = roi_x_;
@@ -335,6 +335,7 @@ namespace pcl
     protected:
       using PCLBase<PointT>::input_;
       using PCLBase<PointT>::indices_;
+      using PCLBase<PointT>::fake_indices_;
       using Filter<PointT>::filter_name_;
       using FilterIndices<PointT>::negative_;
       using FilterIndices<PointT>::keep_organized_;

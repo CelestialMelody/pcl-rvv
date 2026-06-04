@@ -41,6 +41,184 @@
 #include <pcl/filters/frustum_culling.h>
 #include <vector>
 
+#if defined(__RVV10__)
+#include <cstdint>
+#include <limits>
+#include <riscv_vector.h>
+#include <type_traits>
+#include <utility>
+#endif
+
+namespace pcl
+{
+
+template <typename PointT> void
+frustumCullingApplyFilterStd (const pcl::PointCloud<PointT>& input,
+                              const Indices& input_indices,
+                              Indices& indices,
+                              IndicesPtr removed_indices,
+                              bool extract_removed_indices,
+                              bool negative,
+                              const Eigen::Vector4f& pl_l,
+                              const Eigen::Vector4f& pl_r,
+                              const Eigen::Vector4f& pl_t,
+                              const Eigen::Vector4f& pl_b,
+                              const Eigen::Vector4f& pl_f,
+                              const Eigen::Vector4f& pl_n)
+{
+  if (extract_removed_indices)
+  {
+    removed_indices->resize (input_indices.size ());
+  }
+  indices.resize (input_indices.size ());
+  std::size_t indices_ctr = 0;
+  std::size_t removed_ctr = 0;
+  for (std::size_t i = 0; i < input_indices.size (); i++)
+  {
+    int idx = input_indices.at (i);
+    Eigen::Vector4f pt (input[idx].x,
+                        input[idx].y,
+                        input[idx].z,
+                        1.0f);
+    bool is_in_fov = (pt.dot (pl_l) <= 0) &&
+                     (pt.dot (pl_r) <= 0) &&
+                     (pt.dot (pl_t) <= 0) &&
+                     (pt.dot (pl_b) <= 0) &&
+                     (pt.dot (pl_f) <= 0) &&
+                     (pt.dot (pl_n) <= 0);
+    if (is_in_fov ^ negative)
+    {
+      indices[indices_ctr++] = idx;
+    }
+    else if (extract_removed_indices)
+    {
+      (*removed_indices)[removed_ctr++] = idx;
+    }
+  }
+  indices.resize (indices_ctr);
+  removed_indices->resize (removed_ctr);
+}
+
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kFrustumCullingIndicesMinPoints = 64;
+
+template <typename T>
+using FrustumCullingScalar = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename PointT, typename = void>
+struct FrustumCullingPointXYZCompatible : std::false_type {};
+
+template <typename PointT>
+struct FrustumCullingPointXYZCompatible<
+    PointT,
+    std::void_t<decltype(std::declval<PointT>().x),
+                decltype(std::declval<PointT>().y),
+                decltype(std::declval<PointT>().z)>>
+: std::bool_constant<
+      std::is_same_v<PointT, pcl::PointXYZ> &&
+      std::is_standard_layout_v<PointT> &&
+      std::is_same_v<FrustumCullingScalar<decltype(std::declval<PointT>().x)>, float> &&
+      std::is_same_v<FrustumCullingScalar<decltype(std::declval<PointT>().y)>, float> &&
+      std::is_same_v<FrustumCullingScalar<decltype(std::declval<PointT>().z)>, float>> {};
+
+template <typename PointT>
+inline constexpr bool kFrustumCullingPointXYZCompatible = FrustumCullingPointXYZCompatible<PointT>::value;
+
+template <typename PointT> bool
+frustumCullingApplyFilterRVV (const pcl::PointCloud<PointT>& input,
+                              Indices& indices,
+                              IndicesPtr removed_indices,
+                              bool extract_removed_indices,
+                              bool negative,
+                              bool fake_indices,
+                              const Eigen::Vector4f& pl_l,
+                              const Eigen::Vector4f& pl_r,
+                              const Eigen::Vector4f& pl_t,
+                              const Eigen::Vector4f& pl_b,
+                              const Eigen::Vector4f& pl_f,
+                              const Eigen::Vector4f& pl_n)
+{
+  const std::size_t n = input.size ();
+  if (!fake_indices ||
+      !input.is_dense ||
+      n < pcl::kFrustumCullingIndicesMinPoints ||
+      n > static_cast<std::size_t> (std::numeric_limits<int>::max ()))
+    return false;
+
+  indices.resize (n);
+  if (extract_removed_indices)
+    removed_indices->resize (n);
+  else
+    removed_indices->clear ();
+
+  const auto* base = reinterpret_cast<const std::uint8_t*> (input.data ());
+  int* out = indices.data ();
+  int* removed = extract_removed_indices ? removed_indices->data () : nullptr;
+  std::size_t kept = 0;
+  std::size_t dropped = 0;
+  std::size_t i = 0;
+
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    const auto* chunk = base + i * sizeof (PointT);
+    const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
+
+    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, x)), stride, vl);
+    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, y)), stride, vl);
+    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, z)), stride, vl);
+
+    auto plane_leq_zero = [&](const Eigen::Vector4f& plane) {
+      vfloat32m2_t distance = __riscv_vfmul_vf_f32m2 (vx, plane[0], vl);
+      distance = __riscv_vfmacc_vf_f32m2 (distance, plane[1], vy, vl);
+      distance = __riscv_vfmacc_vf_f32m2 (distance, plane[2], vz, vl);
+      distance = __riscv_vfadd_vf_f32m2 (distance, plane[3], vl);
+      return __riscv_vmfle_vf_f32m2_b16 (distance, 0.0f, vl);
+    };
+
+    // Full-cloud dense PointXYZ inputs use AoS strided loads for x/y/z.
+    // Six plane masks are combined exactly like the scalar short-circuit
+    // predicate, and vcompress preserves the FilterIndices output order.
+    vbool16_t inside = plane_leq_zero (pl_l);
+    inside = __riscv_vmand_mm_b16 (inside, plane_leq_zero (pl_r), vl);
+    inside = __riscv_vmand_mm_b16 (inside, plane_leq_zero (pl_t), vl);
+    inside = __riscv_vmand_mm_b16 (inside, plane_leq_zero (pl_b), vl);
+    inside = __riscv_vmand_mm_b16 (inside, plane_leq_zero (pl_f), vl);
+    inside = __riscv_vmand_mm_b16 (inside, plane_leq_zero (pl_n), vl);
+
+    const vbool16_t keep = negative ? __riscv_vmnot_m_b16 (inside, vl) : inside;
+    const vbool16_t removed_mask = negative ? inside : __riscv_vmnot_m_b16 (inside, vl);
+
+    const vuint32m2_t local = __riscv_vid_v_u32m2 (vl);
+    const vuint32m2_t source = __riscv_vadd_vx_u32m2 (local, static_cast<std::uint32_t> (i), vl);
+    const vint32m2_t source_i32 = __riscv_vreinterpret_v_u32m2_i32m2 (source);
+
+    const vint32m2_t kept_i32 = __riscv_vcompress_vm_i32m2 (source_i32, keep, vl);
+    const std::size_t keep_count = __riscv_vcpop_m_b16 (keep, vl);
+    __riscv_vse32_v_i32m2 (out + kept, kept_i32, keep_count);
+    kept += keep_count;
+
+    if (extract_removed_indices)
+    {
+      const vint32m2_t removed_i32 = __riscv_vcompress_vm_i32m2 (source_i32, removed_mask, vl);
+      const std::size_t removed_count = __riscv_vcpop_m_b16 (removed_mask, vl);
+      __riscv_vse32_v_i32m2 (removed + dropped, removed_i32, removed_count);
+      dropped += removed_count;
+    }
+
+    i += vl;
+  }
+
+  indices.resize (kept);
+  removed_indices->resize (extract_removed_indices ? dropped : 0);
+  return true;
+}
+
+#endif
+
+} // namespace pcl
+
 ///////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
 pcl::FrustumCulling<PointT>::applyFilter (Indices &indices)
@@ -50,7 +228,7 @@ pcl::FrustumCulling<PointT>::applyFilter (Indices &indices)
         fp_dist_ = np_dist_ + 1.0f;
     }
 
-  Eigen::Vector4f pl_n; // near plane 
+  Eigen::Vector4f pl_n; // near plane
   Eigen::Vector4f pl_f; // far plane
   Eigen::Vector4f pl_t; // top plane
   Eigen::Vector4f pl_b; // bottom plane
@@ -72,7 +250,7 @@ pcl::FrustumCulling<PointT>::applyFilter (Indices &indices)
   float roi_xmin = roi_x_ - (roi_w_ / 2);  // roi min x
   float roi_ymax = roi_y_ + (roi_h_ / 2);  // roi max y
   float roi_ymin = roi_y_ - (roi_h_ / 2);  // roi min y
-  
+
   float np_h_u = static_cast<float>(2 * std::tan(fov_lower_bound_rad) * np_dist_ * (roi_ymin - 0.5));  // near plane upper height
   float np_h_d = static_cast<float>(2 * std::tan(fov_upper_bound_rad) * np_dist_ * (roi_ymax - 0.5));  // near plane lower height
   float np_w_l = static_cast<float>(2 * std::tan(fov_left_bound_rad) * np_dist_ * (roi_xmin - 0.5));   // near plane left width
@@ -95,7 +273,7 @@ pcl::FrustumCulling<PointT>::applyFilter (Indices &indices)
   Eigen::Vector3f np_bl (np_c - (up * np_h_d) - (right * np_w_l));  // Bottom left corner of the near plane
   Eigen::Vector3f np_br (np_c - (up * np_h_d) + (right * np_w_r));  // Bottom right corner of the near plane
 
-  pl_f.head<3> () = (fp_bl - fp_br).cross (fp_tr - fp_br);  // Far plane equation - cross product of the 
+  pl_f.head<3> () = (fp_bl - fp_br).cross (fp_tr - fp_br);  // Far plane equation - cross product of the
   pl_f (3) = -fp_c.dot (pl_f.head<3> ());                   // perpendicular edges of the far plane
 
   if(is_far_plane_infinite) {
@@ -103,7 +281,7 @@ pcl::FrustumCulling<PointT>::applyFilter (Indices &indices)
       fp_dist_ = std::numeric_limits<float>::max();
   }
 
-  pl_n.head<3> () = (np_tr - np_br).cross (np_bl - np_br);  // Near plane equation - cross product of the 
+  pl_n.head<3> () = (np_tr - np_br).cross (np_bl - np_br);  // Near plane equation - cross product of the
   pl_n (3) = -np_c.dot (pl_n.head<3> ());                   // perpendicular edges of the near plane
 
   Eigen::Vector3f a (fp_bl - T);  // Vector connecting the camera and far plane bottom left
@@ -115,12 +293,12 @@ pcl::FrustumCulling<PointT>::applyFilter (Indices &indices)
   //                             _________
   //                           /|       . |
   //                       d  / |   c .   |
-  //                         /  | __._____| 
+  //                         /  | __._____|
   //                        /  /  .      .
   //                 a <---/-/  .    .
   //                      / / .   .  b
   //                     /   .
-  //                     . 
+  //                     .
   //                   T
   //
 
@@ -134,37 +312,19 @@ pcl::FrustumCulling<PointT>::applyFilter (Indices &indices)
   pl_t (3) = -T.dot (pl_t.head<3> ());
   pl_b (3) = -T.dot (pl_b.head<3> ());
 
-  if (extract_removed_indices_)
+#if defined(__RVV10__)
+  if constexpr (pcl::kFrustumCullingPointXYZCompatible<PointT>)
   {
-    removed_indices_->resize (indices_->size ());
+    if (pcl::frustumCullingApplyFilterRVV (*input_, indices, removed_indices_,
+                                           extract_removed_indices_, negative_, fake_indices_,
+                                           pl_l, pl_r, pl_t, pl_b, pl_f, pl_n))
+      return;
   }
-  indices.resize (indices_->size ());
-  std::size_t indices_ctr = 0;
-  std::size_t removed_ctr = 0;
-  for (std::size_t i = 0; i < indices_->size (); i++) 
-  {
-    int idx = indices_->at (i);
-    Eigen::Vector4f pt ((*input_)[idx].x,
-                        (*input_)[idx].y,
-                        (*input_)[idx].z,
-                        1.0f);
-    bool is_in_fov = (pt.dot (pl_l) <= 0) && 
-                     (pt.dot (pl_r) <= 0) &&
-                     (pt.dot (pl_t) <= 0) && 
-                     (pt.dot (pl_b) <= 0) && 
-                     (pt.dot (pl_f) <= 0) &&
-                     (pt.dot (pl_n) <= 0);
-    if (is_in_fov ^ negative_)
-    {
-      indices[indices_ctr++] = idx;
-    }
-    else if (extract_removed_indices_)
-    {
-      (*removed_indices_)[removed_ctr++] = idx;
-    }
-  }
-  indices.resize (indices_ctr);
-  removed_indices_->resize (removed_ctr);
+#endif
+
+  pcl::frustumCullingApplyFilterStd (*input_, *indices_, indices, removed_indices_,
+                                     extract_removed_indices_, negative_,
+                                     pl_l, pl_r, pl_t, pl_b, pl_f, pl_n);
 }
 
 #define PCL_INSTANTIATE_FrustumCulling(T) template class PCL_EXPORTS pcl::FrustumCulling<T>;
