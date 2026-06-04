@@ -1,0 +1,11 @@
+Note: Google Test filter = FrustumCulling.Filters
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FrustumCulling
+[ RUN      ] FrustumCulling.Filters
+[       OK ] FrustumCulling.Filters (56 ms)
+[----------] 1 test from FrustumCulling (57 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (60 ms total)
+[  PASSED  ] 1 test.

@@ -1,0 +1,23 @@
+Build: RVV (__RVV10__ enabled)
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from FrustumCullingRVV
+[ RUN      ] FrustumCullingRVV.SmallCloudFallsBackAndMatchesExplicitAll
+[       OK ] FrustumCullingRVV.SmallCloudFallsBackAndMatchesExplicitAll (0 ms)
+[ RUN      ] FrustumCullingRVV.LargeDensePointXYZMatchesExplicitAll
+[       OK ] FrustumCullingRVV.LargeDensePointXYZMatchesExplicitAll (0 ms)
+[ RUN      ] FrustumCullingRVV.NegativeMatchesExplicitAll
+[       OK ] FrustumCullingRVV.NegativeMatchesExplicitAll (0 ms)
+[ RUN      ] FrustumCullingRVV.ExtractRemovedIndicesMatchesExplicitAll
+[       OK ] FrustumCullingRVV.ExtractRemovedIndicesMatchesExplicitAll (0 ms)
+[ RUN      ] FrustumCullingRVV.FarPlaneInfinityMatchesExplicitAll
+[       OK ] FrustumCullingRVV.FarPlaneInfinityMatchesExplicitAll (0 ms)
+[ RUN      ] FrustumCullingRVV.NonDenseFlagFallbackPreservesScalarSemantics
+[       OK ] FrustumCullingRVV.NonDenseFlagFallbackPreservesScalarSemantics (0 ms)
+[ RUN      ] FrustumCullingRVV.PointXYZIFallbackPreservesGenericSemantics
+[       OK ] FrustumCullingRVV.PointXYZIFallbackPreservesGenericSemantics (0 ms)
+[----------] 7 tests from FrustumCullingRVV (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (3 ms total)
+[  PASSED  ] 7 tests.

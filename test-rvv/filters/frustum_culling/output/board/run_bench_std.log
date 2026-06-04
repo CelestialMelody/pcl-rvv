@@ -1,0 +1,18 @@
+================================================================================================
+ PCL filters/frustum_culling Benchmark (FrustumCulling<PointXYZ> full-cloud RVV path)
+================================================================================================
+Build: Std (__RVV10__ disabled)
+Dataset: synthetic PointXYZ clouds; full-cloud six-plane frustum RVV cases and subset/type fallback cases
+Iterations: 30
+frustum_culling pointxyz full-cloud 64K                   : 3.7764 ms/iter
+  Total Time: 113.2918 ms, checksum: 6258084631656263720
+frustum_culling pointxyz full-cloud 1M                    : 60.6842 ms/iter
+  Total Time: 1820.5254 ms, checksum: 10339669341503731344
+frustum_culling pointxyz negative removed 1M              : 66.1487 ms/iter
+  Total Time: 1984.4624 ms, checksum: 2917122627139816008
+frustum_culling nondense fallback 1M                      : 60.6530 ms/iter
+  Total Time: 1819.5909 ms, checksum: 10339669341503731344
+frustum_culling subset fallback 1M                        : 30.4931 ms/iter
+  Total Time: 914.7939 ms, checksum: 1089437055429716404
+frustum_culling pointxyzi fallback 1M                     : 76.4250 ms/iter
+  Total Time: 2292.7485 ms, checksum: 2480665868204470711
