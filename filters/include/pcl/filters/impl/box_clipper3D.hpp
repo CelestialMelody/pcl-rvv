@@ -36,6 +36,138 @@
 #define PCL_FILTERS_IMPL_BOX_CLIPPER3D_HPP
 
 #include <pcl/filters/box_clipper3D.h>
+#include <pcl/common/rvv_point_load.h>
+#include <pcl/point_types.h>
+
+#if defined(__RVV10__)
+#include <cstdint>
+#include <limits>
+#include <riscv_vector.h>
+#include <type_traits>
+#endif
+
+namespace pcl
+{
+
+template<typename PointT> void
+clipPointCloud3DStd (const pcl::PointCloud<PointT>& cloud_in,
+                     Indices& clipped,
+                     const Indices& indices,
+                     const pcl::BoxClipper3D<PointT>& clipper)
+{
+  clipped.clear ();
+  if (indices.empty ())
+  {
+    clipped.reserve (cloud_in.size ());
+    for (std::size_t pIdx = 0; pIdx < cloud_in.size (); ++pIdx)
+      if (clipper.clipPoint3D (cloud_in[pIdx]))
+        clipped.push_back (pIdx);
+  }
+  else
+  {
+    for (const auto &index : indices)
+      if (clipper.clipPoint3D (cloud_in[index]))
+        clipped.push_back (index);
+  }
+}
+
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kBoxClipper3DMinPoints = 64;
+
+template<typename PointT> bool
+clipPointCloud3DRVV (const pcl::PointCloud<PointT>& cloud_in,
+                     Indices& clipped,
+                     const Indices& indices,
+                     const Eigen::Matrix4f& transform)
+{
+  const std::size_t n = cloud_in.size ();
+  if (!indices.empty () ||
+      n < pcl::kBoxClipper3DMinPoints ||
+      n > static_cast<std::size_t> (std::numeric_limits<int>::max ()))
+    return false;
+
+  clipped.clear ();
+  clipped.resize (n);
+
+  const auto* base = reinterpret_cast<const std::uint8_t*> (cloud_in.data ());
+  int* out = clipped.data ();
+  std::size_t kept = 0;
+  std::size_t i = 0;
+
+  const float m00 = transform (0, 0);
+  const float m01 = transform (0, 1);
+  const float m02 = transform (0, 2);
+  const float m03 = transform (0, 3);
+  const float m10 = transform (1, 0);
+  const float m11 = transform (1, 1);
+  const float m12 = transform (1, 2);
+  const float m13 = transform (1, 3);
+  const float m20 = transform (2, 0);
+  const float m21 = transform (2, 1);
+  const float m22 = transform (2, 2);
+  const float m23 = transform (2, 3);
+  const float m30 = transform (3, 0);
+  const float m31 = transform (3, 1);
+  const float m32 = transform (3, 2);
+  const float m33 = transform (3, 3);
+
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    const auto* chunk = base + i * sizeof (PointT);
+
+    vfloat32m2_t vx;
+    vfloat32m2_t vy;
+    vfloat32m2_t vz;
+    pcl::rvv_load::strided_load3_f32m2<sizeof (PointT), offsetof (PointT, x), offsetof (PointT, y), offsetof (PointT, z)> (chunk, vl, vx, vy, vz);
+
+    // The scalar predicate is (abs(T * [x y z 1]^T) <= 1).all().
+    // Full-cloud PointXYZ uses AoS stride loads and vcompress keeps output
+    // indices ordered; subset/generic point types fall back to the scalar path.
+    vfloat32m2_t tx = __riscv_vfmul_vf_f32m2 (vx, m00, vl);
+    tx = __riscv_vfmacc_vf_f32m2 (tx, m01, vy, vl);
+    tx = __riscv_vfmacc_vf_f32m2 (tx, m02, vz, vl);
+    tx = __riscv_vfadd_vf_f32m2 (tx, m03, vl);
+
+    vfloat32m2_t ty = __riscv_vfmul_vf_f32m2 (vx, m10, vl);
+    ty = __riscv_vfmacc_vf_f32m2 (ty, m11, vy, vl);
+    ty = __riscv_vfmacc_vf_f32m2 (ty, m12, vz, vl);
+    ty = __riscv_vfadd_vf_f32m2 (ty, m13, vl);
+
+    vfloat32m2_t tz = __riscv_vfmul_vf_f32m2 (vx, m20, vl);
+    tz = __riscv_vfmacc_vf_f32m2 (tz, m21, vy, vl);
+    tz = __riscv_vfmacc_vf_f32m2 (tz, m22, vz, vl);
+    tz = __riscv_vfadd_vf_f32m2 (tz, m23, vl);
+
+    vfloat32m2_t tw = __riscv_vfmul_vf_f32m2 (vx, m30, vl);
+    tw = __riscv_vfmacc_vf_f32m2 (tw, m31, vy, vl);
+    tw = __riscv_vfmacc_vf_f32m2 (tw, m32, vz, vl);
+    tw = __riscv_vfadd_vf_f32m2 (tw, m33, vl);
+
+    vbool16_t keep = __riscv_vmfle_vf_f32m2_b16 (__riscv_vfabs_v_f32m2 (tx, vl), 1.0f, vl);
+    keep = __riscv_vmand_mm_b16 (keep, __riscv_vmfle_vf_f32m2_b16 (__riscv_vfabs_v_f32m2 (ty, vl), 1.0f, vl), vl);
+    keep = __riscv_vmand_mm_b16 (keep, __riscv_vmfle_vf_f32m2_b16 (__riscv_vfabs_v_f32m2 (tz, vl), 1.0f, vl), vl);
+    keep = __riscv_vmand_mm_b16 (keep, __riscv_vmfle_vf_f32m2_b16 (__riscv_vfabs_v_f32m2 (tw, vl), 1.0f, vl), vl);
+
+    const vuint32m2_t local = __riscv_vid_v_u32m2 (vl);
+    const vuint32m2_t source = __riscv_vadd_vx_u32m2 (local, static_cast<std::uint32_t> (i), vl);
+    const vint32m2_t source_i32 = __riscv_vreinterpret_v_u32m2_i32m2 (source);
+    const vint32m2_t compact = __riscv_vcompress_vm_i32m2 (source_i32, keep, vl);
+    const std::size_t count = __riscv_vcpop_m_b16 (keep, vl);
+    __riscv_vse32_v_i32m2 (out + kept, compact, count);
+
+    kept += count;
+    i += vl;
+  }
+
+  clipped.resize (kept);
+  return true;
+}
+
+#endif
+
+} // namespace pcl
 
 template<typename PointT>
 pcl::BoxClipper3D<PointT>::BoxClipper3D (const Eigen::Affine3f& transformation)
@@ -194,19 +326,14 @@ pcl::BoxClipper3D<PointT>::clipPlanarPolygon3D (std::vector<PointT, Eigen::align
 template<typename PointT> void
 pcl::BoxClipper3D<PointT>::clipPointCloud3D (const pcl::PointCloud<PointT>& cloud_in, Indices& clipped, const Indices& indices) const
 {
-  clipped.clear ();
-  if (indices.empty ())
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<PointT, pcl::PointXYZ>)
   {
-    clipped.reserve (cloud_in.size ());
-    for (std::size_t pIdx = 0; pIdx < cloud_in.size (); ++pIdx)
-      if (clipPoint3D (cloud_in[pIdx]))
-        clipped.push_back (pIdx);
+    if (pcl::clipPointCloud3DRVV (cloud_in, clipped, indices, transformation_.matrix ()))
+      return;
   }
-  else
-  {
-    for (const auto &index : indices)
-      if (clipPoint3D (cloud_in[index]))
-        clipped.push_back (index);
-  }
+#endif
+
+  pcl::clipPointCloud3DStd (cloud_in, clipped, indices, *this);
 }
 #endif //PCL_FILTERS_IMPL_BOX_CLIPPER3D_HPP
