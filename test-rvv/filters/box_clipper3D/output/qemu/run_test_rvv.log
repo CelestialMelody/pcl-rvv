@@ -1,0 +1,21 @@
+Build: RVV (__RVV10__ enabled)
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from BoxClipper3DRVV
+[ RUN      ] BoxClipper3DRVV.SmallCloudMatchesScalarFormula
+[       OK ] BoxClipper3DRVV.SmallCloudMatchesScalarFormula (0 ms)
+[ RUN      ] BoxClipper3DRVV.LargeDensePointXYZKeepsOrder
+[       OK ] BoxClipper3DRVV.LargeDensePointXYZKeepsOrder (1 ms)
+[ RUN      ] BoxClipper3DRVV.ClearsExistingOutput
+[       OK ] BoxClipper3DRVV.ClearsExistingOutput (0 ms)
+[ RUN      ] BoxClipper3DRVV.ExplicitIndicesFallbackPreservesSubsetValues
+[       OK ] BoxClipper3DRVV.ExplicitIndicesFallbackPreservesSubsetValues (0 ms)
+[ RUN      ] BoxClipper3DRVV.NonFiniteValuesMatchScalarComparison
+[       OK ] BoxClipper3DRVV.NonFiniteValuesMatchScalarComparison (0 ms)
+[ RUN      ] BoxClipper3DRVV.PointXYZIFallbackPreservesGenericSemantics
+[       OK ] BoxClipper3DRVV.PointXYZIFallbackPreservesGenericSemantics (0 ms)
+[----------] 6 tests from BoxClipper3DRVV (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (8 ms total)
+[  PASSED  ] 6 tests.

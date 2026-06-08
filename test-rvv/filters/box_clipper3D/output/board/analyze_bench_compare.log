@@ -1,0 +1,30 @@
+===================================================================================================
+ PCL filters/box_clipper3D Benchmark (BoxClipper3D<PointXYZ> full-cloud RVV path) (Std vs RVV)
+===================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : synthetic PointXYZ clouds; full-cloud affine box clipping RVV cases and subset/type fallback cases
+  Iterations: 30 （每行 Total = Avg × 30）
+  Std log   : /root/pcl-test/filters/box_clipper3D/output/run_bench_std.log
+  RVV log   : /root/pcl-test/filters/box_clipper3D/output/run_bench_rvv.log
+
+---------------------------------------------------------------------------------------------------
+Benchmark Item                         | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+---------------------------------------|--------|----------------|----------------|----------------
+box_clipper3D pointxyz balanced 64K    | Std    |      3.6611 ms |    109.8330 ms |    [   1.00x ]
+                                       | RVV    |      0.6245 ms |     18.7350 ms |    [   5.86x ]
+---------------------------------------|--------|----------------|----------------|----------------
+box_clipper3D pointxyz balanced 1M     | Std    |     57.9010 ms |   1737.0300 ms |    [   1.00x ]
+                                       | RVV    |     10.1840 ms |    305.5200 ms |    [   5.69x ]
+---------------------------------------|--------|----------------|----------------|----------------
+box_clipper3D pointxyz mostly-keep 1M  | Std    |     70.5970 ms |   2117.9100 ms |    [   1.00x ]
+                                       | RVV    |     14.2747 ms |    428.2410 ms |    [   4.95x ]
+---------------------------------------|--------|----------------|----------------|----------------
+box_clipper3D subset fallback 1M       | Std    |     27.4105 ms |    822.3150 ms |    [   1.00x ]
+                                       | RVV    |     27.9268 ms |    837.8040 ms |    [   0.98x ]
+---------------------------------------|--------|----------------|----------------|----------------
+box_clipper3D pointxyzi fallback 1M    | Std    |     61.7393 ms |   1852.1790 ms |    [   1.00x ]
+                                       | RVV    |     62.3824 ms |   1871.4720 ms |    [   0.99x ]
+---------------------------------------|--------|----------------|----------------|----------------
+===================================================================================================

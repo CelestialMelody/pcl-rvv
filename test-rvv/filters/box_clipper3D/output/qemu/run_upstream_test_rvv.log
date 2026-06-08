@@ -1,0 +1,15 @@
+[==========] Running 2 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from BoxClipper3D
+[ RUN      ] BoxClipper3D.Filters
+[       OK ] BoxClipper3D.Filters (2 ms)
+[----------] 1 test from BoxClipper3D (2 ms total)
+
+[----------] 1 test from CropBox
+[ RUN      ] CropBox.Filters
+[       OK ] CropBox.Filters (10 ms)
+[----------] 1 test from CropBox (10 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 2 test suites ran. (17 ms total)
+[  PASSED  ] 2 tests.

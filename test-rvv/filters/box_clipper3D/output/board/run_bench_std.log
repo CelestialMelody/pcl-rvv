@@ -1,0 +1,16 @@
+================================================================================================
+ PCL filters/box_clipper3D Benchmark (BoxClipper3D<PointXYZ> full-cloud RVV path)
+================================================================================================
+Build: Std (__RVV10__ disabled)
+Dataset: synthetic PointXYZ clouds; full-cloud affine box clipping RVV cases and subset/type fallback cases
+Iterations: 30
+box_clipper3D pointxyz balanced 64K                       : 3.6611 ms/iter
+  Total Time: 109.8331 ms, checksum: 17872802775308602658
+box_clipper3D pointxyz balanced 1M                        : 57.9010 ms/iter
+  Total Time: 1737.0300 ms, checksum: 10661084573013112729
+box_clipper3D pointxyz mostly-keep 1M                     : 70.5970 ms/iter
+  Total Time: 2117.9086 ms, checksum: 809534331754972035
+box_clipper3D subset fallback 1M                          : 27.4105 ms/iter
+  Total Time: 822.3163 ms, checksum: 14598943245788870753
+box_clipper3D pointxyzi fallback 1M                       : 61.7393 ms/iter
+  Total Time: 1852.1793 ms, checksum: 9250306183328080131
