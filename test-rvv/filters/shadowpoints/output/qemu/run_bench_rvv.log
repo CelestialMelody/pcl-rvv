@@ -1,0 +1,27 @@
+make[1]: Entering directory '/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/filters/shadowpoints'
+rm -f build/riscv/bench_shadowpoints_rvv
+[BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
+riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-06-07_21-51-18.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/RISCV/workspace/pcl/common/include -I/home/zoomin/codes/RISCV/workspace/pcl/filters/include -I/home/zoomin/codes/RISCV/workspace/pcl/features/include -I/home/zoomin/codes/RISCV/workspace/pcl/search/include -I/home/zoomin/codes/RISCV/workspace/pcl/kdtree/include -I/home/zoomin/codes/RISCV/workspace/pcl/octree/include -I/home/zoomin/codes/RISCV/workspace/pcl/sample_consensus/include -I/home/zoomin/codes/RISCV/workspace/pcl/io/include -I/home/zoomin/codes/RISCV/workspace/pcl/test/include -I/home/zoomin/codes/RISCV/workspace/pcl -I/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/RISCV/workspace/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/RISCV/workspace/riscv/boost/include -I/home/zoomin/codes/RISCV/workspace/riscv/gtest/include -I/home/zoomin/codes/RISCV/workspace/riscv/flann/include -I/home/zoomin/codes/RISCV/workspace/riscv/lz4/include -I/home/zoomin/codes/RISCV/workspace/riscv/hdf5/include -I/home/zoomin/codes/RISCV/workspace/riscv/zlib/include -I/home/zoomin/codes/RISCV/workspace/riscv/libpng/include -DPCL_SHADOWPOINTS_RVV_BENCH_ONLY bench_shadowpoints.cpp -L/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -L/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -L/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -L/home/zoomin/codes/RISCV/workspace/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/flann/lib -L/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib -L/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib -L/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib -L/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib  -lpcl_common -lm -o build/riscv/bench_shadowpoints_rvv
+[RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
+LD_LIBRARY_PATH=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib:/home/zoomin/codes/RISCV/workspace/riscv/boost/lib:/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib:/home/zoomin/codes/RISCV/workspace/riscv/flann/lib:/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib:/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib:/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib:/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_shadowpoints_rvv 
+================================================================================================
+ PCL filters/shadowpoints Benchmark (ShadowPoints<PointXYZ,PointNormal> indices RVV path)
+================================================================================================
+Build: RVV (__RVV10__ enabled, bench-only helper enabled)
+Dataset: synthetic PointXYZ + PointNormal clouds; full-cloud dot/abs threshold bench-only RVV cases and subset/type/cloud-output fallback cases
+Iterations: 30
+shadowpoints pointxyz full-cloud 64K                  : 12.5126 ms/iter
+  Total Time: 375.3771 ms, checksum: 11700163607559850908
+shadowpoints pointxyz full-cloud 1M                   : 199.8961 ms/iter
+  Total Time: 5996.8821 ms, checksum: 4831015018897800993
+shadowpoints negative removed 1M                      : 211.5322 ms/iter
+  Total Time: 6345.9659 ms, checksum: 12184345176756006576
+shadowpoints subset fallback 1M                       : 9.1646 ms/iter
+  Total Time: 274.9384 ms, checksum: 18036595852822747721
+shadowpoints normal type fallback 1M                  : 16.4639 ms/iter
+  Total Time: 493.9182 ms, checksum: 12949535999456508277
+shadowpoints pointxyzi fallback 1M                    : 19.1402 ms/iter
+  Total Time: 574.2061 ms, checksum: 16357277656814387029
+shadowpoints cloud keep_organized fallback 64K        : 1.1411 ms/iter
+  Total Time: 34.2339 ms, checksum: 6081673756672
+make[1]: Leaving directory '/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/filters/shadowpoints'
