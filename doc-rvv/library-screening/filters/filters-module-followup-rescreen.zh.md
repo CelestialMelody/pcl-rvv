@@ -16,7 +16,7 @@
 
 - 第一实施波次已经完成，二轮报告中靠前主题 `voxel_grid`、`convolution`、`filter_indices/filter`、`passthrough`、`crop_box`、`voxel_grid_covariance`、`fast_bilateral`、`fast_bilateral_omp` 均已 closeout。
 - 已完成主题显示：直接主路径中的大规模线性扫描、organized 内区卷积、mask + `vcompress` 保序输出通常具备强收益；只覆盖前置预处理或尾段压缩的小片段时，整体收益容易被后续 lattice、map、sort、search、Eigen 或整点复制稀释。
-- `fast_bilateral` blur RVV 已作为 bench-only 诊断验证，正确性和指令路径成立但板卡为 `0.95x`，不接入生产；`filter_indices` normals prototype 曾约 `0.62x` 后回退；这些结果要求后续候选必须下钻到函数入口，不能只按循环数量排序。
+- `fast_bilateral` blur RVV 已作为 bench-only 诊断验证，正确性和指令路径成立但板卡为 `1.00x`，不接入生产；`filter_indices` normals prototype 曾约 `0.62x` 后回退；这些结果要求后续候选必须下钻到函数入口，不能只按循环数量排序。
 
 ## 2. 筛选统计
 
@@ -38,13 +38,13 @@
 | `filter_indices/filter` | indices-only sparse xyz 约 `2.21x`~`2.35x`，cloud-out 间接受益约 `1.62x` | normals RVV prototype 约 `0.62x` 后回退 Std | 保序 indices 压缩有效；整点复制或额外字段检查主导时降级 |
 | `passthrough` | indices 主路径约 `2.60x`~`3.21x`，cloud-out 约 `1.63x` | 显式 subset indices 与 `PCLPointCloud2` 路径暂缓 | 字段区间判断 + inlier/removed 双路保序输出是强模式；gather/subset 要后置 |
 | `crop_box` | dense identity indices 约 `2.09x`~`3.08x`，cloud-out 约 `2.63x` | subset、non-dense、transform、`PCLPointCloud2` 回退 | 多字段比较 + `vcompress` 是 filters 后续几何筛选的主要参考 |
-| `voxel_grid_covariance` | dense leaf-id 预计算约 `1.46x`~`1.52x` | distance-field fallback `0.79x`，non-dense fallback `0.95x`；cov/eigen/searchable 状态保持标量 | 前置 leaf-id 可有中等收益，但不应优先于直接输出主路径 |
-| `fast_bilateral` | z 预处理整体约 `1.04x`~`1.10x` | lattice blur bench-only RVV 为 `0.95x`，生产 blur 回退 | 只覆盖小前置片段通常是弱收益；邻域 / lattice / 冲突累加不因循环大自动升级 |
+| `voxel_grid_covariance` | dense leaf-id 预计算约 `1.46x`~`1.52x` | distance-field fallback `0.79x`，non-dense fallback `1.00x`；cov/eigen/searchable 状态保持标量 | 前置 leaf-id 可有中等收益，但不应优先于直接输出主路径 |
+| `fast_bilateral` | z 预处理整体约 `1.04x`~`1.10x` | lattice blur bench-only RVV 为 `1.00x`，生产 blur 回退 | 只覆盖小前置片段通常是弱收益；邻域 / lattice / 冲突累加不因循环大自动升级 |
 | `fast_bilateral_omp` | z 预处理整体约 `1.05x`~`1.16x` | OMP lattice 主体保持标量 | OMP + RVV 需要清晰边界；弱收益只适合极小、低风险、常用入口 |
 
 ## 4. 筛选口径修正
 
-第二轮靠前队列中的 `fast_bilateral` / `fast_bilateral_omp` 显示，organized 图像式循环和大规模数据本身不足以支撑生产优先级。两者在文件级具备大循环和深度图像式数据流，但当前可安全接入生产的 RVV 覆盖主要是 finite `z` 的 min/max 规约与 non-finite 替换；后续 lattice splat、blur、插值和 OpenMP 主体仍是主要成本。因此板卡整体收益只有 `1.04x`~`1.16x`，非 OMP blur microbench 正确且命中 RVV 指令，但板卡为 `0.95x`，不接入生产。
+第二轮靠前队列中的 `fast_bilateral` / `fast_bilateral_omp` 显示，organized 图像式循环和大规模数据本身不足以支撑生产优先级。两者在文件级具备大循环和深度图像式数据流，但当前可安全接入生产的 RVV 覆盖主要是 finite `z` 的 min/max 规约与 non-finite 替换；后续 lattice splat、blur、插值和 OpenMP 主体仍是主要成本。因此板卡整体收益只有 `1.04x`~`1.16x`，非 OMP blur microbench 正确且命中 RVV 指令，但板卡为 `1.00x`，不接入生产。
 
 相对地，`plane_clipper3D` 与 `frustum_culling` 在二轮报告中只是后续保留几何裁剪候选，但 follow-up 后接入生产主路径后分别达到约 `2.48x`~`3.00x` 和 `4.33x`~`5.94x`。这类主题的共同点是 RVV 覆盖公开入口的直接筛选主成本：AoS stride 读取 `x/y/z`、生成几何谓词 mask、用 `vcompress` 保序输出 indices / removed indices。
 
@@ -135,7 +135,7 @@ bench-only / 诊断主题不改变公开 API 和生产分流。只有诊断结�
 | 2 | `frustum_culling` | `filters/include/pcl/filters/impl/frustum_culling.hpp` | `applyFilter(Indices&)` 的 6 平面 dot + mask + inlier/removed 压缩 | 已完成 | `test-rvv/filters/frustum_culling/frustum_culling-evaluation.zh.md` | `doc-rvv/filters/frustum_culling-RVV.zh.md` | dense 全云 `PointXYZ` 主路径已接入 RVV；Milkv-Jupiter 主路径约 `4.33x`~`5.94x`，non-dense、subset 与非 `PointXYZ` fallback 保持标量 |
 | 3 | `shadowpoints` | `filters/include/pcl/filters/impl/shadowpoints.hpp` | `applyFilter(Indices&)` 的 point + normal dot、`abs` threshold、`negative_` | 已完成（bench-only，生产回退） | `test-rvv/filters/shadowpoints/shadowpoints-evaluation.zh.md` | `doc-rvv/filters/shadowpoints-RVV.zh.md` | bench-only RVV helper 正确且指令命中，但 Milkv-Jupiter 主诊断 case 仅 `0.38x`~`0.79x`，不接入生产；上游源码已回退，实验保留在 `test-rvv`；fallback case 约 `0.99x`~`1.00x` |
 | 4 | `box_clipper3D` | `filters/include/pcl/filters/impl/box_clipper3D.hpp` | `clipPointCloud3D` 的 affine box 判定和保序输出 | 已完成 | `test-rvv/filters/box_clipper3D/box_clipper3D-evaluation.zh.md` | `doc-rvv/filters/box_clipper3D-RVV.zh.md` | 全云 `PointXYZ` 主路径已接入 RVV；Milkv-Jupiter 主路径约 `4.95x`~`5.86x`，subset 与非 `PointXYZ` fallback 保持标量 |
-| 5 | `pyramid` | `filters/include/pcl/filters/impl/pyramid.hpp`、`filters/src/pyramid.cpp` | dense organized 小 kernel 下采样横向 VL chunk | 待函数级评估 | `test-rvv/filters/pyramid/pyramid-evaluation.zh.md` | `doc-rvv/filters/pyramid-RVV.zh.md` | 图像式循环候选；需同时评估 RGB/RGBA 特化和 OpenMP |
+| 5 | `pyramid` | `filters/include/pcl/filters/impl/pyramid.hpp`、`filters/src/pyramid.cpp` | dense organized 小 kernel 下采样横向 VL chunk | 已完成 | `test-rvv/filters/pyramid/pyramid-evaluation.zh.md` | `doc-rvv/filters/pyramid-RVV.zh.md` | dense `PointXYZ` small-kernel 单线程主路径已接入 RVV；Milkv-Jupiter 640x480 / 1280x720 small-kernel 约 `2.16x` / `2.13x`，显式多线程、5x5 large-kernel、non-dense、非 `PointXYZ` 与 RGB/RGBA/RGB 特化保持标量 fallback |
 | 6 | `conditional_removal` | `filters/include/pcl/filters/impl/conditional_removal.hpp` | 简单 `FieldComparison<float>` 字段比较 + mask；通用条件 fallback | 待函数级评估 | `test-rvv/filters/conditional_removal/conditional_removal-evaluation.zh.md` | `doc-rvv/filters/conditional_removal-RVV.zh.md` | 低置信生产候选，只限简单条件形态 |
 
 后续普通主题优化应按本表第一条未完成项推进。若函数级评估确认某主题不适合生产 RVV，应在对应评估文档和本状态表中记录回退原因，再进入下一条。
