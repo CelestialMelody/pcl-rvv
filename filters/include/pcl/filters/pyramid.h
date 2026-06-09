@@ -133,6 +133,10 @@ namespace pcl
         bool 
         initCompute ();
 
+        /// \brief scalar implementation after initCompute has prepared kernel_
+        void
+        computeStd (std::vector<PointCloudPtr>& output);
+
         /** \brief nullify a point 
           * \param[in][out] p point to nullify
           */

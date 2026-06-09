@@ -42,9 +42,14 @@
 #define PCL_FILTERS_IMPL_PYRAMID_HPP
 
 #include <pcl/common/distances.h>
+#include <pcl/common/point_tests.h>
+#include <pcl/common/rvv_point_load.h>
+#include <pcl/common/rvv_point_store.h>
 #include <pcl/filters/pyramid.h>
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
+
+#include <type_traits>
 
 namespace pcl
 {
@@ -96,15 +101,110 @@ Pyramid<PointT>::initCompute ()
   return (true);
 }
 
-template <typename PointT> void
-Pyramid<PointT>::compute (std::vector<PointCloudPtr>& output)
+#ifdef __RVV10__
+inline void
+pyramidPointXYZDenseLevelRVV (const PointCloud<PointXYZ> &previous,
+                              PointCloud<PointXYZ> &next,
+                              const Eigen::MatrixXf &kernel,
+                              const int kernel_rows,
+                              const int kernel_cols,
+                              const int kernel_center_x,
+                              const int kernel_center_y)
 {
-  std::cout << "compute" << std::endl;
-  if (!initCompute ())
+  constexpr std::size_t kStride = sizeof (PointXYZ);
+  constexpr std::size_t kXOff = offsetof (PointXYZ, x);
+  constexpr std::size_t kYOff = offsetof (PointXYZ, y);
+  constexpr std::size_t kZOff = offsetof (PointXYZ, z);
+
+  const std::uint8_t *previous_base = reinterpret_cast<const std::uint8_t*> (previous.points.data ());
+  const std::uint8_t *next_base = reinterpret_cast<const std::uint8_t*> (next.points.data ());
+  const int next_width = static_cast<int> (next.width);
+  const int previous_width = static_cast<int> (previous.width);
+  const int previous_height = static_cast<int> (previous.height);
+
+  for (int i=0; i < static_cast<int> (next.height); ++i)
   {
-    PCL_ERROR ("[pcl::%s::compute] initCompute failed!\n", getClassName ().c_str ());
-    return;
+    int j = 0;
+    for (; j < next_width; )
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (static_cast<std::size_t> (next_width - j));
+      vfloat32m2_t vx = __riscv_vfmv_v_f_f32m2 (0.0f, vl);
+      vfloat32m2_t vy = __riscv_vfmv_v_f_f32m2 (0.0f, vl);
+      vfloat32m2_t vz = __riscv_vfmv_v_f_f32m2 (0.0f, vl);
+      const vuint32m2_t vj = __riscv_vid_v_u32m2 (vl);
+
+      for (int m=0; m < kernel_rows; ++m)
+      {
+        const int mm = kernel_rows - 1 - m;
+        int ii = 2*i + (m - kernel_center_y);
+        if (ii < 0) ii = 0;
+        if (ii >= previous_height) ii = previous_height - 1;
+
+        for (int n=0; n < kernel_cols; ++n)
+        {
+          const int nn = kernel_cols - 1 - n;
+          int jj_base = 2*j + (n - kernel_center_x);
+          const float k = kernel (mm, nn);
+
+          vuint32m2_t vjj = __riscv_vadd_vv_u32m2 (vj, vj, vl);
+          vjj = __riscv_vadd_vx_u32m2 (vjj, static_cast<unsigned> (jj_base), vl);
+          const vbool16_t low = __riscv_vmslt_vx_i32m2_b16 (__riscv_vreinterpret_v_u32m2_i32m2 (vjj), 0, vl);
+          vjj = __riscv_vmerge_vxm_u32m2 (vjj, 0u, low, vl);
+          const vbool16_t high = __riscv_vmsgeu_vx_u32m2_b16 (vjj, static_cast<unsigned> (previous_width), vl);
+          vjj = __riscv_vmerge_vxm_u32m2 (vjj, static_cast<unsigned> (previous_width - 1), high, vl);
+
+          const vuint32m2_t v_index = __riscv_vadd_vx_u32m2 (vjj, static_cast<unsigned> (ii * previous_width), vl);
+          const vuint32m2_t v_off = pcl::rvv_load::byte_offsets_u32m2<PointXYZ> (v_index, vl);
+          vfloat32m2_t px, py, pz;
+          pcl::rvv_load::indexed_load3_f32m2<PointXYZ, kXOff, kYOff, kZOff> (previous_base, v_off, vl, px, py, pz);
+          vx = __riscv_vfmacc_vf_f32m2 (vx, k, px, vl);
+          vy = __riscv_vfmacc_vf_f32m2 (vy, k, py, vl);
+          vz = __riscv_vfmacc_vf_f32m2 (vz, k, pz, vl);
+        }
+      }
+
+      const std::size_t out_offset = static_cast<std::size_t> (i * next_width + j) * sizeof (PointXYZ);
+      // Each VL chunk writes consecutive output columns; input columns are 2*j+n and are gathered
+      // because the downsampling stride is two and boundary clamping can duplicate edge samples.
+      pcl::rvv_store::strided_store3_f32m2<kStride, kXOff, kYOff, kZOff> (next_base + out_offset, vl, vx, vy, vz);
+      j += static_cast<int> (vl);
+    }
   }
+}
+
+inline void
+pyramidPointXYZDenseRVV (const PointCloud<PointXYZ> &input,
+                         const int levels,
+                         const Eigen::MatrixXf &kernel,
+                         std::vector<Pyramid<PointXYZ>::PointCloudPtr>& output)
+{
+  const int kernel_rows = static_cast<int> (kernel.rows ());
+  const int kernel_cols = static_cast<int> (kernel.cols ());
+  const int kernel_center_x = kernel_cols / 2;
+  const int kernel_center_y = kernel_rows / 2;
+
+  output.resize (levels + 1);
+  output[0].reset (new pcl::PointCloud<PointXYZ>);
+  *(output[0]) = input;
+
+  for (int l = 1; l <= levels; ++l)
+  {
+    output[l].reset (new pcl::PointCloud<PointXYZ> (output[l-1]->width/2, output[l-1]->height/2));
+    pyramidPointXYZDenseLevelRVV (*output[l-1],
+                                  *output[l],
+                                  kernel,
+                                  kernel_rows,
+                                  kernel_cols,
+                                  kernel_center_x,
+                                  kernel_center_y);
+  }
+}
+#endif
+
+template <typename PointT> void
+Pyramid<PointT>::computeStd (std::vector<PointCloudPtr>& output)
+{
+  using namespace pcl::common;
 
   int kernel_rows = static_cast<int> (kernel_.rows ());
   int kernel_cols = static_cast<int> (kernel_.cols ());
@@ -179,7 +279,7 @@ Pyramid<PointT>::compute (std::vector<PointCloudPtr>& output)
               if (ii >= previous.height) ii = previous.height - 1;
               if (jj < 0) jj = 0;
               if (jj >= previous.width) jj = previous.width - 1;
-              if (!isFinite (previous.at (jj,ii)))
+              if (!pcl::isFinite (previous.at (jj,ii)))
                 continue;
               if (pcl::squaredEuclideanDistance (previous.at (2*j,2*i), previous.at (jj,ii)) < threshold_)
               {
@@ -201,6 +301,32 @@ Pyramid<PointT>::compute (std::vector<PointCloudPtr>& output)
   }
 }
 
+template <typename PointT> void
+Pyramid<PointT>::compute (std::vector<PointCloudPtr>& output)
+{
+  if (!initCompute ())
+  {
+    PCL_ERROR ("[pcl::%s::compute] initCompute failed!\n", getClassName ().c_str ());
+    return;
+  }
+
+#ifdef __RVV10__
+  if constexpr (std::is_same_v<PointT, pcl::PointXYZ>)
+  {
+    if (input_->is_dense && !large_ && threads_ <= 1 && input_->width >= 8 && input_->height >= 2)
+    {
+      // Dense PointXYZ small-kernel keeps scalar semantics: same flipped 3x3 kernel and boundary clamp;
+      // explicit multi-thread, 5x5 large-kernel, non-dense threshold/weight paths and RGB specializations
+      // remain scalar fallbacks.
+      pyramidPointXYZDenseRVV (*input_, levels_, kernel_, output);
+      return;
+    }
+  }
+#endif
+
+  computeStd (output);
+}
+
 template <> void
 Pyramid<pcl::PointXYZRGB>::compute (std::vector<Pyramid<pcl::PointXYZRGB>::PointCloudPtr> &output);
 
@@ -208,7 +334,7 @@ template <> void
 Pyramid<pcl::PointXYZRGBA>::compute (std::vector<Pyramid<pcl::PointXYZRGBA>::PointCloudPtr> &output);
 
 template<> void
-Pyramid<pcl::RGB>::nullify (pcl::RGB& p)
+Pyramid<pcl::RGB>::nullify (pcl::RGB& p) const
 {
   p.r = 0; p.g = 0; p.b = 0;
 }
