@@ -167,4 +167,7 @@ vfloat32m2_t inv = __riscv_vfdiv_vf_f32m2_m(ok, zero, 1.0f, v_x, vl);
 | 块内全无命中       | `vcpop == 0` 时 `continue`（标量跳过 strip） | 可与各内核组合使用                               |
 | 避免非法 lane 运算 | 带掩码的算术 `_m`                           | 实现时查 intrinsics 手册                      |
 
+延伸文档：
 
+- [RVV 多谓词掩码收敛模式](RVV%20Mask%20Predicate%20Convergence.zh.md)：说明多个几何 / 数值谓词如何收敛为一个 `keep` mask，以及 NaN / Inf 语义如何按标量公式复现。
+- [RVV 掩码压缩与保序索引输出模式](RVV%20Compress%20Index%20Output.zh.md)：说明 `vid + vcompress + vcpop + vse32` 如何实现标量 `if (...) indices.push_back(i)`。

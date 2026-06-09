@@ -142,6 +142,11 @@ __riscv_<operation>_<operand-shape>_<type/lmul>[_mask/tail]
 | `__riscv_vmerge_vvm_f32m2` | 按 mask 在两个 float vector 中选择 | keep/replace、条件输出 |
 | `__riscv_vmerge_vvm_i32m2` | 按 mask 在两个 int32 vector 中选择 | 条件 index / voxel id |
 
+常见组合模式：
+
+- [RVV 多谓词掩码收敛模式](RVV%20Mask%20Predicate%20Convergence.zh.md)：`vfabs/vmfle` 或其他比较生成局部 mask，再用 `vmand` / `vmor` 收敛为最终 `keep`。
+- [RVV 掩码压缩与保序索引输出模式](RVV%20Compress%20Index%20Output.zh.md)：`vid + vadd + vcompress + vcpop + vse32` 实现保序 indices 输出。
+
 ## Float 算术
 
 | intrinsic | 功能 | 常见作用 |
