@@ -1,0 +1,113 @@
+[==========] Running 21 tests from 21 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from ExtractIndicesSelf
+[ RUN      ] ExtractIndicesSelf.Filters
+[       OK ] ExtractIndicesSelf.Filters (1 ms)
+[----------] 1 test from ExtractIndicesSelf (2 ms total)
+
+[----------] 1 test from ExtractIndices
+[ RUN      ] ExtractIndices.Filters
+[pcl::ExtractIndices::applyFilter] The indices size exceeds the size of the input.
+[pcl::ExtractIndices::applyFilter] The indices size exceeds the size of the input.
+[       OK ] ExtractIndices.Filters (7 ms)
+[----------] 1 test from ExtractIndices (7 ms total)
+
+[----------] 1 test from PassThrough
+[ RUN      ] PassThrough.Filters
+[pcl::FilterIndices<PointT>::applyFilter] extract_removed_indices_ was set to 'true' to keep the point cloud organized.
+[       OK ] PassThrough.Filters (6 ms)
+[----------] 1 test from PassThrough (6 ms total)
+
+[----------] 1 test from VoxelGrid
+[ RUN      ] VoxelGrid.Filters
+[       OK ] VoxelGrid.Filters (8 ms)
+[----------] 1 test from VoxelGrid (8 ms total)
+
+[----------] 1 test from VoxelGrid_No_DownsampleAllData
+[ RUN      ] VoxelGrid_No_DownsampleAllData.Filters
+[       OK ] VoxelGrid_No_DownsampleAllData.Filters (2 ms)
+[----------] 1 test from VoxelGrid_No_DownsampleAllData (2 ms total)
+
+[----------] 1 test from VoxelGrid_RGB
+[ RUN      ] VoxelGrid_RGB.Filters
+[       OK ] VoxelGrid_RGB.Filters (3 ms)
+[----------] 1 test from VoxelGrid_RGB (3 ms total)
+
+[----------] 1 test from VoxelGrid_RGBA
+[ RUN      ] VoxelGrid_RGBA.Filters
+[       OK ] VoxelGrid_RGBA.Filters (2 ms)
+[----------] 1 test from VoxelGrid_RGBA (2 ms total)
+
+[----------] 1 test from VoxelGridCovariance
+[ RUN      ] VoxelGridCovariance.Filters
+[       OK ] VoxelGridCovariance.Filters (9 ms)
+[----------] 1 test from VoxelGridCovariance (9 ms total)
+
+[----------] 1 test from VoxelGridMinPoints
+[ RUN      ] VoxelGridMinPoints.Filters
+[       OK ] VoxelGridMinPoints.Filters (1 ms)
+[----------] 1 test from VoxelGridMinPoints (1 ms total)
+
+[----------] 1 test from ProjectInliers
+[ RUN      ] ProjectInliers.Filters
+[       OK ] ProjectInliers.Filters (2 ms)
+[----------] 1 test from ProjectInliers (2 ms total)
+
+[----------] 1 test from RadiusOutlierRemoval
+[ RUN      ] RadiusOutlierRemoval.Filters
+[       OK ] RadiusOutlierRemoval.Filters (2643 ms)
+[----------] 1 test from RadiusOutlierRemoval (2643 ms total)
+
+[----------] 1 test from StatisticalOutlierRemoval
+[ RUN      ] StatisticalOutlierRemoval.Filters
+[       OK ] StatisticalOutlierRemoval.Filters (70 ms)
+[----------] 1 test from StatisticalOutlierRemoval (70 ms total)
+
+[----------] 1 test from ConditionalRemoval
+[ RUN      ] ConditionalRemoval.Filters
+[       OK ] ConditionalRemoval.Filters (2 ms)
+[----------] 1 test from ConditionalRemoval (2 ms total)
+
+[----------] 1 test from ConditionalRemovalSetIndices
+[ RUN      ] ConditionalRemovalSetIndices.Filters
+[       OK ] ConditionalRemovalSetIndices.Filters (2 ms)
+[----------] 1 test from ConditionalRemovalSetIndices (2 ms total)
+
+[----------] 1 test from SamplingSurfaceNormal
+[ RUN      ] SamplingSurfaceNormal.Filters
+[       OK ] SamplingSurfaceNormal.Filters (7 ms)
+[----------] 1 test from SamplingSurfaceNormal (7 ms total)
+
+[----------] 1 test from ShadowPoints
+[ RUN      ] ShadowPoints.Filters
+[       OK ] ShadowPoints.Filters (127 ms)
+[----------] 1 test from ShadowPoints (127 ms total)
+
+[----------] 1 test from FrustumCulling
+[ RUN      ] FrustumCulling.Filters
+[       OK ] FrustumCulling.Filters (52 ms)
+[----------] 1 test from FrustumCulling (52 ms total)
+
+[----------] 1 test from ConditionalRemovalTfQuadraticXYZComparison
+[ RUN      ] ConditionalRemovalTfQuadraticXYZComparison.Filters
+[       OK ] ConditionalRemovalTfQuadraticXYZComparison.Filters (1 ms)
+[----------] 1 test from ConditionalRemovalTfQuadraticXYZComparison (1 ms total)
+
+[----------] 1 test from MedianFilter
+[ RUN      ] MedianFilter.Filters
+[       OK ] MedianFilter.Filters (259 ms)
+[----------] 1 test from MedianFilter (259 ms total)
+
+[----------] 1 test from NormalRefinement
+[ RUN      ] NormalRefinement.Filters
+[       OK ] NormalRefinement.Filters (8470 ms)
+[----------] 1 test from NormalRefinement (8470 ms total)
+
+[----------] 1 test from VoxelGridOcclusionEstimation
+[ RUN      ] VoxelGridOcclusionEstimation.Filters
+[       OK ] VoxelGridOcclusionEstimation.Filters (1 ms)
+[----------] 1 test from VoxelGridOcclusionEstimation (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 21 tests from 21 test suites ran. (11690 ms total)
+[  PASSED  ] 21 tests.

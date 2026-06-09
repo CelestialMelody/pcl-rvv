@@ -1,0 +1,23 @@
+Build: Std (__RVV10__ disabled)
+[==========] Running 7 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 7 tests from ConditionalRemovalRVV
+[ RUN      ] ConditionalRemovalRVV.LargeSingleFieldGTKeepsOrder
+[       OK ] ConditionalRemovalRVV.LargeSingleFieldGTKeepsOrder (3 ms)
+[ RUN      ] ConditionalRemovalRVV.NonFiniteXYZIsRemovedBeforeCondition
+[       OK ] ConditionalRemovalRVV.NonFiniteXYZIsRemovedBeforeCondition (1 ms)
+[ RUN      ] ConditionalRemovalRVV.KeepOrganizedFallbackPreservesShape
+[       OK ] ConditionalRemovalRVV.KeepOrganizedFallbackPreservesShape (0 ms)
+[ RUN      ] ConditionalRemovalRVV.ExplicitIndicesFallbackPreservesSubset
+[       OK ] ConditionalRemovalRVV.ExplicitIndicesFallbackPreservesSubset (0 ms)
+[ RUN      ] ConditionalRemovalRVV.CompoundConditionFallbackPreservesScalarLogic
+[       OK ] ConditionalRemovalRVV.CompoundConditionFallbackPreservesScalarLogic (0 ms)
+[ RUN      ] ConditionalRemovalRVV.EQFallbackKeepsScalarNaNFieldSemantics
+[       OK ] ConditionalRemovalRVV.EQFallbackKeepsScalarNaNFieldSemantics (0 ms)
+[ RUN      ] ConditionalRemovalRVV.PointXYZISingleFloatFieldKeepsGenericFields
+[       OK ] ConditionalRemovalRVV.PointXYZISingleFloatFieldKeepsGenericFields (1 ms)
+[----------] 7 tests from ConditionalRemovalRVV (9 ms total)
+
+[----------] Global test environment tear-down
+[==========] 7 tests from 1 test suite ran. (12 ms total)
+[  PASSED  ] 7 tests.

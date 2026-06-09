@@ -1,0 +1,18 @@
+========================================================================================================
+ PCL filters/conditional_removal Benchmark (single FLOAT32 FieldComparison RVV path)
+========================================================================================================
+Build: Std (__RVV10__ disabled)
+Dataset: synthetic PointXYZ clouds; full-cloud single FieldComparison<float> RVV cases and fallback cases
+Iterations: 30
+conditional_removal single z>0.05 64K                             : 6.9191 ms/iter
+  Total Time: 207.5718 ms, checksum: 499425043859129807
+conditional_removal single z>0.05 removed 1M                      : 113.4504 ms/iter
+  Total Time: 3403.5121 ms, checksum: 9649705414759671085
+conditional_removal single y<=0.10 1M                             : 112.4027 ms/iter
+  Total Time: 3372.0811 ms, checksum: 9975319883248906839
+conditional_removal keep-organized fallback 1M                    : 195.4857 ms/iter
+  Total Time: 5864.5708 ms, checksum: 5011021265776251753
+conditional_removal subset fallback 1M                            : 56.1692 ms/iter
+  Total Time: 1685.0753 ms, checksum: 7500577286575187017
+conditional_removal pointxyzi intensity>4 1M                      : 95.8147 ms/iter
+  Total Time: 2874.4415 ms, checksum: 740171
