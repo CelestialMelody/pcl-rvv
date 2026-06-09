@@ -16,8 +16,8 @@ Build: RVV (__RVV10__ enabled)
 [       OK ] ConditionalRemovalRVV.EQFallbackKeepsScalarNaNFieldSemantics (0 ms)
 [ RUN      ] ConditionalRemovalRVV.PointXYZISingleFloatFieldKeepsGenericFields
 [       OK ] ConditionalRemovalRVV.PointXYZISingleFloatFieldKeepsGenericFields (1 ms)
-[----------] 7 tests from ConditionalRemovalRVV (9 ms total)
+[----------] 7 tests from ConditionalRemovalRVV (10 ms total)
 
 [----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (12 ms total)
+[==========] 7 tests from 1 test suite ran. (13 ms total)
 [  PASSED  ] 7 tests.
