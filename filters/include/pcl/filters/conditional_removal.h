@@ -43,6 +43,8 @@
 
 namespace pcl
 {
+  template<typename PointT> class ConditionalRemoval;
+
   //////////////////////////////////////////////////////////////////////////////////////////
   namespace ComparisonOps
   {
@@ -60,6 +62,9 @@ namespace pcl
   template<typename PointT>
   class PointDataAtOffset
   {
+    template <typename> friend class FieldComparison;
+    template <typename> friend class ConditionalRemoval;
+
     public:
       /** \brief Constructor. */
       PointDataAtOffset (std::uint8_t datatype, std::uint32_t offset) :
@@ -128,6 +133,8 @@ namespace pcl
   template<typename PointT>
   class FieldComparison : public ComparisonBase<PointT>
   {
+    template <typename> friend class ConditionalRemoval;
+
     using ComparisonBase<PointT>::field_name_;
     using ComparisonBase<PointT>::op_;
     using ComparisonBase<PointT>::capable_;
@@ -448,6 +455,8 @@ namespace pcl
   template<typename PointT>
   class ConditionBase
   {
+    template <typename> friend class ConditionalRemoval;
+
     public:
       using ComparisonBase = pcl::ComparisonBase<PointT>;
       using ComparisonBasePtr = typename ComparisonBase::Ptr;
@@ -595,6 +604,7 @@ namespace pcl
     using Filter<PointT>::input_;
     using Filter<PointT>::filter_name_;
     using Filter<PointT>::getClassName;
+    using PCLBase<PointT>::fake_indices_;
 
     using Filter<PointT>::removed_indices_;
     using Filter<PointT>::extract_removed_indices_;
@@ -671,6 +681,14 @@ namespace pcl
         */
       void
       applyFilter (PointCloud &output) override;
+
+      void
+      applyFilterStd (PointCloud &output);
+
+#if defined(__RVV10__)
+      bool
+      applyFilterRVV (PointCloud &output, std::uint32_t field_offset, ComparisonOps::CompareOp op, float compare_val);
+#endif
 
       /** \brief True if capable. */
       bool capable_{false};

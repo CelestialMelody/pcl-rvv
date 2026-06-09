@@ -40,7 +40,73 @@
 
 #include <pcl/common/io.h>
 #include <pcl/common/copy_point.h>
+#include <pcl/common/rvv_point_load.h>
 #include <pcl/filters/conditional_removal.h>
+
+#include <vector>
+
+#if defined(__RVV10__)
+#include <cstdint>
+#include <limits>
+#include <riscv_vector.h>
+#include <type_traits>
+#include <utility>
+#endif
+
+namespace pcl
+{
+
+#if defined(__RVV10__)
+
+inline constexpr std::size_t kConditionalRemovalMinPoints = 64;
+
+template <typename T>
+using ConditionalRemovalScalar = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename PointT, typename = void>
+struct ConditionalRemovalXYZCompatible : std::false_type {};
+
+template <typename PointT>
+struct ConditionalRemovalXYZCompatible<
+    PointT,
+    std::void_t<decltype(std::declval<PointT>().x),
+                decltype(std::declval<PointT>().y),
+                decltype(std::declval<PointT>().z)>>
+: std::bool_constant<
+      std::is_standard_layout_v<PointT> &&
+      std::is_same_v<ConditionalRemovalScalar<decltype(std::declval<PointT>().x)>, float> &&
+      std::is_same_v<ConditionalRemovalScalar<decltype(std::declval<PointT>().y)>, float> &&
+      std::is_same_v<ConditionalRemovalScalar<decltype(std::declval<PointT>().z)>, float>> {};
+
+template <typename PointT>
+inline constexpr bool kConditionalRemovalXYZCompatible = ConditionalRemovalXYZCompatible<PointT>::value;
+
+inline vbool16_t
+compareFloatFieldMask (const vfloat32m2_t vf,
+                       const pcl::ComparisonOps::CompareOp op,
+                       const float compare_val,
+                       const std::size_t vl)
+{
+  switch (op)
+  {
+    case pcl::ComparisonOps::GT:
+      return __riscv_vmfgt_vf_f32m2_b16 (vf, compare_val, vl);
+    case pcl::ComparisonOps::GE:
+      return __riscv_vmnot_m_b16 (__riscv_vmflt_vf_f32m2_b16 (vf, compare_val, vl), vl);
+    case pcl::ComparisonOps::LT:
+      return __riscv_vmflt_vf_f32m2_b16 (vf, compare_val, vl);
+    case pcl::ComparisonOps::LE:
+      return __riscv_vmnot_m_b16 (__riscv_vmfgt_vf_f32m2_b16 (vf, compare_val, vl), vl);
+    case pcl::ComparisonOps::EQ:
+      return __riscv_vmclr_m_b16 (vl);
+    default:
+      return __riscv_vmclr_m_b16 (vl);
+  }
+}
+
+#endif
+
+} // namespace pcl
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -622,7 +688,7 @@ pcl::ConditionalRemoval<PointT>::setCondition (ConditionBasePtr condition)
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
-pcl::ConditionalRemoval<PointT>::applyFilter (PointCloud &output)
+pcl::ConditionalRemoval<PointT>::applyFilterStd (PointCloud &output)
 {
   if (!capable_)
   {
@@ -742,6 +808,130 @@ pcl::ConditionalRemoval<PointT>::applyFilter (PointCloud &output)
       output.is_dense = false;
   }
   removed_indices_->resize (nr_removed_p);
+}
+
+#if defined(__RVV10__)
+
+template <typename PointT> bool
+pcl::ConditionalRemoval<PointT>::applyFilterRVV (PointCloud &output,
+                                                std::uint32_t field_offset,
+                                                ComparisonOps::CompareOp op,
+                                                float compare_val)
+{
+  const std::size_t n = input_->size ();
+  if (!fake_indices_ ||
+      keep_organized_ ||
+      !input_->is_dense ||
+      n < pcl::kConditionalRemovalMinPoints ||
+      n > static_cast<std::size_t> (std::numeric_limits<int>::max ()) ||
+      field_offset % alignof (float) != 0)
+    return false;
+
+  output.header = input_->header;
+  output.height = 1;
+  output.is_dense = true;
+  output.resize (n);
+  removed_indices_->resize (extract_removed_indices_ ? n : 0);
+
+  const auto* base = reinterpret_cast<const std::uint8_t*> (input_->data ());
+  int* removed = extract_removed_indices_ ? removed_indices_->data () : nullptr;
+  std::vector<int> kept_indices (__riscv_vsetvlmax_e32m2 ());
+  std::size_t kept = 0;
+  std::size_t dropped = 0;
+  std::size_t i = 0;
+
+  while (i < n)
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+    const auto* chunk = base + i * sizeof (PointT);
+    vfloat32m2_t vx;
+    vfloat32m2_t vy;
+    vfloat32m2_t vz;
+    pcl::rvv_load::strided_load3_f32m2<sizeof (PointT),
+                                       offsetof (PointT, x),
+                                       offsetof (PointT, y),
+                                       offsetof (PointT, z)> (chunk, vl, vx, vy, vz);
+    const vfloat32m2_t vf =
+        pcl::rvv_load::strided_load_f32m2<sizeof (PointT)> (reinterpret_cast<const float*> (chunk + field_offset), vl);
+
+    // This path covers one FLOAT32 FieldComparison on a full dense
+    // XYZ-compatible cloud.  The scalar path rejects non-finite xyz before
+    // evaluating the condition; the RVV mask keeps the same order and records
+    // dropped indices.
+    vbool16_t finite = __riscv_vmfeq_vv_f32m2_b16 (vx, vx, vl);
+    finite = __riscv_vmand_mm_b16 (finite, __riscv_vmfeq_vv_f32m2_b16 (vy, vy, vl), vl);
+    finite = __riscv_vmand_mm_b16 (finite, __riscv_vmfeq_vv_f32m2_b16 (vz, vz, vl), vl);
+    finite = __riscv_vmand_mm_b16 (finite, __riscv_vmflt_vf_f32m2_b16 (__riscv_vfabs_v_f32m2 (vx, vl), std::numeric_limits<float>::infinity (), vl), vl);
+    finite = __riscv_vmand_mm_b16 (finite, __riscv_vmflt_vf_f32m2_b16 (__riscv_vfabs_v_f32m2 (vy, vl), std::numeric_limits<float>::infinity (), vl), vl);
+    finite = __riscv_vmand_mm_b16 (finite, __riscv_vmflt_vf_f32m2_b16 (__riscv_vfabs_v_f32m2 (vz, vl), std::numeric_limits<float>::infinity (), vl), vl);
+
+    vbool16_t keep = pcl::compareFloatFieldMask (vf, op, compare_val, vl);
+    keep = __riscv_vmand_mm_b16 (keep, finite, vl);
+    const vbool16_t drop = __riscv_vmnot_m_b16 (keep, vl);
+
+    const vuint32m2_t local = __riscv_vid_v_u32m2 (vl);
+    const vuint32m2_t source = __riscv_vadd_vx_u32m2 (local, static_cast<std::uint32_t> (i), vl);
+    const vint32m2_t source_i32 = __riscv_vreinterpret_v_u32m2_i32m2 (source);
+    const vint32m2_t kept_i32 = __riscv_vcompress_vm_i32m2 (source_i32, keep, vl);
+    const std::size_t keep_count = __riscv_vcpop_m_b16 (keep, vl);
+    __riscv_vse32_v_i32m2 (kept_indices.data (), kept_i32, keep_count);
+    for (std::size_t k = 0; k < keep_count; ++k)
+      copyPoint ((*input_)[kept_indices[k]], output[kept++]);
+
+    if (extract_removed_indices_)
+    {
+      const vint32m2_t removed_i32 = __riscv_vcompress_vm_i32m2 (source_i32, drop, vl);
+      const std::size_t drop_count = __riscv_vcpop_m_b16 (drop, vl);
+      __riscv_vse32_v_i32m2 (removed + dropped, removed_i32, drop_count);
+      dropped += drop_count;
+    }
+
+    i += vl;
+  }
+
+  output.width = kept;
+  output.resize (kept);
+  removed_indices_->resize (extract_removed_indices_ ? dropped : 0);
+  return true;
+}
+
+#endif
+
+template <typename PointT> void
+pcl::ConditionalRemoval<PointT>::applyFilter (PointCloud &output)
+{
+#if defined(__RVV10__)
+  if constexpr (pcl::kConditionalRemovalXYZCompatible<PointT>)
+  {
+    if (capable_ && input_ && condition_.get () != nullptr)
+    {
+      const auto* and_condition = dynamic_cast<const pcl::ConditionAnd<PointT>*> (condition_.get ());
+      if (and_condition != nullptr)
+      {
+        const auto* base_condition = static_cast<const pcl::ConditionBase<PointT>*> (and_condition);
+        if (base_condition->conditions_.empty () &&
+            base_condition->comparisons_.size () == 1)
+        {
+          const auto* field_comparison =
+              dynamic_cast<const pcl::FieldComparison<PointT>*> (base_condition->comparisons_[0].get ());
+          if (field_comparison != nullptr &&
+              field_comparison->point_data_ != nullptr &&
+              field_comparison->point_data_->datatype_ == pcl::PCLPointField::FLOAT32 &&
+              field_comparison->op_ != pcl::ComparisonOps::EQ &&
+              field_comparison->compare_val_ >= static_cast<double> (-std::numeric_limits<float>::max ()) &&
+              field_comparison->compare_val_ <= static_cast<double> (std::numeric_limits<float>::max ()) &&
+              applyFilterRVV (output,
+                              field_comparison->point_data_->offset_,
+                              field_comparison->op_,
+                              static_cast<float> (field_comparison->compare_val_)))
+            return;
+        }
+      }
+    }
+  }
+#endif
+
+  applyFilterStd (output);
 }
 
 #define PCL_INSTANTIATE_PointDataAtOffset(T) template class PCL_EXPORTS pcl::PointDataAtOffset<T>;
