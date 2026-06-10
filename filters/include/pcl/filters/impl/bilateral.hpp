@@ -41,14 +41,31 @@
 #define PCL_FILTERS_BILATERAL_IMPL_H_
 
 #include <pcl/filters/bilateral.h>
+#include <pcl/common/common.h>
 #include <pcl/search/auto.h> // for autoSelectMethod
 #include <pcl/common/point_tests.h> // for isXYZFinite
+#include <pcl/common/rvv_point_load.h>
+
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <type_traits>
+
+#ifdef __RVV10__
+#include <riscv_vector.h>
+#endif
+
+namespace pcl
+{
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> double
-pcl::BilateralFilter<PointT>::computePointWeight (const int pid, 
-                                                  const Indices &indices,
-                                                  const std::vector<float> &distances)
+computePointWeightStd (const typename pcl::PointCloud<PointT>::ConstPtr& input,
+                       const int pid,
+                       const pcl::Indices &indices,
+                       const std::vector<float> &distances,
+                       const double sigma_s,
+                       const double sigma_r)
 {
   double BF = 0, W = 0;
 
@@ -57,17 +74,113 @@ pcl::BilateralFilter<PointT>::computePointWeight (const int pid,
   {
     int id = indices[n_id];
     // Compute the difference in intensity
-    double intensity_dist = std::abs ((*input_)[pid].intensity - (*input_)[id].intensity);
+    double intensity_dist = std::abs ((*input)[pid].intensity - (*input)[id].intensity);
 
     // Compute the Gaussian intensity weights both in Euclidean and in intensity space
     double dist = std::sqrt (distances[n_id]);
-    double weight = kernel (dist, sigma_s_) * kernel (intensity_dist, sigma_r_);
+    double weight = std::exp (- (dist * dist)/(2 * sigma_s * sigma_s)) *
+                    std::exp (- (intensity_dist * intensity_dist)/(2 * sigma_r * sigma_r));
 
     // Calculate the bilateral filter response
-    BF += weight * (*input_)[id].intensity;
+    BF += weight * (*input)[id].intensity;
     W += weight;
   }
   return (BF / W);
+}
+
+#ifdef __RVV10__
+//////////////////////////////////////////////////////////////////////////////////////////////
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC push_options
+#pragma GCC optimize ("no-tree-vectorize")
+#endif
+template <typename PointT> double
+computePointWeightRVV (const typename pcl::PointCloud<PointT>::ConstPtr& input,
+                       const int pid,
+                       const pcl::Indices &indices,
+                       const std::vector<float> &distances,
+                       const double sigma_s,
+                       const double sigma_r)
+{
+  // The RVV path only covers radiusSearch neighbor lists where each distance
+  // entry still lines up with one non-negative point index.  Short lists keep
+  // the original scalar path to avoid paying vector setup and stack staging.
+  if (indices.size () < 16 || indices.size () != distances.size ())
+    return pcl::computePointWeightStd<PointT> (input, pid, indices, distances, sigma_s, sigma_r);
+
+  const auto* base_u8 = reinterpret_cast<const std::uint8_t*> (input->points.data ());
+  const auto* raw_indices = reinterpret_cast<const std::uint32_t*> (indices.data ());
+  const float center_intensity = (*input)[pid].intensity;
+  const float spatial_scale = static_cast<float> (-1.0 / (2.0 * sigma_s * sigma_s));
+  const float intensity_scale = static_cast<float> (-1.0 / (2.0 * sigma_r * sigma_r));
+  double BF = 0.0;
+  double W = 0.0;
+
+  constexpr std::size_t kMaxChunkLanes = 256;
+  alignas(64) float weights[kMaxChunkLanes];
+  alignas(64) float contribs[kMaxChunkLanes];
+
+  std::size_t offset = 0;
+  while (offset < indices.size ())
+  {
+    const std::size_t remaining = std::min<std::size_t> (indices.size () - offset, kMaxChunkLanes);
+    const std::size_t vl = __riscv_vsetvl_e32m2 (remaining);
+    const vuint32m2_t v_ids = __riscv_vle32_v_u32m2 (raw_indices + offset, vl);
+    // Neighbor ids are produced by radiusSearch, so intensity is a gathered
+    // PointXYZI field load rather than a contiguous array load.
+    const vuint32m2_t v_point_offsets =
+        pcl::rvv_load::byte_offsets_u32m2<PointT> (v_ids, vl);
+    const vfloat32m2_t v_intensity =
+        pcl::rvv_load::gather_load_f32m2<PointT, offsetof(PointT, intensity)> (
+            base_u8, v_point_offsets, vl);
+    const vfloat32m2_t v_squared = __riscv_vle32_v_f32m2 (distances.data () + offset, vl);
+    const vfloat32m2_t v_center = __riscv_vfmv_v_f_f32m2 (center_intensity, vl);
+    const vfloat32m2_t v_delta = __riscv_vfsub_vv_f32m2 (v_center, v_intensity, vl);
+    // The scalar path computes sqrt(d2) and kernel() immediately squares it.
+    // Using d2 directly keeps the same Gaussian argument while avoiding that
+    // staging-only round trip; the approximation boundary is only common expf.
+    const vfloat32m2_t v_spatial_arg = __riscv_vfmul_vf_f32m2 (v_squared, spatial_scale, vl);
+    const vfloat32m2_t v_delta2 = __riscv_vfmul_vv_f32m2 (v_delta, v_delta, vl);
+    const vfloat32m2_t v_intensity_arg = __riscv_vfmul_vf_f32m2 (v_delta2, intensity_scale, vl);
+    const vfloat32m2_t v_weight =
+        __riscv_vfmul_vv_f32m2 (pcl::expf_RVV_f32m2 (v_spatial_arg, vl),
+                                pcl::expf_RVV_f32m2 (v_intensity_arg, vl),
+                                vl);
+    const vfloat32m2_t v_contrib = __riscv_vfmul_vv_f32m2 (v_weight, v_intensity, vl);
+
+    __riscv_vse32_v_f32m2 (weights, v_weight, vl);
+    __riscv_vse32_v_f32m2 (contribs, v_contrib, vl);
+    // Preserve radiusSearch neighbor order; this avoids adding a vector
+    // reduction-order difference on top of the accepted float exp approximation.
+    for (std::size_t lane = 0; lane < vl; ++lane)
+    {
+      BF += static_cast<double> (contribs[lane]);
+      W += static_cast<double> (weights[lane]);
+    }
+    offset += vl;
+  }
+  return (BF / W);
+}
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC pop_options
+#endif
+#endif
+
+} // namespace pcl
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointT> double
+pcl::BilateralFilter<PointT>::computePointWeight (const int pid,
+                                                  const Indices &indices,
+                                                  const std::vector<float> &distances)
+{
+#if defined(__RVV10__)
+  // Production coverage is intentionally limited to PointXYZI, the point type
+  // whose intensity field layout is fixed for the RVV gather helper.
+  if constexpr (std::is_same_v<PointT, pcl::PointXYZI>)
+    return (pcl::computePointWeightRVV<PointT> (input_, pid, indices, distances, sigma_s_, sigma_r_));
+#endif
+  return (pcl::computePointWeightStd<PointT> (input_, pid, indices, distances, sigma_s_, sigma_r_));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,4 +226,3 @@ pcl::BilateralFilter<PointT>::applyFilter (PointCloud &output)
 #define PCL_INSTANTIATE_BilateralFilter(T) template class PCL_EXPORTS pcl::BilateralFilter<T>;
 
 #endif // PCL_FILTERS_BILATERAL_IMPL_H_
-
