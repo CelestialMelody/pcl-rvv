@@ -1,0 +1,29 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 10 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 10 tests from BilateralDiagnostic
+[ RUN      ] BilateralDiagnostic.ScalarFormulaMatchesManualTwoNeighbors
+[       OK ] BilateralDiagnostic.ScalarFormulaMatchesManualTwoNeighbors (1 ms)
+[ RUN      ] BilateralDiagnostic.RVVStagingMatchesScalarWeight
+[       OK ] BilateralDiagnostic.RVVStagingMatchesScalarWeight (1 ms)
+[ RUN      ] BilateralDiagnostic.RVVExpWeightMatchesScalarWithinApproximation
+[       OK ] BilateralDiagnostic.RVVExpWeightMatchesScalarWithinApproximation (0 ms)
+[ RUN      ] BilateralDiagnostic.FullDiagnosticMatchesScalar
+[       OK ] BilateralDiagnostic.FullDiagnosticMatchesScalar (497 ms)
+[ RUN      ] BilateralDiagnostic.FullExpDiagnosticMatchesScalar
+[       OK ] BilateralDiagnostic.FullExpDiagnosticMatchesScalar (1121 ms)
+[ RUN      ] BilateralDiagnostic.FullExpErrorBudgetAcrossParameters
+[       OK ] BilateralDiagnostic.FullExpErrorBudgetAcrossParameters (3258 ms)
+[ RUN      ] BilateralDiagnostic.ProductionFilterMatchesScalarWithinApproximation
+[       OK ] BilateralDiagnostic.ProductionFilterMatchesScalarWithinApproximation (1093 ms)
+[ RUN      ] BilateralDiagnostic.ProductionFilterErrorBudgetAcrossParameters
+[       OK ] BilateralDiagnostic.ProductionFilterErrorBudgetAcrossParameters (3164 ms)
+[ RUN      ] BilateralDiagnostic.NonDenseInvalidCentersAreSkipped
+[       OK ] BilateralDiagnostic.NonDenseInvalidCentersAreSkipped (461 ms)
+[ RUN      ] BilateralDiagnostic.SmallNeighborListFallsBack
+[       OK ] BilateralDiagnostic.SmallNeighborListFallsBack (0 ms)
+[----------] 10 tests from BilateralDiagnostic (9601 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 1 test suite ran. (9604 ms total)
+[  PASSED  ] 10 tests.

@@ -1,0 +1,11 @@
+Note: Google Test filter = FastBilateralFilter.Filters_Bilateral
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from FastBilateralFilter
+[ RUN      ] FastBilateralFilter.Filters_Bilateral
+[       OK ] FastBilateralFilter.Filters_Bilateral (279 ms)
+[----------] 1 test from FastBilateralFilter (280 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (284 ms total)
+[  PASSED  ] 1 test.

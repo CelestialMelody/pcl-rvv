@@ -1,0 +1,44 @@
+====================================================================================================
+PCL filters/bilateral RVV diagnostic
+Build: RVV diagnostic (__RVV10__ enabled)
+Dataset: synthetic PointXYZI grid clouds; BilateralFilter radiusSearch full diagnostic and neighbor weight staging
+Iterations: 3
+----------------------------------------------------------------------------------------------------
+bilateral neighbor weight-stage diag 512                          : 0.0798 ms/iter
+  Total Time: 0.2395 ms, checksum: 32490752
+bilateral full diag 256 radiusSearch                              : 18.5273 ms/iter
+  Total Time: 55.5819 ms, checksum: 13969045355133458813
+bilateral full diag 1K radiusSearch                               : 121.1240 ms/iter
+  Total Time: 363.3720 ms, checksum: 18282033827491641828
+bilateral subset full diag 1K radiusSearch                        : 61.1278 ms/iter
+  Total Time: 183.3835 ms, checksum: 11711915678833038132
+bilateral finite full diag 1K radiusSearch                        : 123.0265 ms/iter
+  Total Time: 369.0794 ms, checksum: 8819174970645590401
+bilateral full exp diag 256 radiusSearch                          : 11.2317 ms/iter
+  Total Time: 33.6952 ms, checksum: 12687309538293145917
+  Error: max_abs=3.814697e-06, max_rel=1.167396e-07, rmse=1.066240e-06, p95_abs=3.814697e-06, p99_abs=3.814697e-06
+bilateral full exp diag 1K radiusSearch                           : 76.0978 ms/iter
+  Total Time: 228.2935 ms, checksum: 11799598538268747830
+  Error: max_abs=3.814697e-06, max_rel=1.191673e-07, rmse=1.061231e-06, p95_abs=3.814697e-06, p99_abs=3.814697e-06
+bilateral subset full exp diag 1K radiusSearch                    : 38.6635 ms/iter
+  Total Time: 115.9906 ms, checksum: 12098904854932774537
+  Error: max_abs=3.814697e-06, max_rel=1.189552e-07, rmse=7.444618e-07, p95_abs=1.907349e-06, p99_abs=3.814697e-06
+ErrorCase: high-contrast full exp sigma_s=0.060 sigma_r=8.000
+  Error: max_abs=1.525879e-05, max_rel=1.002734e-07, rmse=2.100250e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+ErrorCase: high-contrast full exp sigma_s=0.090 sigma_r=18.000
+  Error: max_abs=1.525879e-05, max_rel=9.911005e-08, rmse=1.738985e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+ErrorCase: high-contrast full exp sigma_s=0.140 sigma_r=32.000
+  Error: max_abs=1.525879e-05, max_rel=9.917679e-08, rmse=1.748764e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+ProductionErrorCase: high-contrast sigma_s=0.060 sigma_r=8.000
+  Error: max_abs=1.525879e-05, max_rel=1.002734e-07, rmse=2.100250e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+ProductionErrorCase: high-contrast sigma_s=0.090 sigma_r=18.000
+  Error: max_abs=1.525879e-05, max_rel=9.911005e-08, rmse=1.738985e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+ProductionErrorCase: high-contrast sigma_s=0.140 sigma_r=32.000
+  Error: max_abs=1.525879e-05, max_rel=9.917679e-08, rmse=1.748764e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+bilateral production filter 256                                   : 3.1566 ms/iter
+  Total Time: 9.4698 ms, checksum: 10058299795221424303
+  Error: max_abs=3.814697e-06, max_rel=1.167396e-07, rmse=1.099055e-06, p95_abs=3.814697e-06, p99_abs=3.814697e-06
+bilateral production filter 1K                                    : 44.5187 ms/iter
+  Total Time: 133.5562 ms, checksum: 11799598538268747830
+  Error: max_abs=3.814697e-06, max_rel=1.191673e-07, rmse=1.061231e-06, p95_abs=3.814697e-06, p99_abs=3.814697e-06
+====================================================================================================
