@@ -142,18 +142,20 @@ bench-only / 诊断主题不改变公开 API 和生产分流。只有诊断结�
 
 ### 6.2 bench-only / 诊断主题
 
-| 主题 | 诊断目标 | 不直接接入生产的原因 |
-| --- | --- | --- |
-| `approximate_voxel_grid` | finite + leaf-id/hash 预计算 microbench | hash bucket 冲突、flush、scratch 累加主导，生产收益难归因 |
-| `grid_minimum` | 2D grid id + floor 预计算 microbench | sort 和 per-cell min z 主导 |
-| `extract_indices` | bitmap / set-difference 替代方案与 keep_organized 坏点写诊断 | 当前主逻辑是 sort + `set_difference` 或整点字段写，语义边界复杂 |
-| `model_outlier_removal` | 连续 distances 后的 threshold + compress microbench | `getDistancesToModel` 和模型多态主导，后处理占比未知 |
-| `normal_space` | normal bin id 预计算 microbench | list/bin/random sampling 主导，生产接入需重构采样状态 |
-| `radius_outlier_removal` | `to_keep` 到 indices / removed_indices 的尾段压缩 microbench | nearestK/radius search 主导，尾段压缩只能给出成本上界 |
-| `sampling_surface_normal` | min/max 与小分区 covariance 规约诊断 | recursive partition、random、Eigen plane solve 主导 |
-| `statistical_outlier_removal` | distances mean/stddev 规约与 threshold compress | KNN search 主导，整体收益预计有限 |
-| `uniform_sampling` | leaf id 与 voxel center distance microbench | `leaves_` map 和 per-leaf conflict update 主导，生产收益需先诊断占比 |
-| `src/voxel_grid_label.cpp` | distance filter 与 leaf id 计算 microbench | sort、label histogram、`std::map` 和字段聚合主导，固定点类型适合先做局部诊断 |
+6.1 全部完成后，后续普通对话应从本表第一条 `待诊断` 主题继续。bench-only / 诊断主题默认不修改公开 API、不接入生产分流；只有诊断结果显示板卡收益、覆盖面和维护成本同时成立，才重新纳入生产候选。
+
+| 顺序 | 主题 | 诊断目标 | 状态 | 诊断文档 / 证据路径 | 不直接接入生产的原因 |
+| ---: | --- | --- | --- | --- | --- |
+| 1 | `approximate_voxel_grid` | finite + leaf-id/hash 预计算 microbench；full `PointXYZ` bucket/flush/centroid 诊断；生产 `PointXYZ` 主路径 | 已完成（`PointXYZ` 生产接入） | `test-rvv/filters/approximate_voxel_grid/approximate_voxel_grid-evaluation.zh.md`；`doc-rvv/filters/approximate_voxel_grid-RVV.zh.md`；`test-rvv/filters/approximate_voxel_grid/output/board/analyze_bench_compare.log` | leaf-id/hash 片段板卡约 `1.98x`~`2.00x`，full `PointXYZ` 诊断约 `1.67x`~`1.68x`，生产 `ApproximateVoxelGrid<PointXYZ>` 约 `1.92x`；非 `PointXYZ`、小规模、泛型 `FieldList`、`Eigen::VectorXf scratch` 和 RGB/RGBA 仍回退标量 |
+| 2 | `grid_minimum` | 2D grid id + floor 预计算 microbench | 待诊断 | 待建 | sort 和 per-cell min z 主导 |
+| 3 | `extract_indices` | bitmap / set-difference 替代方案与 keep_organized 坏点写诊断 | 待诊断 | 待建 | 当前主逻辑是 sort + `set_difference` 或整点字段写，语义边界复杂 |
+| 4 | `model_outlier_removal` | 连续 distances 后的 threshold + compress microbench | 待诊断 | 待建 | `getDistancesToModel` 和模型多态主导，后处理占比未知 |
+| 5 | `normal_space` | normal bin id 预计算 microbench | 待诊断 | 待建 | list/bin/random sampling 主导，生产接入需重构采样状态 |
+| 6 | `radius_outlier_removal` | `to_keep` 到 indices / removed_indices 的尾段压缩 microbench | 待诊断 | 待建 | nearestK/radius search 主导，尾段压缩只能给出成本上界 |
+| 7 | `sampling_surface_normal` | min/max 与小分区 covariance 规约诊断 | 待诊断 | 待建 | recursive partition、random、Eigen plane solve 主导 |
+| 8 | `statistical_outlier_removal` | distances mean/stddev 规约与 threshold compress | 待诊断 | 待建 | KNN search 主导，整体收益预计有限 |
+| 9 | `uniform_sampling` | leaf id 与 voxel center distance microbench | 待诊断 | 待建 | `leaves_` map 和 per-leaf conflict update 主导，生产收益需先诊断占比 |
+| 10 | `src/voxel_grid_label.cpp` | distance filter 与 leaf id 计算 microbench | 待诊断 | 待建 | sort、label histogram、`std::map` 和字段聚合主导，固定点类型适合先做局部诊断 |
 
 bench-only / 诊断主题不改变公开 API 和生产分流。只有诊断结果显示板卡收益、覆盖面和维护成本同时成立，才重新纳入生产候选。
 
