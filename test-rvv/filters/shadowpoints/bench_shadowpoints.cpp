@@ -317,13 +317,13 @@ main()
 #if defined(__RVV10__)
   std::cout << "Build: RVV (__RVV10__ enabled";
 #if defined(PCL_SHADOWPOINTS_RVV_BENCH_ONLY)
-  std::cout << ", bench-only helper enabled";
+  std::cout << ", bench-diagnosis helper enabled";
 #endif
   std::cout << ")\n";
 #else
   std::cout << "Build: Std (__RVV10__ disabled)\n";
 #endif
-  std::cout << "Dataset: synthetic PointXYZ + PointNormal clouds; full-cloud dot/abs threshold bench-only RVV cases and subset/type/cloud-output fallback cases\n";
+  std::cout << "Dataset: synthetic PointXYZ + PointNormal clouds; full-cloud dot/abs threshold bench-diagnosis RVV cases and subset/type/cloud-output fallback cases\n";
   std::cout << "Iterations: " << kBenchmarkIterations << '\n';
 
   const auto cloud64k = makeCloud(64 * 1024);

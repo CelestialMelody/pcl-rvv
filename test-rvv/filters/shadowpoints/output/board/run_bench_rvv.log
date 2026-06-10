@@ -1,20 +1,20 @@
 ================================================================================================
  PCL filters/shadowpoints Benchmark (ShadowPoints<PointXYZ,PointNormal> indices RVV path)
 ================================================================================================
-Build: RVV (__RVV10__ enabled, bench-only helper enabled)
-Dataset: synthetic PointXYZ + PointNormal clouds; full-cloud dot/abs threshold bench-only RVV cases and subset/type/cloud-output fallback cases
+Build: RVV (__RVV10__ enabled, bench-diagnosis helper enabled)
+Dataset: synthetic PointXYZ + PointNormal clouds; full-cloud dot/abs threshold bench-diagnosis RVV cases and subset/type/cloud-output fallback cases
 Iterations: 30
-shadowpoints pointxyz full-cloud 64K                  : 2.6012 ms/iter
-  Total Time: 78.0360 ms, checksum: 11700163607559850908
-shadowpoints pointxyz full-cloud 1M                   : 75.0959 ms/iter
-  Total Time: 2252.8785 ms, checksum: 4831015018897800993
-shadowpoints negative removed 1M                      : 92.5573 ms/iter
-  Total Time: 2776.7198 ms, checksum: 12184345176756006576
-shadowpoints subset fallback 1M                       : 16.5231 ms/iter
-  Total Time: 495.6921 ms, checksum: 18036595852822747721
-shadowpoints normal type fallback 1M                  : 29.5620 ms/iter
-  Total Time: 886.8610 ms, checksum: 12949535999456508277
-shadowpoints pointxyzi fallback 1M                    : 31.5096 ms/iter
-  Total Time: 945.2873 ms, checksum: 16357277656814387029
-shadowpoints cloud keep_organized fallback 64K        : 1.8915 ms/iter
-  Total Time: 56.7450 ms, checksum: 6081673756672
+shadowpoints pointxyz full-cloud 64K                  : 3.1508 ms/iter
+  Total Time: 94.5242 ms, checksum: 11700163607559850908
+shadowpoints pointxyz full-cloud 1M                   : 61.3398 ms/iter
+  Total Time: 1840.1935 ms, checksum: 4831015018897800993
+shadowpoints negative removed 1M                      : 80.6662 ms/iter
+  Total Time: 2419.9855 ms, checksum: 12184345176756006576
+shadowpoints subset fallback 1M                       : 16.2578 ms/iter
+  Total Time: 487.7347 ms, checksum: 18036595852822747721
+shadowpoints normal type fallback 1M                  : 29.2587 ms/iter
+  Total Time: 877.7602 ms, checksum: 12949535999456508277
+shadowpoints pointxyzi fallback 1M                    : 31.1084 ms/iter
+  Total Time: 933.2511 ms, checksum: 16357277656814387029
+shadowpoints cloud keep_organized fallback 64K        : 1.8772 ms/iter
+  Total Time: 56.3161 ms, checksum: 6081673756672

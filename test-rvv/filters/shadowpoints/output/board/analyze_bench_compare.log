@@ -4,7 +4,7 @@
 [Benchmark Context]
   Device    : Milkv-Jupiter
   VLEN      : see SoC / ELF (board)
-  Dataset   : synthetic PointXYZ + PointNormal clouds; full-cloud dot/abs threshold bench-only RVV cases and subset/type/cloud-output fallback cases
+  Dataset   : synthetic PointXYZ + PointNormal clouds; full-cloud dot/abs threshold bench-diagnosis RVV cases and subset/type/cloud-output fallback cases
   Iterations: 30 （每行 Total = Avg × 30）
   Std log   : /root/pcl-test/filters/shadowpoints/output/run_bench_std.log
   RVV log   : /root/pcl-test/filters/shadowpoints/output/run_bench_rvv.log
@@ -12,25 +12,25 @@
 ------------------------------------------------------------------------------------------------------------
 Benchmark Item                                  | Impl   |       Avg (ms) |     Total (ms) |        Speedup
 ------------------------------------------------|--------|----------------|----------------|----------------
-shadowpoints pointxyz full-cloud 64K            | Std    |      2.0500 ms |     61.5000 ms |    [   1.00x ]
-                                                | RVV    |      2.6012 ms |     78.0360 ms |    [   0.79x ]
+shadowpoints pointxyz full-cloud 64K            | Std    |      1.9789 ms |     59.3670 ms |    [   1.00x ]
+                                                | RVV    |      3.1508 ms |     94.5240 ms |    [   0.63x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-shadowpoints pointxyz full-cloud 1M             | Std    |     30.8180 ms |    924.5400 ms |    [   1.00x ]
-                                                | RVV    |     75.0959 ms |   2252.8770 ms |    [   0.41x ]
+shadowpoints pointxyz full-cloud 1M             | Std    |     30.2056 ms |    906.1680 ms |    [   1.00x ]
+                                                | RVV    |     61.3398 ms |   1840.1940 ms |    [   0.49x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-shadowpoints negative removed 1M                | Std    |     34.8570 ms |   1045.7100 ms |    [   1.00x ]
-                                                | RVV    |     92.5573 ms |   2776.7190 ms |    [   0.38x ]
+shadowpoints negative removed 1M                | Std    |     35.2654 ms |   1057.9620 ms |    [   1.00x ]
+                                                | RVV    |     80.6662 ms |   2419.9860 ms |    [   0.44x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-shadowpoints subset fallback 1M                 | Std    |     16.5461 ms |    496.3830 ms |    [   1.00x ]
-                                                | RVV    |     16.5231 ms |    495.6930 ms |    [   1.00x ]
+shadowpoints subset fallback 1M                 | Std    |     16.3322 ms |    489.9660 ms |    [   1.00x ]
+                                                | RVV    |     16.2578 ms |    487.7340 ms |    [   1.00x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-shadowpoints normal type fallback 1M            | Std    |     29.5327 ms |    885.9810 ms |    [   1.00x ]
-                                                | RVV    |     29.5620 ms |    886.8600 ms |    [   1.00x ]
+shadowpoints normal type fallback 1M            | Std    |     29.2840 ms |    878.5200 ms |    [   1.00x ]
+                                                | RVV    |     29.2587 ms |    877.7610 ms |    [   1.00x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-shadowpoints pointxyzi fallback 1M              | Std    |     31.3488 ms |    940.4640 ms |    [   1.00x ]
-                                                | RVV    |     31.5096 ms |    945.2880 ms |    [   0.99x ]
+shadowpoints pointxyzi fallback 1M              | Std    |     31.2208 ms |    936.6240 ms |    [   1.00x ]
+                                                | RVV    |     31.1084 ms |    933.2520 ms |    [   1.00x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-shadowpoints cloud keep_organized fallback 64K  | Std    |      1.8935 ms |     56.8050 ms |    [   1.00x ]
-                                                | RVV    |      1.8915 ms |     56.7450 ms |    [   1.00x ]
+shadowpoints cloud keep_organized fallback 64K  | Std    |      1.8734 ms |     56.2020 ms |    [   1.00x ]
+                                                | RVV    |      1.8772 ms |     56.3160 ms |    [   1.00x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
 ============================================================================================================

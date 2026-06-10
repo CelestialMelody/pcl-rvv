@@ -1,6 +1,6 @@
 # filters/shadowpoints RVV 优化说明
 
-本文档记录 `pcl::ShadowPoints<PointT, NormalT>` 的 RVV 可行性实验、bench-only 诊断 helper 和验证结果。实验显示该 RVV 方案正确且命中指令，但 Milkv-Jupiter 上真实性能不成立，因此上游源码已回退到原始标量实现，RVV 只保留在专项 bench 中作为诊断证据。
+本文档记录 `pcl::ShadowPoints<PointT, NormalT>` 的 RVV 可行性实验、bench 诊断 helper 和验证结果。实验显示该 RVV 方案正确且命中指令，但 Milkv-Jupiter 上真实性能不成立，因此上游源码已回退到原始标量实现，RVV 只保留在专项 bench 中作为诊断证据。
 
 ## 1. 入口作用
 
@@ -10,7 +10,7 @@
 
 ## 2. 覆盖范围
 
-bench-only RVV helper 只覆盖：
+bench-diagnosis RVV helper 只覆盖：
 
 - `PointT = pcl::PointXYZ`
 - `NormalT = pcl::PointNormal`
@@ -31,7 +31,7 @@ bench-only RVV helper 只覆盖：
 
 `test-rvv/filters/shadowpoints/bench_shadowpoints.cpp` 保留诊断实现：
 
-- `shadowPointsBenchOnlyRVV`：`__RVV10__ && PCL_SHADOWPOINTS_RVV_BENCH_ONLY` 下的 bench-only RVV helper；
+- `shadowPointsBenchOnlyRVV`：`__RVV10__ && PCL_SHADOWPOINTS_RVV_BENCH_ONLY` 下的 bench-diagnosis RVV helper；
 - `benchIndices` 中的 `if constexpr`：只允许 `PointXYZ` + `PointNormal`、全云 fake indices 命中诊断 helper；
 - 其它类型、subset indices 和 cloud-output case 继续调用生产 `ShadowPoints` 标量路径，用于验证上游源码回退后的 fallback 语义和成本。
 
@@ -103,7 +103,7 @@ QEMU：
 make -C test-rvv/filters/shadowpoints run_board_test run_board_bench_compare fetch_board_logs
 ```
 
-设备：Milkv-Jupiter。Dataset：synthetic `PointXYZ` + `PointNormal` clouds; full-cloud dot/abs threshold bench-only RVV cases and subset/type/cloud-output fallback cases。Iterations：`30`。日志路径：
+设备：Milkv-Jupiter。Dataset：synthetic `PointXYZ` + `PointNormal` clouds; full-cloud dot/abs threshold bench-diagnosis RVV cases and subset/type/cloud-output fallback cases。Iterations：`30`。日志路径：
 
 ```text
 test-rvv/filters/shadowpoints/output/board/run_test.log
@@ -114,16 +114,16 @@ test-rvv/filters/shadowpoints/output/board/analyze_bench_compare.log
 
 ## 6. 性能结果与结论
 
-每个 speedup 按 `Std avg / RVV avg` 计算。前三个 case 直接调用 bench-only RVV helper，用于证明双 AoS dot/abs/mask/压缩方案的真实性能；后四个 case 是 fallback / 未覆盖路径语义和成本证据，不作为 RVV 主路径性能结论。
+每个 speedup 按 `Std avg / RVV avg` 计算。前三个 case 直接调用 bench-diagnosis RVV helper，用于证明双 AoS dot/abs/mask/压缩方案的真实性能；后四个 case 是 fallback / 未覆盖路径语义和成本证据，不作为 RVV 主路径性能结论。
 
 | case | 入口 / 参数 | 路径 | Std ms/iter | RVV ms/iter | speedup | 结论 |
 | --- | --- | --- | ---: | ---: | ---: | --- |
-| `shadowpoints pointxyz full-cloud 64K` | `filter(Indices&)`，64K `PointXYZ` + `PointNormal`，`negative=false` | bench-only RVV | `2.0500` | `2.6012` | `0.79x` | 小规模主路径不成立 |
-| `shadowpoints pointxyz full-cloud 1M` | `filter(Indices&)`，1M `PointXYZ` + `PointNormal`，`negative=false` | bench-only RVV | `30.8180` | `75.0959` | `0.41x` | 大规模主路径显著慢于 Std |
-| `shadowpoints negative removed 1M` | `filter(Indices&)`，1M，`negative=true`，提取 removed indices | bench-only RVV | `34.8570` | `92.5573` | `0.38x` | 双路压缩输出进一步放大成本 |
-| `shadowpoints subset fallback 1M` | 显式 subset indices | Std fallback | `16.5461` | `16.5231` | `1.00x` | 未覆盖 subset 语义 / 成本保持 |
-| `shadowpoints normal type fallback 1M` | `PointXYZ` + `Normal` | Std fallback | `29.5327` | `29.5620` | `1.00x` | 类型 fallback 保持 |
-| `shadowpoints pointxyzi fallback 1M` | `PointXYZI` + `PointNormal` | Std fallback | `31.3488` | `31.5096` | `0.99x` | 非目标点类型 fallback 保持 |
-| `shadowpoints cloud keep_organized fallback 64K` | `filter(PointCloud&)`，`keep_organized=true` | Std fallback | `1.8935` | `1.8915` | `1.00x` | cloud-out 路径保持标量语义 |
+| `shadowpoints pointxyz full-cloud 64K` | `filter(Indices&)`，64K `PointXYZ` + `PointNormal`，`negative=false` | bench-diagnosis RVV | `1.9789` | `3.1508` | `0.63x` | 小规模主路径不成立 |
+| `shadowpoints pointxyz full-cloud 1M` | `filter(Indices&)`，1M `PointXYZ` + `PointNormal`，`negative=false` | bench-diagnosis RVV | `30.2056` | `61.3398` | `0.49x` | 大规模主路径显著慢于 Std |
+| `shadowpoints negative removed 1M` | `filter(Indices&)`，1M，`negative=true`，提取 removed indices | bench-diagnosis RVV | `35.2654` | `80.6662` | `0.44x` | 双路压缩输出进一步放大成本 |
+| `shadowpoints subset fallback 1M` | 显式 subset indices | Std fallback | `16.3322` | `16.2578` | `1.00x` | 未覆盖 subset 语义 / 成本保持 |
+| `shadowpoints normal type fallback 1M` | `PointXYZ` + `Normal` | Std fallback | `29.2840` | `29.2587` | `1.00x` | 类型 fallback 保持 |
+| `shadowpoints pointxyzi fallback 1M` | `PointXYZI` + `PointNormal` | Std fallback | `31.2208` | `31.1084` | `1.00x` | 非目标点类型 fallback 保持 |
+| `shadowpoints cloud keep_organized fallback 64K` | `filter(PointCloud&)`，`keep_organized=true` | Std fallback | `1.8734` | `1.8772` | `1.00x` | cloud-out 路径保持标量语义 |
 
-结论：`shadowPointsBenchOnlyRVV` 的正确性、checksum 和指令路径成立，但真实板卡性能不成立。双 AoS stride load、绝对值比较和 `vcompress` 输出在该入口上不能抵消额外成本；`negative_ + removed_indices_` 需要额外压缩 removed 输出，退化更明显。因此本主题收敛为 bench-only microbench / 诊断 case，不接入生产主路径；上游 `shadowpoints` 源码保持原始标量实现。
+结论：`shadowPointsBenchOnlyRVV` 的正确性、checksum 和指令路径成立，但真实板卡性能不成立。双 AoS stride load、绝对值比较和 `vcompress` 输出在该入口上不能抵消额外成本；`negative_ + removed_indices_` 需要额外压缩 removed 输出，退化更明显。因此本主题收敛为 bench-diagnosis microbench / 诊断 case，不接入生产主路径；上游 `shadowpoints` 源码保持原始标量实现。
