@@ -238,6 +238,14 @@ namespace pcl
       void 
       applyFilter (PointCloud &output) override;
 
+      void
+      applyFilterStd (PointCloud &output);
+
+#if defined(__RVV10__)
+      bool
+      applyFilterPointXYZRVV (PointCloud &output);
+#endif
+
       /** \brief Write a single point from the hash to the output cloud
         */
       void 

@@ -40,8 +40,20 @@
 
 #include <pcl/common/io.h>
 #include <pcl/common/point_tests.h>
+#include <pcl/common/rvv_point_load.h>
 #include <pcl/filters/approximate_voxel_grid.h>
+#include <pcl/point_types.h>
 #include <boost/mpl/size.hpp> // for size
+
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <type_traits>
+#include <vector>
+
+#if defined(__RVV10__)
+#include <riscv_vector.h>
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
@@ -63,7 +75,7 @@ pcl::ApproximateVoxelGrid<PointT>::flush (PointCloud &output, std::size_t op, he
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
-pcl::ApproximateVoxelGrid<PointT>::applyFilter (PointCloud &output)
+pcl::ApproximateVoxelGrid<PointT>::applyFilterStd (PointCloud &output)
 {
   int centroid_size = 4;
   if (downsample_all_data_)
@@ -134,6 +146,215 @@ pcl::ApproximateVoxelGrid<PointT>::applyFilter (PointCloud &output)
   output.width = output.size ();
   output.height       = 1;                    // downsampling breaks the organized structure
   output.is_dense     = true;                 // we filter out invalid points
+}
+
+#if defined(__RVV10__)
+namespace pcl
+{
+  namespace approximate_voxel_grid_rvv
+  {
+    struct PointXYZLeafHash
+    {
+      int ix;
+      int iy;
+      int iz;
+      unsigned int hash;
+      std::uint32_t source_index;
+    };
+
+    struct PointXYZHistoryEntry
+    {
+      int ix{0};
+      int iy{0};
+      int iz{0};
+      int count{0};
+      float sx{0.0f};
+      float sy{0.0f};
+      float sz{0.0f};
+    };
+
+    inline vint32m2_t
+    floorF32ToI32NoFrm (vfloat32m2_t values, std::size_t vl)
+    {
+      // vfcvt.rtz is independent of FRM. Negative non-integers need one
+      // extra step to match std::floor used by the scalar path.
+      vint32m2_t trunc = __riscv_vfcvt_rtz_x_f_v_i32m2 (values, vl);
+      const vfloat32m2_t trunc_f = __riscv_vfcvt_f_x_v_f32m2 (trunc, vl);
+      const vbool16_t negative_fraction = __riscv_vmflt_vv_f32m2_b16 (values, trunc_f, vl);
+      const vint32m2_t zero = __riscv_vmv_v_x_i32m2 (0, vl);
+      const vint32m2_t adjust = __riscv_vmerge_vxm_i32m2 (zero, 1, negative_fraction, vl);
+      return __riscv_vsub_vv_i32m2 (trunc, adjust, vl);
+    }
+
+    inline vbool16_t
+    finiteMask (vfloat32m2_t values, std::size_t vl)
+    {
+      const vbool16_t eq_self = __riscv_vmfeq_vv_f32m2_b16 (values, values, vl);
+      const vfloat32m2_t abs_v = __riscv_vfabs_v_f32m2 (values, vl);
+      const vfloat32m2_t inf_v = __riscv_vfmv_v_f_f32m2 (std::numeric_limits<float>::infinity (), vl);
+      const vbool16_t not_inf = __riscv_vmflt_vv_f32m2_b16 (abs_v, inf_v, vl);
+      return __riscv_vmand_mm_b16 (eq_self, not_inf, vl);
+    }
+
+    inline bool
+    computePointXYZLeafHashes (const pcl::PointCloud<pcl::PointXYZ>& cloud,
+                               const Eigen::Array3f& inverse_leaf_size,
+                               std::size_t history_size,
+                               std::vector<PointXYZLeafHash>& out)
+    {
+      const std::size_t n = cloud.size ();
+      if (n < 64 || n > static_cast<std::size_t> (std::numeric_limits<std::uint32_t>::max ()) ||
+          history_size == 0 || (history_size & (history_size - 1)) != 0)
+        return false;
+
+      out.resize (n);
+      auto* out_leaf = out.data ();
+      std::size_t kept = 0;
+      std::size_t i = 0;
+      const auto* base = reinterpret_cast<const std::uint8_t*> (cloud.data ());
+
+      while (i < n)
+      {
+        const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
+        const auto* chunk = base + i * sizeof (pcl::PointXYZ);
+        vfloat32m2_t vx;
+        vfloat32m2_t vy;
+        vfloat32m2_t vz;
+        pcl::rvv_load::strided_load3_f32m2<sizeof (pcl::PointXYZ),
+                                           offsetof (pcl::PointXYZ, x),
+                                           offsetof (pcl::PointXYZ, y),
+                                           offsetof (pcl::PointXYZ, z)> (chunk, vl, vx, vy, vz);
+
+        const vbool16_t finite =
+            __riscv_vmand_mm_b16 (__riscv_vmand_mm_b16 (finiteMask (vx, vl), finiteMask (vy, vl), vl),
+                                  finiteMask (vz, vl),
+                                  vl);
+        const vfloat32m2_t sx = __riscv_vfmul_vf_f32m2 (vx, inverse_leaf_size[0], vl);
+        const vfloat32m2_t sy = __riscv_vfmul_vf_f32m2 (vy, inverse_leaf_size[1], vl);
+        const vfloat32m2_t sz = __riscv_vfmul_vf_f32m2 (vz, inverse_leaf_size[2], vl);
+        const vint32m2_t ix = floorF32ToI32NoFrm (sx, vl);
+        const vint32m2_t iy = floorF32ToI32NoFrm (sy, vl);
+        const vint32m2_t iz = floorF32ToI32NoFrm (sz, vl);
+
+        vint32m2_t hash = __riscv_vmul_vx_i32m2 (ix, 7171, vl);
+        hash = __riscv_vmacc_vx_i32m2 (hash, 3079, iy, vl);
+        hash = __riscv_vmacc_vx_i32m2 (hash, 4231, iz, vl);
+        const vuint32m2_t hash_u = __riscv_vreinterpret_v_i32m2_u32m2 (hash);
+        const vuint32m2_t masked_hash =
+            __riscv_vand_vx_u32m2 (hash_u, static_cast<std::uint32_t> (history_size - 1), vl);
+
+        const vuint32m2_t local = __riscv_vid_v_u32m2 (vl);
+        const vuint32m2_t source = __riscv_vadd_vx_u32m2 (local, static_cast<std::uint32_t> (i), vl);
+
+        const vint32m2_t ix_kept = __riscv_vcompress_vm_i32m2 (ix, finite, vl);
+        const vint32m2_t iy_kept = __riscv_vcompress_vm_i32m2 (iy, finite, vl);
+        const vint32m2_t iz_kept = __riscv_vcompress_vm_i32m2 (iz, finite, vl);
+        const vuint32m2_t hash_kept = __riscv_vcompress_vm_u32m2 (masked_hash, finite, vl);
+        const vuint32m2_t source_kept = __riscv_vcompress_vm_u32m2 (source, finite, vl);
+        const std::size_t keep_count = __riscv_vcpop_m_b16 (finite, vl);
+
+        for (std::size_t lane = 0; lane < keep_count; ++lane)
+        {
+          out_leaf[kept + lane].ix =
+              __riscv_vmv_x_s_i32m2_i32 (__riscv_vslidedown_vx_i32m2 (ix_kept, lane, keep_count));
+          out_leaf[kept + lane].iy =
+              __riscv_vmv_x_s_i32m2_i32 (__riscv_vslidedown_vx_i32m2 (iy_kept, lane, keep_count));
+          out_leaf[kept + lane].iz =
+              __riscv_vmv_x_s_i32m2_i32 (__riscv_vslidedown_vx_i32m2 (iz_kept, lane, keep_count));
+          out_leaf[kept + lane].hash =
+              __riscv_vmv_x_s_u32m2_u32 (__riscv_vslidedown_vx_u32m2 (hash_kept, lane, keep_count));
+          out_leaf[kept + lane].source_index =
+              __riscv_vmv_x_s_u32m2_u32 (__riscv_vslidedown_vx_u32m2 (source_kept, lane, keep_count));
+        }
+
+        kept += keep_count;
+        i += vl;
+      }
+
+      out.resize (kept);
+      return true;
+    }
+
+    inline void
+    flushPointXYZHistoryEntry (pcl::PointCloud<pcl::PointXYZ>& output,
+                               const PointXYZHistoryEntry& entry)
+    {
+      const float inv_count = 1.0f / static_cast<float> (entry.count);
+      output.push_back (pcl::PointXYZ (entry.sx * inv_count,
+                                       entry.sy * inv_count,
+                                       entry.sz * inv_count));
+    }
+  }
+}
+
+template <typename PointT> bool
+pcl::ApproximateVoxelGrid<PointT>::applyFilterPointXYZRVV (PointCloud &output)
+{
+  if constexpr (!std::is_same_v<PointT, pcl::PointXYZ>)
+  {
+    return false;
+  }
+  else
+  {
+    std::vector<approximate_voxel_grid_rvv::PointXYZLeafHash> leaves;
+    if (!approximate_voxel_grid_rvv::computePointXYZLeafHashes (*input_,
+                                                                inverse_leaf_size_,
+                                                                histsize_,
+                                                                leaves))
+      return false;
+
+    // PointXYZ has no extra fields or RGB packing. The stateful history table
+    // remains scalar so collision flush order and centroid semantics match the
+    // original ApproximateVoxelGrid loop while leaf/hash generation runs in VL
+    // chunks.
+    std::vector<approximate_voxel_grid_rvv::PointXYZHistoryEntry> history (histsize_);
+    output.clear ();
+    output.reserve (input_->size ());
+
+    for (const auto& leaf : leaves)
+    {
+      const auto& point = (*input_)[leaf.source_index];
+      auto& entry = history[leaf.hash];
+      if (entry.count && ((leaf.ix != entry.ix) || (leaf.iy != entry.iy) || (leaf.iz != entry.iz)))
+      {
+        approximate_voxel_grid_rvv::flushPointXYZHistoryEntry (output, entry);
+        entry = approximate_voxel_grid_rvv::PointXYZHistoryEntry {};
+      }
+      entry.ix = leaf.ix;
+      entry.iy = leaf.iy;
+      entry.iz = leaf.iz;
+      entry.count++;
+      entry.sx += point.x;
+      entry.sy += point.y;
+      entry.sz += point.z;
+    }
+
+    for (const auto& entry : history)
+    {
+      if (entry.count)
+        approximate_voxel_grid_rvv::flushPointXYZHistoryEntry (output, entry);
+    }
+
+    output.width = output.size ();
+    output.height = 1;
+    output.is_dense = true;
+    return true;
+  }
+}
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::ApproximateVoxelGrid<PointT>::applyFilter (PointCloud &output)
+{
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<PointT, pcl::PointXYZ>)
+  {
+    if (applyFilterPointXYZRVV (output))
+      return;
+  }
+#endif
+  applyFilterStd (output);
 }
 
 #define PCL_INSTANTIATE_ApproximateVoxelGrid(T) template class PCL_EXPORTS pcl::ApproximateVoxelGrid<T>;
