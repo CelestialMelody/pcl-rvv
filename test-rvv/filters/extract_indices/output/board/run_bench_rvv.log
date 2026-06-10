@@ -1,0 +1,23 @@
+====================================================================================================
+PCL filters/extract_indices RVV diagnostic
+Build: RVV diagnostic (__RVV10__ enabled)
+Dataset: synthetic PointXYZ clouds; ExtractIndices complement bitmap, keep_organized write, and unchanged production filter
+Iterations: 30
+----------------------------------------------------------------------------------------------------
+extract indices complement diag sparse 64K                        : 0.5110 ms/iter
+  Total Time: 15.3293 ms, checksum: 12295308198027281283
+extract indices complement diag sparse 1M                         : 10.5958 ms/iter
+  Total Time: 317.8737 ms, checksum: 4442760590737343363
+extract indices complement diag half 1M                           : 8.3397 ms/iter
+  Total Time: 250.1913 ms, checksum: 10840377115661370243
+extract indices keep organized positive diag 64K                  : 3.2866 ms/iter
+  Total Time: 98.5974 ms, checksum: 12880487939088757824
+extract indices keep organized positive diag 1M                   : 44.6745 ms/iter
+  Total Time: 1340.2340 ms, checksum: 12977274005718586201
+extract indices keep organized negative diag 1M                   : 33.8247 ms/iter
+  Total Time: 1014.7409 ms, checksum: 12886139140570934160
+extract indices production unchanged negative 64K                 : 3.8536 ms/iter
+  Total Time: 115.6091 ms, checksum: 9008456904734371093
+extract indices production unchanged keep organized 64K           : 4.9617 ms/iter
+  Total Time: 148.8523 ms, checksum: 12880487939088757824
+====================================================================================================

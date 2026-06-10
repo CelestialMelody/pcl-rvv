@@ -1,0 +1,20 @@
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from ExtractIndicesDiag
+[ RUN      ] ExtractIndicesDiag.BitmapComplementMatchesSetDifference
+[       OK ] ExtractIndicesDiag.BitmapComplementMatchesSetDifference (0 ms)
+[ RUN      ] ExtractIndicesDiag.RVVBitmapComplementMatchesScalar
+[       OK ] ExtractIndicesDiag.RVVBitmapComplementMatchesScalar (1 ms)
+[ RUN      ] ExtractIndicesDiag.RVVKeepOrganizedPositiveMatchesScalar
+[       OK ] ExtractIndicesDiag.RVVKeepOrganizedPositiveMatchesScalar (3 ms)
+[ RUN      ] ExtractIndicesDiag.RVVKeepOrganizedNegativeMatchesScalar
+[       OK ] ExtractIndicesDiag.RVVKeepOrganizedNegativeMatchesScalar (2 ms)
+[ RUN      ] ExtractIndicesDiag.RVVMainThenSmallFallbackDoesNotChangeScalar
+[       OK ] ExtractIndicesDiag.RVVMainThenSmallFallbackDoesNotChangeScalar (0 ms)
+[ RUN      ] ExtractIndicesDiag.ProductionExtractIndicesStillRuns
+[       OK ] ExtractIndicesDiag.ProductionExtractIndicesStillRuns (1 ms)
+[----------] 6 tests from ExtractIndicesDiag (11 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (14 ms total)
+[  PASSED  ] 6 tests.

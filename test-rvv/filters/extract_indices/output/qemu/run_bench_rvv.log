@@ -1,0 +1,30 @@
+make[1]: Entering directory '/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/filters/extract_indices'
+rm -f build/riscv/bench_extract_indices_rvv
+[BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
+riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-06-10_18-49-24.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/RISCV/workspace/pcl/common/include -I/home/zoomin/codes/RISCV/workspace/pcl/filters/include -I/home/zoomin/codes/RISCV/workspace/pcl/test/include -I/home/zoomin/codes/RISCV/workspace/pcl -I/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/RISCV/workspace/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/RISCV/workspace/riscv/boost/include -I/home/zoomin/codes/RISCV/workspace/riscv/gtest/include -I/home/zoomin/codes/RISCV/workspace/riscv/flann/include -I/home/zoomin/codes/RISCV/workspace/riscv/lz4/include -I/home/zoomin/codes/RISCV/workspace/riscv/hdf5/include -I/home/zoomin/codes/RISCV/workspace/riscv/zlib/include -I/home/zoomin/codes/RISCV/workspace/riscv/libpng/include -DPCL_EXTRACT_INDICES_RVV_DIAGNOSTIC bench_extract_indices.cpp -L/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -L/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -L/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -L/home/zoomin/codes/RISCV/workspace/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/flann/lib -L/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib -L/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib -L/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib -L/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib  -lpcl_filters -lpcl_common -lm -o build/riscv/bench_extract_indices_rvv
+[RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
+LD_LIBRARY_PATH=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib:/home/zoomin/codes/RISCV/workspace/riscv/boost/lib:/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib:/home/zoomin/codes/RISCV/workspace/riscv/flann/lib:/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib:/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib:/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib:/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_extract_indices_rvv
+====================================================================================================
+PCL filters/extract_indices RVV diagnostic
+Build: RVV diagnostic (__RVV10__ enabled)
+Dataset: synthetic PointXYZ clouds; ExtractIndices complement bitmap, keep_organized write, and unchanged production filter
+Iterations: 30
+----------------------------------------------------------------------------------------------------
+extract indices complement diag sparse 64K                        : 0.6054 ms/iter
+  Total Time: 18.1612 ms, checksum: 12295308198027281283
+extract indices complement diag sparse 1M                         : 9.6195 ms/iter
+  Total Time: 288.5862 ms, checksum: 4442760590737343363
+extract indices complement diag half 1M                           : 10.0496 ms/iter
+  Total Time: 301.4887 ms, checksum: 10840377115661370243
+extract indices keep organized positive diag 64K                  : 7.5715 ms/iter
+  Total Time: 227.1455 ms, checksum: 12880487939088757824
+extract indices keep organized positive diag 1M                   : 121.1642 ms/iter
+  Total Time: 3634.9272 ms, checksum: 12977274005718586201
+extract indices keep organized negative diag 1M                   : 98.7356 ms/iter
+  Total Time: 2962.0689 ms, checksum: 12886139140570934160
+extract indices production unchanged negative 64K                 : 7.3882 ms/iter
+  Total Time: 221.6451 ms, checksum: 9008456904734371093
+extract indices production unchanged keep organized 64K           : 13.1283 ms/iter
+  Total Time: 393.8501 ms, checksum: 12880487939088757824
+====================================================================================================
+make[1]: Leaving directory '/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/filters/extract_indices'
