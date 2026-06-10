@@ -52,6 +52,8 @@
 
 - “文件里有大循环”不等同于“RVV 覆盖入口主成本”；
 - 只覆盖前置预处理、尾段压缩或小片段的候选，必须先证明该片段在整体入口中占比足够，或先降为 bench-only / 诊断；
+- bench-only / 诊断主题重新纳入生产候选时，不能只依据局部 microbench speedup；必须看 full diagnostic 或生产入口 case 是否在板卡上稳定明显收益，并确认收益覆盖入口主成本、fallback 边界清晰、语义风险和维护复杂度可接受；
+- 若局部片段正确且加速，但 sort / search / map / Eigen / 状态机 / 整点复制等后续主成本把 full diagnostic 稀释到弱收益区间，默认保留为 bench-only / 诊断，不接入生产；
 - search、sort、map、Eigen solver、lattice、冲突累加、随机采样、邻域不规则访问和整点字段复制会稀释局部 RVV 收益；
 - 直接线性扫描、organized 连续访存、规整字段遍历、mask + `vcompress` 保序输出是 filters 已完成主题中最稳定的强收益模式；
 - bench-only / 诊断只收纳能回答明确局部问题的候选，不把所有“有局部 loop”的暂缓项自动纳入。
@@ -147,7 +149,7 @@ bench-only / 诊断主题不改变公开 API 和生产分流。只有诊断结�
 | 顺序 | 主题 | 诊断目标 | 状态 | 诊断文档 / 证据路径 | 不直接接入生产的原因 |
 | ---: | --- | --- | --- | --- | --- |
 | 1 | `approximate_voxel_grid` | finite + leaf-id/hash 预计算 microbench；full `PointXYZ` bucket/flush/centroid 诊断；生产 `PointXYZ` 主路径 | 已完成（`PointXYZ` 生产接入） | `test-rvv/filters/approximate_voxel_grid/approximate_voxel_grid-evaluation.zh.md`；`doc-rvv/filters/approximate_voxel_grid-RVV.zh.md`；`test-rvv/filters/approximate_voxel_grid/output/board/analyze_bench_compare.log` | leaf-id/hash 片段板卡约 `1.98x`~`2.00x`，full `PointXYZ` 诊断约 `1.67x`~`1.68x`，生产 `ApproximateVoxelGrid<PointXYZ>` 约 `1.92x`；非 `PointXYZ`、小规模、泛型 `FieldList`、`Eigen::VectorXf scratch` 和 RGB/RGBA 仍回退标量 |
-| 2 | `grid_minimum` | 2D grid id + floor 预计算 microbench | 待诊断 | 待建 | sort 和 per-cell min z 主导 |
+| 2 | `grid_minimum` | 2D grid id + floor 预计算 microbench | 已完成（bench-only，生产不接入） | `test-rvv/filters/grid_minimum/grid_minimum-evaluation.zh.md`；`doc-rvv/filters/grid_minimum-RVV.zh.md`；`test-rvv/filters/grid_minimum/output/board/analyze_bench_compare.log` | cell-id 片段板卡约 `1.33x`~`1.52x`，但 full diagnostic 仅约 `1.09x`~`1.14x`，sort 和 per-cell min z 稀释收益；生产入口不接入本主题分流 |
 | 3 | `extract_indices` | bitmap / set-difference 替代方案与 keep_organized 坏点写诊断 | 待诊断 | 待建 | 当前主逻辑是 sort + `set_difference` 或整点字段写，语义边界复杂 |
 | 4 | `model_outlier_removal` | 连续 distances 后的 threshold + compress microbench | 待诊断 | 待建 | `getDistancesToModel` 和模型多态主导，后处理占比未知 |
 | 5 | `normal_space` | normal bin id 预计算 microbench | 待诊断 | 待建 | list/bin/random sampling 主导，生产接入需重构采样状态 |
