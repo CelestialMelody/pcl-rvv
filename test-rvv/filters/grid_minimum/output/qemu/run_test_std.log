@@ -1,0 +1,20 @@
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from GridMinimumDiag
+[ RUN      ] GridMinimumDiag.ScalarFormulaCoversNegativeFloorAndGridId
+[       OK ] GridMinimumDiag.ScalarFormulaCoversNegativeFloorAndGridId (0 ms)
+[ RUN      ] GridMinimumDiag.RVVGridCellsMatchScalarFullIndices
+[       OK ] GridMinimumDiag.RVVGridCellsMatchScalarFullIndices (0 ms)
+[ RUN      ] GridMinimumDiag.RVVGridCellsMatchScalarSubsetAndInvalidSkip
+[       OK ] GridMinimumDiag.RVVGridCellsMatchScalarSubsetAndInvalidSkip (0 ms)
+[ RUN      ] GridMinimumDiag.FullDiagnosticMatchesScalar
+[       OK ] GridMinimumDiag.FullDiagnosticMatchesScalar (2 ms)
+[ RUN      ] GridMinimumDiag.RVVMainThenFallbackOrderDoesNotPolluteRounding
+[       OK ] GridMinimumDiag.RVVMainThenFallbackOrderDoesNotPolluteRounding (0 ms)
+[ RUN      ] GridMinimumDiag.ProductionGridMinimumStillRuns
+[       OK ] GridMinimumDiag.ProductionGridMinimumStillRuns (3 ms)
+[----------] 6 tests from GridMinimumDiag (10 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (13 ms total)
+[  PASSED  ] 6 tests.

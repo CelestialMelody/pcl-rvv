@@ -1,0 +1,23 @@
+====================================================================================================
+PCL filters/grid_minimum RVV diagnostic
+Build: Std (__RVV10__ disabled)
+Dataset: synthetic PointXYZ clouds; GridMinimum cell-id diagnostic, full diagnostic, and unchanged production filter
+Iterations: 30
+----------------------------------------------------------------------------------------------------
+grid minimum cell-id diag 64K                                 : 6.0054 ms/iter
+  Total Time: 180.1618 ms, checksum: 9662288246206089360
+grid minimum cell-id diag 1M                                  : 95.9951 ms/iter
+  Total Time: 2879.8533 ms, checksum: 12817448577461967868
+grid minimum subset cell-id diag 1M                           : 48.3718 ms/iter
+  Total Time: 1451.1535 ms, checksum: 18227386407573366756
+grid minimum finite cell-id diag 1M                           : 111.6683 ms/iter
+  Total Time: 3350.0489 ms, checksum: 12020619682319212062
+grid minimum full diag 64K                                    : 13.1410 ms/iter
+  Total Time: 394.2310 ms, checksum: 2818745639880120742
+grid minimum full diag 1M                                     : 243.8576 ms/iter
+  Total Time: 7315.7267 ms, checksum: 18334447566426090822
+grid minimum finite full diag 1M                              : 279.7051 ms/iter
+  Total Time: 8391.1537 ms, checksum: 2870295639173743270
+grid minimum production unchanged 64K                         : 14.9277 ms/iter
+  Total Time: 447.8313 ms, checksum: 2263
+====================================================================================================
