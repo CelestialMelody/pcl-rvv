@@ -1,0 +1,21 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from ApproximateVoxelGridDiag
+[ RUN      ] ApproximateVoxelGridDiag.ScalarFormulaCoversNegativeFloorAndHash
+[       OK ] ApproximateVoxelGridDiag.ScalarFormulaCoversNegativeFloorAndHash (0 ms)
+[ RUN      ] ApproximateVoxelGridDiag.RVVLeafHashMatchesScalar
+[       OK ] ApproximateVoxelGridDiag.RVVLeafHashMatchesScalar (1 ms)
+[ RUN      ] ApproximateVoxelGridDiag.RVVFiniteMaskSkipsInvalidXYZLikeScalar
+[       OK ] ApproximateVoxelGridDiag.RVVFiniteMaskSkipsInvalidXYZLikeScalar (0 ms)
+[ RUN      ] ApproximateVoxelGridDiag.FullPointXYZDiagnosticMatchesScalar
+[       OK ] ApproximateVoxelGridDiag.FullPointXYZDiagnosticMatchesScalar (3 ms)
+[ RUN      ] ApproximateVoxelGridDiag.FallbackCasesRemainScalar
+[       OK ] ApproximateVoxelGridDiag.FallbackCasesRemainScalar (0 ms)
+[ RUN      ] ApproximateVoxelGridDiag.ProductionApproximateVoxelGridStillRuns
+[       OK ] ApproximateVoxelGridDiag.ProductionApproximateVoxelGridStillRuns (3 ms)
+[----------] 6 tests from ApproximateVoxelGridDiag (11 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (14 ms total)
+[  PASSED  ] 6 tests.

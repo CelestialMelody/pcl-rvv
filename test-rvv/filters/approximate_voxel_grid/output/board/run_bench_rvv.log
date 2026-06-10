@@ -1,0 +1,21 @@
+========================================================================================================
+PCL filters/approximate_voxel_grid RVV production + diagnostic
+Build: RVV production + diagnostic (__RVV10__ enabled)
+Dataset: synthetic PointXYZ clouds; leaf-id/hash diagnostic, full diagnostic, and production filter RVV path
+Iterations: 30
+--------------------------------------------------------------------------------------------------------
+approx voxel leaf-hash diag 64K                                     : 3.9333 ms/iter
+  Total Time: 117.9990 ms, checksum: 644294707020395791
+approx voxel leaf-hash diag 1M                                      : 63.1650 ms/iter
+  Total Time: 1894.9503 ms, checksum: 162170121068983127
+approx voxel finite leaf-hash diag 1M                               : 63.5819 ms/iter
+  Total Time: 1907.4580 ms, checksum: 8630169122293479827
+approx voxel full diag 64K                                          : 5.3965 ms/iter
+  Total Time: 161.8942 ms, checksum: 5310430645508108914
+approx voxel full diag 1M                                           : 85.1374 ms/iter
+  Total Time: 2554.1208 ms, checksum: 542421584424802715
+approx voxel finite full diag 1M                                    : 85.5158 ms/iter
+  Total Time: 2565.4743 ms, checksum: 1148581633955235889
+approx voxel production pointxyz 64K                                : 7.9986 ms/iter
+  Total Time: 239.9592 ms, checksum: 493720114953849593
+========================================================================================================
