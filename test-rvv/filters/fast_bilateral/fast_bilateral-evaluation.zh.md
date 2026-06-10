@@ -78,9 +78,9 @@ RVV helper 不要求 `input_->is_dense=true`，因为原标量路径会在非 de
 - 正确性：专项测试、bench checksum、上游 `FastBilateralFilter.Filters_Bilateral` 均通过；
 - QEMU 现象：QEMU bench 显示 `160x120` case 约 `1.9x`，但 QEMU 只能作为路径和格式证据；
 - 板卡现象：生产主路径中接入该 helper 后，Milkv-Jupiter 上 `160x120 finite` 仅约 `1.06x`，低于 z 预处理版本约 `1.09x`，说明真实硬件上该 helper 的 stride load/store 和双通道访存开销抵消了算术收益；
-- 进一步实验：保留 bench-only `LatticeCell` blur microbench，尺寸 `96x72x64`，只测 `data/buffer` blur 形态，不接入生产 `applyFilter`；
+- 进一步实验：保留 bench-diagnosis `LatticeCell` blur microbench，尺寸 `96x72x64`，只测 `data/buffer` blur 形态，不接入生产 `applyFilter`；
 - microbench 结果：Milkv-Jupiter 上 Std `65.8100` ms/iter，RVV `69.4940` ms/iter，`0.95x`；反汇编确认实验路径命中 `vlse32.v`、`vsse32.v`、`vfmacc.vf`、`vsetvli e32,m2`；
-- 最终处理：生产代码回退 blur RVV，保留原标量 blur；bench-only case 用于证明当前 stride 双通道方案不值得接入主实现。后续若要继续优化 blur，应先对比 segment load/store、按 z 方向专门化、x/y 方向保持标量或改变 lattice 存储布局等方案。
+- 最终处理：生产代码回退 blur RVV，保留原标量 blur；bench-diagnosis case 用于证明当前 stride 双通道方案不值得接入主实现。后续若要继续优化 blur，应先对比 segment load/store、按 z 方向专门化、x/y 方向保持标量或改变 lattice 存储布局等方案。
 
 ## 专项测试
 
@@ -182,6 +182,6 @@ make -C test-rvv/filters/fast_bilateral run_board_test run_board_bench_compare f
 | `fast_bilateral organized 320x240 finite` | 32.1309 | 30.9764 | 1.04x | 放大输入后仍只优化前置 z 预处理，整体收益被 lattice 主成本稀释 |
 | `fast_bilateral organized 320x240 nonfinite` | 30.6193 | 29.4964 | 1.04x | 大规模 non-finite 替换正确，整体收益同样受后续标量路径限制 |
 | `fast_bilateral small fallback 7x5` | 0.0203 | 0.0305 | 0.67x | 小规模 fallback 语义 / 成本证据，不作为 RVV 主路径性能结论 |
-| `fast_bilateral blur lattice 96x72x64` | 65.8100 | 69.4940 | 0.95x | bench-only data/buffer blur 实验；命中 RVV stride 双通道路径但未加速，不作为生产主路径结论 |
+| `fast_bilateral blur lattice 96x72x64` | 65.8100 | 69.4940 | 0.95x | bench-diagnosis data/buffer blur 实验；命中 RVV stride 双通道路径但未加速，不作为生产主路径结论 |
 
 speedup 计算方式为 `Std Avg / RVV Avg`。主路径收益较小，符合本轮只覆盖 `applyFilter` 前置 z 预处理、未改写 lattice 主成本的实现范围。

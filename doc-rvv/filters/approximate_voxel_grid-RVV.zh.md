@@ -288,9 +288,9 @@ speedup 计算方式为 `Std avg ms / RVV avg ms`，设备为 Milkv-Jupiter，it
 
 | case | 入口 / 数据 | 路径含义 | speedup | 证明点 |
 | --- | --- | --- | ---: | --- |
-| `approx voxel leaf-hash diag 64K` | 64K `PointXYZ`，无 invalid | bench-only leaf-id/hash RVV | 2.00x | 前置 `finite + floor + hash` 片段在小中规模上有板卡收益 |
-| `approx voxel leaf-hash diag 1M` | 1M `PointXYZ`，无 invalid | bench-only leaf-id/hash RVV | 1.99x | 大规模前置片段收益稳定 |
-| `approx voxel finite leaf-hash diag 1M` | 1M `PointXYZ`，含 NaN / Inf | bench-only finite mask + leaf-id/hash RVV | 1.98x | finite mask 与压缩输出没有抵消片段收益 |
+| `approx voxel leaf-hash diag 64K` | 64K `PointXYZ`，无 invalid | bench-diagnosis leaf-id/hash RVV | 2.00x | 前置 `finite + floor + hash` 片段在小中规模上有板卡收益 |
+| `approx voxel leaf-hash diag 1M` | 1M `PointXYZ`，无 invalid | bench-diagnosis leaf-id/hash RVV | 1.99x | 大规模前置片段收益稳定 |
+| `approx voxel finite leaf-hash diag 1M` | 1M `PointXYZ`，含 NaN / Inf | bench-diagnosis finite mask + leaf-id/hash RVV | 1.98x | finite mask 与压缩输出没有抵消片段收益 |
 | `approx voxel full diag 64K` | 64K `PointXYZ`，无 invalid，`histsize=512` | RVV leaf/hash + 标量 bucket/flush/centroid | 1.67x | bucket、flush 和 centroid 累加纳入后仍有整体收益 |
 | `approx voxel full diag 1M` | 1M `PointXYZ`，无 invalid，`histsize=512` | RVV leaf/hash + 标量 bucket/flush/centroid | 1.68x | 大规模 full `PointXYZ` 形态下收益没有被下游标量工作完全抵消 |
 | `approx voxel finite full diag 1M` | 1M `PointXYZ`，含 NaN / Inf，`histsize=512` | RVV finite leaf/hash + 标量 bucket/flush/centroid | 1.67x | invalid 跳过与 full diagnostic 同时存在时仍保持收益 |

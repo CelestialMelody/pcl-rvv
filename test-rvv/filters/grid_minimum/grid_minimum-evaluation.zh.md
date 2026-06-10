@@ -6,7 +6,7 @@
 - 主文件：`filters/include/pcl/filters/impl/grid_minimum.hpp`
 - 公开类：`pcl::GridMinimum<PointT>`
 - 专项目录：`test-rvv/filters/grid_minimum/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的 `6.2 bench-only / 诊断主题` 第二项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的 `6.2 bench 诊断主题` 第二项。
 
 `GridMinimum<PointT>` 在输入点云上建立二维 `x/y` 网格，并在每个 cell 中选择 `z` 最小的原始点索引。公开调用 `filter(output)` 时，`applyFilter(PointCloud&)` 先调用 `applyFilterIndices(indices)` 得到被保留点索引，再通过 `copyPointCloud` 生成输出点云。
 
@@ -19,21 +19,21 @@ getMinMax3D(input, indices) -> min/max xy
 -> 每个相同 idx 的连续段中选择最小 z 的 source_index
 ```
 
-follow-up rescreen 已把本主题列为 bench-only / 诊断主题。当前实现只在 `test-rvv` 专项目录中做 RVV 原型和板卡诊断，不改变公开 API，不修改上游生产分流。
+follow-up rescreen 已把本主题列为 bench 诊断主题。当前实现只在 `test-rvv` 专项目录中做 RVV 原型和板卡诊断，不改变公开 API，不修改上游生产分流。
 
 ## 2. 函数级评估
 
 | 函数 / 片段 | 优先级 | RVV 决策 | 覆盖 / 回退 |
 | --- | --- | --- | --- |
-| `applyFilterIndices` 的 cell-id 预计算 | bench-only 诊断 | 已实现专项 RVV 原型 | 覆盖 `PointXYZ`、显式 `indices`、点数 `>=64`；dense 使用所有 lane，non-dense 用 finite mask 跳过 invalid xyz |
+| `applyFilterIndices` 的 cell-id 预计算 | bench 诊断 | 已实现专项 RVV 原型 | 覆盖 `PointXYZ`、显式 `indices`、点数 `>=64`；dense 使用所有 lane，non-dense 用 finite mask 跳过 invalid xyz |
 | `sort(index_vector)` | 主成本风险 | 保持标量 | 排序主导 full 入口的一部分，RVV cell-id staging 后仍调用同一排序 |
 | 每 cell 最小 `z` 选择 | 主成本风险 | 保持标量 | 按排序后连续段扫描，保证与标量 tie/order 语义一致 |
 | `applyFilter(PointCloud&)` 生产入口 | 生产暂不接入 | 不修改上游源码 | 当前 bench 中 `production unchanged` 只反映未改源码时的整体成本；其中可能包含已有 `getMinMax3D` RVV 间接受益 |
 | 小规模 / 非 `PointXYZ` / 非 RVV 编译 | fallback | Std | 诊断 helper 返回 false 或根本不编译 RVV 分支 |
 
-结论：cell-id 片段在 Milkv-Jupiter 上有 `1.33x` 到 `1.52x` 收益，但 full diagnostic 只有 `1.09x` 到 `1.14x`。排序、分组和最小 z 选择明显稀释了前置片段收益；当前不接入生产分流，保留为 bench-only 诊断证据。
+结论：cell-id 片段在 Milkv-Jupiter 上有 `1.33x` 到 `1.52x` 收益，但 full diagnostic 只有 `1.09x` 到 `1.14x`。排序、分组和最小 z 选择明显稀释了前置片段收益；当前不接入生产分流，保留为 bench 诊断证据。
 
-生产接入判断按当前 workflow 的 bench-only 升级标准执行：不能只依据局部 microbench speedup，必须确认 full diagnostic 或生产入口 case 稳定明显收益、覆盖入口主成本、fallback 边界清晰、语义风险和维护复杂度可控。`grid_minimum` 当前只满足“局部片段正确且加速”，不满足“full diagnostic 明显收益”和“生产复杂度与收益匹配”；因此不修改上游生产路径。
+生产接入判断按当前 workflow 的 bench-diagnosis 升级标准执行：不能只依据局部 microbench speedup，必须确认 full diagnostic 或生产入口 case 稳定明显收益、覆盖入口主成本、fallback 边界清晰、语义风险和维护复杂度可控。`grid_minimum` 当前只满足“局部片段正确且加速”，不满足“full diagnostic 明显收益”和“生产复杂度与收益匹配”；因此不修改上游生产路径。
 
 ## 3. RVV 设计
 
@@ -41,7 +41,7 @@ follow-up rescreen 已把本主题列为 bench-only / 诊断主题。当前实�
 
 - `GridCell`：保存 `idx/source_index/ix/iy/z`，对应上游 `point_index_idx` 加诊断字段；
 - `computeGridCellsStd`：标量 cell-id 预计算；
-- `computeGridCellsRVV`：`__RVV10__` 下的 bench-only RVV helper；
+- `computeGridCellsRVV`：`__RVV10__` 下的 bench-diagnosis RVV helper；
 - `selectMinimumZIndices`：复用标量排序和每 cell 最小 z 选择；
 - `gridMinimumPointXYZRVV`：RVV cell-id staging + 标量 sort / min-z full diagnostic。
 
@@ -106,7 +106,7 @@ Milkv-Jupiter 结果：
 
 ## 6. 结论
 
-`GridMinimum` 的 2D cell-id 预计算可以 RVV 化并保持标量语义，板卡片段收益为 `1.33x` 到 `1.52x`。但 full diagnostic 只有 `1.09x` 到 `1.14x`，说明排序和每 cell 最小 z 选择稀释了局部收益。当前主题收敛为 bench-only / 诊断，不接入上游生产分流。
+`GridMinimum` 的 2D cell-id 预计算可以 RVV 化并保持标量语义，板卡片段收益为 `1.33x` 到 `1.52x`。但 full diagnostic 只有 `1.09x` 到 `1.14x`，说明排序和每 cell 最小 z 选择稀释了局部收益。当前主题收敛为 bench 诊断，不接入上游生产分流。
 
 不接生产的直接原因是：生产接入需要新增 staging、RVV/Std 分流、indices gather、non-dense mask、floor 语义保护和文档 / 测试维护边界，但完整入口收益仅为弱收益区间。该收益不足以覆盖生产复杂度，也不足以排除不同数据分布下被排序和 min-z 扫描进一步稀释的风险。
 

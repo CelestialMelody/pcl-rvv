@@ -241,7 +241,7 @@ QEMU 只用于构建、正确性补充、日志格式和指令路径证据，不
 | `fast_bilateral organized 320x240 finite` | `filter(output)`，320x240 organized `PointXYZ`，finite z，`sigma_s=6`、`sigma_r=0.05` | RVV 主路径 | 放大数据规模后观察整体收益上限，证明未改写 lattice 主成本时 speedup 被稀释 |
 | `fast_bilateral organized 320x240 nonfinite` | 同上，但注入 NaN/+Inf/-Inf z | RVV 主路径 | 证明大规模 non-finite 替换路径正确，并观察后续标量成本占比 |
 | `fast_bilateral small fallback 7x5` | 7x5 organized 小输入，含 non-finite z | fallback | 证明小规模路径保持标量语义和接近成本，不作为 RVV 主路径性能结论 |
-| `fast_bilateral blur lattice 96x72x64` | bench-only `LatticeCell {sum,count}` 三维 blur，模拟 `Array3D data/buffer` 的两通道 cell | RVV 实验路径，不接入生产 `applyFilter` | 直接测试 data/buffer blur 是否值得 RVV 化；用于决策，不作为生产主路径性能结论 |
+| `fast_bilateral blur lattice 96x72x64` | bench-diagnosis `LatticeCell {sum,count}` 三维 blur，模拟 `Array3D data/buffer` 的两通道 cell | RVV 实验路径，不接入生产 `applyFilter` | 直接测试 data/buffer blur 是否值得 RVV 化；用于决策，不作为生产主路径性能结论 |
 
 ## 板卡结果
 
@@ -272,6 +272,6 @@ make -C test-rvv/filters/fast_bilateral run_board_test run_board_bench_compare f
 | `fast_bilateral organized 320x240 finite` | 32.1309 | 30.9764 | 1.04x | 放大输入后仍只优化前置 z 预处理，整体收益被 lattice 主成本稀释 |
 | `fast_bilateral organized 320x240 nonfinite` | 30.6193 | 29.4964 | 1.04x | 大规模 non-finite 替换正确，整体收益同样受后续标量路径限制 |
 | `fast_bilateral small fallback 7x5` | 0.0203 | 0.0305 | 0.67x | fallback 语义 / 成本证据，不作为 RVV 主路径性能结论 |
-| `fast_bilateral blur lattice 96x72x64` | 65.8100 | 69.4940 | 0.95x | bench-only data/buffer blur 实验；命中 RVV stride 双通道路径但未加速，不作为生产主路径结论 |
+| `fast_bilateral blur lattice 96x72x64` | 65.8100 | 69.4940 | 0.95x | bench-diagnosis data/buffer blur 实验；命中 RVV stride 双通道路径但未加速，不作为生产主路径结论 |
 
-结论：本轮最终保留的 RVV 覆盖是 `FastBilateralFilter` 的低风险 z 预处理，因此整体 filter speedup 为约 `1.04x` 到 `1.10x`。输入放大到 320x240 后，前置 z 预处理占比下降，speedup 更接近 `1.04x`；主要 lattice splat、blur 和 interpolation 仍是标量主成本，决定了收益上限。blur RVV 已尝试且 bench-only microbench 已复核，但当前 stride 双通道方案在板卡上没有收益，生产实现保持回退。
+结论：本轮最终保留的 RVV 覆盖是 `FastBilateralFilter` 的低风险 z 预处理，因此整体 filter speedup 为约 `1.04x` 到 `1.10x`。输入放大到 320x240 后，前置 z 预处理占比下降，speedup 更接近 `1.04x`；主要 lattice splat、blur 和 interpolation 仍是标量主成本，决定了收益上限。blur RVV 已尝试且 bench-diagnosis microbench 已复核，但当前 stride 双通道方案在板卡上没有收益，生产实现保持回退。

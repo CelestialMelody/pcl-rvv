@@ -280,4 +280,4 @@ vfcvt_x_f_v_i32m2_rm(..., RDN)
 - 新增 intrinsic 后同步更新本文，至少放入对应功能组。
 - 新增 masked、tail-undisturbed、segment、gather/scatter 或显式舍入 intrinsic 时，应在主题文档说明语义边界和 fallback 条件。
 - QEMU 反汇编可证明路径命中，但性能结论仍以板卡或目标硬件为准。
-- 如果 bench-only microbench 引入实验 intrinsic，应在本文中保留，但在主题文档中明确它不属于生产主路径。
+- 如果 bench-diagnosis microbench 引入实验 intrinsic，应在本文中保留，但在主题文档中明确它不属于生产主路径。

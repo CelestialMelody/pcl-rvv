@@ -17,7 +17,7 @@
 | `FastBilateralFilterOMP<PointT>::applyFilter(PointCloud&)` 的 finite `z` min/max 规约 | 已实现 RVV | 中。OMP 版本先复制 organized 点云到 `output`，再对 AoS `z` 字段做线性扫描；可复用非 OMP 的 `vlse32` + finite mask + `vfredmin/vfredmax` | 覆盖标准布局、`float z`、点数不少于 64 的 organized 输入；小规模、非标准布局、非 float `z` 回退 Std |
 | `applyFilter` 的 non-finite `z` 替换 | 已实现 RVV | 中。替换逻辑与线程无关，RVV mask store 能表达 `!isfinite(z)` | 覆盖同上；RVV helper 内部小规模回退失败时落回原 OMP parallel for |
 | OMP lattice splat | 暂缓 | 低。每个小格子会聚合多个 `(x,y)` 输入，存在冲突累加和线程共享 `data` 的语义风险 | 保持原 OpenMP 标量循环，避免引入原子、改变累加顺序或扩大 race 风险 |
-| OMP 三维 blur `data/buffer` | 暂缓 | 中但不接入。非 OMP 主题中 bench-only RVV blur 已在 Milkv-Jupiter 上验证为 `0.95x`，说明当前 stride 双通道方案不值得直接复用 | 保持原 OMP 标量 blur；后续若重做，应先改变 lattice 存储或只专门化 z 方向 |
+| OMP 三维 blur `data/buffer` | 暂缓 | 中但不接入。非 OMP 主题中 bench-diagnosis RVV blur 已在 Milkv-Jupiter 上验证为 `0.95x`，说明当前 stride 双通道方案不值得直接复用 | 保持原 OMP 标量 blur；后续若重做，应先改变 lattice 存储或只专门化 z 方向 |
 | OMP interpolation 写回 | 暂缓 | 低到中。每点读取 8 个 lattice cell，gather 与插值数值边界复杂 | 保持标量，避免扩大验证范围 |
 
 ## 输入输出边界

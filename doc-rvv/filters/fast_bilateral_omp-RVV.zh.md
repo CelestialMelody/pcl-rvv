@@ -226,4 +226,4 @@ speedup 计算方式为 `Std Avg / RVV Avg`。
 - 当前只优化 `z` 预处理，不优化 splat、blur 和 interpolation。
 - `threads_` 只影响后续 OpenMP loop；RVV z 预处理本身是单线程 strip-mined loop。
 - 非标准布局、非 float `z` 或小规模输入保持回退。
-- 若后续继续优化 OMP blur，需要先重新评估存储布局、线程分块和真实板卡收益，不能直接复用非 OMP 的 bench-only stride 双通道方案。
+- 若后续继续优化 OMP blur，需要先重新评估存储布局、线程分块和真实板卡收益，不能直接复用非 OMP 的 bench-diagnosis stride 双通道方案。

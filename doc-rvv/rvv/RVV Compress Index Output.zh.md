@@ -51,7 +51,7 @@ kept += count;
 - `vse32(..., count)` 只写压缩后的前 `count` 个 lane；
 - `kept += count` 更新输出尾指针。
 
-若输出类型是 `std::uint32_t` 或 bench-only 原型允许无符号下标，可直接使用 `vcompress_vm_u32m2` 与 `vse32_v_u32m2`。PCL `pcl::Indices` 通常是 `int`，生产路径应与容器元素类型保持一致。
+若输出类型是 `std::uint32_t` 或 bench-diagnosis 原型允许无符号下标，可直接使用 `vcompress_vm_u32m2` 与 `vse32_v_u32m2`。PCL `pcl::Indices` 通常是 `int`，生产路径应与容器元素类型保持一致。
 
 ## 3. VL chunk 的算例
 

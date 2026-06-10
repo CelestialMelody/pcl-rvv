@@ -146,7 +146,7 @@
 | 4        | `passthrough`                 | `filters/include/pcl/filters/impl/passthrough.hpp`                                                     | `test-rvv/filters/passthrough/passthrough-evaluation.zh.md`                     | `doc-rvv/filters/passthrough-RVV.zh.md`           | 已完成   | 已实现 `PointT` identity indices + FLOAT32 字段区间过滤 RVV；`PCLPointCloud2` 与显式 subset indices 暂缓并记录原因                                                                                                                |
 | 5        | `crop_box`                    | `filters/include/pcl/filters/impl/crop_box.hpp`                                                        | `test-rvv/filters/crop_box/crop_box-evaluation.zh.md`                           | `doc-rvv/filters/crop_box-RVV.zh.md`              | 已完成   | dense identity transform 的 xyz 区间裁剪已实现；板卡主路径约 `2.09x`~`3.08x`，fallback case 约 `1.00x`                                                                                                                          |
 | 6        | `voxel_grid_covariance`       | `filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`                                           | `test-rvv/filters/voxel_grid_covariance/voxel_grid_covariance-evaluation.zh.md` | `doc-rvv/filters/voxel_grid_covariance-RVV.zh.md` | 已完成   | dense 标准 float xyz 的 first-pass leaf id 预计算 RVV 已完成；covariance、eigen、searchable leaf 状态保持标量；板卡主路径约 `1.46x`~`1.52x`，fallback case 保持语义一致                                                           |
-| 7        | `fast_bilateral`              | `filters/include/pcl/filters/impl/fast_bilateral.hpp`                                                  | `test-rvv/filters/fast_bilateral/fast_bilateral-evaluation.zh.md`               | `doc-rvv/filters/fast_bilateral-RVV.zh.md`        | 已完成   | organized `PointXYZ` depth z 预处理 RVV 已完成；finite z min/max 与 non-finite z 替换命中 RVV；放大到 320x240 后板卡主路径约 `1.04x`~`1.10x`；data/buffer blur bench-only RVV 实验为 `0.95x`，生产 blur 保持标量              |
+| 7        | `fast_bilateral`              | `filters/include/pcl/filters/impl/fast_bilateral.hpp`                                                  | `test-rvv/filters/fast_bilateral/fast_bilateral-evaluation.zh.md`               | `doc-rvv/filters/fast_bilateral-RVV.zh.md`        | 已完成   | organized `PointXYZ` depth z 预处理 RVV 已完成；finite z min/max 与 non-finite z 替换命中 RVV；放大到 320x240 后板卡主路径约 `1.04x`~`1.10x`；data/buffer blur bench-diagnosis RVV 实验为 `0.95x`，生产 blur 保持标量         |
 | 8        | `fast_bilateral_omp`          | `filters/include/pcl/filters/impl/fast_bilateral_omp.hpp`                                              | `test-rvv/filters/fast_bilateral_omp/fast_bilateral_omp-evaluation.zh.md`       | `doc-rvv/filters/fast_bilateral_omp-RVV.zh.md`    | 已完成   | 复用 `fast_bilateral` z 预处理 RVV helper；finite z min/max 与 non-finite z 替换命中 RVV；OpenMP lattice 主体保持标量，板卡主路径约 `1.05x`~`1.16x`                                                                             |
 
 ## 1.4 首批已完成/待完成状态
@@ -302,16 +302,16 @@
 
 ## 5. 新的执行队列与优先级
 
-| 队列 | 优先级 | 主题 / 文件                                                                                      | 当前动作 | 首轮 RVV 覆盖建议                                                                                                                          |
-| ---- | ------ | ------------------------------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1    | 高     | `voxel_grid`：`filters/include/pcl/filters/impl/voxel_grid.hpp`                              | 已完成   | `getMinMax3D` dense、float x/y/z、非 indexed；`applyFilter` 仅评估 voxel index 生成，不直接承诺实现                                    |
-| 2    | 高     | `convolution`：`filters/include/pcl/filters/impl/convolution.hpp`                            | 已完成   | dense organized 行卷积优先；列卷积和 non-dense 暂缓                                                                                        |
-| 3    | 中高   | `filter_indices`：`filters/include/pcl/filters/impl/filter.hpp`、`impl/filter_indices.hpp` | 已完成   | `removeNaNFromPointCloud` 标准字段 non-dense RVV 已完成；`removeNaNNormalsFromPointCloud` 已评估后回退 Std                             |
-| 4    | 中     | `passthrough`：`filters/include/pcl/filters/impl/passthrough.hpp`                            | 已完成   | `PointT` identity indices + FLOAT32 字段区间判断 + 顺序压缩输出已实现；显式 subset indices 与 `PCLPointCloud2` 路径暂缓                |
-| 5    | 中     | `crop_box`：`filters/include/pcl/filters/impl/crop_box.hpp`                                  | 已完成   | dense identity transform 的 xyz 区间判断已实现；带 transform、non-dense、显式 subset 和 `PCLPointCloud2` 路径保持标量回退                |
-| 6    | 中     | `voxel_grid_covariance`：`filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`        | 已完成   | dense 标准 float xyz 的 first-pass leaf id 预计算 RVV 已完成；cov/eigen 保持标量；板卡主路径约 `1.46x`~`1.52x`                         |
-| 7    | 中     | `fast_bilateral` / `fast_bilateral_omp`                                                      | 已完成   | organized depth z 预处理 RVV 已完成；非 OMP blur bench-only 实验未达收益，生产 blur/lattice 保持标量；OMP 版本复用 z helper 并保持线程边界 |
-| 8    | 低     | `project_inliers`、`crop_hull`、`voxel_grid_label` 等                                      | 暂缓     | 当前文件内 RVV 覆盖面有限或风险高                                                                                                          |
+| 队列 | 优先级 | 主题 / 文件                                                                                      | 当前动作 | 首轮 RVV 覆盖建议                                                                                                                               |
+| ---- | ------ | ------------------------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | 高     | `voxel_grid`：`filters/include/pcl/filters/impl/voxel_grid.hpp`                              | 已完成   | `getMinMax3D` dense、float x/y/z、非 indexed；`applyFilter` 仅评估 voxel index 生成，不直接承诺实现                                         |
+| 2    | 高     | `convolution`：`filters/include/pcl/filters/impl/convolution.hpp`                            | 已完成   | dense organized 行卷积优先；列卷积和 non-dense 暂缓                                                                                             |
+| 3    | 中高   | `filter_indices`：`filters/include/pcl/filters/impl/filter.hpp`、`impl/filter_indices.hpp` | 已完成   | `removeNaNFromPointCloud` 标准字段 non-dense RVV 已完成；`removeNaNNormalsFromPointCloud` 已评估后回退 Std                                  |
+| 4    | 中     | `passthrough`：`filters/include/pcl/filters/impl/passthrough.hpp`                            | 已完成   | `PointT` identity indices + FLOAT32 字段区间判断 + 顺序压缩输出已实现；显式 subset indices 与 `PCLPointCloud2` 路径暂缓                     |
+| 5    | 中     | `crop_box`：`filters/include/pcl/filters/impl/crop_box.hpp`                                  | 已完成   | dense identity transform 的 xyz 区间判断已实现；带 transform、non-dense、显式 subset 和 `PCLPointCloud2` 路径保持标量回退                     |
+| 6    | 中     | `voxel_grid_covariance`：`filters/include/pcl/filters/impl/voxel_grid_covariance.hpp`        | 已完成   | dense 标准 float xyz 的 first-pass leaf id 预计算 RVV 已完成；cov/eigen 保持标量；板卡主路径约 `1.46x`~`1.52x`                              |
+| 7    | 中     | `fast_bilateral` / `fast_bilateral_omp`                                                      | 已完成   | organized depth z 预处理 RVV 已完成；非 OMP blur bench-diagnosis 实验未达收益，生产 blur/lattice 保持标量；OMP 版本复用 z helper 并保持线程边界 |
+| 8    | 低     | `project_inliers`、`crop_hull`、`voxel_grid_label` 等                                      | 暂缓     | 当前文件内 RVV 覆盖面有限或风险高                                                                                                               |
 
 ## 6. 后续候选复筛入口
 
@@ -319,4 +319,4 @@
 
 - `doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md`
 
-该复筛文档基于已完成主题的板卡真实性能、弱收益路径、bench-only 回退和暂缓原因，重新下钻 `1.2.4` 的 26 个后续保留候选，并给出下一阶段执行队列。
+该复筛文档基于已完成主题的板卡真实性能、弱收益路径、bench-diagnosis 回退和暂缓原因，重新下钻 `1.2.4` 的 26 个后续保留候选，并给出下一阶段执行队列。

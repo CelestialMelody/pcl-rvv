@@ -4,7 +4,7 @@
 
 `pcl::GridMinimum<PointT>` 是 `filters` 模块的二维网格最小值下采样滤波器。用户配置 `resolution` 后调用 `filter(output)`，公开入口最终进入 `GridMinimum<PointT>::applyFilter(PointCloud&)`，该函数调用 `applyFilterIndices(indices)` 找到每个 `x/y` cell 中 `z` 最小的原始点，再通过 `copyPointCloud` 输出这些点。
 
-该滤波器在地形或地面点粗筛场景中用于保留每个网格单元的最低点。输入是 `PointCloud<PointT>` 和可选 `indices_`，输出是被保留点的索引或对应点云。当前 RVV 工作只做 bench-only 诊断，不改变公开 API，也不修改 `filters/include/pcl/filters/impl/grid_minimum.hpp` 的生产分流。
+该滤波器在地形或地面点粗筛场景中用于保留每个网格单元的最低点。输入是 `PointCloud<PointT>` 和可选 `indices_`，输出是被保留点的索引或对应点云。当前 RVV 工作只做 bench 诊断，不改变公开 API，也不修改 `filters/include/pcl/filters/impl/grid_minimum.hpp` 的生产分流。
 
 ## 2. 标量路径与诊断边界
 
@@ -26,7 +26,7 @@ sort(idx, source_index)
 
 当前诊断覆盖 `PointXYZ`、显式 indices、dense / non-dense 两种输入。RVV 只批量化 cell-id 预计算，排序和 min-z 分组扫描保持标量。生产入口没有接入新 RVV helper；bench 中 `production unchanged` case 只是未修改上游源码的整体观察，其中可能包含此前 `getMinMax3D` RVV 的间接受益。
 
-bench-only 主题升级为生产路径时，判断依据必须是 full diagnostic 或生产入口 case，而不是局部片段 speedup。`grid_minimum` 的局部 cell-id 片段在板卡上有 `1.33x` 到 `1.52x`，但包含排序和每 cell 最小 z 扫描后的 full diagnostic 只有 `1.09x` 到 `1.14x`。这说明当前 RVV 覆盖没有覆盖完整入口主成本；接入生产需要承担 staging、分流、fallback 和维护复杂度，但完整收益不足，因此本主题不加入生产路径。
+bench 诊断升级为生产路径时，判断依据必须是 full diagnostic 或生产入口 case，而不是局部片段 speedup。`grid_minimum` 的局部 cell-id 片段在板卡上有 `1.33x` 到 `1.52x`，但包含排序和每 cell 最小 z 扫描后的 full diagnostic 只有 `1.09x` 到 `1.14x`。这说明当前 RVV 覆盖没有覆盖完整入口主成本；接入生产需要承担 staging、分流、fallback 和维护复杂度，但完整收益不足，因此本主题不加入生产路径。
 
 ## 3. 覆盖范围与 fallback
 
@@ -45,7 +45,7 @@ bench-only 主题升级为生产路径时，判断依据必须是 full diagnosti
 
 ### 4.1 类型与布局边界
 
-本主题是 bench-only 诊断，不提供模板化生产 helper。诊断入口固定为 `pcl::PointXYZ`：
+本主题是 bench 诊断，不提供模板化生产 helper。诊断入口固定为 `pcl::PointXYZ`：
 
 ```cpp
 computeGridCellsRVV(const pcl::PointCloud<pcl::PointXYZ>& cloud,
@@ -280,6 +280,6 @@ speedup 计算方式为 `Std avg ms/iter / RVV avg ms/iter`。每个 case 的 st
 
 ## 8. 结论
 
-`GridMinimum` 的 2D cell-id 预计算 RVV 片段正确、命中指令，并在 Milkv-Jupiter 上有 `1.33x` 到 `1.52x` 局部收益。但 full diagnostic 只有 `1.09x` 到 `1.14x`，排序和每 cell 最小 z 扫描稀释了局部收益。当前主题保留为 bench-only / 诊断，不接入生产主路径。
+`GridMinimum` 的 2D cell-id 预计算 RVV 片段正确、命中指令，并在 Milkv-Jupiter 上有 `1.33x` 到 `1.52x` 局部收益。但 full diagnostic 只有 `1.09x` 到 `1.14x`，排序和每 cell 最小 z 扫描稀释了局部收益。当前主题保留为 bench 诊断，不接入生产主路径。
 
 若后续重新评估生产接入，应先证明完整 `GridMinimum::filter` 入口稳定明显收益，而不是只证明 cell-id 片段收益；同时需要保持 indices 顺序、相同 cell 内最小 z 选择、non-dense invalid 跳过和公开 API 不变。重新纳入生产候选还需要确认 fallback 边界清晰，且新增 helper、staging 结构、诊断宏和文档维护成本与 full / production 收益匹配。
