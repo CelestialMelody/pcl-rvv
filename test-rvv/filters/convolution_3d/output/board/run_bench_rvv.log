@@ -1,0 +1,33 @@
+====================================================================================================
+PCL filters/convolution_3d RVV diagnostic
+Build: RVV diagnostic (__RVV10__ enabled)
+Dataset: synthetic PointXYZ 3D grids; radiusSearch, GaussianKernel kernel-only, full diagnostic, unchanged production entry
+Iterations: 5
+----------------------------------------------------------------------------------------------------
+convolution_3d radiusSearch only 8K                                   : 96.3783 ms/iter
+  Total Time: 481.8917 ms, checksum: 5947149376537802155
+convolution_3d radiusSearch only 32K                                  : 353.8309 ms/iter
+  Total Time: 1769.1543 ms, checksum: 1773096050296582639
+convolution_3d kernel distance-threshold 1024                         : 0.0013 ms/iter
+  Total Time: 0.0063 ms, checksum: 1024
+convolution_3d kernel gather-finite 1024                              : 0.0045 ms/iter
+  Total Time: 0.0226 ms, checksum: 10499125126595987075
+convolution_3d kernel exp-weight 1024                                 : 0.0071 ms/iter
+  Total Time: 0.0355 ms, checksum: 375705984
+convolution_3d kernel-only Gaussian 1024                              : 0.0522 ms/iter
+  Total Time: 0.2608 ms, checksum: 13260413868970188935
+convolution_3d full diag 8K                                           : 119.8917 ms/iter
+  Total Time: 599.4583 ms, checksum: 17347630652532769936
+  Error: max_abs=2.980232e-07, max_rel=2.980232e-07, rmse=4.893594e-08
+convolution_3d full diag 32K                                          : 453.1217 ms/iter
+  Total Time: 2265.6086 ms, checksum: 5581071291723730046
+  Error: max_abs=4.768372e-07, max_rel=4.444816e-07, rmse=7.938719e-08
+convolution_3d subset full diag 32K                                   : 252.8701 ms/iter
+  Total Time: 1264.3504 ms, checksum: 14305174381616543054
+  Error: max_abs=4.768372e-07, max_rel=4.444816e-07, rmse=7.972722e-08
+convolution_3d finite full diag 32K                                   : 467.8918 ms/iter
+  Total Time: 2339.4590 ms, checksum: 14983133525203160477
+  Error: max_abs=4.768372e-07, max_rel=4.702675e-07, rmse=7.940871e-08
+convolution_3d production unchanged 8K                                : 110.0236 ms/iter
+  Total Time: 550.1182 ms, checksum: 9544818130276797788
+====================================================================================================
