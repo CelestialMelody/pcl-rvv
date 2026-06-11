@@ -90,6 +90,11 @@ computePointWeightStd (const typename pcl::PointCloud<PointT>::ConstPtr& input,
 
 #ifdef __RVV10__
 //////////////////////////////////////////////////////////////////////////////////////////////
+// Keep GCC from auto-vectorizing the scalar BF/W accumulation that follows
+// each explicit RVV chunk.  The hand-written RVV loads/gathers/exp calls remain
+// active; this only preserves the radiusSearch neighbor order for the final
+// double accumulation so the accepted expf approximation is the sole numeric
+// difference from the scalar helper.  Clang ignores this GCC-specific guard.
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC push_options
 #pragma GCC optimize ("no-tree-vectorize")
