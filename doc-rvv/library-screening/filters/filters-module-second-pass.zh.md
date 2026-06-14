@@ -12,7 +12,7 @@
 - 源码范围：`filters/include/pcl/filters/**`、`filters/src/**`
 - 上游测试：`test/filters/*.cpp`
 - 上游 benchmark：`benchmarks/filters/voxel_grid.cpp`、`benchmarks/filters/radius_outlier_removal.cpp`
-- 既有 RVV 工作流：`tmp/02ChatLogs/01-rvv-workflow-prompt-skill/prompt-v1.md`、`tmp/02ChatLogs/01-rvv-workflow-prompt-skill/skill-v1.md`
+- 既有 RVV 工作流：`tmp/rvv-workflow-prompt-skill/prompt-v1.md`、`tmp/rvv-workflow-prompt-skill/skill-v1.md`
 
 原始 triage 对 `filters` 做了全覆盖登记：总文件 `109`，其中 high `6`、mid `70`、low `33`。第二轮不重复全库筛选，只把候选文件转成可执行队列。
 
