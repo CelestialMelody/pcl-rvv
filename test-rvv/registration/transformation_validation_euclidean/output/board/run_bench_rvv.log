@@ -1,0 +1,15 @@
+========================================================================================================
+PCL registration/transformation_validation_euclidean diagnostic benchmark
+Build: RVV (__RVV10__ enabled)
+Dataset: synthetic PointXYZ clouds; transform staging microbench and full KdTree validation diagnostic
+Iterations: 20
+--------------------------------------------------------------------------------------------------------
+tve transform-staging pointxyz 64K                                      : 0.8258 ms/iter
+  Total Time: 16.5159 ms, checksum: 2825629992724132138
+tve transform-staging pointxyz 256K                                     : 4.2220 ms/iter
+  Total Time: 84.4391 ms, checksum: 1850937584657094995
+tve full-validation pointxyz 64K                                        : 267.4663 ms/iter
+  Total Time: 5349.3262 ms, checksum: 0
+tve full-validation pointxyz 256K                                       : 1219.2291 ms/iter
+  Total Time: 24384.5825 ms, checksum: 0
+========================================================================================================

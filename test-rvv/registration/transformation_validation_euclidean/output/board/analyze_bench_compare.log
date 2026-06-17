@@ -1,0 +1,27 @@
+=================================================================================================
+ PCL registration/transformation_validation_euclidean diagnostic benchmark (Std vs RVV)
+=================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : synthetic PointXYZ clouds; transform staging microbench and full KdTree validation diagnostic
+  Iterations: 20 （每行 Total = Avg × 20）
+  Std log   : /root/pcl-test/registration/transformation_validation_euclidean/output/run_bench_std.log
+  RVV log   : /root/pcl-test/registration/transformation_validation_euclidean/output/run_bench_rvv.log
+
+-------------------------------------------------------------------------------------------------
+Benchmark Item                       | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+-------------------------------------|--------|----------------|----------------|----------------
+tve transform-staging pointxyz 64K   | Std    |      3.2105 ms |     64.2100 ms |    [   1.00x ]
+                                     | RVV    |      0.8258 ms |     16.5160 ms |    [   3.89x ]
+-------------------------------------|--------|----------------|----------------|----------------
+tve transform-staging pointxyz 256K  | Std    |     12.1858 ms |    243.7160 ms |    [   1.00x ]
+                                     | RVV    |      4.2220 ms |     84.4400 ms |    [   2.89x ]
+-------------------------------------|--------|----------------|----------------|----------------
+tve full-validation pointxyz 64K     | Std    |    269.2100 ms |   5384.2000 ms |    [   1.00x ]
+                                     | RVV    |    267.4663 ms |   5349.3260 ms |    [   1.01x ]
+-------------------------------------|--------|----------------|----------------|----------------
+tve full-validation pointxyz 256K    | Std    |   1255.8260 ms |  25116.5200 ms |    [   1.00x ]
+                                     | RVV    |   1219.2291 ms |  24384.5820 ms |    [   1.03x ]
+-------------------------------------|--------|----------------|----------------|----------------
+=================================================================================================
