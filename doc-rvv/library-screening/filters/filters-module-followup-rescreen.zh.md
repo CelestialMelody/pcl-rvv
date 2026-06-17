@@ -1,6 +1,6 @@
 # filters 模块后续候选复筛报告
 
-本文档记录 `filters` 模块第一实施波次完成后的后续候选复筛。输入范围限定为 `doc-rvv/library-screening/filters/filters-module-second-pass.zh.md` 中 `1.2.4 后续保留的直接实施候选（26）`；未重新扩大到全模块。复筛结论基于已完成主题的板卡真实性能、回退原因、bench-diagnosis 结果和当前源码中的函数级数据流。
+本文档记录 `filters` 模块建议优化队列完成后的保留候选复筛。输入范围限定为 `doc-rvv/library-screening/filters/filters-module-second-pass.zh.md` 中 `3.2 保留实施的候选文件` 的 26 个文件；未重新扩大到全模块。复筛结论基于已完成主题的板卡真实性能、回退原因、bench-diagnosis 结果和当前源码中的函数级数据流。
 
 ## 1. 输入依据与复筛原因
 
@@ -14,7 +14,7 @@
 
 复筛原因：
 
-- 第一实施波次已经完成，二轮报告中靠前主题 `voxel_grid`、`convolution`、`filter_indices/filter`、`passthrough`、`crop_box`、`voxel_grid_covariance`、`fast_bilateral`、`fast_bilateral_omp` 均已 closeout。
+- 二轮报告中的建议优化队列已经完成，其中 `voxel_grid`、`convolution`、`filter_indices/filter`、`passthrough`、`crop_box`、`voxel_grid_covariance`、`fast_bilateral`、`fast_bilateral_omp` 均已 closeout。
 - 已完成主题显示：直接主路径中的大规模线性扫描、organized 内区卷积、mask + `vcompress` 保序输出通常具备强收益；只覆盖前置预处理或尾段压缩的小片段时，整体收益容易被后续 lattice、map、sort、search、Eigen 或整点复制稀释。
 - `fast_bilateral` blur RVV 已作为 bench 诊断验证，正确性和指令路径成立但板卡为 `1.00x`，不接入生产；`filter_indices` normals prototype 曾约 `0.62x` 后回退；这些结果要求后续候选必须下钻到函数入口，不能只按循环数量排序。
 
@@ -22,7 +22,7 @@
 
 | 分类                              | 数量 | 说明                                                                  |
 | --------------------------------- | ---: | --------------------------------------------------------------------- |
-| 后续保留候选输入总数              |   26 | 来自二轮报告 `1.2.4`                                                |
+| 保留候选输入总数                  |   26 | 来自二轮报告 `3.2 保留实施的候选文件`                              |
 | 建议进入函数级评估                |    6 | 公开入口直接包含线性几何筛选、organized 下采样或可限定的简单字段条件  |
 | bench 诊断主题                    |   19 | 有局部 RVV 实验问题，按状态分为已完成、可直接建 bench 或保留 / 待诊断 |
 | 暂缓主题                          |    1 | filters 文件本身不承载主要热点或当前不适合作为 filters 专项           |
@@ -43,9 +43,9 @@
 
 ## 4. 筛选口径修正
 
-第二轮靠前队列中的 `fast_bilateral` / `fast_bilateral_omp` 显示，organized 图像式循环和大规模数据本身不足以支撑生产优先级。两者在文件级具备大循环和深度图像式数据流，但当前可安全接入生产的 RVV 覆盖主要是 finite `z` 的 min/max 规约与 non-finite 替换；后续 lattice splat、blur、插值和 OpenMP 主体仍是主要成本。因此板卡整体收益只有 `1.04x`~`1.16x`，非 OMP blur microbench 正确且命中 RVV 指令，但板卡为 `1.00x`，不接入生产。
+第二轮建议优化队列中的 `fast_bilateral` / `fast_bilateral_omp` 显示，organized 图像式循环和大规模数据本身不足以支撑生产优先级。两者在文件级具备大循环和深度图像式数据流，但当前可安全接入生产的 RVV 覆盖主要是 finite `z` 的 min/max 规约与 non-finite 替换；后续 lattice splat、blur、插值和 OpenMP 主体仍是主要成本。因此板卡整体收益只有 `1.04x`~`1.16x`，非 OMP blur microbench 正确且命中 RVV 指令，但板卡为 `1.00x`，不接入生产。
 
-相对地，`plane_clipper3D` 与 `frustum_culling` 在二轮报告中只是后续保留几何裁剪候选，但 follow-up 后接入生产主路径后分别达到约 `2.48x`~`3.00x` 和 `4.33x`~`5.94x`。这类主题的共同点是 RVV 覆盖公开入口的直接筛选主成本：AoS stride 读取 `x/y/z`、生成几何谓词 mask、用 `vcompress` 保序输出 indices / removed indices。
+相对地，`plane_clipper3D` 与 `frustum_culling` 在二轮报告中属于保留实施的几何裁剪候选，但 follow-up 后接入生产主路径后分别达到约 `2.48x`~`3.00x` 和 `4.33x`~`5.94x`。这类主题的共同点是 RVV 覆盖公开入口的直接筛选主成本：AoS stride 读取 `x/y/z`、生成几何谓词 mask、用 `vcompress` 保序输出 indices / removed indices。
 
 后续排序因此采用以下修正口径：
 
@@ -66,7 +66,7 @@
 - `diagnostic-only`：可做局部实验，但当前不承诺生产分流；
 - `non-standalone`：filters 文件本身不承载主要热点或真实循环在其它主题。
 
-## 5. 后续保留候选逐项复筛
+## 5. 保留候选逐项复筛
 
 本节按推荐动作拆分逐项复筛结论。第 5 节侧重说明分类理由；第 6 节再给出可执行状态表，避免一个超宽总表同时承担分析和状态跟踪。
 
