@@ -1,51 +1,76 @@
-# stereo 模块文件级筛查清单（全覆盖版，重评）
+# stereo 模块 RVV 第一轮文件级筛选报告
 
-本版按统一口径重评：全文件覆盖、实现优先。双目模块口径：重点看代价体构建与窗口聚合循环。
+本文档记录 `stereo` 模块的第一轮 RVV 文件级粗筛结果。第一轮只回答“文件中是否存在值得第二轮下钻复核的可 SIMD/RVV 片段”，不直接决定最终 RVV 实施队列。
 
-## 1. 覆盖范围与口径
+## 1. 输入依据与范围
 
 - 覆盖范围：`stereo/**` 下源码后缀文件（`.h/.hpp/.c/.cc/.cpp/.cu`）。
 - 覆盖结果：总文件 `11`，已判定 `11`（`11/11` 全覆盖）。
 - 目录拆分：`include` `5`，`src` `6`。
-- 候选定义：仅 `high/mid` 计入候选。
+- 路径显示：候选表和覆盖表中的 `include` 文件省略公共前缀 `stereo/include/pcl/stereo/`，`src` 文件以 `src/` 开头显示。
 
-## 2. 筛选出的文件清单（候选）
+## 2. 第一轮筛选口径
 
-### 2.1 high 候选（1）
+- 第一轮是文件级粗筛，判断标准是文件内是否存在可向量化循环、数学密集片段、批量字段访问、规约、mask/压缩、图像式 organized 遍历或可诊断的局部 SIMD/RVV 点。
+- `high/mid` 是第二轮必须复核并交代去向的初始候选基线，不是最终实施全集。
+- `low` 表示本轮未发现足以进入二轮基线的证据，不是永久排除；如果第二轮源码下钻发现明显漏判，可以补入并说明证据。
+- 第一轮不承诺 RVV 覆盖公开入口主成本；主成本覆盖、测试可行性、fallback 条件和维护风险由第二轮筛选继续判断。
 
-| file_path | 说明 |
+优先级含义：
+
+| 优先级 | 含义 |
 | --- | --- |
-| `stereo/src/stereo_matching.cpp` | 循环33处，双目匹配核心路径，建议优先优化 |
+| `high` | 文件内存在明显批量循环或数学密集片段，且粗看具备较强 SIMD/RVV 评估价值 |
+| `mid` | 文件内存在可向量化片段，但主成本、数据布局、语义风险或测试入口需要第二轮继续确认 |
+| `low` | 以声明、薄 wrapper、调度、类型、构建胶水、小规模固定计算或明显不规则状态路径为主 |
 
-### 2.2 mid 候选（5）
+## 3. 第一轮筛选统计
 
-| file_path | 说明 |
+| 项目 | 数量 | 说明 |
+| --- | ---: | --- |
+| 源码文件总数 | 11 | `stereo/**` 源码文件。 |
+| 已判定文件数 | 11 | `11/11` |
+| high | 1 | 二轮必查 |
+| mid | 5 | 二轮必查 |
+| low | 5 | 已覆盖但不进入二轮初始基线 |
+| high + mid | 6 | 第一轮候选基线 |
+| 候选占比 | 6/11 = 54.5% | high + mid / 源码文件总数 |
+
+## 4. high 候选（1）
+
+| 文件 | 第一轮证据 |
 | --- | --- |
-| `stereo/src/stereo_adaptive_cost_so.cpp` | 存在可向量化路径（循环20，分支6），建议次优先 |
-| `stereo/src/stereo_block_based.cpp` | 存在可向量化路径（循环13，分支4），建议次优先 |
-| `stereo/include/pcl/stereo/impl/disparity_map_converter.hpp` | 存在可向量化路径（循环4，分支5），建议次优先 |
-| `stereo/src/digital_elevation_map.cpp` | 存在可向量化路径（循环4，分支5），建议次优先 |
-| `stereo/include/pcl/stereo/stereo_matching.h` | 存在可向量化路径（循环0，分支5），建议次优先 |
+| `src/stereo_matching.cpp` | 循环33处，双目匹配核心路径，建议优先优化 |
 
-## 3. 全量文件覆盖表（11/11）
+## 5. mid 候选（5）
 
-| file_path | file_priority | 是否候选 | 判断依据 | impl关联文件 |
+| 文件 | 第一轮证据 |
+| --- | --- |
+| `src/stereo_adaptive_cost_so.cpp` | 存在可向量化路径（循环20，分支6），建议次优先 |
+| `src/stereo_block_based.cpp` | 存在可向量化路径（循环13，分支4），建议次优先 |
+| `impl/disparity_map_converter.hpp` | 存在可向量化路径（循环4，分支5），建议次优先 |
+| `src/digital_elevation_map.cpp` | 存在可向量化路径（循环4，分支5），建议次优先 |
+| `stereo_matching.h` | 存在可向量化路径（循环0，分支5），建议次优先 |
+
+## 6. 全量文件覆盖表（11/11）
+
+| 文件 | 优先级 | 是否候选 | 判断依据 | 关联实现 |
 | --- | --- | --- | --- | --- |
-| `stereo/include/pcl/stereo/digital_elevation_map.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `stereo/include/pcl/stereo/disparity_map_converter.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `stereo/include/pcl/stereo/impl/disparity_map_converter.hpp` |
-| `stereo/include/pcl/stereo/impl/disparity_map_converter.hpp` | `mid` | 是 | 存在可向量化路径（循环4，分支5），建议次优先 | `-` |
-| `stereo/include/pcl/stereo/stereo_grabber.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `stereo/include/pcl/stereo/stereo_matching.h` | `mid` | 是 | 存在可向量化路径（循环0，分支5），建议次优先 | `-` |
-| `stereo/src/digital_elevation_map.cpp` | `mid` | 是 | 存在可向量化路径（循环4，分支5），建议次优先 | `-` |
-| `stereo/src/disparity_map_converter.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `stereo/src/stereo_adaptive_cost_so.cpp` | `mid` | 是 | 存在可向量化路径（循环20，分支6），建议次优先 | `-` |
-| `stereo/src/stereo_block_based.cpp` | `mid` | 是 | 存在可向量化路径（循环13，分支4），建议次优先 | `-` |
-| `stereo/src/stereo_grabber.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `stereo/src/stereo_matching.cpp` | `high` | 是 | 循环33处，双目匹配核心路径，建议优先优化 | `-` |
+| `digital_elevation_map.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `disparity_map_converter.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `impl/disparity_map_converter.hpp` |
+| `impl/disparity_map_converter.hpp` | `mid` | 是 | 存在可向量化路径（循环4，分支5），建议次优先 | `-` |
+| `stereo_grabber.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `stereo_matching.h` | `mid` | 是 | 存在可向量化路径（循环0，分支5），建议次优先 | `-` |
+| `src/digital_elevation_map.cpp` | `mid` | 是 | 存在可向量化路径（循环4，分支5），建议次优先 | `-` |
+| `src/disparity_map_converter.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `src/stereo_adaptive_cost_so.cpp` | `mid` | 是 | 存在可向量化路径（循环20，分支6），建议次优先 | `-` |
+| `src/stereo_block_based.cpp` | `mid` | 是 | 存在可向量化路径（循环13，分支4），建议次优先 | `-` |
+| `src/stereo_grabber.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `src/stereo_matching.cpp` | `high` | 是 | 循环33处，双目匹配核心路径，建议优先优化 | `-` |
 
-## 4. 简要统计
+## 7. 二轮交接说明
 
-- 模块统计：high `1`，mid `5`，low `5`。
-- 候选占比：`6/11 = 54.5%`。
-- include 口径：候选 `2/5`。
-- src 口径：候选 `4/6`。
+- 第二轮筛选应读取本文件，并把所有 `high/mid` 文件作为初始候选基线逐项交代去向。
+- 第二轮可以将 `high/mid` 降级为暂缓、不推荐或不单独实施，但必须说明源码证据和主成本覆盖原因。
+- 第二轮可以补入 `low` 或初筛遗漏文件，但必须说明补入来源、证据和为什么没有扩展成重新全模块/全库筛选。
+- 第二轮输出应使用 `doc-rvv/library-screening/stereo/stereo-module-second-pass.zh.md`，并按“建议进行 RVV 优化的文件 / 保留实施的候选文件 / 暂缓或不推荐考虑 RVV 优化的文件”三类组织。

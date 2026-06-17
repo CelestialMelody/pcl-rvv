@@ -1,66 +1,91 @@
-# search 模块文件级筛查清单（全覆盖版，重评）
+# search 模块 RVV 第一轮文件级筛选报告
 
-本版按数据结构专用口径重评：全文件覆盖、实现优先。数据结构查询模块口径：重点看树遍历分支与批量查询重排潜力。
+本文档记录 `search` 模块的第一轮 RVV 文件级粗筛结果。第一轮只回答“文件中是否存在值得第二轮下钻复核的可 SIMD/RVV 片段”，不直接决定最终 RVV 实施队列。
 
-## 1. 覆盖范围与口径
+## 1. 输入依据与范围
 
 - 覆盖范围：`search/**` 下源码后缀文件（`.h/.hpp/.c/.cc/.cpp/.cu`）。
 - 覆盖结果：总文件 `21`，已判定 `21`（`21/21` 全覆盖）。
 - 目录拆分：`include` `15`，`src` `6`。
-- 候选定义：仅 `high/mid` 计入候选。
+- 路径显示：候选表和覆盖表中的 `include` 文件省略公共前缀 `search/include/pcl/search/`，`src` 文件以 `src/` 开头显示。
 
-## 2. 筛选出的文件清单（候选）
+## 2. 第一轮筛选口径
 
-### 2.1 high 候选（3）
+- 第一轮是文件级粗筛，判断标准是文件内是否存在可向量化循环、数学密集片段、批量字段访问、规约、mask/压缩、图像式 organized 遍历或可诊断的局部 SIMD/RVV 点。
+- `high/mid` 是第二轮必须复核并交代去向的初始候选基线，不是最终实施全集。
+- `low` 表示本轮未发现足以进入二轮基线的证据，不是永久排除；如果第二轮源码下钻发现明显漏判，可以补入并说明证据。
+- 第一轮不承诺 RVV 覆盖公开入口主成本；主成本覆盖、测试可行性、fallback 条件和维护风险由第二轮筛选继续判断。
 
-| file_path | 说明 |
+优先级含义：
+
+| 优先级 | 含义 |
 | --- | --- |
-| `search/include/pcl/search/kdtree_nanoflann.h` | 循环10处，查询/检索核心路径，建议优先优化 |
-| `search/include/pcl/search/impl/search.hpp` | 循环6处，查询/检索核心路径，建议优先优化 |
-| `search/include/pcl/search/search.h` | 循环4处，查询/检索核心路径，建议优先优化 |
+| `high` | 文件内存在明显批量循环或数学密集片段，且粗看具备较强 SIMD/RVV 评估价值 |
+| `mid` | 文件内存在可向量化片段，但主成本、数据布局、语义风险或测试入口需要第二轮继续确认 |
+| `low` | 以声明、薄 wrapper、调度、类型、构建胶水、小规模固定计算或明显不规则状态路径为主 |
 
-### 2.2 mid 候选（8）
+## 3. 第一轮筛选统计
 
-| file_path | 说明 |
+| 项目 | 数量 | 说明 |
+| --- | ---: | --- |
+| 源码文件总数 | 21 | `search/**` 源码文件。 |
+| 已判定文件数 | 21 | `21/21` |
+| high | 3 | 二轮必查 |
+| mid | 8 | 二轮必查 |
+| low | 10 | 已覆盖但不进入二轮初始基线 |
+| high + mid | 11 | 第一轮候选基线 |
+| 候选占比 | 11/21 = 52.4% | high + mid / 源码文件总数 |
+
+## 4. high 候选（3）
+
+| 文件 | 第一轮证据 |
 | --- | --- |
-| `search/include/pcl/search/impl/flann_search.hpp` | 存在可向量化路径（循环16，分支29），建议次优先 |
-| `search/include/pcl/search/impl/brute_force.hpp` | 存在可向量化路径（循环14，分支35），建议次优先 |
-| `search/include/pcl/search/impl/organized.hpp` | 存在可向量化路径（循环11，分支32），建议次优先 |
-| `search/include/pcl/search/organized.h` | 存在可向量化路径（循环3，分支16），建议次优先 |
-| `search/include/pcl/search/flann_search.h` | 存在可向量化路径（循环0，分支4），建议次优先 |
-| `search/include/pcl/search/kdtree.h` | 存在可向量化路径（循环0，分支3），建议次优先 |
-| `search/include/pcl/search/brute_force.h` | 存在可向量化路径（循环0，分支1），建议次优先 |
-| `search/include/pcl/search/auto.h` | 存在可向量化路径（循环0，分支0），建议次优先 |
+| `kdtree_nanoflann.h` | 循环10处，查询/检索核心路径，建议优先优化 |
+| `impl/search.hpp` | 循环6处，查询/检索核心路径，建议优先优化 |
+| `search.h` | 循环4处，查询/检索核心路径，建议优先优化 |
 
-## 3. 全量文件覆盖表（21/21）
+## 5. mid 候选（8）
 
-| file_path | file_priority | 是否候选 | 判断依据 | impl关联文件 |
+| 文件 | 第一轮证据 |
+| --- | --- |
+| `impl/flann_search.hpp` | 存在可向量化路径（循环16，分支29），建议次优先 |
+| `impl/brute_force.hpp` | 存在可向量化路径（循环14，分支35），建议次优先 |
+| `impl/organized.hpp` | 存在可向量化路径（循环11，分支32），建议次优先 |
+| `organized.h` | 存在可向量化路径（循环3，分支16），建议次优先 |
+| `flann_search.h` | 存在可向量化路径（循环0，分支4），建议次优先 |
+| `kdtree.h` | 存在可向量化路径（循环0，分支3），建议次优先 |
+| `brute_force.h` | 存在可向量化路径（循环0，分支1），建议次优先 |
+| `auto.h` | 存在可向量化路径（循环0，分支0），建议次优先 |
+
+## 6. 全量文件覆盖表（21/21）
+
+| 文件 | 优先级 | 是否候选 | 判断依据 | 关联实现 |
 | --- | --- | --- | --- | --- |
-| `search/include/pcl/search/auto.h` | `mid` | 是 | 存在可向量化路径（循环0，分支0），建议次优先 | `search/include/pcl/search/impl/auto.hpp` |
-| `search/include/pcl/search/brute_force.h` | `mid` | 是 | 存在可向量化路径（循环0，分支1），建议次优先 | `search/include/pcl/search/impl/brute_force.hpp` |
-| `search/include/pcl/search/flann_search.h` | `mid` | 是 | 存在可向量化路径（循环0，分支4），建议次优先 | `search/include/pcl/search/impl/flann_search.hpp` |
-| `search/include/pcl/search/impl/auto.hpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/include/pcl/search/impl/brute_force.hpp` | `mid` | 是 | 存在可向量化路径（循环14，分支35），建议次优先 | `-` |
-| `search/include/pcl/search/impl/flann_search.hpp` | `mid` | 是 | 存在可向量化路径（循环16，分支29），建议次优先 | `-` |
-| `search/include/pcl/search/impl/kdtree.hpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/include/pcl/search/impl/organized.hpp` | `mid` | 是 | 存在可向量化路径（循环11，分支32），建议次优先 | `-` |
-| `search/include/pcl/search/impl/search.hpp` | `high` | 是 | 循环6处，查询/检索核心路径，建议优先优化 | `-` |
-| `search/include/pcl/search/kdtree.h` | `mid` | 是 | 存在可向量化路径（循环0，分支3），建议次优先 | `search/include/pcl/search/impl/kdtree.hpp` |
-| `search/include/pcl/search/kdtree_nanoflann.h` | `high` | 是 | 循环10处，查询/检索核心路径，建议优先优化 | `-` |
-| `search/include/pcl/search/octree.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/include/pcl/search/organized.h` | `mid` | 是 | 存在可向量化路径（循环3，分支16），建议次优先 | `search/include/pcl/search/impl/organized.hpp` |
-| `search/include/pcl/search/pcl_search.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/include/pcl/search/search.h` | `high` | 是 | 循环4处，查询/检索核心路径，建议优先优化 | `search/include/pcl/search/impl/search.hpp` |
-| `search/src/auto.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/src/brute_force.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/src/kdtree.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/src/octree.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/src/organized.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
-| `search/src/search.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `auto.h` | `mid` | 是 | 存在可向量化路径（循环0，分支0），建议次优先 | `impl/auto.hpp` |
+| `brute_force.h` | `mid` | 是 | 存在可向量化路径（循环0，分支1），建议次优先 | `impl/brute_force.hpp` |
+| `flann_search.h` | `mid` | 是 | 存在可向量化路径（循环0，分支4），建议次优先 | `impl/flann_search.hpp` |
+| `impl/auto.hpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `impl/brute_force.hpp` | `mid` | 是 | 存在可向量化路径（循环14，分支35），建议次优先 | `-` |
+| `impl/flann_search.hpp` | `mid` | 是 | 存在可向量化路径（循环16，分支29），建议次优先 | `-` |
+| `impl/kdtree.hpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `impl/organized.hpp` | `mid` | 是 | 存在可向量化路径（循环11，分支32），建议次优先 | `-` |
+| `impl/search.hpp` | `high` | 是 | 循环6处，查询/检索核心路径，建议优先优化 | `-` |
+| `kdtree.h` | `mid` | 是 | 存在可向量化路径（循环0，分支3），建议次优先 | `impl/kdtree.hpp` |
+| `kdtree_nanoflann.h` | `high` | 是 | 循环10处，查询/检索核心路径，建议优先优化 | `-` |
+| `octree.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `organized.h` | `mid` | 是 | 存在可向量化路径（循环3，分支16），建议次优先 | `impl/organized.hpp` |
+| `pcl_search.h` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `search.h` | `high` | 是 | 循环4处，查询/检索核心路径，建议优先优化 | `impl/search.hpp` |
+| `src/auto.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `src/brute_force.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `src/kdtree.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `src/octree.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `src/organized.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
+| `src/search.cpp` | `low` | 否 | 以声明/接口封装为主，暂不纳入本轮候选 | `-` |
 
-## 4. 简要统计
+## 7. 二轮交接说明
 
-- 模块统计：high `3`，mid `8`，low `10`。
-- 候选占比：`11/21 = 52.4%`。
-- include 口径：候选 `11/15`。
-- src 口径：候选 `0/6`。
+- 第二轮筛选应读取本文件，并把所有 `high/mid` 文件作为初始候选基线逐项交代去向。
+- 第二轮可以将 `high/mid` 降级为暂缓、不推荐或不单独实施，但必须说明源码证据和主成本覆盖原因。
+- 第二轮可以补入 `low` 或初筛遗漏文件，但必须说明补入来源、证据和为什么没有扩展成重新全模块/全库筛选。
+- 第二轮输出应使用 `doc-rvv/library-screening/search/search-module-second-pass.zh.md`，并按“建议进行 RVV 优化的文件 / 保留实施的候选文件 / 暂缓或不推荐考虑 RVV 优化的文件”三类组织。

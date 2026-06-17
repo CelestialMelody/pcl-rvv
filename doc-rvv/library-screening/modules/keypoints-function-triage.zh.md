@@ -1,96 +1,120 @@
-# keypoints 模块文件级筛查清单（全覆盖版，重评）
+# keypoints 模块 RVV 第一轮文件级筛选报告
 
-本版按当前统一标准重评：全文件覆盖、实现优先、允许推翻旧结论；`3rdparty/**` 仅登记覆盖，不纳入候选。
+本文档记录 `keypoints` 模块的第一轮 RVV 文件级粗筛结果。第一轮只回答“文件中是否存在值得第二轮下钻复核的可 SIMD/RVV 片段”，不直接决定最终 RVV 实施队列。
 
-## 1. 覆盖范围与口径
+## 1. 输入依据与范围
 
 - 覆盖范围：`keypoints/**` 下源码后缀文件（`.h/.hpp/.c/.cc/.cpp/.cu`）。
 - 覆盖结果：总文件 `36`，已判定 `36`（`36/36` 全覆盖）。
 - 目录拆分：`include` `25`，`src` `11`。
 - 第三方口径：`3rdparty/**` 文件 `0`，候选 `0`（仅登记，不纳入优化队列）。
-- 候选定义：仅 `high/mid` 计入候选。
+- 路径显示：候选表和覆盖表中的 `include` 文件省略公共前缀 `keypoints/include/pcl/keypoints/`，`src` 文件以 `src/` 开头显示。
 
-## 2. 筛选出的文件清单（候选）
+## 2. 第一轮筛选口径
 
-### 2.1 high 候选（4）
+- 第一轮是文件级粗筛，判断标准是文件内是否存在可向量化循环、数学密集片段、批量字段访问、规约、mask/压缩、图像式 organized 遍历或可诊断的局部 SIMD/RVV 点。
+- `high/mid` 是第二轮必须复核并交代去向的初始候选基线，不是最终实施全集。
+- `low` 表示本轮未发现足以进入二轮基线的证据，不是永久排除；如果第二轮源码下钻发现明显漏判，可以补入并说明证据。
+- 第一轮不承诺 RVV 覆盖公开入口主成本；主成本覆盖、测试可行性、fallback 条件和维护风险由第二轮筛选继续判断。
 
-| file_path | 说明 |
+优先级含义：
+
+| 优先级 | 含义 |
 | --- | --- |
-| `keypoints/src/narf_keypoint.cpp` | 循环48处，关键点响应计算密集，建议优先优化 |
-| `keypoints/src/brisk_2d.cpp` | 循环34处，关键点响应计算密集，建议优先优化 |
-| `keypoints/include/pcl/keypoints/impl/harris_3d.hpp` | 循环13处，关键点响应计算密集，建议优先优化 |
-| `keypoints/include/pcl/keypoints/impl/sift_keypoint.hpp` | 循环11处，关键点响应计算密集，建议优先优化 |
+| `high` | 文件内存在明显批量循环或数学密集片段，且粗看具备较强 SIMD/RVV 评估价值 |
+| `mid` | 文件内存在可向量化片段，但主成本、数据布局、语义风险或测试入口需要第二轮继续确认 |
+| `low` | 以声明、薄 wrapper、调度、类型、构建胶水、小规模固定计算或明显不规则状态路径为主 |
 
-### 2.2 mid 候选（20）
+## 3. 第一轮筛选统计
 
-| file_path | 说明 |
+| 项目 | 数量 | 说明 |
+| --- | ---: | --- |
+| 源码文件总数 | 36 | `keypoints/**` 源码文件，第三方实现仅登记覆盖，不纳入候选主线。 |
+| 已判定文件数 | 36 | `36/36` |
+| high | 4 | 二轮必查 |
+| mid | 20 | 二轮必查 |
+| low | 12 | 已覆盖但不进入二轮初始基线 |
+| high + mid | 24 | 第一轮候选基线 |
+| 候选占比 | 24/36 = 66.7% | high + mid / 源码文件总数 |
+
+## 4. high 候选（4）
+
+| 文件 | 第一轮证据 |
 | --- | --- |
-| `keypoints/src/agast_2d.cpp` | 存在可向量化路径（循环20，数学项45），建议次优先 |
-| `keypoints/include/pcl/keypoints/impl/iss_3d.hpp` | 存在可向量化路径（循环14，数学项16），建议次优先 |
-| `keypoints/include/pcl/keypoints/impl/harris_2d.hpp` | 存在可向量化路径（循环14，数学项3），建议次优先 |
-| `keypoints/include/pcl/keypoints/impl/smoothed_surfaces_keypoint.hpp` | 存在可向量化路径（循环11，数学项5），建议次优先 |
-| `keypoints/include/pcl/keypoints/impl/harris_6d.hpp` | 存在可向量化路径（循环10，数学项88），建议次优先 |
-| `keypoints/include/pcl/keypoints/impl/susan.hpp` | 存在可向量化路径（循环7，数学项71），建议次优先 |
-| `keypoints/include/pcl/keypoints/impl/trajkovic_3d.hpp` | 存在可向量化路径（循环7，数学项10），建议次优先 |
-| `keypoints/include/pcl/keypoints/impl/trajkovic_2d.hpp` | 存在可向量化路径（循环7，数学项0），建议次优先 |
-| `keypoints/include/pcl/keypoints/agast_2d.h` | 存在可向量化路径（循环0，数学项94），建议次优先 |
-| `keypoints/include/pcl/keypoints/brisk_2d.h` | 存在可向量化路径（循环0，数学项41），建议次优先 |
-| `keypoints/include/pcl/keypoints/susan.h` | 存在可向量化路径（循环0，数学项29），建议次优先 |
-| `keypoints/include/pcl/keypoints/harris_3d.h` | 存在可向量化路径（循环0，数学项27），建议次优先 |
-| `keypoints/include/pcl/keypoints/harris_2d.h` | 存在可向量化路径（循环0，数学项22），建议次优先 |
-| `keypoints/include/pcl/keypoints/harris_6d.h` | 存在可向量化路径（循环0，数学项20），建议次优先 |
-| `keypoints/include/pcl/keypoints/trajkovic_3d.h` | 存在可向量化路径（循环0，数学项19），建议次优先 |
-| `keypoints/include/pcl/keypoints/iss_3d.h` | 存在可向量化路径（循环0，数学项16），建议次优先 |
-| `keypoints/include/pcl/keypoints/sift_keypoint.h` | 存在可向量化路径（循环0，数学项15），建议次优先 |
-| `keypoints/include/pcl/keypoints/trajkovic_2d.h` | 存在可向量化路径（循环0，数学项13），建议次优先 |
-| `keypoints/include/pcl/keypoints/smoothed_surfaces_keypoint.h` | 存在可向量化路径（循环0，数学项10），建议次优先 |
-| `keypoints/include/pcl/keypoints/keypoint.h` | 存在可向量化路径（循环0，数学项8），建议次优先 |
+| `src/narf_keypoint.cpp` | 循环48处，关键点响应计算密集，建议优先优化 |
+| `src/brisk_2d.cpp` | 循环34处，关键点响应计算密集，建议优先优化 |
+| `impl/harris_3d.hpp` | 循环13处，关键点响应计算密集，建议优先优化 |
+| `impl/sift_keypoint.hpp` | 循环11处，关键点响应计算密集，建议优先优化 |
 
-## 3. 全量文件覆盖表（36/36）
+## 5. mid 候选（20）
 
-| file_path | file_priority | 是否候选 | 判断依据 | impl关联文件 |
+| 文件 | 第一轮证据 |
+| --- | --- |
+| `src/agast_2d.cpp` | 存在可向量化路径（循环20，数学项45），建议次优先 |
+| `impl/iss_3d.hpp` | 存在可向量化路径（循环14，数学项16），建议次优先 |
+| `impl/harris_2d.hpp` | 存在可向量化路径（循环14，数学项3），建议次优先 |
+| `impl/smoothed_surfaces_keypoint.hpp` | 存在可向量化路径（循环11，数学项5），建议次优先 |
+| `impl/harris_6d.hpp` | 存在可向量化路径（循环10，数学项88），建议次优先 |
+| `impl/susan.hpp` | 存在可向量化路径（循环7，数学项71），建议次优先 |
+| `impl/trajkovic_3d.hpp` | 存在可向量化路径（循环7，数学项10），建议次优先 |
+| `impl/trajkovic_2d.hpp` | 存在可向量化路径（循环7，数学项0），建议次优先 |
+| `agast_2d.h` | 存在可向量化路径（循环0，数学项94），建议次优先 |
+| `brisk_2d.h` | 存在可向量化路径（循环0，数学项41），建议次优先 |
+| `susan.h` | 存在可向量化路径（循环0，数学项29），建议次优先 |
+| `harris_3d.h` | 存在可向量化路径（循环0，数学项27），建议次优先 |
+| `harris_2d.h` | 存在可向量化路径（循环0，数学项22），建议次优先 |
+| `harris_6d.h` | 存在可向量化路径（循环0，数学项20），建议次优先 |
+| `trajkovic_3d.h` | 存在可向量化路径（循环0，数学项19），建议次优先 |
+| `iss_3d.h` | 存在可向量化路径（循环0，数学项16），建议次优先 |
+| `sift_keypoint.h` | 存在可向量化路径（循环0，数学项15），建议次优先 |
+| `trajkovic_2d.h` | 存在可向量化路径（循环0，数学项13），建议次优先 |
+| `smoothed_surfaces_keypoint.h` | 存在可向量化路径（循环0，数学项10），建议次优先 |
+| `keypoint.h` | 存在可向量化路径（循环0，数学项8），建议次优先 |
+
+## 6. 全量文件覆盖表（36/36）
+
+| 文件 | 优先级 | 是否候选 | 判断依据 | 关联实现 |
 | --- | --- | --- | --- | --- |
-| `keypoints/include/pcl/keypoints/agast_2d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项94），建议次优先 | `keypoints/include/pcl/keypoints/impl/agast_2d.hpp` |
-| `keypoints/include/pcl/keypoints/brisk_2d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项41），建议次优先 | `keypoints/include/pcl/keypoints/impl/brisk_2d.hpp` |
-| `keypoints/include/pcl/keypoints/harris_2d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项22），建议次优先 | `keypoints/include/pcl/keypoints/impl/harris_2d.hpp` |
-| `keypoints/include/pcl/keypoints/harris_3d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项27），建议次优先 | `keypoints/include/pcl/keypoints/impl/harris_3d.hpp` |
-| `keypoints/include/pcl/keypoints/harris_6d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项20），建议次优先 | `keypoints/include/pcl/keypoints/impl/harris_6d.hpp` |
-| `keypoints/include/pcl/keypoints/impl/agast_2d.hpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/include/pcl/keypoints/impl/brisk_2d.hpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/include/pcl/keypoints/impl/harris_2d.hpp` | `mid` | 是 | 存在可向量化路径（循环14，数学项3），建议次优先 | `-` |
-| `keypoints/include/pcl/keypoints/impl/harris_3d.hpp` | `high` | 是 | 循环13处，关键点响应计算密集，建议优先优化 | `-` |
-| `keypoints/include/pcl/keypoints/impl/harris_6d.hpp` | `mid` | 是 | 存在可向量化路径（循环10，数学项88），建议次优先 | `-` |
-| `keypoints/include/pcl/keypoints/impl/iss_3d.hpp` | `mid` | 是 | 存在可向量化路径（循环14，数学项16），建议次优先 | `-` |
-| `keypoints/include/pcl/keypoints/impl/keypoint.hpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/include/pcl/keypoints/impl/sift_keypoint.hpp` | `high` | 是 | 循环11处，关键点响应计算密集，建议优先优化 | `-` |
-| `keypoints/include/pcl/keypoints/impl/smoothed_surfaces_keypoint.hpp` | `mid` | 是 | 存在可向量化路径（循环11，数学项5），建议次优先 | `-` |
-| `keypoints/include/pcl/keypoints/impl/susan.hpp` | `mid` | 是 | 存在可向量化路径（循环7，数学项71），建议次优先 | `-` |
-| `keypoints/include/pcl/keypoints/impl/trajkovic_2d.hpp` | `mid` | 是 | 存在可向量化路径（循环7，数学项0），建议次优先 | `-` |
-| `keypoints/include/pcl/keypoints/impl/trajkovic_3d.hpp` | `mid` | 是 | 存在可向量化路径（循环7，数学项10），建议次优先 | `-` |
-| `keypoints/include/pcl/keypoints/iss_3d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项16），建议次优先 | `keypoints/include/pcl/keypoints/impl/iss_3d.hpp` |
-| `keypoints/include/pcl/keypoints/keypoint.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项8），建议次优先 | `keypoints/include/pcl/keypoints/impl/keypoint.hpp` |
-| `keypoints/include/pcl/keypoints/narf_keypoint.h` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/include/pcl/keypoints/sift_keypoint.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项15），建议次优先 | `keypoints/include/pcl/keypoints/impl/sift_keypoint.hpp` |
-| `keypoints/include/pcl/keypoints/smoothed_surfaces_keypoint.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项10），建议次优先 | `keypoints/include/pcl/keypoints/impl/smoothed_surfaces_keypoint.hpp` |
-| `keypoints/include/pcl/keypoints/susan.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项29），建议次优先 | `keypoints/include/pcl/keypoints/impl/susan.hpp` |
-| `keypoints/include/pcl/keypoints/trajkovic_2d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项13），建议次优先 | `keypoints/include/pcl/keypoints/impl/trajkovic_2d.hpp` |
-| `keypoints/include/pcl/keypoints/trajkovic_3d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项19），建议次优先 | `keypoints/include/pcl/keypoints/impl/trajkovic_3d.hpp` |
-| `keypoints/src/agast_2d.cpp` | `mid` | 是 | 存在可向量化路径（循环20，数学项45），建议次优先 | `-` |
-| `keypoints/src/brisk_2d.cpp` | `high` | 是 | 循环34处，关键点响应计算密集，建议优先优化 | `-` |
-| `keypoints/src/harris_3d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/src/harris_6d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/src/iss_3d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/src/narf_keypoint.cpp` | `high` | 是 | 循环48处，关键点响应计算密集，建议优先优化 | `-` |
-| `keypoints/src/sift_keypoint.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/src/smoothed_surfaces_keypoint.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/src/susan.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/src/trajkovic_2d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
-| `keypoints/src/trajkovic_3d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `agast_2d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项94），建议次优先 | `impl/agast_2d.hpp` |
+| `brisk_2d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项41），建议次优先 | `impl/brisk_2d.hpp` |
+| `harris_2d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项22），建议次优先 | `impl/harris_2d.hpp` |
+| `harris_3d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项27），建议次优先 | `impl/harris_3d.hpp` |
+| `harris_6d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项20），建议次优先 | `impl/harris_6d.hpp` |
+| `impl/agast_2d.hpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `impl/brisk_2d.hpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `impl/harris_2d.hpp` | `mid` | 是 | 存在可向量化路径（循环14，数学项3），建议次优先 | `-` |
+| `impl/harris_3d.hpp` | `high` | 是 | 循环13处，关键点响应计算密集，建议优先优化 | `-` |
+| `impl/harris_6d.hpp` | `mid` | 是 | 存在可向量化路径（循环10，数学项88），建议次优先 | `-` |
+| `impl/iss_3d.hpp` | `mid` | 是 | 存在可向量化路径（循环14，数学项16），建议次优先 | `-` |
+| `impl/keypoint.hpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `impl/sift_keypoint.hpp` | `high` | 是 | 循环11处，关键点响应计算密集，建议优先优化 | `-` |
+| `impl/smoothed_surfaces_keypoint.hpp` | `mid` | 是 | 存在可向量化路径（循环11，数学项5），建议次优先 | `-` |
+| `impl/susan.hpp` | `mid` | 是 | 存在可向量化路径（循环7，数学项71），建议次优先 | `-` |
+| `impl/trajkovic_2d.hpp` | `mid` | 是 | 存在可向量化路径（循环7，数学项0），建议次优先 | `-` |
+| `impl/trajkovic_3d.hpp` | `mid` | 是 | 存在可向量化路径（循环7，数学项10），建议次优先 | `-` |
+| `iss_3d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项16），建议次优先 | `impl/iss_3d.hpp` |
+| `keypoint.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项8），建议次优先 | `impl/keypoint.hpp` |
+| `narf_keypoint.h` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `sift_keypoint.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项15），建议次优先 | `impl/sift_keypoint.hpp` |
+| `smoothed_surfaces_keypoint.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项10），建议次优先 | `impl/smoothed_surfaces_keypoint.hpp` |
+| `susan.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项29），建议次优先 | `impl/susan.hpp` |
+| `trajkovic_2d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项13），建议次优先 | `impl/trajkovic_2d.hpp` |
+| `trajkovic_3d.h` | `mid` | 是 | 存在可向量化路径（循环0，数学项19），建议次优先 | `impl/trajkovic_3d.hpp` |
+| `src/agast_2d.cpp` | `mid` | 是 | 存在可向量化路径（循环20，数学项45），建议次优先 | `-` |
+| `src/brisk_2d.cpp` | `high` | 是 | 循环34处，关键点响应计算密集，建议优先优化 | `-` |
+| `src/harris_3d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `src/harris_6d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `src/iss_3d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `src/narf_keypoint.cpp` | `high` | 是 | 循环48处，关键点响应计算密集，建议优先优化 | `-` |
+| `src/sift_keypoint.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `src/smoothed_surfaces_keypoint.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `src/susan.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `src/trajkovic_2d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
+| `src/trajkovic_3d.cpp` | `low` | 否 | 以声明/接口封装/构建胶水为主，暂不纳入本轮候选 | `-` |
 
-## 4. 简要统计
+## 7. 二轮交接说明
 
-- 模块统计：high `4`，mid `20`，low `12`。
-- 候选占比：`24/36 = 66.7%`。
-- include 口径：候选 `21/25`。
-- src 口径：候选 `3/11`。
-- thirdparty 口径：`0` 文件已登记，候选 `0`。
+- 第二轮筛选应读取本文件，并把所有 `high/mid` 文件作为初始候选基线逐项交代去向。
+- 第二轮可以将 `high/mid` 降级为暂缓、不推荐或不单独实施，但必须说明源码证据和主成本覆盖原因。
+- 第二轮可以补入 `low` 或初筛遗漏文件，但必须说明补入来源、证据和为什么没有扩展成重新全模块/全库筛选。
+- 第二轮输出应使用 `doc-rvv/library-screening/keypoints/keypoints-module-second-pass.zh.md`，并按“建议进行 RVV 优化的文件 / 保留实施的候选文件 / 暂缓或不推荐考虑 RVV 优化的文件”三类组织。
