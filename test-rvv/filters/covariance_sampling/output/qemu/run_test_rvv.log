@@ -1,0 +1,17 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from CovarianceSamplingDiag
+[ RUN      ] CovarianceSamplingDiag.ScaledPointsRVVMatchesScalarConditionInput
+[       OK ] CovarianceSamplingDiag.ScaledPointsRVVMatchesScalarConditionInput (2 ms)
+[ RUN      ] CovarianceSamplingDiag.FullDiagnosticIdentityIndicesMatchesScalarWithinTolerance
+[       OK ] CovarianceSamplingDiag.FullDiagnosticIdentityIndicesMatchesScalarWithinTolerance (11 ms)
+[ RUN      ] CovarianceSamplingDiag.FullDiagnosticShuffledIndicesMatchesScalarWithinTolerance
+[       OK ] CovarianceSamplingDiag.FullDiagnosticShuffledIndicesMatchesScalarWithinTolerance (8 ms)
+[ RUN      ] CovarianceSamplingDiag.SmallInputFallsBackToScalarHelper
+[       OK ] CovarianceSamplingDiag.SmallInputFallsBackToScalarHelper (1 ms)
+[----------] 4 tests from CovarianceSamplingDiag (25 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (28 ms total)
+[  PASSED  ] 4 tests.

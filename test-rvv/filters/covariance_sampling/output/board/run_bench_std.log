@@ -1,0 +1,31 @@
+====================================================================================================
+PCL filters/covariance_sampling RVV diagnostic
+Build: Std (__RVV10__ disabled)
+Dataset: synthetic PointXYZ + Normal clouds; identity and shuffled indices; phase breakdown plus full diagnostic
+Iterations: 5
+----------------------------------------------------------------------------------------------------
+covariance_sampling scaled-points identity 4K                           : 0.3001 ms/iter
+  Total Time: 1.5003 ms, checksum: 7371701650782910361
+covariance_sampling scaled-points shuffled 4K                           : 0.4046 ms/iter
+  Total Time: 2.0231 ms, checksum: 15543697549295433625
+covariance_sampling 6D-vector identity 4K                               : 0.2628 ms/iter
+  Total Time: 1.3141 ms, checksum: 18271256262928860035
+covariance_sampling 6D-vector shuffled 4K                               : 0.4021 ms/iter
+  Total Time: 2.0106 ms, checksum: 6770632778716382083
+covariance_sampling covariance+solver identity 4K                       : 0.5279 ms/iter
+  Total Time: 2.6394 ms, checksum: 9153109002634841734
+covariance_sampling full apply identity 4K sample 512                   : 23.1350 ms/iter
+  Total Time: 115.6748 ms, checksum: 12904988662512744628
+covariance_sampling full apply shuffled 4K sample 512                   : 26.8783 ms/iter
+  Total Time: 134.3913 ms, checksum: 8724291970838592627
+covariance_sampling scaled-points identity 16K                          : 1.1653 ms/iter
+  Total Time: 5.8265 ms, checksum: 7714965001369798553
+covariance_sampling 6D-vector identity 16K                              : 1.0687 ms/iter
+  Total Time: 5.3436 ms, checksum: 11633225183072813955
+covariance_sampling covariance+solver identity 16K                      : 2.0648 ms/iter
+  Total Time: 10.3238 ms, checksum: 4606853634175855446
+covariance_sampling full apply identity 16K sample 1024                 : 114.8097 ms/iter
+  Total Time: 574.0483 ms, checksum: 1275559586159802884
+covariance_sampling full apply shuffled 16K sample 1024                 : 150.0901 ms/iter
+  Total Time: 750.4507 ms, checksum: 2659664853126770056
+====================================================================================================
