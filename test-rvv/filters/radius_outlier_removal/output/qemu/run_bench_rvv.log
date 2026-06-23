@@ -1,0 +1,36 @@
+make[1]: Entering directory '/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/filters/radius_outlier_removal'
+rm -f build/riscv/bench_radius_outlier_removal_rvv
+[BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
+riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-06-18_21-33-41.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/RISCV/workspace/pcl/common/include -I/home/zoomin/codes/RISCV/workspace/pcl/filters/include -I/home/zoomin/codes/RISCV/workspace/pcl/test/include -I/home/zoomin/codes/RISCV/workspace/pcl -I/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/RISCV/workspace/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/RISCV/workspace/riscv/boost/include -I/home/zoomin/codes/RISCV/workspace/riscv/gtest/include -I/home/zoomin/codes/RISCV/workspace/riscv/flann/include -I/home/zoomin/codes/RISCV/workspace/riscv/lz4/include -I/home/zoomin/codes/RISCV/workspace/riscv/hdf5/include -I/home/zoomin/codes/RISCV/workspace/riscv/zlib/include -I/home/zoomin/codes/RISCV/workspace/riscv/libpng/include -DPCL_RADIUS_OUTLIER_REMOVAL_RVV_DIAGNOSTIC bench_radius_outlier_removal.cpp -L/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -L/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -L/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -L/home/zoomin/codes/RISCV/workspace/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/flann/lib -L/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib -L/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib -L/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib -L/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib  -lpcl_filters -lpcl_search -lpcl_kdtree -lpcl_octree -lpcl_common -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_radius_outlier_removal_rvv
+[RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
+LD_LIBRARY_PATH=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib:/home/zoomin/codes/RISCV/workspace/riscv/boost/lib:/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib:/home/zoomin/codes/RISCV/workspace/riscv/flann/lib:/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib:/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib:/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib:/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_radius_outlier_removal_rvv 
+====================================================================================================
+PCL filters/radius_outlier_removal RVV diagnostic
+Build: RVV diagnostic (__RVV10__ enabled)
+Dataset: synthetic to_keep masks and source indices; tail compress plus search-dominated full diagnostic
+Iterations: 5
+----------------------------------------------------------------------------------------------------
+radius_outlier_removal tail compress mostly-keep 64K                    : 0.9568 ms/iter
+  Total Time: 4.7840 ms, checksum: 11338021678850739428
+radius_outlier_removal tail compress half-keep shuffled 64K             : 0.7969 ms/iter
+  Total Time: 3.9846 ms, checksum: 10153353889152394971
+radius_outlier_removal tail compress mostly-remove 64K                  : 0.7874 ms/iter
+  Total Time: 3.9371 ms, checksum: 11110618692744591569
+radius_outlier_removal tail compress mostly-keep 1M                     : 12.8150 ms/iter
+  Total Time: 64.0752 ms, checksum: 10151647101795259422
+radius_outlier_removal tail compress half-keep shuffled 1M              : 12.7055 ms/iter
+  Total Time: 63.5273 ms, checksum: 14326219092359349348
+radius_outlier_removal tail compress no-removed 1M                      : 7.4765 ms/iter
+  Total Time: 37.3827 ms, checksum: 3861624921978117505
+radius_outlier_removal full diag light-search 64K                       : 17.7756 ms/iter
+  Total Time: 88.8782 ms, checksum: 9720436774536743561
+radius_outlier_removal full diag search-dominated 64K                   : 136.6001 ms/iter
+  Total Time: 683.0005 ms, checksum: 9720434134698472890
+radius_outlier_removal full diag search-dominated shuffled 64K          : 137.7573 ms/iter
+  Total Time: 688.7867 ms, checksum: 8613463221155597120
+radius_outlier_removal full diag search-dominated 1M                    : 2190.0123 ms/iter
+  Total Time: 10950.0615 ms, checksum: 8433151547587027215
+radius_outlier_removal full diag search-dominated mostly-remove 1M      : 2185.3737 ms/iter
+  Total Time: 10926.8684 ms, checksum: 11099497187682932919
+====================================================================================================
+make[1]: Leaving directory '/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/filters/radius_outlier_removal'

@@ -1,0 +1,25 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from RadiusOutlierRemovalDiag
+[ RUN      ] RadiusOutlierRemovalDiag.TailCompressMostlyKeepMatchesScalar
+[       OK ] RadiusOutlierRemovalDiag.TailCompressMostlyKeepMatchesScalar (0 ms)
+[ RUN      ] RadiusOutlierRemovalDiag.TailCompressShuffledHalfKeepMatchesScalar
+[       OK ] RadiusOutlierRemovalDiag.TailCompressShuffledHalfKeepMatchesScalar (0 ms)
+[ RUN      ] RadiusOutlierRemovalDiag.TailCompressWithoutRemovedMatchesScalar
+[       OK ] RadiusOutlierRemovalDiag.TailCompressWithoutRemovedMatchesScalar (0 ms)
+[ RUN      ] RadiusOutlierRemovalDiag.SmallInputFallsBackToScalar
+[       OK ] RadiusOutlierRemovalDiag.SmallInputFallsBackToScalar (0 ms)
+[ RUN      ] RadiusOutlierRemovalDiag.FullDiagnosticKeepsCompressSemantics
+[       OK ] RadiusOutlierRemovalDiag.FullDiagnosticKeepsCompressSemantics (0 ms)
+[ RUN      ] RadiusOutlierRemovalDiag.ProductionRadiusOutlierRemovalStillRuns
+[       OK ] RadiusOutlierRemovalDiag.ProductionRadiusOutlierRemovalStillRuns (1 ms)
+[ RUN      ] RadiusOutlierRemovalDiag.EntryDiagnosticMatchesUpstreamFakeIndices
+[       OK ] RadiusOutlierRemovalDiag.EntryDiagnosticMatchesUpstreamFakeIndices (1 ms)
+[ RUN      ] RadiusOutlierRemovalDiag.EntryDiagnosticMatchesUpstreamExplicitIndicesNegative
+[       OK ] RadiusOutlierRemovalDiag.EntryDiagnosticMatchesUpstreamExplicitIndicesNegative (0 ms)
+[----------] 8 tests from RadiusOutlierRemovalDiag (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test suite ran. (5 ms total)
+[  PASSED  ] 8 tests.

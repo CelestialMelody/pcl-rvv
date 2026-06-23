@@ -1,0 +1,29 @@
+====================================================================================================
+PCL filters/radius_outlier_removal RVV diagnostic
+Build: Std (__RVV10__ disabled)
+Dataset: synthetic to_keep masks and source indices; tail compress plus search-dominated full diagnostic
+Iterations: 5
+----------------------------------------------------------------------------------------------------
+radius_outlier_removal tail compress mostly-keep 64K                    : 1.1860 ms/iter
+  Total Time: 5.9298 ms, checksum: 11338021678850739428
+radius_outlier_removal tail compress half-keep shuffled 64K             : 1.3580 ms/iter
+  Total Time: 6.7899 ms, checksum: 10153353889152394971
+radius_outlier_removal tail compress mostly-remove 64K                  : 1.0153 ms/iter
+  Total Time: 5.0764 ms, checksum: 11110618692744591569
+radius_outlier_removal tail compress mostly-keep 1M                     : 17.2349 ms/iter
+  Total Time: 86.1744 ms, checksum: 10151647101795259422
+radius_outlier_removal tail compress half-keep shuffled 1M              : 20.1653 ms/iter
+  Total Time: 100.8264 ms, checksum: 14326219092359349348
+radius_outlier_removal tail compress no-removed 1M                      : 10.2103 ms/iter
+  Total Time: 51.0514 ms, checksum: 3861624921978117505
+radius_outlier_removal full diag light-search 64K                       : 2.0406 ms/iter
+  Total Time: 10.2028 ms, checksum: 9720436774536743561
+radius_outlier_removal full diag search-dominated 64K                   : 10.1287 ms/iter
+  Total Time: 50.6436 ms, checksum: 9720434134698472890
+radius_outlier_removal full diag search-dominated shuffled 64K          : 83.8979 ms/iter
+  Total Time: 419.4896 ms, checksum: 8613463221155597120
+radius_outlier_removal full diag search-dominated 1M                    : 163.3968 ms/iter
+  Total Time: 816.9839 ms, checksum: 8433151547587027215
+radius_outlier_removal full diag search-dominated mostly-remove 1M      : 162.9816 ms/iter
+  Total Time: 814.9082 ms, checksum: 11099497187682932919
+====================================================================================================
