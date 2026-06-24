@@ -146,6 +146,7 @@ __riscv_<operation>_<operand-shape>_<type/lmul>[_mask/tail]
 
 - [RVV 多谓词掩码收敛模式](RVV%20Mask%20Predicate%20Convergence.zh.md)：`vfabs/vmfle` 或其他比较生成局部 mask，再用 `vmand` / `vmor` 收敛为最终 `keep`。
 - [RVV 掩码压缩与保序索引输出模式](RVV%20Compress%20Index%20Output.zh.md)：`vid + vadd + vcompress + vcpop + vse32` 实现保序 indices 输出。
+- [RVV 多字段压缩 staging 输出模式](RVV%20Multi-Field%20Compress%20Staging.zh.md)：多个字段共用同一个 `keep` mask，分别 `vcompress` 后经临时 SoA buffer 组装为 AoS staging。
 
 ## Float 算术
 
@@ -186,6 +187,8 @@ __riscv_<operation>_<operand-shape>_<type/lmul>[_mask/tail]
 | `__riscv_vfmacc_vv_f32m2_tu` | tail-undisturbed `acc += vector * vector` | 协方差 / moment 跨 chunk 累加 |
 | `__riscv_vfmsac_vv_f32m2` | `acc -= vector * vector` | 差分公式、几何表达式 |
 | `__riscv_vfnmsub_vf_f32m2` | fused negative multiply-subtract | 特定线性公式重排，减少中间误差和指令数 |
+
+相关语义规则见 [RVV Eigen 表达式语义对齐](RVV%20Eigen%20Expression%20Semantic%20Alignment.zh.md)。手工展开 Eigen 小矩阵、小向量、投影或 `Vector3f::norm()` 时，应先用反汇编确认标量 lowering，再选择 `vfmacc` / `vfmul` / `vfadd` 形态；若结果进入像素、voxel、阈值谓词或保序输出序列，应按 bit / predicate / output 等价处理。
 
 ## Reduction
 
@@ -250,6 +253,22 @@ compare -> vmand/vmnot -> vcpop -> vcompress -> vse32
 ```
 
 常见于 filters 的保留 index 生成。`vcpop` 给出本 chunk 写出数量，`vcompress` 把命中 lane 压到前面。
+
+### 3.1 Mask + compress 输出多字段 staging
+
+```text
+compare -> vcompress(field0..fieldN) -> vse32(temp SoA buffers) -> scalar pack AoS staging
+```
+
+常见于输出 `Candidate{index, target, x, y, z}` 这类多字段候选结构。每个字段必须使用同一个 `keep` mask 和同一个 `vcpop` 结果，避免压缩后字段错位。该模式适合先把 predicate 和主要数学计算 RVV 化，再用短标量循环保持 AoS staging 与后续 scalar tail 的可维护性。
+
+### 3.2 Eigen / FMA / norm 语义对齐
+
+```text
+反汇编确认标量 lowering -> 选择 vfmacc/vfmul/vfadd/vfsqrt/vfcvt 形态 -> adversarial bit/predicate 测试
+```
+
+常见于 `Matrix4f * getVector4fMap()`、`projection_matrix * Vector3f`、`Vector3f::norm()`、像素投影和距离阈值。该模式的重点不是新增 intrinsic，而是确认 RVV 的舍入点、FMA contraction、`sqrt` 计算域和 float/double 比较谓词与生产标量路径一致。详见 [RVV Eigen 表达式语义对齐](RVV%20Eigen%20Expression%20Semantic%20Alignment.zh.md)。
 
 ### 4. Reduction
 
