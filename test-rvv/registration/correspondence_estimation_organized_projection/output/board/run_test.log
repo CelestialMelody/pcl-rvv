@@ -1,0 +1,87 @@
+Running main() from /home/zoomin/codes/RISCV/workspace/pkgs/googletest/googletest/src/gtest_main.cc
+[==========] Running 39 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 39 tests from CorrespondenceEstimationOrganizedProjectionDiag
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.CandidateMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.CandidateMatchesScalar (8 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.CandidateSupportsPointXYZITarget
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.CandidateSupportsPointXYZITarget (15 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.CandidateSupportsPointXYZISourceAndTarget
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.CandidateSupportsPointXYZISourceAndTarget (13 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.SmallInputFallbackMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.SmallInputFallbackMatchesScalar (2 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.DiagnosticFakeIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.DiagnosticFakeIndicesMatchesScalar (8 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.DiagnosticSubsetIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.DiagnosticSubsetIndicesMatchesScalar (9 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.PclClassMatchesScalarFormula
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.PclClassMatchesScalarFormula (3 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionFakeIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionFakeIndicesMatchesScalar (5 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionSubsetIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionSubsetIndicesMatchesScalar (6 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionSupportsPointXYZITarget
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionSupportsPointXYZITarget (17 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionSupportsPointXYZISourceAndTarget
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionSupportsPointXYZISourceAndTarget (19 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionSmallInputFallbackMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionSmallInputFallbackMatchesScalar (2 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionDistanceBoundaryPredicateMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionDistanceBoundaryPredicateMatchesScalar (0 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.DistanceRvvMatchesEigenNormBits
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.DistanceRvvMatchesEigenNormBits (0 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.DistanceRvvThresholdPredicateMatchesDoubleScalarPredicate
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.DistanceRvvThresholdPredicateMatchesDoubleScalarPredicate (0 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionIdentityProjectionPixelBoundaryMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionIdentityProjectionPixelBoundaryMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentityTransformFakeIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentityTransformFakeIndicesMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentityTransformSubsetIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentityTransformSubsetIndicesMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentityProjectionPixelBoundaryMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentityProjectionPixelBoundaryMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentityTransformSmallZPointXYZIMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentityTransformSmallZPointXYZIMatchesScalar (13 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentitySmallInputFallbackMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProductionNonIdentitySmallInputFallbackMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTransformRvvStagingBoundaryMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTransformRvvStagingBoundaryMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTransformDiagnosticFakeIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTransformDiagnosticFakeIndicesMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTransformDiagnosticSubsetIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTransformDiagnosticSubsetIndicesMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityProjectionPixelDiagnosticFakeIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityProjectionPixelDiagnosticFakeIndicesMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityProjectionPixelDiagnosticSubsetIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityProjectionPixelDiagnosticSubsetIndicesMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTransformSmallZPointXYZIMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTransformSmallZPointXYZIMatchesScalar (14 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.TightDepthThresholdRejectsMatches
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.TightDepthThresholdRejectsMatches (3 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.ProjectionPixelRvvDiagnosticMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.ProjectionPixelRvvDiagnosticMatchesScalar (5 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.IdentityProjectionPixelDiagnosticFakeIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.IdentityProjectionPixelDiagnosticFakeIndicesMatchesScalar (5 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.IdentityProjectionPixelDiagnosticSubsetIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.IdentityProjectionPixelDiagnosticSubsetIndicesMatchesScalar (6 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateRvvDiagnosticMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateRvvDiagnosticMatchesScalar (5 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateDiagnosticFakeIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateDiagnosticFakeIndicesMatchesScalar (5 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateDiagnosticSubsetIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateDiagnosticSubsetIndicesMatchesScalar (6 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateSupportsPointXYZISourceAndTarget
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateSupportsPointXYZISourceAndTarget (18 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateSmallInputFallbackMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateSmallInputFallbackMatchesScalar (2 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateTightThresholdsMatchScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.TargetPredicateTightThresholdsMatchScalar (5 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTargetPredicateDiagnosticFakeIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTargetPredicateDiagnosticFakeIndicesMatchesScalar (1 ms)
+[ RUN      ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTargetPredicateDiagnosticSubsetIndicesMatchesScalar
+[       OK ] CorrespondenceEstimationOrganizedProjectionDiag.NonIdentityTargetPredicateDiagnosticSubsetIndicesMatchesScalar (1 ms)
+[----------] 39 tests from CorrespondenceEstimationOrganizedProjectionDiag (227 ms total)
+
+[----------] Global test environment tear-down
+[==========] 39 tests from 1 test suite ran. (227 ms total)
+[  PASSED  ] 39 tests.

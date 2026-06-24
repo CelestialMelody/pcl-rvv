@@ -1,0 +1,51 @@
+==============================================================================================================
+PCL registration/correspondence_estimation_organized_projection diagnostic benchmark
+Build: Std (__RVV10__ disabled)
+Dataset: synthetic PointXYZ source and organized PointXYZ target; projection staging plus full correspondence diagnostic
+Iterations: 30
+--------------------------------------------------------------------------------------------------------------
+ceop projection-staging pointxyz 64K                                          : 7.5715 ms/iter
+  Total Time: 227.1446 ms, checksum: 2172970935374644472
+ceop projection-staging pointxyz 256K                                         : 30.2948 ms/iter
+  Total Time: 908.8429 ms, checksum: 9293170544389510043
+ceop identity projection-pixel diagnostic pointxyz 64K                        : 20.0170 ms/iter
+  Total Time: 600.5108 ms, checksum: 140547372586179969
+ceop identity projection-pixel diagnostic pointxyz 256K                       : 76.9705 ms/iter
+  Total Time: 2309.1142 ms, checksum: 13594340667184250285
+ceop target-predicate staging pointxyz 64K                                    : 18.5612 ms/iter
+  Total Time: 556.8361 ms, checksum: 4417340144073031140
+ceop target-predicate staging pointxyz 256K                                   : 72.8146 ms/iter
+  Total Time: 2184.4378 ms, checksum: 15052876296552908126
+ceop identity target-predicate diagnostic pointxyz 64K                        : 20.0242 ms/iter
+  Total Time: 600.7260 ms, checksum: 140547372586179969
+ceop identity target-predicate diagnostic pointxyz 256K                       : 78.5207 ms/iter
+  Total Time: 2355.6202 ms, checksum: 13594340667184250285
+ceop full-correspondence pointxyz 64K                                         : 19.5974 ms/iter
+  Total Time: 587.9234 ms, checksum: 140547372586179969
+ceop full-correspondence pointxyz 256K                                        : 75.9962 ms/iter
+  Total Time: 2279.8848 ms, checksum: 13594340667184250285
+ceop upstream-like std fake-indices pointxyz 64K                              : 19.3389 ms/iter
+  Total Time: 580.1667 ms, checksum: 140547372586179969
+ceop upstream-like candidate fake-indices pointxyz 64K                        : 19.7356 ms/iter
+  Total Time: 592.0688 ms, checksum: 140547372586179969
+ceop upstream-like accepted fake-indices pointxyz 64K                         : 20.0774 ms/iter
+  Total Time: 602.3232 ms, checksum: 140547372586179969
+ceop upstream-like std explicit-indices pointxyz 64K                          : 19.3552 ms/iter
+  Total Time: 580.6547 ms, checksum: 140547372586179969
+ceop upstream-like candidate explicit-indices pointxyz 64K                    : 19.7315 ms/iter
+  Total Time: 591.9451 ms, checksum: 140547372586179969
+ceop upstream-like accepted explicit-indices pointxyz 64K                     : 20.1948 ms/iter
+  Total Time: 605.8429 ms, checksum: 140547372586179969
+ceop production fake-indices pointxyz 64K                                     : 21.7347 ms/iter
+  Total Time: 652.0423 ms, checksum: 10393124863019881355
+ceop production explicit-indices pointxyz 64K                                 : 21.7268 ms/iter
+  Total Time: 651.8031 ms, checksum: 10393124863019881355
+ceop upstream-like accepted non-identity fake-indices pointxyz 64K            : 15.9257 ms/iter
+  Total Time: 477.7698 ms, checksum: 13376866430852120216
+ceop upstream-like accepted non-identity explicit-indices pointxyz 64K        : 16.0207 ms/iter
+  Total Time: 480.6205 ms, checksum: 13376866430852120216
+ceop production non-identity fake-indices pointxyz 64K                        : 16.7381 ms/iter
+  Total Time: 502.1427 ms, checksum: 13376866430852120216
+ceop production non-identity explicit-indices pointxyz 64K                    : 16.7513 ms/iter
+  Total Time: 502.5375 ms, checksum: 13376866430852120216
+==============================================================================================================

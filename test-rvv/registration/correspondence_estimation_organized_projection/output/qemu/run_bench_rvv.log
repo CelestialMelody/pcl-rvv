@@ -1,0 +1,58 @@
+make[1]: Entering directory '/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/registration/correspondence_estimation_organized_projection'
+rm -f build/riscv/bench_correspondence_estimation_organized_projection_rvv
+[BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
+riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-06-24_15-04-29.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/RISCV/workspace/pcl/common/include -I/home/zoomin/codes/RISCV/workspace/pcl/registration/include -I/home/zoomin/codes/RISCV/workspace/pcl/search/include -I/home/zoomin/codes/RISCV/workspace/pcl/kdtree/include -I/home/zoomin/codes/RISCV/workspace/pcl/octree/include -I/home/zoomin/codes/RISCV/workspace/pcl/test/include -I/home/zoomin/codes/RISCV/workspace/pcl -I/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/RISCV/workspace/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/RISCV/workspace/riscv/boost/include -I/home/zoomin/codes/RISCV/workspace/riscv/gtest/include -I/home/zoomin/codes/RISCV/workspace/riscv/flann/include -I/home/zoomin/codes/RISCV/workspace/riscv/lz4/include -I/home/zoomin/codes/RISCV/workspace/riscv/hdf5/include -I/home/zoomin/codes/RISCV/workspace/riscv/zlib/include -I/home/zoomin/codes/RISCV/workspace/riscv/libpng/include  bench_correspondence_estimation_organized_projection.cpp -L/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -L/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -L/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -L/home/zoomin/codes/RISCV/workspace/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/flann/lib -L/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib -L/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib -L/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib -L/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib  -lpcl_registration -lpcl_search -lpcl_kdtree -lpcl_octree -lpcl_common -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_correspondence_estimation_organized_projection_rvv
+[RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
+LD_LIBRARY_PATH=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib:/home/zoomin/codes/RISCV/workspace/riscv/boost/lib:/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib:/home/zoomin/codes/RISCV/workspace/riscv/flann/lib:/home/zoomin/codes/RISCV/workspace/riscv/lz4/lib:/home/zoomin/codes/RISCV/workspace/riscv/hdf5/lib:/home/zoomin/codes/RISCV/workspace/riscv/zlib/lib:/home/zoomin/codes/RISCV/workspace/riscv/libpng/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_correspondence_estimation_organized_projection_rvv
+==============================================================================================================
+PCL registration/correspondence_estimation_organized_projection diagnostic benchmark
+Build: RVV (__RVV10__ enabled)
+Dataset: synthetic PointXYZ source and organized PointXYZ target; projection staging plus full correspondence diagnostic
+Iterations: 30
+--------------------------------------------------------------------------------------------------------------
+ceop projection-staging pointxyz 64K                                          : 18.4480 ms/iter
+  Total Time: 553.4398 ms, checksum: 2172970935374644472
+ceop projection-staging pointxyz 256K                                         : 73.7857 ms/iter
+  Total Time: 2213.5718 ms, checksum: 9293170544389510043
+ceop identity projection-pixel diagnostic pointxyz 64K                        : 44.8753 ms/iter
+  Total Time: 1346.2598 ms, checksum: 140547372586179969
+ceop identity projection-pixel diagnostic pointxyz 256K                       : 178.9828 ms/iter
+  Total Time: 5369.4844 ms, checksum: 13594340667184250285
+ceop target-predicate staging pointxyz 64K                                    : 62.4099 ms/iter
+  Total Time: 1872.2964 ms, checksum: 4417340144073031140
+ceop target-predicate staging pointxyz 256K                                   : 247.3376 ms/iter
+  Total Time: 7420.1274 ms, checksum: 15052876296552908126
+ceop identity target-predicate diagnostic pointxyz 64K                        : 66.9208 ms/iter
+  Total Time: 2007.6226 ms, checksum: 140547372586179969
+ceop identity target-predicate diagnostic pointxyz 256K                       : 267.7180 ms/iter
+  Total Time: 8031.5393 ms, checksum: 13594340667184250285
+ceop full-correspondence pointxyz 64K                                         : 41.1361 ms/iter
+  Total Time: 1234.0831 ms, checksum: 140547372586179969
+ceop full-correspondence pointxyz 256K                                        : 163.7061 ms/iter
+  Total Time: 4911.1844 ms, checksum: 13594340667184250285
+ceop upstream-like std fake-indices pointxyz 64K                              : 16.9364 ms/iter
+  Total Time: 508.0915 ms, checksum: 140547372586179969
+ceop upstream-like candidate fake-indices pointxyz 64K                        : 41.0124 ms/iter
+  Total Time: 1230.3712 ms, checksum: 140547372586179969
+ceop upstream-like accepted fake-indices pointxyz 64K                         : 66.9061 ms/iter
+  Total Time: 2007.1818 ms, checksum: 140547372586179969
+ceop upstream-like std explicit-indices pointxyz 64K                          : 16.9563 ms/iter
+  Total Time: 508.6883 ms, checksum: 140547372586179969
+ceop upstream-like candidate explicit-indices pointxyz 64K                    : 41.2394 ms/iter
+  Total Time: 1237.1813 ms, checksum: 140547372586179969
+ceop upstream-like accepted explicit-indices pointxyz 64K                     : 66.9621 ms/iter
+  Total Time: 2008.8619 ms, checksum: 140547372586179969
+ceop production fake-indices pointxyz 64K                                     : 50.6764 ms/iter
+  Total Time: 1520.2906 ms, checksum: 10393124863019881355
+ceop production explicit-indices pointxyz 64K                                 : 50.7003 ms/iter
+  Total Time: 1521.0103 ms, checksum: 10393124863019881355
+ceop upstream-like accepted non-identity fake-indices pointxyz 64K            : 75.5715 ms/iter
+  Total Time: 2267.1439 ms, checksum: 13376866430852120216
+ceop upstream-like accepted non-identity explicit-indices pointxyz 64K        : 75.5481 ms/iter
+  Total Time: 2266.4436 ms, checksum: 13376866430852120216
+ceop production non-identity fake-indices pointxyz 64K                        : 75.9062 ms/iter
+  Total Time: 2277.1846 ms, checksum: 13376866430852120216
+ceop production non-identity explicit-indices pointxyz 64K                    : 75.9656 ms/iter
+  Total Time: 2278.9673 ms, checksum: 13376866430852120216
+==============================================================================================================
+make[1]: Leaving directory '/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/registration/correspondence_estimation_organized_projection'
