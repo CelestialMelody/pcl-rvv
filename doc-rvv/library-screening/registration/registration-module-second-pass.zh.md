@@ -141,7 +141,7 @@
 | 顺序 | 主题                                                       | 主文件                                                         | 状态   | 下一步动作                                                                   |
 | ---: | ---------------------------------------------------------- | -------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------- |
 |    1 | `transformation_validation_euclidean`                      | `impl/transformation_validation_euclidean.hpp`                 | 已完成 / bench诊断 | 建立函数级评估，确认 transform staging、nearest search 稀释和专项 bench |
-|    2 | `correspondence_estimation_organized_projection`           | `impl/correspondence_estimation_organized_projection.hpp`      | 待评估    | 评估 organized projection 的矩阵投影、depth mask、distance mask 和输出保序 |
+|    2 | `correspondence_estimation_organized_projection`           | `impl/correspondence_estimation_organized_projection.hpp`      | 已完成 / production-ready | 已接入 source transform、projection-pixel 和 target-predicate production RVV；append / stored distance 写出保留标量 |
 |    3 | `transformation_estimation_point_to_plane_lls`             | `impl/transformation_estimation_point_to_plane_lls.hpp`        | 待评估    | 评估 PointNormal 全云 / correspondences normal-equation 构造 |
 |    4 | `transformation_estimation_point_to_plane_lls_weighted`    | `impl/transformation_estimation_point_to_plane_lls_weighted.hpp` | 待评估    | 在 LLS 经验后补权重路径 |
 |    5 | `transformation_estimation_symmetric_point_to_plane_lls`   | `impl/transformation_estimation_symmetric_point_to_plane_lls.hpp` | 待评估    | 在普通 LLS 后评估 symmetric 公式和数值边界 |
@@ -158,7 +158,7 @@
 | 主题                                                       | 函数级评估 | RVV 实现 | 专项测试 | bench  | QEMU   | 反汇编 | 板卡闭环 | 主题文档 | 工作日志 |
 | ---------------------------------------------------------- | ---------- | -------- | -------- | ------ | ------ | ------ | -------- | -------- | -------- |
 | `transformation_validation_euclidean`                    | 已完成 / bench诊断 | bench诊断 | 已完成 | 已完成 | 已完成 | 已完成 | 已完成 | 已完成 | 已记录   |
-| `correspondence_estimation_organized_projection`         | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
+| `correspondence_estimation_organized_projection`         | 已完成 / production-ready | 已接入 production | 已完成 | 已完成 | 已完成 | 已完成 | 已完成   | 已完成   | 已记录   |
 | `transformation_estimation_point_to_plane_lls`           | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 | `transformation_estimation_point_to_plane_lls_weighted`  | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 | `transformation_estimation_symmetric_point_to_plane_lls` | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
@@ -170,4 +170,4 @@
 | `transformation_estimation_dual_quaternion`              | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 | `bfgs`                                                   | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 
-`transformation_validation_euclidean` 已完成首轮评估与诊断闭环，但板卡结果只证明 transform staging 片段加速，full validation 只有弱收益，因此该主题应保持为 bench-diagnosis，不进入生产接入队列。后续普通主题优化应转到 `correspondence_estimation_organized_projection`。若后续新的 full diagnostic 或生产入口证据推翻当前判断，再回到本主题重新评估。
+`transformation_validation_euclidean` 已完成首轮评估与诊断闭环，但板卡结果只证明 transform staging 片段加速，full validation 只有弱收益，因此该主题应保持为 bench-diagnosis，不进入生产接入队列。`correspondence_estimation_organized_projection` 已完成 production-ready closeout：production RVV 覆盖 source gather / finite / transform staging、projection-pixel staging 和 target-predicate final predicate；append 与 stored distance 写出保留标量。板卡 `board_smoke` 39 个专项测试通过，production identity fake/explicit 为 `1.64x` / `1.65x`，production non-identity fake/explicit 均为 `2.36x`。后续普通主题优化应转到 `transformation_estimation_point_to_plane_lls`。
