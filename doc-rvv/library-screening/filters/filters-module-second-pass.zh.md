@@ -16,7 +16,7 @@
 - 源码范围：`filters/include/pcl/filters/**`、`filters/src/**`
 - 上游测试：`test/filters/*.cpp`
 - 上游 benchmark：`benchmarks/filters/voxel_grid.cpp`、`benchmarks/filters/radius_outlier_removal.cpp`
-- 表格文件路径说明：候选表中的文件名省略公共前缀 `filters/include/pcl/filters/`；`src/*` 文件保留 `src/` 前缀；评估文档和主题文档路径保留完整 repo-relative 路径。
+- 表格文件路径说明：候选表中的文件名省略公共前缀 `filters/include/pcl/filters/`；`src/*` 文件保留 `src/` 前缀。
 
 ## 2. 二轮筛选统计
 
@@ -154,16 +154,16 @@
 
 ### 4.1 建议优化文件队列
 
-| 顺序 | 主题                         | 主文件                               | 函数级评估文档                                                                    | 主题文档                                            | 当前状态 | 下一步动作 |
-| ---: | ---------------------------- | ------------------------------------ | --------------------------------------------------------------------------------- | --------------------------------------------------- | -------- | ---------- |
-|    1 | `voxel_grid`                 | `impl/voxel_grid.hpp`                | `test-rvv/filters/voxel_grid/voxel_grid-evaluation.zh.md`                       | `doc-rvv/filters/voxel_grid-RVV.zh.md`            | 已完成   | 不再重复实施；仅在回归、板卡日志或文档口径变化时同步。 |
-|    2 | `convolution`                | `impl/convolution.hpp`               | `test-rvv/filters/convolution/convolution-evaluation.zh.md`                     | `doc-rvv/filters/convolution-RVV.zh.md`           | 已完成   | dense organized `PointXYZI` ignore / duplicate / mirror 行列方向 RVV 已完成。 |
-|    3 | `filter_indices` / `filter`  | `impl/filter_indices.hpp`、`impl/filter.hpp` | `test-rvv/filters/filter_indices/filter_indices-evaluation.zh.md`               | `doc-rvv/filters/filter_indices-RVV.zh.md`        | 已完成   | non-dense 标准 `float x/y/z` indices-only 与 cloud-out RVV 已完成。 |
-|    4 | `passthrough`                | `impl/passthrough.hpp`               | `test-rvv/filters/passthrough/passthrough-evaluation.zh.md`                     | `doc-rvv/filters/passthrough-RVV.zh.md`           | 已完成   | `PointT` identity indices + FLOAT32 字段区间过滤 RVV 已完成；subset / PCLPointCloud2 暂缓。 |
-|    5 | `crop_box`                   | `impl/crop_box.hpp`                  | `test-rvv/filters/crop_box/crop_box-evaluation.zh.md`                           | `doc-rvv/filters/crop_box-RVV.zh.md`              | 已完成   | dense identity transform 的 xyz 区间裁剪已完成。 |
-|    6 | `voxel_grid_covariance`      | `impl/voxel_grid_covariance.hpp`     | `test-rvv/filters/voxel_grid_covariance/voxel_grid_covariance-evaluation.zh.md` | `doc-rvv/filters/voxel_grid_covariance-RVV.zh.md` | 已完成   | dense 标准 float xyz 的 first-pass leaf id 预计算 RVV 已完成；covariance / Eigen 保持标量。 |
-|    7 | `fast_bilateral`             | `impl/fast_bilateral.hpp`            | `test-rvv/filters/fast_bilateral/fast_bilateral-evaluation.zh.md`               | `doc-rvv/filters/fast_bilateral-RVV.zh.md`        | 已完成   | organized `PointXYZ` depth z 预处理 RVV 已完成；blur bench 诊断不接入生产。 |
-|    8 | `fast_bilateral_omp`         | `impl/fast_bilateral_omp.hpp`        | `test-rvv/filters/fast_bilateral_omp/fast_bilateral_omp-evaluation.zh.md`       | `doc-rvv/filters/fast_bilateral_omp-RVV.zh.md`    | 已完成   | 复用 `fast_bilateral` z 预处理 helper；OpenMP lattice 主体保持标量。 |
+| 顺序 | 主题                         | 主文件                               | 当前状态 | 当前结论 / 下一步条件 |
+| ---: | ---------------------------- | ------------------------------------ | -------- | --------------------- |
+|    1 | `voxel_grid`                 | `impl/voxel_grid.hpp`                | 已完成   | 不再重复实施；仅在回归、板卡日志或文档口径变化时同步。 |
+|    2 | `convolution`                | `impl/convolution.hpp`               | 已完成   | dense organized `PointXYZI` ignore / duplicate / mirror 行列方向 RVV 已完成。 |
+|    3 | `filter_indices` / `filter`  | `impl/filter_indices.hpp`、`impl/filter.hpp` | 已完成   | non-dense 标准 `float x/y/z` indices-only 与 cloud-out RVV 已完成。 |
+|    4 | `passthrough`                | `impl/passthrough.hpp`               | 已完成   | `PointT` identity indices + FLOAT32 字段区间过滤 RVV 已完成；subset / PCLPointCloud2 暂缓。 |
+|    5 | `crop_box`                   | `impl/crop_box.hpp`                  | 已完成   | dense identity transform 的 xyz 区间裁剪已完成。 |
+|    6 | `voxel_grid_covariance`      | `impl/voxel_grid_covariance.hpp`     | 已完成   | dense 标准 float xyz 的 first-pass leaf id 预计算 RVV 已完成；covariance / Eigen 保持标量。 |
+|    7 | `fast_bilateral`             | `impl/fast_bilateral.hpp`            | 已完成   | organized `PointXYZ` depth z 预处理 RVV 已完成；blur bench 诊断不接入生产。 |
+|    8 | `fast_bilateral_omp`         | `impl/fast_bilateral_omp.hpp`        | 已完成   | 复用 `fast_bilateral` z 预处理 helper；OpenMP lattice 主体保持标量。 |
 
 ### 4.2 建议优化文件状态矩阵
 

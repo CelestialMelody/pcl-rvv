@@ -10,7 +10,7 @@
 - 源码范围：`registration`
 - 上游测试：`test/registration/*.cpp`
 - 上游 benchmark：当前仓库未发现 `benchmarks/registration/` 目录；registration 主题需要优先建立专项 bench
-- 既有 RVV 经验：`common` 的 transform / centroid / norms，`filters` 的 direct-main-path、partial-preprocess、bench-diagnosis 和 follow-up rescreen 经验
+- 既有 RVV 经验：`common` 的 transform / centroid / norms，`filters` 的 direct-main-path、partial-preprocess、bench 诊断和 follow-up rescreen 经验
 - 通用 workflow：`doc-rvv/library-screening/module-optimization-workflow.zh.md`
 - 表格文件路径说明：候选表和执行清单中的文件名省略公共前缀 `registration/include/pcl/registration/`；`impl/*.hpp` 保留 `impl/` 前缀
 
@@ -138,26 +138,26 @@
 
 ### 4.1 建议优化文件队列
 
-| 顺序 | 主题                                                       | 主文件                                                         | 状态   | 下一步动作                                                                   |
-| ---: | ---------------------------------------------------------- | -------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------- |
-|    1 | `transformation_validation_euclidean`                      | `impl/transformation_validation_euclidean.hpp`                 | 已完成 / bench诊断 | 建立函数级评估，确认 transform staging、nearest search 稀释和专项 bench |
-|    2 | `correspondence_estimation_organized_projection`           | `impl/correspondence_estimation_organized_projection.hpp`      | 已完成 / production-ready | 已接入 source transform、projection-pixel 和 target-predicate production RVV；append / stored distance 写出保留标量 |
-|    3 | `transformation_estimation_point_to_plane_lls`             | `impl/transformation_estimation_point_to_plane_lls.hpp`        | 待评估    | 评估 PointNormal 全云 / correspondences normal-equation 构造 |
-|    4 | `transformation_estimation_point_to_plane_lls_weighted`    | `impl/transformation_estimation_point_to_plane_lls_weighted.hpp` | 待评估    | 在 LLS 经验后补权重路径 |
-|    5 | `transformation_estimation_symmetric_point_to_plane_lls`   | `impl/transformation_estimation_symmetric_point_to_plane_lls.hpp` | 待评估    | 在普通 LLS 后评估 symmetric 公式和数值边界 |
-|    6 | `icp_transform_cloud`                                      | `impl/icp.hpp`                                                 | 待评估    | 先做 transformCloud/full diagnostic，确认是否被 ICP search 主成本稀释 |
-|    7 | `correspondence_types`                                     | `impl/correspondence_types.hpp`                                | 待评估    | 评估 correspondence helper 的输出顺序、重复输入和 set-difference / mask 语义 |
-|    8 | `correspondence_rejection_poly`                            | `impl/correspondence_rejection_poly.hpp`                       | 待评估    | 优先诊断 histogram / Otsu / accept-rate 局部收益，不直接承诺生产分流 |
-|    9 | `transformation_estimation_2D`                             | `impl/transformation_estimation_2D.hpp`                        | 待评估    | 确认 2D 数据规模、上游测试和 fixed formula reduction 收益 |
-|   10 | `transformation_estimation_svd`                            | `impl/transformation_estimation_svd.hpp`                       | 待评估    | 评估 centroid / covariance 前置累加是否被 Eigen SVD 稀释 |
-|   11 | `transformation_estimation_dual_quaternion`                | `impl/transformation_estimation_dual_quaternion.hpp`           | 待评估    | 评估 dual quaternion 累加公式和数值维护边界 |
-|   12 | `bfgs`                                                     | `bfgs.h`                                                       | 待评估    | 仅建立优化器局部诊断问题，确认是否服务 GICP / NDT 热点 |
+| 顺序 | 主题                                                       | 主文件                                                         | 状态   | 当前结论 / 下一步条件 |
+| ---: | ---------------------------------------------------------- | -------------------------------------------------------------- | ------ | --------------------- |
+|    1 | `transformation_validation_euclidean`                      | `impl/transformation_validation_euclidean.hpp`                 | 已完成 / bench 诊断 | transform staging 片段有收益，但 nearest search 稀释 full validation；保留 bench 诊断证据，不接生产分流。 |
+|    2 | `correspondence_estimation_organized_projection`           | `impl/correspondence_estimation_organized_projection.hpp`      | 已完成 / production-ready | 已接入 source transform、projection-pixel 和 target-predicate production RVV；append / stored distance 写出保留标量。 |
+|    3 | `transformation_estimation_point_to_plane_lls`             | `impl/transformation_estimation_point_to_plane_lls.hpp`        | 待评估    | 评估 PointNormal 全云 / correspondences normal-equation 构造。 |
+|    4 | `transformation_estimation_point_to_plane_lls_weighted`    | `impl/transformation_estimation_point_to_plane_lls_weighted.hpp` | 待评估    | 在 LLS 经验后补权重路径。 |
+|    5 | `transformation_estimation_symmetric_point_to_plane_lls`   | `impl/transformation_estimation_symmetric_point_to_plane_lls.hpp` | 待评估    | 在普通 LLS 后评估 symmetric 公式和数值边界。 |
+|    6 | `icp_transform_cloud`                                      | `impl/icp.hpp`                                                 | 待评估    | 先做 transformCloud/full diagnostic，确认是否被 ICP search 主成本稀释。 |
+|    7 | `correspondence_types`                                     | `impl/correspondence_types.hpp`                                | 待评估    | 评估 correspondence helper 的输出顺序、重复输入和 set-difference / mask 语义。 |
+|    8 | `correspondence_rejection_poly`                            | `impl/correspondence_rejection_poly.hpp`                       | 待评估    | 优先诊断 histogram / Otsu / accept-rate 局部收益，不直接承诺生产分流。 |
+|    9 | `transformation_estimation_2D`                             | `impl/transformation_estimation_2D.hpp`                        | 待评估    | 确认 2D 数据规模、上游测试和 fixed formula reduction 收益。 |
+|   10 | `transformation_estimation_svd`                            | `impl/transformation_estimation_svd.hpp`                       | 待评估    | 评估 centroid / covariance 前置累加是否被 Eigen SVD 稀释。 |
+|   11 | `transformation_estimation_dual_quaternion`                | `impl/transformation_estimation_dual_quaternion.hpp`           | 待评估    | 评估 dual quaternion 累加公式和数值维护边界。 |
+|   12 | `bfgs`                                                     | `bfgs.h`                                                       | 待评估    | 仅建立优化器局部诊断问题，确认是否服务 GICP / NDT 热点。 |
 
 ### 4.2 建议优化文件状态矩阵
 
 | 主题                                                       | 函数级评估 | RVV 实现 | 专项测试 | bench  | QEMU   | 反汇编 | 板卡闭环 | 主题文档 | 工作日志 |
 | ---------------------------------------------------------- | ---------- | -------- | -------- | ------ | ------ | ------ | -------- | -------- | -------- |
-| `transformation_validation_euclidean`                    | 已完成 / bench诊断 | bench诊断 | 已完成 | 已完成 | 已完成 | 已完成 | 已完成 | 已完成 | 已记录   |
+| `transformation_validation_euclidean`                    | 已完成 / bench 诊断 | bench 诊断 | 已完成 | 已完成 | 已完成 | 已完成 | 已完成 | 已完成 | 已记录   |
 | `correspondence_estimation_organized_projection`         | 已完成 / production-ready | 已接入 production | 已完成 | 已完成 | 已完成 | 已完成 | 已完成   | 已完成   | 已记录   |
 | `transformation_estimation_point_to_plane_lls`           | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 | `transformation_estimation_point_to_plane_lls_weighted`  | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
@@ -170,4 +170,4 @@
 | `transformation_estimation_dual_quaternion`              | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 | `bfgs`                                                   | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 
-`transformation_validation_euclidean` 已完成首轮评估与诊断闭环，但板卡结果只证明 transform staging 片段加速，full validation 只有弱收益，因此该主题应保持为 bench-diagnosis，不进入生产接入队列。`correspondence_estimation_organized_projection` 已完成 production-ready closeout：production RVV 覆盖 source gather / finite / transform staging、projection-pixel staging 和 target-predicate final predicate；append 与 stored distance 写出保留标量。板卡 `board_smoke` 39 个专项测试通过，production identity fake/explicit 为 `1.64x` / `1.65x`，production non-identity fake/explicit 均为 `2.36x`。后续普通主题优化应转到 `transformation_estimation_point_to_plane_lls`。
+`transformation_validation_euclidean` 已完成首轮评估与诊断闭环，但板卡结果只证明 transform staging 片段加速，full validation 只有弱收益，因此该主题应保持为 bench 诊断，不进入生产接入队列。`correspondence_estimation_organized_projection` 已完成 production-ready closeout：production RVV 覆盖 source gather / finite / transform staging、projection-pixel staging 和 target-predicate final predicate；append 与 stored distance 写出保留标量。板卡 `board_smoke` 39 个专项测试通过，production identity fake/explicit 为 `1.64x` / `1.65x`，production non-identity fake/explicit 均为 `2.36x`。后续普通主题优化应转到 `transformation_estimation_point_to_plane_lls`。

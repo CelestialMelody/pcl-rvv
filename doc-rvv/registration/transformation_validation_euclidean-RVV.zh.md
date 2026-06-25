@@ -13,7 +13,7 @@
 
 ## 覆盖范围与 fallback
 
-本轮不接入生产分流，只保留 `test-rvv/registration/transformation_validation_euclidean/` 下的 bench-diagnosis helper。原因是 RVV 只能覆盖第 1 步 transform staging，而公开入口的主要成本很可能被第 2 步 KdTree search 稀释。
+本轮不接入生产分流，只保留 `test-rvv/registration/transformation_validation_euclidean/` 下的 bench 诊断 helper。原因是 RVV 只能覆盖第 1 步 transform staging，而公开入口的主要成本很可能被第 2 步 KdTree search 稀释。
 
 诊断覆盖：
 
@@ -171,4 +171,4 @@ knn_search(*flann_index_,
 
 ## 生产接入判断
 
-当前结论：暂不修改上游生产入口。板卡已经证明 transform-staging microbench 可加速，但 full validation 只剩 `1.01x`~`1.03x` 的弱收益，说明 KdTree search 仍是主成本。本主题保持 bench-diagnosis，不接生产分流。只有 full diagnostic 或真实生产入口稳定明显收益，并且泛型点类型、fallback、小规模和上游测试边界补齐后，才重新评估生产接入。
+当前结论：暂不修改上游生产入口。板卡已经证明 transform-staging microbench 可加速，但 full validation 只剩 `1.01x`~`1.03x` 的弱收益，说明 KdTree search 仍是主成本。本主题保持 bench 诊断，不接生产分流。只有 full diagnostic 或真实生产入口稳定明显收益，并且泛型点类型、fallback、小规模和上游测试边界补齐后，才重新评估生产接入。
