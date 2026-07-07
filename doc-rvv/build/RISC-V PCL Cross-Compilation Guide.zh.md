@@ -1,99 +1,103 @@
-# PCL RISC-V 交叉编译指南
+# PCL RISC-V RVV 交叉编译指南
 
-在阅读本文之前，请先阅读 [RISCV Environment Setup.zh.md](./RISCV Environment Setup.zh.md)，完成 RISCV  开发环境的搭建。
+在阅读本文之前，请先阅读 [RISCV Environment Setup.zh.md](./RISCV Environment Setup.zh.md)，完成 RISC-V 交叉工具链、CMake、QEMU 或目标板运行环境的准备。
 
-## 1. 环境准备与变量配置说明
+本文对应 `build_zlib.sh`、`build_lz4.sh`、`build_hdf5.sh`、`build_flann.sh`、`build_boost.sh`、`build_eigen.sh`、`build_gtest.sh`、`build_libpng.sh` 和 `build_pcl.sh` 的当前构建方式。示例中的路径变量故意留空，请按自己的机器或容器环境填写，不要直接复制成本机固定路径。
 
-**后续环境配置请看这里**
+## 1. 目录与变量
 
-为了简化后续命令，我们先定义统一的环境变量。请将 `{YOUR_RISCV_ENV_PATH}` 替换为您希望安装库的实际路径（例如 `/workspace/riscv`）。
-
-> 若在容器内编译，一些说明：
->
-> 1. 编译时若存在 "Too many open files" 问题，请确保宿主机与容器内的 ulimit 足够大且一致 ；
-> 2. 编译时若存在 OOM (Out of Memory) 问题，可以减小编译并行度，如采用 make -j8
+建议把第三方依赖安装到同一个 RISC-V sysroot 风格目录下，把源码包和中间构建文件放到另一个工作目录下。PCL 源码目录可以单独放置。
 
 ```bash
-# === 环境变量配置（可以选择不配置，后续文件中相关变量直接替换为相应的值即可） ===
-# 定义安装目录 (请根据需要修改)
-export INSTALL_DIR="{YOUR_RISCV_ENV_PATH}"
-# 定义工具链路径（请根据需要修改)
-export RISCV_TOOLCHAIN="/usr/local/riscv"
-
-# 创建目录
-mkdir -p ${INSTALL_DIR}
-
-# 编译器标志
-export CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
-export CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
-export AR="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ar"
-export RANLIB="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ranlib"
-
-# 参考硬件 Milk-V Jupyter
-export VLEN=256
-export DEFAULT_LMUL=2
-# EIGEN RVV 支持需要使用的编译选项参数, https://gitlab.com/libeigen/eigen/-/merge_requests/1687
-export EIGEN_ARCH_FLAGS="-mrvv-vector-bits=zvl -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=${DEFAULT_LMUL}"
-# 架构优化标志 (RV64GCV)
-export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
-
-# 验证环境变量
-echo "Install Dir: ${INSTALL_DIR}"
-echo "Compiler: ${CC}"
-```
-
-## 2. 编译 zlib-1.3.1
-
-测试时依赖 [zlib](https://www.zlib.net/) （libz.so）
-
-``` bash
-# === 1. 环境准备 ===
 export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
 export RISCV_TOOLCHAIN=
 
-# 编译器及标志
+export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
+export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
+export RV_AR="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ar"
+export RV_RANLIB="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ranlib"
+
+export VLEN=256
+export DEFAULT_LMUL=2
+export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
+export EIGEN_ARCH_FLAGS="-mrvv-vector-bits=zvl -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=${DEFAULT_LMUL}"
+```
+
+变量含义：
+
+- `RV_INSTALL_DIR`：所有交叉编译产物的安装前缀，例如 `${RV_INSTALL_DIR}/zlib`、`${RV_INSTALL_DIR}/boost`、`${RV_INSTALL_DIR}/pcl-rvv`。
+- `RV_BUILD_DIR`：依赖库源码包和源码目录的工作目录。编译 PCL 时，该变量可直接指向 PCL 源码目录。
+- `RISCV_TOOLCHAIN`：RISC-V 交叉工具链前缀目录。
+- `VLEN`：目标机器的向量长度；Milk-V Jupyter 一类 RVV 256-bit 环境可使用 `256`。
+- `DEFAULT_LMUL`：Eigen RVV 默认 LMUL，当前脚本使用 `2`。
+
+容器或资源受限环境下，如果遇到 `Too many open files`，请提高宿主机和容器内的 `ulimit -n`；如果遇到 OOM，请降低并行度，例如把 `make -j16` 改成 `make -j8` 或更低。
+
+## 2. 推荐构建顺序
+
+PCL 依赖链比较长，建议按下面顺序构建：
+
+| 顺序 | 脚本 | 产物目录 | 说明 |
+| --- | --- | --- | --- |
+| 1 | `build_zlib.sh` | `${RV_INSTALL_DIR}/zlib` | HDF5、Boost iostreams、libpng 等依赖 |
+| 2 | `build_lz4.sh` | `${RV_INSTALL_DIR}/lz4` | FLANN/HDF5/PCL 链接时需要 |
+| 3 | `build_hdf5.sh` | `${RV_INSTALL_DIR}/hdf5` | FLANN 依赖，启用 zlib，关闭 szip |
+| 4 | `build_flann.sh` | `${RV_INSTALL_DIR}/flann` | PCL kdtree/search 等模块依赖 |
+| 5 | `build_boost.sh` | `${RV_INSTALL_DIR}/boost` | PCL 核心依赖，显式接入 zlib |
+| 6 | `build_eigen.sh` | `${RV_INSTALL_DIR}/eigen-rvv` | 使用 Eigen master 的 RVV10 支持 |
+| 7 | `build_libpng.sh` | `${RV_INSTALL_DIR}/libpng` | PCL 可选图像相关依赖 |
+| 8 | `build_gtest.sh` | `${RV_INSTALL_DIR}/gtest` | 测试程序需要；PCL 库本身不是必须 |
+| 9 | `build_pcl.sh` | `${RV_INSTALL_DIR}/pcl-rvv` | 最终 PCL RVV 版本 |
+
+## 3. zlib 1.3.2
+
+zlib 使用自带 `configure`，通过环境变量识别交叉编译器。
+
+```bash
+export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
+export RISCV_TOOLCHAIN=
+
 export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
 export RV_AR="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ar"
 export RV_RANLIB="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ranlib"
-# 架构优化标志 (RV64GCV)
 export VLEN=256
 export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
 
-# === 2. 下载与解压 ===
-wget https://www.zlib.net/zlib-1.3.1.tar.gz
-tar -xvf zlib-1.3.1.tar.gz
-cd zlib-1.3.1
+ZLIB_VERSION="zlib-1.3.2"
+TAR_FILE="${ZLIB_VERSION}.tar.gz"
+ZLIB_DOWNLOAD_URL="https://zlib.net/${TAR_FILE}"
 
-# === 3. 配置阶段 ===
+mkdir -p "${RV_BUILD_DIR}"
+cd "${RV_BUILD_DIR}"
+
+if [ ! -d "${ZLIB_VERSION}" ]; then
+    [ -f "${TAR_FILE}" ] || wget "${ZLIB_DOWNLOAD_URL}"
+    tar -xvf "${TAR_FILE}"
+fi
+
+cd "${ZLIB_VERSION}"
+
 export CC="${RV_CC}"
 export AR="${RV_AR}"
 export RANLIB="${RV_RANLIB}"
 export CFLAGS="${ARCH_FLAGS}"
 
-# 显式指定前缀，并开启共享库编译
-./configure \
-    --prefix=${RV_INSTALL_DIR}/zlib \
-    --shared
-
-# === 4. 编译与安装 ===
-# 再次确保 CFLAGS 传递到位，利用多核编译加速
-make -j8
+./configure --prefix="${RV_INSTALL_DIR}/zlib" --shared
+make -j16
 make install
 
-# === 5. 验证成果 ===
-echo "--------------------------------------"
-echo "验证编译出的库文件格式："
-file ${RV_INSTALL_DIR}/zlib/lib/libz.so.1.3.1
-echo "--------------------------------------"
+file "${RV_INSTALL_DIR}/zlib/lib/libz.so.1.3.2"
 ```
 
-## 3.编译 LZ4-1.10.0
+## 4. LZ4 1.10.0
 
-[LZ4](https://github.com/lz4/lz4/releases) 是 PCL 和 FLANN 的依赖库。
+LZ4 的 Makefile 可以直接接收 `CC`、`AR`、`RANLIB` 和 `CFLAGS`。
 
 ```bash
-# === 1. 环境准备 ===
 export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
 export RISCV_TOOLCHAIN=
 
 export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
@@ -102,34 +106,38 @@ export RV_RANLIB="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ranlib"
 export VLEN=256
 export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
 
-# === 2. 下载与解压 ===
-wget https://github.com/lz4/lz4/releases/download/v1.10.0/lz4-1.10.0.tar.gz
-tar -zxvf lz4-1.10.0.tar.gz
-cd lz4-1.10.0
+LZ4_VERSION="lz4-1.10.0"
+TAR_FILE="${LZ4_VERSION}.tar.gz"
+LZ4_DOWNLOAD_URL="https://github.com/lz4/lz4/releases/download/v1.10.0/${TAR_FILE}"
 
-# === 3. 编译与安装 ===
-# lz4 的 Makefile 直接接受 CC, AR 等变量
-make -j8 CC="$RV_CC" \
-         AR="$RV_AR" \
-         RANLIB="$RV_RANLIB" \
-         CFLAGS="$ARCH_FLAGS"
+mkdir -p "${RV_BUILD_DIR}"
+cd "${RV_BUILD_DIR}"
 
-make PREFIX="${RV_INSTALL_DIR}/lz4" install
+if [ ! -d "${LZ4_VERSION}" ]; then
+    [ -f "${TAR_FILE}" ] || wget "${LZ4_DOWNLOAD_URL}"
+    tar -zxvf "${TAR_FILE}"
+fi
 
-# === 4. 验证 ===
-echo "--------------------------------------"
-echo "验证 lz4 库文件格式："
-file ${RV_INSTALL_DIR}/lz4/lib/liblz4.so.1.10.0
-echo "--------------------------------------"
+cd "${LZ4_VERSION}"
+
+export CC="${RV_CC}"
+export AR="${RV_AR}"
+export RANLIB="${RV_RANLIB}"
+export CFLAGS="${ARCH_FLAGS}"
+
+make -j16 CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="${CFLAGS}"
+make PREFIX="${RV_INSTALL_DIR}/lz4" CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="${CFLAGS}" install
+
+file "${RV_INSTALL_DIR}/lz4/lib/liblz4.so.1.10.0"
 ```
 
-## 4.编译 HDF5-2.1.0
+## 5. HDF5 2.1.0
 
-FLANN 需要 [HDF5](https://github.com/HDFGroup/hdf5/releases) 支持。
+HDF5 需要显式指向 zlib，并关闭 Fortran、examples、tests 和 szip。
 
 ```bash
-# === 1. 环境准备 ===
 export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
 export RISCV_TOOLCHAIN=
 
 export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
@@ -137,57 +145,123 @@ export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
 export VLEN=256
 export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
 
-# === 2. 下载与解压 ===
-wget "https://github.com/HDFGroup/hdf5/releases/download/2.1.0/hdf5-2.1.0.tar.gz"
-tar -zxvf hdf5-2.1.0.tar.gz
-cd hdf5-2.1.0
+HDF5_VERSION="hdf5-2.1.0"
+TAR_FILE="${HDF5_VERSION}.tar.gz"
+HDF5_DOWNLOAD_URL="https://github.com/HDFGroup/hdf5/releases/download/2.1.0/${TAR_FILE}"
 
-# 建议在源码外构建
+mkdir -p "${RV_BUILD_DIR}"
+cd "${RV_BUILD_DIR}"
+
+if [ ! -d "${HDF5_VERSION}" ]; then
+    [ -f "${TAR_FILE}" ] || wget "${HDF5_DOWNLOAD_URL}"
+    tar -zxvf "${TAR_FILE}"
+fi
+
+cd "${HDF5_VERSION}"
 rm -rf build && mkdir build && cd build
 
-# === 3. 配置阶段 ===
 cmake .. \
-  -DCMAKE_SYSTEM_NAME=Linux \
-  -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
-  -DCMAKE_C_COMPILER="$RV_CC" \
-  -DCMAKE_CXX_COMPILER="$RV_CXX" \
-  -DCMAKE_C_FLAGS="$ARCH_FLAGS" \
-  -DCMAKE_CXX_FLAGS="$ARCH_FLAGS" \
-  -DCMAKE_INSTALL_PREFIX="${RV_INSTALL_DIR}/hdf5" \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_PREFIX_PATH="${RV_INSTALL_DIR}/zlib" \
-  -DCMAKE_EXE_LINKER_FLAGS="-L${RV_INSTALL_DIR}/zlib/lib -Wl,-rpath-link,${RV_INSTALL_DIR}/zlib/lib" \
-  -DCMAKE_SHARED_LINKER_FLAGS="-L${RV_INSTALL_DIR}/zlib/lib -Wl,-rpath-link,${RV_INSTALL_DIR}/zlib/lib" \
-  -DHDF5_BUILD_CPP_LIB=ON \
-  -DBUILD_SHARED_LIBS=ON \
-  -DHDF5_BUILD_FORTRAN=OFF \
-  -DHDF5_BUILD_EXAMPLES=OFF \
-  -DBUILD_TESTING=OFF \
-  -DHDF5_ENABLE_ZLIB_SUPPORT=ON \
-  -DHDF5_ENABLE_SZIP_SUPPORT=OFF \
-  -DHDF5_ENABLE_SZIP_ENCODING=OFF
+    -DCMAKE_SYSTEM_NAME=Linux \
+    -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
+    -DCMAKE_C_COMPILER="${RV_CC}" \
+    -DCMAKE_CXX_COMPILER="${RV_CXX}" \
+    -DCMAKE_C_FLAGS="${ARCH_FLAGS}" \
+    -DCMAKE_CXX_FLAGS="${ARCH_FLAGS}" \
+    -DCMAKE_INSTALL_PREFIX="${RV_INSTALL_DIR}/hdf5" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_PREFIX_PATH="${RV_INSTALL_DIR}/zlib" \
+    -DZLIB_ROOT="${RV_INSTALL_DIR}/zlib" \
+    -DCMAKE_EXE_LINKER_FLAGS="-L${RV_INSTALL_DIR}/zlib/lib -Wl,-rpath-link,${RV_INSTALL_DIR}/zlib/lib" \
+    -DCMAKE_SHARED_LINKER_FLAGS="-L${RV_INSTALL_DIR}/zlib/lib -Wl,-rpath-link,${RV_INSTALL_DIR}/zlib/lib" \
+    -DHDF5_BUILD_CPP_LIB=ON \
+    -DBUILD_SHARED_LIBS=ON \
+    -DHDF5_BUILD_FORTRAN=OFF \
+    -DHDF5_BUILD_EXAMPLES=OFF \
+    -DBUILD_TESTING=OFF \
+    -DHDF5_ENABLE_ZLIB_SUPPORT=ON \
+    -DHDF5_ENABLE_Z_LIB_SUPPORT=ON \
+    -DHDF5_ENABLE_SZIP_SUPPORT=OFF \
+    -DHDF5_ENABLE_SZIP_ENCODING=OFF
 
-# === 4. 编译与安装 ===
-make -j8
+make -j16
 make install
 
-# === 5. 验证 ===
-echo "--------------------------------------"
-echo "验证 HDF5 C++ 库文件格式："
-file ${RV_INSTALL_DIR}/hdf5/lib/libhdf5_cpp.so.320.1.0
-echo "--------------------------------------"
+file "${RV_INSTALL_DIR}/hdf5/lib/libhdf5_cpp.so.320.1.0"
 ```
 
-## 5.编译 FLANN
+## 6. FLANN
 
-[FLANN](https://github.com/flann-lib/flann) 需要链接前面编译好的 LZ4 和 HDF5。
+FLANN 从源码仓库构建，链接前面安装的 zlib、LZ4 和 HDF5。当前脚本会把旧版 `cmake_minimum_required` 调整为 `3.5`，并屏蔽 FLANN 模板代码常见的 `-Woverloaded-virtual` 噪音。
 
 ```bash
-# === 1. 环境准备 ===
 export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
 export RISCV_TOOLCHAIN=
 
 export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
+export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
+export VLEN=256
+export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
+export CXX_WARNING_FLAGS="-Wno-overloaded-virtual"
+
+export ZLIB_LIB="${RV_INSTALL_DIR}/zlib/lib"
+export ZLIB_INC="${RV_INSTALL_DIR}/zlib/include"
+export HDF5_LIB="${RV_INSTALL_DIR}/hdf5/lib"
+export HDF5_INC="${RV_INSTALL_DIR}/hdf5/include"
+export LZ4_LIB="${RV_INSTALL_DIR}/lz4/lib"
+export LZ4_INC="${RV_INSTALL_DIR}/lz4/include"
+
+FLANN_SOURCE_DIR="flann"
+FLANN_GIT_URL="https://github.com/flann-lib/flann.git"
+
+mkdir -p "${RV_BUILD_DIR}"
+cd "${RV_BUILD_DIR}"
+
+[ -d "${FLANN_SOURCE_DIR}" ] || git clone "${FLANN_GIT_URL}" "${FLANN_SOURCE_DIR}"
+cd "${FLANN_SOURCE_DIR}"
+
+sed -i 's/cmake_minimum_required(VERSION [^)]*)/cmake_minimum_required(VERSION 3.5)/' CMakeLists.txt
+rm -rf build && mkdir build && cd build
+
+cmake .. \
+    -DCMAKE_SYSTEM_NAME=Linux \
+    -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
+    -DCMAKE_C_COMPILER="${RV_CC}" \
+    -DCMAKE_CXX_COMPILER="${RV_CXX}" \
+    -DCMAKE_POLICY_DEFAULT_CMP0074=NEW \
+    -DCMAKE_POLICY_DEFAULT_CMP0135=NEW \
+    -DCMAKE_FIND_ROOT_PATH="${RV_INSTALL_DIR}" \
+    -DCMAKE_C_FLAGS="${ARCH_FLAGS} -I${LZ4_INC} -I${HDF5_INC} -I${ZLIB_INC}" \
+    -DCMAKE_CXX_FLAGS="${ARCH_FLAGS} ${CXX_WARNING_FLAGS} -I${LZ4_INC} -I${HDF5_INC} -I${ZLIB_INC}" \
+    -DCMAKE_EXE_LINKER_FLAGS="-L${LZ4_LIB} -L${HDF5_LIB} -L${ZLIB_LIB} -Wl,-rpath-link,${LZ4_LIB} -Wl,-rpath-link,${HDF5_LIB} -Wl,-rpath-link,${ZLIB_LIB}" \
+    -DCMAKE_SHARED_LINKER_FLAGS="-L${LZ4_LIB} -L${HDF5_LIB} -L${ZLIB_LIB} -Wl,-rpath-link,${LZ4_LIB} -Wl,-rpath-link,${HDF5_LIB} -Wl,-rpath-link,${ZLIB_LIB}" \
+    -DCMAKE_INSTALL_PREFIX="${RV_INSTALL_DIR}/flann" \
+    -DCMAKE_PREFIX_PATH="${RV_INSTALL_DIR}/hdf5;${RV_INSTALL_DIR}/zlib;${RV_INSTALL_DIR}/lz4" \
+    -DHDF5_ROOT="${RV_INSTALL_DIR}/hdf5" \
+    -DZLIB_ROOT="${RV_INSTALL_DIR}/zlib" \
+    -DLZ4_ROOT="${RV_INSTALL_DIR}/lz4" \
+    -DHDF5_USE_STATIC_LIBRARIES=OFF \
+    -DBUILD_PYTHON_BINDINGS=OFF \
+    -DBUILD_MATLAB_BINDINGS=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_TESTS=OFF \
+    -DBUILD_DOC=OFF
+
+make -j16
+make install
+
+file "${RV_INSTALL_DIR}/flann/lib/libflann_cpp.so.1.9.2"
+```
+
+## 7. Boost 1.88.0
+
+Boost 使用 `bootstrap.sh` 生成 `b2`，再通过 `user-config.jam` 指定 RISC-V g++。`boost.iostreams` 需要通过 `-sZLIB_INCLUDE` 和 `-sZLIB_LIBPATH` 显式开启 zlib 支持。
+
+```bash
+export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
+export RISCV_TOOLCHAIN=
+
 export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
 export VLEN=256
 export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
@@ -195,87 +269,33 @@ export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
 export ZLIB_LIB="${RV_INSTALL_DIR}/zlib/lib"
 export ZLIB_INC="${RV_INSTALL_DIR}/zlib/include"
 
-# === 2. 进入源码目录 ===
-# 这里选择从源码仓库编译
-git clone https://github.com/flann-lib/flann.git
-cd flann
+BOOST_VERSION="1.88.0"
+BOOST_VERSION_UNDERSCORE="${BOOST_VERSION//./_}"
+BOOST_SOURCE_DIR="boost_${BOOST_VERSION_UNDERSCORE}"
+TAR_FILE="${BOOST_SOURCE_DIR}.tar.gz"
+BOOST_DOWNLOAD_URL="https://archives.boost.io/release/${BOOST_VERSION}/source/${TAR_FILE}"
 
-# 预处理：修改 CMakeLists.txt 以兼容 CMake
-sed -i 's/cmake_minimum_required(VERSION [0-9.]*)/cmake_minimum_required(VERSION 3.5)/' CMakeLists.txt
+mkdir -p "${RV_BUILD_DIR}"
+cd "${RV_BUILD_DIR}"
 
-# 清理旧的构建目录
-rm -rf build && mkdir build && cd build
+if [ ! -d "${BOOST_SOURCE_DIR}" ]; then
+    [ -f "${TAR_FILE}" ] || wget "${BOOST_DOWNLOAD_URL}"
+    tar -zxvf "${TAR_FILE}"
+fi
 
-# === 3. CMake 配置 ===
-# 提示：将路径直接加入编译器标志，确保链接器能准确找到 lz4 和 hdf5
-cmake .. \
-    -DCMAKE_SYSTEM_NAME=Linux \
-    -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
-    -DCMAKE_C_COMPILER="$RV_CC" \
-    -DCMAKE_CXX_COMPILER="$RV_CXX" \
-    -DCMAKE_FIND_ROOT_PATH="${RV_INSTALL_DIR}" \
-    -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
-    -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
-    -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-    -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
-    -DCMAKE_C_FLAGS="$ARCH_FLAGS -I${ZLIB_INC} -I${RV_INSTALL_DIR}/lz4/include -I${RV_INSTALL_DIR}/hdf5/include" \
-    -DCMAKE_CXX_FLAGS="$ARCH_FLAGS -I${ZLIB_INC} -I${RV_INSTALL_DIR}/lz4/include -I${RV_INSTALL_DIR}/hdf5/include" \
-    -DCMAKE_EXE_LINKER_FLAGS="-L${ZLIB_LIB} -L${RV_INSTALL_DIR}/lz4/lib -L${RV_INSTALL_DIR}/hdf5/lib -lz -llz4 -lhdf5" \
-    -DCMAKE_SHARED_LINKER_FLAGS="-L${ZLIB_LIB} -L${RV_INSTALL_DIR}/lz4/lib -L${RV_INSTALL_DIR}/hdf5/lib -lz -llz4 -lhdf5" \
-    -DCMAKE_INSTALL_PREFIX="${RV_INSTALL_DIR}/flann" \
-    -DHDF5_ROOT="${RV_INSTALL_DIR}/hdf5" \
-    -DBUILD_PYTHON_BINDINGS=OFF \
-    -DBUILD_MATLAB_BINDINGS=OFF \
-    -DBUILD_EXAMPLES=OFF \
-    -DBUILD_TESTS=OFF \
-    -DBUILD_DOC=OFF
+cd "${BOOST_SOURCE_DIR}"
 
-# === 4. 编译与安装 ===
-make -j8
-make install
+./bootstrap.sh --prefix="${RV_INSTALL_DIR}/boost"
 
-# === 5. 验证与清理 ===
-echo "--------------------------------------"
-echo "验证 FLANN 库文件格式："
-file ${RV_INSTALL_DIR}/flann/lib/libflann_cpp.so.1.9.2
-echo "--------------------------------------"
-```
-
-## 6. 编译 Boost -1.88.0
-
-[Boost](https://www.boost.org/releases/1.88.0/) 采用1.88.0版本，后续版本似乎存在 [libboost_system 丢失问题](https://github.com/boostorg/boost/issues/1071)。使用 `b2` 构建系统并指定配置文件。
-
-```bash
-# === 1. 环境准备 ===
-export RV_INSTALL_DIR=
-export RISCV_TOOLCHAIN=
-
-export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
-export VLEN=256
-export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -fPIC -O3"
-
-# === 2. 下载与解压 ===
-wget https://archives.boost.io/release/1.88.0/source/boost_1_88_0.tar.gz
-tar -zxvf boost_1_88_0.tar.gz
-cd boost_1_88_0
-
-# === 3. 引导构建系统 (生成 b2 引擎) ===
-./bootstrap.sh --prefix=${RV_INSTALL_DIR}/boost
-
-# === 4. 创建关键配置文件 user-config.jam ===
-# 注意：using gcc 后的空格必须严格遵守语法，末尾的分号前必须有空格
-cat << EOF > user-config.jam
-using gcc : riscv64 : $RV_CXX : <cflags>"$ARCH_FLAGS" <cxxflags>"$ARCH_FLAGS" ;
+cat > user-config.jam << EOF
+using gcc : riscv64 : ${RV_CXX} : <cflags>"${ARCH_FLAGS}" <cxxflags>"${ARCH_FLAGS}" ;
 EOF
 
-# === 5. 编译与安装 ===
-# 1. 必须通过 -s 指定 zlib 路径，否则 boost.iostreams 会跳过 zlib 支持
-# 2. 显式指定 architecture=riscv 和 abi=sysv
-./b2 -j8 \
+./b2 -j16 \
     --user-config=./user-config.jam \
     --build-dir=./build \
     toolset=gcc-riscv64 \
-    --prefix=${RV_INSTALL_DIR}/boost \
+    --prefix="${RV_INSTALL_DIR}/boost" \
     architecture=riscv \
     abi=sysv \
     address-model=64 \
@@ -283,325 +303,325 @@ EOF
     link=shared \
     threading=multi \
     runtime-link=shared \
-    -sZLIB_INCLUDE="${RV_INSTALL_DIR}/zlib/include" \
-    -sZLIB_LIBPATH="${RV_INSTALL_DIR}/zlib/lib" \
+    -sZLIB_INCLUDE="${ZLIB_INC}" \
+    -sZLIB_LIBPATH="${ZLIB_LIB}" \
     -sZLIB_BINARY=z \
     install
 
-# === 6. 验证 ===
-echo "--------------------------------------"
-echo "验证 Boost 库文件格式："
-file ${RV_INSTALL_DIR}/boost/lib/libboost_system.so.1.88.0
-echo "--------------------------------------"
+file "${RV_INSTALL_DIR}/boost/lib/libboost_system.so.1.88.0"
 ```
 
-## 7.编译 Eigen
+## 8. Eigen RVV
 
-eigen 源码仓库最新分支上是支持 RISCV RVV 的，[#2842: RISC-V RVV1.0 support](https://gitlab.com/libeigen/eigen/-/issues/2842)
+Eigen 是 header-only，但仍建议通过 CMake 安装，以便生成 `Eigen3Config.cmake`，供 PCL 的 `find_package(Eigen3)` 使用。
+
+当前脚本从 Eigen `master` 拉取最新代码；RVV10 支持位于 `Eigen/src/Core/arch/RVV10`，历史背景可参考 Eigen RVV1.0 支持相关讨论。
 
 ```bash
-# === 1. 环境准备 ===
 export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
 export RISCV_TOOLCHAIN=
 
 export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
 export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
-# milk-v jupyter vlen = 256
 export VLEN=256
 export DEFAULT_LMUL=2
-# 包含 zfh (半精度浮点) 和 zvfh (向量半精度浮点)
 export MARCH="rv64gcv_zvl${VLEN}b_zfh_zvfh"
 export EIGEN_ARCH_FLAGS="-march=${MARCH} -mabi=lp64d -O3 -mrvv-vector-bits=zvl -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=${DEFAULT_LMUL}"
 
-# === 2. 下载与构建 ===
-git clone https://gitlab.com/libeigen/eigen.git
-cd eigen
+EIGEN_SOURCE_DIR="eigen"
+EIGEN_GIT_URL="https://gitlab.com/libeigen/eigen.git"
+EIGEN_BRANCH="master"
+
+mkdir -p "${RV_BUILD_DIR}"
+cd "${RV_BUILD_DIR}"
+
+[ -d "${EIGEN_SOURCE_DIR}" ] || git clone "${EIGEN_GIT_URL}" "${EIGEN_SOURCE_DIR}"
+cd "${EIGEN_SOURCE_DIR}"
+git fetch origin "${EIGEN_BRANCH}"
+git checkout -B "${EIGEN_BRANCH}" "origin/${EIGEN_BRANCH}"
+
 rm -rf build && mkdir build && cd build
 
-# 根据需求更改 CMAKE_INSTALL_PREFIX
-cmake .. \
-  -DCMAKE_SYSTEM_NAME=Linux \
-  -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
-  -DCMAKE_C_COMPILER=$RV_CC \
-  -DCMAKE_CXX_COMPILER=$RV_CXX \
-  -DCMAKE_INSTALL_PREFIX=${RV_INSTALL_DIR}/eigen-rvv \
-  -DCMAKE_CXX_FLAGS="$EIGEN_ARCH_FLAGS" \
-  -DBUILD_TESTING=OFF
-
-make install -j8
-
-echo "--------------------------------------"
-echo "Eigen RVV (VLEN=256) 安装完成！"
-echo "路径: ${RV_INSTALL_DIR}/eigen-rvv"
-echo "--------------------------------------"
-```
-
-## 8.其他相关依赖
-
-### 编译 gtest
-
-提供的测试程序依赖 [gtest](https://github.com/google/googletest.git)，但 PCL 库编译本身不依赖
-
-```bash
-# === 1. 环境准备 ===
-export RV_INSTALL_DIR=
-export RISCV_TOOLCHAIN=
-
-# 编译器路径
-export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
-export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
-
-# 标志位：googletest 建议开启 -fPIC
-export VLEN=256
-export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -O3 -fPIC"
-
-# === 2. 下载与源码进入 ===
-git clone https://github.com/google/googletest.git
-cd googletest
-rm -rf build && mkdir -p build && cd build
-
-# === 3. 配置阶段 ===
-# 注意：gtest 交叉编译时通常不需要额外的前缀路径，因为它不依赖第三方库
 cmake .. \
     -DCMAKE_SYSTEM_NAME=Linux \
     -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
-    -DCMAKE_C_COMPILER="$RV_CC" \
-    -DCMAKE_CXX_COMPILER="$RV_CXX" \
+    -DCMAKE_C_COMPILER="${RV_CC}" \
+    -DCMAKE_CXX_COMPILER="${RV_CXX}" \
+    -DCMAKE_CXX_FLAGS="${EIGEN_ARCH_FLAGS}" \
+    -DCMAKE_INSTALL_PREFIX="${RV_INSTALL_DIR}/eigen-rvv" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=OFF \
+    -DEIGEN_BUILD_TESTING=OFF
+
+make install -j16
+
+find "${RV_INSTALL_DIR}/eigen-rvv" -name Eigen3Config.cmake -print
+```
+
+## 9. GoogleTest
+
+GoogleTest 主要用于测试程序。PCL 库本身编译可以不依赖它。
+
+```bash
+export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
+export RISCV_TOOLCHAIN=
+
+export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
+export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
+export VLEN=256
+export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -O3 -fPIC"
+
+GTEST_SOURCE_DIR="googletest"
+GTEST_GIT_URL="https://github.com/google/googletest.git"
+
+mkdir -p "${RV_BUILD_DIR}"
+cd "${RV_BUILD_DIR}"
+
+[ -d "${GTEST_SOURCE_DIR}" ] || git clone "${GTEST_GIT_URL}" "${GTEST_SOURCE_DIR}"
+cd "${GTEST_SOURCE_DIR}"
+
+rm -rf build && mkdir -p build && cd build
+
+cmake .. \
+    -DCMAKE_SYSTEM_NAME=Linux \
+    -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
+    -DCMAKE_C_COMPILER="${RV_CC}" \
+    -DCMAKE_CXX_COMPILER="${RV_CXX}" \
     -DCMAKE_INSTALL_PREFIX="${RV_INSTALL_DIR}/gtest" \
     -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
     -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
     -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_CXX_FLAGS="$ARCH_FLAGS" \
-    -DCMAKE_C_FLAGS="$ARCH_FLAGS" \
+    -DCMAKE_C_FLAGS="${ARCH_FLAGS}" \
+    -DCMAKE_CXX_FLAGS="${ARCH_FLAGS}" \
     -Dgtest_disable_pthreads=OFF
 
-# === 4. 编译与安装 ===
-make -j8
+make -j16
 make install
 
-# === 5. 验证成果 ===
-echo "--------------------------------------"
-echo "验证 GTest 库文件格式："
-file ${RV_INSTALL_DIR}/gtest/lib/libgtest.so
-echo "--------------------------------------"
+file "${RV_INSTALL_DIR}/gtest/lib/libgtest.so"
 ```
 
-### 编译 libpng
+## 10. libpng 1.6.54
 
-可能存在对 libpng 的依赖
+libpng 通过 autotools 构建，需要显式指定 zlib 的 include 和 lib 路径。
 
 ```bash
-# === 1. 环境准备 ===
 export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
 export RISCV_TOOLCHAIN=
 
-# 编译器及工具链路径
 export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
 export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
 export RV_AR="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ar"
 export RV_RANLIB="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-ranlib"
-
-# 标志位：注入 RVV 256-bit 优化及 fPIC
 export VLEN=256
 export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -O3 -fPIC"
 
-# === 2. 下载与解压 ===
-wget http://prdownloads.sourceforge.net/libpng/libpng-1.6.54.tar.gz
-tar -xzf libpng-1.6.54.tar.gz
-cd libpng-1.6.54
+export ZLIB_LIB="${RV_INSTALL_DIR}/zlib/lib"
+export ZLIB_INC="${RV_INSTALL_DIR}/zlib/include"
 
-# === 3. 配置阶段 ===
-# 注意：libpng 的 configure 需要显式指定 zlib 的头文件和库路径
-# 我们通过环境变量直接传递给 configure 脚本
-echo "正在配置 libpng (依赖 zlib: ${RV_INSTALL_DIR}/zlib)..."
+LIBPNG_VERSION="libpng-1.6.54"
+TAR_FILE="${LIBPNG_VERSION}.tar.gz"
+LIBPNG_DOWNLOAD_URL="http://prdownloads.sourceforge.net/libpng/${TAR_FILE}"
+
+mkdir -p "${RV_BUILD_DIR}"
+cd "${RV_BUILD_DIR}"
+
+if [ ! -d "${LIBPNG_VERSION}" ]; then
+    [ -f "${TAR_FILE}" ] || wget "${LIBPNG_DOWNLOAD_URL}"
+    tar -xzf "${TAR_FILE}"
+fi
+
+cd "${LIBPNG_VERSION}"
 
 ./configure \
     --host=riscv64-unknown-linux-gnu \
-    --prefix=${RV_INSTALL_DIR}/libpng \
+    --prefix="${RV_INSTALL_DIR}/libpng" \
     --enable-shared \
     --disable-static \
-    CC="$RV_CC" \
-    CXX="$RV_CXX" \
-    AR="$RV_AR" \
-    RANLIB="$RV_RANLIB" \
-    CFLAGS="$ARCH_FLAGS" \
-    CXXFLAGS="$ARCH_FLAGS" \
-    CPPFLAGS="-I${RV_INSTALL_DIR}/zlib/include" \
-    LDFLAGS="-L${RV_INSTALL_DIR}/zlib/lib -Wl,-rpath-link=${RV_INSTALL_DIR}/zlib/lib"
+    CC="${RV_CC}" \
+    CXX="${RV_CXX}" \
+    AR="${RV_AR}" \
+    RANLIB="${RV_RANLIB}" \
+    CFLAGS="${ARCH_FLAGS}" \
+    CXXFLAGS="${ARCH_FLAGS}" \
+    CPPFLAGS="-I${ZLIB_INC}" \
+    LDFLAGS="-L${ZLIB_LIB} -Wl,-rpath-link=${ZLIB_LIB}"
 
-# === 4. 编译与安装 ===
-make -j8
+make -j16
 make install
 
-# === 5. 验证成果 ===
-echo "--------------------------------------"
-echo "验证 libpng 库文件格式及依赖："
-file ${RV_INSTALL_DIR}/libpng/lib/libpng16.so.16.*
-ls -l ${RV_INSTALL_DIR}/libpng/lib
-echo "--------------------------------------"
-
+file "${RV_INSTALL_DIR}"/libpng/lib/libpng16.so.16.*
+ls -l "${RV_INSTALL_DIR}/libpng/lib"
 ```
 
+## 11. PCL RVV
 
+PCL 使用 `CelestialMelody/pcl.git` 源码。当前脚本中 `RV_BUILD_DIR` 表示 PCL 源码目录，而不是依赖库源码工作目录；`RV_PCL_DIR` 直接引用它。
 
-## 9.编译 PCL
-
-链接所有依赖项。这里加上了 libpng，考虑到可能存在对其的依赖。
+如果目录不存在，脚本会 clone；如果路径已存在但不是 Git 仓库，脚本会退出，避免误把空目录当成源码。
 
 ```bash
-# === 1. 环境准备 ===
 export RV_INSTALL_DIR=
+export RV_BUILD_DIR=
 export RISCV_TOOLCHAIN=
-export PCL_WORKSPACE=
 
 export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
 export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
 export VLEN=256
 export DEFAULT_LMUL=2
-
 export EIGEN_ARCH_FLAGS="-mrvv-vector-bits=zvl -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=${DEFAULT_LMUL}"
-# -D__RVV10__ 进入 common/src/gaussian.cpp 等 TU 的 RVV 分支；去掉则卷积走标量路径。对比两套库时需各编一次。
-export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -O3 -D__RVV10__"
-export EXTRA_INCLUDES="-I${RV_INSTALL_DIR}/boost/include \
-                       -I${RV_INSTALL_DIR}/eigen-rvv/include/eigen3 \
-                       -I${RV_INSTALL_DIR}/flann/include \
-                       -I${RV_INSTALL_DIR}/lz4/include \
-                       -I${RV_INSTALL_DIR}/hdf5/include \
-                       -I${RV_INSTALL_DIR}/libpng/include"
+export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -O3 -fPIC -D__RVV10__"
 
-# === 2. 进入源码目录 ===
-cd ${PCL_WORKSPACE}
+export BOOST_ROOT="${RV_INSTALL_DIR}/boost"
+export EIGEN_ROOT="${RV_INSTALL_DIR}/eigen-rvv"
+export FLANN_ROOT="${RV_INSTALL_DIR}/flann"
+export LZ4_ROOT="${RV_INSTALL_DIR}/lz4"
+export HDF5_ROOT="${RV_INSTALL_DIR}/hdf5"
+export LIBPNG_ROOT="${RV_INSTALL_DIR}/libpng"
+export ZLIB_ROOT="${RV_INSTALL_DIR}/zlib"
+
+export EXTRA_INCLUDES="-I${BOOST_ROOT}/include \
+                       -I${EIGEN_ROOT}/include/eigen3 \
+                       -I${FLANN_ROOT}/include \
+                       -I${LZ4_ROOT}/include \
+                       -I${HDF5_ROOT}/include \
+                       -I${LIBPNG_ROOT}/include \
+                       -I${ZLIB_ROOT}/include"
+
+export EXTRA_LIB_DIRS="-L${BOOST_ROOT}/lib \
+                       -L${LZ4_ROOT}/lib \
+                       -L${HDF5_ROOT}/lib \
+                       -L${LIBPNG_ROOT}/lib \
+                       -L${ZLIB_ROOT}/lib \
+                       -L${FLANN_ROOT}/lib"
+
+export EXTRA_RPATH_LINKS="-Wl,-rpath-link=${BOOST_ROOT}/lib \
+                          -Wl,-rpath-link=${LZ4_ROOT}/lib \
+                          -Wl,-rpath-link=${HDF5_ROOT}/lib \
+                          -Wl,-rpath-link=${LIBPNG_ROOT}/lib \
+                          -Wl,-rpath-link=${ZLIB_ROOT}/lib \
+                          -Wl,-rpath-link=${FLANN_ROOT}/lib"
+
+export RV_PCL_DIR="${RV_BUILD_DIR}"
+PCL_GIT_URL="https://github.com/CelestialMelody/pcl.git"
+
+if [ ! -d "${RV_PCL_DIR}/.git" ]; then
+    if [ -e "${RV_PCL_DIR}" ]; then
+        echo "Path ${RV_PCL_DIR} already exists, but it is not a git repository."
+        exit 1
+    fi
+
+    mkdir -p "$(dirname "${RV_PCL_DIR}")"
+    git clone "${PCL_GIT_URL}" "${RV_PCL_DIR}"
+fi
+
+cd "${RV_PCL_DIR}"
 rm -rf build && mkdir build && cd build
 
-# === 3. 配置阶段 ===
-# 根据需求更改 CMAKE_INSTALL_PREFIX
 cmake .. \
-  -DCMAKE_SYSTEM_NAME=Linux \
-  -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
-  -DCMAKE_C_COMPILER=${RV_CC} \
-  -DCMAKE_CXX_COMPILER=${RV_CXX} \
-  -DCMAKE_INSTALL_PREFIX=${RV_INSTALL_DIR}/pcl-rvv \
-  -DCMAKE_PREFIX_PATH="${RV_INSTALL_DIR}/zlib;${RV_INSTALL_DIR}/libpng;${RV_INSTALL_DIR}/lz4;${RV_INSTALL_DIR}/hdf5;${RV_INSTALL_DIR}/flann;${RV_INSTALL_DIR}/eigen-rvv;${RV_INSTALL_DIR}/boost" \
-  -DCMAKE_LIBRARY_PATH="${RV_INSTALL_DIR}/lz4/lib;${RV_INSTALL_DIR}/zlib/lib;${RV_INSTALL_DIR}/hdf5/lib;${RV_INSTALL_DIR}/boost/lib;${RV_INSTALL_DIR}/flann/lib" \
-  -DCMAKE_FIND_ROOT_PATH="${RV_INSTALL_DIR}/boost;${RV_INSTALL_DIR}/eigen-rvv;${RV_INSTALL_DIR}/flann;${RV_INSTALL_DIR}/lz4;${RV_INSTALL_DIR}/hdf5" \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
-  -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH \
-  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
-  -DBOOST_ROOT=${RV_INSTALL_DIR}/boost \
-  -DEigen3_DIR=${RV_INSTALL_DIR}/eigen-rvv/share/eigen3/cmake \
-  -DCMAKE_CXX_FLAGS="$ARCH_FLAGS $EIGEN_ARCH_FLAGS $EXTRA_INCLUDES" \
-  -DCMAKE_EXE_LINKER_FLAGS="-L${RV_INSTALL_DIR}/boost/lib -L${RV_INSTALL_DIR}/lz4/lib -L${RV_INSTALL_DIR}/hdf5/lib -L${RV_INSTALL_DIR}/libpng/lib -L${RV_INSTALL_DIR}/zlib/lib -L${RV_INSTALL_DIR}/flann/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/boost/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/lz4/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/hdf5/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/flann/lib" \
-  -DCMAKE_SHARED_LINKER_FLAGS="-L${RV_INSTALL_DIR}/boost/lib -L${RV_INSTALL_DIR}/lz4/lib -L${RV_INSTALL_DIR}/hdf5/lib -L${RV_INSTALL_DIR}/libpng/lib -L${RV_INSTALL_DIR}/zlib/lib -L${RV_INSTALL_DIR}/flann/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/boost/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/lz4/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/hdf5/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/flann/lib" \
-  -DPCL_ENABLE_SSE=OFF -DPCL_ENABLE_AVX=OFF \
-  -DWITH_CUDA=OFF -DWITH_OPENGL=OFF -DWITH_LIBUSB=OFF -DWITH_PCAP=OFF -DWITH_QT=OFF -DWITH_VTK=OFF \
-  -DCMAKE_POLICY_DEFAULT_CMP0144=NEW
+    -DCMAKE_SYSTEM_NAME=Linux \
+    -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
+    -DCMAKE_C_COMPILER="${RV_CC}" \
+    -DCMAKE_CXX_COMPILER="${RV_CXX}" \
+    -DCMAKE_INSTALL_PREFIX="${RV_INSTALL_DIR}/pcl-rvv" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_PREFIX_PATH="${ZLIB_ROOT};${LIBPNG_ROOT};${LZ4_ROOT};${HDF5_ROOT};${FLANN_ROOT};${EIGEN_ROOT};${BOOST_ROOT}" \
+    -DCMAKE_LIBRARY_PATH="${LZ4_ROOT}/lib;${ZLIB_ROOT}/lib;${HDF5_ROOT}/lib;${BOOST_ROOT}/lib;${FLANN_ROOT}/lib;${LIBPNG_ROOT}/lib" \
+    -DCMAKE_INCLUDE_PATH="${BOOST_ROOT}/include;${EIGEN_ROOT}/include/eigen3;${FLANN_ROOT}/include;${LZ4_ROOT}/include;${HDF5_ROOT}/include;${LIBPNG_ROOT}/include;${ZLIB_ROOT}/include" \
+    -DCMAKE_FIND_ROOT_PATH="${BOOST_ROOT};${EIGEN_ROOT};${FLANN_ROOT};${LZ4_ROOT};${HDF5_ROOT};${LIBPNG_ROOT};${ZLIB_ROOT}" \
+    -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+    -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH \
+    -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH \
+    -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
+    -DBOOST_ROOT="${BOOST_ROOT}" \
+    -DBoost_NO_SYSTEM_PATHS=ON \
+    -DEigen3_DIR="${EIGEN_ROOT}/share/eigen3/cmake" \
+    -DFlann_DIR="${FLANN_ROOT}/share/flann" \
+    -DHDF5_ROOT="${HDF5_ROOT}" \
+    -DPNG_ROOT="${LIBPNG_ROOT}" \
+    -DZLIB_ROOT="${ZLIB_ROOT}" \
+    -DCMAKE_C_FLAGS="${ARCH_FLAGS} ${EXTRA_INCLUDES}" \
+    -DCMAKE_CXX_FLAGS="${ARCH_FLAGS} ${EIGEN_ARCH_FLAGS} ${EXTRA_INCLUDES}" \
+    -DCMAKE_EXE_LINKER_FLAGS="${EXTRA_LIB_DIRS} ${EXTRA_RPATH_LINKS}" \
+    -DCMAKE_SHARED_LINKER_FLAGS="${EXTRA_LIB_DIRS} ${EXTRA_RPATH_LINKS}" \
+    -DPCL_ENABLE_SSE=OFF \
+    -DPCL_ENABLE_AVX=OFF \
+    -DWITH_CUDA=OFF \
+    -DWITH_OPENGL=OFF \
+    -DWITH_LIBUSB=OFF \
+    -DWITH_PCAP=OFF \
+    -DWITH_QT=OFF \
+    -DWITH_VTK=OFF \
+    -DWITH_TESTS=OFF \
+    -DBUILD_TESTS=OFF \
+    -DBUILD_examples=OFF \
+    -DBUILD_global_tests=OFF \
+    -DCMAKE_POLICY_DEFAULT_CMP0144=NEW
 
-# === 4. 编译与安装 ===
-make -j8
+make -j16
 make install
 
-# === 5. 验证成果 ===
-echo "--------------------------------------"
-echo "验证 PCL 核心库格式："
-file ${RV_INSTALL_DIR}/pcl-rvv/lib/libpcl_common.so.1.15.1.99
-echo "--------------------------------------"
-
+file "${RV_INSTALL_DIR}"/pcl-rvv/lib/libpcl_common.so*
 ```
 
-## 10. 增量重编 pcl 模块
+关键点：
 
-以 `pcl_common` 为例，仅修改 `common` 下个别源文件（例如 `common/src/gaussian.cpp`）时，可以只构建目标 `pcl_common`，并把生成的 `libpcl_common.so*` 拷贝到安装前缀的 `lib` 目录，从而避免 `make install` 依赖整棵安装树或触发不必要的工作。
+- `-D__RVV10__` 用于进入 PCL RVV 代码分支；如果要对比标量版本，需要移除该宏后重新配置和编译。
+- `PCL_ENABLE_SSE` 和 `PCL_ENABLE_AVX` 必须关闭，因为目标是 RISC-V。
+- CUDA、OpenGL、USB、PCAP、Qt、VTK 和 tests/examples 当前默认关闭，以降低交叉编译依赖复杂度。
+- `Eigen3_DIR` 指向 `${RV_INSTALL_DIR}/eigen-rvv/share/eigen3/cmake`，确保 PCL 使用 RVV 版本 Eigen。
+- `Flann_DIR`、`HDF5_ROOT`、`PNG_ROOT`、`ZLIB_ROOT` 用来减少 CMake 查找系统库的概率。
 
-首次在本机建立 `build` 目录时仍需执行与上一节一致的 `cmake`；之后若未改 CMake 选项，可在 `build` 目录内直接 `make pcl_common`，无需每次重新配置。
+## 12. 增量重编 PCL 模块
 
-下面脚本与上一节使用相同的交叉工具链、`__RVV10__`、Eigen RVV 与依赖路径变量；请将 `RV_INSTALL_DIR`、`RISCV_TOOLCHAIN` 以及 `cd` 到 PCL 源码的路径改成你的环境。
+如果只修改 `common` 下少量源文件，例如 `common/src/gaussian.cpp`，可以只重编 `pcl_common` 并复制生成的库，避免触发全量安装。
 
-若 `file` 检查的 `.so` 版本号与当前 PCL 不一致，请按 `ls ${RV_INSTALL_DIR}/pcl-rvv/lib/libpcl_common.so*` 实际名称修改。
+首次建立 `build` 目录时仍需执行与第 11 节一致的 `cmake` 配置。后续 CMake 选项不变时，可直接在 `build` 目录中执行：
 
 ```bash
-#!/usr/bin/env bash
-# 增量重编 PCL
-
-set -euo pipefail
-
-# === 1. 环境准备 ===
-export RV_INSTALL_DIR=
-export RISCV_TOOLCHAIN=
-export PCL_WORKSPACE=
-
-export RV_CC="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-gcc"
-export RV_CXX="${RISCV_TOOLCHAIN}/bin/riscv64-unknown-linux-gnu-g++"
-export VLEN=256
-export DEFAULT_LMUL=2
-
-export EIGEN_ARCH_FLAGS="-mrvv-vector-bits=zvl -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=${DEFAULT_LMUL}"
-# 与第 9 节相同：保留 -D__RVV10__ 则 gaussian.cpp 卷积进 RVV；去掉后重装/拷贝的 lib 内为标量卷积。改 ARCH_FLAGS 后须重新 cmake 或清缓存再配置，再 make pcl_common。
-export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -O3 -D__RVV10__"
-# 标量卷积库示例（仅此注释，使用时替换上一行）： export ARCH_FLAGS="-march=rv64gcv_zvl${VLEN}b -mabi=lp64d -O3"
-export EXTRA_INCLUDES="-I${RV_INSTALL_DIR}/boost/include \
-                       -I${RV_INSTALL_DIR}/eigen-rvv/include/eigen3 \
-                       -I${RV_INSTALL_DIR}/flann/include \
-                       -I${RV_INSTALL_DIR}/lz4/include \
-                       -I${RV_INSTALL_DIR}/hdf5/include \
-                       -I${RV_INSTALL_DIR}/libpng/include"
-
-# === 2. 构建目录 ===
-cd ${PCL_WORKSPACE}
-mkdir -p build && cd build
-
-# === 3. 配置 ===
-cmake .. \
-  -DCMAKE_SYSTEM_NAME=Linux \
-  -DCMAKE_SYSTEM_PROCESSOR=riscv64 \
-  -DCMAKE_C_COMPILER="${RV_CC}" \
-  -DCMAKE_CXX_COMPILER="${RV_CXX}" \
-  -DCMAKE_INSTALL_PREFIX="${RV_INSTALL_DIR}/pcl-rvv" \
-  -DCMAKE_PREFIX_PATH="${RV_INSTALL_DIR}/zlib;${RV_INSTALL_DIR}/libpng;${RV_INSTALL_DIR}/lz4;${RV_INSTALL_DIR}/hdf5;${RV_INSTALL_DIR}/flann;${RV_INSTALL_DIR}/eigen-rvv;${RV_INSTALL_DIR}/boost" \
-  -DCMAKE_LIBRARY_PATH="${RV_INSTALL_DIR}/lz4/lib;${RV_INSTALL_DIR}/zlib/lib;${RV_INSTALL_DIR}/hdf5/lib;${RV_INSTALL_DIR}/boost/lib;${RV_INSTALL_DIR}/flann/lib" \
-  -DCMAKE_FIND_ROOT_PATH="${RV_INSTALL_DIR}/boost;${RV_INSTALL_DIR}/eigen-rvv;${RV_INSTALL_DIR}/flann;${RV_INSTALL_DIR}/lz4;${RV_INSTALL_DIR}/hdf5" \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
-  -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH \
-  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH \
-  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
-  -DBOOST_ROOT="${RV_INSTALL_DIR}/boost" \
-  -DEigen3_DIR="${RV_INSTALL_DIR}/eigen-rvv/share/eigen3/cmake" \
-  -DCMAKE_CXX_FLAGS="${ARCH_FLAGS} ${EIGEN_ARCH_FLAGS} ${EXTRA_INCLUDES}" \
-  -DCMAKE_EXE_LINKER_FLAGS="-L${RV_INSTALL_DIR}/boost/lib -L${RV_INSTALL_DIR}/lz4/lib -L${RV_INSTALL_DIR}/hdf5/lib -L${RV_INSTALL_DIR}/libpng/lib -L${RV_INSTALL_DIR}/zlib/lib -L${RV_INSTALL_DIR}/flann/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/boost/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/lz4/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/hdf5/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/flann/lib" \
-  -DCMAKE_SHARED_LINKER_FLAGS="-L${RV_INSTALL_DIR}/boost/lib -L${RV_INSTALL_DIR}/lz4/lib -L${RV_INSTALL_DIR}/hdf5/lib -L${RV_INSTALL_DIR}/libpng/lib -L${RV_INSTALL_DIR}/zlib/lib -L${RV_INSTALL_DIR}/flann/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/boost/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/lz4/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/hdf5/lib \
-    -Wl,-rpath-link=${RV_INSTALL_DIR}/flann/lib" \
-  -DPCL_ENABLE_SSE=OFF -DPCL_ENABLE_AVX=OFF \
-  -DWITH_CUDA=OFF -DWITH_OPENGL=OFF -DWITH_LIBUSB=OFF -DWITH_PCAP=OFF -DWITH_QT=OFF -DWITH_VTK=OFF \
-  -DCMAKE_POLICY_DEFAULT_CMP0144=NEW
-
-# === 4. 编译与安装 ===
+cd "${RV_PCL_DIR}/build"
 make -j16 pcl_common
-# 勿用 make install：会依赖整棵安装树并触发全量编译
+
 install -d "${RV_INSTALL_DIR}/pcl-rvv/lib"
 cp -a lib/libpcl_common.so* "${RV_INSTALL_DIR}/pcl-rvv/lib/"
-echo "[INFO] 已仅更新 ${RV_INSTALL_DIR}/pcl-rvv/lib/libpcl_common.so*"
 
-# === 5. 验证 ===
-echo "--------------------------------------"
-echo "验证 PCL 核心库格式："
-file "${RV_INSTALL_DIR}/pcl-rvv/lib/libpcl_common.so.1.15.1.99"
-echo "--------------------------------------"
+file "${RV_INSTALL_DIR}"/pcl-rvv/lib/libpcl_common.so*
 ```
 
+如果修改了 `ARCH_FLAGS`、`EIGEN_ARCH_FLAGS`、依赖路径或开关选项，请重新执行 CMake 配置，必要时清理 `build` 目录。
+
+## 13. 常见警告
+
+当前构建过程中可能出现少量 warning：
+
+- FLANN 可能出现 `-Woverloaded-virtual`，脚本已通过 `-Wno-overloaded-virtual` 屏蔽。
+- PCL `KdTreeFLANN` 模板实例化时，GCC 16 可能报告 `-Wstringop-overread`。如果构建成功且库文件为 RISC-V shared object，通常可以先保留观察。
+- OpenMP 5.1 可能提示 `#pragma omp master` 已 deprecated，建议后续源码层面再决定是否改成 `masked`。
+
+判断是否需要处理 warning 时，优先查找真正的错误信号：
+
+```bash
+rg -n "error:|undefined reference|cannot find|No such file|fatal error|CMake Error|collect2: error" build.log
+```
+
+## 14. 验证安装结果
+
+每个库安装后都建议使用 `file` 检查目标架构。例如：
+
+```bash
+file "${RV_INSTALL_DIR}/zlib/lib/libz.so.1.3.2"
+file "${RV_INSTALL_DIR}/lz4/lib/liblz4.so.1.10.0"
+file "${RV_INSTALL_DIR}/hdf5/lib/libhdf5_cpp.so.320.1.0"
+file "${RV_INSTALL_DIR}/flann/lib/libflann_cpp.so.1.9.2"
+file "${RV_INSTALL_DIR}/boost/lib/libboost_system.so.1.88.0"
+file "${RV_INSTALL_DIR}/gtest/lib/libgtest.so"
+file "${RV_INSTALL_DIR}"/libpng/lib/libpng16.so.16.*
+file "${RV_INSTALL_DIR}"/pcl-rvv/lib/libpcl_common.so*
+```
+
+期望输出中应包含 `RISC-V`、`64-bit`、`shared object` 等信息。

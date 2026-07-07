@@ -45,9 +45,9 @@ sudo pacman -S --noconfirm \
 
 ```bash
 # 1. 设置目标路径
-export RISCV=/opt/riscv
-sudo mkdir -p $RISCV
-sudo chown -R $USER:$USER $RISCV
+export RISCV_INSTALL_PATH=/opt/riscv64
+sudo mkdir -p $RISCV_INSTALL_PATH
+# sudo chown -R $USER:$USER $RISCV_INSTALL_PATH
 
 # 2. 克隆源码
 git clone https://github.com/riscv-collab/riscv-gnu-toolchain
@@ -55,12 +55,13 @@ cd riscv-gnu-toolchain
 
 # 3. 检出子模块 (Submodules)
 # 这一步会下载 gcc, binutils, glibc 等大量源码，请确保网络通畅
+# 或者可查看 .gitmodules 文件的内容，明确有哪些子模块，再尝试通过镜像加速，手动下载子模块
 git submodule update --init --recursive
 
 # 4. 配置构建选项
 # --prefix: 安装路径
 # --enable-multilib: 启用多库支持（允许编译 32位/64位 软浮点/硬浮点等不同变体）
-./configure --prefix=$RISCV --enable-multilib
+./configure --prefix=$RISCV_INSTALL_PATH --enable-multilib
 
 # 5. 编译 (构建 Linux 版本工具链，包含 glibc)
 # -j$(nproc) 表示使用所有 CPU 核心并行编译
@@ -70,17 +71,21 @@ make linux -j$(nproc)
 
 ### 3. 编译 QEMU 模拟器
 
-编译支持 RISC-V 的 QEMU，用于运行交叉编译后的程序。
+编译支持 RISC-V 的 QEMU，用于运行交叉编译后的程序.
+对于 Arch Linux 用户，QEMU 可以直接通过包管理器安装 `qemu-user` 即可.
+其他发行版用户可以选择从源码编译安装.
 
 ```bash
+export QEMU_INSTALL_PATH=/opt/qemu
+
 # 1. 下载源码 (参考 Dockerfile 使用的版本)
-wget https://download.qemu.org/qemu-9.0.0.tar.xz
-tar xvJf qemu-9.0.0.tar.xz
-cd qemu-9.0.0
+wget https://download.qemu.org/qemu-11.0.2.tar.xz
+tar xvJf qemu-11.0.2.tar.xz
+cd qemu-11.0.2
 
 # 2. 配置
 # target-list: 仅构建 riscv64 的系统模式和用户模式，节省时间
-./configure --target-list=riscv64-softmmu,riscv64-linux-user --prefix=$RISCV
+./configure --target-list=riscv64-softmmu,riscv64-linux-user --prefix=${QEMU_INSTALL_PATH}
 
 # 3. 编译安装
 make -j$(nproc)
@@ -101,7 +106,8 @@ mkdir build && cd build
 
 # 2. 配置与编译
 # 这里的 --prefix 可以指向我们统一的 RISCV 目录，也可以安装到 /usr/local
-../configure --prefix=$RISCV
+export SPIKE_INSTALL_PATH=/opt/spike
+../configure --prefix=$SPIKE_INSTALL_PATH
 make -j$(nproc)
 make install
 
@@ -110,7 +116,7 @@ cd ../..
 git clone https://github.com/riscv-software-src/riscv-pk.git
 cd riscv-pk
 mkdir build && cd build
-../configure --prefix=$RISCV --host=riscv64-unknown-linux-gnu
+../configure --prefix=$RISCV_INSTALL_PATH --host=riscv64-unknown-linux-gnu
 make -j$(nproc)
 make install
 ```
@@ -122,8 +128,14 @@ make install
 在您的 `~/.bashrc` 或 `~/.zshrc` 文件末尾添加：
 
 ```bash
-export RISCV=/opt/riscv
-export PATH=$RISCV/bin:$PATH
+export RISCV_INSTALL_PATH=/opt/riscv64
+export PATH=$RISCV_INSTALL_PATH/bin:$PATH
+
+export QEMU_INSTALL_PATH=/opt/qemu
+export PATH=$QEMU_INSTALL_PATH/bin:$PATH
+
+export SPIKE_INSTALL_PATH=/opt/spike
+export PATH=$SPIKE_INSTALL_PATH/bin:$PATH
 ```
 
 执行 `source ~/.bashrc` 使配置生效。
