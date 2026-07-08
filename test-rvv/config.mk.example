@@ -1,0 +1,41 @@
+# Local configuration example for test-rvv.
+#
+# Copy this file to test-rvv/config.mk and edit it for your machine.
+# test-rvv/config.mk is intentionally ignored by git.
+#
+# In most setups only RV_INSTALL_DIR and, optionally, CROSS_COMPILE need to be
+# set here. test-rvv/mk/rvv-env.mk derives the rest from those values.
+
+# PCL source tree used for test headers. By default this is auto-detected as
+# the parent of test-rvv, so a normal in-tree build does not need this setting.
+# Set it only when building these tests against another PCL source checkout.
+# PCL_SRC_DIR := /path/to/pcl
+
+# Cross-compiled RISC-V dependency install prefix. The default is inferred as
+# $(PCL_SRC_DIR)/../riscv as a convenience for sibling pcl/riscv layouts. Set
+# this explicitly when dependencies are installed anywhere else.
+RV_INSTALL_DIR := /path/to/riscv
+
+# Installed PCL and third-party dependency roots are derived from RV_INSTALL_DIR
+# by default. Override individual roots only if your install layout differs from
+# the expected subdirectory names below.
+# PCL_INSTALL_ROOT := $(RV_INSTALL_DIR)/pcl-rvv
+# BOOST_ROOT       := $(RV_INSTALL_DIR)/boost
+# EIGEN_ROOT       := $(RV_INSTALL_DIR)/eigen-rvv
+# GTEST_ROOT       := $(RV_INSTALL_DIR)/gtest
+# FLANN_ROOT       := $(RV_INSTALL_DIR)/flann
+# LZ4_ROOT         := $(RV_INSTALL_DIR)/lz4
+# HDF5_ROOT        := $(RV_INSTALL_DIR)/hdf5
+# ZLIB_ROOT        := $(RV_INSTALL_DIR)/zlib
+# LIBPNG_ROOT      := $(RV_INSTALL_DIR)/libpng
+
+# Toolchain. If riscv64-unknown-linux-gnu-g++ is already in PATH, the default
+# CROSS_COMPILE value from rvv-env.mk is enough. Otherwise point it at your
+# absolute toolchain prefix. Keep the trailing dash.
+# CROSS_COMPILE := /opt/riscv64/bin/riscv64-unknown-linux-gnu-
+
+# Optional board deployment settings. These are required only for deploy_board
+# and board_smoke targets. QEMU/local runs do not need them.
+# REMOTE_USER := root
+# REMOTE_IP   := 192.0.2.10
+# BOARD_LABEL := my-rvv-board

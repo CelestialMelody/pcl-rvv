@@ -9,7 +9,7 @@ SCRIPT_DIR           ?= $(REMOTE_DIR)/script
 BENCH_COMPARE_SCRIPT ?= $(SCRIPT_DIR)/analyze_bench_compare.py
 
 PYTHON ?= python3
-BOARD_LABEL ?= Milkv-Jupiter
+BOARD_LABEL ?= RVV board
 BENCH_COMPARE_SAVE ?=
 BOARD_SELF_MAKEFILE ?= $(firstword $(MAKEFILE_LIST))
 
