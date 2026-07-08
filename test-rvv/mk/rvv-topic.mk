@@ -90,18 +90,7 @@ EXTRA_LDFLAGS  ?=
 CXXFLAGS = -std=c++17 -O3 -g $(CXXFLAGS_ARCH) -DPCL_NO_PRECOMPILE $(INCLUDES) $(EXTRA_CXXFLAGS)
 LIBS_BENCH ?= -lpcl_common -lm
 LIBS_TEST  ?= -lpcl_common -lgtest -lgtest_main -lpthread -lm
-LIBS_UPSTREAM_TEST ?= \
-	-lpcl_filters \
-	-lpcl_io \
-	-lpcl_sample_consensus \
-	-lpcl_search \
-	-lpcl_kdtree \
-	-lpcl_octree \
-	-lpcl_common \
-	-lflann_cpp \
-	-lboost_filesystem -lboost_iostreams -lboost_system \
-	-lgtest -lgtest_main -lpthread \
-	-lz -lhdf5 -llz4 -lpng -lm
+LIBS_UPSTREAM_TEST ?= $(LIBS_TEST)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)

@@ -31,5 +31,17 @@ UPSTREAM_TEST_ARGS       = $(PCL_SOURCE_ROOT)/test/bun0.pcd $(PCL_SOURCE_ROOT)/t
 EXTRA_CXXFLAGS := -DPCL_EXTRACT_INDICES_RVV_DIAGNOSTIC
 LIBS_BENCH := -lpcl_filters -lpcl_common -lm
 LIBS_TEST  := -lpcl_filters -lpcl_common -lgtest -lgtest_main -lpthread -lm
+LIBS_UPSTREAM_TEST := \
+	-lpcl_filters \
+	-lpcl_io \
+	-lpcl_sample_consensus \
+	-lpcl_search \
+	-lpcl_kdtree \
+	-lpcl_octree \
+	-lpcl_common \
+	-lflann_cpp \
+	-lboost_filesystem -lboost_iostreams -lboost_system \
+	-lgtest -lgtest_main -lpthread \
+	-lz -lhdf5 -llz4 -lpng -lm
 
 include ../../mk/rvv-topic.mk
