@@ -6,6 +6,11 @@
 # deployment settings. Test/bench build rules live in rvv-topic.mk.
 # =============================================================================
 
+# Keep piped test/benchmark commands honest: without pipefail, a failing test
+# followed by "| tee log" reports success because tee exits with status 0.
+SHELL := /bin/bash
+.SHELLFLAGS := -o pipefail -c
+
 # Path to test-rvv, inferred from this file's location. Keeping this independent
 # from the including Makefile lets legacy tests include only rvv-env.mk.
 ifndef TEST_RVV_ROOT

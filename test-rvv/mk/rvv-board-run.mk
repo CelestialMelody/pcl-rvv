@@ -2,6 +2,10 @@
 # Common board-side Makefile fragment for deployed PCL RVV test/bench topics.
 # =============================================================================
 
+# Keep "| tee log" from hiding benchmark/test failures on the board.
+SHELL := /usr/bin/bash
+.SHELLFLAGS := -o pipefail -c
+
 REMOTE_LIB_DIR    ?= /root/pcl-test/lib
 REMOTE_OUTPUT_DIR ?= $(REMOTE_DIR)/output
 
