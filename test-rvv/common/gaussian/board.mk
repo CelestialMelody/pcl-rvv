@@ -15,7 +15,7 @@ BENCH_COMPARE_SCRIPT = $(SCRIPT_DIR)/analyze_bench_compare.py
 
 PYTHON ?= python3
 
-BOARD_LABEL ?= Milkv-Jupiter
+BOARD_LABEL ?= RVV board
 BENCH_COMPARE_SAVE ?=
 
 REMOTE_BENCH_STD_OUTPUT_FILE = $(REMOTE_OUTPUT_DIR)/run_bench_std.log

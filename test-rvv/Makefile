@@ -1,17 +1,19 @@
-REMOTE_USER = root
-REMOTE_IP   = 172.16.89.126
 REMOTE_LIB_DIR = ~/pcl-test/lib
 TEMP_LIB_DIR = ./slim_lib
-CC = riscv64-unknown-linux-gnu-gcc
-CXX = riscv64-unknown-linux-gnu-g++
-WORKSPACE = /home/zoomin/codes/RISCV/workspace
-PCL_INSTALL_ROOT = $(WORKSPACE)/riscv/pcl-rvv
-RISCV_DEPS = $(WORKSPACE)/riscv
+
+MODULE ?= test-rvv
+TOPIC ?= deploy_lib
+include mk/rvv-env.mk
 
 # 交叉编译工具链的 Sysroot 路径
-SYSROOT := $(shell $(CC) -print-sysroot)
+SYSROOT := $(RISCV_SYSROOT)
 
-deploy_lib:
+check_board_ssh:
+	@test -n "$(REMOTE_USER)" || (echo "[config] REMOTE_USER is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_USER=<user>." >&2; exit 1)
+	@test -n "$(REMOTE_IP)" || (echo "[config] REMOTE_IP is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_IP=<ip>." >&2; exit 1)
+	@$(SSH_CMD) -o BatchMode=yes -o ConnectTimeout=5 $(REMOTE_USER)@$(REMOTE_IP) true
+
+deploy_lib: check_board_ssh
 	@echo "[PREPARE] Creating local slim_lib directory..."
 	@mkdir -p $(TEMP_LIB_DIR)
 
@@ -31,11 +33,11 @@ deploy_lib:
 	@cp $(SYSROOT)/lib/libstdc++.so* $(SYSROOT)/lib/libc.so* $(SYSROOT)/lib/libm.so* $(SYSROOT)/lib/libgcc_s.so* $(TEMP_LIB_DIR)/ 2>/dev/null || true
 
 	@echo "[STRIP] Slimming down libraries..."
-	@riscv64-unknown-linux-gnu-strip -s $(TEMP_LIB_DIR)/*.so* 2>/dev/null || true
+	@$(STRIP) -s $(TEMP_LIB_DIR)/*.so* 2>/dev/null || true
 
-	@echo "[DEPLOY] Syncing slim lib to Jupiter..."
-	@ssh $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_LIB_DIR)"
-	@rsync -avzP $(TEMP_LIB_DIR)/ $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_LIB_DIR)/
+	@echo "[DEPLOY] Syncing slim lib to board..."
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_LIB_DIR)"
+	@rsync -e "$(RSYNC_SSH)" -avzP $(TEMP_LIB_DIR)/ $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_LIB_DIR)/
 
 	@echo "[CLEANUP] Removing local temporary slim_lib..."
 	@rm -rf $(TEMP_LIB_DIR)

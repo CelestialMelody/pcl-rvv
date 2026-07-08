@@ -1,52 +1,23 @@
 ARCH ?= riscv
+EIGEN_RVV_FLAGS ?= -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=2 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl
+THIS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 # =============================================================================
 #  Sample Consensus / Plane Models (RVV)
 # =============================================================================
 
 ifeq ($(ARCH), riscv)
-	CC  = riscv64-unknown-linux-gnu-gcc
-	CXX = riscv64-unknown-linux-gnu-g++
-
-# -------------------------------------------------------------------------
-# 路径配置
-# -------------------------------------------------------------------------
-	WORKSPACE        = /home/zoomin/codes/RISCV/workspace
-	INSTALL_DIR      = $(WORKSPACE)/riscv
-	PCL_INSTALL_ROOT = $(INSTALL_DIR)/pcl-rvv
-	PCL_SOURCE_ROOT  = $(WORKSPACE)/pcl
-	RISCV_DEPS       = $(INSTALL_DIR)
-
-	BOOST_ROOT       = $(RISCV_DEPS)/boost
-	EIGEN_ROOT       = $(RISCV_DEPS)/eigen-rvv
-	FLANN_ROOT       = $(RISCV_DEPS)/flann
-	LZ4_ROOT         = $(RISCV_DEPS)/lz4
-	HDF5_ROOT        = $(RISCV_DEPS)/hdf5
-	GTEST_ROOT       = $(RISCV_DEPS)/gtest
-	ZLIB_ROOT        = $(RISCV_DEPS)/zlib
-	LIBPNG_ROOT      = $(RISCV_DEPS)/libpng
-
-	RISCV_SYSROOT := $(shell $(CC) -print-sysroot)
-
-	LIB_LIST = \
-		$(PCL_INSTALL_ROOT)/lib \
-		$(BOOST_ROOT)/lib \
-		$(FLANN_ROOT)/lib \
-		$(LZ4_ROOT)/lib \
-		$(HDF5_ROOT)/lib \
-		$(GTEST_ROOT)/lib \
-		$(ZLIB_ROOT)/lib \
-		$(LIBPNG_ROOT)/lib
-
-	empty :=
-	space := $(empty) $(empty)
-	RISCV_LIB_PATH := $(subst $(space),:,$(LIB_LIST))
+MODULE ?= sample_consensus
+TOPIC ?= $(notdir $(CURDIR))
+include ../../mk/rvv-env.mk
+LIB_LIST = $(LIB_DIRS_LIST)
+RISCV_LIB_PATH := $(LIB_PATH_VAL)
 endif
 
 # =============================================================================
 # PCD Files
 # =============================================================================
-PCD_FILES_DIR = $(WORKSPACE)/pcl/test-rvv/sample_consensus/plane_models/pcd
+PCD_FILES_DIR ?= $(THIS_DIR)/pcd
 PCD_FILES = $(PCD_FILES_DIR)/sac_plane_test.pcd
 
 # =============================================================================
@@ -190,8 +161,8 @@ run_bench_load: clean $(TARGET_BENCH_LOAD_BIN)
 #  Remote Deployment (RISC-V 板卡)
 # =============================================================================
 
-REMOTE_USER = root
-REMOTE_IP   = 172.16.89.126
+REMOTE_USER ?=
+REMOTE_IP   ?=
 REMOTE_DIR  = ~/pcl-test/sample_consensus/plane_models
 REMOTE_PCD_FILES_DIR = $(REMOTE_DIR)/pcd
 REMOTE_PCD_FILES = $(notdir $(PCD_FILES))
@@ -200,29 +171,38 @@ REMOTE_PCD_FILES = $(notdir $(PCD_FILES))
 PCD_FILE ?= sac_plane_test.pcd
 PCD_FILE_PATH := $(PCD_FILES_DIR)/$(PCD_FILE)
 
-deploy_files: $(PCD_FILES)
+SSH_OPTS ?= -F $(HOME)/.ssh/config
+SSH_CMD ?= ssh $(SSH_OPTS)
+RSYNC_SSH ?= ssh $(SSH_OPTS)
+
+check_board_ssh:
+	@test -n "$(REMOTE_USER)" || (echo "[config] REMOTE_USER is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_USER=<user>." >&2; exit 1)
+	@test -n "$(REMOTE_IP)" || (echo "[config] REMOTE_IP is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_IP=<ip>." >&2; exit 1)
+	@$(SSH_CMD) -o BatchMode=yes -o ConnectTimeout=5 $(REMOTE_USER)@$(REMOTE_IP) true
+
+deploy_files: check_board_ssh $(PCD_FILES)
 	@echo "[DEPLOY] Syncing PCD test data $(PCD_FILES) only..."
-	@ssh $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_PCD_FILES_DIR)"
-	@rsync -avzP $(PCD_FILES) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_PCD_FILES_DIR)/
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_PCD_FILES_DIR)"
+	@rsync -e "$(RSYNC_SSH)" -avzP $(PCD_FILES) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_PCD_FILES_DIR)/
 	@echo "[DONE] PCD test data deployed."
 
 deploy_bench: clean $(TARGET_BENCH_BIN) $(PCD_FILE_PATH) deploy_files
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_BENCH)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_BENCH_BIN) -o ./$(TARGET_BENCH)_stripped
-	@rsync -avzP ./$(TARGET_BENCH)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH)
+	@$(STRIP) -s ./$(TARGET_BENCH_BIN) -o ./$(TARGET_BENCH)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_BENCH)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH)
 	@rm -f ./$(TARGET_BENCH)_stripped
 	@echo "[DONE] $(TARGET_BENCH) deployed."
 
 deploy_bench_load: clean $(TARGET_BENCH_LOAD_BIN) $(PCD_FILE_PATH) deploy_files
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_BENCH_LOAD)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_BENCH_LOAD_BIN) -o ./$(TARGET_BENCH_LOAD)_stripped
-	@rsync -avzP ./$(TARGET_BENCH_LOAD)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH_LOAD)
+	@$(STRIP) -s ./$(TARGET_BENCH_LOAD_BIN) -o ./$(TARGET_BENCH_LOAD)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_BENCH_LOAD)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH_LOAD)
 	@rm -f ./$(TARGET_BENCH_LOAD)_stripped
 	@echo "[DONE] $(TARGET_BENCH_LOAD) deployed."
 
 deploy_test: clean $(TARGET_TEST_BIN) $(PCD_FILE_PATH) deploy_files
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_TEST)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_TEST_BIN) -o ./$(TARGET_TEST)_stripped
-	@rsync -avzP ./$(TARGET_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_TEST)
+	@$(STRIP) -s ./$(TARGET_TEST_BIN) -o ./$(TARGET_TEST)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_TEST)
 	@rm -f ./$(TARGET_TEST)_stripped
 	@echo "[DONE] $(TARGET_TEST) deployed."

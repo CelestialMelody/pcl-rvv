@@ -61,58 +61,9 @@ TARGET_UPSTREAM_TEST_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_UPSTREAM_TEST)
 
 USE_PCL_RVV10  ?= 1
 
-WS               = /home/zoomin/codes/RISCV/workspace
-PCL_SOURCE_ROOT  = $(WS)/pcl
-
-ifeq ($(ARCH),riscv)
-CC  = riscv64-unknown-linux-gnu-gcc
-CXX = riscv64-unknown-linux-gnu-g++
-STRIP = riscv64-unknown-linux-gnu-strip
-OBJDUMP = riscv64-unknown-linux-gnu-objdump
-
-PCL_INSTALL_ROOT = $(WS)/riscv/pcl-rvv
-RISCV_DEPS       = $(WS)/riscv
-RISCV_SYSROOT   := $(shell $(CC) -print-sysroot)
-
-BOOST_ROOT  = $(RISCV_DEPS)/boost
-EIGEN_ROOT  = $(RISCV_DEPS)/eigen-rvv
-GTEST_ROOT  = $(RISCV_DEPS)/gtest
-FLANN_ROOT  = $(RISCV_DEPS)/flann
-LZ4_ROOT    = $(RISCV_DEPS)/lz4
-HDF5_ROOT   = $(RISCV_DEPS)/hdf5
-ZLIB_ROOT   = $(RISCV_DEPS)/zlib
-LIBPNG_ROOT = $(RISCV_DEPS)/libpng
-
-EIGEN_RVV_FLAGS ?= -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl
-LIB_DIRS_LIST = \
-	$(PCL_INSTALL_ROOT)/lib \
-	$(BOOST_ROOT)/lib \
-	$(GTEST_ROOT)/lib \
-	$(FLANN_ROOT)/lib \
-	$(LZ4_ROOT)/lib \
-	$(HDF5_ROOT)/lib \
-	$(ZLIB_ROOT)/lib \
-	$(LIBPNG_ROOT)/lib
-empty :=
-space := $(empty) $(empty)
-LIB_PATH_VAL := $(subst $(space),:,$(LIB_DIRS_LIST))
-
-CXXFLAGS_ARCH = -march=rv64gcv -mabi=lp64d \
-	-fopt-info-vec-missed=$(LOG_FILE) \
-	-DPCL_SILENCE_MALLOC_WARNING=1
-CXXFLAGS_ARCH += $(EIGEN_RVV_FLAGS)
-ifeq ($(USE_PCL_RVV10),1)
-CXXFLAGS_ARCH += -D__RVV10__
-endif
-
-LDFLAGS = $(foreach dir,$(LIB_DIRS_LIST),-L$(dir) -Wl,-rpath-link=$(dir))
-RUN_CMD = LD_LIBRARY_PATH=$(LIB_PATH_VAL):$$LD_LIBRARY_PATH qemu-riscv64 -L $(RISCV_SYSROOT) -cpu rv64,v=true,vlen=256,elen=64
-VEC_REGEX_STR := "[[:space:]]+v[a-z0-9]+(\.[a-z0-9]+)*[[:space:]]+"
-endif
-
-ifneq ($(filter $(ARCH),riscv),$(ARCH))
-$(error Unsupported ARCH=$(ARCH), expected riscv)
-endif
+MODULE ?= filters
+TOPIC ?= $(notdir $(CURDIR))
+include ../../mk/rvv-env.mk
 
 INCLUDES = \
 	-I$(PCL_SOURCE_ROOT)/common/include \
@@ -249,8 +200,6 @@ clean_bench_rvv:
 clean:
 	rm -rf $(BUILD_DIR) $(LOG_DIR) $(OUTPUT_DIR)
 
-REMOTE_USER ?= root
-REMOTE_IP   ?= 172.16.89.126
 REMOTE_DIR  ?= /root/pcl-test/filters/plane_clipper3D
 REMOTE_SCRIPT_DIR = $(REMOTE_DIR)/script
 REMOTE_BOARD_OUTPUT_DIR = $(REMOTE_DIR)/output
@@ -261,6 +210,8 @@ SSH_CMD ?= ssh $(SSH_OPTS)
 RSYNC_SSH ?= ssh $(SSH_OPTS)
 
 check_board_ssh:
+	@test -n "$(REMOTE_USER)" || (echo "[config] REMOTE_USER is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_USER=<user>." >&2; exit 1)
+	@test -n "$(REMOTE_IP)" || (echo "[config] REMOTE_IP is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_IP=<ip>." >&2; exit 1)
 	@$(SSH_CMD) -o BatchMode=yes -o ConnectTimeout=5 $(REMOTE_USER)@$(REMOTE_IP) true
 
 deploy_files: check_board_ssh

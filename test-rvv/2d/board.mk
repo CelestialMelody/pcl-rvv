@@ -37,8 +37,8 @@ BENCH_COMPARE_SAVE ?=
 VENV_PYTHON := $(abspath $(REMOTE_DIR)/.venv/bin/python)
 PYTHON      := $(shell test -x '$(VENV_PYTHON)' && echo '$(VENV_PYTHON)' || echo python3)
 
-# 传给分析脚本的 --device（可覆盖，例如 BOARD_LABEL="Milkv-Jupiter"）
-BOARD_LABEL ?= Milkv-Jupiter
+# 传给分析脚本的 --device（可覆盖，例如 BOARD_LABEL="your-board"）
+BOARD_LABEL ?= RVV board
 # 可与 app deploy_read_vlen 共用同一路径（默认 app 目录下的 read_vlen）
 READ_VLEN ?= /root/pcl-test/app/read_vlen
 ifndef BOARD_VLEN_DESC

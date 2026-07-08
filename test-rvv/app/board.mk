@@ -19,7 +19,7 @@
 REMOTE_DIR         ?= /root/pcl-test/app
 
 # 板卡展示名（可覆盖）；read_vlen 默认与 app 二进制同目录
-BOARD_LABEL   ?= Milkv-Jupiter
+BOARD_LABEL   ?= RVV board
 READ_VLEN      ?= $(REMOTE_DIR)/read_vlen
 BOARD_DEVICE   ?= board rv64 ($(BOARD_LABEL))
 ifndef BOARD_VLEN_DESC

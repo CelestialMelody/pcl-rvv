@@ -47,6 +47,7 @@ PYTHON_BENCH_COMPARE  := $(shell test -x '$(VENV_PYTHON)' && echo '$(VENV_PYTHON
 # 目标定义
 # ================================================
 ARCH ?= riscv
+USE_PCL_RVV10 ?= 1
 BUILD_DIR             = build
 ASM_DIR               = $(BUILD_DIR)/asm
 
@@ -96,8 +97,9 @@ PERF_SCRIPT           = $(PERF_DIR)/perf.script
 FOCUS_DIR             = pcl/2d/include/pcl/2d/impl/edge.hpp
 
 # 其他路径
-WORKSPACE             = /home/zoomin/codes/RISCV/workspace
-PCD_FILES_DIR         = $(WORKSPACE)/pcl/test-rvv/2d/pcd
+THIS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+TEST_RVV_ROOT ?= $(abspath $(THIS_DIR)/..)
+PCD_FILES_DIR ?= $(THIS_DIR)/pcd
 # 命令行参数是按位置固定的输入，顺序是固定的
 # lena.pcd gauss_smooth.pcd erosion.pcd dilation.pcd opening.pcd closing.pcd \
 # erosion_binary.pcd dilation_binary.pcd opening_binary.pcd closing_binary.pcd canny.pcd
@@ -122,74 +124,14 @@ space := $(empty) $(empty)
 # ================================================
 
 ifeq ($(ARCH), riscv)
-# ================= 基础工具配置 =================
-	CC            = riscv64-unknown-linux-gnu-gcc
-	CXX           = riscv64-unknown-linux-gnu-g++
-
-# 依赖库根路径配置
-	PCL_INSTALL_ROOT  = $(WORKSPACE)/riscv/pcl-rvv
-	PCL_SOURCE_ROOT   = $(WORKSPACE)/pcl
-	RISCV_DEPS        = $(WORKSPACE)/riscv
-	RISCV_SYSROOT    := $(shell $(CC) -print-sysroot)
-
-# ================= 各个依赖库的具体路径 =================
-	BOOST_ROOT  = $(RISCV_DEPS)/boost
-	EIGEN_ROOT  = $(RISCV_DEPS)/eigen-rvv
-	FLANN_ROOT  = $(RISCV_DEPS)/flann
-	LZ4_ROOT    = $(RISCV_DEPS)/lz4
-	HDF5_ROOT   = $(RISCV_DEPS)/hdf5
-	GTEST_ROOT  = $(RISCV_DEPS)/gtest
-	ZLIB_ROOT   = $(RISCV_DEPS)/zlib
-	LIBPNG_ROOT = $(RISCV_DEPS)/libpng
-
-# 是否启用 PCL 手写 RVV 内核 -D__RVV10__（仅 riscv 时生效）
-# 说明：即使关闭 __RVV10__，也建议保留 EIGEN_RVV_FLAGS 以与 PCL 安装时 Eigen 配置一致，避免 ABI / aligned malloc warning。
-	USE_PCL_RVV10 ?= 1
-
-# Eigen RVV1.0 支持所需的编译参数（与 PCL 安装时的 Eigen 配置一致）
-# 固定向量长度 256bit，与当前 PCL 构建一致
 	EIGEN_RVV_FLAGS ?= -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=2 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl
-
-# ================= 核心路径管理 =================
-	LIB_DIRS_LIST = \
-		$(PCL_INSTALL_ROOT)/lib \
-		$(BOOST_ROOT)/lib \
-		$(FLANN_ROOT)/lib \
-		$(LZ4_ROOT)/lib \
-		$(HDF5_ROOT)/lib \
-		$(GTEST_ROOT)/lib \
-		$(ZLIB_ROOT)/lib \
-		$(LIBPNG_ROOT)/lib
-
-# 转换为 LD_LIBRARY_PATH 格式
-	LIB_PATH_VAL := $(subst $(space),:,$(LIB_DIRS_LIST))
-
-# ================= 编译器标志 =================
-	CXXFLAGS_ARCH = -mabi=lp64d \
-		-fopt-info-vec-missed=$(LOG_FILE) \
-		-DPCL_SILENCE_MALLOC_WARNING=1
-	CXXFLAGS_ARCH += $(EIGEN_RVV_FLAGS)
-	ifeq ($(USE_PCL_RVV10),1)
-	CXXFLAGS_ARCH += -D__RVV10__
-	endif
-
-# ================= 链接器标志 =================
-	RUN_CMD = LD_LIBRARY_PATH=$(LIB_PATH_VAL):$$LD_LIBRARY_PATH qemu-riscv64 -L $(RISCV_SYSROOT) -cpu rv64,v=true,vlen=256,elen=64
-
+MODULE ?= 2d
+TOPIC ?= 2d
+include ../mk/rvv-env.mk
 	PERF_TARGET_CMD_STR = qemu-riscv64 -perfmap -L $(RISCV_SYSROOT) -cpu rv64,v=true ./$(TARGET_BENCH_BIN)
 	PERF_NEED_JIT = true
-
-# ================= 反汇编工具 =================
-	OBJDUMP_CMD = riscv64-unknown-linux-gnu-objdump
-
-# ================= 向量化检查配置 (RVV) =================
-# 检查以 v 开头且带 .v 后缀的指令 (如 vadd.vv)，或者 vsetvli
+	OBJDUMP_CMD = $(OBJDUMP)
 	VEC_TPYE_NAME = RVV (RISC-V Vector)
-# 1. [[:space:]]+ 匹配指令前的空格
-# 2. v[a-z0-9]+ 匹配 v 开头的指令名（如 vadd, vsetvli）
-# 3. (\.[a-z0-9]+)* 匹配可选的后缀（如 .vv, .v）
-# 4. [[:space:]]+ 确保指令后有空格（区分于以 v 开头的标量寄存器名，如果存在的话
-	VEC_REGEX_STR := "[[:space:]]+v[a-z0-9]+(\.[a-z0-9]+)*[[:space:]]+"
 endif
 
 ifeq ($(ARCH), x86)
@@ -197,7 +139,7 @@ ifeq ($(ARCH), x86)
 	CXX = g++
 	X86_INSTALL_DIR = /home/zoomin/workspace/x86
 	WORKSPACE_X86              = /home/zoomin/workspace
-	PCL_SOURCE_ROOT = $(WORKSPACE_X86)/pcl
+	PCL_SOURCE_ROOT ?= $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
 
 # ================= 依赖库路径 =================
 	PCL_INSTALL_ROOT = $(X86_INSTALL_DIR)/pcl
@@ -529,75 +471,84 @@ clean_bench:
 #  Remote Deployment (RISC-V 板卡)
 # =============================================================================
 
-REMOTE_USER = root
-REMOTE_IP   = 172.16.89.126
+REMOTE_USER ?=
+REMOTE_IP   ?=
 REMOTE_DIR  = /root/pcl-test/2d
 # 仅位于 $(PCD_FILES_DIR) 目录下的文件，不包含路径
 REMOTE_PCD_FILES_DIR = $(REMOTE_DIR)/pcds
 REMOTE_PCD_FILES = $(notdir $(PCD_FILES))
 
-deploy_files:
+SSH_OPTS ?= -F $(HOME)/.ssh/config
+SSH_CMD ?= ssh $(SSH_OPTS)
+RSYNC_SSH ?= ssh $(SSH_OPTS)
+
+check_board_ssh:
+	@test -n "$(REMOTE_USER)" || (echo "[config] REMOTE_USER is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_USER=<user>." >&2; exit 1)
+	@test -n "$(REMOTE_IP)" || (echo "[config] REMOTE_IP is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_IP=<ip>." >&2; exit 1)
+	@$(SSH_CMD) -o BatchMode=yes -o ConnectTimeout=5 $(REMOTE_USER)@$(REMOTE_IP) true
+
+deploy_files: check_board_ssh
 	@echo "[DEPLOY] Syncing PCD files to $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)..."
-	@ssh $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_PCD_FILES_DIR)"
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_PCD_FILES_DIR)"
 	@echo "[DEPLOY] Syncing analyze_bench_compare.py to $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/script/..."
-	@ssh $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_DIR)/script"
-	@rsync -avzP $(BENCH_COMPARE_SCRIPT) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/script/
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_DIR)/script"
+	@rsync -e "$(RSYNC_SSH)" -avzP $(BENCH_COMPARE_SCRIPT) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/script/
 	@echo "[DONE] analyze_bench_compare.py deployed."
 	@echo "-------------------------------------------------------"
-	@rsync -avzP $(PCD_FILES) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_PCD_FILES_DIR)/
+	@rsync -e "$(RSYNC_SSH)" -avzP $(PCD_FILES) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_PCD_FILES_DIR)/
 	@echo "[DONE] PCD files deployed: $(REMOTE_PCD_FILES)"
 	@echo "-------------------------------------------------------"
 
 deploy_bench_std: deploy_files clean_bench_std
 	@$(MAKE) --no-print-directory ARCH=$(ARCH) TARGET_BENCH=$(TARGET_BENCH_STD) USE_PCL_RVV10=0 $(TARGET_BENCH_STD_BIN)
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_BENCH_STD)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_BENCH_STD_BIN) -o ./$(TARGET_BENCH_STD)_stripped
-	@rsync -avzP ./$(TARGET_BENCH_STD)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH_STD)
+	@$(STRIP) -s ./$(TARGET_BENCH_STD_BIN) -o ./$(TARGET_BENCH_STD)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_BENCH_STD)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH_STD)
 	@rm -f ./$(TARGET_BENCH_STD)_stripped
 	@echo "[DONE] $(TARGET_BENCH_STD) deployed."
 
 deploy_bench_rvv: deploy_files clean_bench_rvv
 	@$(MAKE) --no-print-directory ARCH=$(ARCH) TARGET_BENCH=bench_2d_rvv USE_PCL_RVV10=1 $(BUILD_DIR)/$(ARCH)/bench_2d_rvv
 	@echo "[DEPLOY] Stripping and Syncing bench_2d_rvv..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(BUILD_DIR)/$(ARCH)/bench_2d_rvv -o ./bench_2d_rvv_stripped
-	@rsync -avzP ./bench_2d_rvv_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/bench_2d_rvv
+	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/bench_2d_rvv -o ./bench_2d_rvv_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./bench_2d_rvv_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/bench_2d_rvv
 	@rm -f ./bench_2d_rvv_stripped
 	@echo "[DONE] bench_2d_rvv deployed."
 
 deploy_test: $(TARGET_TEST_BIN) deploy_files
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_TEST)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_TEST_BIN) -o ./$(TARGET_TEST)_stripped
-	@rsync -avzP ./$(TARGET_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_TEST)
+	@$(STRIP) -s ./$(TARGET_TEST_BIN) -o ./$(TARGET_TEST)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_TEST)
 	@rm -f ./$(TARGET_TEST)_stripped
 	@echo "[DONE] $(TARGET_TEST) deployed."
 
 deploy_edge_store_test: $(TARGET_EDGE_STORE_TEST_BIN)
 	@echo "[DEPLOY] Ensuring remote dir exists: $(REMOTE_DIR)"
-	@ssh $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_DIR)"
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_DIR)"
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_EDGE_STORE_TEST)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_EDGE_STORE_TEST_BIN) -o ./$(TARGET_EDGE_STORE_TEST)_stripped
-	@rsync -avzP ./$(TARGET_EDGE_STORE_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_EDGE_STORE_TEST)
+	@$(STRIP) -s ./$(TARGET_EDGE_STORE_TEST_BIN) -o ./$(TARGET_EDGE_STORE_TEST)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_EDGE_STORE_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_EDGE_STORE_TEST)
 	@rm -f ./$(TARGET_EDGE_STORE_TEST)_stripped
 	@echo "[DONE] $(TARGET_EDGE_STORE_TEST) deployed."
 
 deploy_atan2_test: $(TARGET_ATAN2_TEST_BIN) deploy_files
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_ATAN2_TEST)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_ATAN2_TEST_BIN) -o ./$(TARGET_ATAN2_TEST)_stripped
-	@rsync -avzP ./$(TARGET_ATAN2_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_ATAN2_TEST)
+	@$(STRIP) -s ./$(TARGET_ATAN2_TEST_BIN) -o ./$(TARGET_ATAN2_TEST)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_ATAN2_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_ATAN2_TEST)
 	@rm -f ./$(TARGET_ATAN2_TEST)_stripped
 	@echo "[DONE] $(TARGET_ATAN2_TEST) deployed."
 
 deploy_expf_test: $(TARGET_EXPF_TEST_BIN) deploy_files
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_EXPF_TEST)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_EXPF_TEST_BIN) -o ./$(TARGET_EXPF_TEST)_stripped
-	@rsync -avzP ./$(TARGET_EXPF_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_EXPF_TEST)
+	@$(STRIP) -s ./$(TARGET_EXPF_TEST_BIN) -o ./$(TARGET_EXPF_TEST)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_EXPF_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_EXPF_TEST)
 	@rm -f ./$(TARGET_EXPF_TEST)_stripped
 	@echo "[DONE] $(TARGET_EXPF_TEST) deployed."
 
 deploy_expf_remez_vs_taylor: $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) deploy_files
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET_EXPF_REMEZ_VS_TAYLOR)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) -o ./$(TARGET_EXPF_REMEZ_VS_TAYLOR)_stripped
-	@rsync -avzP ./$(TARGET_EXPF_REMEZ_VS_TAYLOR)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_EXPF_REMEZ_VS_TAYLOR)
+	@$(STRIP) -s ./$(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) -o ./$(TARGET_EXPF_REMEZ_VS_TAYLOR)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_EXPF_REMEZ_VS_TAYLOR)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_EXPF_REMEZ_VS_TAYLOR)
 	@rm -f ./$(TARGET_EXPF_REMEZ_VS_TAYLOR)_stripped
 	@echo "[DONE] $(TARGET_EXPF_REMEZ_VS_TAYLOR) deployed."
 

@@ -55,56 +55,20 @@ HOT_RVV_OUTPUT_FILE  = $(OUTPUT_DIR_QEMU)/run_hot_rvv.log
 HOT_COMPARE_OUTPUT_FILE = $(OUTPUT_DIR_QEMU)/analyze_hot_compare.log
 
 PYTHON ?= python3
-STRIP  ?= riscv64-unknown-linux-gnu-strip
 
 # 与 test-rvv/Makefile 一致，可按环境覆盖
-REMOTE_USER     ?= root
-REMOTE_IP       ?= 172.16.89.126
+REMOTE_USER     ?=
+REMOTE_IP       ?=
 REMOTE_APP_DIR  ?= ~/pcl-test/app
 # 板卡上与 app 同级的 script/，供 analyze_bench_compare.py（board.mk 的 SCRIPT_DIR 应对齐此路径）
 REMOTE_SCRIPT_DIR ?= $(REMOTE_APP_DIR)/../script
 
 USE_PCL_RVV10 ?= 1
 
-CC  = riscv64-unknown-linux-gnu-gcc
-CXX = riscv64-unknown-linux-gnu-g++
-
-WS               = $(or $(WORKSPACE),/home/zoomin/codes/RISCV/workspace)
-PCL_INSTALL_ROOT = $(WS)/riscv/pcl-rvv
-PCL_SOURCE_ROOT  = $(WS)/pcl
-RISCV_DEPS       = $(WS)/riscv
-RISCV_SYSROOT   := $(shell $(CC) -print-sysroot)
-
-BOOST_ROOT = $(RISCV_DEPS)/boost
-EIGEN_ROOT = $(RISCV_DEPS)/eigen-rvv
-FLANN_ROOT = $(RISCV_DEPS)/flann
-LZ4_ROOT   = $(RISCV_DEPS)/lz4
-HDF5_ROOT  = $(RISCV_DEPS)/hdf5
-ZLIB_ROOT  = $(RISCV_DEPS)/zlib
-LIBPNG_ROOT = $(RISCV_DEPS)/libpng
-
 EIGEN_RVV_FLAGS ?= -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=2 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl
-
-LIB_DIRS_LIST = \
-	$(PCL_INSTALL_ROOT)/lib \
-	$(BOOST_ROOT)/lib \
-	$(FLANN_ROOT)/lib \
-	$(LZ4_ROOT)/lib \
-	$(HDF5_ROOT)/lib \
-	$(ZLIB_ROOT)/lib \
-	$(LIBPNG_ROOT)/lib
-empty :=
-space := $(empty) $(empty)
-LIB_PATH_VAL := $(subst $(space),:,$(LIB_DIRS_LIST))
-
-CXXFLAGS_ARCH = -march=rv64gcv -mabi=lp64d \
-	-DPCL_SILENCE_MALLOC_WARNING=1
-CXXFLAGS_ARCH += $(EIGEN_RVV_FLAGS)
-ifeq ($(USE_PCL_RVV10),1)
-CXXFLAGS_ARCH += -D__RVV10__
-endif
-
-LDFLAGS = $(foreach dir,$(LIB_DIRS_LIST),-L$(dir) -Wl,-rpath-link=$(dir))
+MODULE ?= app
+TOPIC ?= app
+include ../mk/rvv-env.mk
 
 INCLUDES = \
 	-I$(PCL_SOURCE_ROOT)/2d/include \

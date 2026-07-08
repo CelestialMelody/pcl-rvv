@@ -4,23 +4,11 @@ ARCH ?= riscv
 #  RVV load/store micro-benchmarks (isolated)
 # =============================================================================
 ifeq ($(ARCH), riscv)
-CC  = riscv64-unknown-linux-gnu-gcc
-CXX = riscv64-unknown-linux-gnu-g++
-STRIP = riscv64-unknown-linux-gnu-strip
-
-WS = /home/zoomin/codes/RISCV/workspace
-PCL_SOURCE_ROOT  = $(WS)/pcl
-PCL_INSTALL_ROOT = $(WS)/riscv/pcl-rvv
-RISCV_SYSROOT   := $(shell $(CC) -print-sysroot)
-EIGEN_ROOT       = $(WS)/riscv/eigen-rvv
-BOOST_ROOT       = $(WS)/riscv/boost
-
 EIGEN_RVV_FLAGS ?= -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=2 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl
-
-LIB_DIRS_LIST = $(PCL_INSTALL_ROOT)/lib $(BOOST_ROOT)/lib
-empty :=
-space := $(empty) $(empty)
-LIB_PATH_VAL := $(subst $(space),:,$(LIB_DIRS_LIST))
+MODULE ?= rvv
+TOPIC ?= load_store
+include ../../mk/rvv-env.mk
+endif
 
 INCLUDES = \
 	-I$(PCL_SOURCE_ROOT)/common/include \
@@ -30,17 +18,11 @@ INCLUDES = \
 	-I$(BOOST_ROOT)/include
 
 CXXFLAGS = -std=c++17 -O3 -g \
-	$(EIGEN_RVV_FLAGS) \
-	-mabi=lp64d \
-	-D__RVV10__ \
+	$(CXXFLAGS_ARCH) \
 	-DPCL_NO_PRECOMPILE \
 	$(INCLUDES)
 
-LDFLAGS = $(foreach dir,$(LIB_DIRS_LIST),-L$(dir) -Wl,-rpath-link=$(dir))
 LIBS = -lpcl_common -lm
-
-RUN_CMD = LD_LIBRARY_PATH=$(LIB_PATH_VAL):$$LD_LIBRARY_PATH qemu-riscv64 -L $(RISCV_SYSROOT) -cpu rv64,v=true,vlen=256,elen=64
-endif
 
 BUILD_DIR = build/$(ARCH)
 OUTPUT_DIR = output
@@ -83,23 +65,31 @@ clean:
 # =============================================================================
 # Remote Deployment (board)
 # =============================================================================
-REMOTE_USER = root
-REMOTE_IP   = 172.16.89.126
+REMOTE_USER ?=
+REMOTE_IP   ?=
 REMOTE_DIR  = ~/pcl-test/rvv/load_store
+SSH_OPTS ?= -F $(HOME)/.ssh/config
+SSH_CMD ?= ssh $(SSH_OPTS)
+RSYNC_SSH ?= ssh $(SSH_OPTS)
 
-deploy_load: $(TARGET_LOAD_BIN)
+check_board_ssh:
+	@test -n "$(REMOTE_USER)" || (echo "[config] REMOTE_USER is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_USER=<user>." >&2; exit 1)
+	@test -n "$(REMOTE_IP)" || (echo "[config] REMOTE_IP is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_IP=<ip>." >&2; exit 1)
+	@$(SSH_CMD) -o BatchMode=yes -o ConnectTimeout=5 $(REMOTE_USER)@$(REMOTE_IP) true
+
+
+deploy_load: check_board_ssh $(TARGET_LOAD_BIN)
 	@echo "[DEPLOY] $(TARGET_LOAD) -> $(REMOTE_DIR)"
-	@ssh $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_DIR)"
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_DIR)"
 	@$(STRIP) -s ./$(TARGET_LOAD_BIN) -o ./$(TARGET_LOAD)_stripped
-	@rsync -avzP ./$(TARGET_LOAD)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_LOAD)
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_LOAD)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_LOAD)
 	@rm -f ./$(TARGET_LOAD)_stripped
 
-deploy_store: $(TARGET_STORE_BIN)
+deploy_store: check_board_ssh $(TARGET_STORE_BIN)
 	@echo "[DEPLOY] $(TARGET_STORE) -> $(REMOTE_DIR)"
-	@ssh $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_DIR)"
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_DIR)"
 	@$(STRIP) -s ./$(TARGET_STORE_BIN) -o ./$(TARGET_STORE)_stripped
-	@rsync -avzP ./$(TARGET_STORE)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_STORE)
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_STORE)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_STORE)
 	@rm -f ./$(TARGET_STORE)_stripped
 
 .PHONY: all run_load run_store clean deploy_load deploy_store
-

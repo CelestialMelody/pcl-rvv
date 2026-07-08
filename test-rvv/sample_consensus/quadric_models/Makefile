@@ -1,46 +1,16 @@
 ARCH ?= riscv
+EIGEN_RVV_FLAGS ?= -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=2 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl
 
 # =============================================================================
 # Sample Consensus / Quadric Models (RVV)
 # =============================================================================
 
 ifeq ($(ARCH), riscv)
-CC  = riscv64-unknown-linux-gnu-gcc
-CXX = riscv64-unknown-linux-gnu-g++
-
-# =============================================================================
-#  Paths
-# =============================================================================
-WORKSPACE               = /home/zoomin/codes/RISCV/workspace
-PCL_INSTALL_ROOT = $(WORKSPACE)/riscv/pcl-rvv
-PCL_SOURCE_ROOT  = $(WORKSPACE)/pcl
-RISCV_DEPS       = $(WORKSPACE)/riscv
-BOOST_ROOT  = $(RISCV_DEPS)/boost
-EIGEN_ROOT  = $(RISCV_DEPS)/eigen-rvv
-FLANN_ROOT  = $(RISCV_DEPS)/flann
-LZ4_ROOT    = $(RISCV_DEPS)/lz4
-HDF5_ROOT   = $(RISCV_DEPS)/hdf5
-GTEST_ROOT  = $(RISCV_DEPS)/gtest
-ZLIB_ROOT   = $(RISCV_DEPS)/zlib
-LIBPNG_ROOT = $(RISCV_DEPS)/libpng
-
-# 自动获取 sysroot
-RISCV_SYSROOT := $(shell $(CC) -print-sysroot)
-
-LIB_LIST = \
-	$(PCL_INSTALL_ROOT)/lib \
-	$(BOOST_ROOT)/lib \
-	$(FLANN_ROOT)/lib \
-	$(LZ4_ROOT)/lib \
-	$(HDF5_ROOT)/lib \
-	$(GTEST_ROOT)/lib \
-	$(ZLIB_ROOT)/lib \
-	$(LIBPNG_ROOT)/lib
-
-empty :=
-space := $(empty) $(empty)
-RISCV_LIB_PATH := $(subst $(space),:,$(LIB_LIST))
-
+MODULE ?= sample_consensus
+TOPIC ?= $(notdir $(CURDIR))
+include ../../mk/rvv-env.mk
+LIB_LIST = $(LIB_DIRS_LIST)
+RISCV_LIB_PATH := $(LIB_PATH_VAL)
 endif
 
 # =============================================================================
@@ -151,13 +121,13 @@ run_test: clean $(TARGET_BIN)
 # =============================================================================
 #  Remote Deployment
 # =============================================================================
-REMOTE_USER = root
-REMOTE_IP   = 172.16.89.126
+REMOTE_USER ?=
+REMOTE_IP   ?=
 REMOTE_DIR  = ~/pcl-test/sample_consensus/quadric_models
 
 deploy_test: $(TARGET_BIN)
 	@echo "[DEPLOY] Stripping and Syncing $(TARGET)..."
-	@riscv64-unknown-linux-gnu-strip -s ./$(TARGET_BIN) -o ./$(TARGET)_stripped
-	@rsync -avzP ./$(TARGET)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET)
+	@$(STRIP) -s ./$(TARGET_BIN) -o ./$(TARGET)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET)
 	@rm -f ./$(TARGET)_stripped
 	@echo "[DONE] $(TARGET) deployed."

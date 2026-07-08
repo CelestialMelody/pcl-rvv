@@ -85,6 +85,18 @@ LIB_PATH_VAL := $(subst $(space),:,$(LIB_DIRS_LIST))
 
 LDFLAGS = $(foreach dir,$(LIB_DIRS_LIST),-L$(dir) -Wl,-rpath-link=$(dir))
 RUN_CMD = LD_LIBRARY_PATH=$(LIB_PATH_VAL):$$LD_LIBRARY_PATH qemu-riscv64 -L $(RISCV_SYSROOT) -cpu rv64,v=true,vlen=256,elen=64
+
+# Defaults used by legacy self-contained Makefiles. New topic Makefiles may
+# override these after including rvv-env.mk when they need custom behavior.
+CXXFLAGS_ARCH ?= -march=rv64gcv -mabi=lp64d \
+	$(if $(LOG_FILE),-fopt-info-vec-missed=$(LOG_FILE)) \
+	-DPCL_SILENCE_MALLOC_WARNING=1
+CXXFLAGS_ARCH += $(EIGEN_RVV_FLAGS)
+ifeq ($(USE_PCL_RVV10),1)
+CXXFLAGS_ARCH += -D__RVV10__
+endif
+
+VEC_REGEX_STR ?= "[[:space:]]+v[a-z0-9]+(\.[a-z0-9]+)*[[:space:]]+"
 endif
 
 ifneq ($(filter $(ARCH),riscv),$(ARCH))

@@ -46,8 +46,8 @@ PYTHON ?= python3
 # 可选：对比表同时保存到文件，例如 BENCH_COMPARE_SAVE=$(REMOTE_OUTPUT_DIR)/bench_compare.log
 BENCH_COMPARE_SAVE ?=
 
-# 传给分析脚本的 --device（可覆盖，例如 BOARD_LABEL="Milkv-Jupiter"）
-BOARD_LABEL ?= Milkv-Jupiter
+# 传给分析脚本的 --device（可覆盖，例如 BOARD_LABEL="your-board"）
+BOARD_LABEL ?= RVV board
 
 REMOTE_BENCH_STD_OUTPUT_FILE  = $(REMOTE_OUTPUT_DIR)/run_bench_std.log
 REMOTE_BENCH_RVV_OUTPUT_FILE  = $(REMOTE_OUTPUT_DIR)/run_bench_rvv.log
