@@ -5,19 +5,6 @@
 TOPIC  := correspondence_estimation_organized_projection
 MODULE := registration
 
-WS              := /home/zoomin/codes/RISCV/workspace
-PCL_SOURCE_ROOT := $(WS)/pcl
-RISCV_DEPS      := $(WS)/riscv
-PCL_INSTALL_ROOT := $(WS)/riscv/pcl-rvv
-BOOST_ROOT      := $(RISCV_DEPS)/boost
-EIGEN_ROOT      := $(RISCV_DEPS)/eigen-rvv
-GTEST_ROOT      := $(RISCV_DEPS)/gtest
-FLANN_ROOT      := $(RISCV_DEPS)/flann
-LZ4_ROOT        := $(RISCV_DEPS)/lz4
-HDF5_ROOT       := $(RISCV_DEPS)/hdf5
-ZLIB_ROOT       := $(RISCV_DEPS)/zlib
-LIBPNG_ROOT     := $(RISCV_DEPS)/libpng
-
 FOCUS_DIR      := pcl/registration/include/pcl/registration/impl/correspondence_estimation_organized_projection.hpp
 FILTER_REPORT  := log/filtered_correspondence_estimation_organized_projection.log
 ANALYZE_REPORT := log/analyze_correspondence_estimation_organized_projection.log
