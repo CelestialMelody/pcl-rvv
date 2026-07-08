@@ -20,12 +20,11 @@ tolRvvVsNaive (int dim)
   return std::max (1e-5f, 2e-6f * static_cast<float> (std::max (dim, 1)));
 }
 
-/** Div / KL：向量块内与标量同序、同 \c std::log，容差可更紧。 */
+/** Div / KL：RVV log 近似与规约顺序会让误差随维度累积。 */
 inline float
 tolRvvLogNorms (int dim)
 {
-  (void)dim;
-  return 1e-5f;
+  return std::max (1.2e-4f, 5e-7f * static_cast<float> (std::max (dim, 1)));
 }
 
 float
