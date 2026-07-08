@@ -33,7 +33,7 @@ cp test-rvv/config.mk.example test-rvv/config.mk
 
 在本机收集交叉编译测试所需的 `.so`，`strip` 后通过 `rsync` 同步到远端板卡，便于在硬件上直接运行已部署的可执行文件（配合各子目录的 `board.mk`）：
 
-1. 在 `./slim_lib` 中汇总（从本机 `WORKSPACE` 布局复制）：
+1. 在 `./slim_lib` 中汇总（路径来自 `test-rvv/mk/rvv-env.mk` 与本机 `test-rvv/config.mk`）：
   - `$(PCL_INSTALL_ROOT)/lib` 下 PCL 相关 `lib*.so*`
   - 依赖：`boost`、`lz4`、`hdf5`、`flann`、`libpng`、`zlib`、`gtest` 各 `lib` 目录
   - 工具链 sysroot 中的基础库：`libstdc++`、`libc`、`libm`、`libgcc_s`
@@ -65,7 +65,12 @@ make deploy_lib
 
 ## 构建模板迁移状态
 
-当前已采用公共 topic 模板 `test-rvv/mk/rvv-topic.mk` 的目录包括。该模板内部会引入 `test-rvv/mk/rvv-env.mk` 统一管理路径、工具链、依赖目录和板卡配置：
+`test-rvv/mk` 目前分为两层：
+
+- `rvv-env.mk`：只负责本机/板卡环境配置，包括源码路径、RISC-V 依赖路径、工具链、QEMU 运行命令、板卡 SSH 配置等。自包含 Makefile 可以先接入这一层，去除硬编码路径。
+- `rvv-topic.mk`：在 `rvv-env.mk` 之上提供统一的 test/bench/build/deploy 规则。迁移到这一层才算真正采用公共构建模板。
+
+当前已采用公共 topic 模板 `test-rvv/mk/rvv-topic.mk` 的目录包括：
 
 - `filters/approximate_voxel_grid`
 - `filters/bilateral`
@@ -78,7 +83,7 @@ make deploy_lib
 - `registration/correspondence_estimation_organized_projection`
 - `registration/transformation_validation_euclidean`
 
-早期测试如 `test-rvv/2d`、`test-rvv/common/*`、`test-rvv/sample_consensus/*` 仍是自包含 Makefile，后续应逐步迁移到公共模板后再统一清理路径配置。
+早期测试如 `test-rvv/2d`、`test-rvv/common/*`、`test-rvv/sample_consensus/*` 仍保留自包含 Makefile。当前阶段先接入 `rvv-env.mk` 统一路径、工具链、依赖和板卡配置；后续再逐步迁移到 `rvv-topic.mk` 公共构建模板。
 
 ### 与子目录 `board.mk` 的配合
 
