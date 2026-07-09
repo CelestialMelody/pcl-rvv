@@ -63,29 +63,14 @@ make deploy_lib
 
 依赖：ssh、rsync、交叉工具链（含 `strip`），且本机已通过 `test-rvv/config.mk` 或命令行变量配置好 PCL 与各 `RISCV_DEPS` 库路径。
 
-## 构建模板迁移状态
+## 构建模板结构
 
 `test-rvv/mk` 目前分为两层：
 
-- `rvv-env.mk`：只负责本机/板卡环境配置，包括源码路径、RISC-V 依赖路径、工具链、QEMU 运行命令、板卡 SSH 配置等。自包含 Makefile 可以先接入这一层，去除硬编码路径。
-- `rvv-topic.mk`：在 `rvv-env.mk` 之上提供统一的 test/bench/build/deploy 规则。迁移到这一层才算真正采用公共构建模板。
+- `rvv-env.mk`：负责本机/板卡环境配置，包括源码路径、RISC-V 依赖路径、工具链、QEMU 运行命令、板卡 SSH 配置等。
+- `rvv-topic.mk`：在 `rvv-env.mk` 之上提供统一的 test/bench/build/deploy 规则。
 
-当前已采用公共 topic 模板 `test-rvv/mk/rvv-topic.mk` 的目录包括：
-
-- `filters/*`
-- `common/*`
-- `sample_consensus/*`
-- `test-rvv/2d`
-- `test-rvv/app`
-- `test-rvv/rvv/load_store`
-- `registration/correspondence_estimation_organized_projection`
-- `registration/transformation_validation_euclidean`
-
-仍在迁移中的历史自包含或特殊结构目录包括：
-
-- 暂无（后续新增/发现的 legacy 目录继续按模块迁移）
-
-迁移原则是先统一环境配置层，再逐步迁移公共构建模板：每个 topic 的源码、输入数据、依赖库、benchmark 参数和板卡运行参数仍保留在各自 Makefile / board.mk 中；公共模板只沉淀可复用的 build、QEMU、deploy、board run 流程。
+每个 topic 的源码、输入数据、依赖库、benchmark 参数和板卡运行参数仍保留在各自 Makefile / board.mk 中；公共模板只沉淀可复用的 build、QEMU、deploy、board run 流程。
 
 ### 与子目录 `board.mk` 的配合
 
