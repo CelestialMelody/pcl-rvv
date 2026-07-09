@@ -23,13 +23,15 @@ class SampleConsensusModelNormalPlaneBench
 public:
   using Base::Base;
 
-  using Base::selectWithinDistanceRVV;
   using Base::selectWithinDistanceStandard;
-  using Base::countWithinDistanceRVV;
   using Base::countWithinDistanceStandard;
-  using Base::getDistancesToModelRVV;
   using Base::getDistancesToModelStandard;
   using Base::error_sqr_dists_;
+#if defined (__RVV10__)
+  using Base::selectWithinDistanceRVV;
+  using Base::countWithinDistanceRVV;
+  using Base::getDistancesToModelRVV;
+#endif
 };
 
 class Benchmarker {
