@@ -52,6 +52,8 @@ PYTHON_RUN = bash -lc 'if [ -f "$(VENV_ACTIVATE)" ]; then . "$(VENV_ACTIVATE)"; 
 TARGET_BENCH       ?= bench_$(TOPIC)
 TARGET_BENCH_STD   ?= $(TARGET_BENCH)_std
 TARGET_BENCH_RVV   ?= $(TARGET_BENCH)_rvv
+# Test-only topics leave SRCS_BENCH empty; deploy_board then skips bench bins.
+HAS_BENCH          ?= $(if $(strip $(SRCS_BENCH)),1,0)
 TARGET_TEST        ?= test_$(TOPIC)
 TARGET_TEST_STD    ?= $(TARGET_TEST)_std
 TARGET_TEST_RVV    ?= $(TARGET_TEST)_rvv
@@ -239,7 +241,11 @@ deploy_test: deploy_files
 	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/$(BOARD_TARGET_TEST) -o ./$(BOARD_TARGET_TEST)_stripped
 	@rsync -e "$(RSYNC_SSH)" -avzP ./$(BOARD_TARGET_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(BOARD_TARGET_TEST)
 	@rm -f ./$(BOARD_TARGET_TEST)_stripped
+ifeq ($(HAS_BENCH),1)
 deploy_board: deploy_bench_std deploy_bench_rvv deploy_test
+else
+deploy_board: deploy_test
+endif
 run_board_test: deploy_board | $(OUTPUT_DIR_BOARD)
 	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_test"
 run_board_bench_compare: deploy_board | $(OUTPUT_DIR_BOARD)

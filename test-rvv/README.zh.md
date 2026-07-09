@@ -74,6 +74,7 @@ make deploy_lib
 
 - `filters/*`
 - `common/*`
+- `sample_consensus/*`
 - `registration/correspondence_estimation_organized_projection`
 - `registration/transformation_validation_euclidean`
 
@@ -81,7 +82,6 @@ make deploy_lib
 
 - `test-rvv/2d`
 - `test-rvv/app`
-- `test-rvv/sample_consensus/*`
 - `test-rvv/rvv/load_store`
 
 迁移原则是先统一环境配置层，再逐步迁移公共构建模板：每个 topic 的源码、输入数据、依赖库、benchmark 参数和板卡运行参数仍保留在各自 Makefile / board.mk 中；公共模板只沉淀可复用的 build、QEMU、deploy、board run 流程。
