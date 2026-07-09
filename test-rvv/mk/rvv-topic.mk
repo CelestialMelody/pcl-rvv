@@ -57,6 +57,8 @@ HAS_BENCH          ?= $(if $(strip $(SRCS_BENCH)),1,0)
 TARGET_TEST        ?= test_$(TOPIC)
 TARGET_TEST_STD    ?= $(TARGET_TEST)_std
 TARGET_TEST_RVV    ?= $(TARGET_TEST)_rvv
+# Bench-only topics leave SRCS_TEST empty; deploy_board then skips test bins.
+HAS_TEST           ?= $(if $(strip $(SRCS_TEST)),1,0)
 TARGET_UPSTREAM_TEST ?= test_$(TOPIC)_upstream
 TARGET_UPSTREAM_TEST_STD ?= $(TARGET_UPSTREAM_TEST)_std
 TARGET_UPSTREAM_TEST_RVV ?= $(TARGET_UPSTREAM_TEST)_rvv
@@ -109,8 +111,6 @@ LIBS_UPSTREAM_TEST ?= $(LIBS_TEST)
 # such as a PCD path; quote values in the topic Makefile when spaces are possible.
 TEST_ARGS ?=
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
 $(LOG_DIR):
 	mkdir -p $(LOG_DIR)
 $(OUTPUT_DIR):
@@ -119,9 +119,9 @@ $(VEC_LOGS_DIR): $(LOG_DIR)
 	mkdir -p $(VEC_LOGS_DIR)
 $(LOG_VEC_MISS_DIR): $(LOG_DIR)
 	mkdir -p $(LOG_VEC_MISS_DIR)
-$(BUILD_DIR)/$(ARCH): $(BUILD_DIR)
+$(BUILD_DIR)/$(ARCH):
 	mkdir -p $(BUILD_DIR)/$(ARCH)
-$(ASM_DIR): $(BUILD_DIR)
+$(ASM_DIR):
 	mkdir -p $(ASM_DIR)
 $(ASM_DIR)/$(ARCH): $(ASM_DIR)
 	mkdir -p $(ASM_DIR)/$(ARCH)
@@ -241,11 +241,14 @@ deploy_test: deploy_files
 	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/$(BOARD_TARGET_TEST) -o ./$(BOARD_TARGET_TEST)_stripped
 	@rsync -e "$(RSYNC_SSH)" -avzP ./$(BOARD_TARGET_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(BOARD_TARGET_TEST)
 	@rm -f ./$(BOARD_TARGET_TEST)_stripped
+DEPLOY_BOARD_TARGETS :=
 ifeq ($(HAS_BENCH),1)
-deploy_board: deploy_bench_std deploy_bench_rvv deploy_test
-else
-deploy_board: deploy_test
+DEPLOY_BOARD_TARGETS += deploy_bench_std deploy_bench_rvv
 endif
+ifeq ($(HAS_TEST),1)
+DEPLOY_BOARD_TARGETS += deploy_test
+endif
+deploy_board: $(DEPLOY_BOARD_TARGETS)
 run_board_test: deploy_board | $(OUTPUT_DIR_BOARD)
 	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_test"
 run_board_bench_compare: deploy_board | $(OUTPUT_DIR_BOARD)

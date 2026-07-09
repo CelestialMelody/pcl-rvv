@@ -1,13 +1,13 @@
 # =============================================================================
 # 板卡侧运行（与开发机 deploy_* / deploy_board 配合）
 #
-# 用法（板卡上，在含本文件的目录）：
+# 用法（板卡上，在含本文件的目录；部署后通常已保存为 Makefile）：
 #   export LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH
-#   make -f board.mk run_pipeline_rvv
-#   make -f board.mk run_dag_rvv
-#   make -f board.mk run_hot_rvv           # pcl_pipeline_hot（仅 common 热区对比）
-#   make -f board.mk run_pipeline_compare  # std + rvv 跑完并生成对比报告
-#   make -f board.mk run_hot_compare
+#   make run_pipeline_rvv
+#   make run_dag_rvv
+#   make run_hot_rvv           # pcl_pipeline_hot（仅 common 热区对比）
+#   make run_pipeline_compare  # std + rvv 跑完并生成对比报告
+#   make run_hot_compare
 #
 # 可执行需已 rsync 到 REMOTE_DIR：pipeline_{app,dag}_{std,rvv}[, pipeline_hot_{std,rvv}]
 # 部署：开发机  make deploy_hot_std deploy_hot_rvv REMOTE_IP=...
@@ -15,6 +15,9 @@
 #       或与脚本一起：make deploy_compare_script REMOTE_IP=...
 #   analyze_bench_compare.py -> $(REMOTE_DIR)/../script/（与下方 SCRIPT_DIR 一致）
 # =============================================================================
+
+SHELL := /usr/bin/bash
+.SHELLFLAGS := -o pipefail -c
 
 REMOTE_DIR         ?= /root/pcl-test/app
 
