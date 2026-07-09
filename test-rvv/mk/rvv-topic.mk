@@ -208,8 +208,9 @@ clean_bench_std:
 	rm -f $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_STD)
 clean_bench_rvv:
 	rm -f $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_RVV)
+CLEAN_TARGETS ?= $(BUILD_DIR) $(LOG_DIR) $(OUTPUT_DIR)
 clean:
-	rm -rf $(BUILD_DIR) $(LOG_DIR) $(OUTPUT_DIR)
+	rm -rf $(CLEAN_TARGETS)
 
 check_board_ssh:
 	@test -n "$(REMOTE_USER)" || (echo "[config] REMOTE_USER is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_USER=<user>." >&2; exit 1)

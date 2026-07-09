@@ -77,12 +77,13 @@ make deploy_lib
 - `sample_consensus/*`
 - `test-rvv/2d`
 - `test-rvv/app`
+- `test-rvv/rvv/load_store`
 - `registration/correspondence_estimation_organized_projection`
 - `registration/transformation_validation_euclidean`
 
 仍在迁移中的历史自包含或特殊结构目录包括：
 
-- `test-rvv/rvv/load_store`
+- 暂无（后续新增/发现的 legacy 目录继续按模块迁移）
 
 迁移原则是先统一环境配置层，再逐步迁移公共构建模板：每个 topic 的源码、输入数据、依赖库、benchmark 参数和板卡运行参数仍保留在各自 Makefile / board.mk 中；公共模板只沉淀可复用的 build、QEMU、deploy、board run 流程。
 

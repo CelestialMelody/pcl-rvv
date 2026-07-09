@@ -2,6 +2,9 @@
 # Board-side runner for rvv/load_store micro-benchmarks
 # =============================================================================
 
+SHELL := /bin/bash
+.SHELLFLAGS := -o pipefail -c
+
 REMOTE_DIR     = /root/pcl-test/rvv/load_store
 REMOTE_LIB_DIR = /root/pcl-test/lib
 OUTPUT_DIR     = $(REMOTE_DIR)/output
@@ -29,4 +32,3 @@ $(OUTPUT_DIR):
 	mkdir -p $(OUTPUT_DIR)
 
 .PHONY: run_load run_store
-
