@@ -125,27 +125,20 @@ pcl::getAcuteAngle3DAVX (const __m256 &x1, const __m256 &y1, const __m256 &z1, c
 inline vfloat32m2_t
 pcl::acos_RVV_f32m2 (const vfloat32m2_t& x, const std::size_t vl)
 {
-  // Coefficients (broadcasted)
-  const vfloat32m2_t a0 = __riscv_vfmv_v_f_f32m2 (1.59121552f, vl);
-  const vfloat32m2_t a1 = __riscv_vfmv_v_f_f32m2 (-0.15461442f, vl);
-  const vfloat32m2_t a2 = __riscv_vfmv_v_f_f32m2 (0.05354897f, vl);
-  const vfloat32m2_t b0 = __riscv_vfmv_v_f_f32m2 (0.89286965f, vl);
-  const vfloat32m2_t b1 = __riscv_vfmv_v_f_f32m2 (-0.89282669f, vl);
-  const vfloat32m2_t c0 = __riscv_vfmv_v_f_f32m2 (0.06681017f, vl);
-  const vfloat32m2_t c1 = __riscv_vfmv_v_f_f32m2 (-0.09402311f, vl);
-  const vfloat32m2_t c2 = __riscv_vfmv_v_f_f32m2 (0.02708663f, vl);
+  // acos(x) ~= sqrt(1 - x) * Q(1 - x), deg5 remez2 from parms_acos.py.
+  const vfloat32m2_t one = __riscv_vfmv_v_f_f32m2 (1.0f, vl);
+  vfloat32m2_t u = __riscv_vfsub_vv_f32m2 (one, x, vl);
+  u = __riscv_vfmax_vf_f32m2 (u, 0.0f, vl);
 
-  // mul_term = a0 + x*(a1 + x*a2)
-  const vfloat32m2_t mul_term = __riscv_vfmacc_vv_f32m2 (a0, x, __riscv_vfmacc_vv_f32m2 (a1, x, a2, vl), vl);
+  vfloat32m2_t q = __riscv_vfmv_v_f_f32m2 (0.004346735271181379f, vl);
+  q = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (-0.002360310714948563f, vl), u, q, vl);
+  q = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (0.01095480727067022f, vl), u, q, vl);
+  q = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (0.02571508511147162f, vl), u, q, vl);
+  q = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (0.117926522053977f, vl), u, q, vl);
+  q = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (1.414212408248559f, vl), u, q, vl);
 
-  // sqrt_term = sqrt(b0 + x*b1)
-  const vfloat32m2_t sqrt_term = __riscv_vfsqrt_v_f32m2 (__riscv_vfmacc_vv_f32m2 (b0, x, b1, vl), vl);
-
-  // add_term = c0 + x*(c1 + x*c2)
-  const vfloat32m2_t add_term = __riscv_vfmacc_vv_f32m2 (c0, x, __riscv_vfmacc_vv_f32m2 (c1, x, c2, vl), vl);
-
-  // result = mul_term * sqrt_term + add_term
-  return __riscv_vfmacc_vv_f32m2 (add_term, mul_term, sqrt_term, vl);
+  const vfloat32m2_t sqrt_u = __riscv_vfsqrt_v_f32m2 (u, vl);
+  return __riscv_vfmul_vv_f32m2 (sqrt_u, q, vl);
 }
 
 inline vfloat32m2_t
@@ -1162,4 +1155,3 @@ pcl::calculatePolygonArea (const pcl::PointCloud<PointT> &polygon)
 }
 
 #endif  //#ifndef PCL_COMMON_IMPL_H_
-

@@ -23,15 +23,15 @@ $$
    > 向量单位化可从代码编写角度，以及测试文件 test_sample_consensus_plane_models.cpp 的使用角度看出。
    >
 
-### 1.2 `pcl::acos` (快速近似) 原理
+### 1.2 `pcl::acos_RVV_f32m2` (快速近似) 原理
 
-标准的 `std::acos` 计算非常耗时。PCL 使用了一种基于多项式拟合的近似算法（见代码注释中的 Python 脚本引用），其形式为：
+标准的 `std::acos` 计算非常耗时。RVV 当前实现保留上游 PCL 八常数 sqrt 结构作为测试 baseline，但 `common.hpp` 中的 `pcl::acos_RVV_f32m2` 已改用更直接的约化模型：
 
 $$
-\arccos(x) \approx mul\_term(x) \cdot \sqrt{sqrt\_term(x)} + add\_term(x)
+\arccos(x) \approx \sqrt{u}\,Q(u),\quad u=1-x
 $$
 
-其中 `mul_term` 和 `add_term` 是关于 $x$ 的二次多项式，这种结构适合 SIMD 并行化。
+其中 \(Q(u)\) 为 5 次多项式，系数来自 `test-rvv/common/common/script/parms_acos.py --method remez2-deg5`（默认区间 `x in [0, 0.999]`）。采用 deg5 remez2 是精度与速度的折中：相对旧 PCL 八常数结构，误差从约 `7.75e-4 rad` 降到约 `1.31e-6 rad`，同时板卡历史记录显示速度接近旧 RVV PCL 路径。
 
 ---
 
@@ -39,41 +39,35 @@ $$
 
 下面对比分析如何将 x86 AVX 代码转换为 RISC-V RVV 代码。
 
-### 2.1 `pcl::acos` 实现对比
+### 2.1 `pcl::acos_RVV_f32m2` 实现
 
-AVX 逻辑 (SIMD 指令堆叠):
+RVV 逻辑仍使用 FMA 链做 Horner 求值，但输入变量从旧结构中的 `x` 改为约化变量 `u = max(1 - x, 0)`。实现步骤为：
 
-AVX 使用显式的 add 和 mul 指令。对于多项式 $a + x(b + xc)$ (Horner 算法)，AVX 需要嵌套调用：
+1. 计算 `u = 1.0f - x`，并用 `vfmax` 避免输入略大于 1 时出现负数开方。
+2. 用 Horner 计算 deg5 remez2 多项式 `Q(u)`。
+3. 返回 `sqrt(u) * Q(u)`。
 
-> AVX 也可采用 FMA 融合指令
-
-```cpp
-// AVX: 显式的乘法和加法
-_mm256_add_ps(a, _mm256_mul_ps(x, _mm256_add_ps(b, _mm256_mul_ps(x, c))))
-```
-
-RVV 逻辑 (FMA 融合指令):
-
-RISC-V 的 FMA (Fused Multiply-Accumulate) 指令 vfmacc，可以一条指令完成 a += b * c。这不仅减少了指令数，还提高了精度。
+核心代码形态如下：
 
 ```cpp
-// mul_term = a0 + x * (a1 + x * a2)
-// 1. 计算内层: tmp = a1 + x * a2
-//    RVV: vfmacc(a1, x, a2) -> 累加器是 a1，加上 x*a2
-// 2. 计算外层: res = a0 + x * tmp
-//    RVV: vfmacc(a0, x, tmp)
-vfloat32m2_t mul_term = __riscv_vfmacc_vv_f32m2(a0, x, __riscv_vfmacc_vv_f32m2(a1, x, a2, vl), vl);
+vfloat32m2_t u = __riscv_vfsub_vv_f32m2(one, x, vl);
+u = __riscv_vfmax_vf_f32m2(u, 0.0f, vl);
+
+vfloat32m2_t q = q5;
+q = q4 + u * q;
+q = q3 + u * q;
+q = q2 + u * q;
+q = q1 + u * q;
+q = q0 + u * q;
+
+return sqrt(u) * q;
 ```
-
-> **注意**：RISC-V 的 `vfmacc` 定义通常是 `vd = vd + vs1 * vs2`。我们在代码中利用这一点，将常数项 (`a0`, `a1`) 作为累加器的初始值（目标寄存器），从而完美实现多项式求值。
-
-**转换策略**：将 AVX 的 `add(mul(...))` 结构转换为 RVV 的 `vfmacc` 链。
 
 | **操作** | **AVX (__m256)** | **RVV (vfloat32m2_t)** | **说明** |
 | ------ | ------ | ------ | ------ |
 | **广播常数** | `_mm256_set1_ps(1.5f)` | `__riscv_vfmv_v_f_f32m2(1.5f, vl)` | 将标量复制到整个向量寄存器 |
-| **多项式计算** | `add(mul(x, add(b, mul(x, c))), a)` | `vfmacc(a, x, vfmacc(b, x, c))` | RVV 使用 FMA 简化了 Horner 算法 |
-| **平方根** | `_mm256_sqrt_ps` | `__riscv_vfsqrt_v_f32m2` | 直接对应 |
+| **多项式计算** | Horner 链 | `vfmacc(acc, u, q)` | RVV 使用 FMA 计算 `Q(u)` |
+| **平方根** | `_mm256_sqrt_ps` | `__riscv_vfsqrt_v_f32m2` | 对 `u=1-x` 开方 |
 
 ---
 
@@ -123,3 +117,31 @@ vfloat32m2_t mul_term = __riscv_vfmacc_vv_f32m2(a0, x, __riscv_vfmacc_vv_f32m2(a
 
 - **AVX**: `_mm256_min_ps(val, 1.0f)`
 - **RVV**: `__riscv_vfmin_vf_f32m2(val, 1.0f, vl)` (直接使用向量-标量版本，更简洁)
+
+---
+
+## 3. 参数与验证记录
+
+参数来源：
+
+- 脚本：`test-rvv/common/common/script/parms_acos.py`
+- 模型：`acos(x) ~= sqrt(1-x) * Q(1-x)`
+- 当前默认：`deg5 remez2`
+- 系数：
+  - `q0 = 1.414212408248559`
+  - `q1 = 0.117926522053977`
+  - `q2 = 0.02571508511147162`
+  - `q3 = 0.01095480727067022`
+  - `q4 = -0.002360310714948563`
+  - `q5 = 0.004346735271181379`
+
+本轮替换前复核：
+
+```bash
+make -C test-rvv/common/common parms_acos
+make -C test-rvv/common/common run_acos_test
+```
+
+QEMU 专项结果：当前 `pcl::acos_RVV_f32m2` 最大误差 `1.311302e-06 rad`，与标量 deg5 remez2 的 `max |diff|` 为 `0`；历史 PCL 八常数 baseline 最大误差为 `7.749423e-04 rad`。
+
+板卡专项结果：`make deploy_acos_test` 后在板卡侧执行 `make run_acos_test` 通过。当前 `pcl::acos_RVV_f32m2` 最大误差 `1.311302e-06 rad`，与标量 deg5 remez2 的 `max |diff|` 为 `0`；计时为 `29.203 ms`，`17.01x vs std`。同次测试中 RVV deg7 remez2 最大误差为 `2.384186e-07 rad`，速度约为当前 common.hpp 的 `0.89x`。

@@ -1,9 +1,9 @@
 /*
  * acos_test.cpp — 在 x∈[0, x_hi] 上将多种 acos 逼近与 std::acos 对比（不改 common.hpp 亦可跑）。
  *
- *  (1) 标量 sqrt(1-x)*P 八常数（与 pcl::acos_RVV 同系，common.hpp）
+ *  (1) 标量 sqrt(1-x)*P 八常数（历史 PCL baseline）
  *  (2)–(10) 约化模型 acos(x)≈sqrt(1-x)*Q(1-x)，deg11/deg7/deg5 ×（remez1 / remez2 / LP）；标量侧为 float32 同构 Horner
- *  (11) __RVV10__：pcl::acos_RVV_f32m2（系数同 (1)）
+ *  (11) __RVV10__：pcl::acos_RVV_f32m2（common.hpp 当前实现，deg5 remez2）
  *  (12) __RVV10__：约化模型 deg7 + remez2 的 RVV 实现
  *  (13) __RVV10__：约化模型 deg5 + remez2 的 RVV 实现
  *
@@ -11,8 +11,8 @@
  *
  * 精度与 RVV/标量对照（下文「max |diff|」）
  * ----------------------------------------
- *  (1) PCL：标量 acos_pcl_scalar 与 pcl::acos_RVV_f32m2 同为 float32 算子，逐点可对齐，diff 常为 0。
- *  (2)～(10) 约化多项式：标量路径按 RVV 思路使用 float32 Horner + sqrtf，常量由 double 系数 cast 到 float；
+ *  (1) PCL：保留旧八常数作为历史 baseline。
+ *  (2)～(11) 约化多项式：标量路径按 RVV 思路使用 float32 Horner + sqrtf，常量由 double 系数 cast 到 float；
  *      RVV 约化内核全程 float32。若两端序列一致，RVV 与标量 max|diff| 通常显著收敛（接近 0 或低 ULP）。
  *
  * Build: make acos_test ARCH=riscv  或  g++ -std=c++17 -O3 -o acos_test acos_test.cpp -lm （+ RVV 时同 atan2_test）
@@ -91,41 +91,27 @@ void print_perf_table_close(int w_kern_disp)
 }
 
 void print_rvv_tradeoff_summary(
-    double ms_rvv_pcl,
-    double err_rvv_pcl,
+    double ms_rvv_common,
+    double err_rvv_common,
     double ms_rvv_d7,
     double err_rvv_d7,
     double ms_rvv_d5,
     double err_rvv_d5)
 {
-  const double spd_d7_vs_pcl = ms_rvv_pcl / ms_rvv_d7;
-  const double spd_d5_vs_pcl = ms_rvv_pcl / ms_rvv_d5;
-  const double err_gain_d7 = err_rvv_pcl / err_rvv_d7;
-  const double err_gain_d5 = err_rvv_pcl / err_rvv_d5;
+  const double spd_d7_vs_common = ms_rvv_common / ms_rvv_d7;
+  const double spd_d5_vs_common = ms_rvv_common / ms_rvv_d5;
 
-  std::printf("\n=== RVV Tradeoff vs PCL RVV ===\n");
-  std::printf("  baseline: RVV PCL       max err = %.6e rad, time = %.3f ms\n", err_rvv_pcl, ms_rvv_pcl);
+  std::printf("\n=== RVV Status vs Reduced Candidates ===\n");
+  std::printf("  common.hpp: pcl::acos_RVV_f32m2  max err = %.6e rad, time = %.3f ms\n", err_rvv_common, ms_rvv_common);
   std::printf(
-      "  candidate: RVV d7 remez2  max err = %.6e rad (improve %.1fx), speed = %.2fx of RVV PCL\n",
+      "  candidate: RVV d7 remez2        max err = %.6e rad, speed = %.2fx of common.hpp\n",
       err_rvv_d7,
-      err_gain_d7,
-      spd_d7_vs_pcl);
+      spd_d7_vs_common);
   std::printf(
-      "  candidate: RVV d5 remez2  max err = %.6e rad (improve %.1fx), speed = %.2fx of RVV PCL\n",
+      "  candidate: RVV d5 remez2        max err = %.6e rad, speed = %.2fx of common.hpp\n",
       err_rvv_d5,
-      err_gain_d5,
-      spd_d5_vs_pcl);
-
-  // 简单策略：速度>=0.9x 且误差提升>=100x 视为“平衡档”
-  const bool d5_balanced = (spd_d5_vs_pcl >= 0.90) && (err_gain_d5 >= 100.0);
-  const bool d7_balanced = (spd_d7_vs_pcl >= 0.90) && (err_gain_d7 >= 100.0);
-  if (d5_balanced) {
-    std::printf("  suggestion: use RVV d5 remez2 as balanced default.\n");
-  } else if (d7_balanced) {
-    std::printf("  suggestion: use RVV d7 remez2 as balanced default.\n");
-  } else {
-    std::printf("  suggestion: keep RVV PCL as speed-first default.\n");
-  }
+      spd_d5_vs_common);
+  std::printf("  note: row (1) remains the historical PCL eight-constant scalar baseline.\n");
 }
 
 const float k_pi = 3.141592653589793f;
@@ -459,7 +445,7 @@ void print_rvv_scalar_diff_legend()
 {
   std::printf(
       "\n"
-      "（RVV 与标量 max|diff| 说明）PCL：(1) 与 (11) 均为 float32 公式，预期 max|diff| 约为 0。"
+      "（RVV 与标量 max|diff| 说明）(11) common.hpp 当前实现应与标量 (9) deg5 remez2 对齐。"
       "约化 (2)–(10) 标量改为 float32 同构 Horner；(12)(13) 亦为 float32 RVV，故与对应标量应更接近（常见为 0 或低 ULP），"
       "与主表相对 std::acos 的误差是不同指标。\n");
 }
@@ -492,7 +478,7 @@ void compute_errors(
 }
 
 const AcosCase k_cases[] = {
-    {"(1) 标量 sqrt(1-x)*P 八常数（与 pcl::acos_RVV 同系，common.hpp）", run_scalar_pcl},
+    {"(1) 标量 sqrt(1-x)*P 八常数（历史 PCL baseline）", run_scalar_pcl},
     {"(2) 约化 deg11 + remez1（sqrt(1-x)*Q，稠密 float32 Horner）",
      run_reduced_poly_dense11<AcosReducedRemez1Deg11>},
     {"(3) 约化 deg11 + remez2（sqrt(1-x)*Q，float32 Horner）", run_reduced_poly<AcosReducedRemez2Deg11>},
@@ -547,7 +533,7 @@ int main()
 #if defined(__RVV10__)
   w_item_disp = std::max(
       w_item_disp,
-      utf8_display_width("(11) pcl::acos_RVV_f32m2（系数同 (1)）"));
+      utf8_display_width("(11) pcl::acos_RVV_f32m2（common.hpp：deg5 remez2）"));
   w_item_disp = std::max(
       w_item_disp,
       utf8_display_width("(12) RVV 约化 deg7 remez2（sqrt(1-x)*Q）"));
@@ -584,7 +570,7 @@ int main()
     err_rvv_pcl_max = static_cast<double>(max_r);
     print_err_table_row(
         w_item_disp,
-        "(11) pcl::acos_RVV_f32m2（系数同 (1)）",
+        "(11) pcl::acos_RVV_f32m2（common.hpp：deg5 remez2）",
         static_cast<double>(max_r),
         static_cast<double>(max_d),
         mean_r);
@@ -619,7 +605,7 @@ int main()
 
   print_rvv_scalar_diff_legend();
   {
-    run_scalar_pcl(xs, out, n);
+    run_reduced_poly_deg5<AcosReducedRemez2Deg5>(xs, out, n);
     float max_diff = 0.f;
     for (std::size_t i = 0; i < n; ++i) {
       float d = std::fabs(out_rvv_pcl[i] - out[i]);
@@ -628,7 +614,7 @@ int main()
     }
     const int col0 = 6;
     const char* diff_lbl = "max |diff| :";
-    std::printf("\n[pcl::acos_RVV vs 标量 (1)]\n");
+    std::printf("\n[pcl::acos_RVV vs 标量 (9) deg5 remez2]\n");
     std::printf("  %-*s  %*.*e\n", col0, diff_lbl, col0, 6, static_cast<double>(max_diff));
   }
   {
@@ -763,7 +749,7 @@ int main()
   w_perf_lab = std::max(w_perf_lab, utf8_display_width("scalar reduced d5 remez2"));
   w_perf_lab = std::max(w_perf_lab, utf8_display_width("scalar reduced d5 LP"));
 #if defined(__RVV10__)
-  w_perf_lab = std::max(w_perf_lab, utf8_display_width("RVV PCL"));
+  w_perf_lab = std::max(w_perf_lab, utf8_display_width("pcl::acos_RVV_f32m2"));
   w_perf_lab = std::max(w_perf_lab, utf8_display_width("RVV reduced d7 remez2"));
   w_perf_lab = std::max(w_perf_lab, utf8_display_width("RVV reduced d5 remez2"));
 #endif
@@ -820,18 +806,18 @@ int main()
     bench_touch_output(out_rvv_d5, n, &bench_sink);
   }
   auto t15 = std::chrono::high_resolution_clock::now();
-  double ms_r_pcl = std::chrono::duration<double, std::milli>(t13 - t12).count();
+  double ms_r_common = std::chrono::duration<double, std::milli>(t13 - t12).count();
   double ms_r_d7 = std::chrono::duration<double, std::milli>(t14 - t13).count();
   double ms_r_d5 = std::chrono::duration<double, std::milli>(t15 - t14).count();
-  std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", ms_std / ms_r_pcl);
-  print_perf_table_row(w_perf_lab, "RVV PCL", ms_r_pcl, note_buf);
+  std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", ms_std / ms_r_common);
+  print_perf_table_row(w_perf_lab, "pcl::acos_RVV_f32m2", ms_r_common, note_buf);
   std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", ms_std / ms_r_d7);
   print_perf_table_row(w_perf_lab, "RVV reduced d7 remez2", ms_r_d7, note_buf);
   std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", ms_std / ms_r_d5);
   print_perf_table_row(w_perf_lab, "RVV reduced d5 remez2", ms_r_d5, note_buf);
   print_perf_table_close(w_perf_lab);
   print_rvv_tradeoff_summary(
-      ms_r_pcl, err_rvv_pcl_max, ms_r_d7, err_rvv_d7_max, ms_r_d5, err_rvv_d5_max);
+      ms_r_common, err_rvv_pcl_max, ms_r_d7, err_rvv_d7_max, ms_r_d5, err_rvv_d5_max);
   std::free(out_rvv_pcl);
   std::free(out_rvv_d7);
   std::free(out_rvv_d5);

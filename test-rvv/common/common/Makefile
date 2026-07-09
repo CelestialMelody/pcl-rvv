@@ -130,16 +130,16 @@ run_bench: clean_bench $(TARGET_BENCH_BIN)
 run_test: clean_test $(TARGET_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] Unit Test on $(ARCH)..."
 	$(RUN_CMD) ./$(TARGET_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_test.log
-run_atan2_test: $(TARGET_ATAN2_TEST_BIN) | $(OUTPUT_DIR)
-	$(RUN_CMD) ./$(TARGET_ATAN2_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_atan2_test.log
-run_acos_test: $(TARGET_ACOS_TEST_BIN) | $(OUTPUT_DIR)
-	$(RUN_CMD) ./$(TARGET_ACOS_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_acos_test.log
-run_expf_test: $(TARGET_EXPF_TEST_BIN) | $(OUTPUT_DIR)
-	$(RUN_CMD) ./$(TARGET_EXPF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_expf_test.log
-run_expf_remez_vs_taylor: $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) | $(OUTPUT_DIR)
-	$(RUN_CMD) ./$(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_expf_remez_vs_taylor.log
-run_logf_test: $(TARGET_LOGF_TEST_BIN) | $(OUTPUT_DIR)
-	$(RUN_CMD) ./$(TARGET_LOGF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_logf_test.log
+run_atan2_test: $(TARGET_ATAN2_TEST_BIN) | $(OUTPUT_DIR_QEMU)
+	$(RUN_CMD) ./$(TARGET_ATAN2_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_atan2_test.log
+run_acos_test: $(TARGET_ACOS_TEST_BIN) | $(OUTPUT_DIR_QEMU)
+	$(RUN_CMD) ./$(TARGET_ACOS_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_acos_test.log
+run_expf_test: $(TARGET_EXPF_TEST_BIN) | $(OUTPUT_DIR_QEMU)
+	$(RUN_CMD) ./$(TARGET_EXPF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_expf_test.log
+run_expf_remez_vs_taylor: $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) | $(OUTPUT_DIR_QEMU)
+	$(RUN_CMD) ./$(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_expf_remez_vs_taylor.log
+run_logf_test: $(TARGET_LOGF_TEST_BIN) | $(OUTPUT_DIR_QEMU)
+	$(RUN_CMD) ./$(TARGET_LOGF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_logf_test.log
 run_math: run_atan2_test run_acos_test run_expf_test run_logf_test
 
 clean_bench:
@@ -252,25 +252,25 @@ parms_log1p: $(VENV_DEPS_STAMP)
 parms_acos: $(VENV_DEPS_STAMP)
 	$(VENV_PYTHON) $(SCRIPT_DIR)/parms_acos.py
 
-run_atan2_test: $(TARGET_ATAN2_TEST_BIN) | $(OUTPUT_DIR)
+run_atan2_test: $(TARGET_ATAN2_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] atan2 approximation vs std::atan2..."
-	$(RUN_CMD) ./$(TARGET_ATAN2_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_atan2_test.log
+	$(RUN_CMD) ./$(TARGET_ATAN2_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_atan2_test.log
 
-run_acos_test: $(TARGET_ACOS_TEST_BIN) | $(OUTPUT_DIR)
+run_acos_test: $(TARGET_ACOS_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] acos approximation vs std::acos..."
-	$(RUN_CMD) ./$(TARGET_ACOS_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_acos_test.log
+	$(RUN_CMD) ./$(TARGET_ACOS_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_acos_test.log
 
-run_expf_test: $(TARGET_EXPF_TEST_BIN) | $(OUTPUT_DIR)
+run_expf_test: $(TARGET_EXPF_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] expf approximation vs std::expf..."
-	$(RUN_CMD) ./$(TARGET_EXPF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_expf_test.log
+	$(RUN_CMD) ./$(TARGET_EXPF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_expf_test.log
 
-run_expf_remez_vs_taylor: $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) | $(OUTPUT_DIR)
+run_expf_remez_vs_taylor: $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] expf Remez/Taylor vs std::expf..."
-	$(RUN_CMD) ./$(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_expf_remez_vs_taylor.log
+	$(RUN_CMD) ./$(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_expf_remez_vs_taylor.log
 
-run_logf_test: $(TARGET_LOGF_TEST_BIN) | $(OUTPUT_DIR)
+run_logf_test: $(TARGET_LOGF_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] logf Remez+RVV vs std::logf..."
-	$(RUN_CMD) ./$(TARGET_LOGF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR)/run_logf_test.log
+	$(RUN_CMD) ./$(TARGET_LOGF_TEST_BIN) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_logf_test.log
 
 clean_math:
 	rm -f $(TARGET_ATAN2_TEST_BIN) $(TARGET_ACOS_TEST_BIN) $(TARGET_EXPF_TEST_BIN) $(TARGET_EXPF_REMEZ_VS_TAYLOR_BIN) $(TARGET_LOGF_TEST_BIN)

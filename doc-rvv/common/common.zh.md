@@ -351,7 +351,7 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
 
 #### getAcuteAngle3DRVV
 
-`getAngle3D` 公开 API 仍是双向量夹角（`std::acos`）；批量场景在 x86 上用 SSE/AVX 的 `acos` 近似与 `getAcuteAngle3D*`。RVV 侧提供同系数结构的 `acos_RVV_f32m2`，以及 `getAcuteAngle3DRVV_f32m2`：先算点积，`vfsgnjx` 得到 \(|\mathbf{u}\cdot \mathbf{v}|\)，`vfmin` 夹到 \([0,1]\) 后调用 `acos_RVV`，与锐角定义及 SSE 路径对齐。
+`getAngle3D` 公开 API 仍是双向量夹角（`std::acos`）；批量场景在 x86 上用 SSE/AVX 的 `acos` 近似与 `getAcuteAngle3D*`。RVV 侧提供 `acos_RVV_f32m2`（当前为 `sqrt(1-x)*Q(1-x)` 的 deg5 remez2 约化模型），以及 `getAcuteAngle3DRVV_f32m2`：先算点积，`vfsgnjx` 得到 \(|\mathbf{u}\cdot \mathbf{v}|\)，`vfmin` 夹到 \([0,1]\) 后调用 `acos_RVV`，与锐角定义对齐。
 
 #### atan2_RVV_f32m2
 

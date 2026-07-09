@@ -30,7 +30,7 @@
 - atan2 / `parms_atan2.py`（推荐通读）：默认 `python script/parms_atan2.py` 打印**六路**对照：(1) [mazzo.li / vectorized atan2](https://mazzo.li/posts/vectorized-atan2.html) 文章常数（注释）；(2) **Remez1** 交换法（`--method remez1`）；(3) **Remez2**（Powell + 密栅）；(4) 离散 LP；(5)(6) Sollya 全次数 5 / 11（Horner `c0..`；与 (2)–(4) 的 \(t\cdot(a_1+a_3 t^2+\cdots)\) 形式不同）。六路快照写在脚本顶部注释块；Sollya deg11 用 `--run-sollya`，deg5 用 `--run-sollya-deg5`。`atan2_test.cpp` 为标量 **(1)–(6)** + **(7) RVV**（系数同 (1)）。Sollya 路径在负 `t=y/x` 上按 \(\mathrm{sign}(t)\cdot P(\lvert t\rvert)\) 对 `atan` 做奇延拓。
 - log(1+u)：在 \([0,1]\) 上逼近光滑，离散 LP（`parms_log1p.py` 默认）与旧版 remez-legacy 相比，在头文件所采用的 float Horner 下已看到更小 max 绝对误差；`common.hpp` 中 `kLogfLog1pC0..C7` 已与 LP 输出对齐。这不表示「logf 不适于 LP」——与下面 exp 的情况不同。
 - exp(r) 默认在 [-ln2/2, ln2/2]：与 expf 的 `n=round(x/ln2)` 约化一致。`parms_expf.py` 提供 `remez1`（绝对误差，第一算法风格交换实现）以及 `remez1-rel` / `remez2-rel` / `lp-rel`（相对误差目标），另有 `sollya-script/sollya-run`。当前 `expf_test.cpp` 已同步新区间系数；板卡实测六路新系数（remez1/remez1-rel/remez2-rel/lp-rel/sollya）`max rel` 同为约 `2.234380e-07`，显著优于 baseline `1.517213e-06`。
-- acos：`parms_acos.py` 默认**四路** report：(1) PCL sqrt 八常数基线；(2) 约化模型 `acos(x) ~= sqrt(1-x)*Q(1-x)` 的 **remez1**（交换法，`fit_reduced_remez1`）；(3) 同模型的 **remez2**；(4) 离散 LP。`--powell-grid` 同时用作 remez1 迭代中的误差密栅长度与 remez2 目标栅格。单跑 remez1 仅需 numpy；默认 report 仍依赖 scipy（remez2 与 LP）。`x_hi` 与 `acos_test.cpp` 的 `k_x_hi`、脚本 `--x-hi` 一致（默认 `0.999`）。C++ `acos_test.cpp`：标量 **(1)–(10)**（PCL + deg11/7/5 × remez1/remez2/LP），RVV **(11)–(13)**；deg11 的 remez1 在 C++ 侧用**稠密** Horner（`q0..q11` 全用），与 remez2 所用稀疏结构区分。
+- acos：`parms_acos.py` 默认**四路** report：(1) PCL sqrt 八常数基线；(2) 约化模型 `acos(x) ~= sqrt(1-x)*Q(1-x)` 的 **remez1**（交换法，`fit_reduced_remez1`）；(3) 同模型的 **remez2**；(4) 离散 LP。`--powell-grid` 同时用作 remez1 迭代中的误差密栅长度与 remez2 目标栅格。单跑 remez1 仅需 numpy；默认 report 仍依赖 scipy（remez2 与 LP）。`x_hi` 与 `acos_test.cpp` 的 `k_x_hi`、脚本 `--x-hi` 一致（默认 `0.999`）。C++ `acos_test.cpp`：标量 **(1)–(10)**（历史 PCL + deg11/7/5 × remez1/remez2/LP），RVV **(11)–(13)**；`common.hpp` 当前默认采用 **deg5 remez2** reduced 形式，deg11 的 remez1 在 C++ 侧用**稠密** Horner（`q0..q11` 全用），与 remez2 所用稀疏结构区分。
 - acos（模型说明）：`lp_minimax.minimax_polynomial_lp` 与报告中的 remez2 初值都要求逼近式对所求系数是线性的（单项式或给定基下的线性组合）。PCL 的 `(a0+x(a1+x a2))√(b0+b1 x)+(c0+x(c1+x c2))` 对八个参数是非线性的，不能原样塞进上述 LP；因此改用线性可解的约化模型 `sqrt(1-x)*Q(1-x)`。若希望「泰勒式」少用系数，可在区间上固定解析形状，仅拟合少量参数；得到的仍是 minimax / LP 系数，不是截断泰勒的解析系数。
 
 ---
@@ -53,6 +53,12 @@
 - 精度：scalar/RVV 的新系数组（remez1、remez1-rel、remez2-rel、lp-rel、sollya）`max rel` 均约 `2.234380e-07`，baseline 为 `1.517213e-06`。
 - 一致性：`[RVV-* vs scalar-*] max |diff|` 全部为 `0`，说明当前 RVV 与标量路径在该测试网格上数值一致。
 - 性能：标量各系数方案耗时几乎一致；RVV 端 `remez1-rel` 略快于其余方案，但总体差异主要来自实现路径（scalar vs RVV），不是系数来源。
+
+补充（acos 当前采用 deg5 remez2）：
+
+- 参数：`q0=1.414212408248559`、`q1=0.117926522053977`、`q2=0.02571508511147162`、`q3=0.01095480727067022`、`q4=-0.002360310714948563`、`q5=0.004346735271181379`。
+- QEMU 专项复核：当前 `pcl::acos_RVV_f32m2` 最大误差 `1.311302e-06 rad`，与标量 deg5 remez2 的 `max |diff|` 为 `0`；历史 PCL 八常数 baseline 最大误差 `7.749423e-04 rad`。
+- 板卡专项复核：当前 `pcl::acos_RVV_f32m2` 最大误差 `1.311302e-06 rad`，与标量 deg5 remez2 的 `max |diff|` 为 `0`；计时 `29.203 ms`，`17.01x vs std`。同次测试中 RVV deg7 remez2 最大误差 `2.384186e-07 rad`，速度约为当前 common.hpp 的 `0.89x`。
 
 对「约化 + 核函数」的进一步优化（不互相排斥）：
 
