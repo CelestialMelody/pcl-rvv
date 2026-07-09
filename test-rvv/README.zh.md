@@ -75,12 +75,12 @@ make deploy_lib
 - `filters/*`
 - `common/*`
 - `sample_consensus/*`
+- `test-rvv/2d`
 - `registration/correspondence_estimation_organized_projection`
 - `registration/transformation_validation_euclidean`
 
 仍在迁移中的历史自包含或特殊结构目录包括：
 
-- `test-rvv/2d`
 - `test-rvv/app`
 - `test-rvv/rvv/load_store`
 
