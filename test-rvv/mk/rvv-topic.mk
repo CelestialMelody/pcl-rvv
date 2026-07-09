@@ -40,6 +40,11 @@ UPSTREAM_TEST_RVV_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test_rvv.log
 ANALYZE_VEC_SCRIPT    ?= $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_vec_log.py
 BENCH_COMPARE_SCRIPT  ?= $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_bench_compare.py
 
+# Optional data files to deploy beside the board binaries. Keep the list in the
+# topic Makefile so inputs such as PCD fixtures remain topic-owned.
+DEPLOY_EXTRA_FILES ?=
+DEPLOY_EXTRA_REMOTE_DIR ?= $(REMOTE_DIR)
+
 VENV_ACTIVATE ?= $(abspath $(CURDIR)/.venv/bin/activate)
 PYTHON ?= python3
 PYTHON_RUN = bash -lc 'if [ -f "$(VENV_ACTIVATE)" ]; then . "$(VENV_ACTIVATE)"; fi; $(PYTHON) "$$@"' --
@@ -53,6 +58,12 @@ TARGET_TEST_RVV    ?= $(TARGET_TEST)_rvv
 TARGET_UPSTREAM_TEST ?= test_$(TOPIC)_upstream
 TARGET_UPSTREAM_TEST_STD ?= $(TARGET_UPSTREAM_TEST)_std
 TARGET_UPSTREAM_TEST_RVV ?= $(TARGET_UPSTREAM_TEST)_rvv
+
+# Board smoke tests usually deploy the RVV test binary, but a few legacy topics
+# kept an un-suffixed remote name. Override BOARD_TARGET_TEST in the topic
+# Makefile instead of changing TARGET_TEST_RVV or duplicating deploy rules.
+BOARD_TARGET_TEST ?= $(TARGET_TEST_RVV)
+BOARD_TEST_USE_PCL_RVV10 ?= 1
 
 TARGET_BENCH_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH)
 TARGET_TEST_BIN  = $(BUILD_DIR)/$(ARCH)/$(TARGET_TEST)
@@ -92,6 +103,10 @@ LIBS_BENCH ?= -lpcl_common -lm
 LIBS_TEST  ?= -lpcl_common -lgtest -lgtest_main -lpthread -lm
 LIBS_UPSTREAM_TEST ?= $(LIBS_TEST)
 
+# Extra argv passed to local test binaries. Use this for topic-owned fixtures
+# such as a PCD path; quote values in the topic Makefile when spaces are possible.
+TEST_ARGS ?=
+
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 $(LOG_DIR):
@@ -127,11 +142,11 @@ $(TARGET_UPSTREAM_TEST_BIN): $(SRCS_UPSTREAM_TEST) | $(LOG_DIR) $(LOG_VEC_MISS_D
 
 run_test: clean_test $(TARGET_TEST_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] Unit Test on $(ARCH)..."
-	$(RUN_CMD) ./$(TARGET_TEST_BIN) 2>&1 | tee $(TEST_OUTPUT_FILE)
+	$(RUN_CMD) ./$(TARGET_TEST_BIN) $(TEST_ARGS) 2>&1 | tee $(TEST_OUTPUT_FILE)
 run_test_std: clean_test_std | $(OUTPUT_DIR_QEMU)
-	@$(MAKE) -C $(CURDIR) run_test USE_PCL_RVV10=0 TARGET_TEST=$(TARGET_TEST_STD) TEST_OUTPUT_FILE=$(TEST_STD_OUTPUT_FILE)
+	@$(MAKE) -C $(CURDIR) run_test USE_PCL_RVV10=0 TARGET_TEST=$(TARGET_TEST_STD) TEST_OUTPUT_FILE=$(TEST_STD_OUTPUT_FILE) TEST_ARGS="$(TEST_ARGS)"
 run_test_rvv: clean_test_rvv | $(OUTPUT_DIR_QEMU)
-	@$(MAKE) -C $(CURDIR) run_test USE_PCL_RVV10=1 TARGET_TEST=$(TARGET_TEST_RVV) TEST_OUTPUT_FILE=$(TEST_RVV_OUTPUT_FILE)
+	@$(MAKE) -C $(CURDIR) run_test USE_PCL_RVV10=1 TARGET_TEST=$(TARGET_TEST_RVV) TEST_OUTPUT_FILE=$(TEST_RVV_OUTPUT_FILE) TEST_ARGS="$(TEST_ARGS)"
 run_test_compare: run_test_std run_test_rvv
 
 run_upstream_test: clean_upstream_test $(TARGET_UPSTREAM_TEST_BIN) | $(OUTPUT_DIR_QEMU)
@@ -204,6 +219,10 @@ deploy_files: check_board_ssh
 	@rsync -e "$(RSYNC_SSH)" -avzP $(BENCH_COMPARE_SCRIPT) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_SCRIPT_DIR)/
 	@rsync -e "$(RSYNC_SSH)" -avzP $(BOARD_RUN_MK) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_SCRIPT_DIR)/
 	@rsync -e "$(RSYNC_SSH)" -avzP board.mk $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/Makefile
+	@if [ -n "$(DEPLOY_EXTRA_FILES)" ]; then \
+		$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(DEPLOY_EXTRA_REMOTE_DIR)"; \
+		rsync -e "$(RSYNC_SSH)" -avzP $(DEPLOY_EXTRA_FILES) $(REMOTE_USER)@$(REMOTE_IP):$(DEPLOY_EXTRA_REMOTE_DIR)/; \
+	fi
 deploy_bench_rvv: deploy_files clean_bench_rvv
 	@$(MAKE) -C $(CURDIR) USE_PCL_RVV10=1 TARGET_BENCH=$(TARGET_BENCH_RVV) $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_RVV)
 	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_RVV) -o ./$(TARGET_BENCH_RVV)_stripped
@@ -214,11 +233,12 @@ deploy_bench_std: deploy_files clean_bench_std
 	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_STD) -o ./$(TARGET_BENCH_STD)_stripped
 	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_BENCH_STD)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH_STD)
 	@rm -f ./$(TARGET_BENCH_STD)_stripped
-deploy_test: deploy_files clean_test_rvv
-	@$(MAKE) -C $(CURDIR) USE_PCL_RVV10=1 TARGET_TEST=$(TARGET_TEST_RVV) $(BUILD_DIR)/$(ARCH)/$(TARGET_TEST_RVV)
-	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/$(TARGET_TEST_RVV) -o ./$(TARGET_TEST_RVV)_stripped
-	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_TEST_RVV)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_TEST_RVV)
-	@rm -f ./$(TARGET_TEST_RVV)_stripped
+deploy_test: deploy_files
+	@rm -f ./$(BUILD_DIR)/$(ARCH)/$(BOARD_TARGET_TEST)
+	@$(MAKE) -C $(CURDIR) USE_PCL_RVV10=$(BOARD_TEST_USE_PCL_RVV10) TARGET_TEST=$(BOARD_TARGET_TEST) $(BUILD_DIR)/$(ARCH)/$(BOARD_TARGET_TEST)
+	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/$(BOARD_TARGET_TEST) -o ./$(BOARD_TARGET_TEST)_stripped
+	@rsync -e "$(RSYNC_SSH)" -avzP ./$(BOARD_TARGET_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(BOARD_TARGET_TEST)
+	@rm -f ./$(BOARD_TARGET_TEST)_stripped
 deploy_board: deploy_bench_std deploy_bench_rvv deploy_test
 run_board_test: deploy_board | $(OUTPUT_DIR_BOARD)
 	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_test"

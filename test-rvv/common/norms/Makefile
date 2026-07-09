@@ -1,232 +1,66 @@
 # =============================================================================
-#  PCL common/impl/norms.hpp — test-rvv（bench / 单测 / vec 探针）
+#  PCL common/norms RVV diagnostic Makefile
 #
-# 板卡：开发机 make deploy_bench_* / deploy_test / deploy_test_std_vs_rvv_compare 后，
-#       在板卡 norms 目录执行 make -f board.mk run_*（见 board.mk）。
+# Topic-specific parameters live here; shared build, QEMU and board deploy rules
+# are provided by test-rvv/mk/rvv-topic.mk. The one-process Std vs RVV compare
+# and vec probe remain norms-specific extensions.
 # =============================================================================
 
-LOG_DIR           = log
-TIMESTAMP        := $(shell date +%Y-%m-%d_%H-%M-%S)
-LOG_FILE          = $(LOG_VEC_MISS_DIR)/vec_missed_$(TIMESTAMP).log
-LATEST_VEC_LOG    = $(LOG_DIR)/latest_vec_missed.log
-FOCUS_DIR         = pcl/common/include/pcl/common/impl/norms.hpp
-FILTER_REPORT     = $(LOG_DIR)/filtered_norms.log
-VEC_LOGS_DIR      = $(LOG_DIR)/vec_logs
-LOG_VEC_MISS_DIR  = $(LOG_DIR)/vec_missed_log
-ANALYZE_REPORT    = $(LOG_DIR)/analyze_norms.log
+TOPIC  := norms
+MODULE := common
 
-OUTPUT_DIR        = output
-OUTPUT_DIR_BOARD  = $(OUTPUT_DIR)/board
-OUTPUT_DIR_QEMU   = $(OUTPUT_DIR)/qemu
+FOCUS_DIR      := pcl/common/include/pcl/common/impl/norms.hpp
+FILTER_REPORT  := log/filtered_norms.log
+ANALYZE_REPORT := log/analyze_norms.log
 
-BUILD_DIR         = build
-ASM_DIR           = $(BUILD_DIR)/asm
-SCRIPT_DIR        = script
-TEST_RVV_SHARED_SCRIPT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../../script)
+TARGET_BENCH     := bench_norms
+TARGET_BENCH_STD := bench_norms_std
+TARGET_BENCH_RVV := bench_norms_rvv
+SRCS_BENCH       := bench_norms.cpp
 
-BENCH_STD_OUTPUT_FILE     = $(OUTPUT_DIR_QEMU)/run_bench_std.log
-BENCH_RVV_OUTPUT_FILE     = $(OUTPUT_DIR_QEMU)/run_bench_rvv.log
-BENCH_COMPARE_OUTPUT_FILE = $(OUTPUT_DIR_QEMU)/analyze_bench_compare.log
-TEST_STD_OUTPUT_FILE      = $(OUTPUT_DIR_QEMU)/run_test_std.log
-TEST_RVV_OUTPUT_FILE      = $(OUTPUT_DIR_QEMU)/run_test_rvv.log
-TEST_OUTPUT_FILE          = $(OUTPUT_DIR_QEMU)/run_test.log
-TEST_STD_VS_RVV_COMPARE_OUTPUT_FILE = $(OUTPUT_DIR_QEMU)/run_test_std_vs_rvv_compare.log
+TARGET_TEST     := test_norms
+TARGET_TEST_STD := test_norms_std
+TARGET_TEST_RVV := test_norms_rvv
+BOARD_TARGET_TEST := test_norms
+SRCS_TEST       := test_norms.cpp
 
-ANALYZE_VEC_SCRIPT    = $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_vec_log.py
-BENCH_COMPARE_SCRIPT  = $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_bench_compare.py
-COMPARE_ASM_SCRIPT    = $(TEST_RVV_SHARED_SCRIPT_DIR)/compare_rvv_asm.py
-
-VENV_ACTIVATE := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/.venv/bin/activate)
-PYTHON ?= python3
-PYTHON_RUN = bash -lc 'if [ -f "$(VENV_ACTIVATE)" ]; then . "$(VENV_ACTIVATE)"; fi; $(PYTHON) "$$@"' --
-
-TARGET_BENCH   ?= bench_norms
-TARGET_BENCH_STD ?= bench_norms_std
-TARGET_BENCH_RVV ?= bench_norms_rvv
-SRCS_BENCH     = bench_norms.cpp
-TARGET_TEST    = test_norms
-TARGET_TEST_STD ?= test_norms_std
-TARGET_TEST_RVV ?= test_norms_rvv
-SRCS_TEST      = test_norms.cpp
-# 同进程：*_Norm_Std vs float* 上 *_Norm（RVV）；固定 -D__RVV10__，见 CXXFLAGS_TEST_COMPARE
 TARGET_TEST_COMPARE ?= test_norms_std_vs_rvv_compare
-SRCS_TEST_COMPARE   = test_norms_std_vs_rvv_compare.cpp
+SRCS_TEST_COMPARE   := test_norms_std_vs_rvv_compare.cpp
+TEST_STD_VS_RVV_COMPARE_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_test_std_vs_rvv_compare.log
 
-NORMS_PROBE_SRC = norms_vec_probe.cpp
+NORMS_PROBE_SRC := norms_vec_probe.cpp
 NORMS_PROBE_OBJ = $(BUILD_DIR)/$(ARCH)/norms_vec_probe.o
 
-ARCH ?= riscv
+REMOTE_DIR ?= ~/pcl-test/common/norms
 
-TARGET_BENCH_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH)
-TARGET_TEST_BIN  = $(BUILD_DIR)/$(ARCH)/$(TARGET_TEST)
-TARGET_TEST_COMPARE_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_TEST_COMPARE)
+LIBS_BENCH := -lpcl_common -lm
+LIBS_TEST  := -lpcl_common -lgtest -lgtest_main -lpthread -lm
 
-TARGET_BENCH_ASM      = $(ASM_DIR)/$(ARCH)/$(TARGET_BENCH).asm
-TARGET_BENCH_FULL_ASM = $(ASM_DIR)/$(ARCH)/$(TARGET_BENCH).full.asm
+include ../../mk/rvv-topic.mk
 
-USE_PCL_RVV10  ?= 1
-
-MODULE ?= common
-TOPIC ?= $(notdir $(CURDIR))
-include ../../mk/rvv-env.mk
-VEC_TPYE_NAME = RVV (RISC-V Vector)
-
-INCLUDES = \
-	-I$(PCL_SOURCE_ROOT)/common/include \
-	-I$(PCL_SOURCE_ROOT)/test/include \
-	-I$(PCL_SOURCE_ROOT) \
-	-I$(PCL_INSTALL_ROOT)/include/pcl-1.15 \
-	-I$(EIGEN_ROOT)/include/eigen3 \
-	-I$(BOOST_ROOT)/include \
-	-I$(GTEST_ROOT)/include
-
-EXTRA_CXXFLAGS ?=
-EXTRA_LDFLAGS  ?=
-CXXFLAGS = -std=c++17 -O3 -g $(CXXFLAGS_ARCH) -DPCL_NO_PRECOMPILE $(INCLUDES) $(EXTRA_CXXFLAGS)
-
-LIBS_BENCH = -lpcl_common -lm
-LIBS_TEST  = -lpcl_common -lgtest -lgtest_main -lpthread -lm
-# 对拍可执行：自有 \c main，不链 \c gtest_main；**始终** \c -D__RVV10__
-CXXFLAGS_TEST_COMPARE = -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d \
+TARGET_TEST_COMPARE_BIN := $(BUILD_DIR)/$(ARCH)/$(TARGET_TEST_COMPARE)
+CXXFLAGS_TEST_COMPARE := -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d \
 	$(EIGEN_RVV_FLAGS) \
 	-D__RVV10__ \
 	-DPCL_NO_PRECOMPILE \
 	-DPCL_SILENCE_MALLOC_WARNING=1 \
 	$(INCLUDES) $(EXTRA_CXXFLAGS)
-LIBS_TEST_COMPARE  = -lpcl_common -lgtest -lpthread -lm
+LIBS_TEST_COMPARE := -lpcl_common -lgtest -lpthread -lm
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
-$(LOG_DIR):
-	mkdir -p $(LOG_DIR)
-$(OUTPUT_DIR):
-	mkdir -p $(OUTPUT_DIR)
-$(VEC_LOGS_DIR): $(LOG_DIR)
-	mkdir -p $(VEC_LOGS_DIR)
-$(LOG_VEC_MISS_DIR): $(LOG_DIR)
-	mkdir -p $(LOG_VEC_MISS_DIR)
-$(BUILD_DIR)/$(ARCH): $(BUILD_DIR)
-	mkdir -p $(BUILD_DIR)/$(ARCH)
-$(ASM_DIR): $(BUILD_DIR)
-	mkdir -p $(ASM_DIR)
-$(ASM_DIR)/$(ARCH): $(ASM_DIR)
-	mkdir -p $(ASM_DIR)/$(ARCH)
-$(OUTPUT_DIR_QEMU): $(OUTPUT_DIR)
-	mkdir -p $(OUTPUT_DIR_QEMU)
-$(OUTPUT_DIR_BOARD): $(OUTPUT_DIR)
-	mkdir -p $(OUTPUT_DIR_BOARD)
-
-# 仅编译 norms 探针 → 针对 norms.hpp 标量循环的 vec-missed（建议 USE_PCL_RVV10=0）
 $(NORMS_PROBE_OBJ): $(NORMS_PROBE_SRC) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
-	@echo "[BUILD] compile_norms_probe → $(NORMS_PROBE_OBJ) (USE_PCL_RVV10=$(USE_PCL_RVV10))"
+	@echo "[BUILD] compile_norms_probe -> $(NORMS_PROBE_OBJ) (USE_PCL_RVV10=$(USE_PCL_RVV10))"
 	$(CXX) $(CXXFLAGS) -c -o $(NORMS_PROBE_OBJ) $(NORMS_PROBE_SRC)
 
 compile_norms_probe: $(NORMS_PROBE_OBJ)
 	@echo "[DONE] $(NORMS_PROBE_OBJ) ; vec-missed under $(LOG_VEC_MISS_DIR)/"
 
-$(TARGET_BENCH_BIN): $(SRCS_BENCH) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
-	@echo "[BUILD] Benchmark (riscv)..."
-	$(CXX) $(CXXFLAGS) $(SRCS_BENCH) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIBS_BENCH) -o $(TARGET_BENCH_BIN)
-
-$(TARGET_TEST_BIN): $(SRCS_TEST) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
-	@echo "[BUILD] Unit Test (riscv)..."
-	$(CXX) $(CXXFLAGS) $(SRCS_TEST) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIBS_TEST) -o $(TARGET_TEST_BIN)
-
 $(TARGET_TEST_COMPARE_BIN): $(SRCS_TEST_COMPARE) | $(BUILD_DIR)/$(ARCH)
 	@echo "[BUILD] test_norms_std_vs_rvv_compare (Std vs RVV in one process, -D__RVV10__)..."
 	$(CXX) $(CXXFLAGS_TEST_COMPARE) $(SRCS_TEST_COMPARE) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIBS_TEST_COMPARE) -o $(TARGET_TEST_COMPARE_BIN)
 
-run_bench: clean_bench $(TARGET_BENCH_BIN)
-	@echo "[RUN] Benchmark (USE_PCL_RVV10=$(USE_PCL_RVV10))..."
-	$(RUN_CMD) ./$(TARGET_BENCH_BIN)
-
-run_test: clean_test $(TARGET_TEST_BIN) | $(BUILD_DIR)/$(ARCH) $(OUTPUT_DIR_QEMU)
-	@echo "[RUN] Unit Test..."
-	$(RUN_CMD) ./$(TARGET_TEST_BIN) 2>&1 | tee $(TEST_OUTPUT_FILE)
-
-run_test_std: clean_test_std | $(BUILD_DIR)/$(ARCH) $(OUTPUT_DIR_QEMU)
-	@$(MAKE) run_test USE_PCL_RVV10=0 TARGET_TEST=$(TARGET_TEST_STD) TEST_OUTPUT_FILE=$(TEST_STD_OUTPUT_FILE)
-
-run_test_rvv: clean_test_rvv | $(BUILD_DIR)/$(ARCH) $(OUTPUT_DIR_QEMU)
-	@$(MAKE) run_test USE_PCL_RVV10=1 TARGET_TEST=$(TARGET_TEST_RVV) TEST_OUTPUT_FILE=$(TEST_RVV_OUTPUT_FILE)
-
-run_test_compare: run_test_std run_test_rvv
-
-# 单进程对拍：显式 *_Norm_Std 与连续 float* 上窄分发 RVV（需当前源码/安装的 impl/norms.hpp 一致）
 run_test_std_vs_rvv_compare: clean_test_std_vs_rvv_compare $(TARGET_TEST_COMPARE_BIN) | $(OUTPUT_DIR_QEMU)
 	@echo "[RUN] test_norms_std_vs_rvv_compare..."
 	$(RUN_CMD) ./$(TARGET_TEST_COMPARE_BIN) 2>&1 | tee $(TEST_STD_VS_RVV_COMPARE_OUTPUT_FILE)
-
-run_bench_rvv: clean_bench_rvv | $(BUILD_DIR)/$(ARCH) $(OUTPUT_DIR_QEMU)
-	@$(MAKE) run_bench USE_PCL_RVV10=1 TARGET_BENCH=$(TARGET_BENCH_RVV) 2>&1 | tee $(BENCH_RVV_OUTPUT_FILE)
-
-run_bench_std: clean_bench_std | $(BUILD_DIR)/$(ARCH) $(OUTPUT_DIR_QEMU)
-	@$(MAKE) run_bench USE_PCL_RVV10=0 TARGET_BENCH=$(TARGET_BENCH_STD) 2>&1 | tee $(BENCH_STD_OUTPUT_FILE)
-
-analyze_bench_compare: $(BENCH_STD_OUTPUT_FILE) $(BENCH_RVV_OUTPUT_FILE) | $(OUTPUT_DIR_QEMU)
-	@$(PYTHON_RUN) $(BENCH_COMPARE_SCRIPT) \
-		--std-log $(BENCH_STD_OUTPUT_FILE) --rvv-log $(BENCH_RVV_OUTPUT_FILE) 2>&1 | tee $(BENCH_COMPARE_OUTPUT_FILE)
-
-run_bench_compare: run_bench_std run_bench_rvv analyze_bench_compare
-
-generate_vec_report: $(TARGET_BENCH_BIN) | $(LOG_DIR) $(LOG_VEC_MISS_DIR)
-	@latest_file=""; \
-	if ls "$(LOG_VEC_MISS_DIR)"/vec_missed_*.log >/dev/null 2>&1; then \
-		latest_file=$$(realpath "$$(ls -1t "$(LOG_VEC_MISS_DIR)"/vec_missed_*.log | head -n 1)"); \
-	else \
-		echo "[WARN] No vec-missed log found."; \
-		: > "$(LATEST_VEC_LOG)"; \
-	fi; \
-	if [ -n "$$latest_file" ]; then \
-		ln -sf "$$latest_file" "$(LATEST_VEC_LOG)"; \
-	fi; \
-	echo "[INFO] Filtering: $(FOCUS_DIR)"; \
-	grep '$(FOCUS_DIR)' '$(LATEST_VEC_LOG)' -A 1 > '$(FILTER_REPORT)' || true; \
-	if [ ! -s "$(FILTER_REPORT)" ]; then \
-		grep 'missed:' '$(LATEST_VEC_LOG)' | head -n 80 > '$(FILTER_REPORT)' || true; \
-	fi; \
-	$(PYTHON_RUN) "$(ANALYZE_VEC_SCRIPT)" "$(FILTER_REPORT)" -o "$(ANALYZE_REPORT)" -s "$(VEC_LOGS_DIR)"; \
-	echo "[DONE] $(ANALYZE_REPORT)"
-
-dump_bench_inner: $(TARGET_BENCH_BIN) | $(ASM_DIR)/$(ARCH)
-	@$(OBJDUMP) -d ./$(TARGET_BENCH_BIN) > $(TARGET_BENCH_ASM)
-	@$(OBJDUMP) -d -C -S -l --no-show-raw-insn --wide ./$(TARGET_BENCH_BIN) > $(TARGET_BENCH_FULL_ASM)
-	@echo "[DUMP] $(TARGET_BENCH_FULL_ASM)"
-	@echo "RVV insn count: $$(grep -E $(VEC_REGEX_STR) $(TARGET_BENCH_ASM) | wc -l)"
-
-dump_bench: clean dump_bench_inner
-
-dump_bench_rvv:
-	@$(MAKE) clean
-	@$(MAKE) dump_bench_inner USE_PCL_RVV10=1 TARGET_BENCH=$(TARGET_BENCH_RVV)
-
-dump_bench_std:
-	@$(MAKE) clean
-	@$(MAKE) dump_bench_inner USE_PCL_RVV10=0 TARGET_BENCH=$(TARGET_BENCH_STD)
-
-clean:
-	rm -f $(LATEST_VEC_LOG)
-	rm -f $(TARGET_BENCH_BIN) $(TARGET_TEST_BIN) $(TARGET_TEST_COMPARE_BIN) $(NORMS_PROBE_OBJ)
-	rm -rf $(ASM_DIR)/$(ARCH)
-	rm -rf $(FILTER_REPORT) $(ANALYZE_REPORT) $(VEC_LOGS_DIR) $(LOG_VEC_MISS_DIR)
-
-clean_bench_std:
-	rm -rf $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_STD)
-
-clean_bench_rvv:
-	rm -rf $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_RVV)
-
-clean_bench:
-	rm -rf $(BUILD_DIR)/$(ARCH)/bench_norms
-
-clean_test:
-	rm -rf $(BUILD_DIR)/$(ARCH)/test_norms
-
-clean_test_std:
-	rm -rf $(BUILD_DIR)/$(ARCH)/$(TARGET_TEST_STD)
-
-clean_test_rvv:
-	rm -rf $(BUILD_DIR)/$(ARCH)/$(TARGET_TEST_RVV)
 
 clean_test_std_vs_rvv_compare:
 	rm -f $(TARGET_TEST_COMPARE_BIN)
@@ -234,55 +68,12 @@ clean_test_std_vs_rvv_compare:
 clean_probe:
 	rm -f $(NORMS_PROBE_OBJ)
 
-info:
-	@echo "PCL_SOURCE_ROOT  : $(PCL_SOURCE_ROOT)"
-	@echo "compile_norms_probe: make compile_norms_probe USE_PCL_RVV10=0"
-
-REMOTE_USER ?=
-REMOTE_IP   ?=
-REMOTE_DIR  = ~/pcl-test/common/norms
-REMOTE_SCRIPT_DIR = $(REMOTE_DIR)/script
-
-SSH_OPTS ?= -F $(HOME)/.ssh/config
-SSH_CMD ?= ssh $(SSH_OPTS)
-RSYNC_SSH ?= ssh $(SSH_OPTS)
-
-check_board_ssh:
-	@test -n "$(REMOTE_USER)" || (echo "[config] REMOTE_USER is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_USER=<user>." >&2; exit 1)
-	@test -n "$(REMOTE_IP)" || (echo "[config] REMOTE_IP is not set. Set it in $(TEST_RVV_ROOT)/config.mk or pass REMOTE_IP=<ip>." >&2; exit 1)
-	@$(SSH_CMD) -o BatchMode=yes -o ConnectTimeout=5 $(REMOTE_USER)@$(REMOTE_IP) true
-
-deploy_files: check_board_ssh
-	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "mkdir -p $(REMOTE_SCRIPT_DIR)"
-	@rsync -e "$(RSYNC_SSH)" -avzP $(BENCH_COMPARE_SCRIPT) $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_SCRIPT_DIR)/
-
-deploy_bench_rvv: deploy_files clean_bench_rvv
-	@$(MAKE) USE_PCL_RVV10=1 TARGET_BENCH=$(TARGET_BENCH_RVV) $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_RVV)
-	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_RVV) -o ./$(TARGET_BENCH_RVV)_stripped
-	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_BENCH_RVV)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH_RVV)
-	@rm -f ./$(TARGET_BENCH_RVV)_stripped
-
-deploy_bench_std: deploy_files clean_bench_std
-	@$(MAKE) USE_PCL_RVV10=0 TARGET_BENCH=$(TARGET_BENCH_STD) $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_STD)
-	@$(STRIP) -s ./$(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_STD) -o ./$(TARGET_BENCH_STD)_stripped
-	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_BENCH_STD)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_BENCH_STD)
-	@rm -f ./$(TARGET_BENCH_STD)_stripped
-
-deploy_test: deploy_files clean_test
-	@$(MAKE) clean_test $(TARGET_TEST_BIN)
-	@$(STRIP) -s ./$(TARGET_TEST_BIN) -o ./$(TARGET_TEST)_stripped
-	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_TEST)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_TEST)
-	@rm -f ./$(TARGET_TEST)_stripped
-
-# Std vs RVV 对拍（固定 RVV 构建）；板卡上见 board.mk \c run_test_std_vs_rvv_compare
 deploy_test_std_vs_rvv_compare: deploy_files clean_test_std_vs_rvv_compare
-	@$(MAKE) $(TARGET_TEST_COMPARE_BIN)
+	@$(MAKE) -C $(CURDIR) $(TARGET_TEST_COMPARE_BIN)
 	@$(STRIP) -s ./$(TARGET_TEST_COMPARE_BIN) -o ./$(TARGET_TEST_COMPARE)_stripped
 	@rsync -e "$(RSYNC_SSH)" -avzP ./$(TARGET_TEST_COMPARE)_stripped $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_DIR)/$(TARGET_TEST_COMPARE)
 	@rm -f ./$(TARGET_TEST_COMPARE)_stripped
 
-.PHONY: run_bench run_bench_std run_bench_rvv run_bench_compare analyze_bench_compare \
-	run_test run_test_std run_test_rvv run_test_compare run_test_std_vs_rvv_compare \
-	compile_norms_probe clean_probe clean_test_std_vs_rvv_compare \
-	generate_vec_report dump_bench dump_bench_inner dump_bench_rvv dump_bench_std clean info \
-	deploy_files deploy_bench_rvv deploy_bench_std deploy_test deploy_test_std_vs_rvv_compare
+clean: clean_test_std_vs_rvv_compare clean_probe
+
+.PHONY: run_test_std_vs_rvv_compare clean_test_std_vs_rvv_compare compile_norms_probe clean_probe deploy_test_std_vs_rvv_compare

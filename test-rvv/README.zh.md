@@ -72,18 +72,19 @@ make deploy_lib
 
 当前已采用公共 topic 模板 `test-rvv/mk/rvv-topic.mk` 的目录包括：
 
-- `filters/approximate_voxel_grid`
-- `filters/bilateral`
-- `filters/conditional_removal`
-- `filters/convolution_3d`
-- `filters/covariance_sampling`
-- `filters/extract_indices`
-- `filters/grid_minimum`
-- `filters/radius_outlier_removal`
+- `filters/*`
+- `common/*`
 - `registration/correspondence_estimation_organized_projection`
 - `registration/transformation_validation_euclidean`
 
-早期测试如 `test-rvv/2d`、`test-rvv/common/*`、`test-rvv/sample_consensus/*` 仍保留自包含 Makefile。当前阶段先接入 `rvv-env.mk` 统一路径、工具链、依赖和板卡配置；后续再逐步迁移到 `rvv-topic.mk` 公共构建模板。
+仍在迁移中的历史自包含或特殊结构目录包括：
+
+- `test-rvv/2d`
+- `test-rvv/app`
+- `test-rvv/sample_consensus/*`
+- `test-rvv/rvv/load_store`
+
+迁移原则是先统一环境配置层，再逐步迁移公共构建模板：每个 topic 的源码、输入数据、依赖库、benchmark 参数和板卡运行参数仍保留在各自 Makefile / board.mk 中；公共模板只沉淀可复用的 build、QEMU、deploy、board run 流程。
 
 ### 与子目录 `board.mk` 的配合
 

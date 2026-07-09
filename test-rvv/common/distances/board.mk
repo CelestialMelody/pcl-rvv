@@ -1,62 +1,23 @@
 # =============================================================================
-# 板卡侧运行 Makefile（配套 test-rvv/common/distances/Makefile 的 deploy_* 目标）
-#
-# 本 Makefile 仅用于板卡上运行已部署的二进制与保存日志，不负责交叉编译/部署。
+# Board-side parameters for test-rvv/common/distances.
+# Shared rules are deployed as script/rvv-board-run.mk.
 # =============================================================================
 
-REMOTE_BENCH_STD = bench_distances_std
-REMOTE_BENCH_RVV = bench_distances_rvv
-REMOTE_TEST      = test_distances
-REMOTE_BENCH_LOAD_COMPARE = bench_getmaxsegment_load_compare
+REMOTE_BENCH_STD := bench_distances_std
+REMOTE_BENCH_RVV := bench_distances_rvv
+REMOTE_TEST      := test_distances
+REMOTE_BENCH_LOAD_COMPARE := bench_getmaxsegment_load_compare
 
-REMOTE_DIR        = /root/pcl-test/common/distances
-REMOTE_LIB_DIR    = /root/pcl-test/lib
-REMOTE_OUTPUT_DIR = $(REMOTE_DIR)/output
+REMOTE_DIR := /root/pcl-test/common/distances
+REMOTE_BENCH_LOAD_COMPARE_OUTPUT_FILE ?= $(REMOTE_OUTPUT_DIR)/run_bench_load_compare.log
 
-SCRIPT_DIR           = $(REMOTE_DIR)/script
-BENCH_COMPARE_SCRIPT = $(SCRIPT_DIR)/analyze_bench_compare.py
+BOARD_MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+BOARD_RUN_FRAGMENT := $(firstword $(wildcard script/rvv-board-run.mk $(BOARD_MAKEFILE_DIR)../../mk/rvv-board-run.mk))
+include $(BOARD_RUN_FRAGMENT)
 
-PYTHON ?= python3
-
-BOARD_LABEL ?= RVV board
-BENCH_COMPARE_SAVE ?=
-
-REMOTE_BENCH_STD_OUTPUT_FILE = $(REMOTE_OUTPUT_DIR)/run_bench_std.log
-REMOTE_BENCH_RVV_OUTPUT_FILE = $(REMOTE_OUTPUT_DIR)/run_bench_rvv.log
-REMOTE_TEST_OUTPUT_FILE      = $(REMOTE_OUTPUT_DIR)/run_test.log
-
-run_bench_std: | $(REMOTE_OUTPUT_DIR)
-	@echo "[BOARD] Benchmark Std -> $(REMOTE_BENCH_STD_OUTPUT_FILE)"
-	LD_LIBRARY_PATH=$(REMOTE_LIB_DIR):$$LD_LIBRARY_PATH \
-	$(REMOTE_DIR)/$(REMOTE_BENCH_STD) 2>&1 | tee $(REMOTE_BENCH_STD_OUTPUT_FILE)
-
-run_bench_rvv: | $(REMOTE_OUTPUT_DIR)
-	@echo "[BOARD] Benchmark RVV -> $(REMOTE_BENCH_RVV_OUTPUT_FILE)"
-	LD_LIBRARY_PATH=$(REMOTE_LIB_DIR):$$LD_LIBRARY_PATH \
-	$(REMOTE_DIR)/$(REMOTE_BENCH_RVV) 2>&1 | tee $(REMOTE_BENCH_RVV_OUTPUT_FILE)
-
-analyze_bench_compare:
-	@test -f '$(BENCH_COMPARE_SCRIPT)' || (echo "缺少 $(BENCH_COMPARE_SCRIPT)，请将开发机 test-rvv/script/analyze_bench_compare.py 同步到板卡 $(SCRIPT_DIR)/" >&2; exit 1)
-	$(PYTHON) '$(BENCH_COMPARE_SCRIPT)' \
-		--std-log $(REMOTE_BENCH_STD_OUTPUT_FILE) \
-		--rvv-log $(REMOTE_BENCH_RVV_OUTPUT_FILE) \
-		--device "$(BOARD_LABEL)" \
-		--vlen-desc "see SoC / ELF (board)" \
-		$(if $(BENCH_COMPARE_SAVE),| tee $(BENCH_COMPARE_SAVE),)
-
-run_bench_compare: run_bench_std run_bench_rvv analyze_bench_compare
-
-run_bench_load_compare:
-	LD_LIBRARY_PATH=$(REMOTE_LIB_DIR):$$LD_LIBRARY_PATH \
+run_bench_load_compare: | $(REMOTE_OUTPUT_DIR)
+	@echo "[BOARD] getMaxSegment load-compare -> $(REMOTE_BENCH_LOAD_COMPARE_OUTPUT_FILE)"
+	@LD_LIBRARY_PATH=$(REMOTE_LIB_DIR):$$LD_LIBRARY_PATH \
 	$(REMOTE_DIR)/$(REMOTE_BENCH_LOAD_COMPARE) 2>&1 | tee $(REMOTE_BENCH_LOAD_COMPARE_OUTPUT_FILE)
 
-run_test: | $(REMOTE_OUTPUT_DIR)
-	@echo "[BOARD] Unit Test -> $(REMOTE_TEST_OUTPUT_FILE)"
-	LD_LIBRARY_PATH=$(REMOTE_LIB_DIR):$$LD_LIBRARY_PATH \
-	$(REMOTE_DIR)/$(REMOTE_TEST) 2>&1 | tee $(REMOTE_TEST_OUTPUT_FILE)
-
-$(REMOTE_OUTPUT_DIR):
-	mkdir -p $(REMOTE_OUTPUT_DIR)
-
-.PHONY: run_bench_std run_bench_rvv run_bench_compare analyze_bench_compare run_test run_bench_load_compare
-
+.PHONY: run_bench_load_compare
