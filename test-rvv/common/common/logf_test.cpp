@@ -26,7 +26,7 @@
 #if defined(__RVV10__)
 #include <cstddef>
 #include <pcl/common/common.h>
-#include <pcl/common/impl/common.hpp>
+#include <pcl/common/impl/rvv_math.hpp>
 #include <riscv_vector.h>
 #endif
 

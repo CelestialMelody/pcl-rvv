@@ -140,6 +140,7 @@ set(common_incs_impl
   include/pcl/common/impl/spring.hpp
   include/pcl/common/impl/intensity.hpp
   include/pcl/common/impl/random.hpp
+  include/pcl/common/impl/rvv_math.hpp
   include/pcl/common/impl/generate.hpp
   include/pcl/common/impl/projection_matrix.hpp
   include/pcl/common/impl/accumulators.hpp

@@ -49,7 +49,7 @@
 #if defined(__RVV10__)
 #include <cstddef>
 #include <riscv_vector.h>
-#include <pcl/common/impl/common.hpp> // for pcl::logf_RVV_f32m2
+#include <pcl/common/impl/rvv_math.hpp> // for pcl::logf_RVV_f32m2
 #endif
 
 
