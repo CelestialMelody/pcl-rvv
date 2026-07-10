@@ -148,14 +148,15 @@ namespace pcl
    * \brief Compute the approximate arccosine of multiple values at once using RISC-V
    * Vector instructions.
    *
-   * The approximation used is:
-   * \f$
-   * (1.59121552+x*(-0.15461442+x*0.05354897))*\sqrt{0.89286965-0.89282669*x}+0.06681017+x*(-0.09402311+x*0.02708663)
-   * \f$ The average error is ~0.00012 rad.
+   * Uses the reduced form \f$\acos(x) \approx \sqrt{1 - x} Q(1 - x)\f$
+   * with a degree-5 remez2 polynomial. The QEMU/board run_acos_test grid
+   * reports a max error of about 1.311302e-06 rad.
    * \param x input vector of floats in [0; 1]
    * \param vl vector length
    * \return vector of acos(x) in [0; pi/2]
    * \ingroup common
+   * \see doc-rvv/common/getAcuteAngle3DRVV.zh.md
+   * \see doc-rvv/common/remez-coeffs.zh.md
    */
   inline vfloat32m2_t
   acos_RVV_f32m2(const vfloat32m2_t& x, const std::size_t vl);
@@ -194,13 +195,15 @@ namespace pcl
    * \brief Compute expf(x) for multiple float values using RISC-V Vector (RVV) instructions.
    *
    * Uses "reduction → approximation → reconstruction": reduce x = n*ln2 + r with r in
-   * [-ln2/2, ln2/2], approximate exp(r) by a Remez polynomial, then exp(x) = 2^n * exp(r).
-   * Max relative error vs std::expf is about 1.5e-6. Inputs are clamped to [-88, 88].
+   * [-ln2/2, ln2/2], approximate exp(r) by the remez1-rel polynomial, then exp(x) = 2^n * exp(r).
+   * The run_expf_test grid reports a max relative error of about 2.234380e-07.
+   * This is a finite-domain fast approximation: inputs are clamped to [-88, 88], and
+   * NaN/Inf/overflow/underflow behavior does not fully emulate \c std::expf.
    * \param x vector of float inputs
    * \param vl vector length (from vsetvl)
    * \return vector of exp(x)
    * \ingroup common
-   * \see doc-rvv/expf_RVV.zh.md
+   * \see doc-rvv/common/expf-RVV.zh.md
    */
   inline vfloat32m2_t
   expf_RVV_f32m2(const vfloat32m2_t& x, const std::size_t vl);
@@ -209,8 +212,9 @@ namespace pcl
    * \brief Compute logf(x) (natural log) for multiple float values using RISC-V Vector.
    *
    * Mantissa reduction to [1,2), then Remez polynomial for log(1+u) on u in [0,1).
+   * Uses the current/common.hpp historical LP-derived baseline coefficients.
    * Returns -inf for +0, qNaN for x<0, +inf for +inf, and preserves input NaN.
-   * Max relative error vs \c std::logf in typical positive ranges is on the order of 1e-6.
+   * The run_logf_test grid reports a current max relative error of about 6.739247e-05.
    * \see doc-rvv/common/logf-RVV.zh.md
    */
   inline vfloat32m2_t
