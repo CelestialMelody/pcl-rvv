@@ -46,7 +46,7 @@ x' = x \cdot 2^{24}
 
 - \(\ln(2)\) 分解：与 `expf` 中 `kExpfLog2Hi` / `kExpfLog2Lo` 相同，在实现里记为 `kLogfLog2Hi` / `kLogfLog2Lo`，用 `e * hi + e * lo` 形式减少 `E * ln(2)` 的舍入损失（`e` 为 32 位有符号指数）。
 
-- \(\log(1+u)\) 多项式系数：在区间 \([0,1]\) 上逼近 \(\log(1+u)\)。脚本为 `test-rvv/common/common/script/parms_log1p.py`（名称与标准库 `log1p(x)=log(1+x)` 一致；`1p` 即 one plus）。当前 `common.hpp` 中 `kLogfLog1pC0..C7` 与脚本的 `--method lp`（离散 L∞ 线性规划）输出一致，在 `float` Horner 下 max 绝对误差优于旧版「Remez 交换」脚本约一倍量级。总述与 exp/atan/acos 脚本关系见 `doc-rvv/common/remez-coeffs.zh.md`。再经 `float` Horner 与 `e*ln(2)` 项相加，与 `std::logf` 比较时，典型正数抽样上的最大相对误差仍受 `expf` 造点与双重舍入影响（见下节测试）。
+- \(\log(1+u)\) 多项式系数：在区间 \([0,1]\) 上逼近 \(\log(1+u)\)。脚本为 `test-rvv/common/common/script/parms_log1p.py`（名称与标准库 `log1p(x)=log(1+x)` 一致；`1p` 即 one plus）。当前 `common.hpp` 中 `kLogfLog1pC0..C7` 是历史 LP-derived baseline；`parms_log1p.py` 当前 report 中的 `(1) baseline/current` 与 `(4) lp` 是不同候选，不应视为同一组系数。总述与 exp/atan/acos 脚本关系见 `doc-rvv/common/remez-coeffs.zh.md`。再经 `float` Horner 与 `e*ln(2)` 项相加，与 `std::logf` 比较时，典型正数抽样上的最大相对误差仍受 `expf` 造点与双重舍入影响（见下节测试）。
 
 ```bash
 cd test-rvv/common/common
@@ -88,17 +88,28 @@ make run_logf_test
 
 日志写到 `board.mk` 中的 `$(REMOTE_OUTPUT_DIR)/run_logf_test.log`（默认与远程测试目录下 `output/run_logf_test.log` 对齐）。
 
-### 3.3 示例数据（QEMU / 可对照板卡重跑）
+### 3.3 当前复核结论（QEMU / 板卡）
 
-QEMU 下录得的示例输出（`n=10000`）如下（实机/编译器可能略有差异；RVV 在 QEMU 上常显著慢于标量/库，仅供参考）：
+本轮只读复核中，QEMU 与板卡 `run_logf_test` 的误差表一致；板卡性能以实机为准。`n=10000` 专项网格上的关键结果如下：
 
 ```text
-  Scalar Remez (same constants as common.hpp):
+  (1) current/common.hpp baseline:
+    max relative error:  6.739247e-05
+    mean absolute error: 1.585479e-07
+  (2) remez1:
     max relative error:  4.477345e-05
-  RVV (pcl::logf_RVV_f32m2 from common.hpp):
-    max relative error:  4.477345e-05
-  RVV vs scalar Remez max abs diff: 3.814697e-06
+    mean absolute error: 2.058984e-07
+  (4) lp:
+    max relative error:  5.738253e-05
+    mean absolute error: 1.610150e-07
+  (6) pcl::logf_RVV_f32m2:
+    max relative error:  6.739247e-05
+    mean absolute error: 1.585479e-07
+    board time:          9.031 ms, about 3.99x vs std
+  RVV vs scalar max diff: 0.000000e+00
 ```
+
+`remez1` 可降低该网格上的 max relative error，但 mean absolute error 变大；当前 `lp` 候选也不是当前 common.hpp baseline，且 mean absolute error 略高。`Div_Norm` / `KL_Norm` 通过 norms 下游 QEMU 与板卡 `run_test_rvv`、`run_test_std_vs_rvv_compare` 复核。综合收益与下游容差风险，本轮暂不替换 logf 系数，继续保留 current/common.hpp baseline。
 
 ---
 
