@@ -29,7 +29,7 @@
 
 - atan2 / `parms_atan2.py`（推荐通读）：默认 `python script/parms_atan2.py` 打印**六路**对照：(1) [mazzo.li / vectorized atan2](https://mazzo.li/posts/vectorized-atan2.html) 文章常数（注释）；(2) **Remez1** 交换法（`--method remez1`）；(3) **Remez2**（Powell + 密栅）；(4) 离散 LP；(5)(6) Sollya 全次数 5 / 11（Horner `c0..`；与 (2)–(4) 的 \(t\cdot(a_1+a_3 t^2+\cdots)\) 形式不同）。六路快照写在脚本顶部注释块；Sollya deg11 用 `--run-sollya`，deg5 用 `--run-sollya-deg5`。`atan2_test.cpp` 为标量 **(1)–(6)** + **(7) RVV**（系数同 (1)）。Sollya 路径在负 `t=y/x` 上按 \(\mathrm{sign}(t)\cdot P(\lvert t\rvert)\) 对 `atan` 做奇延拓。
 - log(1+u)：在 \([0,1]\) 上逼近光滑，离散 LP（`parms_log1p.py` 默认）与旧版 remez-legacy 相比，在头文件所采用的 float Horner 下已看到更小 max 绝对误差；`common.hpp` 中 `kLogfLog1pC0..C7` 已与 LP 输出对齐。这不表示「logf 不适于 LP」——与下面 exp 的情况不同。
-- exp(r) 默认在 [-ln2/2, ln2/2]：与 expf 的 `n=round(x/ln2)` 约化一致。`parms_expf.py` 提供 `remez1`（绝对误差，第一算法风格交换实现）以及 `remez1-rel` / `remez2-rel` / `lp-rel`（相对误差目标），另有 `sollya-script/sollya-run`。当前 `expf_test.cpp` 已同步新区间系数；板卡实测六路新系数（remez1/remez1-rel/remez2-rel/lp-rel/sollya）`max rel` 同为约 `2.234380e-07`，显著优于 baseline `1.517213e-06`。
+- exp(r) 默认在 [-ln2/2, ln2/2]：与 expf 的 `n=round(x/ln2)` 约化一致。`parms_expf.py` 提供 `remez1`（绝对误差，第一算法风格交换实现）以及 `remez1-rel` / `remez2-rel` / `lp-rel`（相对误差目标），另有 `sollya-script/sollya-run`。当前 `common.hpp` 采用 `remez1-rel`；板卡 `run_expf_test` 专项网格实测 `max rel = 2.234380e-07`，显著优于旧 baseline 的同网格结果 `1.517213e-06`。
 - acos：`parms_acos.py` 默认**四路** report：(1) PCL sqrt 八常数基线；(2) 约化模型 `acos(x) ~= sqrt(1-x)*Q(1-x)` 的 **remez1**（交换法，`fit_reduced_remez1`）；(3) 同模型的 **remez2**；(4) 离散 LP。`--powell-grid` 同时用作 remez1 迭代中的误差密栅长度与 remez2 目标栅格。单跑 remez1 仅需 numpy；默认 report 仍依赖 scipy（remez2 与 LP）。`x_hi` 与 `acos_test.cpp` 的 `k_x_hi`、脚本 `--x-hi` 一致（默认 `0.999`）。C++ `acos_test.cpp`：标量 **(1)–(10)**（历史 PCL + deg11/7/5 × remez1/remez2/LP），RVV **(11)–(13)**；`common.hpp` 当前默认采用 **deg5 remez2** reduced 形式，deg11 的 remez1 在 C++ 侧用**稠密** Horner（`q0..q11` 全用），与 remez2 所用稀疏结构区分。
 - acos（模型说明）：`lp_minimax.minimax_polynomial_lp` 与报告中的 remez2 初值都要求逼近式对所求系数是线性的（单项式或给定基下的线性组合）。PCL 的 `(a0+x(a1+x a2))√(b0+b1 x)+(c0+x(c1+x c2))` 对八个参数是非线性的，不能原样塞进上述 LP；因此改用线性可解的约化模型 `sqrt(1-x)*Q(1-x)`。若希望「泰勒式」少用系数，可在区间上固定解析形状，仅拟合少量参数；得到的仍是 minimax / LP 系数，不是截断泰勒的解析系数。
 
@@ -48,11 +48,24 @@
 
 结论：exp 的候选系数优先比较 relative 指标，并以真实链路仿真/板卡结果做最终准入；absolute 指标仅作旁证。
 
-补充（当前板卡 `run_expf_test`）：
+当前 `common.hpp` 采用的 expf 系数（`parms_expf.py` 的 `remez1-rel`）：
 
-- 精度：scalar/RVV 的新系数组（remez1、remez1-rel、remez2-rel、lp-rel、sollya）`max rel` 均约 `2.234380e-07`，baseline 为 `1.517213e-06`。
-- 一致性：`[RVV-* vs scalar-*] max |diff|` 全部为 `0`，说明当前 RVV 与标量路径在该测试网格上数值一致。
-- 性能：标量各系数方案耗时几乎一致；RVV 端 `remez1-rel` 略快于其余方案，但总体差异主要来自实现路径（scalar vs RVV），不是系数来源。
+```cpp
+static const float kExpfRemezC0 = 0.9999999999876557f;
+static const float kExpfRemezC1 = 1.000000000027863f;
+static const float kExpfRemezC2 = 0.5000000053614374f;
+static const float kExpfRemezC3 = 0.16666666439294f;
+static const float kExpfRemezC4 = 0.04166635362288752f;
+static const float kExpfRemezC5 = 0.008333359419394903f;
+static const float kExpfRemezC6 = 0.001394106053653905f;
+static const float kExpfRemezC7 = 0.0001986611354469939f;
+```
+
+补充（板卡 `run_expf_test` 专项网格）：
+
+- 精度：当前 `common.hpp` / `remez1-rel` 的 `max rel = 2.234380e-07`，`mean abs = 6.639316e+27`；旧 baseline 在同网格下为 `max rel = 1.517213e-06`。`parms_expf.py` 另输出 dense chain f32 仿真指标，例如当前系数 `max relative error (f32 chain, 200k x in [-88,88]) = 3.891403569248383e-06`，两者测试口径不同。
+- 一致性：`[pcl::expf_RVV vs 标量 (1)]` 与 `[RVV-* vs scalar-*] max |diff|` 全部为 `0`，说明当前 RVV 与标量路径在该测试网格上数值一致。
+- 性能：选择阶段板卡上 `remez1-rel` 候选耗时 `4.342 ms`，约 `9.73x vs std`；旧 baseline 耗时 `4.500 ms`，约 `9.39x vs std`。替换后 direct `pcl::expf_RVV_f32m2` 复测保持在 `4.5 ms` 量级，性能与旧 baseline 同阶。标量各系数方案耗时几乎一致；收益主要来自 RVV 向量化、FMA 与 `2^n` 位构造。
 
 补充（acos 当前采用 deg5 remez2）：
 

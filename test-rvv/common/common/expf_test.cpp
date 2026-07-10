@@ -2,9 +2,9 @@
  * expf_test.cpp — 多路 expf 参数对比（标量 + RVV）
  *
  * 比较对象：
- *   (1) 本文件内标量 float Horner；系数与 common.hpp 中 expf_RVV 所用 Remez 常数一致（库内无单独标量 expf API）
+ *   (1) 本文件内标量 float Horner；系数与 common.hpp 中 expf_RVV 所用 remez1-rel 常数一致（库内无单独标量 expf API）
  *   (2) parms_expf.py remez1（绝对误差，第一算法风格）
- *   (3) parms_expf.py remez1-rel（相对误差）
+ *   (3) parms_expf.py remez1-rel（相对误差；当前与 (1)/common.hpp 同系数，用于候选复核）
  *   (4) parms_expf.py remez2-rel（相对误差）
  *   (5) parms_expf.py lp-rel（相对误差）
  *   (6) parms_expf.py sollya(fpminimax, relative)
@@ -47,14 +47,14 @@ static constexpr float kXMin = -88.0f;
 static constexpr float kMaxAbsRefThreshold = 1e10f;
 
 struct ExpfBaselineCoeff {
-  static constexpr float c0 = 9.9999999998e-01f;
-  static constexpr float c1 = 1.0000000154e+00f;
-  static constexpr float c2 = 4.9999959620e-01f;
-  static constexpr float c3 = 1.6667078702e-01f;
-  static constexpr float c4 = 4.1645250213e-02f;
-  static constexpr float c5 = 8.3952782982e-03f;
-  static constexpr float c6 = 1.2887034349e-03f;
-  static constexpr float c7 = 2.8147688485e-04f;
+  static constexpr float c0 = 0.9999999999876557f;
+  static constexpr float c1 = 1.000000000027863f;
+  static constexpr float c2 = 0.5000000053614374f;
+  static constexpr float c3 = 0.16666666439294f;
+  static constexpr float c4 = 0.04166635362288752f;
+  static constexpr float c5 = 0.008333359419394903f;
+  static constexpr float c6 = 0.001394106053653905f;
+  static constexpr float c7 = 0.0001986611354469939f;
 };
 
 struct ExpfRemez1Coeff {
@@ -377,16 +377,16 @@ main()
   double mean_abs = 0.0;
 
   int w_err = 10;
-  w_err = std::max(w_err, utf8_display_width("(1) 标量 float（同 pcl::expf_RVV）"));
+  w_err = std::max(w_err, utf8_display_width("(1) 标量 remez1-rel（同 common.hpp）"));
   w_err = std::max(w_err, utf8_display_width("(2) 标量 remez1 abs"));
-  w_err = std::max(w_err, utf8_display_width("(3) 标量 remez1-rel"));
+  w_err = std::max(w_err, utf8_display_width("(3) 标量 remez1-rel（候选复核，同(1)）"));
   w_err = std::max(w_err, utf8_display_width("(4) 标量 remez2-rel"));
   w_err = std::max(w_err, utf8_display_width("(5) 标量 lp-rel"));
   w_err = std::max(w_err, utf8_display_width("(6) 标量 Sollya rel"));
 #if defined(__RVV10__)
-  w_err = std::max(w_err, utf8_display_width("(7) pcl::expf_RVV_f32m2（同(1)）"));
+  w_err = std::max(w_err, utf8_display_width("(7) pcl::expf_RVV_f32m2（remez1-rel，同(1)）"));
   w_err = std::max(w_err, utf8_display_width("(8) RVV remez1 abs"));
-  w_err = std::max(w_err, utf8_display_width("(9) RVV remez1-rel"));
+  w_err = std::max(w_err, utf8_display_width("(9) RVV remez1-rel（候选复核，同(7)）"));
   w_err = std::max(w_err, utf8_display_width("(10) RVV remez2-rel"));
   w_err = std::max(w_err, utf8_display_width("(11) RVV lp-rel"));
   w_err = std::max(w_err, utf8_display_width("(12) RVV Sollya rel"));
@@ -399,11 +399,11 @@ main()
   std::printf("=== expf approximation vs std::expf (n = %zu) ===\n", n);
   print_err_table_top(w_err);
   compute_errors(ref, out_s_base, max_abs, max_rel, mean_abs);
-  print_err_table_row(w_err, "(1) 标量 float（同 pcl::expf_RVV）", max_rel, mean_abs);
+  print_err_table_row(w_err, "(1) 标量 remez1-rel（同 common.hpp）", max_rel, mean_abs);
   compute_errors(ref, out_s_r1, max_abs, max_rel, mean_abs);
   print_err_table_row(w_err, "(2) 标量 remez1 abs", max_rel, mean_abs);
   compute_errors(ref, out_s_r1r, max_abs, max_rel, mean_abs);
-  print_err_table_row(w_err, "(3) 标量 remez1-rel", max_rel, mean_abs);
+  print_err_table_row(w_err, "(3) 标量 remez1-rel（候选复核，同(1)）", max_rel, mean_abs);
   compute_errors(ref, out_s_r2r, max_abs, max_rel, mean_abs);
   print_err_table_row(w_err, "(4) 标量 remez2-rel", max_rel, mean_abs);
   compute_errors(ref, out_s_lpr, max_abs, max_rel, mean_abs);
@@ -420,11 +420,11 @@ main()
   run_rvv_poly<ExpfSollyaCoeff>(xs, out_v_sol);
 
   compute_errors(ref, out_v_base, max_abs, max_rel, mean_abs);
-  print_err_table_row(w_err, "(7) pcl::expf_RVV_f32m2（同(1)）", max_rel, mean_abs);
+  print_err_table_row(w_err, "(7) pcl::expf_RVV_f32m2（remez1-rel，同(1)）", max_rel, mean_abs);
   compute_errors(ref, out_v_r1, max_abs, max_rel, mean_abs);
   print_err_table_row(w_err, "(8) RVV remez1 abs", max_rel, mean_abs);
   compute_errors(ref, out_v_r1r, max_abs, max_rel, mean_abs);
-  print_err_table_row(w_err, "(9) RVV remez1-rel", max_rel, mean_abs);
+  print_err_table_row(w_err, "(9) RVV remez1-rel（候选复核，同(7)）", max_rel, mean_abs);
   compute_errors(ref, out_v_r2r, max_abs, max_rel, mean_abs);
   print_err_table_row(w_err, "(10) RVV remez2-rel", max_rel, mean_abs);
   compute_errors(ref, out_v_lpr, max_abs, max_rel, mean_abs);
@@ -491,14 +491,14 @@ main()
   });
 
   int w_perf = 10;
-  w_perf = std::max(w_perf, utf8_display_width("标量（同 expf_RVV）"));
+  w_perf = std::max(w_perf, utf8_display_width("标量 remez1-rel（同 common.hpp）"));
   w_perf = std::max(w_perf, utf8_display_width("标量 remez1 abs"));
   w_perf = std::max(w_perf, utf8_display_width("标量 remez1-rel"));
   w_perf = std::max(w_perf, utf8_display_width("标量 remez2-rel"));
   w_perf = std::max(w_perf, utf8_display_width("标量 lp-rel"));
   w_perf = std::max(w_perf, utf8_display_width("标量 Sollya"));
 #if defined(__RVV10__)
-  w_perf = std::max(w_perf, utf8_display_width("pcl::expf_RVV_f32m2"));
+  w_perf = std::max(w_perf, utf8_display_width("pcl::expf_RVV_f32m2（remez1-rel）"));
   w_perf = std::max(w_perf, utf8_display_width("RVV remez1 abs"));
   w_perf = std::max(w_perf, utf8_display_width("RVV remez1-rel"));
   w_perf = std::max(w_perf, utf8_display_width("RVV remez2-rel"));
@@ -510,7 +510,7 @@ main()
   char note_buf[64];
   print_perf_table_header(n, iters, w_perf);
   std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", t_std / t_s_base);
-  print_perf_table_row(w_perf, "标量（同 expf_RVV）", t_s_base, note_buf);
+  print_perf_table_row(w_perf, "标量 remez1-rel（同 common.hpp）", t_s_base, note_buf);
   std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", t_std / t_s_r1);
   print_perf_table_row(w_perf, "标量 remez1 abs", t_s_r1, note_buf);
   std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", t_std / t_s_r1r);
@@ -548,7 +548,7 @@ main()
       run_rvv_poly<ExpfSollyaCoeff>(xs, out_v_sol);
   });
   std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", t_std / t_v_base);
-  print_perf_table_row(w_perf, "pcl::expf_RVV_f32m2", t_v_base, note_buf);
+  print_perf_table_row(w_perf, "pcl::expf_RVV_f32m2（remez1-rel）", t_v_base, note_buf);
   std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", t_std / t_v_r1);
   print_perf_table_row(w_perf, "RVV remez1 abs", t_v_r1, note_buf);
   std::snprintf(note_buf, sizeof(note_buf), "%.2fx vs std", t_std / t_v_r1r);

@@ -222,8 +222,10 @@ pcl::atan2_RVV_f32m2 (const vfloat32m2_t& y, const vfloat32m2_t& x, const std::s
 // expf_RVV_f32m2: vectorized float exp using reduction → approximation → reconstruction
 // -----------------------------------------------------------------------------
 // 约化: x = n*ln2 + r, r ∈ [-ln2/2, ln2/2]. 逼近: exp(r) ≈ P(r) (Remez degree 7).
-// 重构: exp(x) = 2^n * P(r). 2^n 用查表 (vluxei32 字节偏移).
-// 误差: 相对 std::expf 最大相对误差约 1.5e-6. 系数见 test-rvv/common/common/script/parms_expf.py
+// 重构: exp(x) = 2^n * P(r). 2^n 用 IEEE754 指数位构造.
+// 误差: run_expf_test 专项网格上相对 std::expf 最大相对误差约 2.3e-7.
+// 说明: 本函数仍是有限输入域 fast approximation，不完整模拟 std::expf 特殊值语义.
+// 系数见 test-rvv/common/common/script/parms_expf.py
 //
 // 2^n 计算说明:
 //   - 约化后 n = round(x/ln2) 是整数，范围约 [-127, 128]（对应 x ∈ [-88, 88]）
@@ -238,15 +240,15 @@ namespace {
   const float kExpfXMin     = -88.0f;  // 输入下限（exp(-88) ≈ 6e-39，接近 float 下界）
   // 2^-127 对应 IEEE754 非规格化数：exp=0, mantissa=2^22
   const float kExpfTwoToMinus127 = 5.877471754111438e-39f;
-  // Remez polynomial for exp(r) on [0, ln(2)], degree 7 (max abs err ~1.85e-10)
-  const float kExpfRemezC0  = 9.9999999998e-01f;
-  const float kExpfRemezC1  = 1.0000000154e+00f;
-  const float kExpfRemezC2  = 4.9999959620e-01f;
-  const float kExpfRemezC3  = 1.6667078702e-01f;
-  const float kExpfRemezC4  = 4.1645250213e-02f;
-  const float kExpfRemezC5  = 8.3952782982e-03f;
-  const float kExpfRemezC6  = 1.2887034349e-03f;
-  const float kExpfRemezC7  = 2.8147688485e-04f;
+  // remez1-rel polynomial for exp(r) on [-ln(2)/2, ln(2)/2], degree 7.
+  const float kExpfRemezC0  = 0.9999999999876557f;
+  const float kExpfRemezC1  = 1.000000000027863f;
+  const float kExpfRemezC2  = 0.5000000053614374f;
+  const float kExpfRemezC3  = 0.16666666439294f;
+  const float kExpfRemezC4  = 0.04166635362288752f;
+  const float kExpfRemezC5  = 0.008333359419394903f;
+  const float kExpfRemezC6  = 0.001394106053653905f;
+  const float kExpfRemezC7  = 0.0001986611354469939f;
 }
 
 inline vfloat32m2_t

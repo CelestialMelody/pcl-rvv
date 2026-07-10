@@ -7,7 +7,7 @@ expf 参数脚本（对齐 parms_atan2.py 的输出风格）
   exp(r) ~= P(r),  P(r)=c0 + r*(c1 + r*(... + c7*r))
 
 方法:
-  (1) baseline: common.hpp 当前系数
+  (1) baseline: common.hpp 当前系数（remez1-rel）
   (2) remez1: 第一算法风格交换实现（绝对误差）
   (3) remez1-rel: 第一算法风格交换实现（相对误差）
   (4) remez2-rel: LP 初值 + Powell 密栅 min-max（相对误差）
@@ -59,15 +59,15 @@ K_LOG2_LO = -1.904654290582768e-09
 
 # -----------------------------------------------------------------------------
 # 六路系数快照（默认 degree=7, r in [-ln2/2, ln2/2]；与 expf_test.cpp 对齐）
-# (1) baseline（common.hpp 当前系数）:
-#     c0 = 0.99999999998f;
-#     c1 = 1.0000000154f;
-#     c2 = 0.4999995962f;
-#     c3 = 0.16667078702f;
-#     c4 = 0.041645250213f;
-#     c5 = 0.0083952782982f;
-#     c6 = 0.0012887034349f;
-#     c7 = 0.00028147688485f;
+# (1) baseline（common.hpp 当前系数，remez1-rel）:
+#     c0 = 0.9999999999876557f;
+#     c1 = 1.000000000027863f;
+#     c2 = 0.5000000053614374f;
+#     c3 = 0.16666666439294f;
+#     c4 = 0.04166635362288752f;
+#     c5 = 0.008333359419394903f;
+#     c6 = 0.001394106053653905f;
+#     c7 = 0.0001986611354469939f;
 # (2) remez1:
 #     c0 = 0.9999999999875628f;
 #     c1 = 0.9999999999949485f;
@@ -116,14 +116,14 @@ K_LOG2_LO = -1.904654290582768e-09
 # -----------------------------------------------------------------------------
 
 HEADER_C = [
-    9.9999999998e-01,
-    1.0000000154e00,
-    4.9999959620e-01,
-    1.6667078702e-01,
-    4.1645250213e-02,
-    8.3952782982e-03,
-    1.2887034349e-03,
-    2.8147688485e-04,
+    0.9999999999876557,
+    1.000000000027863,
+    0.5000000053614374,
+    0.16666666439294,
+    0.04166635362288752,
+    0.008333359419394903,
+    0.001394106053653905,
+    0.0001986611354469939,
 ]
 
 
@@ -433,7 +433,7 @@ def print_report(deg: int, r_lo: float, r_hi: float, grid: int, powell_grid: int
 
     r = np.linspace(r_lo, r_hi, 200000, dtype=np.float64)
 
-    print("=== (1) common.hpp baseline（当前头文件）===")
+    print("=== (1) common.hpp baseline（当前头文件，remez1-rel）===")
     b = HEADER_C[: deg + 1]
     e64 = float(np.max(np.abs(np.exp(r) - poly_eval(b, r))))
     print(f"# max|exp-P| (200k float64): {fmt16g(e64)}")
@@ -550,7 +550,7 @@ def main():
         coeffs = HEADER_C[: args.degree + 1]
         grid = np.linspace(r_lo, r_hi, 10000, dtype=np.float64)
         est = float(np.max(np.abs(np.exp(grid) - poly_eval(coeffs, grid))))
-        title = "baseline(common.hpp)"
+        title = "baseline(common.hpp current remez1-rel)"
     elif method == "remez1":
         coeffs, est = remez_exp_r_first_algorithm(args.degree, a=r_lo, b=r_hi, max_iter=args.iterations)
         title = "remez1(abs-error, first algorithm style)"

@@ -30,7 +30,7 @@ e^x = e^{n\ln 2 + r} = 2^n\cdot e^r
 
 - \(\ln 2\) 拆分与基础常量：`test-rvv/common/common/script/parms.py` 使用 `decimal` 高精度计算 \(\ln 2\)，再将 `ln2` 的高位部分量化为 float32（脚本输出为 `kLog2Hi`），低位部分为 `kLog2Lo = ln2 - kLog2Hi`，并输出 `kLog2Inv = 1/ln2` 与 `kTwoToMinus127 = 2^-127` 等常量。对应 Makefile 目标为 `parms`。
 
-- Remez 系数：`test-rvv/common/common/script/parms_expf.py` 默认在区间 \([-\ln 2/2,\ln 2/2]\) 上输出 `exp(r)` 的 degree=7 多项式（与 `round` 约化一致；可用 `--r-lo/--r-hi` 覆盖）。默认 `report` 包含 `remez1`、`remez1-rel`、`remez2-rel`、`lp-rel` 与 Sollya 脚本。其中 `remez1` 为第一算法风格交换实现（绝对误差），`remez1-rel/remez2-rel/lp-rel` 以相对误差为目标。是否替换 `kExpfRemezC*` 请以真实链路相对误差与板卡测试为准；说明见 `doc-rvv/common/remez-coeffs.zh.md`。对应 Makefile 目标为 `parms_expf`。
+- Remez 系数：`test-rvv/common/common/script/parms_expf.py` 默认在区间 \([-\ln 2/2,\ln 2/2]\) 上输出 `exp(r)` 的 degree=7 多项式（与 `round` 约化一致；可用 `--r-lo/--r-hi` 覆盖）。默认 `report` 包含 `remez1`、`remez1-rel`、`remez2-rel`、`lp-rel` 与 Sollya 脚本。其中 `remez1` 为第一算法风格交换实现（绝对误差），`remez1-rel/remez2-rel/lp-rel` 以相对误差为目标。当前 `common.hpp` 采用 `remez1-rel`，最终选择以真实链路相对误差与板卡测试为准；说明见 `doc-rvv/common/remez-coeffs.zh.md`。对应 Makefile 目标为 `parms_expf`。
 
 参数获取方式如下：
 
@@ -69,17 +69,17 @@ make parms_expf
 
 ### 2.3 多项式逼近
 
-在约化后的 \(r\) 上，使用 7 次 Remez 多项式逼近 \(e^r\)。实现采用 Horner 形式，依次执行 `poly = c_k + r*poly`，最后得到 `exp_r = c0 + r*poly`。系数在 `common.hpp` 里以常量形式给出。
+在约化后的 \(r\) 上，使用 7 次 `remez1-rel` 多项式逼近 \(e^r\)。实现采用 Horner 形式，依次执行 `poly = c_k + r*poly`，最后得到 `exp_r = c0 + r*poly`。系数在 `common.hpp` 里以常量形式给出。
 
 ```cpp
-  const float kExpfRemezC0  = 9.9999999998e-01f;
-  const float kExpfRemezC1  = 1.0000000154e+00f;
-  const float kExpfRemezC2  = 4.9999959620e-01f;
-  const float kExpfRemezC3  = 1.6667078702e-01f;
-  const float kExpfRemezC4  = 4.1645250213e-02f;
-  const float kExpfRemezC5  = 8.3952782982e-03f;
-  const float kExpfRemezC6  = 1.2887034349e-03f;
-  const float kExpfRemezC7  = 2.8147688485e-04f;
+  const float kExpfRemezC0  = 0.9999999999876557f;
+  const float kExpfRemezC1  = 1.000000000027863f;
+  const float kExpfRemezC2  = 0.5000000053614374f;
+  const float kExpfRemezC3  = 0.16666666439294f;
+  const float kExpfRemezC4  = 0.04166635362288752f;
+  const float kExpfRemezC5  = 0.008333359419394903f;
+  const float kExpfRemezC6  = 0.001394106053653905f;
+  const float kExpfRemezC7  = 0.0001986611354469939f;
   // Horner
   vfloat32m2_t poly = __riscv_vfmv_v_f_f32m2 (kExpfRemezC7, vl);
   poly = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kExpfRemezC6, vl), r, poly, vl);
@@ -116,27 +116,28 @@ make parms_expf
 
 ### 3.1 expf_test：与 std::expf 对比
 
-板卡侧日志位于 `test-rvv/common/common/output/board/expf_test.log`。该测试对 `n=10000` 的输入向量比较最大相对误差，并进行 100 次迭代计时：
+板卡侧 `run_expf_test` 对 `n=10000` 的专项输入网格比较最大相对误差，并进行 100 次迭代计时。当前 `common.hpp` 的 `remez1-rel` 系数与测试中的 `remez1-rel` 候选重合，RVV 与标量对照在该网格上逐项一致：
 
 ```text
 === expf approximation vs std::expf (n = 10000) ===
-  Scalar Remez (aligned with common.hpp constants):
-    max relative error:  1.517213e-06
-  RVV (pcl::expf_RVV_f32m2 from common.hpp):
-    max relative error:  1.517213e-06
-  RVV vs scalar Remez max diff: 0.000000e+00
+  (1) 标量 remez1-rel（同 common.hpp）:
+    max relative error:  2.234380e-07
+    mean absolute error: 6.639316e+27
+  (7) pcl::expf_RVV_f32m2（remez1-rel，同(1)）:
+    max relative error:  2.234380e-07
+    mean absolute error: 6.639316e+27
+  [pcl::expf_RVV vs 标量 (1)] max |diff| : 0.000000e+00
 
 === Performance (n = 10000, 100 iters) ===
-  std::expf:       42.754 ms
-  Scalar Remez:   127.095 ms  (speedup: 0.34x vs std)
-  RVV common.hpp:   4.634 ms  (speedup: 9.23x vs std, 27.43x vs scalar)
+  pcl::expf_RVV_f32m2（remez1-rel）: 4.5 ms 量级（约 9.2x-9.3x vs std）
+  RVV remez1-rel 候选复核:          4.342 ms 量级（约 9.7x vs std）
 ```
 
-`Scalar Remez` 在该测试中慢于 `std::expf`，原因是测试的标量路径使用了 `std::ldexpf` 重构 \(2^n\)，且没有利用向量并行；而 RVV 路径用位构造与向量 FMA 把多数步骤放入向量流水线中。
+在该 `run_expf_test` 网格口径下，相对旧 baseline（`max rel = 1.517213e-06`、板卡耗时 `4.500 ms`、约 `9.39x vs std`），`remez1-rel` 将最大相对误差降低到 `2.234380e-07`，板卡耗时保持在同一量级；选择阶段的同系数候选路径实测为 `4.342 ms`、约 `9.73x vs std`。`parms_expf.py` 另有 dense chain f32 仿真指标（200k x in [-88,88]），用于脚本侧复核整条约化/重构链路，口径不同于该专项网格。`Scalar Remez/LP` 在该测试口径下慢于 `std::expf`，收益主要来自 RVV 向量化、FMA 与 \(2^n\) 位构造，而不是标量多项式链路。
 
 ### 3.2 expf_remez_vs_taylor：Remez 与 Taylor 对比
 
-板卡侧日志位于 `test-rvv/common/common/output/board/expf_remez_vs_taylor.log`。它对比 Remez 与 Taylor（同为 7 次）在误差与耗时上的差异，并区分了 RVV 的两种 \(2^n\) 计算方式（查表/位构造）：
+`expf_remez_vs_taylor.cpp` 是旧 Remez 与 Taylor 的路径对比专项，用于说明 Remez 多项式与 RVV \(2^n\) 重构方式的差异；它不代表当前 `common.hpp` 采用的 `remez1-rel` 系数。历史板卡结果如下：
 
 ```text
 === expf approximation vs std::expf (n = 10000) ===
