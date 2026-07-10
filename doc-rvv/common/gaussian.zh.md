@@ -18,7 +18,7 @@
 - 单测（`test_gaussian.cpp` + `make run_test_*`）
   - 链当前安装的 `libpcl_common`，对 `compute`、`convolveRows` / `convolveCols` 及别名等做 API/数值回归。
 - 同进程标量/RVV 对拍（不链 `libpcl_common`）
-  - `gaussian_convolve_float_local.hpp` 与 `test_gaussian_convolve_compare.cpp`：`make run_test_convolve_compare`；与库侧算法需人工同步，与双库对拍互补（见 §5.4）。
+  - `gaussian_convolve_float_local.hpp` 与 `test_gaussian_convolve_compare.cpp`：`make run_test_convolve_compare`；与库侧算法需人工同步，与双库对拍互补（见 §5.5）。
 - 文档（本文）
   - 记录分流条件、行/列 RVV 设计、数例、测试与板卡数据、与上游差异及维护约定。
 
@@ -34,7 +34,7 @@
 - 语义与边界：左右或上下各 `radius` 个样本位置输出置零；中间区域为核权与邻域样本的乘加和，与上游循环变量对应关系一致。`input` 与 `output` 为同一对象时先拷贝到局部云再卷积，行为与上游一致。
 - 数据布局：`PointCloud<float>` 为连续 `float` 缓冲，行方向步长为 $1$，列方向（固定列、沿行增长）步长为 `width` 个 `float`，列卷积采用 strided load/store，而非 segment gather。
 - 不适合或未完成向量化的情形：`compute` 仍为短循环、`exp` 与异常路径为主，当前未 RVV 化。模板 `impl/gaussian.hpp` 中经 `std::function` 取值的路径未在本 TU 修改。
-- 编译期分流与测试：`convolveRows` / `convolveCols` 在 RVV 构建下是否走向量路径，取决于本 TU 编入 `libpcl_common` 时是否定义 `__RVV10__`；应用或 bench 可执行文件自身的宏不能改写已安装共享库中的实现。标量与 RVV 的公平对比需分别编译两套 `libpcl_common`（见 `gaussian.cpp` 文件头注释与第 5.1 节板卡流程）。
+- 编译期分流与测试：`convolveRows` / `convolveCols` 在 RVV 构建下是否走向量路径，取决于本 TU 编入 `libpcl_common` 时是否定义 `__RVV10__`；应用或 bench 可执行文件自身的宏不能改写已安装共享库中的实现。标量与 RVV 的公平对比需分别编译两套 `libpcl_common`（见 `gaussian.cpp` 文件头注释与第 5.2 节板卡流程）。
 
 ---
 
@@ -221,7 +221,7 @@ i=5:  5*C + 6*B + 7*A
 i=6:  6*C + 7*B + 8*A
 ```
 
-`convolveRowsRVV` 在条带起点列 `i=1`、`vl=2` 时，本算例中 `j=0`，故 `in_row` 即 `input.data()` 上该行的首地址，沿行连续访问；`win_base = in_row + (i - radius)` 对应该条最左 tap（列 0），与 `tmp/讲解.md` 中「逐指令详解（`vl=2`）」同构。
+`convolveRowsRVV` 在条带起点列 `i=1`、`vl=2` 时，本算例中 `j=0`，故 `in_row` 即 `input.data()` 上该行的首地址，沿行连续访问；`win_base = in_row + (i - radius)` 对应该条最左 tap（列 0）。下面逐步展开该 VL chunk 中两条 lane 如何从同一个滑动窗口对应回标量输出列 1 与列 2。
 
 ```text
 win_base 指向本行列 0，首元素为 input(0,0)=1
@@ -275,12 +275,25 @@ acc[1] = 3*C+4*B+5*A  对应 j=3
 
 ## 5. 测试与验证
 
-### 5.1 测试入口与运行方式
+### 5.1 Evidence 层级与结论边界
+
+| 层级 | 证据入口 | 覆盖对象 | 证明点 | 不能证明 |
+| ---- | -------- | -------- | ------ | -------- |
+| `local fragment` | `test-rvv/common/gaussian/gaussian_convolve_float_local.hpp` + `test-rvv/common/gaussian/test_gaussian_convolve_compare.cpp`，日志 `test-rvv/common/gaussian/output/qemu/run_test_convolve_compare.log` | 不链接 `libpcl_common` 的本地 float 缓冲卷积副本；行卷积、列卷积、先行后列 | 标量副本与 RVV 副本在同一进程内逐元素对拍通过，可定位行/列 RVV 条带算法的数值一致性 | 不证明已安装共享库内 `GaussianKernel::convolveRows` / `convolveCols` 实际命中哪条机器码，也不提供性能结论 |
+| `production direct` 正确性 | `test-rvv/common/gaussian/test_gaussian.cpp`，日志 `test-rvv/common/gaussian/output/qemu/run_test.log` 与 `test-rvv/common/gaussian/output/qemu/run_test_rvv.log` | 真实 `libpcl_common` 中 `GaussianKernel::compute`、`convolveRows`、`convolveCols`、原地别名入口 | QEMU 下公开库入口的 API/数值回归通过；QEMU 只作为正确性与路径可运行证据 | 不作为性能结论；仅凭 test 可执行宏也不能证明共享库已切换 Std/RVV 实现 |
+| `production direct` 性能 | `test-rvv/common/gaussian/output/board/banch_compare.log` | 板卡 Milkv-Jupiter 上两套 `libpcl_common`（Std/RVV）+ 同一 bench 流程 | 在目标硬件、同一数据规模和参数下对真实库入口给出 Avg 与 Speedup，是本文性能结论来源 | 不替代单测和算法对拍；若未按双库采集，则 convolve 项 speedup 不可采信 |
+| 路径命中待补 | 预期为 RVV 构建的 `libpcl_common` 或对象文件反汇编 | `convolveRowsRVV` / `convolveColsRVV` 中 `vle32`、`vfslide1down`、`vlse32`、`vsse32`、`vfmacc` 等指令 | 应证明 RVV 构建的共享库真实包含预期 RVV 指令路径 | 当前仓库未发现已保存的 gaussian 反汇编日志；此项仍是待补路径证据 |
+
+因此，本文证据链为：`local fragment` 先证明无库算法副本的逐元素一致性；QEMU 上 `production direct` 单测证明真实公开入口正确性；板卡双库 bench 证明真实库入口在目标硬件上的性能收益。QEMU bench 日志只保留为冒烟/路径材料，不参与性能结论。
+
+### 5.2 测试入口与运行方式
 
 #### 单测与本地 QEMU
 
 - 路径：`test-rvv/common/gaussian/test_gaussian.cpp`；`test-rvv/common/gaussian/Makefile` 目标 `run_test` / `run_test_std` / `run_test_rvv`；默认以 `qemu-riscv64` 执行，CPU 与 `vlen` 以该 Makefile 中 `RUN_CMD` 为准。
-- 可执行文件侧：`USE_PCL_RVV10=0` 与 `=1` 只影响是否向 bench/test 的翻译单元定义 `__RVV10__`（例如 banner），不改变已链接的 `libpcl_common` 中 `gaussian.cpp` 的机器码。单测验证的是当前安装前缀中的库与参考值是否一致，并非在同一进程内用两套不同 `.so` 对拍库内标量/RVV。与库无关的「同进程、仅验证算法两条路径是否逐元一致」见 5.4 节 `run_test_convolve_compare`。
+- 可执行文件侧：`USE_PCL_RVV10=0` 与 `=1` 只影响是否向 bench/test 的翻译单元定义 `__RVV10__`（例如 banner），不改变已链接的 `libpcl_common` 中 `gaussian.cpp` 的机器码。单测验证的是当前安装前缀中的库与参考值是否一致，并非在同一进程内用两套不同 `.so` 对拍库内标量/RVV。与库无关的「同进程、仅验证算法两条路径是否逐元一致」见 5.5 节 `run_test_convolve_compare`。
+- 现有日志结果：`test-rvv/common/gaussian/output/qemu/run_test.log` 与 `test-rvv/common/gaussian/output/qemu/run_test_rvv.log` 均显示 5 个 gtest 全部通过；`test-rvv/common/gaussian/output/qemu/run_test_convolve_compare.log` 显示 3 个本地算法对拍测试全部通过。这里的 QEMU 结论仅用于正确性与可运行性，不写成性能结论。
+- 反汇编证据：当前 `test-rvv/common/gaussian` 下未发现已保存的 `objdump` / 反汇编日志；因此本文不声称已有反汇编证明。待补证据应从 RVV 构建的 `libpcl_common` 或 `common/src/gaussian.cpp` 对象文件中确认 `convolveRowsRVV` 包含连续 `vle32`、`vfslide1down`、FMA 和写回指令，`convolveColsRVV` 包含 strided `vlse32` / `vsse32` 与 FMA 指令。
 
 #### 板卡性能对比
 
@@ -304,30 +317,31 @@ acc[1] = 3*C+4*B+5*A  对应 j=3
 
 #### 本文件性能数据来源
 
-- 下表及 `test-rvv/common/gaussian/output/board/banch_compare.log` 所反映环境：板卡 Milkv-Jupiter ；Std 与 RVV 行分别对应上述两套库与同一套 bench 流程下的 Avg 列（见 5.2 节路径说明）。若未按两套库采集，表内 convolve 项 Speedup 可能失去对比意义，当前材料不足则未在本文另作推断。
+- 下表及 `test-rvv/common/gaussian/output/board/banch_compare.log` 所反映环境：板卡 Milkv-Jupiter ；Std 与 RVV 行分别对应上述两套库与同一套 bench 流程下的 Avg 列（见 5.3 节路径说明）。若未按两套库采集，表内 convolve 项 Speedup 可能失去对比意义，当前材料不足则未在本文另作推断。
 
-### 5.2 日志与数据来源
+### 5.3 日志与数据来源
 
 - 性能表数据取自板卡侧对比输出副本：`test-rvv/common/gaussian/output/board/banch_compare.log`（与 `run_bench_std.log`、`run_bench_rvv.log` 同一轮 `960×540`、10 次迭代、`sigma=5`）。
 - 仓库内 `test-rvv/common/gaussian/output/qemu/` 下保留的 `run_bench_std.log` 与 `run_bench_rvv.log` 在采集时分辨率与迭代次数不一致，未用于下表。
 - 其他 vec-missed 与过滤日志位于 `test-rvv/common/gaussian/log/`，评估性文字见 `test-rvv/common/gaussian/gaussian-evaluation.zh.md`。
+- Speedup 计算方式：下表每项均使用同一 benchmark 名称下的 `Std Avg / RVV Avg`。Std Avg 来自未以 `__RVV10__` 编译 `common/src/gaussian.cpp` 的 `libpcl_common`；RVV Avg 来自以 `__RVV10__` 编译该 TU 的 `libpcl_common`。`compute` 没有 RVV 实现，作为同流程标量对照项。
 
-### 5.3 测试结果与说明
+### 5.4 测试结果与说明
 
 
-| Benchmark 项                                      | Std Avg (ms) | RVV Avg (ms) | Speedup |
-| ------------------------------------------------ | ------------ | ------------ | ------- |
-| compute(sigma, kernel) [gaussian.cpp]            | 0.0062       | 0.0062       | 1.00    |
-| convolveRows (PointCloud) [gaussian.cpp]         | 53.6127      | 6.3381       | 8.46    |
-| convolveCols (PointCloud) [gaussian.cpp]         | 105.7745     | 42.4242      | 2.49    |
-| convolveRows then convolveCols [gaussian.cpp x2] | 160.0322     | 48.7031      | 3.29    |
+| Benchmark 项 | 入口与规模/参数 | 构建分流 / RVV 覆盖 | Std Avg (ms) | RVV Avg (ms) | Speedup | 证明点 |
+| ------------ | ---------------- | ------------ | ------------ | ------------ | ------- | ------ |
+| `compute(sigma, kernel) [gaussian.cpp]` | `GaussianKernel::compute(sigma, kernel)`；`sigma=5`，kernel 由函数内部生成；10 iterations | 不命中 RVV；`compute` 两版本保持标量 | 0.0062 | 0.0062 | 1.00 = 0.0062 / 0.0062 | 证明双库流程下未改造入口成本不变，作为 bench 流程 sanity check |
+| `convolveRows (PointCloud<float>) [gaussian.cpp]` | `GaussianKernel::convolveRows(input, kernel, out)`；`960×540` random `[0,1]` float image；`sigma=5` 生成一维核；10 iterations | RVV 库按编译期分流进入 `convolveRowsRVV`，覆盖行向连续条带 + `vfslide1down`；Std 库进入 `convolveRowsStandard` | 53.6127 | 6.3381 | 8.46 = 53.6127 / 6.3381 | 证明行向连续窗口是主要收益点，真实库入口在目标硬件上有显著加速；指令级反汇编仍待补 |
+| `convolveCols (PointCloud<float>) [gaussian.cpp]` | `GaussianKernel::convolveCols(input, kernel, out)`；同一图像、kernel、iterations | RVV 库按编译期分流进入 `convolveColsRVV`，覆盖列向 `vlse32` / `vsse32` strided 条带；Std 库进入 `convolveColsStandard` | 105.7745 | 42.4242 | 2.49 = 105.7745 / 42.4242 | 证明列向固定步长访存仍有收益，但受 strided load/store 带宽与延迟限制；指令级反汇编仍待补 |
+| `convolveRows then convolveCols [gaussian.cpp x2]` | 先 `convolveRows(input, kernel, tmp)`，再 `convolveCols(tmp, kernel, out)`；同一图像、kernel、iterations | RVV 库按编译期分流覆盖行/列两步；Std 库两步均为 Standard | 160.0322 | 48.7031 | 3.29 = 160.0322 / 48.7031 | 证明可分离两步组合后的 production direct 入口收益，合并 speedup 与两项耗时占比一致；指令级反汇编仍待补 |
 
 
 `compute` 未走 RVV，两行时间相同符合预期。`convolveRows` 为连续读与滑动窗口，加速比高于 `convolveCols`；列方向 `vlse`/`vsse` 步长大，带宽与延迟行为不同，故 Speedup 较低。合并两步的 Speedup 介于两者之间，与两项耗时占比一致。
 
-### 5.4 算法对拍
+### 5.5 算法对拍
 
-定位：在同一可执行文件、同一组翻译单元内对 float 可分离行/列卷积的标量与 RVV 实现做全缓冲逐元素 `float` 比较（`gtest` 的 `EXPECT_NEAR`），用于证明「算法上两条路径输出一致」。该流程不链接 `libpcl_common`（也无需 PCL 头/依赖），与 5.1 节中「需两套 `libpcl_common` 才能对比 bench 里库内实际走的是哪条机器码」是不同层面的结论：本节对拍回答的是 `RVV` 与 `Standard`  实现是否对齐；不替代在板卡上双库对装后的性能或「已安装库内」行为验证。
+定位：在同一可执行文件、同一组翻译单元内对 float 可分离行/列卷积的标量与 RVV 实现做全缓冲逐元素 `float` 比较（`gtest` 的 `EXPECT_NEAR`），用于证明「算法上两条路径输出一致」。该流程不链接 `libpcl_common`（也无需 PCL 头/依赖），与 5.2 节中「需两套 `libpcl_common` 才能对比 bench 里库内实际走的是哪条机器码」是不同层面的结论：本节对拍回答的是 `RVV` 与 `Standard`  实现是否对齐；不替代在板卡上双库对装后的性能或「已安装库内」行为验证。
 
 | 项 | 说明 |
 | -- | -- |
@@ -349,6 +363,6 @@ make run_test_convolve_compare
 
 ## 6. 总结
 
-`PointCloud<float>` 的 `convolveRows` / `convolveCols` 在以 `__RVV10__` 编译本 TU 时走 `*RVV` 条带，否则走 `*Standard`；`gaussian.h` 中声明与边界语义与上游标量实现一致。主要优化为行向连续块上的 `__riscv_vle32`、滑动 `__riscv_vfslide1down` 与 FMA 累加，列向的 `__riscv_vlse32` / `__riscv_vsse32` 与 `__builtin_prefetch` 提示。`compute` 仍为标量。板卡上在分别安装标量与 RVV 两套 `libpcl_common` 的前提下，对 `960×540` 随机图、10 次迭代、`sigma=5` 的 bench 给出约 $8.5$ 倍、$2.5$ 倍与合并约 $3.3$ 倍量级的加速（见 5.3 表）。
+`PointCloud<float>` 的 `convolveRows` / `convolveCols` 在以 `__RVV10__` 编译本 TU 时走 `*RVV` 条带，否则走 `*Standard`；`gaussian.h` 中声明与边界语义与上游标量实现一致。主要优化为行向连续块上的 `__riscv_vle32`、滑动 `__riscv_vfslide1down` 与 FMA 累加，列向的 `__riscv_vlse32` / `__riscv_vsse32` 与 `__builtin_prefetch` 提示。`compute` 仍为标量。板卡上在分别安装标量与 RVV 两套 `libpcl_common` 的前提下，对 `960×540` 随机图、10 次迭代、`sigma=5` 的 bench 给出约 $8.5$ 倍、$2.5$ 倍与合并约 $3.3$ 倍量级的加速（见 5.4 表）。
 
-若需从可执行文件/安装库侧对比「库内标量与 RVV 的逐输出或计时」，仍须双库对拍与 bench（5.1 节）或等效方式；`run_test` / 单次 `bench` 的宏不替换已链接的 `libpcl_common`。同进程、无 PCL 动态库的算法对拍由 5.4 节 `run_test_convolve_compare` 承担：验证 `gaussian_convolve_float_local.hpp` 中 `*Standard` 与 `*RVV` 一致，与双库对拍互补；改 `gaussian.cpp` 后须同步该副本。
+若需从可执行文件/安装库侧对比「库内标量与 RVV 的逐输出或计时」，仍须双库对拍与 bench（5.2 节）或等效方式；`run_test` / 单次 `bench` 的宏不替换已链接的 `libpcl_common`。同进程、无 PCL 动态库的算法对拍由 5.5 节 `run_test_convolve_compare` 承担：验证 `gaussian_convolve_float_local.hpp` 中 `*Standard` 与 `*RVV` 一致，与双库对拍互补；改 `gaussian.cpp` 后须同步该副本。
