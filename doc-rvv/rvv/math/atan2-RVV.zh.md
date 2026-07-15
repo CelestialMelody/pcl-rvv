@@ -107,7 +107,7 @@ p = a_1 + x2\cdot(a_3 + x2\cdot(a_5 + x2\cdot(a_7 + x2\cdot(a_9 + x2\cdot a_{11}
 
 ## 3. 测试与结果
 
-测试程序为 `test-rvv/common/common/atan2_test.cpp`。它在 `[-1,1]×[-1,1]` 的 256×256 网格上对比 `std::atan2` 的误差，并对 `std::atan2`、标量近似、RVV 版本分别计时。
+测试程序为 `test-rvv/rvv/math/atan2/atan2_test.cpp`。它在 `[-1,1]×[-1,1]` 的 256×256 网格上对比 `std::atan2` 的误差，并对 `std::atan2`、标量近似、RVV 版本分别计时。
 
 ```cpp
 int main()
@@ -122,7 +122,7 @@ int main()
 }
 ```
 
-板卡侧日志位于 `test-rvv/common/common/output/board/atan2_test.log`。其中一组实测数据如下（`n=65536`，`iterations=100`）：
+迁移后的板卡侧 target 为 `test-rvv/rvv/math/board.mk` 中的 `run_atan2_test`，日志按函数写入板卡工作目录的 `output/atan2/run_atan2_test.log`。其中一组历史实测数据如下（`n=65536`，`iterations=100`）：
 
 ```text
 === atan2 approximation vs std::atan2 (n = 65536) ===
@@ -160,4 +160,3 @@ int main()
 
 - [`Speeding up atan2f by 50x`](https://mazzo.li/posts/vectorized-atan2.html)
 - 本仓库中 Remez、LP、Sollya 与 `parms_atan2.py` 的说明：[`remez-coeffs.zh.md`](remez-coeffs.zh.md)
-

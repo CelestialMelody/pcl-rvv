@@ -351,15 +351,15 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
 
 #### getAcuteAngle3DRVV
 
-`getAngle3D` 公开 API 仍是双向量夹角（`std::acos`）；批量场景在 x86 上用 SSE/AVX 的 `acos` 近似与 `getAcuteAngle3D*`。RVV 侧提供 `acos_RVV_f32m2`（当前为 `sqrt(1-x)*Q(1-x)` 的 deg5 remez2 约化模型），以及 `getAcuteAngle3DRVV_f32m2`：先算点积，`vfsgnjx` 得到 \(|\mathbf{u}\cdot \mathbf{v}|\)，`vfmin` 夹到 \([0,1]\) 后调用 `acos_RVV`，与锐角定义对齐。
+`getAngle3D` 公开 API 仍是双向量夹角（`std::acos`）；批量场景在 x86 上用 SSE/AVX 的 `acos` 近似与 `getAcuteAngle3D*`。RVV 侧提供 `acos_RVV_f32m2`（当前为 `sqrt(1-x)*Q(1-x)` 的 deg5 remez2 约化模型），以及 `getAcuteAngle3DRVV_f32m2`：先算点积，`vfsgnjx` 得到 \(|\mathbf{u}\cdot \mathbf{v}|\)，`vfmin` 夹到 \([0,1]\) 后调用 `acos_RVV`，与锐角定义对齐。数学 helper 的模型、系数和误差证据见 [`../rvv/math/getAcuteAngle3DRVV.zh.md`](../rvv/math/getAcuteAngle3DRVV.zh.md)。
 
 #### atan2_RVV_f32m2
 
-对 `|x|,|y|` 比较后可能交换分子分母，把比值限制在多项式有效区间，再用 `vmerge` 补象限，避免逐元素 `std::atan2`。实现文档请查阅同目录下的 [`atan2-RVV.zh.md`](atan2-RVV.zh.md)。
+对 `|x|,|y|` 比较后可能交换分子分母，把比值限制在多项式有效区间，再用 `vmerge` 补象限，避免逐元素 `std::atan2`。数学 helper 实现文档请查阅 [`../rvv/math/atan2-RVV.zh.md`](../rvv/math/atan2-RVV.zh.md)。
 
 #### expf_RVV_f32m2
 
-通过区间约化、多项式逼近、`2^k` 重组等方式实现。实现文档请查阅同目录下的  [`expf-RVV.zh.md`](expf-RVV.zh.md)。
+通过区间约化、多项式逼近、`2^k` 重组等方式实现。数学 helper 实现文档请查阅 [`../rvv/math/expf-RVV.zh.md`](../rvv/math/expf-RVV.zh.md)。
 
 ---
 
@@ -387,7 +387,7 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
 | calculatePolygonArea (256 pts) ×500    | 1.8608       | 0.6479       | 2.87×   |
 
 
-同一目录下另有 `expf_test.log`、`atan2_test.log`、`expf_remez_vs_taylor.log` 等数学辅助单测输出，可与 `doc-rvv/common` 下文档交叉查阅。
+数学 helper 的专项文档已统一放在 `doc-rvv/rvv/math/`；common 模块文档只记录调用关系和模块边界，数学细节请链接到对应专项文档。
 
 ---
 

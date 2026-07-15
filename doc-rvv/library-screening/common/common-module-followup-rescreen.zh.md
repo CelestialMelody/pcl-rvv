@@ -10,7 +10,7 @@
 
 - legacy exploration input：`doc-rvv/common/module-evaluation.zh.md`。
 - 已完成主题文档：`doc-rvv/common/transforms-RVV.zh.md`、`doc-rvv/common/centroid.zh.md`、`doc-rvv/common/norms-RVV.zh.md`、`doc-rvv/common/gaussian.zh.md`、`doc-rvv/common/distances.zh.md`、`doc-rvv/common/common.zh.md`。
-- 数学 helper 文档：`doc-rvv/common/atan2-RVV.zh.md`、`doc-rvv/common/expf-RVV.zh.md`、`doc-rvv/common/logf-RVV.zh.md`、`doc-rvv/common/getAcuteAngle3DRVV.zh.md`、`doc-rvv/common/remez-coeffs.zh.md`。
+- 数学 helper 文档：`doc-rvv/rvv/math/atan2-RVV.zh.md`、`doc-rvv/rvv/math/expf-RVV.zh.md`、`doc-rvv/rvv/math/logf-RVV.zh.md`、`doc-rvv/rvv/math/getAcuteAngle3DRVV.zh.md`、`doc-rvv/rvv/math/remez-coeffs.zh.md`。
 - 函数级评估文档：`test-rvv/common/transforms/transforms-evaluation.zh.md`、`test-rvv/common/centroid/centroid-evaluation.zh.md`、`test-rvv/common/norms/norms-evaluation.zh.md`、`test-rvv/common/gaussian/gaussian-evaluation.zh.md`。
 - 证据日志：`test-rvv/common/*/output/qemu/` 与 `test-rvv/common/*/output/board/` 下现有日志。
 
@@ -93,8 +93,8 @@
 - 主文件：`common/include/pcl/common/impl/common.hpp`。
 - 实际覆盖范围：`getMeanStd`、`getPointsInBox`、`getMaxDistance`、`getMinMax3D`、`calculatePolygonArea`，以及 `acos_RVV`、`getAcuteAngle3DRVV`、`atan2_RVV_f32m2`、`expf_RVV_f32m2`、`logf_RVV_f32m2` 等 helper。
 - 生产接入状态：多个 common 入口已生产接入；math helpers 作为 common 内部或其他模块复用 helper 使用。
-- 正确性证据：`test-rvv/common/common/output/qemu/run_test.log` 显示 66 tests 通过；`atan2`、`expf`、`acos` 等有专项文档和日志说明。
-- QEMU / 反汇编 / 板卡证据：QEMU 只作为正确性和构建材料；板卡 `test-rvv/common/common/output/board/bench_compare.log` 记录 cloud `200000` points、vector `500000` elements、20 iterations，覆盖 `getMeanStd` `7.92x`、`getPointsInBox` `3.79x`、`getMaxDistance` `4.83x-5.26x`、`getMinMax3D` `8.76x-11.18x`、`getAngle3D` `24.53x`、`calculatePolygonArea` `2.87x`。`expf_test.log`、`atan2_test.log` 和 `getAcuteAngle3DRVV.zh.md` 提供部分 helper 的专项板卡或 QEMU 数值证据。反汇编归档待复核。
+- 正确性证据：`test-rvv/common/common/output/qemu/run_test.log` 显示 66 tests 通过；`atan2`、`expf`、`acos` 等有数学专项文档和日志说明。
+- QEMU / 反汇编 / 板卡证据：QEMU 只作为正确性和构建材料；板卡 `test-rvv/common/common/output/board/bench_compare.log` 记录 cloud `200000` points、vector `500000` elements、20 iterations，覆盖 `getMeanStd` `7.92x`、`getPointsInBox` `3.79x`、`getMaxDistance` `4.83x-5.26x`、`getMinMax3D` `8.76x-11.18x`、`getAngle3D` `24.53x`、`calculatePolygonArea` `2.87x`。`expf_test.log`、`atan2_test.log` 和 `doc-rvv/rvv/math/getAcuteAngle3DRVV.zh.md` 提供部分 helper 的专项板卡或 QEMU 数值证据。反汇编归档待复核。
 - 文档状态：主题文档和多个 helper 文档存在；`test-rvv/common/common/*-evaluation.zh.md` 不存在。
 - 待补证据或 closeout：补 common.hpp / math helpers 的函数级 evaluation 或 historical closeout；统一 helper 的反汇编归档；对 `getMeanStd` 的 float 向量部分和上游 double 累加差异保持显式说明。
 - 对后续候选的影响：common math helper 可优先作为其他模块的复用点，但必须携带数值误差预算，不能把 helper microbench 直接升级为完整生产入口结论。

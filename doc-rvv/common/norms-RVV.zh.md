@@ -8,7 +8,7 @@
 
 当前工作概述：在 `norms.hpp` 内为 L1、L2²、L∞、L2、JM、B、Sublinear、CS、Div、PF、K、KL、HIK 等增加 `*Norm_RVV`（`#if defined(__RVV10__)`），通过 `detail::kNormRvvContiguousFloatV` 与 `norm_contiguous_float_data` 将 `float*` / `std::vector<float>` 导向 RVV；`dim < kNormRvvMinDim`（当前为 16）时回退标量。`Div_Norm_RVV` / `KL_Norm_RVV` 使用 `logf_RVV_f32m2` 与掩码累加，替代「向量除法 + 标量 `std::log`」。测试侧增加同进程对拍 `test_norms_std_vs_rvv_compare.cpp` 与 `test-rvv/common/norms` 下 bench / 部署 / 板卡流程；板卡与 QEMU 的 `bench_norms_std` / `bench_norms_rvv` 对比见 `analyze_bench_compare.py` 输出。
 
-条带尾段 `_tu` / `_mu` 语义、`vfloat32m2_t` 与 LMUL 选型见各模块 RVV 说明中的统一约定；`logf` / `expf` 专题见 [logf-RVV.zh.md](./logf-RVV.zh.md)、[expf-RVV.zh.md](./expf-RVV.zh.md)。
+条带尾段 `_tu` / `_mu` 语义、`vfloat32m2_t` 与 LMUL 选型见各模块 RVV 说明中的统一约定；`logf` / `expf` 数学 helper 专题见 [logf-RVV.zh.md](../rvv/math/logf-RVV.zh.md)、[expf-RVV.zh.md](../rvv/math/expf-RVV.zh.md)。
 
 ---
 

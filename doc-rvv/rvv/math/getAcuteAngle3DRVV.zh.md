@@ -1,5 +1,7 @@
 # 3D 向量锐角计算 (`getAcuteAngle3D` & `acos`)
 
+本文迁入 `doc-rvv/rvv/math/`，因为主要内容是 `acos_RVV_f32m2` 数学 helper 的模型、系数和误差证据；`getAcuteAngle3D` 是该 helper 的批量锐角调用场景。PCL common 模块的整体向量化说明仍见 `doc-rvv/common/common.zh.md`。
+
 ## 1. 功能与数学原理
 
 `getAcuteAngle3D`（计算两个向量的锐角）和 `acos`（反余弦函数的快速近似）用于快速计算两个 3D 向量之间的**锐角**夹角。
@@ -31,7 +33,7 @@ $$
 \arccos(x) \approx \sqrt{u}\,Q(u),\quad u=1-x
 $$
 
-其中 \(Q(u)\) 为 5 次多项式，系数来自 `test-rvv/common/common/script/parms_acos.py --method remez2-deg5`（默认区间 `x in [0, 0.999]`）。采用 deg5 remez2 是精度与速度的折中：相对旧 PCL 八常数结构，误差从约 `7.75e-4 rad` 降到约 `1.31e-6 rad`，同时板卡历史记录显示速度接近旧 RVV PCL 路径。
+其中 \(Q(u)\) 为 5 次多项式，系数来自 `test-rvv/rvv/math/acos/script/parms_acos.py --method remez2-deg5`（默认区间 `x in [0, 0.999]`）。采用 deg5 remez2 是精度与速度的折中：相对旧 PCL 八常数结构，误差从约 `7.75e-4 rad` 降到约 `1.31e-6 rad`，同时板卡历史记录显示速度接近旧 RVV PCL 路径。
 
 ---
 
@@ -124,7 +126,7 @@ return sqrt(u) * q;
 
 参数来源：
 
-- 脚本：`test-rvv/common/common/script/parms_acos.py`
+- 脚本：`test-rvv/rvv/math/acos/script/parms_acos.py`
 - 模型：`acos(x) ~= sqrt(1-x) * Q(1-x)`
 - 当前默认：`deg5 remez2`
 - 系数：
@@ -138,8 +140,8 @@ return sqrt(u) * q;
 本轮替换前复核：
 
 ```bash
-make -C test-rvv/common/common parms_acos
-make -C test-rvv/common/common run_acos_test
+make -C test-rvv/rvv/math parms_acos
+make -C test-rvv/rvv/math run_acos_test
 ```
 
 QEMU 专项结果：当前 `pcl::acos_RVV_f32m2` 最大误差 `1.311302e-06 rad`，与标量 deg5 remez2 的 `max |diff|` 为 `0`；历史 PCL 八常数 baseline 最大误差为 `7.749423e-04 rad`。

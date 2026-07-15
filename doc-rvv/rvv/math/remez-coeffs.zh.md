@@ -1,6 +1,6 @@
 # RVV 常用超越函数
 
-本文档汇总 `test-rvv/common/common/script/` 下各 Remez / minimax 相关脚本的数学含义、推荐用法与常见误区，便于与 `common/include/pcl/common/impl/common.hpp` 中的 float 实现对照。
+本文档汇总 `test-rvv/rvv/math/<function>/script/` 下各 Remez / minimax 相关脚本的数学含义、推荐用法与常见误区，便于与 `common/include/pcl/common/impl/common.hpp` 中的 float 实现对照。
 
 ---
 
@@ -91,12 +91,12 @@ static const float kExpfRemezC7 = 0.0001986611354469939f;
 
 ## 3. 如何运行脚本并对比不同方案的精度
 
-环境（在 `test-rvv/common/common` 下）：
+环境（在 `test-rvv/rvv/math` 下）：
 
 ```bash
-cd test-rvv/common/common
+cd test-rvv/rvv/math
 uv venv .venv && uv pip install numpy scipy
-# 或:  .venv/bin/python  直接调用 script/ 下各文件
+# 或:  .venv/bin/python  直接调用各函数目录 script/ 下的文件
 ```
 
 也可用 Makefile（同样目录）：
@@ -109,10 +109,10 @@ make parms_atan2 parms_log1p parms_expf parms_acos
 
 | 脚本 | 对比什么 | 常用命令 |
 |------|----------|----------|
-| `parms_atan2.py` | **六路** report 或单路 **remez1** / `lp` / `remez2` | `.venv/bin/python script/parms_atan2.py`；`... --method remez1` / `lp` / `remez2` |
-| `parms_log1p.py` | `lp` / `remez1` / `remez2` / `sollya` 五路报告 | `.venv/bin/python script/parms_log1p.py`；单路 `... --method lp` / `remez1` / `remez2` |
-| `parms_expf.py` | `remez1` / `remez1-rel` / `remez2-rel` / `lp-rel` / `sollya-script` | `.venv/bin/python script/parms_expf.py`；单路 `... --method remez1-rel` / `remez2-rel` / `lp-rel` |
-| `parms_acos.py` | **四路** report 或单路 **remez1** / `lp` / `remez2` / `pcl-baseline`；快捷 `report-deg7` 等 | `python script/parms_acos.py`；`--method remez1`；`remez1-deg7` / `remez1-deg5` |
+| `parms_atan2.py` | **六路** report 或单路 **remez1** / `lp` / `remez2` | `.venv/bin/python atan2/script/parms_atan2.py`；`... --method remez1` / `lp` / `remez2` |
+| `parms_log1p.py` | `lp` / `remez1` / `remez2` / `sollya` 五路报告 | `.venv/bin/python logf/script/parms_log1p.py`；单路 `... --method lp` / `remez1` / `remez2` |
+| `parms_expf.py` | `remez1` / `remez1-rel` / `remez2-rel` / `lp-rel` / `sollya-script` | `.venv/bin/python expf/script/parms_expf.py`；单路 `... --method remez1-rel` / `remez2-rel` / `lp-rel` |
+| `parms_acos.py` | **四路** report 或单路 **remez1** / `lp` / `remez2` / `pcl-baseline`；快捷 `report-deg7` 等 | `.venv/bin/python acos/script/parms_acos.py`；`--method remez1`；`remez1-deg7` / `remez1-deg5` |
 
 atan 的 remez1 与历史实现 `remez_atan_odd_first_algorithm_legacy` 为同一算法族；正式入口为 **`remez_atan_odd_first`**（CLI：`--method remez1`）。在 \([0,1]\)、`a=0` 上奇次到 \(t^{11}\) 时，当前稳健版典型 max 误差可到 **\(10^{-6}\,\mathrm{rad}\)** 量级；历史版（legacy）仍可复现约 \(10^{-4}\,\mathrm{rad}\) 的退化行为，适合教学对比。
 
@@ -140,23 +140,22 @@ atan 的 remez1 与历史实现 `remez_atan_odd_first_algorithm_legacy` 为同�
 本机已测 Sollya 8.0，下列方式可得到 `fpminimax` 多项式。
 
 ```bash
-cd test-rvv/common/common
+cd test-rvv/rvv/math
 # atan：六路 report；或仅 Sollya deg11 / deg5
-.venv/bin/python script/parms_atan2.py
-.venv/bin/python script/parms_atan2.py --run-sollya-deg5
-.venv/bin/python script/parms_atan2.py --run-sollya --sollya-save script/sollya_atan_fpminimax_report.txt
+.venv/bin/python atan2/script/parms_atan2.py
+.venv/bin/python atan2/script/parms_atan2.py --run-sollya-deg5
+.venv/bin/python atan2/script/parms_atan2.py --run-sollya --sollya-save atan2/script/sollya_atan_fpminimax_report.txt
 
 # acos：四路（PCL8 / 约化 remez1 / 约化 remez2 / 约化 LP）
-.venv/bin/python script/parms_acos.py
-.venv/bin/python script/parms_acos.py --method remez1
-.venv/bin/python script/parms_acos.py --method remez2
-.venv/bin/python script/parms_acos.py --method lp
+.venv/bin/python acos/script/parms_acos.py
+.venv/bin/python acos/script/parms_acos.py --method remez1
+.venv/bin/python acos/script/parms_acos.py --method remez2
+.venv/bin/python acos/script/parms_acos.py --method lp
 
-cd test-rvv/common/common/script
-sollya sollya_fpminimax_exp.sollya          # exp(x)，x∈[-ln2/2,ln2/2]，7 次，relative
-sollya sollya_fpminimax_log1p.sollya        # log(1+x)，x∈[0,0.999999]，7 次，absolute
-sollya sollya_fpminimax_atan_deg11_absolute.sollya   # atan deg11（12 常数）
-sollya sollya_fpminimax_atan_deg5_absolute.sollya    # atan deg5（6 常数，与六路 report 中 Sollya deg5 一致）
+sollya expf/script/sollya_fpminimax_exp.sollya          # exp(x)，x∈[-ln2/2,ln2/2]，7 次，relative
+sollya logf/script/sollya_fpminimax_log1p.sollya        # log(1+x)，x∈[0,0.999999]，7 次，absolute
+sollya atan2/script/sollya_fpminimax_atan_deg11_absolute.sollya   # atan deg11（12 常数）
+sollya atan2/script/sollya_fpminimax_atan_deg5_absolute.sollya    # atan deg5（6 常数，与六路 report 中 Sollya deg5 一致）
 ```
 
 Sollya 进程退出码（与「算没算出来」无必然矛盾）：按 [Sollya 用户手册对交互进程的约定](https://www.sollya.org/sollya-current/sollya.php)（*Exit status of the sollya tool* 一节）：
@@ -171,24 +170,25 @@ Sollya 进程退出码（与「算没算出来」无必然矛盾）：按 [Solly
 
 ## 6. 本仓库里的 C++ 回归测试怎么跑
 
-在 `test-rvv/common/common` 下，先按默认 `ARCH`（本机常见为 `x86` 或需查看 `Makefile` 首段）编出可执行文件，再跑与 `libm` 对比的测试。示例（x86/本地 g++ 能编过时）：
+在 `test-rvv/rvv/math` 下，先按默认 `ARCH`（本机常见为 `riscv`；x86 可显式传 `ARCH=x86`）编出可执行文件，再跑与 `libm` 对比的测试。示例：
 
 ```bash
-cd test-rvv/common/common
-make run_atan2_test    # 标量；RVV 需 ARCH=riscv 且链工具齐全
+cd test-rvv/rvv/math
+make ARCH=x86 run_atan2_test    # x86 标量路径
+make run_atan2_test             # RISC-V/QEMU RVV 路径
 make run_acos_test
 make run_expf_test
 make run_logf_test
 ```
 
-可选：`make run_expf_remez_vs_taylor`（Remez 与 Taylor 对比）。日志默认 tee 到 `output/run_*.log`（以 Makefile 中 `OUTPUT_DIR` 为准）。若交叉编译到 RISC-V 板卡，用仓库里已有的 `deploy_*` 与 `make run_* ARCH=riscv` 及 `board.mk` / QEMU 等流程，与 `logf-RVV.zh.md`、`expf-RVV.zh.md` 中板卡节一致。
+可选：`make run_expf_remez_vs_taylor`（Remez 与 Taylor 对比）。日志默认按函数写到 `output/qemu/<function>/`（以 Makefile 中 `OUTPUT_DIR_QEMU` 为准）。若交叉编译到 RISC-V 板卡，用仓库里已有的 `deploy_*` 与 `board.mk` / QEMU 等流程，与 `logf-RVV.zh.md`、`expf-RVV.zh.md` 中板卡节一致。
 
 ---
 
 ## 7. 与《atan2 文章》及单元测试的衔接
 
-- 标量/向量数值对照：`test-rvv/common/common/atan2_test.cpp`（文章、mazzo 奇次核、**Remez1**、**Remez2**、LP、Sollya deg5/deg11、RVV）；`acos_test.cpp`（PCL8、约化 **remez1 / remez2 / LP**（deg11/7/5）、RVV 约化 remez2）。
-- `atan2` 与 RVV 的专题说明仍见 `doc-rvv/common/atan2-RVV.zh.md`；系数选择策略以本文与脚本头注释为准（文章常数可保留，LP 用于复核与回归）。
+- 标量/向量数值对照：`test-rvv/rvv/math/atan2/atan2_test.cpp`（文章、mazzo 奇次核、**Remez1**、**Remez2**、LP、Sollya deg5/deg11、RVV）；`test-rvv/rvv/math/acos/acos_test.cpp`（PCL8、约化 **remez1 / remez2 / LP**（deg11/7/5）、RVV 约化 remez2）。
+- `atan2` 与 RVV 的专题说明见 [`atan2-RVV.zh.md`](atan2-RVV.zh.md)；系数选择策略以本文与脚本头注释为准（文章常数可保留，LP 用于复核与回归）。
 
 ---
 

@@ -46,10 +46,10 @@ x' = x \cdot 2^{24}
 
 - \(\ln(2)\) 分解：与 `expf` 中 `kExpfLog2Hi` / `kExpfLog2Lo` 相同，在实现里记为 `kLogfLog2Hi` / `kLogfLog2Lo`，用 `e * hi + e * lo` 形式减少 `E * ln(2)` 的舍入损失（`e` 为 32 位有符号指数）。
 
-- \(\log(1+u)\) 多项式系数：在区间 \([0,1]\) 上逼近 \(\log(1+u)\)。脚本为 `test-rvv/common/common/script/parms_log1p.py`（名称与标准库 `log1p(x)=log(1+x)` 一致；`1p` 即 one plus）。当前 `common.hpp` 中 `kLogfLog1pC0..C7` 是历史 LP-derived baseline；`parms_log1p.py` 当前 report 中的 `(1) baseline/current` 与 `(4) lp` 是不同候选，不应视为同一组系数。总述与 exp/atan/acos 脚本关系见 `doc-rvv/common/remez-coeffs.zh.md`。再经 `float` Horner 与 `e*ln(2)` 项相加，与 `std::logf` 比较时，典型正数抽样上的最大相对误差仍受 `expf` 造点与双重舍入影响（见下节测试）。
+- \(\log(1+u)\) 多项式系数：在区间 \([0,1]\) 上逼近 \(\log(1+u)\)。脚本为 `test-rvv/rvv/math/logf/script/parms_log1p.py`（名称与标准库 `log1p(x)=log(1+x)` 一致；`1p` 即 one plus）。当前 `common.hpp` 中 `kLogfLog1pC0..C7` 是历史 LP-derived baseline；`parms_log1p.py` 当前 report 中的 `(1) baseline/current` 与 `(4) lp` 是不同候选，不应视为同一组系数。总述与 exp/atan/acos 脚本关系见 [`remez-coeffs.zh.md`](remez-coeffs.zh.md)。再经 `float` Horner 与 `e*ln(2)` 项相加，与 `std::logf` 比较时，典型正数抽样上的最大相对误差仍受 `expf` 造点与双重舍入影响（见下节测试）。
 
 ```bash
-cd test-rvv/common/common
+cd test-rvv/rvv/math
 make parms_log1p
 ```
 
@@ -69,14 +69,14 @@ make parms_log1p
 
 ### 3.1 logf_test：与 `std::logf` 对比
 
-程序：`test-rvv/common/common/logf_test.cpp`，`make run_logf_test`。在 `log` 域 \([-20, 20]\) 上取 `t`，令 `x = expf(t)`，以 `ref = std::logf(x)` 为参考。标量路径使用与 `common.hpp` 相同常量的 Remez+约化，RVV 路径直接调用 `pcl::logf_RVV_f32m2`。
+程序：`test-rvv/rvv/math/logf/logf_test.cpp`，`make -C test-rvv/rvv/math run_logf_test`。在 `log` 域 \([-20, 20]\) 上取 `t`，令 `x = expf(t)`，以 `ref = std::logf(x)` 为参考。标量路径使用与 `common.hpp` 相同常量的 Remez+约化，RVV 路径直接调用 `pcl::logf_RVV_f32m2`。
 
 ### 3.2 板卡上运行
 
 开发机构建并部署（与 `expf_test` 相同，需能 `rsync` 到板卡且板卡上 `pcl` 等库在 `REMOTE_LIB_DIR` 可查）：
 
 ```bash
-cd test-rvv/common/common
+cd test-rvv/rvv/math
 make deploy_logf_test
 ```
 
