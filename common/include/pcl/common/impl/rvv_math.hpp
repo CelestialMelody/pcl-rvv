@@ -145,6 +145,131 @@ atan2_RVV_f32m2 (const vfloat32m2_t& y, const vfloat32m2_t& x, const std::size_t
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // -----------------------------------------------------------------------------
+// sincos_finite_domain_RVV_f32m2:
+//   受限接入原型（integration prototype，仅验证接入形态，不接 production caller）。
+//
+// 合同:
+//   - finite-domain fast approximation（有限输入域快速近似），不是 strict libm
+//     replacement（严格 libm 替换）。
+//   - 只接受有限 float 且 x in [-pi, pi]。
+//   - domain-out（域外）/ NaN / Inf lane 合并为 quiet NaN，不静默 clamp。
+//   - subnormal（次正规数）在合同域内，走 fast path。
+//   - signed zero（带符号零）保持 sin(+0)=+0、sin(-0)=-0、cos(+-0)=+1。
+//
+// 分层:
+//   - kernel（约化区间多项式核函数）只处理 r in [-pi/4, pi/4]。
+//   - lane-level helper（单个 RVV 向量寄存器级 helper）负责 domain mask、
+//     bounded mask range reduction（有限域 mask 分段约化）、hi/lo compensation
+//     （高低位常量补偿）、象限 sign/swap 重构、signed-zero merge 和 NaN merge。
+//   - 本函数不负责 load/store，不负责 strip-mining，不是 public API。
+//
+// 系数来源:
+//   - test-rvv/rvv/math/sincos/script/parms_sincos.py 的 lp-abs-hi-lo 候选。
+//   - 进入 production 前仍需保留参数脚本、专项测试、反汇编和板卡证据。
+// -----------------------------------------------------------------------------
+namespace {
+  const float kSincosPi = 3.1415927410125732f;
+  const float kSincosPi2 = 1.5707963705062866f;
+  const float kSincosPi4 = 0.7853981852531433f;
+  const float kSincos3Pi4 = 2.3561944961547852f;
+  const float kSincosPiLo = -8.742277657347586e-08f;
+  const float kSincosPi2Lo = -4.371138828673793e-08f;
+
+  const float kSincosSinS0 = -1.666666716337204e-01f;
+  const float kSincosSinS1 = 8.333330973982811e-03f;
+  const float kSincosSinS2 = -1.983980037039146e-04f;
+  const float kSincosSinS3 = 2.721804321481613e-06f;
+  const float kSincosCosC0 = -5.000000000000000e-01f;
+  const float kSincosCosC1 = 4.166663810610771e-02f;
+  const float kSincosCosC2 = -1.388695789501071e-03f;
+  const float kSincosCosC3 = 2.439828858769033e-05f;
+}
+
+/** \brief sin kernel（约化区间多项式核函数）：只接受 r in [-pi/4, pi/4]，不能当完整 sinf 使用。 */
+inline vfloat32m2_t
+sincos_finite_domain_sin_kernel_RVV_f32m2 (const vfloat32m2_t& r, const std::size_t vl)
+{
+  const vfloat32m2_t r2 = __riscv_vfmul_vv_f32m2 (r, r, vl);
+  vfloat32m2_t p = __riscv_vfmv_v_f_f32m2 (kSincosSinS3, vl);
+  p = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kSincosSinS2, vl), r2, p, vl);
+  p = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kSincosSinS1, vl), r2, p, vl);
+  p = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kSincosSinS0, vl), r2, p, vl);
+  const vfloat32m2_t r3 = __riscv_vfmul_vv_f32m2 (r, r2, vl);
+  return __riscv_vfmacc_vv_f32m2 (r, r3, p, vl);
+}
+
+/** \brief cos kernel（约化区间多项式核函数）：只接受 r in [-pi/4, pi/4]，不能当完整 cosf 使用。 */
+inline vfloat32m2_t
+sincos_finite_domain_cos_kernel_RVV_f32m2 (const vfloat32m2_t& r, const std::size_t vl)
+{
+  const vfloat32m2_t r2 = __riscv_vfmul_vv_f32m2 (r, r, vl);
+  vfloat32m2_t p = __riscv_vfmv_v_f_f32m2 (kSincosCosC3, vl);
+  p = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kSincosCosC2, vl), r2, p, vl);
+  p = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kSincosCosC1, vl), r2, p, vl);
+  p = __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (kSincosCosC0, vl), r2, p, vl);
+  return __riscv_vfmacc_vv_f32m2 (__riscv_vfmv_v_f_f32m2 (1.0f, vl), r2, p, vl);
+}
+
+/** \brief 有限输入域 paired sin/cos lane-level helper（单个 RVV 向量寄存器级 helper）。 */
+inline void
+sincos_finite_domain_RVV_f32m2 (const vfloat32m2_t& x, vfloat32m2_t& s, vfloat32m2_t& c, const std::size_t vl)
+{
+  const vbool16_t ge_lo = __riscv_vmfge_vf_f32m2_b16 (x, -kSincosPi, vl);
+  const vbool16_t le_hi = __riscv_vmfle_vf_f32m2_b16 (x, kSincosPi, vl);
+  const vbool16_t valid = __riscv_vmand_mm_b16 (ge_lo, le_hi, vl);
+
+  const vbool16_t hi = __riscv_vmfgt_vf_f32m2_b16 (x, kSincos3Pi4, vl);
+  const vbool16_t mid = __riscv_vmand_mm_b16 (
+      __riscv_vmfgt_vf_f32m2_b16 (x, kSincosPi4, vl),
+      __riscv_vmfle_vf_f32m2_b16 (x, kSincos3Pi4, vl), vl);
+  const vbool16_t neg_hi = __riscv_vmflt_vf_f32m2_b16 (x, -kSincos3Pi4, vl);
+  const vbool16_t neg_mid = __riscv_vmand_mm_b16 (
+      __riscv_vmfge_vf_f32m2_b16 (x, -kSincos3Pi4, vl),
+      __riscv_vmflt_vf_f32m2_b16 (x, -kSincosPi4, vl), vl);
+  const vbool16_t outer = __riscv_vmor_mm_b16 (hi, neg_hi, vl);
+
+  vfloat32m2_t r = x;
+  vfloat32m2_t r_hi = __riscv_vfsub_vf_f32m2 (x, kSincosPi, vl);
+  vfloat32m2_t r_mid = __riscv_vfsub_vf_f32m2 (x, kSincosPi2, vl);
+  vfloat32m2_t r_neg_hi = __riscv_vfadd_vf_f32m2 (x, kSincosPi, vl);
+  vfloat32m2_t r_neg_mid = __riscv_vfadd_vf_f32m2 (x, kSincosPi2, vl);
+  r_hi = __riscv_vfsub_vf_f32m2 (r_hi, kSincosPiLo, vl);
+  r_mid = __riscv_vfsub_vf_f32m2 (r_mid, kSincosPi2Lo, vl);
+  r_neg_hi = __riscv_vfadd_vf_f32m2 (r_neg_hi, kSincosPiLo, vl);
+  r_neg_mid = __riscv_vfadd_vf_f32m2 (r_neg_mid, kSincosPi2Lo, vl);
+
+  r = __riscv_vmerge_vvm_f32m2 (r, r_hi, hi, vl);
+  r = __riscv_vmerge_vvm_f32m2 (r, r_mid, mid, vl);
+  r = __riscv_vmerge_vvm_f32m2 (r, r_neg_hi, neg_hi, vl);
+  r = __riscv_vmerge_vvm_f32m2 (r, r_neg_mid, neg_mid, vl);
+
+  const vfloat32m2_t sr = sincos_finite_domain_sin_kernel_RVV_f32m2 (r, vl);
+  const vfloat32m2_t cr = sincos_finite_domain_cos_kernel_RVV_f32m2 (r, vl);
+  const vfloat32m2_t zero = __riscv_vfmv_v_f_f32m2 (0.0f, vl);
+  const vfloat32m2_t neg_sr = __riscv_vfsub_vv_f32m2 (zero, sr, vl);
+  const vfloat32m2_t neg_cr = __riscv_vfsub_vv_f32m2 (zero, cr, vl);
+
+  vfloat32m2_t ys = sr;
+  vfloat32m2_t yc = cr;
+  ys = __riscv_vmerge_vvm_f32m2 (ys, neg_sr, outer, vl);
+  yc = __riscv_vmerge_vvm_f32m2 (yc, neg_cr, outer, vl);
+  ys = __riscv_vmerge_vvm_f32m2 (ys, cr, mid, vl);
+  yc = __riscv_vmerge_vvm_f32m2 (yc, neg_sr, mid, vl);
+  ys = __riscv_vmerge_vvm_f32m2 (ys, neg_cr, neg_mid, vl);
+  yc = __riscv_vmerge_vvm_f32m2 (yc, sr, neg_mid, vl);
+
+  const vbool16_t zero_mask = __riscv_vmfeq_vf_f32m2_b16 (x, 0.0f, vl);
+  const vfloat32m2_t one = __riscv_vfmv_v_f_f32m2 (1.0f, vl);
+  ys = __riscv_vmerge_vvm_f32m2 (ys, x, zero_mask, vl);
+  yc = __riscv_vmerge_vvm_f32m2 (yc, one, zero_mask, vl);
+
+  const vfloat32m2_t qnan = __riscv_vfmv_v_f_f32m2 (std::numeric_limits<float>::quiet_NaN (), vl);
+  s = __riscv_vmerge_vvm_f32m2 (qnan, ys, valid, vl);
+  c = __riscv_vmerge_vvm_f32m2 (qnan, yc, valid, vl);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------------------
 // expf_RVV_f32m2: vectorized float exp using reduction → approximation → reconstruction
 // -----------------------------------------------------------------------------
 // 约化: x = n*ln2 + r, r ∈ [-ln2/2, ln2/2]. 逼近: exp(r) ≈ P(r) (Remez degree 7).

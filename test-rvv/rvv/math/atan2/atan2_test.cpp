@@ -16,7 +16,7 @@
  *
  * 表格：误差段为「竖线表格」；性能段首列宽度仅按 kernel 英文名计，避免被中文 Case 列撑宽（对齐思路同 analyze_bench_compare 定宽列）。
  * 表头量纲写作 max (rad)、mean (rad)。RVV 与标量 (1) 的 |diff| 单独一节，不插入前表。
- * 终端表格见 ../../script/term_table.hpp（math_test 命名空间），其它数学测试可复用。
+ * 终端表格见 ../../../script/term_table.hpp（math_test 命名空间），其它数学测试可复用。
  */
 #include <algorithm>
 #include <chrono>
@@ -26,7 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "../../script/term_table.hpp"
+#include "../../../script/term_table.hpp"
 
 #if defined(__RVV10__)
 #include <riscv_vector.h>
@@ -39,7 +39,7 @@ namespace {
 
 using math_test::utf8_display_width;
 
-/** 与 ../../script/term_table.hpp 中默认一致的误差/性能列宽；其它测试可自定义 Table3NumCols / Perf2Cols。 */
+/** 与 ../../../script/term_table.hpp 中默认一致的误差/性能列宽；其它测试可自定义 Table3NumCols / Perf2Cols。 */
 constexpr math_test::Table3NumCols k_err_tbl{};
 constexpr math_test::Perf2Cols k_perf_tbl{};
 

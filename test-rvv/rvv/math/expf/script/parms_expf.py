@@ -29,8 +29,10 @@ import struct
 import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-if SCRIPT_DIR not in sys.path:
-    sys.path.insert(0, SCRIPT_DIR)
+MATH_SCRIPT_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", "script"))
+for path in (SCRIPT_DIR, MATH_SCRIPT_DIR):
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
 from sollya_utils import parse_sollya_horner_to_coeffs, run_sollya_file  # noqa: E402
 

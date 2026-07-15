@@ -1,5 +1,13 @@
 # test-rvv/common — common.hpp 测试与 Benchmark
 
+数学 helper / std-libm RVV 向量化专项测试已迁移到：
+
+```bash
+test-rvv/rvv/math
+```
+
+本目录只保留 common.hpp 的 benchmark 与单元测试入口，不再维护 `acos`、`atan2`、`expf`、`logf`、`sinf/cosf` 参数脚本或 standalone math test。
+
 ## 构建与运行
 
 - **运行 Benchmark**  
@@ -40,4 +48,3 @@
 - **向量化日志**：编译时会生成 `logs/vec_missed_*.log`，可配合 `-fopt-info-vec-missed` 分析未向量化循环。
 - **过滤 common 相关**：`make generate_clean_report` 会生成 `logs/filtered_common.log`，仅含 `common.hpp` 相关条目。
 - **反汇编**：`make dump_bench` 生成 `bench_common_app.asm`，可统计 RVV 指令（ARCH=riscv）或 SSE/AVX（ARCH=x86）。
-

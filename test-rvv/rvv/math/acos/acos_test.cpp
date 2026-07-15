@@ -7,7 +7,7 @@
  *  (12) __RVV10__：约化模型 deg7 + remez2 的 RVV 实现
  *  (13) __RVV10__：约化模型 deg5 + remez2 的 RVV 实现
  *
- * 脚本：test-rvv/common/common/script/parms_acos.py（默认三路 report）。
+ * 脚本：test-rvv/rvv/math/acos/script/parms_acos.py（默认三路 report）。
  *
  * 精度与 RVV/标量对照（下文「max |diff|」）
  * ----------------------------------------
@@ -25,7 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "../../script/term_table.hpp"
+#include "../../../script/term_table.hpp"
 
 #if defined(__RVV10__)
 #include <riscv_vector.h>

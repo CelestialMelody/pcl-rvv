@@ -22,7 +22,7 @@
 #include <limits>
 #include <vector>
 
-#include "../../script/term_table.hpp"
+#include "../../../script/term_table.hpp"
 
 #if defined(__RVV10__)
 #include <cstddef>
