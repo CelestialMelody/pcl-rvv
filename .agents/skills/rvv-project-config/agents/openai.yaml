@@ -1,0 +1,4 @@
+interface:
+  display_name: "RVV 项目配置"
+  short_description: "标准化 C/C++ RVV 项目的配置和测试工作流。"
+  default_prompt: "请帮我标准化一个 C/C++ RVV 优化项目的本机配置、共享 Makefile 环境层、测试命令和验证流程。"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "RVV 数学拟合"
+  short_description: "RVV 数学函数拟合与验收流程"
+  default_prompt: "使用 $rvv-math-vectorization 规划并验证一个 C/C++ 数学热点的 RVV 近似实现。"

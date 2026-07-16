@@ -1,0 +1,3 @@
+display_name: RVV 文档
+short_description: 整理 RVV 主题文档、函数级评估、筛选报告和 closeout 证据链。
+default_prompt: 使用 RVV 文档 skill，编写或审查 RVV 主题文档、函数级评估或筛选报告，要求有源码证据、bench 语义和生产接入判断。

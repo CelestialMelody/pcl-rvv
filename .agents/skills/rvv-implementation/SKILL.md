@@ -1,0 +1,71 @@
+---
+name: rvv-implementation
+description: 实现或审查 C/C++ 高性能库中的 RVV 生产路径。适用于上游 RVV helper、fallback gate、公开入口分发、RVV load/store 封装、in-place 安全、注释粒度、代码审查，以及把函数级评估结论落到可维护源码的任务。
+---
+
+# RVV 实现工作流
+
+使用本 skill 前，应已有函数级评估或诊断证据，说明目标函数、覆盖条件、fallback 条件和生产接入价值。
+
+回复、实现说明和 `test-rvv` prototype 注释遵循 `rvv-workflow/references/reviewability-and-language.zh.md`：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释）。中文说明要自然，避免翻译腔和模板填空。production 代码注释保持克制；test/prototype 代码可以更详细，说明 helper 作用、调用者、fallback/gate 边界和证据角色。
+
+中优先级函数不等于默认放弃。应先尝试 RVV 可行性；只有实现困难、语义风险、覆盖条件过窄、验证成本过高、收益不可证明或破坏可维护性时才暂缓，并把原因写入评估和文档。
+
+## 实现结构
+
+- 公开 API 不变。
+- 常驻 `*_Std` 标量 helper。
+- `__RVV10__` 下提供 `*_RVV` helper。
+- 公开入口用短路分流选择 RVV 或自然落回 Std。
+- 不强制新增 dispatch helper；只有多个公开入口共享复杂选择逻辑时才增加。
+- 主路径 helper 放在对应分发入口附近，命名空间遵循所在文件风格。
+- 主路径 RVV helper 不额外包入 `detail`，除非该文件已有同类历史 SIMD 风格。
+- 命名要区分实际 RVV 路径和语义小工具。承载 RVV 指令或公开短路分流的 helper 可使用 `*_RVV`；traits、类型检测、阈值常量、mask helper 等非分流实体使用语义名。
+
+实现结构细则见 [references/implementation-patterns.md](references/implementation-patterns.md)。
+
+## Fallback 与 gate
+
+必须明确：
+
+- 小规模输入。
+- `double` 或不支持的 scalar。
+- non-dense 或 NaN/Inf。
+- indexed/gather/subset。
+- 非连续存储。
+- 字段类型不兼容。
+- 非标准布局。
+- 复杂分支、状态机或收益不确定路径。
+
+细则见 [references/fallback-and-dispatch.md](references/fallback-and-dispatch.md)。
+
+## 访存封装
+
+生产 RVV 代码优先复用公共 load/store 封装，而不是在各主题复制裸 intrinsic。标准 `x/y/z` 字段优先使用 xyz wrapper；normal、intensity、label 或自定义字段优先复用 primitive。
+
+访存封装细则见 [references/point-load-store.md](references/point-load-store.md)。
+
+## 注释规则
+
+新增注释只解释维护边界，不复述代码表面行为。适合注释：
+
+- 覆盖范围和 fallback 原因。
+- AoS/stride/gather/mask/VL chunk 组织理由。
+- `vcompress`、staging 与后续标量状态机衔接。
+- in-place 安全。
+- FRM/FCSR 或浮点语义边界。
+
+不适合注释：
+
+- “加载字段”。
+- “计算结果”。
+- “保存输出”。
+- 逐行复述 intrinsic 名称。
+
+修改旧源码时保持所在文件格式，不做无关格式化。
+
+## PCL adapter 注意点
+
+当前 PCL 旧代码常见函数调用空格风格，例如 `foo (bar)`。抽出 `*_Std` helper 时尽量保持原标量代码文本风格，不顺手做格式化。新增 RVV 代码前先检查同模块已有 RVV 文件的命名空间风格；只有短 traits、小型类型检测、既有 SSE/AVX helper 或不应暴露到主路径语义层的小工具才放入 `detail`。
+
+如果文件已有 x86 SSE/AVX 实现，可以参考减少重复访存、合并同一语义操作、复用寄存器的思路；RVV 仍需按 VL chunk、AoS/SoA 布局、in-place 安全和 fallback 重新设计，不能照搬 x86 单点寄存器粒度。

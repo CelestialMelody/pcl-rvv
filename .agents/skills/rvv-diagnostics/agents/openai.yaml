@@ -1,0 +1,3 @@
+display_name: RVV 诊断
+short_description: 设计和审查 RVV 诊断入口、helper 分层、证据层级和生产接入判断。
+default_prompt: 使用 RVV 诊断 skill，检查当前诊断入口是否贴近上游源码，局部 helper 与 full 证据是否分层清晰，并给出生产接入判断。
