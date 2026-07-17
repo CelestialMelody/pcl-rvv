@@ -39,6 +39,7 @@ UPSTREAM_TEST_RVV_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test_rvv.log
 
 ANALYZE_VEC_SCRIPT    ?= $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_vec_log.py
 BENCH_COMPARE_SCRIPT  ?= $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_bench_compare.py
+SANITIZE_LOGS_SCRIPT  ?= $(TEST_RVV_SHARED_SCRIPT_DIR)/sanitize_evidence_logs.py
 
 # Optional data files to deploy beside the board binaries. Keep the list in the
 # topic Makefile so inputs such as PCD fixtures remain topic-owned.
@@ -258,4 +259,20 @@ fetch_board_logs: | $(OUTPUT_DIR_BOARD)
 	@rsync -e "$(RSYNC_SSH)" -avzP $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_BOARD_OUTPUT_DIR)/ $(OUTPUT_DIR_BOARD)/
 board_smoke: run_board_test run_board_bench_compare fetch_board_logs
 
-.PHONY: run_test run_test_std run_test_rvv run_test_compare run_upstream_test run_upstream_test_std run_upstream_test_rvv run_upstream_test_compare run_test_all run_bench run_bench_std run_bench_rvv run_bench_compare analyze_bench_compare generate_vec_report dump_bench_rvv clean clean_test clean_test_std clean_test_rvv clean_upstream_test clean_upstream_test_std clean_upstream_test_rvv clean_bench clean_bench_std clean_bench_rvv check_board_ssh deploy_files deploy_bench_rvv deploy_bench_std deploy_test deploy_board run_board_test run_board_bench_compare fetch_board_logs board_smoke
+sanitize_output_logs:
+	@files=$$(find "$(OUTPUT_DIR_QEMU)" "$(OUTPUT_DIR_BOARD)" -type f -name '*.log' 2>/dev/null | sort); \
+	if [ -z "$$files" ]; then \
+		echo "[sanitize] No output logs under $(OUTPUT_DIR_QEMU) or $(OUTPUT_DIR_BOARD)."; \
+	else \
+		$(PYTHON_RUN) "$(SANITIZE_LOGS_SCRIPT)" --in-place $$files; \
+	fi
+
+check_output_logs_sanitized:
+	@files=$$(find "$(OUTPUT_DIR_QEMU)" "$(OUTPUT_DIR_BOARD)" -type f -name '*.log' 2>/dev/null | sort); \
+	if [ -z "$$files" ]; then \
+		echo "[sanitize] No output logs under $(OUTPUT_DIR_QEMU) or $(OUTPUT_DIR_BOARD)."; \
+	else \
+		$(PYTHON_RUN) "$(SANITIZE_LOGS_SCRIPT)" --check $$files; \
+	fi
+
+.PHONY: run_test run_test_std run_test_rvv run_test_compare run_upstream_test run_upstream_test_std run_upstream_test_rvv run_upstream_test_compare run_test_all run_bench run_bench_std run_bench_rvv run_bench_compare analyze_bench_compare generate_vec_report dump_bench_rvv clean clean_test clean_test_std clean_test_rvv clean_upstream_test clean_upstream_test_std clean_upstream_test_rvv clean_bench clean_bench_std clean_bench_rvv check_board_ssh deploy_files deploy_bench_rvv deploy_bench_std deploy_test deploy_board run_board_test run_board_bench_compare fetch_board_logs board_smoke sanitize_output_logs check_output_logs_sanitized
