@@ -6,8 +6,8 @@
   VLEN      : see SoC / ELF (board)
   Dataset   : synthetic PointXYZ source and organized PointXYZ target; projection staging plus full correspondence diagnostic
   Iterations: 30 （每行 Total = Avg × 30）
-  Std log   : /root/pcl-test/registration/correspondence_estimation_organized_projection/output/run_bench_std.log
-  RVV log   : /root/pcl-test/registration/correspondence_estimation_organized_projection/output/run_bench_rvv.log
+  Std log   : <board-root>/registration/correspondence_estimation_organized_projection/output/run_bench_std.log
+  RVV log   : <board-root>/registration/correspondence_estimation_organized_projection/output/run_bench_rvv.log
 
 ------------------------------------------------------------------------------------------------------------------------------------
 Benchmark Item                                                          | Impl   |       Avg (ms) |     Total (ms) |        Speedup

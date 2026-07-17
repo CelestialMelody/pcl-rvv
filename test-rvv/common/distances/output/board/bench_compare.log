@@ -1,6 +1,6 @@
-[BOARD] Benchmark Std -> /root/pcl-test/common/distances/output/run_bench_std.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/distances/bench_distances_std 2>&1 | tee /root/pcl-test/common/distances/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/common/distances/output/run_bench_std.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/distances/bench_distances_std 2>&1 | tee <board-root>/common/distances/output/run_bench_std.log
 ============================================================
  PCL distances.h Benchmark
  linear_points: 1000000  maxseg_points: 2500
@@ -11,9 +11,9 @@ LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
 getMaxSegment (cloud, O(n^2))             : 62.7429 ms/iter
 getMaxSegment (indices, O(n^2))           : 87.8233 ms/iter
 ============================================================
-[BOARD] Benchmark RVV -> /root/pcl-test/common/distances/output/run_bench_rvv.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/distances/bench_distances_rvv 2>&1 | tee /root/pcl-test/common/distances/output/run_bench_rvv.log
+[BOARD] Benchmark RVV -> <board-root>/common/distances/output/run_bench_rvv.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/distances/bench_distances_rvv 2>&1 | tee <board-root>/common/distances/output/run_bench_rvv.log
 ============================================================
  PCL distances.h Benchmark
  linear_points: 1000000  maxseg_points: 2500
@@ -24,9 +24,9 @@ LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
 getMaxSegment (cloud, O(n^2))             : 12.4788 ms/iter
 getMaxSegment (indices, O(n^2))           : 12.4328 ms/iter
 ============================================================
-python3 '/root/pcl-test/common/distances/script/analyze_bench_compare.py' \
-        --std-log /root/pcl-test/common/distances/output/run_bench_std.log \
-        --rvv-log /root/pcl-test/common/distances/output/run_bench_rvv.log \
+python3 '<board-root>/common/distances/script/analyze_bench_compare.py' \
+        --std-log <board-root>/common/distances/output/run_bench_std.log \
+        --rvv-log <board-root>/common/distances/output/run_bench_rvv.log \
         --device "Milkv-Jupiter" \
         --vlen-desc "see SoC / ELF (board)" \
 
@@ -40,8 +40,8 @@ python3 '/root/pcl-test/common/distances/script/analyze_bench_compare.py' \
   Iterations: 未解析到 Iter/Iterations
               Total Time 不计算（n/a）
               建议在 bench 输出中增加 Iterations: N/iter: N，或用 --iterations 覆盖
-  Std log   : /root/pcl-test/common/distances/output/run_bench_std.log
-  RVV log   : /root/pcl-test/common/distances/output/run_bench_rvv.log
+  Std log   : <board-root>/common/distances/output/run_bench_std.log
+  RVV log   : <board-root>/common/distances/output/run_bench_rvv.log
 
 ---------------------------------------------------------------------------------------------
 Benchmark Item                   | Impl   |       Avg Time |     Total Time |        Speedup

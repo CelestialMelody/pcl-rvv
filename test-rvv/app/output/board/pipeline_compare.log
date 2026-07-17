@@ -1,7 +1,7 @@
 ❯ make run_pipeline_compare
-make[1]: Entering directory '/root/pcl-test/app'
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/app/pipeline_app_std  2>&1 | tee /root/pcl-test/app/output/run_pipeline_std.log
+make[1]: Entering directory '<board-root>/app'
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/app/pipeline_app_std  2>&1 | tee <board-root>/app/output/run_pipeline_std.log
 ======================================================================================================================
  PCL RVV 综合流水线（生成/滤波/法线/变换/2d/SAC/common）
  Workload: common(centroid..polygon,gaussian) + filters + features(normals) + transform + 2d + SAC + RVV intrinsic strip (common.hpp)
@@ -41,10 +41,10 @@ total_pipeline (full chain)                                         : 1229.7447 
 staged_sum                                                         : 1229.3147 ms/iter
 [pipeline] 完成 12 次计时迭代（不含 warmup）。
 ======================================================================================================================
-make[1]: Leaving directory '/root/pcl-test/app'
-make[1]: Entering directory '/root/pcl-test/app'
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/app/pipeline_app_rvv  2>&1 | tee /root/pcl-test/app/output/run_pipeline_rvv.log
+make[1]: Leaving directory '<board-root>/app'
+make[1]: Entering directory '<board-root>/app'
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/app/pipeline_app_rvv  2>&1 | tee <board-root>/app/output/run_pipeline_rvv.log
 ======================================================================================================================
  PCL RVV 综合流水线（生成/滤波/法线/变换/2d/SAC/common）
  Workload: common(centroid..polygon,gaussian) + filters + features(normals) + transform + 2d + SAC + RVV intrinsic strip (common.hpp)
@@ -84,13 +84,13 @@ total_pipeline (full chain)                                         : 1095.4222 
 staged_sum                                                         : 1095.0038 ms/iter
 [pipeline] 完成 12 次计时迭代（不含 warmup）。
 ======================================================================================================================
-make[1]: Leaving directory '/root/pcl-test/app'
-python3 /root/pcl-test/script/analyze_bench_compare.py \
-        --std-log /root/pcl-test/app/output/run_pipeline_std.log \
-        --rvv-log /root/pcl-test/app/output/run_pipeline_rvv.log \
+make[1]: Leaving directory '<board-root>/app'
+python3 <board-root>/script/analyze_bench_compare.py \
+        --std-log <board-root>/app/output/run_pipeline_std.log \
+        --rvv-log <board-root>/app/output/run_pipeline_rvv.log \
         --device "board rv64 (Milkv-Jupiter)" \
         --vlen-desc "256 bits (hardware vlenb csr, 32 bytes)" \
-        2>&1 | tee /root/pcl-test/app/output/analyze_pipeline_compare.log
+        2>&1 | tee <board-root>/app/output/analyze_pipeline_compare.log
 =========================================================================================
  PCL RVV 综合流水线（生成/滤波/法线/变换/2d/SAC/common） (Std vs RVV)
 =========================================================================================
@@ -99,8 +99,8 @@ python3 /root/pcl-test/script/analyze_bench_compare.py \
   VLEN      : 256 bits (hardware vlenb csr, 32 bytes)
   Dataset   : common(centroid..polygon,gaussian) + filters + features(normals) + transform + 2d + SAC + RVV intrinsic strip (common.hpp)
   Iterations: 12 （每行 Total = Avg × 12）
-  Std log   : /root/pcl-test/app/output/run_pipeline_std.log
-  RVV log   : /root/pcl-test/app/output/run_pipeline_rvv.log
+  Std log   : <board-root>/app/output/run_pipeline_std.log
+  RVV log   : <board-root>/app/output/run_pipeline_rvv.log
 
 -----------------------------------------------------------------------------------------
 Benchmark Item               | Impl   |       Avg (ms) |     Total (ms) |        Speedup

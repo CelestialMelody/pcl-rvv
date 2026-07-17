@@ -1,4 +1,4 @@
-❯ LD_LIBRARY_PATH=./libs ./rvv_sac_plane_test sac_plane_test.pcd
+❯ LD_LIBRARY_PATH=<runtime-libs> ./rvv_sac_plane_test sac_plane_test.pcd
 [==========] Running 19 tests from 3 test suites.
 [----------] Global test environment set-up.
 [----------] 13 tests from SampleConsensusModelPlane

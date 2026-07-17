@@ -1,6 +1,6 @@
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -9,8 +9,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 6.825 ms/iter
   Speedup (A/B): 0.966273x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -19,8 +19,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 7.14762 ms/iter
   Speedup (A/B): 0.984299x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -29,8 +29,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 7.05574 ms/iter
   Speedup (A/B): 0.979513x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -39,8 +39,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 6.94469 ms/iter
   Speedup (A/B): 0.993019x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -49,8 +49,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 6.86917 ms/iter
   Speedup (A/B): 1.01558x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -59,8 +59,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 6.70864 ms/iter
   Speedup (A/B): 1.00904x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -69,8 +69,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 6.87181 ms/iter
   Speedup (A/B): 1.00424x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -79,8 +79,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 6.78842 ms/iter
   Speedup (A/B): 1.01118x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)
@@ -89,8 +89,8 @@ EdgeStoreBench (PointXYZIEdge layout):
   Mode B (vssseg4e32): 6.78191 ms/iter
   Speedup (A/B): 0.97915x
 ❯ make run_bench_store_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/test_edge_store_bench
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/test_edge_store_bench
 EdgeStoreBench (PointXYZIEdge layout):
   n=307200, iterations=20, warmup=5
   stride_bytes=32 (float_stride=8)

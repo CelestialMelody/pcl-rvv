@@ -1,9 +1,9 @@
-make[1]: 进入目录“/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/common/transforms”
+make[1]: 进入目录“<pcl-src>/test-rvv/common/transforms”
 rm -rf build/x86/bench_transforms
 [BUILD] Compiling Benchmark (x86, USE_PCL_RVV10=0)...
-g++ -std=c++17 -O3 -g -march=native -mtune=native -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-05-28_13-37-24.log -DPCL_SILENCE_MALLOC_WARNING=1 -DPCL_NO_PRECOMPILE -I/home/zoomin/workspace/pcl/common/include -I/home/zoomin/workspace/pcl/test/include -I/home/zoomin/workspace/pcl -I/home/zoomin/workspace/x86/pcl/include/pcl-1.15 -I/home/zoomin/workspace/x86/eigen-3.3.9/include/eigen3 -I/home/zoomin/workspace/x86/boost-1.88.0/include  bench_transforms.cpp -L/home/zoomin/workspace/x86/pcl/lib -Wl,-rpath-link=/home/zoomin/workspace/x86/pcl/lib -L/home/zoomin/workspace/x86/boost-1.88.0/lib -Wl,-rpath-link=/home/zoomin/workspace/x86/boost-1.88.0/lib  -lpcl_common -lm -o build/x86/bench_transforms_x86_simd
+g++ -std=c++17 -O3 -g -march=native -mtune=native -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-05-28_13-37-24.log -DPCL_SILENCE_MALLOC_WARNING=1 -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/test/include -I<pcl-src> -I<x86-install>/pcl/include/pcl-1.15 -I<x86-install>/eigen-3.3.9/include/eigen3 -I<x86-install>/boost-1.88.0/include  bench_transforms.cpp -L<x86-install>/pcl/lib -Wl,-rpath-link=<x86-install>/pcl/lib -L<x86-install>/boost-1.88.0/lib -Wl,-rpath-link=<x86-install>/boost-1.88.0/lib  -lpcl_common -lm -o build/x86/bench_transforms_x86_simd
 [RUN] Benchmark on x86 (USE_PCL_RVV10=0)...
-LD_LIBRARY_PATH=/home/zoomin/workspace/x86/pcl/lib:/home/zoomin/workspace/x86/boost-1.88.0/lib:$LD_LIBRARY_PATH ./build/x86/bench_transforms_x86_simd
+LD_LIBRARY_PATH=<runtime-libs> ./build/x86/bench_transforms_x86_simd
 ================================================================================================
  PCL transforms.hpp Benchmark
  points: 1000000
@@ -17,4 +17,4 @@ transformPointCloud PointXYZ dense in-place             : 1.7045 ms/iter
 transformPointCloudWithNormals dense copy=true          : 5.5522 ms/iter
 transformPointCloudWithNormals dense copy=false         : 3.4970 ms/iter
 ================================================================================================
-make[1]: 离开目录“/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/common/transforms”
+make[1]: 离开目录“<pcl-src>/test-rvv/common/transforms”

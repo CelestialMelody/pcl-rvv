@@ -1,6 +1,6 @@
-[BOARD] expf_test -> /root/pcl-test/common/common/output/run_expf_test.log
-LD_LIBRARY_PATH=/root/pcl-test/libs:$LD_LIBRARY_PATH \
-/root/pcl-test/common/common/expf_test 2>&1 | tee /root/pcl-test/common/common/output/run_expf_test.log
+[BOARD] expf_test -> <board-root>/common/common/output/run_expf_test.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/common/expf_test 2>&1 | tee <board-root>/common/common/output/run_expf_test.log
 === Error metric notes ===
     - max relative error: max_i (|approx_i - ref_i| / |ref_i|), ref_i != 0
 

@@ -6,8 +6,8 @@
   VLEN      : see SoC / ELF (board)
   Dataset   : synthetic PointXYZI grid clouds; BilateralFilter radiusSearch full diagnostic and neighbor weight staging
   Iterations: 3 （每行 Total = Avg × 3）
-  Std log   : /root/pcl-test/filters/bilateral/output/run_bench_std.log
-  RVV log   : /root/pcl-test/filters/bilateral/output/run_bench_rvv.log
+  Std log   : <board-root>/filters/bilateral/output/run_bench_std.log
+  RVV log   : <board-root>/filters/bilateral/output/run_bench_rvv.log
 
 ------------------------------------------------------------------------------------------------------------
 Benchmark Item                                  | Impl   |       Avg (ms) |     Total (ms) |        Speedup

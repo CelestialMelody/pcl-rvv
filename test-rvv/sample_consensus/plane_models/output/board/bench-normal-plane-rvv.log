@@ -1,4 +1,4 @@
-❯ LD_LIBRARY_PATH=./libs ./bench_sac_normal_plane sac_plane_test.pcd
+❯ LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane sac_plane_test.pcd
 ===============================================================================
  PCL SampleConsensus: NormalPlane Benchmark (RVV 1.0)
 ===============================================================================
@@ -21,7 +21,7 @@ getDistancesToModel      | Std    |    0.7720 ms |   38.6000 ms |  [   1.00x ]
                          | RVV    |    0.0896 ms |    4.4784 ms |  [   8.62x ]
 -------------------------|--------|--------------|--------------|--------------
 ===============================================================================
-❯ LD_LIBRARY_PATH=./libs ./bench_sac_normal_plane sac_plane_test.pcd
+❯ LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane sac_plane_test.pcd
 ===============================================================================
  PCL SampleConsensus: NormalPlane Benchmark (RVV 1.0)
 ===============================================================================
@@ -44,7 +44,7 @@ getDistancesToModel      | Std    |    0.7716 ms |   38.5794 ms |  [   1.00x ]
                          | RVV    |    0.0746 ms |    3.7321 ms |  [  10.34x ]
 -------------------------|--------|--------------|--------------|--------------
 ===============================================================================
-❯ LD_LIBRARY_PATH=./libs ./bench_sac_normal_plane sac_plane_test.pcd
+❯ LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane sac_plane_test.pcd
 ===============================================================================
  PCL SampleConsensus: NormalPlane Benchmark (RVV 1.0)
 ===============================================================================
@@ -67,7 +67,7 @@ getDistancesToModel      | Std    |    0.7774 ms |   38.8695 ms |  [   1.00x ]
                          | RVV    |    0.0885 ms |    4.4236 ms |  [   8.79x ]
 -------------------------|--------|--------------|--------------|--------------
 ===============================================================================
-❯ LD_LIBRARY_PATH=./libs ./bench_sac_normal_plane sac_plane_test.pcd
+❯ LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane sac_plane_test.pcd
 ===============================================================================
  PCL SampleConsensus: NormalPlane Benchmark (RVV 1.0)
 ===============================================================================
@@ -90,7 +90,7 @@ getDistancesToModel      | Std    |    0.7774 ms |   38.8719 ms |  [   1.00x ]
                          | RVV    |    0.0781 ms |    3.9054 ms |  [   9.95x ]
 -------------------------|--------|--------------|--------------|--------------
 ===============================================================================
-❯ LD_LIBRARY_PATH=./libs ./bench_sac_normal_plane sac_plane_test.pcd
+❯ LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane sac_plane_test.pcd
 ===============================================================================
  PCL SampleConsensus: NormalPlane Benchmark (RVV 1.0)
 ===============================================================================

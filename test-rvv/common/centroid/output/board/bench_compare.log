@@ -1,7 +1,7 @@
 ❯ make run_bench_compare
-[BOARD] Benchmark Std -> /root/pcl-test/common/centroid/output/run_bench_std.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/centroid/bench_centroid_std 2>&1 | tee /root/pcl-test/common/centroid/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/common/centroid/output/run_bench_std.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/centroid/bench_centroid_std 2>&1 | tee <board-root>/common/centroid/output/run_bench_std.log
 ==============================================================================================================
  PCL centroid.hpp Benchmark
  Cloud size: 1000000
@@ -21,9 +21,9 @@ demeanPointCloud (cloud -> PointCloud)              : 17.1303 ms/iter
 demeanPointCloud (indices -> PointCloud)            : 15.9871 ms/iter
 demeanPointCloud (cloud -> Eigen 4xN)               : 17.5953 ms/iter
 ==============================================================================================================
-[BOARD] Benchmark RVV -> /root/pcl-test/common/centroid/output/run_bench_rvv.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/centroid/bench_centroid_rvv 2>&1 | tee /root/pcl-test/common/centroid/output/run_bench_rvv.log
+[BOARD] Benchmark RVV -> <board-root>/common/centroid/output/run_bench_rvv.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/centroid/bench_centroid_rvv 2>&1 | tee <board-root>/common/centroid/output/run_bench_rvv.log
 ==============================================================================================================
  PCL centroid.hpp Benchmark
  Cloud size: 1000000
@@ -43,9 +43,9 @@ demeanPointCloud (cloud -> PointCloud)              : 11.2783 ms/iter
 demeanPointCloud (indices -> PointCloud)            : 12.4232 ms/iter
 demeanPointCloud (cloud -> Eigen 4xN)               : 15.1959 ms/iter
 ==============================================================================================================
-python3 '/root/pcl-test/common/centroid/script/analyze_bench_compare.py' \
-        --std-log /root/pcl-test/common/centroid/output/run_bench_std.log \
-        --rvv-log /root/pcl-test/common/centroid/output/run_bench_rvv.log \
+python3 '<board-root>/common/centroid/script/analyze_bench_compare.py' \
+        --std-log <board-root>/common/centroid/output/run_bench_std.log \
+        --rvv-log <board-root>/common/centroid/output/run_bench_rvv.log \
         --device "Milkv-Jupiter" \
         --vlen-desc "see SoC / ELF (board)" \
 
@@ -57,8 +57,8 @@ python3 '/root/pcl-test/common/centroid/script/analyze_bench_compare.py' \
   VLEN      : see SoC / ELF (board)
   Dataset   : points=1000000 seed=42
   Iterations: 20 （每行 Total = Avg × 20）
-  Std log   : /root/pcl-test/common/centroid/output/run_bench_std.log
-  RVV log   : /root/pcl-test/common/centroid/output/run_bench_rvv.log
+  Std log   : <board-root>/common/centroid/output/run_bench_std.log
+  RVV log   : <board-root>/common/centroid/output/run_bench_rvv.log
 
 ---------------------------------------------------------------------------------------------------------------
 Benchmark Item                                     | Impl   |       Avg Time |     Total Time |        Speedup

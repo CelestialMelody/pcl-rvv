@@ -1,6 +1,6 @@
-[BOARD] Benchmark RVV -> /root/pcl-test/2d/output/run_bench_rvv.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/bench_2d_app_rvv 2>&1 | tee /root/pcl-test/2d/output/run_bench_rvv.log
+[BOARD] Benchmark RVV -> <board-root>/2d/output/run_bench_rvv.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/bench_2d_app_rvv 2>&1 | tee <board-root>/2d/output/run_bench_rvv.log
 ========================================================
  PCL 2D Module Benchmark
  Image Size: 640 x 480

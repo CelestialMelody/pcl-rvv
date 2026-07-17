@@ -1,7 +1,7 @@
 ❯ make run_hot_compare
-make[1]: Entering directory '/root/pcl-test/app'
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/app/pipeline_hot_std  2>&1 | tee /root/pcl-test/app/output/run_hot_std.log
+make[1]: Entering directory '<board-root>/app'
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/app/pipeline_hot_std  2>&1 | tee <board-root>/app/output/run_hot_std.log
 ======================================================================================================================
  PCL pipeline_hot_rvv — common/norms/gaussConv/polygon[+__RVV10__ strip]，已去掉 voxel/法线KdTree/tf/2d/SAC。
  Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-'] [OUT_PCD_BINARY|'-']
@@ -27,10 +27,10 @@ total_pipeline_hot_rvv_only (common+norms+gauss+poly[+strip])       : 15.1088 ms
 staged_sum                                                      : 14.7572 ms/iter
 [pipeline_hot] 完成 12 次计时迭代。
 ======================================================================================================================
-make[1]: Leaving directory '/root/pcl-test/app'
-make[1]: Entering directory '/root/pcl-test/app'
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/app/pipeline_hot_rvv  2>&1 | tee /root/pcl-test/app/output/run_hot_rvv.log
+make[1]: Leaving directory '<board-root>/app'
+make[1]: Entering directory '<board-root>/app'
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/app/pipeline_hot_rvv  2>&1 | tee <board-root>/app/output/run_hot_rvv.log
 ======================================================================================================================
  PCL pipeline_hot_rvv — common/norms/gaussConv/polygon[+__RVV10__ strip]，已去掉 voxel/法线KdTree/tf/2d/SAC。
  Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-'] [OUT_PCD_BINARY|'-']
@@ -56,13 +56,13 @@ total_pipeline_hot_rvv_only (common+norms+gauss+poly[+strip])       : 8.3391 ms/
 staged_sum                                                      : 7.9811 ms/iter
 [pipeline_hot] 完成 12 次计时迭代。
 ======================================================================================================================
-make[1]: Leaving directory '/root/pcl-test/app'
-python3 /root/pcl-test/script/analyze_bench_compare.py \
-        --std-log /root/pcl-test/app/output/run_hot_std.log \
-        --rvv-log /root/pcl-test/app/output/run_hot_rvv.log \
+make[1]: Leaving directory '<board-root>/app'
+python3 <board-root>/script/analyze_bench_compare.py \
+        --std-log <board-root>/app/output/run_hot_std.log \
+        --rvv-log <board-root>/app/output/run_hot_rvv.log \
         --device "board rv64 (Milkv-Jupiter)" \
         --vlen-desc "256 bits (hardware vlenb csr, 32 bytes)" \
-        2>&1 | tee /root/pcl-test/app/output/analyze_hot_compare.log
+        2>&1 | tee <board-root>/app/output/analyze_hot_compare.log
 ===========================================================================================================================
  Args: [ -v | --verbose ] ITERS WARMUP [INPUT_PCD|'-'] [OUT_PCD_BINARY|'-'] (Std vs RVV)
 ===========================================================================================================================
@@ -71,8 +71,8 @@ python3 /root/pcl-test/script/analyze_bench_compare.py \
   VLEN      : 256 bits (hardware vlenb csr, 32 bytes)
   Dataset   : pipeline_hot synth raw_pts=50000 seg_pts=512 norm_dim=128 norm_repeat=400 gaussian_float_image
   Iterations: 12 （每行 Total = Avg × 12）
-  Std log   : /root/pcl-test/app/output/run_hot_std.log
-  RVV log   : /root/pcl-test/app/output/run_hot_rvv.log
+  Std log   : <board-root>/app/output/run_hot_std.log
+  RVV log   : <board-root>/app/output/run_hot_rvv.log
 
 ---------------------------------------------------------------------------------------------------------------------------
 Benchmark Item                                                 | Impl   |       Avg (ms) |     Total (ms) |        Speedup

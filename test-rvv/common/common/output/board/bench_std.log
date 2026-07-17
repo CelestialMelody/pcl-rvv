@@ -1,6 +1,6 @@
-[BOARD] Benchmark Std -> /root/pcl-test/common/common/output/run_bench_std.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/common/bench_common_std 2>&1 | tee /root/pcl-test/common/common/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/common/common/output/run_bench_std.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/common/bench_common_std 2>&1 | tee <board-root>/common/common/output/run_bench_std.log
 ============================================================
  PCL common.hpp Benchmark
  Cloud size: 200000  Vector size: 500000

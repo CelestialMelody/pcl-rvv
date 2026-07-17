@@ -6,8 +6,8 @@
   VLEN      : see SoC / ELF (board)
   Dataset   : synthetic PointXYZ clouds; ExtractIndices complement bitmap, keep_organized write, and unchanged production filter
   Iterations: 30 （每行 Total = Avg × 30）
-  Std log   : /root/pcl-test/filters/extract_indices/output/run_bench_std.log
-  RVV log   : /root/pcl-test/filters/extract_indices/output/run_bench_rvv.log
+  Std log   : <board-root>/filters/extract_indices/output/run_bench_std.log
+  RVV log   : <board-root>/filters/extract_indices/output/run_bench_rvv.log
 
 ---------------------------------------------------------------------------------------------------------------------
 Benchmark Item                                           | Impl   |       Avg (ms) |     Total (ms) |        Speedup

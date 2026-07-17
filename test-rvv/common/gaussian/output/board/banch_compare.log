@@ -1,7 +1,7 @@
 ❯ make run_bench_std
-[BOARD] Benchmark Std -> /root/pcl-test/common/gaussian/output/run_bench_std.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/gaussian/bench_gaussian_std 2>&1 | tee /root/pcl-test/common/gaussian/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/common/gaussian/output/run_bench_std.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/gaussian/bench_gaussian_std 2>&1 | tee <board-root>/common/gaussian/output/run_bench_std.log
 ==============================================================================================================
  PCL gaussian.cpp Benchmark (GaussianKernel non-template members)
  Image Size: 960 x 540
@@ -17,9 +17,9 @@ convolveCols (PointCloud<float>) [gaussian.cpp]     : 105.7745 ms/iter
 convolveRows then convolveCols [gaussian.cpp x2]    : 160.0322 ms/iter
 ==============================================================================================================
 ❯ make run_bench_rvv
-[BOARD] Benchmark RVV -> /root/pcl-test/common/gaussian/output/run_bench_rvv.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/gaussian/bench_gaussian_rvv 2>&1 | tee /root/pcl-test/common/gaussian/output/run_bench_rvv.log
+[BOARD] Benchmark RVV -> <board-root>/common/gaussian/output/run_bench_rvv.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/gaussian/bench_gaussian_rvv 2>&1 | tee <board-root>/common/gaussian/output/run_bench_rvv.log
 ==============================================================================================================
  PCL gaussian.cpp Benchmark (GaussianKernel non-template members)
  Image Size: 960 x 540
@@ -35,9 +35,9 @@ convolveCols (PointCloud<float>) [gaussian.cpp]     : 42.4242 ms/iter
 convolveRows then convolveCols [gaussian.cpp x2]    : 48.7031 ms/iter
 ==============================================================================================================
 ❯ make analyze_bench_compare
-python3 '/root/pcl-test/common/gaussian/script/analyze_bench_compare.py' \
-        --std-log /root/pcl-test/common/gaussian/output/run_bench_std.log \
-        --rvv-log /root/pcl-test/common/gaussian/output/run_bench_rvv.log \
+python3 '<board-root>/common/gaussian/script/analyze_bench_compare.py' \
+        --std-log <board-root>/common/gaussian/output/run_bench_std.log \
+        --rvv-log <board-root>/common/gaussian/output/run_bench_rvv.log \
         --device "Milkv-Jupiter" \
         --vlen-desc "see SoC / ELF (board)" \
 
@@ -49,8 +49,8 @@ python3 '/root/pcl-test/common/gaussian/script/analyze_bench_compare.py' \
   VLEN      : see SoC / ELF (board)
   Dataset   : random [0,1] float image; sigma=5 for compute + convolve
   Iterations: 10 （每行 Total = Avg × 10）
-  Std log   : /root/pcl-test/common/gaussian/output/run_bench_std.log
-  RVV log   : /root/pcl-test/common/gaussian/output/run_bench_rvv.log
+  Std log   : <board-root>/common/gaussian/output/run_bench_std.log
+  RVV log   : <board-root>/common/gaussian/output/run_bench_rvv.log
 
 --------------------------------------------------------------------------------------------------------------
 Benchmark Item                                    | Impl   |       Avg Time |     Total Time |        Speedup

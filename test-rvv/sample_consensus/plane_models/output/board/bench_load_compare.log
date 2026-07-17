@@ -1,7 +1,7 @@
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.076378 ms/iter
@@ -9,9 +9,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.103x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.078376 ms/iter
@@ -19,9 +19,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.162x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.077156 ms/iter
@@ -29,9 +29,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.209x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.077498 ms/iter
@@ -39,9 +39,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.140x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.078196 ms/iter
@@ -49,9 +49,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.141x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.076975 ms/iter
@@ -59,9 +59,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.200x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.077236 ms/iter
@@ -69,9 +69,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.204x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.077539 ms/iter
@@ -79,9 +79,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.239x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.075955 ms/iter
@@ -89,9 +89,9 @@ NormalPlane Load Strategy Compare (RVV):
   speedup (gather/seg): 1.159x
   check_count=2324
 ❯ make run_bench_load_compare
-LD_LIBRARY_PATH=/root/pcl-test/lib ./bench_sac_normal_plane_load_compare /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd 200
+LD_LIBRARY_PATH=<runtime-libs> ./bench_sac_normal_plane_load_compare <board-root>/sample_consensus/plane_models/sac_plane_test.pcd 200
 NormalPlane Load Strategy Compare (RVV):
-  dataset: /root/pcl-test/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
+  dataset: <board-root>/sample_consensus/plane_models/sac_plane_test.pcd (points=3283)
   iters=200, warmup=5
   threshold=0.05, normal_weight=0.1
   gather(vluxei32):    0.077588 ms/iter

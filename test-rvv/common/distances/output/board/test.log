@@ -1,7 +1,7 @@
 ❯ make run_test
-[BOARD] Unit Test -> /root/pcl-test/common/distances/output/run_test.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/distances/test_distances 2>&1 | tee /root/pcl-test/common/distances/output/run_test.log
+[BOARD] Unit Test -> <board-root>/common/distances/output/run_test.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/distances/test_distances 2>&1 | tee <board-root>/common/distances/output/run_test.log
 [==========] Running 5 tests from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 5 tests from PCL

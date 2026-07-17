@@ -1,6 +1,6 @@
-[BOARD] atan2_test -> /root/pcl-test/common/common/output/run_atan2_test.log
-LD_LIBRARY_PATH=/root/pcl-test/libs:$LD_LIBRARY_PATH \
-/root/pcl-test/common/common/atan2_test 2>&1 | tee /root/pcl-test/common/common/output/run_atan2_test.log
+[BOARD] atan2_test -> <board-root>/common/common/output/run_atan2_test.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/common/atan2_test 2>&1 | tee <board-root>/common/common/output/run_atan2_test.log
 === atan2 approximation vs std::atan2 (n = 65536) ===
   Scalar approximation (same polynomial as RVV):
     max absolute error:  0.000002 rad  (0.0001 deg)

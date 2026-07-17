@@ -1,7 +1,7 @@
 ❯ make run_dag_compare
-make[1]: Entering directory '/root/pcl-test/app'
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/app/pipeline_dag_std  2>&1 | tee /root/pcl-test/app/output/run_dag_std.log
+make[1]: Entering directory '<board-root>/app'
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/app/pipeline_dag_std  2>&1 | tee <board-root>/app/output/run_dag_std.log
 ==============================================================================================================
  PCL DAG 单链：raw → voxel → common → normals → transform → gauss+2d → SAC
 （与 pcl_pipeline_app 的多轨覆盖版并列；本程序强调数据依赖顺序。）
@@ -44,10 +44,10 @@ total_pipeline_dag (one full chain)                                 : 10134.4045
 staged_sum                                                           : 10133.8017 ms/iter
 [pipeline_dag] 完成 10 次计时迭代（不含 warmup）。
 ==============================================================================================================
-make[1]: Leaving directory '/root/pcl-test/app'
-make[1]: Entering directory '/root/pcl-test/app'
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/app/pipeline_dag_rvv  2>&1 | tee /root/pcl-test/app/output/run_dag_rvv.log
+make[1]: Leaving directory '<board-root>/app'
+make[1]: Entering directory '<board-root>/app'
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/app/pipeline_dag_rvv  2>&1 | tee <board-root>/app/output/run_dag_rvv.log
 ==============================================================================================================
  PCL DAG 单链：raw → voxel → common → normals → transform → gauss+2d → SAC
 （与 pcl_pipeline_app 的多轨覆盖版并列；本程序强调数据依赖顺序。）
@@ -90,13 +90,13 @@ total_pipeline_dag (one full chain)                                 : 2873.3181 
 staged_sum                                                           : 2872.7492 ms/iter
 [pipeline_dag] 完成 10 次计时迭代（不含 warmup）。
 ==============================================================================================================
-make[1]: Leaving directory '/root/pcl-test/app'
-python3 /root/pcl-test/script/analyze_bench_compare.py \
-        --std-log /root/pcl-test/app/output/run_dag_std.log \
-        --rvv-log /root/pcl-test/app/output/run_dag_rvv.log \
+make[1]: Leaving directory '<board-root>/app'
+python3 <board-root>/script/analyze_bench_compare.py \
+        --std-log <board-root>/app/output/run_dag_std.log \
+        --rvv-log <board-root>/app/output/run_dag_rvv.log \
         --device "board rv64 (Milkv-Jupiter)" \
         --vlen-desc "256 bits (hardware vlenb csr, 32 bytes)" \
-        2>&1 | tee /root/pcl-test/app/output/analyze_dag_compare.log
+        2>&1 | tee <board-root>/app/output/analyze_dag_compare.log
 =================================================================================================
  PCL DAG 单链：raw → voxel → common → normals → transform → gauss+2d → SAC (Std vs RVV)
 =================================================================================================
@@ -105,8 +105,8 @@ python3 /root/pcl-test/script/analyze_bench_compare.py \
   VLEN      : 256 bits (hardware vlenb csr, 32 bytes)
   Dataset   : pipeline_dag voxel+KdTree_radius_normals+raster_z_gauss_2d+SAC synthetic raw_pts=50000
   Iterations: 10 （每行 Total = Avg × 10）
-  Std log   : /root/pcl-test/app/output/run_dag_std.log
-  RVV log   : /root/pcl-test/app/output/run_dag_rvv.log
+  Std log   : <board-root>/app/output/run_dag_std.log
+  RVV log   : <board-root>/app/output/run_dag_rvv.log
 
 -------------------------------------------------------------------------------------------------
 Benchmark Item                       | Impl   |       Avg (ms) |     Total (ms) |        Speedup

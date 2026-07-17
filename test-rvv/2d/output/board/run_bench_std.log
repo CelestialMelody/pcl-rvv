@@ -1,6 +1,6 @@
-[BOARD] Benchmark Std -> /root/pcl-test/2d/output/run_bench_std.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/bench_2d_app_std 2>&1 | tee /root/pcl-test/2d/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/2d/output/run_bench_std.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/bench_2d_app_std 2>&1 | tee <board-root>/2d/output/run_bench_std.log
 ========================================================
  PCL 2D Module Benchmark
  Image Size: 640 x 480

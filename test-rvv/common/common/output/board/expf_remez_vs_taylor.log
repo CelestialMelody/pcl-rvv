@@ -1,6 +1,6 @@
-[BOARD] expf_remez_vs_taylor -> /root/pcl-test/common/common/output/run_expf_remez_vs_taylor.log
-LD_LIBRARY_PATH=/root/pcl-test/libs:$LD_LIBRARY_PATH \
-/root/pcl-test/common/common/expf_remez_vs_taylor 2>&1 | tee /root/pcl-test/common/common/output/run_expf_remez_vs_taylor.log
+[BOARD] expf_remez_vs_taylor -> <board-root>/common/common/output/run_expf_remez_vs_taylor.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/common/expf_remez_vs_taylor 2>&1 | tee <board-root>/common/common/output/run_expf_remez_vs_taylor.log
 === Error metric notes ===
     - max relative error: max_i (|approx_i - ref_i| / |ref_i|), ref_i != 0
 

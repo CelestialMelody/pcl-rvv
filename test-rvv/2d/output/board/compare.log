@@ -1,6 +1,6 @@
-[BOARD] Benchmark Std -> /root/pcl-test/2d/output/run_bench_std.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/bench_2d_app_std 2>&1 | tee /root/pcl-test/2d/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/2d/output/run_bench_std.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/bench_2d_app_std 2>&1 | tee <board-root>/2d/output/run_bench_std.log
 ========================================================
  PCL 2D Module Benchmark
  Image Size: 640 x 480
@@ -32,9 +32,9 @@ Set Operation: Union (A | B)            : 9.466 ms / iter
 Set Operation: Intersection (A & B)     : 9.440 ms / iter
 Set Operation: Subtraction (A - B)      : 9.495 ms / iter
 ========================================================
-[BOARD] Benchmark RVV -> /root/pcl-test/2d/output/run_bench_rvv.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/2d/bench_2d_app_rvv 2>&1 | tee /root/pcl-test/2d/output/run_bench_rvv.log
+[BOARD] Benchmark RVV -> <board-root>/2d/output/run_bench_rvv.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/2d/bench_2d_app_rvv 2>&1 | tee <board-root>/2d/output/run_bench_rvv.log
 ========================================================
  PCL 2D Module Benchmark
  Image Size: 640 x 480
@@ -66,9 +66,9 @@ Set Operation: Union (A | B)            : 9.797 ms / iter
 Set Operation: Intersection (A & B)     : 9.570 ms / iter
 Set Operation: Subtraction (A - B)      : 9.641 ms / iter
 ========================================================
-python3 '/root/pcl-test/2d/script/analyze_bench_compare.py' \
-        --std-log /root/pcl-test/2d/output/run_bench_std.log \
-        --rvv-log /root/pcl-test/2d/output/run_bench_rvv.log \
+python3 '<board-root>/2d/script/analyze_bench_compare.py' \
+        --std-log <board-root>/2d/output/run_bench_std.log \
+        --rvv-log <board-root>/2d/output/run_bench_rvv.log \
         --device "Milkv-Jupiter" \
         --vlen-desc "see SoC / ELF (board)" \
 
@@ -80,8 +80,8 @@ python3 '/root/pcl-test/2d/script/analyze_bench_compare.py' \
   VLEN       : see SoC / ELF (board)
   Dataset    : synthetic 2D image 640 x 480 (307200 points / pixels)
   Iterations : 20 （Set Operation 类项：loop=base_iters×5）
-  Std log    : /root/pcl-test/2d/output/run_bench_std.log
-  RVV log    : /root/pcl-test/2d/output/run_bench_rvv.log
+  Std log    : <board-root>/2d/output/run_bench_std.log
+  RVV log    : <board-root>/2d/output/run_bench_rvv.log
 
 ------------------------------------------------------------------------------------------------------
 Benchmark Item                            | Impl   |       Avg Time |     Total Time |        Speedup

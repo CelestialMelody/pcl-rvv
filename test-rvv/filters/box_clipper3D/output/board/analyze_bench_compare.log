@@ -6,8 +6,8 @@
   VLEN      : see SoC / ELF (board)
   Dataset   : synthetic PointXYZ clouds; full-cloud affine box clipping RVV cases and subset/type fallback cases
   Iterations: 30 （每行 Total = Avg × 30）
-  Std log   : /root/pcl-test/filters/box_clipper3D/output/run_bench_std.log
-  RVV log   : /root/pcl-test/filters/box_clipper3D/output/run_bench_rvv.log
+  Std log   : <board-root>/filters/box_clipper3D/output/run_bench_std.log
+  RVV log   : <board-root>/filters/box_clipper3D/output/run_bench_rvv.log
 
 ---------------------------------------------------------------------------------------------------
 Benchmark Item                         | Impl   |       Avg (ms) |     Total (ms) |        Speedup

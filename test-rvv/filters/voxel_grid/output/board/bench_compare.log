@@ -1,7 +1,7 @@
 ❯ make run_bench_compare
-[BOARD] Benchmark Std -> /root/pcl-test/filters/voxel_grid/output/run_bench_std.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/filters/voxel_grid/bench_voxel_grid_std 2>&1 | tee /root/pcl-test/filters/voxel_grid/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/filters/voxel_grid/output/run_bench_std.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/filters/voxel_grid/bench_voxel_grid_std 2>&1 | tee <board-root>/filters/voxel_grid/output/run_bench_std.log
 ================================================================================================
 PCL filters/voxel_grid getMinMax3D benchmark [std]
 Dataset: synthetic dense PCLPointCloud2 float xyz; cases: 64K packed, 1M packed, 1M padded, 1M indexed, 1M distance
@@ -14,9 +14,9 @@ getMinMax3D dense indexed xyz 1M                        : 25.1025 ms/iter
 getMinMax3D dense distance xyz 1M                       : 31.4692 ms/iter
 getMinMax3D dense distance negative xyz 1M              : 32.4347 ms/iter
 ================================================================================================
-[BOARD] Benchmark RVV -> /root/pcl-test/filters/voxel_grid/output/run_bench_rvv.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/filters/voxel_grid/bench_voxel_grid_rvv 2>&1 | tee /root/pcl-test/filters/voxel_grid/output/run_bench_rvv.log
+[BOARD] Benchmark RVV -> <board-root>/filters/voxel_grid/output/run_bench_rvv.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/filters/voxel_grid/bench_voxel_grid_rvv 2>&1 | tee <board-root>/filters/voxel_grid/output/run_bench_rvv.log
 ================================================================================================
 PCL filters/voxel_grid getMinMax3D benchmark [RVV enabled]
 Dataset: synthetic dense PCLPointCloud2 float xyz; cases: 64K packed, 1M packed, 1M padded, 1M indexed, 1M distance
@@ -29,9 +29,9 @@ getMinMax3D dense indexed xyz 1M                        : 6.9791 ms/iter
 getMinMax3D dense distance xyz 1M                       : 12.4194 ms/iter
 getMinMax3D dense distance negative xyz 1M              : 12.0233 ms/iter
 ================================================================================================
-python3 '/root/pcl-test/filters/voxel_grid/script/analyze_bench_compare.py' \
-        --std-log /root/pcl-test/filters/voxel_grid/output/run_bench_std.log \
-        --rvv-log /root/pcl-test/filters/voxel_grid/output/run_bench_rvv.log \
+python3 '<board-root>/filters/voxel_grid/script/analyze_bench_compare.py' \
+        --std-log <board-root>/filters/voxel_grid/output/run_bench_std.log \
+        --rvv-log <board-root>/filters/voxel_grid/output/run_bench_rvv.log \
         --device "Milkv-Jupiter" \
         --vlen-desc "see SoC / ELF (board)" \
 
@@ -43,8 +43,8 @@ python3 '/root/pcl-test/filters/voxel_grid/script/analyze_bench_compare.py' \
   VLEN      : see SoC / ELF (board)
   Dataset   : synthetic dense PCLPointCloud2 float xyz; cases: 64K packed, 1M packed, 1M padded, 1M indexed, 1M distance
   Iterations: 30 （每行 Total = Avg × 30）
-  Std log   : /root/pcl-test/filters/voxel_grid/output/run_bench_std.log
-  RVV log   : /root/pcl-test/filters/voxel_grid/output/run_bench_rvv.log
+  Std log   : <board-root>/filters/voxel_grid/output/run_bench_std.log
+  RVV log   : <board-root>/filters/voxel_grid/output/run_bench_rvv.log
 
 --------------------------------------------------------------------------------------------------------
 Benchmark Item                              | Impl   |       Avg (ms) |     Total (ms) |        Speedup

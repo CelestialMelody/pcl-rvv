@@ -1,6 +1,6 @@
 ❯ make run_load
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/rvv/load_store/bench_rvv_load_compare 262144 50 5 2>&1 | tee /root/pcl-test/rvv/load_store/output/run_load.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/rvv/load_store/bench_rvv_load_compare 262144 50 5 2>&1 | tee <board-root>/rvv/load_store/output/run_load.log
 RVV Load MicroBench: starting...
   n_points=262144 iters=50 warmup=5
   [1/6] Strided AoS: 3x vlse32
@@ -30,8 +30,8 @@ RVV Load MicroBench:
     F: vluxseg3ei32     52.253730 ms/iter
     speedup (E/F):      1.017x
 ❯ make run_store
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/rvv/load_store/bench_rvv_store_compare 262144 50 5 2>&1 | tee /root/pcl-test/rvv/load_store/output/run_store.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/rvv/load_store/bench_rvv_store_compare 262144 50 5 2>&1 | tee <board-root>/rvv/load_store/output/run_store.log
 RVV Store MicroBench: starting...
   n=262144 iters=50 warmup=5
   [1/12] Strided AoS (4f): strided_store4

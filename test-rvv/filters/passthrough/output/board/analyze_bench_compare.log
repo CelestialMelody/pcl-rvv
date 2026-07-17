@@ -6,8 +6,8 @@
   VLEN      : see SoC / ELF (board)
   Dataset   : synthetic PointXYZI clouds; identity indices RVV cases and explicit subset fallback
   Iterations: 30 （每行 Total = Avg × 30）
-  Std log   : /root/pcl-test/filters/passthrough/output/run_bench_std.log
-  RVV log   : /root/pcl-test/filters/passthrough/output/run_bench_rvv.log
+  Std log   : <board-root>/filters/passthrough/output/run_bench_std.log
+  RVV log   : <board-root>/filters/passthrough/output/run_bench_rvv.log
 
 -----------------------------------------------------------------------------------------------------
 Benchmark Item                           | Impl   |       Avg (ms) |     Total (ms) |        Speedup

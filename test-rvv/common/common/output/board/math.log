@@ -1,7 +1,7 @@
 ❯ make run_math
-[BOARD] atan2_test -> /root/pcl-test/common/common/output/run_atan2_test.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/common/atan2_test 2>&1 | tee /root/pcl-test/common/common/output/run_atan2_test.log
+[BOARD] atan2_test -> <board-root>/common/common/output/run_atan2_test.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/common/atan2_test 2>&1 | tee <board-root>/common/common/output/run_atan2_test.log
 === atan2 核 vs std::atan2, n = 65536 ===
 =======================================================================================================
 | Case / kernel                                      |        max (rad) |      deg |       mean (rad) |
@@ -25,9 +25,9 @@ LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
 | scalar mazzo     |   340.174 |    2.45x vs std |
 | pcl::atan2_RVV   |    61.451 |   13.54x vs std |
 ==================================================
-[BOARD] acos_test -> /root/pcl-test/common/common/output/run_acos_test.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/common/acos_test 2>&1 | tee /root/pcl-test/common/common/output/run_acos_test.log
+[BOARD] acos_test -> <board-root>/common/common/output/run_acos_test.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/common/acos_test 2>&1 | tee <board-root>/common/common/output/run_acos_test.log
 === acos 逼近 vs std::acos, n = 65536, x_hi = 0.999 ===
 ======================================================================================================================
 | Case / kernel                                                     |        max (rad) |      deg |       mean (rad) |
@@ -80,9 +80,9 @@ LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
   candidate: RVV d7 remez2  max err = 2.384186e-07 rad (improve 3250.3x), speed = 0.93x of RVV PCL
   candidate: RVV d5 remez2  max err = 1.311302e-06 rad (improve 591.0x), speed = 0.97x of RVV PCL
   suggestion: use RVV d5 remez2 as balanced default.
-[BOARD] expf_test -> /root/pcl-test/common/common/output/run_expf_test.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/common/expf_test 2>&1 | tee /root/pcl-test/common/common/output/run_expf_test.log
+[BOARD] expf_test -> <board-root>/common/common/output/run_expf_test.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/common/expf_test 2>&1 | tee <board-root>/common/common/output/run_expf_test.log
 === expf approximation vs std::expf (n = 10000) ===
 ==============================================================================
 | Case / kernel                        |          max rel |         mean abs |
@@ -124,9 +124,9 @@ LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
 | RVV lp-rel            |     4.568 |    9.28x vs std |
 | RVV Sollya            |     4.456 |    9.51x vs std |
 =======================================================
-[BOARD] logf_test -> /root/pcl-test/common/common/output/run_logf_test.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/common/logf_test 2>&1 | tee /root/pcl-test/common/common/output/run_logf_test.log
+[BOARD] logf_test -> <board-root>/common/common/output/run_logf_test.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/common/logf_test 2>&1 | tee <board-root>/common/common/output/run_logf_test.log
 === logf approximation vs std::logf (n = 10000) ===
 ==============================================================================
 | Case / kernel                        |          max rel |         mean abs |

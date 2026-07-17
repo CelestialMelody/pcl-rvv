@@ -1,7 +1,7 @@
 ❯ make run_bench_compare
-[BOARD] Benchmark Std -> /root/pcl-test/common/norms/output/run_bench_std.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/norms/bench_norms_std 2>&1 | tee /root/pcl-test/common/norms/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/common/norms/output/run_bench_std.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/norms/bench_norms_std 2>&1 | tee <board-root>/common/norms/output/run_bench_std.log
 ============================================================
  PCL norms.hpp Benchmark
  Iterations: 30
@@ -139,9 +139,9 @@ selectNorm(vec,DIV),dim=4096                            : 195.5065 us/iter
 selectNorm(vec,KL),dim=4096                             : 219.8970 us/iter
 selectNorm(vec,HIK),dim=4096                            : 40.5949 us/iter
 ============================================================
-[BOARD] Benchmark RVV -> /root/pcl-test/common/norms/output/run_bench_rvv.log
-LD_LIBRARY_PATH=/root/pcl-test/lib:$LD_LIBRARY_PATH \
-/root/pcl-test/common/norms/bench_norms_rvv 2>&1 | tee /root/pcl-test/common/norms/output/run_bench_rvv.log
+[BOARD] Benchmark RVV -> <board-root>/common/norms/output/run_bench_rvv.log
+LD_LIBRARY_PATH=<runtime-libs> \
+<board-root>/common/norms/bench_norms_rvv 2>&1 | tee <board-root>/common/norms/output/run_bench_rvv.log
 ============================================================
  PCL norms.hpp Benchmark
  Iterations: 30
@@ -279,9 +279,9 @@ selectNorm(vec,DIV),dim=4096                            : 157.1269 us/iter
 selectNorm(vec,KL),dim=4096                             : 174.9326 us/iter
 selectNorm(vec,HIK),dim=4096                            : 24.0642 us/iter
 ============================================================
-python3 '/root/pcl-test/common/norms/script/analyze_bench_compare.py' \
-        --std-log /root/pcl-test/common/norms/output/run_bench_std.log \
-        --rvv-log /root/pcl-test/common/norms/output/run_bench_rvv.log \
+python3 '<board-root>/common/norms/script/analyze_bench_compare.py' \
+        --std-log <board-root>/common/norms/output/run_bench_std.log \
+        --rvv-log <board-root>/common/norms/output/run_bench_rvv.log \
         --device "Milkv-Jupiter" \
         --vlen-desc "see SoC / ELF (board)" \
 
@@ -293,8 +293,8 @@ python3 '/root/pcl-test/common/norms/script/analyze_bench_compare.py' \
   VLEN      : see SoC / ELF (board)
   Dataset   : norms dim={8,36,128,512,4096} iterations=30 unit=us/iter
   Iterations: 30 （每行 Total = Avg × 30）
-  Std log   : /root/pcl-test/common/norms/output/run_bench_std.log
-  RVV log   : /root/pcl-test/common/norms/output/run_bench_rvv.log
+  Std log   : <board-root>/common/norms/output/run_bench_std.log
+  RVV log   : <board-root>/common/norms/output/run_bench_rvv.log
 
 ----------------------------------------------------------------------------------------------------
 Benchmark Item                      | Impl   |         Avg (us) |       Total (us) |        Speedup

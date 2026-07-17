@@ -6,8 +6,8 @@
   VLEN      : see SoC / ELF (board)
   Dataset   : synthetic to_keep masks and source indices; tail compress plus search-dominated full diagnostic
   Iterations: 5 （每行 Total = Avg × 5）
-  Std log   : /root/pcl-test/filters/radius_outlier_removal/output/run_bench_std.log
-  RVV log   : /root/pcl-test/filters/radius_outlier_removal/output/run_bench_rvv.log
+  Std log   : <board-root>/filters/radius_outlier_removal/output/run_bench_std.log
+  RVV log   : <board-root>/filters/radius_outlier_removal/output/run_bench_rvv.log
 
 --------------------------------------------------------------------------------------------------------------------------------
 Benchmark Item                                                      | Impl   |       Avg (ms) |     Total (ms) |        Speedup

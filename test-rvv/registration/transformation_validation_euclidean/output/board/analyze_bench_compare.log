@@ -6,8 +6,8 @@
   VLEN      : see SoC / ELF (board)
   Dataset   : synthetic PointXYZ clouds; transform staging microbench and full KdTree validation diagnostic
   Iterations: 20 （每行 Total = Avg × 20）
-  Std log   : /root/pcl-test/registration/transformation_validation_euclidean/output/run_bench_std.log
-  RVV log   : /root/pcl-test/registration/transformation_validation_euclidean/output/run_bench_rvv.log
+  Std log   : <board-root>/registration/transformation_validation_euclidean/output/run_bench_std.log
+  RVV log   : <board-root>/registration/transformation_validation_euclidean/output/run_bench_rvv.log
 
 -------------------------------------------------------------------------------------------------
 Benchmark Item                       | Impl   |       Avg (ms) |     Total (ms) |        Speedup

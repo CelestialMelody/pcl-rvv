@@ -97,13 +97,13 @@ Production computePointWeightRVV fallback + explicit RVV gather / common expf pa
    3e2dc:	0991                	addi	s3,s3,4
    3e2de:	22f797d3          	fneg.d	fa5,fa5
    3e2e2:	1aa7f553          	fdiv.d	fa0,fa5,fa0
-   3e2e6:	8bbe80ef          	jal	26ba0 <exp@plt>
+   3e2e6:	8bbe80ef          	jal	26ba0 <<ssh-target>>
    3e2ea:	136b7b53          	fmul.d	fs6,fs6,fs6
    3e2ee:	22a50c53          	fmv.d	fs8,fa0
    3e2f2:	128a7553          	fmul.d	fa0,fs4,fs0
    3e2f6:	236b1b53          	fneg.d	fs6,fs6
    3e2fa:	1aab7553          	fdiv.d	fa0,fs6,fa0
-   3e2fe:	8a3e80ef          	jal	26ba0 <exp@plt>
+   3e2fe:	8a3e80ef          	jal	26ba0 <<ssh-target>>
    3e302:	12ac7553          	fmul.d	fa0,fs8,fa0
    3e306:	420c8cd3          	fcvt.d.s	fs9,fs9
    3e30a:	02ad7d53          	fadd.d	fs10,fs10,fa0
@@ -283,7 +283,7 @@ Common expf_RVV_f32m2 instruction evidence inside production helper:
    3e56e:	23ad0bd3          	fmv.d	fs7,fs10
    3e572:	b355                	j	3e316 <double pcl::computePointWeightRVV<pcl::PointXYZI>(pcl::PointCloud<pcl::PointXYZI>::ConstPtr const&, int, std::vector<int, std::allocator<int> > const&, std::vector<float, std::allocator<float> > const&, double, double)+0xf6>
    3e574:	20f78553          	fmv.s	fa0,fa5
-   3e578:	da8e80ef          	jal	26b20 <sqrtf@plt>
+   3e578:	da8e80ef          	jal	26b20 <<ssh-target>>
    3e57c:	20a507d3          	fmv.s	fa5,fa0
    3e580:	b3b1                	j	3e2cc <double pcl::computePointWeightRVV<pcl::PointXYZI>(pcl::PointCloud<pcl::PointXYZI>::ConstPtr const&, int, std::vector<int, std::allocator<int> > const&, std::vector<float, std::allocator<float> > const&, double, double)+0xac>
 

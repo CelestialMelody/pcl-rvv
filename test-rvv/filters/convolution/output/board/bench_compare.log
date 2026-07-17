@@ -1,5 +1,5 @@
 ❯ make run_bench_compare
-[BOARD] Benchmark Std -> /root/pcl-test/filters/convolution/output/run_bench_std.log
+[BOARD] Benchmark Std -> <board-root>/filters/convolution/output/run_bench_std.log
 ==============================================================================================================
  PCL filters/convolution Benchmark (Convolution<PointXYZI, PointXYZI> dense boundary policies)
 Dataset: organized dense PointXYZI convolution; ignore baseline plus duplicate/mirror rows/cols cases
@@ -22,7 +22,7 @@ Iterations: 20
 640x240-k7-cols-mirror                              : 57.6554 ms/iter
   Direction: cols; Border Policy: mirror; Image Size: 640 x 240; Kernel Width: 7; Total Time: 1153.1082 ms; Checksum: 13.273028
 ==============================================================================================================
-[BOARD] Benchmark RVV -> /root/pcl-test/filters/convolution/output/run_bench_rvv.log
+[BOARD] Benchmark RVV -> <board-root>/filters/convolution/output/run_bench_rvv.log
 ==============================================================================================================
  PCL filters/convolution Benchmark (Convolution<PointXYZI, PointXYZI> dense boundary policies)
 Dataset: organized dense PointXYZI convolution; ignore baseline plus duplicate/mirror rows/cols cases
@@ -53,8 +53,8 @@ Iterations: 20
   VLEN      : see SoC / ELF (board)
   Dataset   : organized dense PointXYZI convolution; ignore baseline plus duplicate/mirror rows/cols cases
   Iterations: 20 （每行 Total = Avg × 20）
-  Std log   : /root/pcl-test/filters/convolution/output/run_bench_std.log
-  RVV log   : /root/pcl-test/filters/convolution/output/run_bench_rvv.log
+  Std log   : <board-root>/filters/convolution/output/run_bench_std.log
+  RVV log   : <board-root>/filters/convolution/output/run_bench_rvv.log
 
 ---------------------------------------------------------------------------------------
 Benchmark Item             | Impl   |       Avg (ms) |     Total (ms) |        Speedup

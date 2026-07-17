@@ -1,9 +1,9 @@
-make[1]: 进入目录“/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/common/transforms”
+make[1]: 进入目录“<pcl-src>/test-rvv/common/transforms”
 rm -rf build/riscv/bench_transforms
 [BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
-riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-05-28_13-39-24.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/RISCV/workspace/pcl/common/include -I/home/zoomin/codes/RISCV/workspace/pcl/test/include -I/home/zoomin/codes/RISCV/workspace/pcl -I/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/RISCV/workspace/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/RISCV/workspace/riscv/boost/include -I/home/zoomin/codes/RISCV/workspace/riscv/gtest/include  bench_transforms.cpp -L/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib -L/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/boost/lib -L/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib  -lpcl_common -lm -o build/riscv/bench_transforms_rvv
+riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-05-28_13-39-24.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include  bench_transforms.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib  -lpcl_common -lm -o build/riscv/bench_transforms_rvv
 [RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
-LD_LIBRARY_PATH=/home/zoomin/codes/RISCV/workspace/riscv/pcl-rvv/lib:/home/zoomin/codes/RISCV/workspace/riscv/boost/lib:/home/zoomin/codes/RISCV/workspace/riscv/gtest/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_transforms_rvv
+LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_transforms_rvv
 ================================================================================================
  PCL transforms.hpp Benchmark
  points: 1000000
@@ -17,4 +17,4 @@ transformPointCloud PointXYZ dense in-place             : 772.2086 ms/iter
 transformPointCloudWithNormals dense copy=true          : 1322.6774 ms/iter
 transformPointCloudWithNormals dense copy=false         : 1299.9477 ms/iter
 ================================================================================================
-make[1]: 离开目录“/home/zoomin/codes/RISCV/workspace/pcl/test-rvv/common/transforms”
+make[1]: 离开目录“<pcl-src>/test-rvv/common/transforms”
