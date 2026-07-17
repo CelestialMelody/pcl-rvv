@@ -1,0 +1,19 @@
+Running main() from <rv-install>-build/googletest/googletest/src/gtest_main.cc
+[==========] Running 5 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 5 tests from TransformationEstimationPointToPlaneLLS
+[ RUN      ] TransformationEstimationPointToPlaneLLS.StdDiagnosticMatchesPublicEstimator
+[       OK ] TransformationEstimationPointToPlaneLLS.StdDiagnosticMatchesPublicEstimator (1 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLS.FullCloudCandidateMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLS.FullCloudCandidateMatchesStd (2 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLS.CorrespondenceCandidateMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLS.CorrespondenceCandidateMatchesStd (3 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLS.SmallInputFallsBackForIsolatedSizeGate
+[       OK ] TransformationEstimationPointToPlaneLLS.SmallInputFallsBackForIsolatedSizeGate (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLS.InvalidLaneMaskMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLS.InvalidLaneMaskMatchesStd (0 ms)
+[----------] 5 tests from TransformationEstimationPointToPlaneLLS (7 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 1 test suite ran. (7 ms total)
+[  PASSED  ] 5 tests.

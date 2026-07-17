@@ -1,0 +1,27 @@
+====================================================================================================================
+ Benchmark (loose parse) (Std vs RVV)
+====================================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : synthetic PointNormal point-to-plane LLS normal-equation diagnostic
+  Iterations: 20 （每行 Total = Avg × 20）
+  Std log   : <board-root>/registration/transformation_estimation_point_to_plane_lls/output/run_bench_std.log
+  RVV log   : <board-root>/registration/transformation_estimation_point_to_plane_lls/output/run_bench_rvv.log
+
+--------------------------------------------------------------------------------------------------------------------
+Benchmark Item                                          | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+--------------------------------------------------------|--------|----------------|----------------|----------------
+lls normal-equation full-cloud pointnormal 65536        | Std    |      6.7628 ms |    135.2567 ms |    [   1.00x ]
+                                                        | RVV    |      6.8200 ms |    136.4006 ms |    [   0.99x ]
+--------------------------------------------------------|--------|----------------|----------------|----------------
+lls normal-equation correspondences pointnormal 65536   | Std    |      5.0639 ms |    101.2780 ms |    [   1.00x ]
+                                                        | RVV    |      9.7184 ms |    194.3674 ms |    [   0.52x ]
+--------------------------------------------------------|--------|----------------|----------------|----------------
+lls normal-equation full-cloud pointnormal 262144       | Std    |     26.8654 ms |    537.3085 ms |    [   1.00x ]
+                                                        | RVV    |     27.9267 ms |    558.5339 ms |    [   0.96x ]
+--------------------------------------------------------|--------|----------------|----------------|----------------
+lls normal-equation correspondences pointnormal 262144  | Std    |     20.1490 ms |    402.9807 ms |    [   1.00x ]
+                                                        | RVV    |     34.7913 ms |    695.8250 ms |    [   0.58x ]
+--------------------------------------------------------|--------|----------------|----------------|----------------
+====================================================================================================================

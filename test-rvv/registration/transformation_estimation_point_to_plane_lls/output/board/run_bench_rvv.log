@@ -1,0 +1,17 @@
+Dataset: synthetic PointNormal point-to-plane LLS normal-equation diagnostic
+Iterations: 20
+Build: rvv
+lls normal-equation full-cloud pointnormal 65536: 6.820029 ms/iter
+  Total Time: 136.400590 ms
+  Checksum: 722.989258
+lls normal-equation correspondences pointnormal 65536: 9.718369 ms/iter
+  Total Time: 194.367385 ms
+  Checksum: 722.596334
+lls normal-equation full-cloud pointnormal 262144: 27.926697 ms/iter
+  Total Time: 558.533935 ms
+  Checksum: 725.418090
+lls normal-equation correspondences pointnormal 262144: 34.791252 ms/iter
+  Total Time: 695.825035 ms
+  Checksum: 723.845144
+Total Time: 1585.126945 ms
+Checksum: 2894.848826

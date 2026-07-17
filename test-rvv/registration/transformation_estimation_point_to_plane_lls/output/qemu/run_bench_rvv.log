@@ -1,0 +1,24 @@
+make[1]: Entering directory '<pcl-src>/test-rvv/registration/transformation_estimation_point_to_plane_lls'
+rm -f build/riscv/bench_transformation_estimation_point_to_plane_lls_rvv
+[BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
+<riscv-toolchain>/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-17_14-28-54.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/registration/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include  bench_transformation_estimation_point_to_plane_lls.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_registration -lpcl_common -lboost_filesystem -lboost_iostreams -lboost_system -lm -o build/riscv/bench_transformation_estimation_point_to_plane_lls_rvv
+[RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
+LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_transformation_estimation_point_to_plane_lls_rvv 
+Dataset: synthetic PointNormal point-to-plane LLS normal-equation diagnostic
+Iterations: 20
+Build: rvv
+lls normal-equation full-cloud pointnormal 65536: 27.983618 ms/iter
+  Total Time: 559.672356 ms
+  Checksum: 722.989258
+lls normal-equation correspondences pointnormal 65536: 20.913870 ms/iter
+  Total Time: 418.277410 ms
+  Checksum: 722.596334
+lls normal-equation full-cloud pointnormal 262144: 112.889467 ms/iter
+  Total Time: 2257.789331 ms
+  Checksum: 725.418090
+lls normal-equation correspondences pointnormal 262144: 84.974228 ms/iter
+  Total Time: 1699.484565 ms
+  Checksum: 723.845144
+Total Time: 4935.223662 ms
+Checksum: 2894.848826
+make[1]: Leaving directory '<pcl-src>/test-rvv/registration/transformation_estimation_point_to_plane_lls'
