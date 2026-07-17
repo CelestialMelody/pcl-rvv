@@ -16,6 +16,12 @@ import sys
 from pathlib import Path
 
 
+PATH_CHARS = r"[^ \t\n'\"，。；:<>]+"
+PATH_ROOT = r"/(?:var/tmp|home|root|mnt|data|opt|srv|tmp)"
+PATH_PREFIX = rf"{PATH_ROOT}(?:/{PATH_CHARS})?"
+PATH_END = r"(?=$|[\/\s'\"，。；:<>])"
+
+
 RULES: list[tuple[str, re.Pattern[str], str]] = [
     (
         "LD_LIBRARY_PATH",
@@ -23,34 +29,34 @@ RULES: list[tuple[str, re.Pattern[str], str]] = [
         "LD_LIBRARY_PATH=<runtime-libs>",
     ),
     (
+        "board pcl-test root",
+        re.compile(rf"/root/{PATH_CHARS}/pcl-test{PATH_END}|/root/pcl-test{PATH_END}"),
+        "<board-root>",
+    ),
+    (
         "pcl source root",
-        re.compile(r"/home/[^ \t\n'\"，。；:]+/(?:codes/RISCV/workspace|codes|workspace)/pcl"),
+        re.compile(rf"{PATH_PREFIX}/pcl{PATH_END}"),
         "<pcl-src>",
     ),
     (
         "riscv dependency root",
-        re.compile(r"/home/[^ \t\n'\"，。；:]+/(?:codes/RISCV/workspace|codes|workspace)/riscv"),
+        re.compile(rf"{PATH_PREFIX}/riscv{PATH_END}"),
         "<rv-install>",
     ),
     (
         "x86 dependency root",
-        re.compile(r"/home/[^ \t\n'\"，。；:]+/(?:codes/RISCV/workspace|codes|workspace)/x86"),
+        re.compile(rf"{PATH_PREFIX}/x86{PATH_END}"),
         "<x86-install>",
     ),
     (
         "riscv build root",
-        re.compile(r"/home/[^ \t\n'\"，。；:]+/(?:codes/)?riscv-build"),
+        re.compile(rf"{PATH_PREFIX}/riscv-build{PATH_END}"),
         "<riscv-build>",
     ),
     (
         "third-party source root",
-        re.compile(r"/home/[^ \t\n'\"，。；:]+/(?:codes/RISCV/workspace|codes|workspace)/pkgs"),
+        re.compile(rf"{PATH_PREFIX}/pkgs{PATH_END}"),
         "<third-party-src>",
-    ),
-    (
-        "board pcl-test root",
-        re.compile(r"/root/pcl-test"),
-        "<board-root>",
     ),
     (
         "riscv toolchain root",
@@ -61,6 +67,11 @@ RULES: list[tuple[str, re.Pattern[str], str]] = [
         "generic home path",
         re.compile(r"/home/[^ \t\n'\"，。；]+"),
         "<home>",
+    ),
+    (
+        "generic root path",
+        re.compile(r"/root/[^ \t\n'\"，。；]+"),
+        "<root-path>",
     ),
     (
         "ssh target",
