@@ -1,0 +1,21 @@
+Running main() from <riscv-build>/googletest/googletest/src/gtest_main.cc
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from TransformationEstimationPointToPlaneLLSWeighted
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.StdDiagnosticMatchesPublicEstimator
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.StdDiagnosticMatchesPublicEstimator (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.StdCorrespondencesMatchesPublicEstimator
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.StdCorrespondencesMatchesPublicEstimator (2 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd (3 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceCandidateMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceCandidateMatchesStd (3 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.SmallInputFallsBackForIsolatedSizeGate
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.SmallInputFallsBackForIsolatedSizeGate (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.InvalidLaneMaskMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.InvalidLaneMaskMatchesStd (1 ms)
+[----------] 6 tests from TransformationEstimationPointToPlaneLLSWeighted (16 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (19 ms total)
+[  PASSED  ] 6 tests.

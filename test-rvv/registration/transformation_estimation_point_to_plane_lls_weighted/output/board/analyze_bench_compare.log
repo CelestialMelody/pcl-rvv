@@ -1,0 +1,27 @@
+=============================================================================================================
+ Benchmark (loose parse) (Std vs RVV)
+=============================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : synthetic PointNormal weighted point-to-plane LLS diagnostic
+  Iterations: 20 （每行 Total = Avg × 20）
+  Std log   : <board-root>/registration/transformation_estimation_point_to_plane_lls_weighted/output/run_bench_std.log
+  RVV log   : <board-root>/registration/transformation_estimation_point_to_plane_lls_weighted/output/run_bench_rvv.log
+
+-------------------------------------------------------------------------------------------------------------
+Benchmark Item                                   | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+-------------------------------------------------|--------|----------------|----------------|----------------
+weighted lls full-cloud pointnormal 65536        | Std    |      7.1234 ms |    142.4687 ms |    [   1.00x ]
+                                                 | RVV    |      6.0440 ms |    120.8808 ms |    [   1.18x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+weighted lls correspondences pointnormal 65536   | Std    |      5.2553 ms |    105.1051 ms |    [   1.00x ]
+                                                 | RVV    |     10.4137 ms |    208.2734 ms |    [   0.50x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+weighted lls full-cloud pointnormal 262144       | Std    |     28.0058 ms |    560.1167 ms |    [   1.00x ]
+                                                 | RVV    |     30.3425 ms |    606.8491 ms |    [   0.92x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+weighted lls correspondences pointnormal 262144  | Std    |     20.9287 ms |    418.5743 ms |    [   1.00x ]
+                                                 | RVV    |     46.2499 ms |    924.9979 ms |    [   0.45x ]
+-------------------------------------------------|--------|----------------|----------------|----------------
+=============================================================================================================

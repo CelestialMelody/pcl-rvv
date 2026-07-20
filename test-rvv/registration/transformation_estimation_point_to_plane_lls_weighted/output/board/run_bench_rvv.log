@@ -1,0 +1,17 @@
+Dataset: synthetic PointNormal weighted point-to-plane LLS diagnostic
+Iterations: 20
+Build: rvv
+weighted lls full-cloud pointnormal 65536: 6.044039 ms/iter
+  Total Time: 120.880776 ms
+  Checksum: 736.028364
+weighted lls correspondences pointnormal 65536: 10.413670 ms/iter
+  Total Time: 208.273391 ms
+  Checksum: 735.633720
+weighted lls full-cloud pointnormal 262144: 30.342456 ms/iter
+  Total Time: 606.849119 ms
+  Checksum: 733.333214
+weighted lls correspondences pointnormal 262144: 46.249895 ms/iter
+  Total Time: 924.997901 ms
+  Checksum: 731.725511
+Total Time: 1861.001187 ms
+Checksum: 2936.720808
