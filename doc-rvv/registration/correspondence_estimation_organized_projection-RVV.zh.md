@@ -198,6 +198,7 @@ vcompress 保序输出 source_index + x/y/z
 生产 RVV 覆盖：
 
 - 通过 PCL traits 证明有 `x/y/z` 字段，且三个字段都是单个 `float` 的 source / target 点类型；
+- 2026-07-22 起，该字段 gate 由公共 `pcl::rvv::RVVXYZFloatLayout<PointT>` 表达；本地 `OrganizedProjectionXYZFloatLayout` 已删除。该公共 trait 与 CEOP 原语义一致，只检查 PCL traits 注册的单个 `float x/y/z` 字段，不额外要求 POD / standard-layout，因此没有收窄 `PointXYZI` 等已验证组合。
 - 当前专项测试覆盖 `PointXYZ -> PointXYZ`、`PointXYZ -> PointXYZI`、`PointXYZI -> PointXYZI`；
 - test-only 派生类和生产 direct class 测试覆盖公开调用形状 `determineCorrespondences(correspondences, max_distance)`；
 - 上游 `initCompute()`、`CorrespondenceEstimationBase` fake indices 和 `setIndices()` subset 已纳入专项对拍与生产入口测试；
@@ -218,6 +219,8 @@ vcompress 保序输出 source_index + x/y/z
 - 三个 RVV staging helper 都成功时，只剩 `finishOrganizedProjectionCorrespondencesFromAccepted()` 做 append-only 标量写出；accepted lane 的 stored distance 已按 production 标量 Eigen `norm()` 重算。
 
 当前 QEMU / board production case 的主路径预期是三个 RVV staging helper 都命中，然后进入 `finishOrganizedProjectionCorrespondencesFromAccepted()`。前两个 tail 在这些 case 中通常不会执行；它们服务于 partial fallback，例如 source staging 压缩后候选数低于后续 helper 的 `n >= 64` gate、projection-pixel staging 压缩后候选数低于 target-predicate helper gate，或后续 helper 因 VLEN / offset / 布局边界失败。
+
+本轮公共 trait 重构没有扩大 CEOP production 行为：`Scalar=float`、`__RVV10__`、source/target `RVVXYZFloatLayout`、规模、VLEN、32-bit byte offset、organized target 和三阶段 staging fallback 边界都保持不变。append 和 stored distance 写出仍保留标量。
 
 ## 4. 详细设计
 

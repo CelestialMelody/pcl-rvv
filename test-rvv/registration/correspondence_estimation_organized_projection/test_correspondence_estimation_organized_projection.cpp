@@ -1,5 +1,6 @@
 #include "correspondence_estimation_organized_projection_diag.hpp"
 
+#include <pcl/common/rvv_point_traits.h>
 #include <pcl/test/gtest.h>
 
 #include <cmath>
@@ -9,6 +10,13 @@
 namespace diag = pcl::registration::correspondence_estimation_organized_projection_diag;
 
 namespace {
+
+static_assert(pcl::rvv::RVVXYZFloatLayout<pcl::PointXYZ>::value);
+static_assert(pcl::rvv::RVVXYZFloatLayout<pcl::PointXYZI>::value);
+static_assert(!pcl::rvv::RVVXYZNormalFloatLayout<pcl::PointXYZI>::value);
+static_assert(pcl::rvv::rvvMaxU32ByteOffsetElements<pcl::PointXYZ>() ==
+              static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max() /
+                                       sizeof(pcl::PointXYZ)));
 
 std::uint32_t
 floatBits(float value)

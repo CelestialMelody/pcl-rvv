@@ -23,6 +23,7 @@ target-predicate 独立诊断、production-shaped prototype 评估和 production
 当前覆盖：
 
 - 通过 PCL traits 证明有单个 `float x/y/z` 字段的 source / target 点类型；
+- 2026-07-22 公共 trait 重构后，production impl 使用 `pcl::rvv::RVVXYZFloatLayout<PointT>` 替代本地 `OrganizedProjectionXYZFloatLayout`；该 trait 只表达 CEOP 原有的单个 `float x/y/z` 字段语义，不额外加入 POD / standard-layout gate，因此不收窄 `PointXYZI` 覆盖。
 - 专项测试覆盖 `PointXYZ -> PointXYZ`、`PointXYZ -> PointXYZI`、`PointXYZI -> PointXYZI`；
 - 显式全量 `indices=[0,n)`，以及 test-only 派生诊断类和生产入口中的 fake indices、`setIndices()` subset；
 - source finite、4x4 transform 后 `z > 0` 前置过滤；identity transform 保留原始 xyz 快路径并继续进入 projection-pixel production staging；non-identity transform 使用 Eigen-aligned FMA staging 后继续进入同一个 projection-pixel production helper；
@@ -61,6 +62,8 @@ target-predicate 独立诊断、production-shaped prototype 评估和 production
 RVV helper 不使用 `_rm` intrinsic，也不读写 FRM/FCSR。早期诊断曾把 `u/v` 截断也放进 RVV 阶段，QEMU 对拍发现边界 lane 的 correspondence 数量不一致；定位后确认投影表达式的 FMA contraction 与普通 `vfmul + vfadd` 顺序会影响接近像素边界的 `static_cast<int>` 结果。本轮将 projection-pixel 诊断中的 RVV 投影改为 `z*cx` 作为累加初值，再用 `vfmacc` 融合 `fx*x`，与标量编译器常见 contraction 形态对齐。修改后 projection-pixel 诊断在 QEMU std/RVV 下恢复 correspondence 完全一致。
 
 当前生产 RVV 覆盖范围由三个 staging helper 组成。`projectOrganizedProjectionCandidatesRVV` 负责 gather source `x/y/z`、source finite、identity 快路径或 non-identity Eigen-aligned 4x4 transform、transformed `z > 0` mask 和 `OrganizedProjectionCandidate` 保序压缩。`projectOrganizedProjectionPixelsRVV` 继续读取 candidate staging，使用 RVV 计算 `u/v`、图像范围 mask 和 `target_index`，并压缩为 `ProjectedOrganizedProjectionCandidate`；identity fast path 和 verified non-identity transform staging 都进入这个 helper。`acceptProjectedOrganizedProjectionCandidatesRVV` 再 gather target `x/y/z`，执行 target finite、depth threshold 和最终 distance predicate，并压缩为 `AcceptedOrganizedProjectionCandidate`。accepted lane 的 `pcl::Correspondence::distance` 仍按标量 Eigen `norm()` 重算后写出，保持 stored distance 与 production 标量表达式绑定。
+
+本轮公共 trait 重构不改变三阶段 production 分流：`Scalar=float`、`__RVV10__`、`indices.size() >= 64`、`vlmax_e32m2 <= 64`、source/target 32-bit byte offset 可表达、target organized 与 staged fallback 边界全部保持不变。专项测试源新增 static_assert，确认 `PointXYZ` / `PointXYZI` 满足 `RVVXYZFloatLayout`，而 `PointXYZI` 不满足 normal layout gate，防止把 CEOP 的字段 gate 和 symmetric LLS 的 normal gate 混用。
 
 标量片段到 production RVV 状态的对应关系：
 
@@ -173,7 +176,7 @@ struct XYZFloatLayout<PointT, true>
 生产改动位于 `registration/include/pcl/registration/impl/correspondence_estimation_organized_projection.hpp`，不改变公开 API 和类成员布局。新增实体放在同一 impl header 的 `pcl::registration::detail` 中：
 
 - `OrganizedProjectionCandidate`：生产 staging 结构，保存 `source_index` 和变换后的 `x/y/z`；identity transform 下直接保存原始 source xyz，non-identity transform 下保存 Eigen-aligned FMA staging 结果；
-- `OrganizedProjectionXYZFloatLayout`：`__RVV10__` 下的 traits gate，要求 source / target 有 PCL 注册的单个 `float x/y/z` 字段；
+- `pcl::rvv::RVVXYZFloatLayout`：`__RVV10__` 下的公共 traits gate，要求 source / target 有 PCL 注册的单个 `float x/y/z` 字段；
 - `organizedProjectionTransformIsIdentity`：source transform staging 的运行时分支 helper，判断入口传入的 `src_to_tgt_transformation_` 是否为精确 identity；identity 时直接 staging 原始 source xyz，non-identity 时进入 Eigen-aligned FMA staging；
 - `projectOrganizedProjectionCandidatesRVV`：生产 RVV source staging helper，只在 `__RVV10__` 下编译；
 - `ProjectedOrganizedProjectionCandidate`：projection-pixel production staging 结构，保存 `source_index`、`target_index` 和 transform 后 `x/y/z`；

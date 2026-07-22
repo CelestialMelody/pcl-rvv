@@ -1,8 +1,20 @@
-# RVV 泛型点类型字段加载策略
+# RVV 泛型点类型 gate 策略
 
-PCL 的很多算法入口使用模板点类型。同一个函数可能接收 `PointXYZ`、`PointXYZI`、`PointXYZRGB`，也可能同时处理不同的 `PointSource` 和 `PointTarget`。RVV 优化如果直接按 `PointXYZ` 写死字段位置，会把泛型入口收窄成单一点类型实现。
+PCL 的很多算法入口使用模板点类型。同一个函数可能接收 `PointXYZ`、
+`PointXYZI`、`PointXYZRGB` 或用户自定义点类型，也可能同时处理不同的
+`PointSource` 和 `PointTarget`。RVV 优化如果直接按 `PointXYZ` 写死字段位置，
+会把泛型入口收窄成单一点类型实现，并可能在字段 offset、POD 类型或结构体大小
+不同的点类型上读错内存。
 
-本文讨论面对 PCL 泛型点类型时，RVV 优化应如何判断 `x/y/z` 字段、取得字段 offset、选择公共 load helper，并设置必要的 fallback gate。CEOP（`correspondence_estimation_organized_projection`）作为示例出现，但它的 organized projection、投影矩阵和 correspondence 写出语义不属于本文的通用规则。
+本文是 RVV 泛型点类型 gate 的首选入口文档。公共 API 落点是
+`common/include/pcl/common/rvv_point_traits.h`。该头文件只包含 compile-time
+traits / layout gate（编译期类型特征和布局准入判断），不包含算法 dispatch
+（选择 RVV 路径还是标量路径的分流逻辑），不包含 RVV intrinsic（RVV 内建函数）
+实现，也不包含 topic 特有逻辑。
+
+CEOP（`correspondence_estimation_organized_projection`）和 symmetric LLS
+（symmetric point-to-plane LLS）在本文中只作为 gate 选择示例。它们各自的投影、
+对应关系写出、法向量累加和 fallback 语义不属于本文的通用规则。
 
 ## 1. 不要硬编码 PointXYZ
 
@@ -15,60 +27,130 @@ constexpr std::size_t kYOff = offsetof(pcl::PointXYZ, y);
 constexpr std::size_t kZOff = offsetof(pcl::PointXYZ, z);
 ```
 
-这段代码只适用于 `PointXYZ`。`PointXYZI`、`PointXYZRGB` 或自定义点类型可能有不同的结构体大小、POD 类型和字段 offset。PCL 的模板参数表达当前调用者提供的点类型。RVV helper 必须基于当前 `PointT` 证明字段可访问。
+这段代码只适用于 `PointXYZ`。其它点类型可能满足“有 `x/y/z` 且都是 float”的
+算法语义，但字段 offset、`sizeof(PointT)`、`pcl::traits::POD<PointT>::type`
+都不同。泛型 RVV 代码必须基于当前模板参数 `PointT` 证明字段语义和布局前提，
+不能把某个具体点类型的 offset 复用到所有调用。
 
-正确方向是：
+推荐思路：
 
 ```text
 当前模板点类型 PointT
-  -> traits 证明存在 x/y/z
-  -> traits 证明每个字段是单个 float
-  -> traits 取得当前点类型的 offset
-  -> 公共 RVV load helper 按当前 PointT/POD/offset 访问
+  -> 用 PCL traits 证明字段存在和字段类型
+  -> 选择与算法访问方式匹配的公共 RVV gate
+  -> 取得当前 PointT 或 POD 的字段 offset
+  -> 用当前点云 base、sizeof(PointT) 和当前 offset 调用公共 RVV helper
+  -> 任一前提失败时回退标量路径
 ```
 
-## 2. 用 PCL traits 证明字段
+## 2. PCL Traits 字段语义
 
-进入 f32 RVV xyz 路径前，至少要证明：
+PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心这些信息：
 
-- `pcl::traits::has_xyz<PointT>::value` 为 true；
+- `pcl::traits::has_xyz<PointT>::value`：点类型是否注册了 `x/y/z` 字段。
+- `pcl::traits::has_normal<PointT>::value`：点类型是否注册了
+  `normal_x/normal_y/normal_z` 字段。
+- `pcl::traits::datatype<PointT, Field>::decomposed::type`：字段标量类型。
+- `pcl::traits::datatype<PointT, Field>::decomposed::value`：字段包含的标量个数。
+- `pcl::traits::offset<PointT, Field>::value`：字段相对当前点类型存储布局的
+  byte offset（字节偏移）。
+- `pcl::traits::POD<PointT>::type`：PCL 注册后的底层 POD 表示，常用于
+  `offsetof` 风格的字节访问前提检查。
+
+进入 f32 RVV xyz 路径前，通常至少要证明：
+
+- `has_xyz<PointT>` 为 true；
 - `x/y/z` 的 `datatype::decomposed::type` 都是 `float`；
-- `x/y/z` 的 `datatype::decomposed::value` 都是 `1`，也就是每个字段是单个 float。
+- `x/y/z` 的 `datatype::decomposed::value` 都是 `1`，即每个字段是单个 float。
 
-一个常见 gate 形态是：
+需要直接读 normal 字段的算法还要分别证明：
+
+- `has_normal<PointT>` 为 true；
+- `normal_x/normal_y/normal_z` 都是单个 `float`；
+- 当前算法所需的 POD、standard-layout、`sizeof` 和 alignment 前提成立。
+
+## 3. 公共 API 落点
+
+`rvv_point_traits.h` 提供以下公共 API。新 RVV topic 应优先复用这些 API，
+不要在算法实现里重复定义本地 `XYZFloatLayout` 或 `XYZNormalFloatLayout`。
+
+| API | 职责 | 典型用途 |
+| --- | --- | --- |
+| `pcl::rvv::RVVFieldScalar<T>` | 去掉 cv/ref，得到字段表达式的实际标量类型。 | 兼容旧 member gate 中的 `decltype(point.x)` 判断。 |
+| `pcl::rvv::RVVFloatFieldLayout<PointT, Field>` | 判断 PCL traits 注册字段是否为单个 `float`。 | 组合 xyz、normal 或其它字段语义 gate。 |
+| `pcl::rvv::RVVXYZFloatLayout<PointT>` | 判断 `x/y/z` 是否是 PCL traits 注册的单个 `float` 字段，并暴露 `kX/kY/kZ` offset。 | CEOP 这类只需要 xyz 字段语义、并由具体 helper / 本地 gate 承担底层访问前提的路径。 |
+| `pcl::rvv::RVVXYZNormalFloatLayout<PointT>` | 判断 `x/y/z/normal_x/normal_y/normal_z` 是否都是单个 `float`，并检查 POD、standard-layout、`sizeof(PointT)==sizeof(POD)`、`sizeof(PointT)` 和字段 offset 的 float alignment；暴露 `kX/kY/kZ/kNX/kNY/kNZ`。 | symmetric LLS 这类直接按 AoS byte offset 读取 xyz 和 normal 的 full-cloud production 路径。 |
+| `pcl::rvv::kRVVXYZPointCompatible<PointT>` | 旧 load/store 兼容 gate：要求成员 `x/y/z` 存在、类型都是 `float`，且 `PointT` 是 standard-layout。 | 保持 `rvv_point_load/store` 旧接口和 common 调用点语义稳定。 |
+| `pcl::rvv::kRVVXYZNormalPointCompatible<PointT>` | `RVVXYZNormalFloatLayout<PointT>::value` 的变量模板形式。 | 需要变量模板风格 gate 的调用点。 |
+| `pcl::rvv::rvvMaxU32ByteOffsetElements<PointT>()` | 返回 `UINT32_MAX / sizeof(PointT)`，即当前 32-bit byte offset helper 可表达的最大合法元素数。 | indexed gather/scatter 使用 32-bit byte offset 时的云规模 gate。 |
+
+`pcl::rvv_load::RVVCoordScalar`、
+`pcl::rvv_load::kRVVXYZPointCompatible`、
+`pcl::rvv_store::RVVCoordScalar` 和
+`pcl::rvv_store::kRVVXYZPointCompatible` 是旧命名空间中的兼容别名。新文档和
+新代码应把 `pcl::rvv::*` 视为公共 API 落点。
+
+## 4. 三类 Gate 的区别
+
+不要把所有“有 xyz”的路径都归并成同一个 gate。公共 traits 目前刻意保留三类
+不同语义边界。
+
+| gate 类别 | 公共 API | 证明内容 | 不证明内容 | 适用示例 |
+| --- | --- | --- | --- | --- |
+| member `x/y/z` + standard-layout | `kRVVXYZPointCompatible<PointT>` | C++ 成员 `x/y/z` 存在、成员表达式类型为 `float`、`PointT` 是 standard-layout。 | 不依赖 PCL traits 的 `has_xyz` / `datatype` 语义；不证明 normal；不证明 `sizeof(PointT)==sizeof(POD)`。 | load/store 旧兼容 gate，以及沿用旧 helper 名称的 common 调用点。 |
+| PCL traits xyz 单 float | `RVVXYZFloatLayout<PointT>` | PCL traits 注册了 `x/y/z`，且三个字段都是单个 `float`；提供当前点类型的 xyz offset。 | 不额外要求 POD / standard-layout / `sizeof(PointT)==sizeof(POD)`；不证明 normal。 | CEOP 这类只需要 xyz 字段语义的算法 gate。底层 helper 的 standard-layout / alignment 前提仍需由 helper `static_assert` 或本地 gate 保证。 |
+| xyz + normal 单 float + AoS layout 前提 | `RVVXYZNormalFloatLayout<PointT>` 或 `kRVVXYZNormalPointCompatible<PointT>` | PCL traits 注册了 xyz 和 normal，六个字段都是单个 `float`；POD standard-layout；`sizeof(PointT)==sizeof(POD)`；stride 和字段 offset 满足 float alignment。 | 不代表所有 normal 算法都可直接接入；仍不包含算法规模、VLEN、索引类型、输出语义等 dispatch 条件。 | symmetric LLS full-cloud production RVV 路径，直接按 AoS byte offset 读取 source / target 的 xyz 和 normal。 |
+
+选择原则：
+
+- 只是保持旧 load/store common helper 的兼容判断时，用 `kRVVXYZPointCompatible`。
+- 算法只需要 PCL 注册的 xyz 单 float 字段语义时，用 `RVVXYZFloatLayout`。
+- 算法要直接用 AoS byte offset 读取 xyz 和 normal，且依赖 POD / alignment 前提时，
+  用 `RVVXYZNormalFloatLayout`。
+- 算法还有规模阈值、VLEN buffer、变换矩阵、输出顺序或表达式一致性要求时，这些仍是
+  算法本地 dispatch / fallback 条件，不应塞进公共 traits。
+
+## 5. Source 和 Target 必须分别 Gate
+
+registration 类算法经常同时包含：
 
 ```cpp
-template <typename PointT, bool HasXYZ = pcl::traits::has_xyz<PointT>::value>
-struct RVVXYZFloatLayout : std::false_type {};
-
-template <typename PointT>
-struct RVVXYZFloatLayout<PointT, true>
-: std::bool_constant<
-      std::is_standard_layout_v<typename pcl::traits::POD<PointT>::type> &&
-      std::is_same_v<typename pcl::traits::datatype<PointT, pcl::fields::x>::decomposed::type, float> &&
-      std::is_same_v<typename pcl::traits::datatype<PointT, pcl::fields::y>::decomposed::type, float> &&
-      std::is_same_v<typename pcl::traits::datatype<PointT, pcl::fields::z>::decomposed::type, float> &&
-      pcl::traits::datatype<PointT, pcl::fields::x>::decomposed::value == 1 &&
-      pcl::traits::datatype<PointT, pcl::fields::y>::decomposed::value == 1 &&
-      pcl::traits::datatype<PointT, pcl::fields::z>::decomposed::value == 1> {};
+PointSource
+PointTarget
 ```
 
-这个 gate 同时检查字段存在、字段类型、字段 count 和 POD layout 前提。不满足这些条件时，生产路径回退到原标量实现。
+这两侧可能是不同点类型，例如 `PointXYZ -> PointXYZI`。source 和 target 必须分别
+执行 layout gate，分别取得 offset，不能把一侧的 offset 或 `sizeof` 复用到另一侧。
 
-## 3. POD、standard-layout 与 alignment
+source load 使用：
 
-只证明 `float x/y/z` 还不够。PCL 的公共 RVV load/store wrapper 还依赖几个底层访问前提：
+- `sizeof(PointSource)`；
+- `typename pcl::traits::POD<PointSource>::type`；
+- `pcl::traits::offset<PointSource, pcl::fields::x/y/z>`，或
+  `RVVXYZFloatLayout<PointSource>::kX/kY/kZ`。
 
-- 传给 wrapper 的 `typename pcl::traits::POD<PointT>::type` 必须满足 `std::is_standard_layout_v<T>`；
-- 字段 offset 必须满足 f32 load/store 的 alignment 前提；
-- `sizeof(PointT)` 或 `sizeof(POD)` 对应当前 AoS stride；
-- indexed gather 使用的 byte offset 不应溢出 helper 采用的 offset 类型。
+target load 使用：
 
-文档或代码注释应写清覆盖条件：traits 证明 `x/y/z` 是单个 float，且当前 POD / standard-layout / offset alignment 满足公共 RVV load/store wrapper 前提。
+- `sizeof(PointTarget)`；
+- `typename pcl::traits::POD<PointTarget>::type`；
+- `pcl::traits::offset<PointTarget, pcl::fields::x/y/z>`，或
+  `RVVXYZFloatLayout<PointTarget>::kX/kY/kZ`。
 
-## 4. 取得当前点类型的 offset
+典型入口 gate：
 
-字段 offset 应来自当前模板点类型：
+```cpp
+if constexpr (!pcl::rvv::RVVXYZFloatLayout<PointSource>::value ||
+              !pcl::rvv::RVVXYZFloatLayout<PointTarget>::value) {
+  return false;
+}
+```
+
+如果只有 target 阶段会读取 target 点云，也可以只在该阶段 gate `PointTarget`，但不能
+用前一阶段 source 的 offset 或 stride 推导 target。
+
+## 6. 取得当前点类型 Offset
+
+字段 offset 应来自当前模板点类型。可以直接使用 PCL traits：
 
 ```cpp
 constexpr std::size_t kXOff = pcl::traits::offset<PointT, pcl::fields::x>::value;
@@ -76,7 +158,17 @@ constexpr std::size_t kYOff = pcl::traits::offset<PointT, pcl::fields::y>::value
 constexpr std::size_t kZOff = pcl::traits::offset<PointT, pcl::fields::z>::value;
 ```
 
-随后把当前点云 base pointer、当前点类型的 byte offsets 和这些字段 offset 交给公共 wrapper：
+也可以在已经选择公共 layout gate 后使用它暴露的 offset：
+
+```cpp
+using Layout = pcl::rvv::RVVXYZFloatLayout<PointT>;
+constexpr std::size_t kXOff = Layout::kX;
+constexpr std::size_t kYOff = Layout::kY;
+constexpr std::size_t kZOff = Layout::kZ;
+```
+
+随后把当前点云 base pointer、当前点类型的 byte offset 和字段 offset 交给公共
+load/store helper：
 
 ```cpp
 const auto* base = reinterpret_cast<const std::uint8_t*>(cloud.points.data());
@@ -88,80 +180,71 @@ pcl::rvv_load::indexed_load3_fields_f32m2<
     base, offsets, vl, x, y, z);
 ```
 
-这个形态保留 PCL 模板入口的泛型性。`PointXYZ`、`PointXYZI` 或其它满足 gate 的点类型都使用自己的 `sizeof`、POD 和 offset。
+这个形态保留 PCL 模板入口的泛型性。满足 gate 的 `PointXYZ`、`PointXYZI` 或自定义
+点类型都使用自己的 `sizeof`、POD 和 offset。
 
-## 5. Source 和 Target 分别处理
+## 7. 32-bit Byte Offset Helper 边界
 
-registration 类算法经常有两个点类型参数：
-
-```cpp
-PointSource
-PointTarget
-```
-
-这两者需要独立 layout 判断。source load 使用：
-
-- `sizeof(PointSource)`；
-- `typename pcl::traits::POD<PointSource>::type`；
-- `pcl::traits::offset<PointSource, pcl::fields::x/y/z>`。
-
-target load 使用：
-
-- `sizeof(PointTarget)`；
-- `typename pcl::traits::POD<PointTarget>::type`；
-- `pcl::traits::offset<PointTarget, pcl::fields::x/y/z>`。
-
-入口 gate 也要分别判断：
-
-```cpp
-if constexpr (!RVVXYZFloatLayout<PointSource>::value ||
-              !RVVXYZFloatLayout<PointTarget>::value) {
-  return false;
-}
-```
-
-CEOP 覆盖 `PointXYZ -> PointXYZI`。该路径对 source 和 target 分别执行 traits gate 和 offset 计算。
-
-## 6. 选择 load helper
-
-生产代码优先复用 `pcl::rvv_load` 的公共 wrapper。避免在每个算法里复制裸 intrinsic。选择 helper 时要区分固定策略 primitive 和自动分发 wrapper。
-
-| helper | 访问形态 | 是否自动选择 segment |
-| --- | --- | --- |
-| `indexed_load3_fields_f32m2` | indexed AoS，3 次字段 gather，分别执行 `vluxei32` | 否 |
-| `indexed_load3_seg_f32m2` | indexed AoS，要求从第一个字段开始三字段连续 | 否 |
-| `indexed_load3_f32m2` | indexed AoS dispatch，字段紧密连续时可走 segment，否则走 fields | 是 |
-| `strided_load3_fields_f32m2` | 顺序 / strided AoS，3 次字段 load | 否 |
-| `strided_load3_seg_f32m2` | 顺序 / strided AoS，要求三字段连续 | 否 |
-| `strided_load3_f32m2` | strided AoS dispatch，字段紧密连续时可走 segment，否则走 fields | 是 |
-
-`_fields` 后缀表示按字段访问。它不会自动切到 segment 指令。若需要根据 `x/y/z` 是否紧密连续自动选择 segment 或 fields，应调用 `indexed_load3_f32m2` 或 `strided_load3_f32m2` 这类 dispatch wrapper，并用 bench / 反汇编确认实际路径。
-
-CEOP production 当前选择 `indexed_load3_fields_f32m2`。这个 helper 固定执行 3 字段 gather。
-
-## 7. 32-bit byte offset gate
-
-当前公共 indexed load helper 使用 32-bit byte offsets。典型计算是：
+当前公共 indexed gather / scatter helper 使用 32-bit byte offsets。典型计算是：
 
 ```cpp
 offsets = indices * sizeof(PointT);
 ```
 
-gate 的目标是证明所有有效访问都能落在 `uint32_t` byte offset 范围内。
-
-如果入口能依赖 PCL 已验证的 indices 有效性，可以用点云规模证明：
+`rvvMaxU32ByteOffsetElements<PointT>()` 返回：
 
 ```text
-cloud.size() <= UINT32_MAX / sizeof(PointT)
+UINT32_MAX / sizeof(PointT)
 ```
 
-这表示所有合法 index 对应的 `index * sizeof(PointT)` 都可用 32-bit byte offset 表达。该条件成立时无需逐个扫描 index。
+如果入口能依赖 PCL 已验证的 index 有效性，可以用点云规模证明：
 
-如果 helper 接收不可信 raw index 数组，或者入口没有证明 index 落在 cloud 范围内，需要额外验证每个 index，或回退标量路径。
+```text
+cloud.size() <= rvvMaxU32ByteOffsetElements<PointT>()
+```
 
-## 8. 输入规模 gate 不一定叫 indices.size()
+这表示所有合法 index 对应的 `index * sizeof(PointT)` 都可用 32-bit byte offset
+表达。该条件成立时不需要逐个扫描 index。
 
-小规模 fallback 是常见生产 gate。文档应描述为当前 RVV stage 的 work item count 低于收益阈值。不要固定写成 `indices.size()`。
+边界注意：
+
+- helper 只证明 byte offset 可表示，不证明 index 数组内容一定合法。
+- 如果入口接收不可信 raw index 数组，或没有其它代码保证 index 落在 cloud 范围内，
+  仍需要逐个检查 index，或回退标量路径。
+- source cloud 和 target cloud 的 `sizeof(PointT)` 可能不同，32-bit gate 必须分别按
+  `PointSource` / `PointTarget` 计算。
+- 对 staged candidate 数组的 offset gate 应按 candidate struct 的 `sizeof` 和实际
+  work item count 另行判断，不要误用点云类型 helper。
+
+## 8. 选择 Load / Store Helper
+
+生产代码优先复用 `pcl::rvv_load` 和 `pcl::rvv_store` 的公共 wrapper。避免在每个算法里
+复制裸 intrinsic。
+
+load helper 需要区分固定策略 primitive 和自动分发 wrapper：
+
+| helper | 访问形态 | 是否自动选择 segment |
+| --- | --- | --- |
+| `indexed_load3_fields_f32m2` | indexed AoS，3 次字段 gather，分别执行 `vluxei32`。 | 否 |
+| `indexed_load3_seg_f32m2` | indexed AoS，要求从第一个字段开始三字段连续。 | 否 |
+| `indexed_load3_f32m2` | indexed AoS dispatch，字段紧密连续时走 segment，否则走 fields。 | 是 |
+| `strided_load3_fields_f32m2` | 顺序 / strided AoS，3 次字段 load。 | 否 |
+| `strided_load3_seg_f32m2` | 顺序 / strided AoS，要求三字段连续。 | 否 |
+| `strided_load3_f32m2` | strided AoS dispatch，字段紧密连续时走 segment，否则走 fields。 | 是 |
+
+store helper 也有同样的 primitive / dispatch 分层。需要特别注意 contiguous segmented
+store 的 buffer layout：`contiguous_seg3_store_f32m2` 和
+`contiguous_seg4_store_f32m2` 写入的是 packed tuple buffer（例如 `xyzxyz...` 或
+`f0f1f2f3...`），不是三个或四个独立 SoA 数组。独立数组应使用
+`contiguous_store3_f32m2` 或 `contiguous_store4_f32m2`。
+
+CEOP production 当前使用 `indexed_load3_fields_f32m2`，即固定三字段 gather。它没有
+自动切换到 segment 指令。
+
+## 9. 输入规模 Gate 不固定为 indices.size()
+
+小规模 fallback 是常见 production gate。文档和代码注释应描述为当前 RVV stage 的
+work item count 低于收益阈值，而不是固定写成 `indices.size()`。
 
 不同阶段的 work item 可能是：
 
@@ -172,11 +255,14 @@ cloud.size() <= UINT32_MAX / sizeof(PointT)
 - neighbor pair count；
 - output upper bound。
 
-CEOP 的 source staging 使用 `indices.size()`。后续 projection-pixel staging 使用 `candidates.size()`。target-predicate staging 使用 `projected.size()`。其它算法可能没有 `indices`，也可能使用其它 RVV stage 输入。
+CEOP 的 source staging 使用 `indices.size()`。projection-pixel staging 使用
+`candidates.size()`。target-predicate staging 使用 `projected.size()`。其它算法可能没有
+`indices`，也可能使用其它 RVV stage 输入。
 
-## 9. 稀疏输出与 staging
+## 10. 稀疏输出与 Staging
 
-泛型点类型的字段加载通常只是 RVV 优化的前半段。若后续 predicate 会稀疏保留 lane，并需要输出多个字段，推荐复用“多字段压缩 staging”模式：
+泛型点类型的字段加载通常只是 RVV 优化的前半段。若后续 predicate 会稀疏保留 lane，
+并需要输出多个字段，推荐复用“多字段压缩 staging”模式：
 
 ```text
 同一个 keep mask
@@ -186,11 +272,31 @@ CEOP 的 source staging 使用 `indices.size()`。后续 projection-pixel stagin
   -> 短标量循环组装 AoS staging
 ```
 
-固定栈 buffer 必须有与实际 SEW/LMUL 绑定的 `vlmax <= buffer_capacity` gate。后续 RVV stage 如果因为规模、VLEN 或布局条件失败，应从已有 staging 进入对应 scalar tail。已有 staging 保留已完成的 RVV 工作。
+固定栈 buffer 必须有与实际 SEW / LMUL 绑定的 `vlmax <= buffer_capacity` gate。后续
+RVV stage 如果因为规模、VLEN 或布局条件失败，应从已有 staging 进入对应 scalar tail。
+已有 staging 保留已完成的 RVV 工作。
 
-详细模式见 `doc-rvv/rvv/RVV Multi-Field Compress Staging.zh.md`。本文不重复展开 `vcompress` 和 staging 写出细节。
+详细模式见 `doc-rvv/rvv/RVV Multi-Field Compress Staging.zh.md`。本文不重复展开
+`vcompress` 和 staging 写出细节。
 
-## 10. CEOP 示例
+## 11. 什么时候不要迁移到公共 Trait
+
+公共 `rvv_point_traits.h` 只收纳可复用的字段语义和布局 gate。以下判断不要默认迁移：
+
+- Z-only gate：算法只依赖 `z`，或只对深度字段有特殊语义时，应保留算法本地判断，
+  除非先抽象出清晰的公共 Z-field 语义。
+- exact `PointXYZ` gate：某些算法特化只想覆盖精确的 `pcl::PointXYZ`，这不是泛型
+  xyz float gate，迁移会扩大语义。
+- 算法特化 predicate：例如 organized target、projection matrix 形态、identity
+  transform fast path、normal orientation、输出顺序、distance 表达式一致性等，
+  都属于算法 dispatch，不属于点类型 traits。
+- topic 临时诊断 gate：用于 benchmark、实验或 debug 的本地判断，不应因为名字相似
+  就进入公共头。
+
+迁移前应先回答：这个判断是否只描述“字段存在、字段类型、字段 offset / layout”。
+如果答案不是明确的 yes，就应留在算法本地。
+
+## 12. CEOP 示例
 
 CEOP production RVV 把泛型点类型字段加载方法应用到 source 和 target 两侧：
 
@@ -205,10 +311,10 @@ PointTarget:
 通用字段加载部分：
 
 - 不硬编码 `PointXYZ`；
-- source / target 分别判断 `float x/y/z`；
+- source / target 分别判断 `RVVXYZFloatLayout`；
 - source / target 分别取 `sizeof`、POD 和 `x/y/z` offset；
 - 使用公共 `pcl::rvv_load::indexed_load3_fields_f32m2`；
-- 用 cloud size 证明 32-bit byte offset；
+- 用 cloud size 和 `rvvMaxU32ByteOffsetElements` 证明 32-bit byte offset；
 - 小规模和 VLEN buffer 条件不满足时 fallback；
 - 分阶段 RVV 失败时从已有 staging 进入 scalar tail。
 
@@ -224,20 +330,23 @@ CEOP 专属部分：
 - projection-pixel staging 按标量 RVV build 的 FMA contraction 对齐像素边界；
 - `depth_threshold_`；
 - distance predicate 的边界处理；
-- accepted lane 写出前用标量 Eigen `norm()` 重算并再次检查，保持 `pcl::Correspondence::distance` 与生产标量表达式一致；
+- accepted lane 写出前用标量 Eigen `norm()` 重算并再次检查，保持
+  `pcl::Correspondence::distance` 与 production 标量表达式一致；
 - `determineReciprocalCorrespondences()` 转调 `determineCorrespondences()`。
 
-这些 CEOP 细节只描述 organized projection production case。其它 PCL RVV 主题需要按各自标量语义重新判断。
+这些 CEOP 细节只描述 organized projection production case。其它 PCL RVV 主题需要按
+各自标量语义重新判断。
 
-## 11. 适用边界
+## 13. 适用边界
 
 本文方法适合：
 
 - 模板点类型中 `x/y/z` 是单个 float；
 - AoS 点云数据可通过 PCL traits 得到可靠 offset；
-- POD / standard-layout / alignment 满足公共 RVV wrapper 前提；
+- 当前访问方式所需的 POD / standard-layout / alignment 前提已由公共 gate、helper
+  `static_assert` 或算法本地 gate 覆盖；
 - source / target 或多个点类型可分别 gate；
-- indexed 或 strided load 能由公共 helper 表达；
+- indexed、strided 或 contiguous load/store 能由公共 helper 表达；
 - fallback 后可保持原标量语义。
 
 回退条件：
@@ -246,4 +355,5 @@ CEOP 专属部分：
 - 未注册或 traits 不完整的自定义点类型；
 - xyz 字段为数组、多元素字段或其它非单标量表达；
 - raw index 输入无法证明有效范围；
+- helper 的 32-bit byte offset 边界无法证明；
 - 输出对象构造、bit pattern 或复杂状态机无法通过 staging / scalar tail 保持语义的路径。

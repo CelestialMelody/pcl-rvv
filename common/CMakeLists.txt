@@ -115,6 +115,7 @@ set(common_incs
   include/pcl/common/random.h
   include/pcl/common/rvv_point_load.h
   include/pcl/common/rvv_point_store.h
+  include/pcl/common/rvv_point_traits.h
   include/pcl/common/generate.h
   include/pcl/common/projection_matrix.h
   include/pcl/common/colors.h

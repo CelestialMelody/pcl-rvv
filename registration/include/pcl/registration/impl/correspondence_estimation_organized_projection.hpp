@@ -50,6 +50,7 @@
 
 #if defined(__RVV10__)
 #include <pcl/common/rvv_point_load.h>
+#include <pcl/common/rvv_point_traits.h>
 #include <pcl/field_traits.h>
 #endif
 
@@ -82,19 +83,6 @@ struct AcceptedOrganizedProjectionCandidate {
 
 #if defined(__RVV10__)
 
-template <typename PointT, bool HasXYZ = pcl::traits::has_xyz<PointT>::value>
-struct OrganizedProjectionXYZFloatLayout : std::false_type {};
-
-template <typename PointT>
-struct OrganizedProjectionXYZFloatLayout<PointT, true>
-: std::bool_constant<
-      std::is_same_v<typename pcl::traits::datatype<PointT, pcl::fields::x>::decomposed::type, float> &&
-      std::is_same_v<typename pcl::traits::datatype<PointT, pcl::fields::y>::decomposed::type, float> &&
-      std::is_same_v<typename pcl::traits::datatype<PointT, pcl::fields::z>::decomposed::type, float> &&
-      pcl::traits::datatype<PointT, pcl::fields::x>::decomposed::value == 1 &&
-      pcl::traits::datatype<PointT, pcl::fields::y>::decomposed::value == 1 &&
-      pcl::traits::datatype<PointT, pcl::fields::z>::decomposed::value == 1> {};
-
 inline vbool16_t
 organizedProjectionFiniteMask(vfloat32m2_t values, const std::size_t vl)
 {
@@ -119,14 +107,6 @@ organizedProjectionTransformIsIdentity(const Eigen::Matrix4f& transform)
          transform(3, 2) == 0.0f && transform(3, 3) == 1.0f;
 }
 
-template <typename PointT>
-constexpr std::size_t
-organizedProjectionMaxU32ByteOffsetElements()
-{
-  return static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max() /
-                                  sizeof(PointT));
-}
-
 inline vbool16_t
 organizedProjectionDistanceThresholdMask(vfloat32m2_t dist,
                                          const double max_distance,
@@ -147,8 +127,8 @@ projectOrganizedProjectionCandidatesRVV(
     const Eigen::Matrix4f& src_to_tgt_transformation,
     std::vector<OrganizedProjectionCandidate>& candidates)
 {
-  if constexpr (!OrganizedProjectionXYZFloatLayout<PointSource>::value ||
-                !OrganizedProjectionXYZFloatLayout<PointTarget>::value) {
+  if constexpr (!pcl::rvv::RVVXYZFloatLayout<PointSource>::value ||
+                !pcl::rvv::RVVXYZFloatLayout<PointTarget>::value) {
     return false;
   } else {
     constexpr std::size_t kXOff =
@@ -161,7 +141,7 @@ projectOrganizedProjectionCandidatesRVV(
     const std::size_t n = indices.size();
     if (n < 64 ||
         n > static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max()) ||
-        input.size() > organizedProjectionMaxU32ByteOffsetElements<PointSource>() ||
+        input.size() > pcl::rvv::rvvMaxU32ByteOffsetElements<PointSource>() ||
         target.width >
             static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max()) ||
         target.height >
@@ -403,7 +383,7 @@ acceptProjectedOrganizedProjectionCandidatesRVV(
     const std::vector<ProjectedOrganizedProjectionCandidate>& projected,
     std::vector<AcceptedOrganizedProjectionCandidate>& accepted)
 {
-  if constexpr (!OrganizedProjectionXYZFloatLayout<PointTarget>::value) {
+  if constexpr (!pcl::rvv::RVVXYZFloatLayout<PointTarget>::value) {
     return false;
   } else {
     constexpr std::size_t kXOff =
@@ -416,7 +396,7 @@ acceptProjectedOrganizedProjectionCandidatesRVV(
     const std::size_t n = projected.size();
     if (n < 64 ||
         n > static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max()) ||
-        target.size() > organizedProjectionMaxU32ByteOffsetElements<PointTarget>())
+        target.size() > pcl::rvv::rvvMaxU32ByteOffsetElements<PointTarget>())
       return false;
 
     const std::size_t vlmax = __riscv_vsetvlmax_e32m2();

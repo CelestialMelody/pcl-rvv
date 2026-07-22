@@ -37,9 +37,10 @@
 
 #pragma once
 
+#include <pcl/common/rvv_point_traits.h>
+
 #include <cstddef>
 #include <cstdint>
-#include <type_traits>
 
 #ifdef __RVV10__
 #include <riscv_vector.h>
@@ -59,8 +60,8 @@ namespace pcl {
   *
   * Intrinsic symmetry with loads: `vlse32`↔`vsse32`, `vlsseg*`↔`vssseg*`, `vlseg*`↔`vsseg*`,
   * `vlux*` / `vluxseg*` ↔ `vsux*` / `vsuxseg*`.
-  * Point traits (\c RVVCoordScalar, \c kRVVXYZPointCompatible) are defined in the implementation header with the
-  * same semantics as in \c rvv_point_load (duplicated to avoid a load/store header dependency).
+  * Point traits (\c RVVCoordScalar, \c kRVVXYZPointCompatible) are thin aliases to
+  * \c pcl/common/rvv_point_traits.h with the same semantics as in \c rvv_point_load.
   *
   * 中文：与 `rvv_point_load` 对称——原语层固定一种 store 指令；合并接口在编译期判断字段是否紧密连续。
   * Indexed 单字段写回命名 `scatter_store_f32m2`，与 `gather_load_f32m2` 对仗。
