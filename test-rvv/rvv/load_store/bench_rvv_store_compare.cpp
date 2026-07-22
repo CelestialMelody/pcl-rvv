@@ -8,7 +8,8 @@
  * Workloads / layout:
  * - Strided AoS: store into an AoS array `dst[]` with a fixed byte stride (`sizeof(Edge4f)`).
  *   Fields `f0..f3` are consecutive floats in this struct, mimicking the common "payload + padding" layout.
- * - Contiguous: store into 4 independent float arrays (`dst_c0..dst_c3`) to model SoA writes.
+ * - Contiguous scalar stores write into independent float arrays (`dst_c0..dst_c3`) to model SoA writes;
+ *   segmented stores write into packed AoS buffers because `vsseg*e32` stores interleaved fields.
  * - Indexed scatter: store into AoS using a random index stream (indirect / non-contiguous stores).
  *
  * Run/print order matches `bench_rvv_load_compare.cpp`: strided → contiguous → indexed,
@@ -76,6 +77,13 @@ struct alignas(16) Edge4f {
   float f3;
 };
 
+struct Packed4f {
+  float f0;
+  float f1;
+  float f2;
+  float f3;
+};
+
 // Three consecutive floats after padding (mimic xyz writeback after PCL_ADD_POINT4D).
 struct alignas(16) Edge3f {
   float pad[4];
@@ -113,6 +121,7 @@ int main(int argc, char** argv)
   std::vector<Edge3f> dst3(n);
   std::vector<float> dst_c0(n), dst_c1(n), dst_c2(n), dst_c3(n);
   std::vector<float> d3_c0(n), d3_c1(n), d3_c2(n);
+  std::vector<Packed4f> packed4(n);
   std::vector<Packed3f> packed3(n);
   std::vector<std::uint32_t> idx;
 
@@ -288,7 +297,7 @@ int main(int argc, char** argv)
         // float* base = dst_c0.data() + i;
         // __riscv_vsseg4e32_v_f32m2x4(base, vt, vl);
 
-        rvv_store::contiguous_seg4_store_f32m2(dst_c0.data() + i, vl, v0, v1, v2, v3);
+        rvv_store::contiguous_seg4_store_f32m2(&packed4[i].f0, vl, v0, v1, v2, v3);
         i += vl;
       }
     }
@@ -301,7 +310,7 @@ int main(int argc, char** argv)
         const vfloat32m2_t v1 = __riscv_vfmv_v_f_f32m2(2.0f, vl);
         const vfloat32m2_t v2 = __riscv_vfmv_v_f_f32m2(3.0f, vl);
         const vfloat32m2_t v3 = __riscv_vfmv_v_f_f32m2(4.0f, vl);
-        rvv_store::contiguous_seg4_store_f32m2(dst_c0.data() + i, vl, v0, v1, v2, v3);
+        rvv_store::contiguous_seg4_store_f32m2(&packed4[i].f0, vl, v0, v1, v2, v3);
         i += vl;
       }
       if ((it + 1) % 50 == 0) {
@@ -311,9 +320,9 @@ int main(int argc, char** argv)
     }
     const auto t1 = std::chrono::high_resolution_clock::now();
 
-    consume(dst_c0[0]);
-    consume(dst_c0[n / 2]);
-    consume(dst_c0[n - 1]);
+    consume(packed4[0].f0);
+    consume(packed4[n / 2].f2);
+    consume(packed4[n - 1].f3);
     return std::chrono::duration<double, std::milli>(t1 - t0).count() / iters;
   };
 
@@ -648,4 +657,3 @@ int main(int argc, char** argv)
   return 0;
 #endif
 }
-
