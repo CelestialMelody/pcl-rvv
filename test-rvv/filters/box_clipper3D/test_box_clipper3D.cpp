@@ -160,7 +160,7 @@ TEST(BoxClipper3DRVV, NonFiniteValuesMatchScalarComparison)
   EXPECT_EQ(clipped, expectedBox(cloud, nullptr, transform));
 }
 
-TEST(BoxClipper3DRVV, PointXYZIFallbackPreservesGenericSemantics)
+TEST(BoxClipper3DRVV, LargeDensePointXYZIMatchesScalarFormula)
 {
   const auto cloud = makeLargeCloudXYZI(257);
   const Eigen::Affine3f transform = makeAffineBox();

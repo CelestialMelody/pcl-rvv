@@ -137,10 +137,10 @@ TEST(PlaneClipper3DRVV, ExplicitIndicesFallbackPreservesSubsetValues)
   EXPECT_EQ(clipped, expectedPlane(cloud, &subset, plane));
 }
 
-TEST(PlaneClipper3DRVV, PointXYZIFallbackPreservesGenericSemantics)
+TEST(PlaneClipper3DRVV, LargeDensePointXYZIMatchesScalarFormula)
 {
-  const auto cloud = makeLargeCloudXYZI(257);
-  const Eigen::Vector4f plane(0.25f, 0.75f, -0.5f, 0.2f);
+  const auto cloud = makeLargeCloudXYZI(8192);
+  const Eigen::Vector4f plane(0.75f, -0.5f, 0.35f, -0.15f);
   pcl::PlaneClipper3D<pcl::PointXYZI> clipper(plane);
 
   pcl::Indices clipped;

@@ -39,10 +39,11 @@
 #include <pcl/point_types.h>
 
 #if defined(__RVV10__)
+#include <pcl/common/rvv_point_traits.h>
+
 #include <cstdint>
 #include <limits>
 #include <riscv_vector.h>
-#include <type_traits>
 #endif
 
 namespace pcl
@@ -139,11 +140,11 @@ clipPointCloud3DRVV (const pcl::PointCloud<PointT>& cloud_in,
     const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, y)), stride, vl);
     const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, z)), stride, vl);
 
-    // Full-cloud PointXYZ is an AoS scan: strided loads gather x/y/z for each
+    // Full-cloud XYZ-compatible input is an AoS scan: strided loads gather x/y/z for each
     // VL chunk, and vcompress keeps the scalar output index order.  Subset
     // indices stay scalar because they would require an extra gather layer.
-    vfloat32m2_t distance = __riscv_vfmul_vf_f32m2 (vx, a, vl);
-    distance = __riscv_vfmacc_vf_f32m2 (distance, b, vy, vl);
+    vfloat32m2_t distance = __riscv_vfmul_vf_f32m2 (vy, b, vl);
+    distance = __riscv_vfmacc_vf_f32m2 (distance, a, vx, vl);
     distance = __riscv_vfmacc_vf_f32m2 (distance, c, vz, vl);
     const vbool16_t keep = __riscv_vmfge_vf_f32m2_b16 (distance, neg_d, vl);
 
@@ -304,7 +305,7 @@ template<typename PointT> void
 pcl::PlaneClipper3D<PointT>::clipPointCloud3D (const pcl::PointCloud<PointT>& cloud_in, Indices& clipped, const Indices& indices) const
 {
 #if defined(__RVV10__)
-  if constexpr (std::is_same_v<PointT, pcl::PointXYZ>)
+  if constexpr (pcl::rvv::kRVVXYZPointCompatible<PointT>)
     if (pcl::clipPointCloud3DRVV (cloud_in, clipped, indices, plane_params_))
       return;
 #endif

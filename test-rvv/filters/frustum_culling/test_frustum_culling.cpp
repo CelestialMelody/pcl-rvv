@@ -160,7 +160,7 @@ TEST(FrustumCullingRVV, NonDenseFlagFallbackPreservesScalarSemantics)
   EXPECT_EQ(filterFullCloud(cloud), filterExplicitAll(cloud));
 }
 
-TEST(FrustumCullingRVV, PointXYZIFallbackPreservesGenericSemantics)
+TEST(FrustumCullingRVV, LargeDensePointXYZIMatchesExplicitAll)
 {
   const auto cloud = makeCloudXYZI(257);
   auto fc = configuredFrustum<pcl::PointXYZI>();

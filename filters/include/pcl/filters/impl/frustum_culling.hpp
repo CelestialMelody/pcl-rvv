@@ -42,11 +42,11 @@
 #include <vector>
 
 #if defined(__RVV10__)
+#include <pcl/common/rvv_point_traits.h>
+
 #include <cstdint>
 #include <limits>
 #include <riscv_vector.h>
-#include <type_traits>
-#include <utility>
 #endif
 
 namespace pcl
@@ -103,27 +103,9 @@ frustumCullingApplyFilterStd (const pcl::PointCloud<PointT>& input,
 
 inline constexpr std::size_t kFrustumCullingIndicesMinPoints = 64;
 
-template <typename T>
-using FrustumCullingScalar = std::remove_cv_t<std::remove_reference_t<T>>;
-
-template <typename PointT, typename = void>
-struct FrustumCullingPointXYZCompatible : std::false_type {};
-
 template <typename PointT>
-struct FrustumCullingPointXYZCompatible<
-    PointT,
-    std::void_t<decltype(std::declval<PointT>().x),
-                decltype(std::declval<PointT>().y),
-                decltype(std::declval<PointT>().z)>>
-: std::bool_constant<
-      std::is_same_v<PointT, pcl::PointXYZ> &&
-      std::is_standard_layout_v<PointT> &&
-      std::is_same_v<FrustumCullingScalar<decltype(std::declval<PointT>().x)>, float> &&
-      std::is_same_v<FrustumCullingScalar<decltype(std::declval<PointT>().y)>, float> &&
-      std::is_same_v<FrustumCullingScalar<decltype(std::declval<PointT>().z)>, float>> {};
-
-template <typename PointT>
-inline constexpr bool kFrustumCullingPointXYZCompatible = FrustumCullingPointXYZCompatible<PointT>::value;
+inline constexpr bool kFrustumCullingXYZCompatible =
+    pcl::rvv::kRVVXYZPointCompatible<PointT>;
 
 template <typename PointT> bool
 frustumCullingApplyFilterRVV (const pcl::PointCloud<PointT>& input,
@@ -177,7 +159,7 @@ frustumCullingApplyFilterRVV (const pcl::PointCloud<PointT>& input,
       return __riscv_vmfle_vf_f32m2_b16 (distance, 0.0f, vl);
     };
 
-    // Full-cloud dense PointXYZ inputs use AoS strided loads for x/y/z.
+    // Full-cloud dense XYZ-compatible inputs use AoS strided loads for x/y/z.
     // Six plane masks are combined exactly like the scalar short-circuit
     // predicate, and vcompress preserves the FilterIndices output order.
     vbool16_t inside = plane_leq_zero (pl_l);
@@ -313,7 +295,7 @@ pcl::FrustumCulling<PointT>::applyFilter (Indices &indices)
   pl_b (3) = -T.dot (pl_b.head<3> ());
 
 #if defined(__RVV10__)
-  if constexpr (pcl::kFrustumCullingPointXYZCompatible<PointT>)
+  if constexpr (pcl::kFrustumCullingXYZCompatible<PointT>)
   {
     if (pcl::frustumCullingApplyFilterRVV (*input_, indices, removed_indices_,
                                            extract_removed_indices_, negative_, fake_indices_,

@@ -5,19 +5,19 @@ Build: Std (__RVV10__ disabled)
 [ RUN      ] FrustumCullingRVV.SmallCloudFallsBackAndMatchesExplicitAll
 [       OK ] FrustumCullingRVV.SmallCloudFallsBackAndMatchesExplicitAll (2 ms)
 [ RUN      ] FrustumCullingRVV.LargeDensePointXYZMatchesExplicitAll
-[       OK ] FrustumCullingRVV.LargeDensePointXYZMatchesExplicitAll (3 ms)
+[       OK ] FrustumCullingRVV.LargeDensePointXYZMatchesExplicitAll (2 ms)
 [ RUN      ] FrustumCullingRVV.NegativeMatchesExplicitAll
-[       OK ] FrustumCullingRVV.NegativeMatchesExplicitAll (2 ms)
+[       OK ] FrustumCullingRVV.NegativeMatchesExplicitAll (1 ms)
 [ RUN      ] FrustumCullingRVV.ExtractRemovedIndicesMatchesExplicitAll
-[       OK ] FrustumCullingRVV.ExtractRemovedIndicesMatchesExplicitAll (3 ms)
+[       OK ] FrustumCullingRVV.ExtractRemovedIndicesMatchesExplicitAll (2 ms)
 [ RUN      ] FrustumCullingRVV.FarPlaneInfinityMatchesExplicitAll
-[       OK ] FrustumCullingRVV.FarPlaneInfinityMatchesExplicitAll (2 ms)
+[       OK ] FrustumCullingRVV.FarPlaneInfinityMatchesExplicitAll (1 ms)
 [ RUN      ] FrustumCullingRVV.NonDenseFlagFallbackPreservesScalarSemantics
-[       OK ] FrustumCullingRVV.NonDenseFlagFallbackPreservesScalarSemantics (2 ms)
-[ RUN      ] FrustumCullingRVV.PointXYZIFallbackPreservesGenericSemantics
-[       OK ] FrustumCullingRVV.PointXYZIFallbackPreservesGenericSemantics (1 ms)
-[----------] 7 tests from FrustumCullingRVV (17 ms total)
+[       OK ] FrustumCullingRVV.NonDenseFlagFallbackPreservesScalarSemantics (1 ms)
+[ RUN      ] FrustumCullingRVV.LargeDensePointXYZIMatchesExplicitAll
+[       OK ] FrustumCullingRVV.LargeDensePointXYZIMatchesExplicitAll (1 ms)
+[----------] 7 tests from FrustumCullingRVV (12 ms total)
 
 [----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (20 ms total)
+[==========] 7 tests from 1 test suite ran. (15 ms total)
 [  PASSED  ] 7 tests.

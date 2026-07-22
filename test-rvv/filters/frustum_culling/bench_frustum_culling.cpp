@@ -164,7 +164,7 @@ benchSubsetFallback(const std::string& name, const pcl::PointCloud<pcl::PointXYZ
 }
 
 void
-benchPointXYZIFallback(const std::string& name, const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud)
+benchPointXYZI(const std::string& name, const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud)
 {
   Benchmarker bench(name);
   auto fc = configuredFrustum<pcl::PointXYZI>();
@@ -190,7 +190,7 @@ main()
 #else
   std::cout << "Build: Std (__RVV10__ disabled)\n";
 #endif
-  std::cout << "Dataset: synthetic PointXYZ clouds; full-cloud six-plane frustum RVV cases and subset/type fallback cases\n";
+  std::cout << "Dataset: synthetic PointXYZ/PointXYZI clouds; full-cloud six-plane frustum RVV cases and subset fallback cases\n";
   std::cout << "Iterations: " << kBenchmarkIterations << '\n';
 
   const auto cloud64k = makeCloud(64 * 1024);
@@ -203,7 +203,7 @@ main()
   benchPointXYZ("frustum_culling pointxyz negative removed 1M", cloud1m, true, true);
   benchPointXYZ("frustum_culling nondense fallback 1M", cloud1m_nondense);
   benchSubsetFallback("frustum_culling subset fallback 1M", cloud1m);
-  benchPointXYZIFallback("frustum_culling pointxyzi fallback 1M", cloudXYZI);
+  benchPointXYZI("frustum_culling pointxyzi xyz-compatible 1M", cloudXYZI);
 
   return 0;
 }

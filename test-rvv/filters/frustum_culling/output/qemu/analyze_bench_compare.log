@@ -4,7 +4,7 @@
 [Benchmark Context]
   Device    : RISC-V RVV target (qemu, rv64gcv)
   VLEN      : 256-bit (vlen=256, elen=64)
-  Dataset   : synthetic PointXYZ clouds; full-cloud six-plane frustum RVV cases and subset/type fallback cases
+  Dataset   : synthetic PointXYZ/PointXYZI clouds; full-cloud six-plane frustum RVV cases and subset fallback cases
   Iterations: 30 （每行 Total = Avg × 30）
   Std log   : output/qemu/run_bench_std.log
   RVV log   : output/qemu/run_bench_rvv.log
@@ -12,22 +12,22 @@
 ----------------------------------------------------------------------------------------------------------
 Benchmark Item                                | Impl   |       Avg (ms) |     Total (ms) |        Speedup
 ----------------------------------------------|--------|----------------|----------------|----------------
-frustum_culling pointxyz full-cloud 64K       | Std    |      4.0705 ms |    122.1150 ms |    [   1.00x ]
-                                              | RVV    |     38.4102 ms |   1152.3060 ms |    [   0.11x ]
+frustum_culling pointxyz full-cloud 64K       | Std    |      3.7162 ms |    111.4860 ms |    [   1.00x ]
+                                              | RVV    |      6.0210 ms |    180.6300 ms |    [   0.62x ]
 ----------------------------------------------|--------|----------------|----------------|----------------
-frustum_culling pointxyz full-cloud 1M        | Std    |     65.5035 ms |   1965.1050 ms |    [   1.00x ]
-                                              | RVV    |    614.8641 ms |  18445.9230 ms |    [   0.11x ]
+frustum_culling pointxyz full-cloud 1M        | Std    |     59.5330 ms |   1785.9900 ms |    [   1.00x ]
+                                              | RVV    |     96.8928 ms |   2906.7840 ms |    [   0.61x ]
 ----------------------------------------------|--------|----------------|----------------|----------------
-frustum_culling pointxyz negative removed 1M  | Std    |     66.2134 ms |   1986.4020 ms |    [   1.00x ]
-                                              | RVV    |    620.3413 ms |  18610.2390 ms |    [   0.11x ]
+frustum_culling pointxyz negative removed 1M  | Std    |     60.1948 ms |   1805.8440 ms |    [   1.00x ]
+                                              | RVV    |     97.7723 ms |   2933.1690 ms |    [   0.62x ]
 ----------------------------------------------|--------|----------------|----------------|----------------
-frustum_culling nondense fallback 1M          | Std    |     65.5240 ms |   1965.7200 ms |    [   1.00x ]
-                                              | RVV    |     72.6900 ms |   2180.7000 ms |    [   0.90x ]
+frustum_culling nondense fallback 1M          | Std    |     59.5722 ms |   1787.1660 ms |    [   1.00x ]
+                                              | RVV    |     59.4770 ms |   1784.3100 ms |    [   1.00x ]
 ----------------------------------------------|--------|----------------|----------------|----------------
-frustum_culling subset fallback 1M            | Std    |     32.8721 ms |    986.1630 ms |    [   1.00x ]
-                                              | RVV    |     36.2212 ms |   1086.6360 ms |    [   0.91x ]
+frustum_culling subset fallback 1M            | Std    |     29.8521 ms |    895.5630 ms |    [   1.00x ]
+                                              | RVV    |     29.4226 ms |    882.6780 ms |    [   1.01x ]
 ----------------------------------------------|--------|----------------|----------------|----------------
-frustum_culling pointxyzi fallback 1M         | Std    |     83.3972 ms |   2501.9160 ms |    [   1.00x ]
-                                              | RVV    |     83.6540 ms |   2509.6200 ms |    [   1.00x ]
+frustum_culling pointxyzi xyz-compatible 1M   | Std    |     76.6955 ms |   2300.8650 ms |    [   1.00x ]
+                                              | RVV    |     98.7038 ms |   2961.1140 ms |    [   0.78x ]
 ----------------------------------------------|--------|----------------|----------------|----------------
 ==========================================================================================================

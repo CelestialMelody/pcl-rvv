@@ -16,12 +16,13 @@ fc.filter(indices or output_cloud)
 
 已覆盖：
 
-- `PointT = pcl::PointXYZ`；
+- XYZ-compatible 点类型：`pcl::rvv::kRVVXYZPointCompatible<PointT>` 为 true，即
+  standard-layout 且有直接 `float x/y/z` 成员；
 - 未显式 `setIndices()` 的 dense 全云扫描；
 - 点数不少于 `64`；
 - `negative_` 和 `extract_removed_indices_`。
 
-未覆盖路径全部回退标量，包括显式 subset indices、non-dense、非 `PointXYZ`、小规模输入。`keep_organized_` 的 cloud 输出由 `FilterIndices` 基类后处理，本轮 RVV 只优化 `applyFilter(Indices&)` 的 indices 主路径。
+未覆盖路径全部回退标量，包括显式 subset indices、non-dense、非 XYZ-compatible 点类型、小规模输入。`keep_organized_` 的 cloud 输出由 `FilterIndices` 基类后处理，本轮 RVV 只优化 `applyFilter(Indices&)` 的 indices 主路径。
 
 ## 实现结构
 
@@ -31,14 +32,14 @@ fc.filter(indices or output_cloud)
 | --- | --- |
 | `frustumCullingApplyFilterStd` | 常驻标量 helper，保留原点循环、`negative_` 与 `removed_indices_` 语义 |
 | `kFrustumCullingIndicesMinPoints` | 小规模 fallback 阈值 |
-| `FrustumCullingPointXYZCompatible` / `kFrustumCullingPointXYZCompatible` | 类型覆盖条件，只允许 `pcl::PointXYZ` |
+| `kFrustumCullingXYZCompatible` | 本地别名，指向公共 `pcl::rvv::kRVVXYZPointCompatible<PointT>` |
 | `frustumCullingApplyFilterRVV` | `__RVV10__` 下的 RVV helper，承载 stride load、6 平面 dot、mask 合并和压缩写 |
 
 公开入口仍负责平面构造；构造完成后短路分流：
 
 ```cpp
 #if defined(__RVV10__)
-  if constexpr (pcl::kFrustumCullingPointXYZCompatible<PointT>)
+  if constexpr (pcl::kFrustumCullingXYZCompatible<PointT>)
   {
     if (pcl::frustumCullingApplyFilterRVV (*input_, indices, removed_indices_,
                                            extract_removed_indices_, negative_, fake_indices_,
@@ -76,7 +77,7 @@ const vbool16_t keep = negative ? __riscv_vmnot_m_b16 (inside, vl) : inside;
 const vint32m2_t kept_i32 = __riscv_vcompress_vm_i32m2 (source_i32, keep, vl);
 ```
 
-这段代码展示了主要边界：AoS 通过 `sizeof(PointXYZ)` stride 读取 x/y/z；每个平面复用同一 VL chunk；mask 合并对应标量 6 个 `&&`；`negative_` 只反转最终 mask；`vcompress` 保持扫描顺序。
+这段代码展示了主要边界：AoS 通过当前 `sizeof(PointT)` stride 读取 x/y/z；每个平面复用同一 VL chunk；mask 合并对应标量 6 个 `&&`；`negative_` 只反转最终 mask；`vcompress` 保持扫描顺序。
 
 这个 `plane_leq_zero` 组织方式是本轮 filters 里首次使用的“同一 VL chunk 上重复套用多个小型线性谓词”的 RVV 模式，和此前主题有明显区别：
 
@@ -97,7 +98,7 @@ const vint32m2_t kept_i32 = __riscv_vcompress_vm_i32m2 (source_i32, keep, vl);
 
 ## RVV 数据组织
 
-`PointCloud<PointXYZ>` 是 AoS：
+XYZ-compatible `PointCloud<PointT>` 是 AoS：
 
 ```text
 cloud[c]         cloud[c+1]       cloud[c+2]       cloud[c+3]
@@ -166,7 +167,7 @@ RVV helper 返回 false 的情况：
 公开入口还会在以下情况下落回 Std：
 
 - 非 RVV 编译；
-- `PointT` 不是 `pcl::PointXYZ`。
+- `PointT` 不满足 `pcl::rvv::kRVVXYZPointCompatible<PointT>`。
 
 NaN / Inf：dense 主路径假定调用者设置的 `is_dense` 可信；non-dense 回退 Std。本实现不额外修改 NaN / Inf 语义。
 
@@ -174,7 +175,11 @@ FRM/FCSR：不使用 `_rm` intrinsic，不修改浮点舍入环境。
 
 ## 诊断记录
 
-初版类型 trait 仅检查标准布局和 x/y/z float 字段，因此 `PointXYZI` bench case 也命中 RVV，导致“非目标类型 fallback”边界不成立。复核后将 trait 收窄为 `std::is_same_v<PointT, pcl::PointXYZ>`。复跑后 `frustum_culling pointxyzi fallback 1M` 在板卡上为 `1.00x`，证明非 `PointXYZ` 未再误入 RVV。该修正不影响 `PointXYZ` 主路径 checksum。
+早期 closeout 曾把 `PointXYZI` 作为非目标类型 fallback，用于证明 exact `PointXYZ`
+生产边界。公共 `rvv_point_traits.h` 接入后，当前实现改为
+`pcl::rvv::kRVVXYZPointCompatible<PointT>`，`PointXYZI` 这类 standard-layout 且有
+直接 `float x/y/z` 成员的点类型会进入全云 dense RVV 路径。当前 QEMU bench 已把
+`PointXYZI` case 重命名为 `xyz-compatible`，并用 checksum 证明它与标量路径一致。
 
 QEMU bench 中 RVV 主路径慢于 Std，这是模拟器执行成本现象；QEMU 只作为构建、正确性、日志格式和指令路径证据，不作为真实性能结论。
 
@@ -186,7 +191,9 @@ QEMU bench 中 RVV 主路径慢于 Std，这是模拟器执行成本现象；QEM
 make -C test-rvv/filters/frustum_culling run_test_compare
 ```
 
-结果：std 与 RVV 二进制均通过 7 个专项测试，覆盖小规模 fallback、大规模 `PointXYZ` 主路径、`negative_`、`extract_removed_indices_`、far plane infinity、non-dense fallback 和 `PointXYZI` fallback。
+结果：std 与 RVV 二进制均通过 7 个专项测试，覆盖小规模 fallback、大规模 `PointXYZ`
+主路径、`negative_`、`extract_removed_indices_`、far plane infinity、non-dense fallback
+和 `PointXYZI` XYZ-compatible 路径与显式 all-indices 标量路径一致。
 
 上游测试：
 
@@ -220,7 +227,7 @@ make -C test-rvv/filters/frustum_culling run_bench_compare dump_bench_rvv
 | `frustum_culling pointxyz negative removed 1M` | 同入口，1M dense，`negative=true`，`extract_removed_indices=true` | RVV 主路径 | 同一 VL chunk 同时生成 kept / removed 两路压缩输出 |
 | `frustum_culling nondense fallback 1M` | 同入口，1M `PointXYZ`，`is_dense=false` | fallback | 证明未覆盖 non-dense 路径保持标量语义和接近成本 |
 | `frustum_culling subset fallback 1M` | 同入口 + `setIndices(subset)`，1M 的一半 subset | fallback | 证明显式 indices/gather 路径未误入 RVV |
-| `frustum_culling pointxyzi fallback 1M` | `FrustumCulling<PointXYZI>::filter(Indices&)`，1M `PointXYZI` | fallback | 证明非 `PointXYZ` 类型未误入 RVV |
+| `frustum_culling pointxyzi xyz-compatible 1M` | `FrustumCulling<PointXYZI>::filter(Indices&)`，1M `PointXYZI` | RVV 主路径 | 证明公共 traits 接入后额外字段点类型保持标量 checksum 一致 |
 
 ## 板卡结果
 
@@ -239,7 +246,7 @@ test-rvv/filters/frustum_culling/output/board/run_bench_rvv.log
 test-rvv/filters/frustum_culling/output/board/analyze_bench_compare.log
 ```
 
-板卡：`Milkv-Jupiter`。Dataset: synthetic `PointXYZ` clouds; full-cloud six-plane frustum RVV cases and subset/type fallback cases。Iterations: `30`。
+板卡：`Milkv-Jupiter`。Dataset: synthetic `PointXYZ` clouds; full-cloud six-plane frustum RVV cases and subset/type fallback cases。Iterations: `30`。下表中的 `PointXYZ` 主路径数据仍是本主题性能证据；`PointXYZI fallback` 行来自公共 traits 接入前的历史 bench 命名，本轮类型放宽的正确性和日志格式证据以 QEMU `pointxyzi xyz-compatible` case 为准。
 
 | case | Std ms/iter | RVV ms/iter | speedup | 说明 |
 | --- | ---: | ---: | ---: | --- |
@@ -248,6 +255,8 @@ test-rvv/filters/frustum_culling/output/board/analyze_bench_compare.log
 | `frustum_culling pointxyz negative removed 1M` | 66.1487 | 15.2663 | 4.33x | 双输出主路径，写 kept 和 removed 两路仍有收益 |
 | `frustum_culling nondense fallback 1M` | 60.6530 | 61.0681 | 0.99x | non-dense fallback，不作为 RVV 主路径性能结论 |
 | `frustum_culling subset fallback 1M` | 30.4931 | 30.6678 | 0.99x | subset fallback，不作为 RVV 主路径性能结论 |
-| `frustum_culling pointxyzi fallback 1M` | 76.4250 | 76.3607 | 1.00x | 类型 fallback，不作为 RVV 主路径性能结论 |
+| `frustum_culling pointxyzi fallback 1M` | 76.4250 | 76.3607 | 1.00x | 历史类型 fallback case；不作为本轮 `PointXYZI` RVV 主路径性能结论 |
 
-结论：`FrustumCulling<PointXYZ>::applyFilter(Indices&)` dense 全云主路径在板卡上约 `4.33x` 到 `5.94x`。收益来自一个 VL chunk 内复用 x/y/z stride load、6 平面 FMA 判定、mask 合并和 `vcompress` 保序输出。
+结论：`FrustumCulling<PointXYZ>::applyFilter(Indices&)` dense 全云主路径在板卡上约
+`4.33x` 到 `5.94x`。当前源码 gate 已扩大为 XYZ-compatible，全云 dense `PointXYZI`
+正确性由 QEMU compare 覆盖；类型真实性能如需纳入结论，可后续单独重跑板卡。

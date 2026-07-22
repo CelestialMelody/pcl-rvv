@@ -136,7 +136,7 @@ benchSubsetFallback(const std::string& name, const pcl::PointCloud<pcl::PointXYZ
 }
 
 void
-benchPointXYZIFallback(const std::string& name, const pcl::PointCloud<pcl::PointXYZI>& cloud, const Eigen::Vector4f& plane)
+benchPointXYZI(const std::string& name, const pcl::PointCloud<pcl::PointXYZI>& cloud, const Eigen::Vector4f& plane)
 {
   Benchmarker bench(name);
   pcl::PlaneClipper3D<pcl::PointXYZI> clipper(plane);
@@ -162,7 +162,7 @@ main()
 #else
   std::cout << "Build: Std (__RVV10__ disabled)\n";
 #endif
-  std::cout << "Dataset: synthetic PointXYZ clouds; full-cloud plane clipping RVV cases and subset/type fallback cases\n";
+  std::cout << "Dataset: synthetic PointXYZ/PointXYZI clouds; full-cloud plane clipping RVV cases and subset fallback case\n";
   std::cout << "Iterations: " << kBenchmarkIterations << '\n';
 
   const auto cloud64k = makeCloud(64 * 1024);
@@ -175,7 +175,7 @@ main()
   benchPointXYZ("plane_clipper3D pointxyz balanced 1M", cloud1m, balanced_plane);
   benchPointXYZ("plane_clipper3D pointxyz mostly-keep 1M", cloud1m, mostly_keep_plane);
   benchSubsetFallback("plane_clipper3D subset fallback 1M", cloud1m, balanced_plane);
-  benchPointXYZIFallback("plane_clipper3D pointxyzi fallback 1M", cloudXYZI, balanced_plane);
+  benchPointXYZI("plane_clipper3D pointxyzi xyz-compatible 1M", cloudXYZI, balanced_plane);
 
   return 0;
 }

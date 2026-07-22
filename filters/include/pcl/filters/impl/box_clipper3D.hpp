@@ -35,15 +35,14 @@
 #ifndef PCL_FILTERS_IMPL_BOX_CLIPPER3D_HPP
 #define PCL_FILTERS_IMPL_BOX_CLIPPER3D_HPP
 
-#include <pcl/filters/box_clipper3D.h>
 #include <pcl/common/rvv_point_load.h>
+#include <pcl/filters/box_clipper3D.h>
 #include <pcl/point_types.h>
 
 #if defined(__RVV10__)
 #include <cstdint>
 #include <limits>
 #include <riscv_vector.h>
-#include <type_traits>
 #endif
 
 namespace pcl
@@ -123,7 +122,7 @@ clipPointCloud3DRVV (const pcl::PointCloud<PointT>& cloud_in,
     pcl::rvv_load::strided_load3_f32m2<sizeof (PointT), offsetof (PointT, x), offsetof (PointT, y), offsetof (PointT, z)> (chunk, vl, vx, vy, vz);
 
     // The scalar predicate is (abs(T * [x y z 1]^T) <= 1).all().
-    // Full-cloud PointXYZ uses AoS stride loads and vcompress keeps output
+    // Full-cloud XYZ-compatible inputs use AoS stride loads and vcompress keeps output
     // indices ordered; subset/generic point types fall back to the scalar path.
     vfloat32m2_t tx = __riscv_vfmul_vf_f32m2 (vx, m00, vl);
     tx = __riscv_vfmacc_vf_f32m2 (tx, m01, vy, vl);
@@ -327,7 +326,7 @@ template<typename PointT> void
 pcl::BoxClipper3D<PointT>::clipPointCloud3D (const pcl::PointCloud<PointT>& cloud_in, Indices& clipped, const Indices& indices) const
 {
 #if defined(__RVV10__)
-  if constexpr (std::is_same_v<PointT, pcl::PointXYZ>)
+  if constexpr (pcl::rvv::kRVVXYZPointCompatible<PointT>)
   {
     if (pcl::clipPointCloud3DRVV (cloud_in, clipped, indices, transformation_.matrix ()))
       return;

@@ -32,12 +32,13 @@ BoxClipper3D<PointT>::clipPointCloud3D(const PointCloud<PointT>& cloud_in,
 
 已覆盖：
 
-- `PointT = pcl::PointXYZ`；
+- XYZ-compatible 点类型：`pcl::rvv::kRVVXYZPointCompatible<PointT>` 为 true，即
+  standard-layout 且有直接 `float x/y/z` 成员；
 - `indices.empty()` 的全云扫描；
 - 点数不少于 `64`；
 - 输出 `clipped` 的清空后重写语义。
 
-未覆盖路径全部回退标量，包括显式 subset indices、非 `PointXYZ` 点类型、小规模输入、单点 / 线段 / 多边形裁剪。
+未覆盖路径全部回退标量，包括显式 subset indices、非 XYZ-compatible 点类型、小规模输入、单点 / 线段 / 多边形裁剪。
 
 ## 实现结构
 
@@ -53,7 +54,7 @@ BoxClipper3D<PointT>::clipPointCloud3D(const PointCloud<PointT>& cloud_in,
 
 ```cpp
 #if defined(__RVV10__)
-  if constexpr (std::is_same_v<PointT, pcl::PointXYZ>)
+  if constexpr (pcl::rvv::kRVVXYZPointCompatible<PointT>)
   {
     if (pcl::clipPointCloud3DRVV (cloud_in, clipped, indices, transformation_.matrix ()))
       return;
@@ -63,11 +64,14 @@ BoxClipper3D<PointT>::clipPointCloud3D(const PointCloud<PointT>& cloud_in,
   pcl::clipPointCloud3DStd (cloud_in, clipped, indices, *this);
 ```
 
-主路径 helper 位于 `pcl` 命名空间，没有额外放入 `pcl::detail`。类型覆盖使用 `std::is_same_v<PointT, pcl::PointXYZ>`，避免把泛型布局检测误命名成 RVV 分流实体。
+主路径 helper 位于 `pcl` 命名空间，没有额外放入 `pcl::detail`。类型覆盖使用公共
+`rvv_point_traits.h` 的 member `x/y/z` layout gate；subset、小规模和其它 clipper
+入口仍由算法本地 dispatch 控制。
 
 ## 详细设计
 
-`PointCloud<PointXYZ>` 是 AoS 布局，`PointXYZ` 由 `PCL_ADD_POINT4D` 提供 `[x,y,z,1]` 齐次语义。RVV path 复用公共 load 封装：
+XYZ-compatible `PointCloud<PointT>` 是 AoS 布局。RVV path 复用公共 load 封装读取
+当前 `PointT` 的 `x/y/z` 字段；齐次第四分量在本 helper 中显式按常量 `1` 参与四行 affine：
 
 ```cpp
 pcl::rvv_load::strided_load3_f32m2<sizeof (PointT),
@@ -209,7 +213,7 @@ RVV helper 返回 false 的情况：
 公开入口还会在以下情况下落回 Std：
 
 - 非 RVV 编译；
-- `PointT` 不是 `pcl::PointXYZ`；
+- `PointT` 不满足 `pcl::rvv::kRVVXYZPointCompatible<PointT>`；
 - 单点、线段、多边形裁剪入口。
 
 ## 测试与验证
@@ -220,7 +224,9 @@ RVV helper 返回 false 的情况：
 make -C test-rvv/filters/box_clipper3D run_test_compare
 ```
 
-结果：std 与 RVV 二进制均通过 6 个专项测试，覆盖小规模公式对拍、大规模 `PointXYZ` 主路径、`clipped` 清空语义、subset fallback、NaN / Inf 语义和 `PointXYZI` fallback。
+结果：std 与 RVV 二进制均通过 6 个专项测试，覆盖小规模公式对拍、大规模 `PointXYZ`
+主路径、`clipped` 清空语义、subset fallback、NaN / Inf 语义和 `PointXYZI`
+XYZ-compatible 路径与标量公式一致。
 
 上游测试：
 
@@ -243,7 +249,7 @@ make -C test-rvv/filters/box_clipper3D run_bench_compare dump_bench_rvv
 - std/RVV checksum 对齐；
 - 反汇编确认 `vlsseg3e32.v`、`vfmacc.vf`、`vfabs.v`、`vmfle.vf`、`vcompress.vm`、`vcpop.m`、`vsetvli ... e32,m2`。
 
-QEMU 下 RVV 主路径慢于标量，这只说明模拟器执行成本，不作为真实性能结论。
+QEMU 日志只用于构建、正确性补充、日志格式和指令路径证据，不作为真实性能结论。
 
 ## Bench Case 含义
 
@@ -255,7 +261,7 @@ QEMU 下 RVV 主路径慢于标量，这只说明模拟器执行成本，不作�
 | `box_clipper3D pointxyz balanced 1M` | 同入口，1M `PointXYZ` | RVV 主路径 | 大规模主性能 case |
 | `box_clipper3D pointxyz mostly-keep 1M` | 同入口，1M `PointXYZ`，较高保留率 | RVV 主路径 | 输出量增加时 `vcompress` 成本仍可控 |
 | `box_clipper3D subset fallback 1M` | `clipPointCloud3D(..., subset)`，1M 的一半 subset | fallback | 证明 gather/subset 未覆盖路径保持语义和接近成本 |
-| `box_clipper3D pointxyzi fallback 1M` | `BoxClipper3D<PointXYZI>::clipPointCloud3D`，1M `PointXYZI` | fallback | 证明非 `PointXYZ` 泛型类型未误入 RVV |
+| `box_clipper3D pointxyzi xyz-compatible 1M` | `BoxClipper3D<PointXYZI>::clipPointCloud3D`，1M `PointXYZI` | RVV 主路径 | 证明公共 traits 接入后额外字段点类型保持标量 checksum 一致 |
 
 ## 板卡结果
 
@@ -274,7 +280,7 @@ test-rvv/filters/box_clipper3D/output/board/run_bench_rvv.log
 test-rvv/filters/box_clipper3D/output/board/analyze_bench_compare.log
 ```
 
-板卡：`Milkv-Jupiter`。Dataset: synthetic `PointXYZ` clouds; full-cloud affine box clipping RVV cases and subset/type fallback cases。Iterations: `30`。
+板卡：`Milkv-Jupiter`。Dataset: synthetic `PointXYZ` clouds; full-cloud affine box clipping RVV cases and subset/type fallback cases。Iterations: `30`。下表中的 `PointXYZ` 主路径数据仍是本主题性能证据；`PointXYZI fallback` 行来自公共 traits 接入前的历史 bench 命名，本轮类型放宽的正确性和日志格式证据以 QEMU `pointxyzi xyz-compatible` case 为准。
 
 | case | Std ms/iter | RVV ms/iter | speedup | 说明 |
 | --- | ---: | ---: | ---: | --- |
@@ -282,6 +288,8 @@ test-rvv/filters/box_clipper3D/output/board/analyze_bench_compare.log
 | `box_clipper3D pointxyz balanced 1M` | 57.9010 | 10.1840 | 5.69x | 1M 主路径，证明 affine box + compress 收益 |
 | `box_clipper3D pointxyz mostly-keep 1M` | 70.5970 | 14.2747 | 4.95x | 高保留率主路径，写出量较高仍有收益 |
 | `box_clipper3D subset fallback 1M` | 27.4105 | 27.9268 | 0.98x | subset fallback，不作为 RVV 主路径性能结论 |
-| `box_clipper3D pointxyzi fallback 1M` | 61.7393 | 62.3824 | 0.99x | 类型 fallback，不作为 RVV 主路径性能结论 |
+| `box_clipper3D pointxyzi fallback 1M` | 61.7393 | 62.3824 | 0.99x | 历史类型 fallback case；不作为本轮 `PointXYZI` RVV 主路径性能结论 |
 
-结论：`BoxClipper3D<PointXYZ>::clipPointCloud3D` 全云主路径在板卡上约 `4.95x` 到 `5.86x`。收益来自一个 VL chunk 内的 AoS stride / segment load、4 行 affine 判定、`vfabs + vmfle` mask 和 `vcompress` 保序输出。
+结论：`BoxClipper3D<PointXYZ>::clipPointCloud3D` 全云主路径在板卡上约 `4.95x` 到
+`5.86x`。当前源码 gate 已扩大为 XYZ-compatible，全云 `PointXYZI` 正确性由 QEMU
+compare 覆盖；类型真实性能如需纳入结论，可后续单独重跑板卡。
