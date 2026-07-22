@@ -43,11 +43,11 @@
 #include <pcl/filters/passthrough.h>
 
 #if defined(__RVV10__)
+#include <pcl/common/rvv_point_traits.h>
+
 #include <cstdint>
 #include <limits>
 #include <riscv_vector.h>
-#include <type_traits>
-#include <utility>
 #endif
 
 namespace pcl
@@ -57,26 +57,9 @@ namespace pcl
 
 inline constexpr std::size_t kPassThroughIndicesMinPoints = 64;
 
-template <typename T>
-using PassThroughScalar = std::remove_cv_t<std::remove_reference_t<T>>;
-
-template <typename PointT, typename = void>
-struct PassThroughXYZCompatible : std::false_type {};
-
 template <typename PointT>
-struct PassThroughXYZCompatible<
-    PointT,
-    std::void_t<decltype(std::declval<PointT>().x),
-                decltype(std::declval<PointT>().y),
-                decltype(std::declval<PointT>().z)>>
-: std::bool_constant<
-      std::is_standard_layout_v<PointT> &&
-      std::is_same_v<PassThroughScalar<decltype(std::declval<PointT>().x)>, float> &&
-      std::is_same_v<PassThroughScalar<decltype(std::declval<PointT>().y)>, float> &&
-      std::is_same_v<PassThroughScalar<decltype(std::declval<PointT>().z)>, float>> {};
-
-template <typename PointT>
-inline constexpr bool kPassThroughXYZCompatible = PassThroughXYZCompatible<PointT>::value;
+inline constexpr bool kPassThroughXYZCompatible =
+    pcl::rvv::kRVVXYZPointCompatible<PointT>;
 
 #endif
 

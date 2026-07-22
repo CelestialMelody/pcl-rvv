@@ -9,15 +9,15 @@ Build: RVV (__RVV10__ enabled)
 [ RUN      ] CropBoxRVV.LargeDenseNegativeKeepsOutsideRange
 [       OK ] CropBoxRVV.LargeDenseNegativeKeepsOutsideRange (0 ms)
 [ RUN      ] CropBoxRVV.CloudOutputUsesFilteredIndices
-[       OK ] CropBoxRVV.CloudOutputUsesFilteredIndices (1 ms)
+[       OK ] CropBoxRVV.CloudOutputUsesFilteredIndices (0 ms)
 [ RUN      ] CropBoxRVV.ExplicitIndicesFallbackPreservesSubsetValues
 [       OK ] CropBoxRVV.ExplicitIndicesFallbackPreservesSubsetValues (0 ms)
 [ RUN      ] CropBoxRVV.NonDenseFallbackSkipsInvalidPoints
 [       OK ] CropBoxRVV.NonDenseFallbackSkipsInvalidPoints (0 ms)
 [ RUN      ] CropBoxRVV.TranslationFallbackPreservesTransformedSemantics
 [       OK ] CropBoxRVV.TranslationFallbackPreservesTransformedSemantics (0 ms)
-[----------] 7 tests from CropBoxRVV (8 ms total)
+[----------] 7 tests from CropBoxRVV (7 ms total)
 
 [----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (11 ms total)
+[==========] 7 tests from 1 test suite ran. (10 ms total)
 [  PASSED  ] 7 tests.

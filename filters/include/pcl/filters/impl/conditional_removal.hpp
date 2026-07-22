@@ -46,11 +46,11 @@
 #include <vector>
 
 #if defined(__RVV10__)
+#include <pcl/common/rvv_point_traits.h>
+
 #include <cstdint>
 #include <limits>
 #include <riscv_vector.h>
-#include <type_traits>
-#include <utility>
 #endif
 
 namespace pcl
@@ -60,26 +60,9 @@ namespace pcl
 
 inline constexpr std::size_t kConditionalRemovalMinPoints = 64;
 
-template <typename T>
-using ConditionalRemovalScalar = std::remove_cv_t<std::remove_reference_t<T>>;
-
-template <typename PointT, typename = void>
-struct ConditionalRemovalXYZCompatible : std::false_type {};
-
 template <typename PointT>
-struct ConditionalRemovalXYZCompatible<
-    PointT,
-    std::void_t<decltype(std::declval<PointT>().x),
-                decltype(std::declval<PointT>().y),
-                decltype(std::declval<PointT>().z)>>
-: std::bool_constant<
-      std::is_standard_layout_v<PointT> &&
-      std::is_same_v<ConditionalRemovalScalar<decltype(std::declval<PointT>().x)>, float> &&
-      std::is_same_v<ConditionalRemovalScalar<decltype(std::declval<PointT>().y)>, float> &&
-      std::is_same_v<ConditionalRemovalScalar<decltype(std::declval<PointT>().z)>, float>> {};
-
-template <typename PointT>
-inline constexpr bool kConditionalRemovalXYZCompatible = ConditionalRemovalXYZCompatible<PointT>::value;
+inline constexpr bool kConditionalRemovalXYZCompatible =
+    pcl::rvv::kRVVXYZPointCompatible<PointT>;
 
 inline vbool16_t
 compareFloatFieldMask (const vfloat32m2_t vf,

@@ -49,11 +49,11 @@
 #include <boost/random/variate_generator.hpp> // for variate_generator
 
 #if defined(__RVV10__)
+#include <pcl/common/rvv_point_traits.h>
+
 #include <cstdint>
 #include <limits>
 #include <riscv_vector.h>
-#include <type_traits>
-#include <utility>
 #endif
 
 namespace pcl
@@ -77,26 +77,9 @@ computeVoxelGridCovarianceLeafIndexStd (const PointT& point,
 inline constexpr std::size_t kVoxelGridCovarianceIndexMinPoints = 64;
 inline constexpr unsigned int kRoundDownMode = 2;
 
-template <typename T>
-using VoxelGridCovarianceScalar = std::remove_cv_t<std::remove_reference_t<T>>;
-
-template <typename PointT, typename = void>
-struct VoxelGridCovarianceXYZCompatible : std::false_type {};
-
 template <typename PointT>
-struct VoxelGridCovarianceXYZCompatible<
-    PointT,
-    std::void_t<decltype(std::declval<PointT>().x),
-                decltype(std::declval<PointT>().y),
-                decltype(std::declval<PointT>().z)>>
-: std::bool_constant<
-      std::is_standard_layout_v<PointT> &&
-      std::is_same_v<VoxelGridCovarianceScalar<decltype(std::declval<PointT>().x)>, float> &&
-      std::is_same_v<VoxelGridCovarianceScalar<decltype(std::declval<PointT>().y)>, float> &&
-      std::is_same_v<VoxelGridCovarianceScalar<decltype(std::declval<PointT>().z)>, float>> {};
-
-template <typename PointT>
-inline constexpr bool kVoxelGridCovarianceXYZCompatible = VoxelGridCovarianceXYZCompatible<PointT>::value;
+inline constexpr bool kVoxelGridCovarianceXYZCompatible =
+    pcl::rvv::kRVVXYZPointCompatible<PointT>;
 
 inline unsigned int
 getVoxelGridCovarianceRoundingMode ()

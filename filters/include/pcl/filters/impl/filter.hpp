@@ -42,6 +42,8 @@
 #include <pcl/filters/filter.h>
 
 #if defined(__RVV10__)
+#include <pcl/common/rvv_point_traits.h>
+
 #include <cstdint>
 #include <limits>
 #include <riscv_vector.h>
@@ -153,26 +155,9 @@ removeNaNNormalsFromPointCloudStd(const pcl::PointCloud<PointT> &cloud_in,
 
 inline constexpr std::size_t kRemoveNaNCloudMinPoints = 64;
 
-template <typename T>
-using FilterScalar = std::remove_cv_t<std::remove_reference_t<T>>;
-
-template <typename PointT, typename = void>
-struct FilterXYZCompatible : std::false_type {};
-
 template <typename PointT>
-struct FilterXYZCompatible<
-    PointT,
-    std::void_t<decltype(std::declval<PointT>().x),
-                decltype(std::declval<PointT>().y),
-                decltype(std::declval<PointT>().z)>>
-: std::bool_constant<
-      std::is_standard_layout_v<PointT> &&
-      std::is_same_v<FilterScalar<decltype(std::declval<PointT>().x)>, float> &&
-      std::is_same_v<FilterScalar<decltype(std::declval<PointT>().y)>, float> &&
-      std::is_same_v<FilterScalar<decltype(std::declval<PointT>().z)>, float>> {};
-
-template <typename PointT>
-inline constexpr bool kFilterXYZCompatible = FilterXYZCompatible<PointT>::value;
+inline constexpr bool kFilterXYZCompatible =
+    pcl::rvv::kRVVXYZPointCompatible<PointT>;
 
 template <typename PointT, typename = void>
 struct FilterNormalCompatible : std::false_type {};
@@ -185,9 +170,9 @@ struct FilterNormalCompatible<
                 decltype(std::declval<PointT>().normal_z)>>
 : std::bool_constant<
       std::is_standard_layout_v<PointT> &&
-      std::is_same_v<FilterScalar<decltype(std::declval<PointT>().normal_x)>, float> &&
-      std::is_same_v<FilterScalar<decltype(std::declval<PointT>().normal_y)>, float> &&
-      std::is_same_v<FilterScalar<decltype(std::declval<PointT>().normal_z)>, float>> {};
+      std::is_same_v<pcl::rvv::RVVFieldScalar<decltype(std::declval<PointT>().normal_x)>, float> &&
+      std::is_same_v<pcl::rvv::RVVFieldScalar<decltype(std::declval<PointT>().normal_y)>, float> &&
+      std::is_same_v<pcl::rvv::RVVFieldScalar<decltype(std::declval<PointT>().normal_z)>, float>> {};
 
 template <typename PointT>
 inline constexpr bool kFilterNormalCompatible = FilterNormalCompatible<PointT>::value;

@@ -3,7 +3,7 @@ Build: RVV (__RVV10__ enabled)
 [----------] Global test environment set-up.
 [----------] 7 tests from FilterIndicesRVV
 [ RUN      ] FilterIndicesRVV.RemoveNaNIndicesOnlyKeepsFiniteXYZInOrder
-[       OK ] FilterIndicesRVV.RemoveNaNIndicesOnlyKeepsFiniteXYZInOrder (0 ms)
+[       OK ] FilterIndicesRVV.RemoveNaNIndicesOnlyKeepsFiniteXYZInOrder (1 ms)
 [ RUN      ] FilterIndicesRVV.DenseIndicesOnlyKeepsLegacyIdentityMapping
 [       OK ] FilterIndicesRVV.DenseIndicesOnlyKeepsLegacyIdentityMapping (0 ms)
 [ RUN      ] FilterIndicesRVV.RemoveNaNCloudCompressesPointsAndIndices
@@ -16,8 +16,8 @@ Build: RVV (__RVV10__ enabled)
 [       OK ] FilterIndicesRVV.RemoveNaNNormalsKeepsNormalFiniteAndDenseFlag (0 ms)
 [ RUN      ] FilterIndicesRVV.LargeNormalPathMatchesScalarFormula
 [       OK ] FilterIndicesRVV.LargeNormalPathMatchesScalarFormula (0 ms)
-[----------] 7 tests from FilterIndicesRVV (6 ms total)
+[----------] 7 tests from FilterIndicesRVV (5 ms total)
 
 [----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (9 ms total)
+[==========] 7 tests from 1 test suite ran. (8 ms total)
 [  PASSED  ] 7 tests.

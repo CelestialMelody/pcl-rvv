@@ -15,9 +15,9 @@ Build: Std (__RVV10__ disabled)
 [ RUN      ] FilterIndicesRVV.RemoveNaNNormalsKeepsNormalFiniteAndDenseFlag
 [       OK ] FilterIndicesRVV.RemoveNaNNormalsKeepsNormalFiniteAndDenseFlag (0 ms)
 [ RUN      ] FilterIndicesRVV.LargeNormalPathMatchesScalarFormula
-[       OK ] FilterIndicesRVV.LargeNormalPathMatchesScalarFormula (1 ms)
-[----------] 7 tests from FilterIndicesRVV (6 ms total)
+[       OK ] FilterIndicesRVV.LargeNormalPathMatchesScalarFormula (0 ms)
+[----------] 7 tests from FilterIndicesRVV (4 ms total)
 
 [----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (9 ms total)
+[==========] 7 tests from 1 test suite ran. (8 ms total)
 [  PASSED  ] 7 tests.
