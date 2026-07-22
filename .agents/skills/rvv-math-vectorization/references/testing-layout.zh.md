@@ -164,7 +164,9 @@ make -C test-rvv/rvv/math run_<function>_<caller>_smoke
 
 ```bash
 make -C test-rvv/rvv/math deploy_<function>_test
-ssh <board> 'cd /root/pcl-test/rvv/math && make -f board.mk run_<function>_test'
+ssh <board> 'cd <board_repo>/rvv/math && make -f board.mk run_<function>_test'
 ```
+
+其中 `<board_repo>` 表示板卡上的 PCL 测试部署目录，不应在 agent 资产中写死成本机或个人远端路径。
 
 最后清理 `build/`、`output/`、`log/`、`.venv`、`__pycache__` 等生成物，确认 `git status --short` 只剩预期源码/文档改动。

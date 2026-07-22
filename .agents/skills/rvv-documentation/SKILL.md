@@ -13,6 +13,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 
 - 主题 RVV 文档：见 [references/topic-doc-structure.md](references/topic-doc-structure.md)。
 - 函数级评估文档：见 [references/evaluation-doc-structure.md](references/evaluation-doc-structure.md)。
+- 函数级评估与 closeout 分工：见 [references/function-evaluation-and-closeout.zh.md](references/function-evaluation-and-closeout.zh.md)。
 - 筛选文档：见 [references/screening-docs.md](references/screening-docs.md)。
 - 诊断和回退文档：见 [references/diagnostic-docs.md](references/diagnostic-docs.md)。
 - closeout 重排和写作风格：见 [references/closeout-style.md](references/closeout-style.md)。
@@ -25,6 +26,9 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - QEMU 只写成正确性、日志格式和路径证据；性能结论来自板卡或目标硬件。
 - 生产接入判断必须连接 local fragment、full diagnostic、production case、fallback 和维护成本。
 - 评估文档负责决策审计；主题文档负责长期维护。
+- S2 函数级评估阶段就应创建或更新 evaluation（评估）文档，用来记录函数功能、可向量化点、RVV 优先级、初步接入判断和需要补齐的证据。不要把这些判断只留到 S11 closeout（收尾）阶段。
+- S11 closeout 文档负责记录实验后的最终状态、证据边界、生产接入或不接入理由、遗留风险和队列表同步。如果 topic 进入 production integration loop（生产接入闭环），S11 必须发生在生产补丁、生产直连测试、生产证据重跑和再次 EvidenceDecision（证据决策）之后。
+- 生产接入后的 doc-rvv 文档必须以真实 production patch（生产补丁）和 production direct（真实生产入口直连）证据为中心，不能只复述 diagnostic prototype（诊断原型）或早期 bench 结果。必须同步覆盖范围、fallback 矩阵、生产直连测试、反汇编归属、板卡 production bench、最终 EvidenceDecision 和未覆盖路径。
 - 筛选文档负责队列和状态，不承担实现事实的长期解释。
 - 诊断文档必须区分授权边界：局部实验、production-shaped diagnostic、production direct 或生产回退。
 - 技术结论以源码、测试、日志和反汇编为依据，不写成对话来源。
@@ -55,10 +59,14 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 新文档至少应回答：
 
 - 入口是什么，调用链如何进入目标函数。
-- 标量路径哪一段被 RVV 接管，哪一段仍是标量。
+- 标量路径做了什么，核心公式、循环、状态或输出如何形成；读者不看源码也应能理解被优化函数的作用和原实现流程。
+- RVV 方案如何实现，哪一段标量路径被 RVV 接管，数据如何 load/gather、mask、staging、store 或 reduction（规约），哪一段仍是标量以及原因。
+- 关键实现取舍为什么成立或暂缓，例如 buffer/staging、scalar tail（标量尾段）、fused multiply-add（融合乘加）、vector reduction（向量规约）、显式舍入或数学函数向量化；不能只写“保持语义”。
 - gate 和 fallback 如何保持公开语义。
 - 关键 RVV 片段是否覆盖完整阶段，是否只贴公式。
 - 数值算例或图示是否能让读者手工对齐一个 VL chunk。
-- 每个 bench case 证明什么，性能结论来自哪里。
+- 每个 bench case 如何构造、测了哪条入口/路径、证明点是什么、不能证明什么，性能结论来自哪里。
+- 性能不好时必须给出源码和证据约束下的归因假设，例如 gather、不规则访存、压缩写回、标量 tail、额外 staging 内存流量、solver 或其它主成本；若尚未定位，写清下一轮需要的 profile、asm 或消融 bench。
 - 生产接入、bench 诊断或回退判断是否由 full evidence 支撑。
+- 生产接入后的文档是否把诊断阶段结论更新为生产证据结论，且没有把未覆盖入口写成已接入。
 - 未闭合项是否让读者知道“要做什么”和“做了有什么用”，而不是只看到名词清单。

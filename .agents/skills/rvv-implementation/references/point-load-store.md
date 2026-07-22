@@ -42,6 +42,10 @@ PCL 模板入口不能硬编码 `PointXYZ` 或复用某个具体点类型的 off
 
 `PointSource` 和 `PointTarget` 必须分别 gate、分别取 `sizeof`、POD 和 offset。不能把 source 的 layout 假设复用到 target；`PointXYZ -> PointXYZI` 这类组合只有在两端各自证明 `float x/y/z` 和 offset 后才可进入 RVV。
 
+基于法线的算法不能只证明 `x/y/z`。如果 RVV 路径读取 `normal_x/normal_y/normal_z`，还必须分别对 `PointSource`
+和 `PointTarget` 证明 normal 字段存在、字段类型是单个 `float`、offset 可由 traits 取得且满足 wrapper 前提。
+如果当前 PCL traits 或公共 wrapper 暂时不能优雅表达 normal 字段 gate，生产补丁应收窄到已验证具体点类型并让其它模板实例 fallback，不能把 `PointNormal` 诊断证据写成泛型点类型证据。
+
 ## Helper 选择
 
 命名中带 `_fields` 的 helper 表示固定按字段访问，不做 segment/field 自动选择：

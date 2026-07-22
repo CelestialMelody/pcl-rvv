@@ -14,18 +14,24 @@
 8. Bench case 说明。
 9. 测试、QEMU、反汇编和板卡证据。
 10. 生产接入评估。
-11. 结论与后续方向。
+11. 生产接入后的 closeout 更新。
+12. 结论与后续方向。
 
 ## 必写要点
 
 - 被优化函数对象或函数入口在库中的作用。
 - 公开入口、wrapper、dispatch、真实实现层之间的调用链。
-- RVV 覆盖原标量代码的哪一段。
-- 哪些阶段仍是标量，原因是什么。
+- 源码中的数据流形态和诊断中的显式数据流形态是否一致。若 production 通过 iterator（迭代器）、wrapper（包装层）、callback（回调）、dispatch（分流逻辑）或模板 helper 隐藏了全云顺序扫描（full-cloud）、indices（索引）、mask（掩码）、correspondences（对应关系）等差异，主题文档必须先说明源码如何统一这些入口，再说明 RVV 诊断为什么要重新拆成跨步加载（stride load）、离散加载（gather）、连续加载（contiguous load）、离散写回（scatter）或分阶段暂存（staging）路径。
+- 标量实现的可读解释：输入如何进入关键循环，核心局部变量/公式/状态如何生成，输出或 solver 如何使用这些中间量。不要只列函数名或公式片段。
+- RVV 实现的可读解释：每个 VL chunk 如何取数，使用 stride/gather/segment/contiguous load 的原因，mask 如何构造，staging 或输出如何写回，后续消费者是谁。
+- RVV 覆盖原标量代码的哪一段，哪些阶段仍是标量，原因是什么。
+- 实现选择审计：如果使用 buffer/staging、`vcompress`、scatter、标量 tail、显式/非显式 fused multiply-add（融合乘加）、vector reduction（向量规约）或数学函数 helper，必须说明为什么这样做、替代方案是什么、当前证据是否足以排除或暂缓替代方案。
 - 哪些 gate 触发 fallback，fallback 后语义如何保持。
 - 当前主题属于 production direct、production-shaped diagnostic、bench 诊断主题，还是生产回退说明。
 - 每个 bench case 的入口、规模、参数、是否命中 RVV、speedup 计算方式和证明点。
 - 板卡收益是否足以覆盖 staging、buffer 和维护成本。
+- 若当前结论是 partial-production-candidate（局部生产候选），必须写清“候选范围”和“尚不能生产接入的原因”。候选范围要窄到入口形态、点类型、数据布局、规模、fallback 条件和目标硬件；不能把局部诊断收益写成整个函数族可接入。
+- 若已经接入 production（生产源码），主题文档必须从“诊断原型说明”升级为“生产实现说明”：写清真实 production patch（生产补丁）、真实 dispatch / fallback、production direct（真实生产入口直连）测试、反汇编符号归属、板卡 production bench 和 PI5 EvidenceDecision（生产证据决策）。不要把早期诊断 speedup 当作最终生产结论。
 
 ## Staging 与特殊实体
 
@@ -38,10 +44,12 @@
 - 覆盖 / fallback 边界。
 - 是否改变公开 API 或对象可见状态。
 
+若诊断数据流不是源码中直接可见的形态，必须额外说明映射关系。例如源码 helper 只看到 iterator 同步前进，但 RVV 诊断拆成“全云顺序扫描”和“对应关系索引扫描”；这时文档要写清每条诊断路径来自哪个公开入口、为什么必须显式展开 index/weight、额外成本是否计入 bench，以及该拆分不能证明哪些真实 production 分流。
+
 多个 staging 名称应给出对照表：
 
 ```text
-| staging 名称 | 结构体 | 生成 helper / 代码位置 | 字段来源 | 下一段消费者 / tail | gate |
+| 暂存路径（staging） | 结构体 | 生成 helper / 代码位置 | 字段来源 | 下一段消费者 / tail | gate |
 ```
 
 ## 关键片段要求
@@ -102,9 +110,55 @@ RVV helper 片段应覆盖：
 性能章节不能只列 case 名和 speedup。每个 case 至少写清：
 
 - 对应函数入口。
-- 数据规模、点类型、字段、kernel、indices 或参数组合。
+- 数据规模、点类型、字段、kernel、indices、correspondences、权重、随机/合成数据来源或其它参数组合。
 - 是否命中 RVV 主路径、fallback 路径或间接受益路径。
 - speedup 计算方式。
 - 该 case 证明的语义或性能点。
+- 该 case 不能证明什么，例如真实 production dispatch、泛型点类型、其它输入形态、规约方案或目标硬件之外的性能。
 
 fallback case 用于证明未覆盖路径保持语义和成本接近，不作为 RVV 主路径性能结论。
+
+## 生产接入后的 Closeout 章节
+
+topic 完成 PI2-PI5 后，主题文档应新增或更新生产 closeout 章节。该章节不需要复述完整代码，
+但必须让 reviewer 能从文档直接看出“实际接入了什么、如何回退、证据是否仍成立”：
+
+```text
+| 项 | 最终状态 | 证据 |
+```
+
+至少覆盖：
+
+- 生产补丁范围：文件、helper、dispatch、编译宏和是否改变 public API（公开接口）。
+- 覆盖范围：入口形态、点类型、`Scalar`、数据布局、规模 gate、目标硬件。
+- 不覆盖范围：indices、correspondences、泛型点类型、`Scalar=double` 或其它保持标量的路径。
+- fallback 矩阵：每个非覆盖路径如何回到原标量语义，以及对应测试 / 构建证据。
+- production direct 证据：真实公开入口测试、fallback 测试、反汇编 production 符号归属、板卡 production bench。
+- 结论差异：诊断阶段结果与生产直连结果是否一致；若有差异，最终采用哪个结论以及为什么。
+- 回退策略：若 PI5 证据不成立，说明生产改动是否回收，保留哪些 `test-rvv` / diagnostic 资产供后续消融。
+
+生产接入后的文档质量不以“新增一段结论”为准，而以读者能否不看对话、只靠源码和证据路径复核生产接入边界为准。
+
+## Partial-production-candidate 写法
+
+当板卡结果显示某一条诊断路径有稳定收益，但还没有修改 production（生产源码）或没有真实公开入口 direct evidence（直接生产路径证据）时，可以写 `partial-production-candidate`。此时文档必须比 no-production closeout 更谨慎：
+
+- 先写候选范围，例如“只限全云顺序扫描 `PointNormal` / `float` / 连续 AoS 布局 / 目标板卡”。
+- 再写明确不覆盖的范围，例如 indices、correspondences、泛型点类型、`Scalar=double`、非 RVV fallback、生产 dispatch、上游完整测试。
+- 列出下一轮 production integration loop（生产接入闭环）前必须补的证据：最小生产补丁、真实入口测试、fallback gate、反汇编符号归属、板卡 production bench、误差预算或数值审计。
+- 对负向路径保持独立结论。一个入口有收益不能抵消另一个入口退化；对应关系索引路径慢时，应明确保持标量或先做消融。
+- 避免使用“可接入 production”“production-ready”这类表达，除非 production direct 证据、维护边界和性能复测都已闭合。
+
+推荐表格：
+
+```text
+| 范围 | 当前证据 | 仍缺什么 | 下一轮动作 |
+```
+
+## 负向性能归因
+
+如果 board（板卡）或目标硬件结果不支持生产接入，主题文档不能只写“不加速”。必须补一段受证据约束的归因：
+
+- 哪些源码结构或 RVV 实现选择可能造成退化，例如 gather、不规则访存、压缩到 buffer、额外 store/load、标量 tail、solver/状态机主成本、数据重排或分流开销。
+- 哪些证据支持这个判断，例如 asm 中的指令归属、bench case 对比、规模放大趋势、QEMU 只作为路径证据、消融 bench 或 profile。
+- 当前还不能确认哪些原因，以及下一轮若要重做，需要新增什么实验。不要把未验证猜测写成事实。

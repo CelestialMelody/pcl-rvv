@@ -15,10 +15,16 @@
 
 开始普通主题前，先读下面的入口和门禁材料；后续按任务需要继续读取更细 reference。
 
+若用户使用短 prompt 启动，先按 `short-prompt-entry.zh.md` 的默认读取链加载，再进入本模板列出的模块材料。
+
 - `rvv-workflow/SKILL.md`：状态机、恢复、closeout 和提交边界。
-- `rvv-workflow/references/rule-coverage.md`：确认高风险规则是否已有入口短提醒和详细落点。
+- `rvv-workflow/references/topic-lifecycle.zh.md`：S0-S12 主干状态、S10 后分支和生产接入闭环。
+- `rvv-workflow/references/handoff-packet.zh.md`：worker 阶段边界和 blocked 时的结构化交接字段。
+- `rvv-workflow/references/worker-quality-gates.zh.md`：短 prompt worker 写文件前的标量路径、数据流映射、文档、注释、证据和归因门禁。
+- `rvv-workflow/references/reviewability-and-language.zh.md`：术语解释、注释密度、文档和 reviewer 汇报规则。
 - `rvv-screening/SKILL.md`：确认当前主题来自 second-pass 还是 follow-up，不重新筛选。
 - `rvv-documentation/references/evaluation-doc-structure.md`：函数级评估是 production gate。
+- `rvv-documentation/references/function-evaluation-and-closeout.zh.md`：S2 evaluation 与 S11 closeout 的文档职责分工。
 - `rvv-diagnostics/SKILL.md`：local fragment、full diagnostic、production decision 的证据层级。
 - `rvv-diagnostics/references/semantic-alignment.md`：浮点、FRM/FCSR、FMA contraction 和反汇编语义对齐。
 - `rvv-diagnostics/references/staging-and-evidence.md`：staging、标量 tail、测试矩阵和 bench 命名。
@@ -28,6 +34,20 @@
 - `rvv-documentation/SKILL.md`：主题文档、评估文档、筛选状态、诊断文档和 closeout 同步。
 
 如果本主题属于 `bench 诊断主题`、涉及 staging、手工浮点表达式、目标硬件验证、上游测试或生产回退，必须读取对应 reference 后再写实现或结论。
+
+如果用户用短 prompt 启动，仍必须在选中 topic 后执行 `worker-quality-gates.zh.md` 的
+“开始写文件前的自查”。短 prompt 只减少用户需要输入的文字，不减少 worker 必须满足的
+文档、注释、bench 和证据门槛。
+
+如果用户用短 prompt 继续已有 topic，且最近 Handoff Packet 的结论是
+`partial-production-candidate`（局部生产候选），默认进入 PI1 production integration plan
+（生产接入计划），不是直接改 production。PI1 涉及模板点类型、traits、字段 offset、fallback
+或从具体点类型诊断扩展到 production 模板入口时，必须读取：
+
+- `rvv-implementation/SKILL.md`
+- `rvv-implementation/references/point-load-store.md`
+- `rvv-implementation/references/fallback-and-dispatch.md`
+- `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`
 
 ## 目标
 

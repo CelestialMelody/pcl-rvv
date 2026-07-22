@@ -1,3 +1,3 @@
 display_name: RVV Workflow
 short_description: 调度 RVV agent 的选题、执行、恢复和 closeout 状态机。
-default_prompt: 使用 RVV workflow skill，读取模块状态表并选择下一未完成主题，协调筛选、诊断、实现、benchmark 和文档 closeout。
+default_prompt: 使用 RVV workflow skill。若用户给出短 prompt，先按 short-prompt-entry 默认读取链启动；模块和 topic 可由当前上下文及状态表自动选择，再协调筛选、诊断、实现、benchmark 和文档 closeout。

@@ -48,3 +48,14 @@
 - 生产接入判断。
 
 不要只写“浮点误差导致失败”。
+
+## FMA 与规约取舍
+
+遇到乘加密集表达式、normal equation（法方程）、统计量、距离或投影时，不要默认“源码里是乘法加法，所以 RVV 也必须拆成乘法加法”。审计顺序是：
+
+1. 用反汇编确认标量构建是否已经出现 `fmadd` / `fmsub` 或自动向量化规约。
+2. 用反汇编确认 RVV 构建的热点函数是否出现预期的 `vfmacc` / `vfmadd` / `vfwmacc`、`vfred*` 或仅有 `vfmul` + `vfadd` / `vfsub`。
+3. 如果 fused intrinsic 能减少指令且业务允许同等或更小的舍入误差，补 same-chain（同构链路）或误差预算测试，再用板卡 bench 判断是否值得。
+4. 如果 vector reduction 会改变标量可见累加顺序，先设计对抗样本、误差预算和输出容差，再判断是否能进入 production；没有这些证据时可以保留 scalar tail，但文档必须写明这是暂缓而不是永久结论。
+
+若反汇编里的 fused 或 reduction 指令来自 Eigen、libm 或其它非热点代码，不能把它写成当前 RVV helper 已采用该方案；文档必须说明指令归属。

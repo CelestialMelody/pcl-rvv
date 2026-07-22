@@ -31,6 +31,22 @@ lane-level helper (a helper that operates on one RVV vector register group and v
 
 不要写只有英文标签堆叠、没有解释的注释，例如 `lane-level batch wrapper sanity gate`。
 
+## 1.1 开工前注释策略
+
+worker 开始写代码或文档前，应在 S0 报告中冻结本轮注释策略。没有用户特别指定时，默认使用：
+
+- `test-rvv`、diagnostic（诊断代码）和 prototype（原型代码）：详细中文注释。文件级说明、非平凡函数说明、复杂循环和 gate（可失败验收条件）前的块级说明都要保留。
+- production（生产源码）：适中注释。只解释维护边界、fallback（回退路径）、dispatch（分流逻辑）、数值风险、数据布局和与标量路径衔接的理由，不写逐行教材。
+- 文档、测试输出、Makefile 和 board.mk：中文主导，英文术语首次出现带中文解释。
+
+如果用户要求显式选择，按下面三个问题记录结果：
+
+1. 代码注释策略：不注释 / 简要注释 / 详细注释。
+2. 注释语言策略：仅中文 / 仅英文 / 中英双写。
+3. 中英双写顺序：中文在前 / 英文在前。
+
+注释策略是本轮工作合同，不是事后润色项。若 reviewer 指出 test-rvv 或 diagnostic 注释不足，worker 应先补可审查性，再继续扩大实现。
+
 ## 2. 自然中文工程说明
 
 中文主导时，解释要像工程说明，不要像机器翻译或模板填空。目标是让读者快速理解“为什么这段代码/测试/证据存在”，而不是只看到术语对照。
@@ -128,6 +144,17 @@ production 头文件，也不覆盖 base RangeImage。
 caller-shaped smoke now has a sanity gate and batch RVV path.
 ```
 
+对于不是标准库 API 或论文中固定使用的词，优先使用中文主称，再把英文放进括号。英文保留的目的应是方便读者对应源码、case 名、反汇编或 RVV intrinsic，而不是让标题和段落变成英文标签串。例如：
+
+- `full-cloud` 写成 `全云顺序扫描（full-cloud，source/target 按相同下标一一对应）`。
+- `correspondences` 写成 `对应关系索引路径（correspondences，由 index_query/index_match 指定点对）`。
+- `staging` 写成 `分阶段暂存（staging，把 RVV 算出的中间量交给后续阶段）`。
+- `lane` 写成 `向量通道（lane，RVV 向量寄存器中的一个元素位置）`。
+- `gather` 写成 `离散加载（gather，按索引读取不连续地址）`。
+- `stride load` 写成 `跨步加载（stride load，按固定字节间隔读取结构数组字段）`。
+
+如果某个英文词已经出现在函数名、benchmark case 名或反汇编指令里，可以保留英文原词，但附近要用一句话说明它在当前 topic 中的具体含义和证据边界。
+
 纯英文文本中也必须解释术语，推荐：
 
 ```text
@@ -159,10 +186,25 @@ production 代码注释应克制，只解释维护边界、fallback、语义风�
 - 文件级阅读提示：本文件做什么，`main()` 或 Makefile target 会按什么顺序运行。可以写“本文件做什么”，不要固定写成“中文执行地图”。
 - 术语说明：reference、scalar same-chain、RVV path、smoke、bench 分别是什么意思。即使整段注释是英文，也要用括号解释这些词。
 - 函数级说明：每个非平凡函数至少说明作用、调用者、证据角色。可以写成自然句，不要机械套用“作用/调用者/类别”模板。
+- 测试级说明：每个非显而易见的 `TEST`、`TEST_F`、`TYPED_TEST` 或同等 benchmark case 前，用 1-2 句中文说明“这个测试验证什么、为什么需要、失败时说明哪条证据断了”。如果测试名已经非常清楚，也至少在附近的表格或文件级说明中逐项解释。
 - 块级说明：复杂循环、mask、staging、特殊值、误差统计、checksum、gate 判断前应有短注释。
 - 边界说明：明确不覆盖哪些 production 行为，例如真实 dispatch、fallback、world transform、完整对象状态、其它 caller 形态。
 
 不要把 production 代码写成逐行教材；但 test/prototype 中可以写接近逐段解释的注释，帮助 reviewer 快速审查。
+
+### 5.1 诊断 helper 注释下限
+
+`test-rvv/*_diag.hpp` 这类 production-shaped diagnostic（生产形态诊断）通常是 reviewer 最难读的文件，不能只靠文件头说明。下列非平凡 helper 需要在函数前或相邻块中有中文说明：
+
+- 标量参考 helper：说明它复刻哪段 production 语义，哪些输入检查、公式、状态更新或 solver 边界必须保持一致。
+- RVV lane / mask helper：说明 mask（掩码）代表什么，和 production 的有限值检查、predicate（谓词）或分支语义如何对应。
+- staging / buffer / `vcompress` helper：说明为什么暂存、为什么压缩、保序性如何影响后续标量 tail，以及这段证据能证明什么、不能证明什么。
+- candidate 入口 helper：说明它对应哪个公开入口形态，何时命中 RVV，何时 fallback，额外 index / weight / offset 展开是否属于 bench 计时边界。
+- solve、矩阵构造或数学函数 helper：说明它是否在逐点热点循环内。如果每次 estimate 只执行一次，通常保留标量；若要向量化，必须先有调用频率和收益证据。
+
+这些说明不需要逐行解释 intrinsic（内建函数），但要让 reviewer 能在不回看对话的情况下回答：“这段 helper 为什么存在，和 production 哪段语义对齐，失败会破坏哪条证据？”
+
+fallback（回退路径）测试要能隔离触发原因。如果一个候选同时有规模阈值、identity gate（顺序一一对应验收条件）、类型 gate 或布局 gate，测试矩阵至少要有一个 case 单独覆盖每个重要 gate，避免一个小规模 case 同时绕开所有分支却被误写成完整 fallback 证据。
 
 ## 6. Python、Makefile 和输出
 
@@ -179,6 +221,8 @@ Makefile / board.mk 应说明：
 - 默认 target 是否会运行测试。
 - QEMU target 是否只代表正确性。
 - 板卡 target 是否包含 bench。
+
+Makefile / board.mk 的关键 target 用途和板卡边界应中文主导；简短文件头、变量名、固定英文短语和远端路径不必为了翻译而改写。语言规则服务于可审查性，不要求制造无意义 churn（无效改动）。
 
 测试输出应明确：
 
@@ -230,7 +274,7 @@ base RangeImage 输入域尚未闭合。base RangeImage 的 angle_x 会除以 co
 - 中文文本中的英文术语是否首次出现带中文解释。
 - 英文文本中的专有术语是否首次出现带 plain-English explanation；如果读者是中文使用者，是否补中文解释。
 - 长测试/诊断文件是否有自然的文件级阅读提示，而不是“中文执行地图”这类生硬标题。
-- 非平凡函数是否说明作用、调用者和证据角色。
+- 非平凡函数是否说明作用、调用者、production 语义映射和证据角色。
 - 注释是否像自然工程说明，而不是模板填空或英语直译。
 - gate 是否明确会失败并返回非 0。
 - 是否区分局部片段、入口形态、生产路径、QEMU、板卡。

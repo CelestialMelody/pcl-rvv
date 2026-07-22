@@ -37,6 +37,16 @@ bench 输出必须可解析，并保留：
 
 证据日志应单独归档、单独分组，不能混入源码或文档提交。日志中不得写入个人路径、私有板卡地址、用户名或临时本机配置。
 
+`output/`、`build/`、`log/`、反汇编 dump 和板卡抓回日志默认是工作区证据，不是默认可提交产物。closeout 前必须检查 `git status --short --ignored`：如果日志未被 ignore 或含本机路径，只在 handoff 中列证据路径和摘要，不把这些文件加入源码 / 文档提交。
+
+用户明确要求提交 evidence logs（证据日志）时，先冻结 evidence log policy（证据日志策略）：
+
+- `summary-only`：只在文档和 handoff 写摘要与路径，不提交日志文件。默认策略。
+- `sanitized-logs`：提交脱敏日志。用户说要提交 log 时默认采用这个策略，优先运行 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或直接运行 `test-rvv/script/sanitize_evidence_logs.py --check <logs>`。
+- `raw-logs`：提交原始日志；只在用户明确要求保留原文、脱敏日志不足以复核、且 reviewer 已确认没有凭据或私有地址风险时使用。
+
+日志提交应与 topic 源码 / 文档拆成独立 commit。通常只考虑 `output/qemu/*.log`、`output/board/*.log` 和必要的 bench compare 摘要；不要默认提交 `build/` 二进制、完整反汇编 dump、`log/vec_missed_log/`、本机 `config.mk` 或临时 deploy 脚本。若必须提交反汇编或编译诊断日志，先说明为什么摘要不足以复核结论。提交后在 handoff 中记录脱敏命令、check 命令、日志 commit 和被排除文件。
+
 细则见 [references/evidence-logs.md](references/evidence-logs.md)。
 
 ## 性能判断
@@ -49,3 +59,5 @@ bench 输出必须可解析，并保留：
 - `< 1.05x`：通常不接生产，保留诊断和回退原因。
 
 如果只有 local fragment 快，但 full diagnostic 或生产入口被后续主成本稀释，默认不接生产。
+
+性能结果不成立时，closeout 需要写清负向证据的含义。至少说明退化发生在哪些 case、这些 case 覆盖哪条入口或路径、可能的实现原因是什么，以及还缺哪些 profile、反汇编归属、消融 bench 或目标硬件复测才能把假设变成结论。不要只写 speedup 小于阈值。

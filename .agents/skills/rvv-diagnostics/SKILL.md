@@ -14,6 +14,7 @@ description: 设计、重构或审查 C/C++ 高性能库的 RVV 诊断代码和�
 - 类式算法优先建立 test-only 派生诊断类，复用公开 setter、基类准备流程、indices/mask/input 生命周期和输出顺序。
 - free function 或纯 helper 保持同名或同形参数；可以增加 test-only wrapper，但 full correctness 和 full bench 应能映射到真实入口。
 - 低层 helper 可用于隔离 RVV 阶段，不能替代入口层证据。
+- 如果 production（生产源码）通过 iterator（迭代器）、wrapper、dispatch（分流逻辑）或模板 helper 把多种入口统一成同一个循环，诊断设计必须先写清源码真实数据流，再解释为什么 RVV 需要显式拆成连续扫描、indices（索引）、correspondences（对应关系）、gather（离散加载）或 scatter（离散写回）路径。不要让读者误以为诊断里的两条数据流就是 production helper 中直接可见的两段代码。
 
 诊断入口形态细则见 [references/entry-shapes.md](references/entry-shapes.md)。
 
@@ -32,6 +33,17 @@ local correctness -> local microbench -> entrance/full evidence -> production de
 
 staging、测试矩阵和证据层级细则见 [references/staging-and-evidence.md](references/staging-and-evidence.md)。
 
+## Fallback gate 复核
+
+fallback（回退路径）不是只要结果一致就算闭合。诊断代码同时存在规模阈值、identity / contiguous / finite / type / layout 等多个 gate（可失败验收条件）时，测试矩阵必须尽量隔离 gate 原因：
+
+- 小规模 fallback 单独证明阈值 gate。
+- 非连续、乱序、重复或 indexed/gather 输入单独证明语义 gate。
+- 不支持的点类型、scalar 或布局单独证明类型 / 布局 gate。
+- 如果某个 gate 只能在文档中说明而无法测试，必须写清为什么当前阶段不能测，以及生产接入前需要补什么证据。
+
+不要把一个同时低于规模阈值又不满足语义条件的 case 写成完整 fallback 证据；它只能证明候选没有走 RVV，不能证明具体 gate 的维护边界正确。
+
 ## 数值语义诊断
 
 手工展开 Eigen 小矩阵、小向量、投影、距离、阈值、float-to-int、floor、规约或其它浮点表达式时，必须同时检查源码公式、标量反汇编和 RVV intrinsic 求值顺序。
@@ -44,6 +56,18 @@ staging、测试矩阵和证据层级细则见 [references/staging-and-evidence.
 - 输出顺序、predicate、indices 或 checksum 被窄边界 lane 改变。
 
 细则见 [references/semantic-alignment.md](references/semantic-alignment.md)。
+
+## 实现选择审计
+
+RVV 诊断不能只证明“某段代码能写成 intrinsic”。当候选实现保留大量 scalar tail（标量尾段）、使用固定 buffer/staging、`vcompress`、gather/scatter、显式或非显式 fused multiply-add（融合乘加）、vector reduction（向量规约）或数学函数 helper 时，必须把这些选择写成可审查的设计决策：
+
+- 标量路径原本做什么，哪些中间量被 RVV 生产，哪些仍交给标量 tail 消费。
+- 为什么使用 buffer/staging，而不是继续在向量寄存器里累加、规约或写回。
+- 为什么使用或暂缓 fused intrinsic；如果标量构建可能发生 FMA contraction（融合乘加收缩），应查看标量和 RVV 反汇编，不要凭源码形状下结论。
+- 为什么暂缓 vector reduction；若只是因为累加顺序改变，要说明误差预算、对抗样本和板卡收益证据还缺什么。
+- 数学函数、矩阵构造、solver 前后处理等只在外层或每次迭代末尾调用的代码，先估算调用频率和耗时占比，再决定是否值得向量化。
+
+这些内容可以写在 evaluation（评估）文档或主题文档中；复杂 topic 建议同时在代码注释中给出短说明。不要把一次 topic 的具体数值上升为通用禁令，但要让 reviewer 能判断当前方案的弱收益是否来自实现方式、入口主成本还是证据不足。
 
 ## 生产接入判断
 

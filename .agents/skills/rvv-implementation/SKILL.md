@@ -45,6 +45,13 @@ description: 实现或审查 C/C++ 高性能库中的 RVV 生产路径。适用�
 
 访存封装细则见 [references/point-load-store.md](references/point-load-store.md)。
 
+如果 production 入口是模板点类型，或诊断证据只覆盖 `PointNormal` / `PointXYZ` 等具体类型但生产补丁准备接入模板入口，必须读取 `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`。实现时二选一：
+
+- 泛型接入：用 PCL traits（点类型字段特征）、字段 offset、POD / standard-layout 和 alignment gate 证明当前 `PointSource` / `PointTarget` 可走 RVV；不满足时 fallback。
+- 窄范围接入：明确只对已证明的具体点类型或布局分流，其它模板实例 fallback；文档和 Handoff Packet 不能把它写成泛型成立。
+
+point-to-plane、normal-based registration（基于法线的配准）还必须额外证明 normal 字段。`x/y/z` traits 成立不代表 `normal_x/normal_y/normal_z` 成立；若公共 normal field gate 不足，先收窄到已证明点类型，或补 traits gate 后再接入。
+
 ## 注释规则
 
 新增注释只解释维护边界，不复述代码表面行为。适合注释：
