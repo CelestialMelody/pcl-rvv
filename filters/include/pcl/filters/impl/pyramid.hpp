@@ -45,6 +45,7 @@
 #include <pcl/common/point_tests.h>
 #include <pcl/common/rvv_point_load.h>
 #include <pcl/common/rvv_point_store.h>
+#include <pcl/common/rvv_point_traits.h>
 #include <pcl/filters/pyramid.h>
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
@@ -102,6 +103,12 @@ Pyramid<PointT>::initCompute ()
 }
 
 #ifdef __RVV10__
+template <typename PointT>
+inline constexpr bool kPyramidPointXYZDenseRVVCompatible =
+    std::is_same_v<PointT, pcl::PointXYZ> &&
+    pcl::rvv::kRVVXYZPointCompatible<PointT> &&
+    pcl::rvv::RVVXYZFloatLayout<PointT>::value;
+
 inline void
 pyramidPointXYZDenseLevelRVV (const PointCloud<PointXYZ> &previous,
                               PointCloud<PointXYZ> &next,
@@ -111,10 +118,14 @@ pyramidPointXYZDenseLevelRVV (const PointCloud<PointXYZ> &previous,
                               const int kernel_center_x,
                               const int kernel_center_y)
 {
+  using Layout = pcl::rvv::RVVXYZFloatLayout<PointXYZ>;
+  static_assert (kPyramidPointXYZDenseRVVCompatible<PointXYZ>,
+                 "Pyramid RVV production path is intentionally exact PointXYZ with xyz float layout");
+
   constexpr std::size_t kStride = sizeof (PointXYZ);
-  constexpr std::size_t kXOff = offsetof (PointXYZ, x);
-  constexpr std::size_t kYOff = offsetof (PointXYZ, y);
-  constexpr std::size_t kZOff = offsetof (PointXYZ, z);
+  constexpr std::size_t kXOff = Layout::kX;
+  constexpr std::size_t kYOff = Layout::kY;
+  constexpr std::size_t kZOff = Layout::kZ;
 
   const std::uint8_t *previous_base = reinterpret_cast<const std::uint8_t*> (previous.points.data ());
   const std::uint8_t *next_base = reinterpret_cast<const std::uint8_t*> (next.points.data ());
@@ -311,7 +322,7 @@ Pyramid<PointT>::compute (std::vector<PointCloudPtr>& output)
   }
 
 #ifdef __RVV10__
-  if constexpr (std::is_same_v<PointT, pcl::PointXYZ>)
+  if constexpr (kPyramidPointXYZDenseRVVCompatible<PointT>)
   {
     if (input_->is_dense && !large_ && threads_ <= 1 && input_->width >= 8 && input_->height >= 2)
     {

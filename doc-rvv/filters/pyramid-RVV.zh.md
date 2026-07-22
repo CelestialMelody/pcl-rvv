@@ -23,7 +23,32 @@ k = [1/4, 1/2, 1/4]
 
 `large_=true` 时使用 5x5 kernel；`is_dense=false` 时还要做 `isFinite`、中心点距离阈值和 weight 归一化。
 
-## 3. RVV 覆盖范围与 fallback
+## 3. 泛型 PointT 输出语义边界
+
+`Pyramid` 不是只读取 xyz 后输出 index、mask 或 staging metadata（暂存元数据）的算法；
+它会构造新的 `PointCloud<PointT>`。泛型 dense 标量路径的核心语句是：
+
+```cpp
+next.at (j,i) += previous.at (jj,ii) * kernel_ (mm,nn);
+```
+
+这条语句会调用 PCL 注册点类型的 point operator（点运算符）。这些运算符按注册字段
+执行 `+=`、`*=` 等字段级运算，因此 `PointXYZI` 不只是平滑 xyz，还会把
+`intensity` 一起按 kernel 聚合。只用 `RVVXYZFloatLayout<PointT>` 或
+`kRVVXYZPointCompatible<PointT>` 证明“有 xyz 且为 float”，不能证明 RVV 已经复现了
+`PointT` 的完整输出语义。
+
+RGB/RGBA/RGB 也是这个边界的反例。`filters/src/pyramid.cpp` 为
+`PointXYZRGB`、`PointXYZRGBA` 和 `RGB` 提供显式特化，手动用 float 累加
+`r/g/b/a`，最后转换回 `std::uint8_t`。这说明颜色字段不是简单的泛型 packed 字段算术；
+生产 RVV 如果覆盖这些类型，必须显式定义并对拍颜色通道处理，而不能只因为类型有
+`x/y/z` 就进入模板 RVV 路径。
+
+因此当前 production RVV 只覆盖 exact `PointXYZ` dense small-kernel 主路径。
+`PointXYZI` 是可评估的后续候选，但必须增加 intensity 聚合的 RVV 或 staged-scalar
+设计，并补充对应对拍和 bench 证据。`PointXYZRGB/RGBA/RGB` 继续使用已有标量特化。
+
+## 4. RVV 覆盖范围与 fallback
 
 | 条件 | 路径 |
 | --- | --- |
@@ -35,11 +60,14 @@ k = [1/4, 1/2, 1/4]
 | `PointXYZI`、其它泛型点类型 | `computeStd` |
 | `PointXYZRGB` / `PointXYZRGBA` / `RGB` 特化 | 原 `filters/src/pyramid.cpp` 标量特化 |
 
-## 4. 详细设计
+## 5. 详细设计
 
 新增实体：
 
 - `Pyramid<PointT>::computeStd`：常驻标量 helper，`initCompute()` 后执行原标量流程；
+- `kPyramidPointXYZDenseRVVCompatible<PointT>`：本地 production gate，组合 exact
+  `PointT=PointXYZ`、公共 `kRVVXYZPointCompatible` 和 `RVVXYZFloatLayout`；它只复用
+  公共 traits 表达字段/layout 前提，不把 Pyramid RVV 放宽到其它 xyz-like 点类型；
 - `pyramidPointXYZDenseLevelRVV`：单层 dense `PointXYZ` small-kernel RVV helper；
 - `pyramidPointXYZDenseRVV`：按 level 调用单层 helper，保持 `output[0]` 是输入副本；
 - 公开 `compute`：初始化 kernel 后，按覆盖条件短路到 RVV，否则落回 `computeStd`。
@@ -64,7 +92,7 @@ vz = __riscv_vfmacc_vf_f32m2 (vz, k, pz, vl);
 pcl::rvv_store::strided_store3_f32m2<kStride, kXOff, kYOff, kZOff> (next_base + out_offset, vl, vx, vy, vz);
 ```
 
-## 5. 数值算例与 VL 图示
+## 6. 数值算例与 VL 图示
 
 小 kernel `k=[1/4,1/2,1/4]`。设 `VL=4`，输出行 `r=1`、输出列 `c=0..3`：
 
@@ -84,7 +112,7 @@ sum_{m=0..2,n=0..2} previous(2+n-1, 2+m-1).x * k[2-m] * k[2-n]
 
 这与标量在 `next.at(c,r)` 上的 3x3 flipped-kernel 累加一致；RVV 只是把多个 `c` 同时放入 lane。
 
-## 6. 测试、QEMU、反汇编和板卡证据
+## 7. 测试、QEMU、反汇编和板卡证据
 
 专项测试：
 
@@ -101,7 +129,7 @@ sum_{m=0..2,n=0..2} previous(2+n-1, 2+m-1).x * k[2-m] * k[2-n]
 
 QEMU 结果只作为构建、checksum、日志格式和指令路径证据，不作为性能结论。QEMU small-kernel RVV 慢于标量，但 Milkv-Jupiter 板卡真实性能成立。
 
-## 7. 性能结果说明
+## 8. 性能结果说明
 
 板卡：Milkv-Jupiter。Iterations: `30`。Speedup = `Std avg / RVV avg`。
 
@@ -113,6 +141,6 @@ QEMU 结果只作为构建、checksum、日志格式和指令路径证据，不�
 | `pyramid pointxyz non-dense fallback 640x480` | non-dense `PointXYZ`，距离阈值/weight 语义 | fallback case，证明未覆盖路径保持语义，不作为 RVV 主路径性能结论 | `1.00x` |
 | `pyramid pointxyzi fallback 640x480` | `PointXYZI` 泛型路径 | fallback case，证明非 `PointXYZ` 未误入 RVV | `0.99x` |
 
-## 8. 结论
+## 9. 结论
 
 `Pyramid<PointXYZ>::compute` dense small-kernel 单线程主路径已接入生产 RVV，在 Milkv-Jupiter 上约 `2.13x`~`2.16x`。显式多线程、5x5 large-kernel、non-dense、RGB/RGBA/RGB 和非 `PointXYZ` 保持标量 fallback。
