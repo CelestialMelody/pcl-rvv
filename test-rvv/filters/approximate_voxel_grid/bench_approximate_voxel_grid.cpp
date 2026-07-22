@@ -5,12 +5,14 @@
 #include <pcl/point_types.h>
 
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <functional>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <string>
+#include <type_traits>
 
 namespace {
 
@@ -84,6 +86,68 @@ makeCloud(std::size_t n, bool with_invalid)
   return cloud;
 }
 
+template <typename PointT>
+pcl::PointCloud<PointT>
+makeGenericCloud(std::size_t n, bool with_invalid)
+{
+  pcl::PointCloud<PointT> cloud;
+  cloud.width = static_cast<std::uint32_t>(n);
+  cloud.height = 1;
+  cloud.is_dense = !with_invalid;
+  cloud.points.resize(n);
+  for (std::size_t i = 0; i < n; ++i) {
+    auto& point = cloud[i];
+    point.x = static_cast<float>(static_cast<int>(i % 4099) - 2049) * 0.0031f;
+    point.y = static_cast<float>(static_cast<int>((i * 7) % 4093) - 2046) * 0.0029f;
+    point.z = static_cast<float>(static_cast<int>((i * 13) % 4091) - 2045) * 0.0027f;
+    if constexpr (std::is_same_v<PointT, pcl::PointXYZI>) {
+      point.intensity = static_cast<float>((i * 5) % 101) * 0.25f;
+    }
+    else if constexpr (std::is_same_v<PointT, pcl::PointXYZRGB> ||
+                       std::is_same_v<PointT, pcl::PointXYZRGBA>) {
+      point.r = static_cast<std::uint8_t>((17 * i) & 0xffu);
+      point.g = static_cast<std::uint8_t>((29 * i) & 0xffu);
+      point.b = static_cast<std::uint8_t>((43 * i) & 0xffu);
+      if constexpr (std::is_same_v<PointT, pcl::PointXYZRGBA>)
+        point.a = static_cast<std::uint8_t>((59 * i) & 0xffu);
+    }
+  }
+  if (with_invalid) {
+    for (std::size_t i = 3; i < n; i += 997)
+      cloud[i].x = std::numeric_limits<float>::quiet_NaN();
+    for (std::size_t i = 67; i < n; i += 1231)
+      cloud[i].y = std::numeric_limits<float>::infinity();
+    for (std::size_t i = 129; i < n; i += 1879)
+      cloud[i].z = -std::numeric_limits<float>::infinity();
+  }
+  return cloud;
+}
+
+template <typename PointT>
+std::uint64_t
+checksumGenericCloud(const pcl::PointCloud<PointT>& cloud)
+{
+  std::uint64_t sum = 1469598103934665603ull;
+  for (const auto& point : cloud) {
+    const auto xi = static_cast<std::uint32_t>(std::lround((point.x + 32.0f) * 100000.0f));
+    const auto yi = static_cast<std::uint32_t>(std::lround((point.y + 32.0f) * 100000.0f));
+    const auto zi = static_cast<std::uint32_t>(std::lround((point.z + 32.0f) * 100000.0f));
+    sum = (sum ^ xi) * 1099511628211ull;
+    sum = (sum ^ yi) * 1099511628211ull;
+    sum = (sum ^ zi) * 1099511628211ull;
+    if constexpr (std::is_same_v<PointT, pcl::PointXYZI>) {
+      const auto intensity =
+          static_cast<std::uint32_t>(std::lround((point.intensity + 32.0f) * 100000.0f));
+      sum = (sum ^ intensity) * 1099511628211ull;
+    }
+    else if constexpr (std::is_same_v<PointT, pcl::PointXYZRGB> ||
+                       std::is_same_v<PointT, pcl::PointXYZRGBA>) {
+      sum = (sum ^ point.rgba) * 1099511628211ull;
+    }
+  }
+  return sum ^ static_cast<std::uint64_t>(cloud.size());
+}
+
 void
 benchLeafHash(const std::string& name,
               const pcl::PointCloud<pcl::PointXYZ>& cloud,
@@ -145,6 +209,22 @@ benchProductionFilter(const std::string& name, const pcl::PointCloud<pcl::PointX
   });
 }
 
+template <typename PointT>
+void
+benchProductionFilterGeneric(const std::string& name, const pcl::PointCloud<PointT>& cloud)
+{
+  Benchmarker bench(name);
+  pcl::ApproximateVoxelGrid<PointT> filter;
+  filter.setLeafSize(0.05f, 0.06f, 0.07f);
+  filter.setInputCloud(cloud.makeShared());
+  pcl::PointCloud<PointT> output;
+  bench.run([&]() {
+    filter.filter(output);
+    bench.setChecksum(checksumGenericCloud(output));
+    doNotOptimize(output);
+  });
+}
+
 } // namespace
 
 int
@@ -167,6 +247,9 @@ main()
   const auto cloud64k = makeCloud(64 * 1024, false);
   const auto cloud1m = makeCloud(1024 * 1024, false);
   const auto cloud1m_invalid = makeCloud(1024 * 1024, true);
+  const auto xyzi64k = makeGenericCloud<pcl::PointXYZI>(64 * 1024, false);
+  const auto rgb64k = makeGenericCloud<pcl::PointXYZRGB>(64 * 1024, false);
+  const auto rgba64k = makeGenericCloud<pcl::PointXYZRGBA>(64 * 1024, false);
 
   benchLeafHash("approx voxel leaf-hash diag 64K", cloud64k, inverse_leaf);
   benchLeafHash("approx voxel leaf-hash diag 1M", cloud1m, inverse_leaf);
@@ -175,6 +258,9 @@ main()
   benchFullDiagnostic("approx voxel full diag 1M", cloud1m, inverse_leaf);
   benchFullDiagnostic("approx voxel finite full diag 1M", cloud1m_invalid, inverse_leaf);
   benchProductionFilter("approx voxel production pointxyz 64K", cloud64k);
+  benchProductionFilterGeneric("approx voxel production pointxyzi 64K", xyzi64k);
+  benchProductionFilterGeneric("approx voxel production pointxyzrgb 64K", rgb64k);
+  benchProductionFilterGeneric("approx voxel production pointxyzrgba 64K", rgba64k);
 
   printBanner('=');
   return 0;

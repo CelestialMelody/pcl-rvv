@@ -43,6 +43,35 @@ constexpr std::size_t kZOff = offsetof(pcl::PointXYZ, z);
   -> 任一前提失败时回退标量路径
 ```
 
+### 1.1 预编译和调用点是泛型需求证据
+
+阅读一个模板算法的 RVV gate 时，除了看当前 helper 用了哪些字段，还要先了解这个
+函数在 PCL 源码语境中实际可能以哪些 `PointT` 实例化或调用。预编译宏、显式
+实例化列表和真实调用点可以帮助 worker 建立“泛型入口常见点类型”的背景：
+
+- filters 模块常在 `src/*.cpp` 中用 `PCL_XYZ_POINT_TYPES` 预编译模板，例如
+  `ApproximateVoxelGrid`、`FrustumCulling`、`PassThrough`、`VoxelGrid` 和
+  `VoxelGridCovariance`。当前配置中的 `PCL_XYZ_POINT_TYPES` 包含
+  `PointXYZ`、`PointXYZI`、`PointXYZRGBA`、`PointXYZRGB`、
+  `PointXYZRGBNormal`、`PointXYZINormal` 等常见 xyz 点类型。
+- filters 还有一些显式实例化列表，例如 `FastBilateralFilter` 使用
+  `PointXYZ`、`PointXYZRGB`、`PointXYZRGBA`，`ProjectInliers` 使用
+  `PointXYZ`、`PointXYZI`、`PointXYZRGB`、`PointXYZRGBA`。
+- app、tool、tutorial 和 test 里的真实调用同样是证据。例如
+  `ApproximateVoxelGrid<PointXYZI>`、`ApproximateVoxelGrid<PointXYZRGBA>` 和
+  `ApproximateVoxelGrid<PointXYZRGBNormal>` 都能在仓库调用点中看到。
+- registration 模块的证据更分散：部分 `src/*.cpp` 显式实例化
+  `PointXYZI -> PointXYZI`、`PointXYZRGB -> PointXYZRGB`，例如 ICP、NDT、
+  SVD 和 LM；`LUM` 使用 `PCL_XYZ_POINT_TYPES`；也有许多 registration
+  算法主要以 header-only 模板形式暴露，不能只按 `src` 宏实例化覆盖范围下结论。
+
+这些证据只能说明“泛型入口和用户语境真实存在”，不能直接替代 RVV gate。它们的作用是
+提醒 worker：`PointT` 很可能不是单一 `PointXYZ`，而是 `PointXYZI`、
+`PointXYZRGB/RGBA`、normal 复合点类型或用户自定义点类型。生产 RVV 是否覆盖这些
+类型，还必须逐项证明：当前算法只读哪些字段、是否构造 `PointT` 输出、是否保留额外
+字段、是否依赖 `getVector4fMap()` 的齐次分量、source / target 是否分别 gate，以及
+fallback 后是否保持原标量语义。
+
 ## 2. PCL Traits 字段语义
 
 PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心这些信息：
@@ -279,6 +308,14 @@ RVV stage 如果因为规模、VLEN 或布局条件失败，应从已有 staging
 详细模式见 `doc-rvv/rvv/RVV Multi-Field Compress Staging.zh.md`。本文不重复展开
 `vcompress` 和 staging 写出细节。
 
+`ApproximateVoxelGrid` 是另一种 staging 形态：RVV 不直接输出完整 `PointT`，而是为
+XYZ-compatible `PointT` 生成保序的 `LeafHash{ix,iy,iz,hash,source_index}`。后续
+history bucket 冲突、`FieldList` 字段聚合、`downsample_all_data_` 和 RGB/RGBA
+packing 继续走原标量状态机。这个模式适合“前置 leaf/hash 是逐点纯函数，但后续
+flush 顺序和对象构造有状态依赖”的算法。它也说明预编译 / 调用点证据需要转化为
+具体语义设计：`PointXYZI`、`PointXYZRGB/RGBA` 可以共享 leaf/hash RVV staging，
+但 intensity 或 packed color 字段本身不因此自动 RVV 化。
+
 ## 11. 什么时候不要迁移到公共 Trait
 
 公共 `rvv_point_traits.h` 只收纳可复用的字段语义和布局 gate。以下判断不要默认迁移：
@@ -286,7 +323,11 @@ RVV stage 如果因为规模、VLEN 或布局条件失败，应从已有 staging
 - Z-only gate：算法只依赖 `z`，或只对深度字段有特殊语义时，应保留算法本地判断，
   除非先抽象出清晰的公共 Z-field 语义。
 - exact `PointXYZ` gate：某些算法特化只想覆盖精确的 `pcl::PointXYZ`，这不是泛型
-  xyz float gate，迁移会扩大语义。
+  xyz float gate，迁移会扩大语义。迁移前要区分两种情况：如果算法只读取 xyz 并输出
+  indices / mask，且 `PointXYZI`、`PointXYZRGB` 等点类型的额外字段不会参与语义，
+  可以评估迁到 `kRVVXYZPointCompatible`；如果算法会构造 `PointT` 输出、聚合
+  `FieldList`、处理 RGB/RGBA packing、或依赖 `getVector4fMap()` 的完整对象语义，
+  exact gate 可能是输出语义 gate，不能只按 xyz layout 放宽。
 - 算法特化 predicate：例如 organized target、projection matrix 形态、identity
   transform fast path、normal orientation、输出顺序、distance 表达式一致性等，
   都属于算法 dispatch，不属于点类型 traits。

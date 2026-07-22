@@ -244,6 +244,9 @@ namespace pcl
 #if defined(__RVV10__)
       bool
       applyFilterPointXYZRVV (PointCloud &output);
+
+      bool
+      applyFilterXYZStagedRVV (PointCloud &output);
 #endif
 
       /** \brief Write a single point from the hash to the output cloud

@@ -2,6 +2,7 @@
 
 #include <pcl/common/point_tests.h>
 #include <pcl/common/rvv_point_load.h>
+#include <pcl/common/rvv_point_traits.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -124,26 +125,6 @@ approximateVoxelGridPointXYZStd(const pcl::PointCloud<pcl::PointXYZ>& cloud,
 
 #if defined(__RVV10__)
 
-template <typename T>
-using CoordScalar = std::remove_cv_t<std::remove_reference_t<T>>;
-
-template <typename PointT, typename = void>
-struct HasXYZFloatLayout : std::false_type {};
-
-template <typename PointT>
-struct HasXYZFloatLayout<
-    PointT,
-    std::void_t<decltype(std::declval<PointT>().x),
-                decltype(std::declval<PointT>().y),
-                decltype(std::declval<PointT>().z)>>
-: std::bool_constant<std::is_standard_layout_v<PointT> &&
-                     std::is_same_v<CoordScalar<decltype(std::declval<PointT>().x)>, float> &&
-                     std::is_same_v<CoordScalar<decltype(std::declval<PointT>().y)>, float> &&
-                     std::is_same_v<CoordScalar<decltype(std::declval<PointT>().z)>, float>> {};
-
-template <typename PointT>
-inline constexpr bool kHasXYZFloatLayout = HasXYZFloatLayout<PointT>::value;
-
 inline vint32m2_t
 floorF32ToI32NoFrm(vfloat32m2_t values, std::size_t vl)
 {
@@ -174,7 +155,7 @@ computeLeafHashesRVV(const pcl::PointCloud<PointT>& cloud,
                      std::size_t history_size,
                      std::vector<LeafHash>& out)
 {
-  if constexpr (!kHasXYZFloatLayout<PointT>) {
+  if constexpr (!pcl::rvv::kRVVXYZPointCompatible<PointT>) {
     return false;
   } else {
     const std::size_t n = cloud.size();
