@@ -1,0 +1,37 @@
+RVV asm check for transformation_estimation_symmetric_point_to_plane_lls
+Generated from build/asm/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_rvv.full.asm
+
+Production direct symbols:
+- Generic helper template exists as `pcl::registration::detail::estimateSymmetricPointNormalFullCloudRVV<PointSource, PointTarget>(...)`.
+- public full-cloud `PointNormal -> PointNormal` estimator calls the production RVV helper:
+  - `jal 1b308 <bool pcl::registration::detail::estimateSymmetricPointNormalFullCloudRVV<pcl::PointNormal, pcl::PointNormal>(...)>`
+- public full-cloud `PointXYZINormal -> PointXYZINormal` estimator calls the production RVV helper:
+  - `jal 1cc08 <bool pcl::registration::detail::estimateSymmetricPointNormalFullCloudRVV<pcl::PointXYZINormal, pcl::PointXYZINormal>(...)>`
+
+Diagnostic symbols retained:
+- `pcl::registration::rvv_te_symmetric_pt2plane_lls_diag::accumulate_candidate_full(...)`
+- `pcl::registration::rvv_te_symmetric_pt2plane_lls_diag::accumulate_candidate_correspondences(...)`
+- `pcl::registration::rvv_te_symmetric_pt2plane_lls_diag::accumulate_staged_rows(...)`
+
+Production helper instruction evidence:
+- production helper symbol ranges contain `vlse32.v` field loads for traits-gated full-cloud stride access.
+- production helper symbol ranges contain `vcompress.vm` and `vcpop.m` for keep-mask compaction.
+- production helper symbol ranges contain `vfmul.vv`, `vfadd.vv` and `vfsub.vv` for staged symmetric row formula and tail accumulation.
+- production helper symbol ranges still contain compiler-generated `vfredosum.vs` around the compressed buffer tail.
+
+Representative lines from full asm:
+- `bool pcl::registration::detail::estimateSymmetricPointNormalFullCloudRVV<pcl::PointNormal, pcl::PointNormal>(...)`
+- `bool pcl::registration::detail::estimateSymmetricPointNormalFullCloudRVV<pcl::PointXYZINormal, pcl::PointXYZINormal>(...)`
+- `vcpop.m`
+- `vcompress.vm`
+- `vlse32.v`
+- `vfmul.vv`
+- `vfadd.vv`
+- `vfsub.vv`
+- `vfredosum.vs`
+
+Interpretation:
+- This is production direct asm evidence: the real public full-cloud estimator can call the production RVV helper for both exact PointNormal and a traits-gated generic normal point type.
+- It does not prove indexed/correspondences production coverage; those overloads intentionally remain scalar.
+- It does not prove Scalar=double coverage; the public dispatch remains gated to `Scalar=float`.
+- `vfredosum.vs` remains an automatic partial vector accumulation in the compressed buffer tail, so the numerical-boundary caveat remains unless a later patch explicitly controls it.

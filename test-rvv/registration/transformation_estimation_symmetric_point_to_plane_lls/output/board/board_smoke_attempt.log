@@ -1,0 +1,180 @@
+make: Entering directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
+sending incremental file list
+
+sent 79 bytes  received 12 bytes  182.00 bytes/sec
+total size is 17,877  speedup is 196.45
+sending incremental file list
+
+sent 72 bytes  received 12 bytes  168.00 bytes/sec
+total size is 2,807  speedup is 33.42
+sending incremental file list
+
+sent 63 bytes  received 12 bytes  150.00 bytes/sec
+total size is 884  speedup is 11.79
+rm -f build/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_std
+make[1]: Entering directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
+[BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=0)...
+/opt/riscv64/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-21_16-15-18.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/pcl/common/include -I/home/zoomin/codes/pcl/registration/include -I/home/zoomin/codes/pcl/test/include -I/home/zoomin/codes/pcl -I/home/zoomin/codes/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/riscv/boost/include -I/home/zoomin/codes/riscv/gtest/include  bench_transformation_estimation_symmetric_point_to_plane_lls.cpp -L/home/zoomin/codes/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/pcl-rvv/lib -L/home/zoomin/codes/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/boost/lib -L/home/zoomin/codes/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/gtest/lib -L/home/zoomin/codes/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/flann/lib -L/home/zoomin/codes/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/lz4/lib -L/home/zoomin/codes/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/hdf5/lib -L/home/zoomin/codes/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/zlib/lib -L/home/zoomin/codes/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/libpng/lib  -lpcl_registration -lpcl_common -lboost_filesystem -lboost_iostreams -lboost_system -lm -o build/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_std
+make[1]: Leaving directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
+sending incremental file list
+bench_transformation_estimation_symmetric_point_to_plane_lls_std_stripped
+          8,216  15%    0.00kB/s    0:00:00           52,096 100%   41.85MB/s    0:00:00 (xfr#1, to-chk=0/1)
+
+sent 24,701 bytes  received 377 bytes  16,718.67 bytes/sec
+total size is 52,096  speedup is 2.08
+rm -f build/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_rvv
+make[1]: Entering directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
+[BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
+/opt/riscv64/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-21_16-15-25.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/pcl/common/include -I/home/zoomin/codes/pcl/registration/include -I/home/zoomin/codes/pcl/test/include -I/home/zoomin/codes/pcl -I/home/zoomin/codes/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/riscv/boost/include -I/home/zoomin/codes/riscv/gtest/include  bench_transformation_estimation_symmetric_point_to_plane_lls.cpp -L/home/zoomin/codes/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/pcl-rvv/lib -L/home/zoomin/codes/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/boost/lib -L/home/zoomin/codes/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/gtest/lib -L/home/zoomin/codes/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/flann/lib -L/home/zoomin/codes/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/lz4/lib -L/home/zoomin/codes/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/hdf5/lib -L/home/zoomin/codes/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/zlib/lib -L/home/zoomin/codes/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/libpng/lib  -lpcl_registration -lpcl_common -lboost_filesystem -lboost_iostreams -lboost_system -lm -o build/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_rvv
+make[1]: Leaving directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
+sending incremental file list
+bench_transformation_estimation_symmetric_point_to_plane_lls_rvv_stripped
+          8,216  11%    0.00kB/s    0:00:00           72,592 100%   61.39MB/s    0:00:00 (xfr#1, to-chk=0/1)
+
+sent 31,412 bytes  received 449 bytes  21,240.67 bytes/sec
+total size is 72,592  speedup is 2.28
+make[1]: Entering directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
+[BUILD] Compiling Unit Test (riscv, USE_PCL_RVV10=1)...
+/opt/riscv64/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-21_16-15-32.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/pcl/common/include -I/home/zoomin/codes/pcl/registration/include -I/home/zoomin/codes/pcl/test/include -I/home/zoomin/codes/pcl -I/home/zoomin/codes/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/riscv/boost/include -I/home/zoomin/codes/riscv/gtest/include  test_transformation_estimation_symmetric_point_to_plane_lls.cpp -L/home/zoomin/codes/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/pcl-rvv/lib -L/home/zoomin/codes/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/boost/lib -L/home/zoomin/codes/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/gtest/lib -L/home/zoomin/codes/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/flann/lib -L/home/zoomin/codes/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/lz4/lib -L/home/zoomin/codes/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/hdf5/lib -L/home/zoomin/codes/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/zlib/lib -L/home/zoomin/codes/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/libpng/lib  -lpcl_registration -lpcl_common -lboost_filesystem -lboost_iostreams -lboost_system -lm -lgtest -lgtest_main -lpthread -o build/riscv/test_transformation_estimation_symmetric_point_to_plane_lls_rvv
+make[1]: Leaving directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
+sending incremental file list
+test_transformation_estimation_symmetric_point_to_plane_lls_rvv_stripped
+          6,404   4%    0.00kB/s    0:00:00          138,264 100%  125.75MB/s    0:00:00 (xfr#1, to-chk=0/1)
+
+sent 57,570 bytes  received 839 bytes  116,818.00 bytes/sec
+total size is 138,264  speedup is 2.37
+mkdir -p output/board
+[BOARD] Unit Test -> /root/pcl-test/registration/transformation_estimation_symmetric_point_to_plane_lls/output/run_test.log
+Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gtest_main.cc
+[==========] Running 15 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 15 tests from TransformationEstimationSymmetricPointToPlaneLLS
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.StdDiagnosticMatchesPublicEstimatorWithNormalDirectionGate
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.StdDiagnosticMatchesPublicEstimatorWithNormalDirectionGate (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.StdDiagnosticMatchesPublicEstimatorWithoutNormalDirectionGate
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.StdDiagnosticMatchesPublicEstimatorWithoutNormalDirectionGate (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudMatchesDiagnosticCandidate
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudMatchesDiagnosticCandidate (2 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSmallInputFallsBackToScalar
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSmallInputFallsBackToScalar (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectInvalidLaneMatchesDiagnosticCandidate
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectInvalidLaneMatchesDiagnosticCandidate (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoubleFallbackStillMatchesGroundTruth
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoubleFallbackStillMatchesGroundTruth (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.SourceIndicesOverloadRemainsScalarFallback
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SourceIndicesOverloadRemainsScalarFallback (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.SourceAndTargetIndicesOverloadRemainsScalarFallback
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SourceAndTargetIndicesOverloadRemainsScalarFallback (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudWithoutNormalDirectionGateMatchesCandidate
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudWithoutNormalDirectionGateMatchesCandidate (2 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.StdCorrespondencesMatchesPublicEstimator
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.StdCorrespondencesMatchesPublicEstimator (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.FullCloudCandidateMatchesStd
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.FullCloudCandidateMatchesStd (2 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.FullCloudCandidateWithoutNormalDirectionGateMatchesStd
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.FullCloudCandidateWithoutNormalDirectionGateMatchesStd (2 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.CorrespondenceCandidateMatchesStd
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.CorrespondenceCandidateMatchesStd (3 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.SmallInputFallsBackForIsolatedSizeGate
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SmallInputFallsBackForIsolatedSizeGate (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.InvalidLaneMaskMatchesStd
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.InvalidLaneMaskMatchesStd (1 ms)
+[----------] 15 tests from TransformationEstimationSymmetricPointToPlaneLLS (19 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 1 test suite ran. (19 ms total)
+[  PASSED  ] 15 tests.
+[BOARD] Benchmark Std -> /root/pcl-test/registration/transformation_estimation_symmetric_point_to_plane_lls/output/run_bench_std.log
+Dataset: synthetic PointNormal symmetric point-to-plane LLS diagnostic
+Iterations: 20
+Build: std
+symmetric lls production-direct full-cloud pointnormal 65536: 15.509061 ms/iter
+  Total Time: 310.181226 ms
+  Checksum: 705.309165
+symmetric lls full-cloud pointnormal 65536: 7.823827 ms/iter
+  Total Time: 156.476547 ms
+  Checksum: 706.619885
+symmetric lls correspondences pointnormal 65536: 7.182140 ms/iter
+  Total Time: 143.642806 ms
+  Checksum: 706.387934
+symmetric lls production-direct full-cloud pointnormal 262144: 61.904625 ms/iter
+  Total Time: 1238.092496 ms
+  Checksum: 705.129998
+symmetric lls full-cloud pointnormal 262144: 31.239134 ms/iter
+  Total Time: 624.782672 ms
+  Checksum: 710.372878
+symmetric lls correspondences pointnormal 262144: 28.577051 ms/iter
+  Total Time: 571.541019 ms
+  Checksum: 709.007225
+Total Time: 3044.716766 ms
+Checksum: 4242.827085
+[BOARD] Benchmark RVV -> /root/pcl-test/registration/transformation_estimation_symmetric_point_to_plane_lls/output/run_bench_rvv.log
+Dataset: synthetic PointNormal symmetric point-to-plane LLS diagnostic
+Iterations: 20
+Build: rvv
+symmetric lls production-direct full-cloud pointnormal 65536: 6.014628 ms/iter
+  Total Time: 120.292561 ms
+  Checksum: 705.322332
+symmetric lls full-cloud pointnormal 65536: 6.436235 ms/iter
+  Total Time: 128.724706 ms
+  Checksum: 706.633052
+symmetric lls correspondences pointnormal 65536: 10.332744 ms/iter
+  Total Time: 206.654871 ms
+  Checksum: 706.395925
+symmetric lls production-direct full-cloud pointnormal 262144: 23.505972 ms/iter
+  Total Time: 470.119440 ms
+  Checksum: 705.129341
+symmetric lls full-cloud pointnormal 262144: 25.895487 ms/iter
+  Total Time: 517.909735 ms
+  Checksum: 710.372221
+symmetric lls correspondences pointnormal 262144: 38.778851 ms/iter
+  Total Time: 775.577024 ms
+  Checksum: 709.010270
+Total Time: 2219.278337 ms
+Checksum: 4242.863140
+===========================================================================================================================
+ Benchmark (loose parse) (Std vs RVV)
+===========================================================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : synthetic PointNormal symmetric point-to-plane LLS diagnostic
+  Iterations: 20 （每行 Total = Avg × 20）
+  Std log   : /root/pcl-test/registration/transformation_estimation_symmetric_point_to_plane_lls/output/run_bench_std.log
+  RVV log   : /root/pcl-test/registration/transformation_estimation_symmetric_point_to_plane_lls/output/run_bench_rvv.log
+
+---------------------------------------------------------------------------------------------------------------------------
+Benchmark Item                                                 | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+symmetric lls production-direct full-cloud pointnormal 65536   | Std    |     15.5091 ms |    310.1812 ms |    [   1.00x ]
+                                                               | RVV    |      6.0146 ms |    120.2926 ms |    [   2.58x ]
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+symmetric lls full-cloud pointnormal 65536                     | Std    |      7.8238 ms |    156.4765 ms |    [   1.00x ]
+                                                               | RVV    |      6.4362 ms |    128.7247 ms |    [   1.22x ]
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+symmetric lls correspondences pointnormal 65536                | Std    |      7.1821 ms |    143.6428 ms |    [   1.00x ]
+                                                               | RVV    |     10.3327 ms |    206.6549 ms |    [   0.70x ]
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+symmetric lls production-direct full-cloud pointnormal 262144  | Std    |     61.9046 ms |   1238.0925 ms |    [   1.00x ]
+                                                               | RVV    |     23.5060 ms |    470.1194 ms |    [   2.63x ]
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+symmetric lls full-cloud pointnormal 262144                    | Std    |     31.2391 ms |    624.7827 ms |    [   1.00x ]
+                                                               | RVV    |     25.8955 ms |    517.9097 ms |    [   1.21x ]
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+symmetric lls correspondences pointnormal 262144               | Std    |     28.5771 ms |    571.5410 ms |    [   1.00x ]
+                                                               | RVV    |     38.7789 ms |    775.5770 ms |    [   0.74x ]
+---------------------------------------------------------------|--------|----------------|----------------|----------------
+===========================================================================================================================
+receiving incremental file list
+analyze_bench_compare.log
+              0   0%    0.00kB/s    0:00:00            3,454 100%    3.29MB/s    0:00:00 (xfr#1, to-chk=3/5)
+run_bench_rvv.log
+              0   0%    0.00kB/s    0:00:00              871 100%  850.59kB/s    0:00:00 (xfr#2, to-chk=2/5)
+run_bench_std.log
+              0   0%    0.00kB/s    0:00:00              872 100%  851.56kB/s    0:00:00 (xfr#3, to-chk=1/5)
+run_test.log
+              0   0%    0.00kB/s    0:00:00            3,850 100%    3.67MB/s    0:00:00 (xfr#4, to-chk=0/5)
+
+sent 160 bytes  received 2,044 bytes  4,408.00 bytes/sec
+total size is 9,047  speedup is 4.10
+make: Leaving directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'

@@ -1,0 +1,29 @@
+Dataset: synthetic PointNormal symmetric point-to-plane LLS diagnostic
+Iterations: 20
+Build: std
+symmetric lls production-direct full-cloud pointnormal 65536: 15.519532 ms/iter
+  Total Time: 310.390645 ms
+  Checksum: 705.309165
+symmetric lls production-direct full-cloud pointxyzinormal 65536: 15.503507 ms/iter
+  Total Time: 310.070141 ms
+  Checksum: 705.309165
+symmetric lls full-cloud pointnormal 65536: 7.863836 ms/iter
+  Total Time: 157.276723 ms
+  Checksum: 706.619885
+symmetric lls correspondences pointnormal 65536: 6.434312 ms/iter
+  Total Time: 128.686247 ms
+  Checksum: 706.387934
+symmetric lls production-direct full-cloud pointnormal 262144: 61.937171 ms/iter
+  Total Time: 1238.743421 ms
+  Checksum: 705.129998
+symmetric lls production-direct full-cloud pointxyzinormal 262144: 61.902156 ms/iter
+  Total Time: 1238.043120 ms
+  Checksum: 705.129998
+symmetric lls full-cloud pointnormal 262144: 31.413988 ms/iter
+  Total Time: 628.279757 ms
+  Checksum: 710.372878
+symmetric lls correspondences pointnormal 262144: 25.855734 ms/iter
+  Total Time: 517.114684 ms
+  Checksum: 709.007225
+Total Time: 4528.604738 ms
+Checksum: 5653.266247
