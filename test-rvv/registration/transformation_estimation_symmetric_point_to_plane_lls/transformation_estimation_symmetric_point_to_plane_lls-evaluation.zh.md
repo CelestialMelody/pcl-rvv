@@ -17,7 +17,7 @@
 
 ## 函数级结论
 
-当前结论是 `production-ready/generic-normal-full-cloud-and-source-indexed`（泛型 normal 全云和 source 单侧索引入口可生产接入）。本轮 production integration loop（生产接入闭环）用 row-source policy（行来源策略）统一两条已获证据支持的数据流：full-cloud（全云顺序扫描）和 source indices + target full-cloud（source 索引 + target 全云）。`PointSource` 和 `PointTarget` 必须分别满足 `x/y/z/normal_x/normal_y/normal_z` 都是单个 `float` 字段、POD（普通数据布局）/ standard-layout（标准布局）和 offset alignment（字段偏移对齐）条件，且 `Scalar=float`。source+target indices、correspondences 和 `Scalar=double` 全部保持标量 fallback（回退路径）。
+当前结论是 `production-ready/generic-normal-full-cloud-and-source-indexed`（泛型 normal 全云和 source 单侧索引入口可生产接入）。本轮 production integration loop（生产接入闭环）用 row-source policy（行来源策略）统一两条已获证据支持的数据流：full-cloud（全云顺序扫描）和 source indices + target full-cloud（source 索引 + target 全云）。后续 dispatch structure cleanup（分流结构收口）把公开 overload 整理为“语义检查 -> RVV 短路 -> Std fallback”：标量权威路径集中到 `estimateSymmetricPointNormal*Std` helper，RVV 路径集中到 `estimateSymmetricPointNormal*RVV` helper。`PointSource` 和 `PointTarget` 必须分别满足 `x/y/z/normal_x/normal_y/normal_z` 都是单个 `float` 字段、POD（普通数据布局）/ standard-layout（标准布局）和 offset alignment（字段偏移对齐）条件，且 `Scalar=float`。source+target indices、correspondences 和 `Scalar=double` 全部保持标量 fallback（回退路径）。
 
 2026-07-22 小型公共化重构后，上述点类型 gate 改由 `pcl::rvv::RVVXYZNormalFloatLayout<PointT>` 提供，本地 `SymmetricXYZNormalFloatLayout` 已删除；32-bit byte offset 边界改用 `pcl::rvv::rvvMaxU32ByteOffsetElements<PointT>()`。本轮 source-indexed production 复用这些 gate，并保持 valid-index-only 合同：RVV 不做负数或越界 index 过滤；source+target indices、correspondences 和 `Scalar=double` 不纳入 RVV production。
 
@@ -34,7 +34,7 @@ QEMU correctness（QEMU 正确性验证）通过，bench（性能测试）输出
 | `estimateRigidTransformation(cloud_src, indices_src, cloud_tgt, indices_tgt, matrix)` | source/target 都使用 indices。 | 两个 indices 数量一致。 |
 | `estimateRigidTransformation(cloud_src, cloud_tgt, correspondences, matrix)` | 使用 `index_query/index_match` 指定点对。 | 当前入口依赖调用方提供有效 correspondences。 |
 
-四个入口最终构造 `ConstCloudIterator`，进入 protected helper：
+四个入口的 Std helper 最终构造 `ConstCloudIterator`，进入共同标量 helper：
 
 ```text
 estimateRigidTransformation(source_it, target_it, transformation_matrix)
@@ -66,7 +66,7 @@ d = (qx - px) * nx + (qy - py) * ny + (qz - pz) * nz
 
 | 路径 | 当前处理 | 证据边界 |
 | --- | --- | --- |
-| 全云顺序扫描 | `n >= 64`、`vlmax_e32m2 <= 64` 且 32-bit byte offset 可表达时走 RVV。production 使用 traits offset 分别读取 source/target 坐标和 normal。 | production direct 已接入 generic normal / `float` full-cloud，板卡 `PointNormal` 为 `2.66x` / `2.68x`，`PointXYZINormal` 为 `2.68x` / `2.66x`。 |
+| 全云顺序扫描 | `n >= 64`、`vlmax_e32m2 <= 64` 且 32-bit byte offset 可表达时走 RVV。production 使用 traits offset 分别读取 source/target 坐标和 normal。 | production direct 已接入 generic normal / `float` full-cloud，板卡 `PointNormal` 为 `2.71x` / `2.70x`，`PointXYZINormal` 为 `2.71x` / `2.48x`。 |
 | source indices + target full-cloud | source 侧加载 index stream 后 gather 点字段，target 侧保持顺序 stride load。 | production direct 已接入 valid-index-only generic normal / `float` source-indexed，板卡 `PointNormal` 为 `2.11x` / `1.87x`，`PointXYZINormal` 为 `2.10x` / `1.90x`。 |
 | source indices + target indices | source/target 两侧各自加载独立 index stream 后 gather 点字段，不解析 `pcl::Correspondence`，不展开 `correspondence.weight`。 | test-rvv diagnostic 层板卡 `0.80x` / `0.63x`，说明双侧 gather 成本可与 correspondence 展开分离，但当前已经负向；不接 production。 |
 | 对应关系索引 | 先展开 `src_indices/tgt_indices`，再用 `vluxei32.v` gather 点字段。 | QEMU correctness 通过，板卡 `0.77x` / `0.86x` 退化，不接 production；退化仍是多因素待消融假设。 |
@@ -80,7 +80,7 @@ d = (qx - px) * nx + (qy - py) * ny + (qz - pz) * nz
 | --- | --- | --- | --- |
 | 直接 vector reduction（向量规约）累加 27 项 | 暂缓 | 会改变 `ATA/ATb` 的累加树，需先定义误差预算。 | 需要 adversarial case（对抗样本）、误差预算和目标硬件 bench。 |
 | `vcompress + buffer + scalar tail` | 采用为诊断方案 | 保持有效 lane 顺序，便于与 production 逐点扫描对齐。 | 额外 store/load 成本高；GCC 还可能自动生成 `vfredosum.vs`，生产接入前必须显式控制。 |
-| 全云 production direct | 已接入 generic normal production | 板卡 `PointNormal` production-direct `2.66x` / `2.68x`，`PointXYZINormal` production-direct `2.68x` / `2.66x`，真实公开入口证据闭合。 | 仅覆盖 `Scalar=float` / full-cloud，且点类型必须满足 normal traits gate。 |
+| 全云 production direct | 已接入 generic normal production | 板卡 `PointNormal` production-direct `2.71x` / `2.70x`，`PointXYZINormal` production-direct `2.71x` / `2.48x`，真实公开入口证据闭合。 | 仅覆盖 `Scalar=float` / full-cloud，且点类型必须满足 normal traits gate。 |
 | source-indices production direct | 已接入 generic normal production | 板卡 `PointNormal` production-direct `2.11x` / `1.87x`，`PointXYZINormal` production-direct `2.10x` / `1.90x`，真实公开入口证据闭合。 | 仅覆盖 valid-index-only、`Scalar=float`、source indices + target full-cloud；不证明非法 index、dual-indices 或 correspondences。 |
 | dual-indices diagnostic | 保留在 test-rvv | 使用独立 target index stream 后，板卡 `0.80x` / `0.63x`，说明双侧 gather 成本可与 correspondence 展开分离，但当前不足以作为 production 候选。 | 没有 production direct 证据；非法 index 行为不覆盖。 |
 | correspondences production | 不接入 | 板卡 `0.77x` / `0.86x` 明确负向。 | 退化仍是多因素假设，不能归因为 gather 单一原因。 |
@@ -189,7 +189,7 @@ QEMU bench compare 可解析，std/RVV checksum 基本对齐。QEMU timing 显�
 - QEMU std/RVV 专项测试各 25 个通过，板卡 RVV test 25 个通过。
 - QEMU bench 输出合同可解析，checksum 基本对齐。
 - 反汇编证明真实 public full-cloud 和 source-indices estimator 分别调用 `SymmetricFullCloudRowSource` 与 `SymmetricSourceIndexedRowSource` production helper 模板实例，并揭示自动 partial vector accumulation。
-- 板卡 production-direct `PointNormal` full-cloud 64K / 256K 为 `2.66x` / `2.68x`；`PointXYZINormal` full-cloud 64K / 256K 为 `2.68x` / `2.66x`。
+- 板卡 production-direct `PointNormal` full-cloud 64K / 256K 为 `2.71x` / `2.70x`；`PointXYZINormal` full-cloud 64K / 256K 为 `2.71x` / `2.48x`。
 - 板卡 production-direct `PointNormal` source-indices 64K / 256K 为 `2.11x` / `1.87x`；`PointXYZINormal` 为 `2.10x` / `1.90x`。
 - test-rvv dual-indices 使用独立 target stream 后为 `0.80x` / `0.63x`，correspondences 为 `0.77x` / `0.86x`。
 

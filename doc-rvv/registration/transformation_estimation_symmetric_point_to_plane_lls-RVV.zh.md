@@ -2,7 +2,7 @@
 
 ## 收尾摘要
 
-`TransformationEstimationSymmetricPointToPlaneLLS::estimateRigidTransformation` 已完成第三轮 production integration loop（生产接入闭环）。production（生产源码）现在用 row-source policy（行来源策略）统一两条已获证据支持的数据流：full-cloud（全云顺序扫描）和 source indices + target full-cloud（source 索引 + target 全云）。两条路径共用后半段 RVV symmetric row pipeline（对称行公式流水线）：法线同向选择、finite mask（有限值掩码）、`(p + q).cross(n)` 公式、`vcompress` 压缩和 `ATA/ATb` 尾段累加；policy 只负责“前半段如何取 source/target row”。`PointSource` 和 `PointTarget` 仍必须分别满足 `x/y/z/normal_x/normal_y/normal_z` 都是单个 `float` 字段、POD（普通数据布局）/ standard-layout（标准布局）和 offset alignment（字段偏移对齐）条件，`Scalar=float`。source+target indices、correspondences 和 `Scalar=double` 继续走原 `ConstCloudIterator` 标量路径。
+`TransformationEstimationSymmetricPointToPlaneLLS::estimateRigidTransformation` 已完成第三轮 production integration loop（生产接入闭环），并在后续 dispatch structure cleanup（分流结构收口）中对齐 PCL 既有 SIMD 源码组织风格。production（生产源码）现在用 row-source policy（行来源策略）统一两条已获证据支持的数据流：full-cloud（全云顺序扫描）和 source indices + target full-cloud（source 索引 + target 全云）。两条路径共用后半段 RVV symmetric row pipeline（对称行公式流水线）：法线同向选择、finite mask（有限值掩码）、`(p + q).cross(n)` 公式、`vcompress` 压缩和 `ATA/ATb` 尾段累加；policy 只负责“前半段如何取 source/target row”。公开 overload 现在保持为“语义检查 -> RVV 短路 -> Std fallback”的小型分发层，标量权威路径集中到 `estimateSymmetricPointNormal*Std` helper，RVV 路径仍由 `estimateSymmetricPointNormal*RVV` helper 负责。`PointSource` 和 `PointTarget` 仍必须分别满足 `x/y/z/normal_x/normal_y/normal_z` 都是单个 `float` 字段、POD（普通数据布局）/ standard-layout（标准布局）和 offset alignment（字段偏移对齐）条件，`Scalar=float`。source+target indices、correspondences 和 `Scalar=double` 继续走 `Std` 标量路径。
 
 QEMU correctness（QEMU 正确性验证，不代表真实性能）通过，bench（性能测试）输出合同可解析，反汇编证明真实 public estimator（公开估计器）会调用 `pcl::registration::detail::estimateSymmetricPointNormalRowsRVV<RowSourcePolicy>`。生产 helper 模板实例覆盖 full-cloud 的 `PointNormal -> PointNormal`、`PointXYZINormal -> PointXYZINormal`，以及 source-indexed 的 `PointNormal -> PointNormal`、`PointXYZINormal -> PointXYZINormal`。反汇编中 full-cloud policy 可见 `vlse32.v` stride load；source-indexed policy 可见 `vle32.v` 读取 source index stream、`vmul.vx` 生成 byte offset、source `vluxei32.v` gather 和 target `vlse32.v` stride load。板卡 `board_smoke` 已在 Milkv-Jupiter 上通过 25 个专项测试；production-direct full-cloud `PointNormal` 64K / 256K 为 `2.71x` / `2.70x`，`PointXYZINormal` 64K / 256K 为 `2.71x` / `2.48x`；production-direct source-indexed `PointNormal` 为 `2.11x` / `1.87x`，`PointXYZINormal` 为 `2.10x` / `1.90x`。diagnostic dual-indices 仍为 `0.80x` / `0.63x`，correspondences 为 `0.77x` / `0.86x`。因此本主题当前 production 结论升级为 `production-ready/generic-normal-full-cloud-and-source-indexed`（泛型 normal 全云和 source 单侧索引入口可生产接入）：只批准 full-cloud 与 source-indexed `Scalar=float` 且满足 normal traits gate 的点类型分流；dual-indices 和 correspondences 不接 production，correspondences 退化主因仍是多因素待消融假设。
 
@@ -34,7 +34,7 @@ source / target iterator
 
 ## 2. 标量路径与诊断边界
 
-production 源码在公开入口里构造 `ConstCloudIterator`（常量点云迭代器），把不同入口统一成 source/target 同步逐点流。helper 内部看不到“这是全云还是 correspondences”的显式分支；它只看到两个 iterator 依次给出的当前点。
+标量源码通过 `estimateSymmetricPointNormal*Std` helper 构造 `ConstCloudIterator`（常量点云迭代器），把不同入口统一成 source/target 同步逐点流。核心标量 helper 内部看不到“这是全云还是 correspondences”的显式分支；它只看到两个 iterator 依次给出的当前点。公开 overload 不再直接展开 iterator fallback，而是只做参数检查、RVV 短路和 Std helper 调用。
 
 逐点标量语义是：
 
@@ -322,7 +322,7 @@ estimateRigidTransformation(const pcl::PointCloud<PointSource>& cloud_src,
                             Matrix4& transformation_matrix) const
 ```
 
-PI2 production patch（生产补丁）把 full-cloud dispatch（分流逻辑）和 source-indexed dispatch 都接到同一个 `estimateSymmetricPointNormalRowsRVV<RowSourcePolicy>` 后半段。full-cloud 使用 `SymmetricFullCloudRowSource`，source indices + target full-cloud 使用 `SymmetricSourceIndexedRowSource`。两条分流都放在各自 overload 完成 size check 之后、构造 `ConstCloudIterator` 之前。source indices + target indices 和 correspondences 两个公开 overload 不改动，继续构造 iterator 并进入原标量 helper。dual-indices 使用独立 target index stream 后已转负，不能替代 production direct 证据；correspondences 的退化仍是 index 展开、gather、压缩、tail、row 分布和入口展开等多因素待消融假设。
+PI2 production patch（生产补丁）把 full-cloud dispatch（分流逻辑）和 source-indexed dispatch 都接到同一个 `estimateSymmetricPointNormalRowsRVV<RowSourcePolicy>` 后半段。full-cloud 使用 `SymmetricFullCloudRowSource`，source indices + target full-cloud 使用 `SymmetricSourceIndexedRowSource`。后续结构收口把公开 overload 整理为“size check / indices size check -> RVV 短路 -> `estimateSymmetricPointNormal*Std` fallback”，使标量 fallback 与 RVV 主路径都具有稳定 helper 名称。source indices + target indices 和 correspondences 两个公开 overload 不接 RVV，直接调用对应 `Std` helper。dual-indices 使用独立 target index stream 后已转负，不能替代 production direct 证据；correspondences 的退化仍是 index 展开、gather、压缩、tail、row 分布和入口展开等多因素待消融假设。
 
 PI2 采用受 traits gate 约束的泛型 normal production patch，而不是无条件泛型接入：
 
@@ -347,8 +347,7 @@ full-cloud public overload
        try estimateSymmetricPointNormalFullCloudRVV(...)
        if true: return
      #endif
-  -> ConstCloudIterator source/target
-  -> existing scalar helper
+  -> estimateSymmetricPointNormalFullCloudStd(...)
 
 source-indices public overload
   -> size check
@@ -356,8 +355,11 @@ source-indices public overload
        try estimateSymmetricPointNormalSourceIndicesRVV(...)
        if true: return
      #endif
-  -> ConstCloudIterator source(indices)/target
-  -> existing scalar helper
+  -> estimateSymmetricPointNormalSourceIndicesStd(...)
+
+source+target indices / correspondences public overload
+  -> size check when the overload has paired indices
+  -> estimateSymmetricPointNormal*Std(...)
 ```
 
 RVV helper 只接管逐点热点：row-source policy 先按 stride 或 gather 读取 source/target xyz 和 normal，公共后半段完成同向 normal 选择、finite mask、`(p + q).cross(n)` 和 `(q - p).dot(n)` staging，然后按压缩后的有效 lane 累加 normal equation。Eigen LDLT solve 和 4x4 matrix 构造仍在 helper 内保持标量结构。
