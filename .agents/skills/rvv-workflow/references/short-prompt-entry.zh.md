@@ -151,6 +151,13 @@ FMA（融合乘加）、板卡性能或 no-production closeout（不接入生产
 `rvv-documentation`、`rvv-diagnostics` 和 `rvv-benchmarking` 详细 reference。短 prompt
 只负责启动变短，不降低 worker 产物质量门槛。
 
+短 prompt worker 不要求用户显式写“检索历史经验”。worker 选中 topic 并读取当前源码/文档后，
+如果发现多公开入口、indices、correspondences、weights、staging、policy、row source、
+common pipeline 或类似数据流分发信号，应按 `.agents/knowledge/pcl-rvv-knowledge-map.md`
+的 `Historical Analogy Retrieval Pattern` 自动检索同模块历史 topic 和 dataflows 文档。
+检索结果只能作为候选设计、风险提示和证据计划来源；不能因为历史 topic 用过某个 helper 或
+production 决策，就跳过当前源码复核、QEMU correctness、反汇编和板卡证据。
+
 如果短 prompt 是“继续当前 topic”或“进入下一阶段”，worker 应先读取最近 work log（工作日志）
 或 Handoff Packet，恢复 `phase_reached`、`current_decision`、`next_worker_action_if_review_passes`
 和 evidence paths（证据路径）。`next_worker_action_if_review_passes` 是默认续作入口；除非用户新指令覆盖，

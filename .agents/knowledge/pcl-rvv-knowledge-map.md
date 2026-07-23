@@ -31,8 +31,11 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 5. 如果任务是选题或恢复工作，读取 `doc-rvv/library-screening/` 中的状态和队列文档。
 6. 如果任务需要通用 RVV 规则，读取 `doc-rvv/rvv/` 下的相关窄文件；涉及模板点类型、traits、字段 offset、POD / standard-layout、或从具体点类型诊断扩展到 production 泛型入口时，优先读取 `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`。
 7. 如果任务针对已有 topic，读取 `doc-rvv/<module>/` 下的对应 topic 文档。
-8. 用当前源码和当前 git diff 复核文档结论。
-9. 只在需要证明具体结论时，读取 `test-rvv/<module>/<topic>/` 下的测试、bench、脚本或日志。
+8. 如果当前 topic 暴露出多种公开入口、indices、correspondences、weights、staging、
+   policy、row source 或相似数据流分发问题，按“Historical Analogy Retrieval Pattern”
+   做同模块历史类比检索。
+9. 用当前源码和当前 git diff 复核文档结论。
+10. 只在需要证明具体结论时，读取 `test-rvv/<module>/<topic>/` 下的测试、bench、脚本或日志。
 
 ## Authority and Freshness（权威性与新鲜度）
 
@@ -63,6 +66,35 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 5. 检查当前源码里的公开入口、helper、fallback 和 `__RVV10__` 分支。
 6. 只为验证当前问题，读取 `test-rvv/<module>/<topic>/` 下必要的测试、bench、脚本或日志。
 7. 结论中分开说明 correctness（正确性）、QEMU path evidence（QEMU 路径证据）、disassembly evidence（反汇编证据）、board performance（板卡性能）和 production decision（生产接入判断）。
+
+## Historical Analogy Retrieval Pattern（历史类比检索模式）
+
+当当前 topic 出现下列信号时，worker 应自动检索同模块历史经验，不需要用户在短 prompt
+里额外说明：
+
+- 公开入口不止一种，例如 full-cloud、indices、dual indices、correspondences、weights。
+- 标量源码通过 iterator、helper 或对象状态把不同入口统一起来，但 RVV 需要重新区分
+  stride load（跨步加载）、gather（离散加载）、weight load（权重加载）或 append tail（追加尾段）。
+- 设计中出现 staging（分阶段暂存）、row source / weight source、policy（策略类型）、
+  common pipeline（共同流水线）、scalar tail（标量尾段）或 production integration loop
+  （生产接入闭环）。
+- 当前 topic 的 bench 结果需要解释“数学相同但数据流不同”“诊断正向但 production 未接”
+  或“某条 indexed / correspondence 路径退化原因不能单因归因”。
+
+检索方式：
+
+1. 先读当前 topic 文档和当前源码，确认当前问题，而不是先套历史模板。
+2. 在同模块 `doc-rvv/<module>/` 中优先查找 dataflows（数据流）总览、同系列函数文档和
+   closeout 摘要；必要时用 `rg` 搜索 `indices`、`correspondences`、`weight`、
+   `staging`、`policy`、`row source`、`production-ready`、`bench-only` 等窄关键词。
+3. 只打开命中的窄文档和必要段落；不要全量加载 `doc-rvv/` 或无关模块。
+4. 把历史经验写成候选设计或风险清单，例如“可以尝试 row-source policy”、
+   “weight 来源应拆成独立 policy”、“correspondence append 保持标量尾段”等。
+5. 用当前源码、当前 diff、QEMU correctness、反汇编和板卡证据重新闭合结论；历史 topic
+   只能启发检索和设计，不能替代当前 topic 的证据。
+
+这个模式沉淀的是“如何找相似经验”，不是某个 topic 的固定做法。不要在 agent 资产中写死某个
+函数必须采用某个 helper 名称，也不要把 historical topic reports 当作 normative rules（规范规则）。
 
 ## Maintenance Rules（维护规则）
 

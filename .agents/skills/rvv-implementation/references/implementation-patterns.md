@@ -10,6 +10,19 @@ public entry
 
 `*_Std` 保留原标量语义，非 RVV 构建、未覆盖类型、小规模、non-dense、indexed 等路径必须自然落回 Std。
 
+公开入口应尽量只保留上游语义检查和短路 dispatch（分流）。如果 RVV 接入后公开入口里同时出现
+非平凡 RVV gate、iterator 构造和标量主体调用，优先抽成命名清楚的 `*_Std` / `*_RVV`
+helper，让 reviewer 可以一眼看出：
+
+- 哪段是原标量权威路径。
+- 哪段是 RVV 候选路径。
+- 哪些公开 overload 只自然落回 Std。
+- 哪些 fallback 没有改变原入口语义。
+
+已有 SSE/AVX/NEON 风格的文件尤其应保持这种组织方式；新增 RVV 不应把 public entry 变成大段
+实现主体。多个公开入口共享同一数学 pipeline 时，可以用 policy（策略类型）复用内部实现，但
+公开入口仍应呈现为“检查 -> RVV 短路 -> Std fallback”的小型分发层。
+
 ## 命名
 
 - 承载 RVV 指令或公开短路分流的 helper 可使用 `*_RVV`。

@@ -108,6 +108,9 @@ PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 �
 - `pi2_scope`：入口、点类型、`Scalar`、数据布局、规模 gate 和不可触碰路径。
 - `forbidden_expansion`：不得扩大到 PI1 未授权的泛型、indices、correspondences、public API 或公共 helper 变更。
 - `fallback_matrix`：非 RVV 构建、非覆盖点类型、`Scalar=double`、小输入、VLEN/buffer、indices、correspondences 等回退项。
+- `entry_structure`：公开入口是否只做上游语义检查和短路分流；标量权威路径是否抽成清晰的
+  `*_Std` helper；RVV 主路径是否抽成清晰的 `*_RVV` helper；多个入口共享 policy 时，public
+  overload 仍不能堆叠大段 RVV gate 或标量主体。
 - `evidence_commands`：PI3/PI4 需要运行的 test、bench、asm 和 board 命令。
 - `pause_conditions`：命中 `topic-lifecycle.zh.md` 中连续推进暂停条件时停止并输出 Handoff Packet。
 
@@ -116,6 +119,8 @@ PI2-PI5 结束后，Handoff Packet 必须新增或等价覆盖：
 - `production_patch_summary`：生产补丁范围和未触碰路径。
 - `production_direct_results`：真实公开入口命中 RVV 的测试结果。
 - `fallback_results`：每个 fallback gate 的测试或构建证据。
+- `entry_structure_review`：是否复核 public entry / `*_Std` / `*_RVV` 分层符合所在文件已有
+  SIMD 或 PCL 源码风格；若因旧接口或模板限制无法完全拆分，说明保留原因。
 - `asm_hotspot_attribution`：按 production 符号范围归属关键 RVV 指令。
 - `board_production_results`：目标硬件 production direct bench 结果；若未运行，写明阻塞原因。
 - `pi5_evidence_decision`：基于 production direct 证据的新 EvidenceDecision。
