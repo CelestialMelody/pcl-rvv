@@ -1,29 +1,39 @@
 Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gtest_main.cc
-[==========] Running 18 tests from 1 test suite.
+[==========] Running 25 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 18 tests from TransformationEstimationSymmetricPointToPlaneLLS
+[----------] 25 tests from TransformationEstimationSymmetricPointToPlaneLLS
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.StdDiagnosticMatchesPublicEstimatorWithNormalDirectionGate
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.StdDiagnosticMatchesPublicEstimatorWithNormalDirectionGate (4 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.StdDiagnosticMatchesPublicEstimatorWithoutNormalDirectionGate
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.StdDiagnosticMatchesPublicEstimatorWithoutNormalDirectionGate (1 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudMatchesDiagnosticCandidate
-[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudMatchesDiagnosticCandidate (5 ms)
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudMatchesDiagnosticCandidate (4 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSmallInputFallsBackToScalar
-[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSmallInputFallsBackToScalar (1 ms)
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSmallInputFallsBackToScalar (0 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectInvalidLaneMatchesDiagnosticCandidate
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectInvalidLaneMatchesDiagnosticCandidate (2 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectPointXYZINormalFullCloudMatchesPointNormalReference
-[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectPointXYZINormalFullCloudMatchesPointNormalReference (4 ms)
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectPointXYZINormalFullCloudMatchesPointNormalReference (5 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectMixedNormalLayoutsMatchPointNormalReference
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectMixedNormalLayoutsMatchPointNormalReference (4 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoubleFallbackStillMatchesGroundTruth
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoubleFallbackStillMatchesGroundTruth (2 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoublePointXYZINormalFallbackStillMatchesGroundTruth
-[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoublePointXYZINormalFallbackStillMatchesGroundTruth (1 ms)
-[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.SourceIndicesOverloadRemainsScalarFallback
-[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SourceIndicesOverloadRemainsScalarFallback (1 ms)
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoublePointXYZINormalFallbackStillMatchesGroundTruth (2 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSourceIndicesMatchesCandidate
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSourceIndicesMatchesCandidate (2 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectPointXYZINormalSourceIndicesMatchesPointNormalReference
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectPointXYZINormalSourceIndicesMatchesPointNormalReference (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoubleSourceIndicesFallbackStillMatchesReference
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ScalarDoubleSourceIndicesFallbackStillMatchesReference (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectMixedNormalLayoutsSourceIndicesMatchPointNormalReference
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectMixedNormalLayoutsSourceIndicesMatchPointNormalReference (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSourceIndicesInvalidLaneMatchesReference
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectSourceIndicesInvalidLaneMatchesReference (0 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.SourceIndicesOverloadSmallInputFallsBackToScalar
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SourceIndicesOverloadSmallInputFallsBackToScalar (0 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.SourceAndTargetIndicesOverloadRemainsScalarFallback
-[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SourceAndTargetIndicesOverloadRemainsScalarFallback (1 ms)
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SourceAndTargetIndicesOverloadRemainsScalarFallback (0 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudWithoutNormalDirectionGateMatchesCandidate
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.ProductionDirectFullCloudWithoutNormalDirectionGateMatchesCandidate (4 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.StdCorrespondencesMatchesPublicEstimator
@@ -34,12 +44,16 @@ Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gte
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.FullCloudCandidateWithoutNormalDirectionGateMatchesStd (3 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.CorrespondenceCandidateMatchesStd
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.CorrespondenceCandidateMatchesStd (5 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.SourceIndicesCandidateMatchesStd
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SourceIndicesCandidateMatchesStd (5 ms)
+[ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.DualIndicesCandidateMatchesStd
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.DualIndicesCandidateMatchesStd (4 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.SmallInputFallsBackForIsolatedSizeGate
 [       OK ] TransformationEstimationSymmetricPointToPlaneLLS.SmallInputFallsBackForIsolatedSizeGate (0 ms)
 [ RUN      ] TransformationEstimationSymmetricPointToPlaneLLS.InvalidLaneMaskMatchesStd
-[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.InvalidLaneMaskMatchesStd (2 ms)
-[----------] 18 tests from TransformationEstimationSymmetricPointToPlaneLLS (54 ms total)
+[       OK ] TransformationEstimationSymmetricPointToPlaneLLS.InvalidLaneMaskMatchesStd (1 ms)
+[----------] 25 tests from TransformationEstimationSymmetricPointToPlaneLLS (69 ms total)
 
 [----------] Global test environment tear-down
-[==========] 18 tests from 1 test suite ran. (57 ms total)
-[  PASSED  ] 18 tests.
+[==========] 25 tests from 1 test suite ran. (72 ms total)
+[  PASSED  ] 25 tests.

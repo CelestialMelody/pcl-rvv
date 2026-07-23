@@ -1,36 +1,60 @@
 make[1]: Entering directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
 rm -f build/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_rvv
 [BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
-/opt/riscv64/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-22_11-40-25.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/pcl/common/include -I/home/zoomin/codes/pcl/registration/include -I/home/zoomin/codes/pcl/test/include -I/home/zoomin/codes/pcl -I/home/zoomin/codes/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/riscv/boost/include -I/home/zoomin/codes/riscv/gtest/include  bench_transformation_estimation_symmetric_point_to_plane_lls.cpp -L/home/zoomin/codes/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/pcl-rvv/lib -L/home/zoomin/codes/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/boost/lib -L/home/zoomin/codes/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/gtest/lib -L/home/zoomin/codes/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/flann/lib -L/home/zoomin/codes/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/lz4/lib -L/home/zoomin/codes/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/hdf5/lib -L/home/zoomin/codes/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/zlib/lib -L/home/zoomin/codes/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/libpng/lib  -lpcl_registration -lpcl_common -lboost_filesystem -lboost_iostreams -lboost_system -lm -o build/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_rvv
+/opt/riscv64/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-23_10-51-18.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/pcl/common/include -I/home/zoomin/codes/pcl/registration/include -I/home/zoomin/codes/pcl/test/include -I/home/zoomin/codes/pcl -I/home/zoomin/codes/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/riscv/boost/include -I/home/zoomin/codes/riscv/gtest/include  bench_transformation_estimation_symmetric_point_to_plane_lls.cpp -L/home/zoomin/codes/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/pcl-rvv/lib -L/home/zoomin/codes/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/boost/lib -L/home/zoomin/codes/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/gtest/lib -L/home/zoomin/codes/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/flann/lib -L/home/zoomin/codes/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/lz4/lib -L/home/zoomin/codes/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/hdf5/lib -L/home/zoomin/codes/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/zlib/lib -L/home/zoomin/codes/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/libpng/lib  -lpcl_registration -lpcl_common -lboost_filesystem -lboost_iostreams -lboost_system -lm -o build/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_rvv
 [RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
 LD_LIBRARY_PATH=/home/zoomin/codes/riscv/pcl-rvv/lib:/home/zoomin/codes/riscv/boost/lib:/home/zoomin/codes/riscv/gtest/lib:/home/zoomin/codes/riscv/flann/lib:/home/zoomin/codes/riscv/lz4/lib:/home/zoomin/codes/riscv/hdf5/lib:/home/zoomin/codes/riscv/zlib/lib:/home/zoomin/codes/riscv/libpng/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_transformation_estimation_symmetric_point_to_plane_lls_rvv 
 Dataset: synthetic PointNormal symmetric point-to-plane LLS diagnostic
 Iterations: 20
 Build: rvv
-symmetric lls production-direct full-cloud pointnormal 65536: 21.077173 ms/iter
-  Total Time: 421.543453 ms
+symmetric lls production-direct full-cloud pointnormal 65536: 20.809781 ms/iter
+  Total Time: 416.195611 ms
   Checksum: 705.322332
-symmetric lls production-direct full-cloud pointxyzinormal 65536: 20.794811 ms/iter
-  Total Time: 415.896212 ms
+symmetric lls production-direct full-cloud pointxyzinormal 65536: 20.868502 ms/iter
+  Total Time: 417.370046 ms
   Checksum: 705.322332
-symmetric lls full-cloud pointnormal 65536: 21.134624 ms/iter
-  Total Time: 422.692477 ms
+symmetric lls production-direct source-indices pointnormal 65536: 15.009637 ms/iter
+  Total Time: 300.192743 ms
+  Checksum: 705.331715
+symmetric lls production-direct source-indices pointxyzinormal 65536: 14.790742 ms/iter
+  Total Time: 295.814834 ms
+  Checksum: 705.331715
+symmetric lls full-cloud pointnormal 65536: 21.524310 ms/iter
+  Total Time: 430.486205 ms
   Checksum: 706.633052
-symmetric lls correspondences pointnormal 65536: 16.241117 ms/iter
-  Total Time: 324.822346 ms
+symmetric lls source-indices pointnormal 65536: 15.870950 ms/iter
+  Total Time: 317.419001 ms
+  Checksum: 706.281235
+symmetric lls dual-indices pointnormal 65536: 14.955887 ms/iter
+  Total Time: 299.117733 ms
+  Checksum: 695.704571
+symmetric lls correspondences pointnormal 65536: 16.226240 ms/iter
+  Total Time: 324.524803 ms
   Checksum: 706.395925
-symmetric lls production-direct full-cloud pointnormal 262144: 83.804453 ms/iter
-  Total Time: 1676.089061 ms
+symmetric lls production-direct full-cloud pointnormal 262144: 83.727758 ms/iter
+  Total Time: 1674.555161 ms
   Checksum: 705.129341
-symmetric lls production-direct full-cloud pointxyzinormal 262144: 84.019495 ms/iter
-  Total Time: 1680.389899 ms
+symmetric lls production-direct full-cloud pointxyzinormal 262144: 84.553632 ms/iter
+  Total Time: 1691.072631 ms
   Checksum: 705.129341
-symmetric lls full-cloud pointnormal 262144: 86.184100 ms/iter
-  Total Time: 1723.682003 ms
+symmetric lls production-direct source-indices pointnormal 262144: 60.816526 ms/iter
+  Total Time: 1216.330513 ms
+  Checksum: 705.310309
+symmetric lls production-direct source-indices pointxyzinormal 262144: 59.869188 ms/iter
+  Total Time: 1197.383758 ms
+  Checksum: 705.310309
+symmetric lls full-cloud pointnormal 262144: 86.457870 ms/iter
+  Total Time: 1729.157409 ms
   Checksum: 710.372221
-symmetric lls correspondences pointnormal 262144: 66.796979 ms/iter
-  Total Time: 1335.939574 ms
+symmetric lls source-indices pointnormal 262144: 63.658349 ms/iter
+  Total Time: 1273.166973 ms
+  Checksum: 709.108249
+symmetric lls dual-indices pointnormal 262144: 61.073161 ms/iter
+  Total Time: 1221.463226 ms
+  Checksum: 711.016202
+symmetric lls correspondences pointnormal 262144: 66.318557 ms/iter
+  Total Time: 1326.371149 ms
   Checksum: 709.010270
-Total Time: 8001.055025 ms
-Checksum: 5653.314813
+Total Time: 14130.621796 ms
+Checksum: 11296.709120
 make[1]: Leaving directory '/home/zoomin/codes/pcl/test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls'
