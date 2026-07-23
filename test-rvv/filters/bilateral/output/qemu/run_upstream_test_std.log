@@ -3,9 +3,9 @@ Note: Google Test filter = FastBilateralFilter.Filters_Bilateral
 [----------] Global test environment set-up.
 [----------] 1 test from FastBilateralFilter
 [ RUN      ] FastBilateralFilter.Filters_Bilateral
-[       OK ] FastBilateralFilter.Filters_Bilateral (279 ms)
-[----------] 1 test from FastBilateralFilter (280 ms total)
+[       OK ] FastBilateralFilter.Filters_Bilateral (224 ms)
+[----------] 1 test from FastBilateralFilter (225 ms total)
 
 [----------] Global test environment tear-down
-[==========] 1 test from 1 test suite ran. (284 ms total)
+[==========] 1 test from 1 test suite ran. (228 ms total)
 [  PASSED  ] 1 test.

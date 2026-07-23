@@ -4,7 +4,7 @@
 [Benchmark Context]
   Device    : RISC-V RVV target (qemu, rv64gcv)
   VLEN      : 256-bit (vlen=256, elen=64)
-  Dataset   : synthetic PointXYZI grid clouds; BilateralFilter radiusSearch full diagnostic and neighbor weight staging
+  Dataset   : synthetic PointXYZI/PointXYZINormal grid clouds; BilateralFilter radiusSearch full diagnostic and neighbor weight staging
   Iterations: 3 （每行 Total = Avg × 3）
   Std log   : output/qemu/run_bench_std.log
   RVV log   : output/qemu/run_bench_rvv.log
@@ -12,34 +12,40 @@
 ------------------------------------------------------------------------------------------------------------
 Benchmark Item                                  | Impl   |       Avg (ms) |     Total (ms) |        Speedup
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral neighbor weight-stage diag 512        | Std    |      0.1160 ms |      0.3480 ms |    [   1.00x ]
-                                                | RVV    |      0.8134 ms |      2.4402 ms |    [   0.14x ]
+bilateral neighbor weight-stage diag 512        | Std    |      0.1181 ms |      0.3543 ms |    [   1.00x ]
+                                                | RVV    |      0.1074 ms |      0.3222 ms |    [   1.10x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral full diag 256 radiusSearch            | Std    |     23.4553 ms |     70.3659 ms |    [   1.00x ]
-                                                | RVV    |     24.1087 ms |     72.3261 ms |    [   0.97x ]
+bilateral full diag 256 radiusSearch            | Std    |     23.6718 ms |     71.0154 ms |    [   1.00x ]
+                                                | RVV    |     22.9550 ms |     68.8650 ms |    [   1.03x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral full diag 1K radiusSearch             | Std    |    145.9484 ms |    437.8452 ms |    [   1.00x ]
-                                                | RVV    |    161.4516 ms |    484.3548 ms |    [   0.90x ]
+bilateral full diag 1K radiusSearch             | Std    |    146.8109 ms |    440.4327 ms |    [   1.00x ]
+                                                | RVV    |    142.2863 ms |    426.8589 ms |    [   1.03x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral subset full diag 1K radiusSearch      | Std    |     72.7035 ms |    218.1105 ms |    [   1.00x ]
-                                                | RVV    |     81.3003 ms |    243.9009 ms |    [   0.89x ]
+bilateral subset full diag 1K radiusSearch      | Std    |     73.5624 ms |    220.6872 ms |    [   1.00x ]
+                                                | RVV    |     71.4322 ms |    214.2966 ms |    [   1.03x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral finite full diag 1K radiusSearch      | Std    |    143.1633 ms |    429.4899 ms |    [   1.00x ]
-                                                | RVV    |    161.3545 ms |    484.0635 ms |    [   0.89x ]
+bilateral finite full diag 1K radiusSearch      | Std    |    146.1154 ms |    438.3462 ms |    [   1.00x ]
+                                                | RVV    |    144.3249 ms |    432.9747 ms |    [   1.01x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral full exp diag 256 radiusSearch        | Std    |     23.1764 ms |     69.5292 ms |    [   1.00x ]
-                                                | RVV    |     88.6590 ms |    265.9770 ms |    [   0.26x ]
+bilateral full exp diag 256 radiusSearch        | Std    |     24.0310 ms |     72.0930 ms |    [   1.00x ]
+                                                | RVV    |     20.9384 ms |     62.8152 ms |    [   1.15x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral full exp diag 1K radiusSearch         | Std    |    144.6539 ms |    433.9617 ms |    [   1.00x ]
-                                                | RVV    |    560.4539 ms |   1681.3617 ms |    [   0.26x ]
+bilateral full exp diag 1K radiusSearch         | Std    |    145.9032 ms |    437.7096 ms |    [   1.00x ]
+                                                | RVV    |    131.4269 ms |    394.2807 ms |    [   1.11x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral subset full exp diag 1K radiusSearch  | Std    |     72.3409 ms |    217.0227 ms |    [   1.00x ]
-                                                | RVV    |    281.3680 ms |    844.1040 ms |    [   0.26x ]
+bilateral subset full exp diag 1K radiusSearch  | Std    |     73.2625 ms |    219.7875 ms |    [   1.00x ]
+                                                | RVV    |     66.5144 ms |    199.5432 ms |    [   1.10x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral production filter 256                 | Std    |     14.0235 ms |     42.0705 ms |    [   1.00x ]
-                                                | RVV    |     89.0456 ms |    267.1368 ms |    [   0.16x ]
+bilateral production filter 256                 | Std    |     13.2622 ms |     39.7866 ms |    [   1.00x ]
+                                                | RVV    |     10.6165 ms |     31.8495 ms |    [   1.25x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
-bilateral production filter 1K                  | Std    |    124.4801 ms |    373.4403 ms |    [   1.00x ]
-                                                | RVV    |    539.7842 ms |   1619.3526 ms |    [   0.23x ]
+bilateral production filter 1K                  | Std    |    126.3933 ms |    379.1799 ms |    [   1.00x ]
+                                                | RVV    |    108.4392 ms |    325.3176 ms |    [   1.17x ]
+------------------------------------------------|--------|----------------|----------------|----------------
+bilateral production normal 256                 | Std    |     13.2736 ms |     39.8208 ms |    [   1.00x ]
+                                                | RVV    |     11.0247 ms |     33.0741 ms |    [   1.20x ]
+------------------------------------------------|--------|----------------|----------------|----------------
+bilateral production normal 1K                  | Std    |    128.2468 ms |    384.7404 ms |    [   1.00x ]
+                                                | RVV    |    109.0131 ms |    327.0393 ms |    [   1.18x ]
 ------------------------------------------------|--------|----------------|----------------|----------------
 ============================================================================================================

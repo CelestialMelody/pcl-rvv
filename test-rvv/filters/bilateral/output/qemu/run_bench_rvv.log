@@ -1,51 +1,57 @@
 make[1]: Entering directory '<pcl-src>/test-rvv/filters/bilateral'
 rm -f build/riscv/bench_bilateral_rvv
 [BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
-riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-06-10_23-13-07.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/filters/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include -I<rv-install>/flann/include -I<rv-install>/lz4/include -I<rv-install>/hdf5/include -I<rv-install>/zlib/include -I<rv-install>/libpng/include -DPCL_BILATERAL_RVV_DIAGNOSTIC bench_bilateral.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_filters -lpcl_io -lpcl_search -lpcl_kdtree -lpcl_octree -lpcl_common -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_bilateral_rvv
+<riscv-toolchain>/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-23_13-41-55.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/filters/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include -I<rv-install>/flann/include -I<rv-install>/lz4/include -I<rv-install>/hdf5/include -I<rv-install>/zlib/include -I<rv-install>/libpng/include -DPCL_BILATERAL_RVV_DIAGNOSTIC bench_bilateral.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_filters -lpcl_io -lpcl_search -lpcl_kdtree -lpcl_octree -lpcl_common -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_bilateral_rvv
 [RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
 LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_bilateral_rvv
 ====================================================================================================
 PCL filters/bilateral RVV diagnostic
 Build: RVV diagnostic (__RVV10__ enabled)
-Dataset: synthetic PointXYZI grid clouds; BilateralFilter radiusSearch full diagnostic and neighbor weight staging
+Dataset: synthetic PointXYZI/PointXYZINormal grid clouds; BilateralFilter radiusSearch full diagnostic and neighbor weight staging
 Iterations: 3
 ----------------------------------------------------------------------------------------------------
-bilateral neighbor weight-stage diag 512                          : 0.8134 ms/iter
-  Total Time: 2.4403 ms, checksum: 32326117
-bilateral full diag 256 radiusSearch                              : 24.1087 ms/iter
-  Total Time: 72.3260 ms, checksum: 13969045355133458813
-bilateral full diag 1K radiusSearch                               : 161.4516 ms/iter
-  Total Time: 484.3549 ms, checksum: 18282033827491641828
-bilateral subset full diag 1K radiusSearch                        : 81.3003 ms/iter
-  Total Time: 243.9010 ms, checksum: 11711915678833038132
-bilateral finite full diag 1K radiusSearch                        : 161.3545 ms/iter
-  Total Time: 484.0634 ms, checksum: 8819174970645590401
-bilateral full exp diag 256 radiusSearch                          : 88.6590 ms/iter
-  Total Time: 265.9769 ms, checksum: 12687309538293145917
-  Error: max_abs=3.814697e-06, max_rel=1.167396e-07, rmse=1.066240e-06, p95_abs=3.814697e-06, p99_abs=3.814697e-06
-bilateral full exp diag 1K radiusSearch                           : 560.4539 ms/iter
-  Total Time: 1681.3616 ms, checksum: 11799598538268747830
-  Error: max_abs=3.814697e-06, max_rel=1.191673e-07, rmse=1.061231e-06, p95_abs=3.814697e-06, p99_abs=3.814697e-06
-bilateral subset full exp diag 1K radiusSearch                    : 281.3680 ms/iter
-  Total Time: 844.1041 ms, checksum: 12098904854932774537
-  Error: max_abs=3.814697e-06, max_rel=1.189552e-07, rmse=7.444618e-07, p95_abs=1.907349e-06, p99_abs=3.814697e-06
+bilateral neighbor weight-stage diag 512                          : 0.1074 ms/iter
+  Total Time: 0.3222 ms, checksum: 32326117
+bilateral full diag 256 radiusSearch                              : 22.9550 ms/iter
+  Total Time: 68.8651 ms, checksum: 13969045355133458813
+bilateral full diag 1K radiusSearch                               : 142.2863 ms/iter
+  Total Time: 426.8588 ms, checksum: 18282033827491641828
+bilateral subset full diag 1K radiusSearch                        : 71.4322 ms/iter
+  Total Time: 214.2967 ms, checksum: 11711915678833038132
+bilateral finite full diag 1K radiusSearch                        : 144.3249 ms/iter
+  Total Time: 432.9748 ms, checksum: 8819174970645590401
+bilateral full exp diag 256 radiusSearch                          : 20.9384 ms/iter
+  Total Time: 62.8153 ms, checksum: 7097941117337656731
+  Error: max_abs=3.814697e-06, max_rel=1.167396e-07, rmse=6.078505e-07, p95_abs=0.000000e+00, p99_abs=3.814697e-06
+bilateral full exp diag 1K radiusSearch                           : 131.4269 ms/iter
+  Total Time: 394.2806 ms, checksum: 4251937246993497068
+  Error: max_abs=3.814697e-06, max_rel=1.103407e-07, rmse=4.172325e-07, p95_abs=0.000000e+00, p99_abs=3.814697e-06
+bilateral subset full exp diag 1K radiusSearch                    : 66.5144 ms/iter
+  Total Time: 199.5433 ms, checksum: 2869893194154939448
+  Error: max_abs=3.814697e-06, max_rel=1.060088e-07, rmse=2.149076e-07, p95_abs=0.000000e+00, p99_abs=0.000000e+00
 ErrorCase: high-contrast full exp sigma_s=0.060 sigma_r=8.000
-  Error: max_abs=1.525879e-05, max_rel=1.002734e-07, rmse=2.100250e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+  Error: max_abs=1.525879e-05, max_rel=1.002734e-07, rmse=2.256805e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
 ErrorCase: high-contrast full exp sigma_s=0.090 sigma_r=18.000
-  Error: max_abs=1.525879e-05, max_rel=9.911005e-08, rmse=1.738985e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+  Error: max_abs=1.525879e-05, max_rel=9.911005e-08, rmse=1.895390e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
 ErrorCase: high-contrast full exp sigma_s=0.140 sigma_r=32.000
-  Error: max_abs=1.525879e-05, max_rel=9.917679e-08, rmse=1.748764e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+  Error: max_abs=1.525879e-05, max_rel=9.905803e-08, rmse=1.570670e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
 ProductionErrorCase: high-contrast sigma_s=0.060 sigma_r=8.000
-  Error: max_abs=1.525879e-05, max_rel=1.002734e-07, rmse=2.100250e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+  Error: max_abs=1.525879e-05, max_rel=1.002734e-07, rmse=2.256805e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
 ProductionErrorCase: high-contrast sigma_s=0.090 sigma_r=18.000
-  Error: max_abs=1.525879e-05, max_rel=9.911005e-08, rmse=1.738985e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+  Error: max_abs=1.525879e-05, max_rel=9.911005e-08, rmse=1.895390e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
 ProductionErrorCase: high-contrast sigma_s=0.140 sigma_r=32.000
-  Error: max_abs=1.525879e-05, max_rel=9.917679e-08, rmse=1.748764e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
-bilateral production filter 256                                   : 89.0456 ms/iter
-  Total Time: 267.1368 ms, checksum: 10058299795221424303
-  Error: max_abs=3.814697e-06, max_rel=1.167396e-07, rmse=1.099055e-06, p95_abs=3.814697e-06, p99_abs=3.814697e-06
-bilateral production filter 1K                                    : 539.7842 ms/iter
-  Total Time: 1619.3525 ms, checksum: 11799598538268747830
-  Error: max_abs=3.814697e-06, max_rel=1.191673e-07, rmse=1.061231e-06, p95_abs=3.814697e-06, p99_abs=3.814697e-06
+  Error: max_abs=1.525879e-05, max_rel=9.905803e-08, rmse=1.570670e-06, p95_abs=0.000000e+00, p99_abs=1.525879e-05
+bilateral production filter 256                                   : 10.6165 ms/iter
+  Total Time: 31.8496 ms, checksum: 2057837133108360223
+  Error: max_abs=3.814697e-06, max_rel=1.187915e-07, rmse=6.078505e-07, p95_abs=0.000000e+00, p99_abs=3.814697e-06
+bilateral production filter 1K                                    : 108.4392 ms/iter
+  Total Time: 325.3175 ms, checksum: 4251937246993497068
+  Error: max_abs=3.814697e-06, max_rel=1.103407e-07, rmse=4.172325e-07, p95_abs=0.000000e+00, p99_abs=3.814697e-06
+bilateral production normal 256                                   : 11.0247 ms/iter
+  Total Time: 33.0741 ms, checksum: 2057837133108360223
+  Error: max_abs=3.814697e-06, max_rel=1.187915e-07, rmse=6.078505e-07, p95_abs=0.000000e+00, p99_abs=3.814697e-06
+bilateral production normal 1K                                    : 109.0131 ms/iter
+  Total Time: 327.0393 ms, checksum: 4251937246993497068
+  Error: max_abs=3.814697e-06, max_rel=1.103407e-07, rmse=4.172325e-07, p95_abs=0.000000e+00, p99_abs=3.814697e-06
 ====================================================================================================
 make[1]: Leaving directory '<pcl-src>/test-rvv/filters/bilateral'

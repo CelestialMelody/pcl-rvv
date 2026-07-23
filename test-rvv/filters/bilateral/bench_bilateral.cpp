@@ -134,16 +134,17 @@ benchFullExpDiagnostic(const std::string& name,
   printErrorStats(pcl_rvv_filters_bilateral::compareCloudIntensity(expected, output));
 }
 
+template <typename PointT>
 void
 benchProductionFilter(const std::string& name,
-                      const pcl::PointCloud<pcl::PointXYZI>& cloud,
+                      const pcl::PointCloud<PointT>& cloud,
                       double sigma_s,
                       double sigma_r)
 {
   Benchmarker bench(name);
   const auto indices = pcl_rvv_filters_bilateral::makeIndices(cloud.size(), false);
   const auto expected = pcl_rvv_filters_bilateral::filterStd(cloud, indices, sigma_s, sigma_r);
-  pcl::PointCloud<pcl::PointXYZI> output;
+  pcl::PointCloud<PointT> output;
   bench.run([&]() {
     output = pcl_rvv_filters_bilateral::filterProduction(cloud, sigma_s, sigma_r);
     bench.setChecksum(pcl_rvv_filters_bilateral::checksumCloudIntensity(output));
@@ -152,8 +153,9 @@ benchProductionFilter(const std::string& name,
   printErrorStats(pcl_rvv_filters_bilateral::compareCloudIntensity(expected, output));
 }
 
+template <typename PointT>
 void
-benchErrorSweep(const pcl::PointCloud<pcl::PointXYZI>& cloud)
+benchErrorSweep(const pcl::PointCloud<PointT>& cloud)
 {
   const auto indices = pcl_rvv_filters_bilateral::makeIndices(cloud.size(), false);
   const std::pair<double, double> params[] = {
@@ -178,8 +180,9 @@ benchErrorSweep(const pcl::PointCloud<pcl::PointXYZI>& cloud)
   }
 }
 
+template <typename PointT>
 void
-benchProductionErrorSweep(const pcl::PointCloud<pcl::PointXYZI>& cloud)
+benchProductionErrorSweep(const pcl::PointCloud<PointT>& cloud)
 {
   const auto indices = pcl_rvv_filters_bilateral::makeIndices(cloud.size(), false);
   const std::pair<double, double> params[] = {
@@ -214,7 +217,7 @@ main()
 #else
   std::cout << "Build: Std (__RVV10__ disabled)\n";
 #endif
-  std::cout << "Dataset: synthetic PointXYZI grid clouds; BilateralFilter radiusSearch full diagnostic and neighbor weight staging\n";
+  std::cout << "Dataset: synthetic PointXYZI/PointXYZINormal grid clouds; BilateralFilter radiusSearch full diagnostic and neighbor weight staging\n";
   std::cout << "Iterations: " << kBenchmarkIterations << '\n';
   printBanner('-');
 
@@ -222,6 +225,8 @@ main()
   const auto cloud1k = pcl_rvv_filters_bilateral::makeCloud(32, 32, false);
   const auto cloud1k_invalid = pcl_rvv_filters_bilateral::makeCloud(32, 32, true);
   const auto high_contrast = pcl_rvv_filters_bilateral::makeHighContrastCloud(40, 32);
+  const auto cloud256_normal = pcl_rvv_filters_bilateral::makeCloudT<pcl::PointXYZINormal>(16, 16, false);
+  const auto cloud1k_normal = pcl_rvv_filters_bilateral::makeCloudT<pcl::PointXYZINormal>(32, 32, false);
   const auto indices256 = pcl_rvv_filters_bilateral::makeIndices(cloud256.size(), false);
   const auto indices1k = pcl_rvv_filters_bilateral::makeIndices(cloud1k.size(), false);
   const auto subset1k = pcl_rvv_filters_bilateral::makeIndices(cloud1k.size(), true);
@@ -246,6 +251,8 @@ main()
   benchProductionErrorSweep(high_contrast);
   benchProductionFilter("bilateral production filter 256", cloud256, 0.09, 18.0);
   benchProductionFilter("bilateral production filter 1K", cloud1k, 0.09, 18.0);
+  benchProductionFilter("bilateral production normal 256", cloud256_normal, 0.09, 18.0);
+  benchProductionFilter("bilateral production normal 1K", cloud1k_normal, 0.09, 18.0);
 
   printBanner('=');
   return 0;

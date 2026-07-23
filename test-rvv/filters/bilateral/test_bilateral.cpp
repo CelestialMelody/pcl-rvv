@@ -9,6 +9,15 @@
 
 namespace {
 
+#if defined(__RVV10__)
+TEST(BilateralDiagnostic, XYZIntensityGateCoversPrecompiledIntensityTypes)
+{
+  EXPECT_TRUE(pcl::kBilateralXYZIntensityCompatible<pcl::PointXYZI>);
+  EXPECT_TRUE(pcl::kBilateralXYZIntensityCompatible<pcl::PointXYZINormal>);
+  EXPECT_FALSE(pcl::kBilateralXYZIntensityCompatible<pcl::PointXYZ>);
+}
+#endif
+
 TEST(BilateralDiagnostic, ScalarFormulaMatchesManualTwoNeighbors)
 {
   auto cloud = pcl_rvv_filters_bilateral::makeCloud(4, 1, false);
@@ -124,6 +133,26 @@ TEST(BilateralDiagnostic, ProductionFilterMatchesScalarWithinApproximation)
   const auto stats = pcl_rvv_filters_bilateral::compareCloudIntensity(std_out, production_out);
   EXPECT_TRUE(pcl_rvv_filters_bilateral::errorWithinTolerance(stats, 3e-4f, 2e-5f, 8e-5))
       << "max_abs=" << stats.max_abs << " max_rel=" << stats.max_rel << " rmse=" << stats.rmse;
+}
+
+TEST(BilateralDiagnostic, ProductionPointXYZINormalMatchesScalarAndPreservesExtraFields)
+{
+  const auto cloud = pcl_rvv_filters_bilateral::makeCloudT<pcl::PointXYZINormal>(48, 32, false);
+  const auto indices = pcl_rvv_filters_bilateral::makeIndices(cloud.size(), false);
+  const auto std_out = pcl_rvv_filters_bilateral::filterStd(cloud, indices, 0.09, 18.0);
+  const auto production_out = pcl_rvv_filters_bilateral::filterProduction(cloud, 0.09, 18.0);
+
+  const auto stats = pcl_rvv_filters_bilateral::compareCloudIntensity(std_out, production_out);
+  EXPECT_TRUE(pcl_rvv_filters_bilateral::errorWithinTolerance(stats, 3e-4f, 2e-5f, 8e-5))
+      << "max_abs=" << stats.max_abs << " max_rel=" << stats.max_rel << " rmse=" << stats.rmse;
+
+  ASSERT_EQ(cloud.size(), production_out.size());
+  for (std::size_t i = 0; i < cloud.size(); ++i) {
+    EXPECT_FLOAT_EQ(cloud[i].normal_x, production_out[i].normal_x) << i;
+    EXPECT_FLOAT_EQ(cloud[i].normal_y, production_out[i].normal_y) << i;
+    EXPECT_FLOAT_EQ(cloud[i].normal_z, production_out[i].normal_z) << i;
+    EXPECT_FLOAT_EQ(cloud[i].curvature, production_out[i].curvature) << i;
+  }
 }
 
 TEST(BilateralDiagnostic, ProductionFilterErrorBudgetAcrossParameters)

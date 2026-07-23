@@ -11,7 +11,9 @@
 - `indices_`：决定哪些 center point 被写回；
 - `input_->is_dense` / `isXYZFinite`：non-dense 点云中 invalid center 保持原输出值。
 
-本主题优化的是 `BilateralFilter<PointXYZI>::computePointWeight` 主路径，公开 API 不变。
+本主题优化的是 `BilateralFilter<PointT>::computePointWeight` 中满足 XYZ + float intensity
+布局条件的生产主路径，公开 API 不变。当前上游预编译实例中覆盖 `PointXYZI` 和
+`PointXYZINormal`。
 
 ## 2. 标量公式与 RVV 等价式
 
@@ -44,12 +46,17 @@ weight        = expf_RVV_f32m2(spatial_arg) * expf_RVV_f32m2(intensity_arg)
 
 - `computePointWeightStd<PointT>`：常驻标量 helper，保留原公式；
 - `computePointWeightRVV<PointT>`：`__RVV10__` 下的 RVV helper；
-- `BilateralFilter<PointT>::computePointWeight`：`PointXYZI` 时短路到 RVV，否则回退 Std。
+- `kBilateralXYZIntensityCompatible<PointT>`：本地 production gate，组合公共
+  `kRVVXYZPointCompatible<PointT>`、`RVVXYZFloatLayout<PointT>`、
+  `RVVFloatFieldLayout<PointT, pcl::fields::intensity>`、可写 `float intensity` 成员和
+  traits intensity offset 对齐检查；
+- `BilateralFilter<PointT>::computePointWeight`：满足本地 gate 时短路到 RVV，否则回退 Std。
 
 覆盖条件：
 
 ```text
-__RVV10__ && PointT == pcl::PointXYZI &&
+__RVV10__ &&
+kBilateralXYZIntensityCompatible<PointT> &&
 indices.size() >= 16 &&
 indices.size() == distances.size()
 ```
@@ -58,8 +65,15 @@ fallback：
 
 - 小邻域 `<16`：避免 vector setup 和 stack staging 成本；
 - 邻域与距离长度不一致：保持标量安全路径；
-- 非 `PointXYZI`：没有固定 intensity field layout，保持泛型标量语义；
+- 不满足 XYZ + writable float intensity layout gate 的点型：保持泛型标量语义；
 - 非 RVV 编译：只编译 Std。
+
+`filters/src/bilateral.cpp` 同时预编译 `PointXYZI` 和 `PointXYZINormal`。从源码语义看，
+`applyFilter` 先复制整点输出，再只写回 `output[idx].intensity`，normal 字段应保持输入值；
+因此该类型可以使用同一个 RVV weight helper。专项测试新增 `PointXYZINormal` 生产对拍，
+并检查 `normal_x/y/z` 与 `curvature` 保持输入值；bench 增加 `production normal`
+入口。该扩展不是按名字匹配任意 `PointXYZIxxx`，而是按字段语义、成员可写性和 AoS
+offset/alignment gate 判定。
 
 生产 helper 使用 `pcl/common/rvv_point_load.h`：
 
@@ -67,8 +81,9 @@ fallback：
 const vuint32m2_t v_ids = __riscv_vle32_v_u32m2(raw_indices + offset, vl);
 const vuint32m2_t v_point_offsets =
     pcl::rvv_load::byte_offsets_u32m2<PointT> (v_ids, vl);
+constexpr std::size_t kIntensityOff = pcl::traits::offset<PointT, pcl::fields::intensity>::value;
 const vfloat32m2_t v_intensity =
-    pcl::rvv_load::gather_load_f32m2<PointT, offsetof(PointT, intensity)> (
+    pcl::rvv_load::gather_load_f32m2<PointT, kIntensityOff> (
         base_u8, v_point_offsets, vl);
 ```
 
@@ -171,7 +186,8 @@ store:       weight/contribution arrays -> scalar BF/W in lane order
 
 反汇编确认：
 
-- `BilateralFilter<PointXYZI>::applyFilter` 调用 `computePointWeightRVV<PointXYZI>`；
+- `BilateralFilter<PointXYZI>::applyFilter` 和 `BilateralFilter<PointXYZINormal>::applyFilter`
+  可调用对应 `computePointWeightRVV<PointT>`；
 - 生产 helper 中出现 `vsetvli`、`vle32.v`、`vluxei32.v`、`vfsub.vv`、`vfmul.vv`、`vse32.v`；
 - common exp helper 路径出现 `vfcvt.x.f.v`、`vfcvt.f.x.v`、`vsll.vi`、`vfmacc.vv`、`vfmul.vv`。
 
@@ -187,10 +203,14 @@ Milkv-Jupiter，`Iterations: 3`，speedup = `Std avg / RVV avg`：
 | `bilateral production filter 256` | 公开 `BilateralFilter<PointXYZI>` | 10.8279 | 3.1566 | 3.43x | 生产主路径收益明显 |
 | `bilateral production filter 1K` | 公开 `BilateralFilter<PointXYZI>` | 91.8276 | 44.5187 | 2.06x | 生产主路径收益明显 |
 
+QEMU 最新日志另包含 `PointXYZINormal` production case，用于证明新增覆盖范围可编译、
+可运行并维持同一误差预算；QEMU 时间只作为日志/路径证据，不作为板卡性能结论。
+
 误差预算：
 
 - 常规 production case：max abs `3.814697e-06`，max rel 约 `1.19e-07`，RMSE 约 `1.1e-06`；
 - 高对比 `ProductionErrorCase`：三组 `sigma_s/sigma_r` 的 max abs `1.525879e-05`，max rel 约 `1.0e-07`，RMSE 最大约 `2.10e-06`；
 - 专项预算为 `max_abs <= 8e-4`、`max_rel <= 5e-5`、`rmse <= 2e-4`。
 
-结论：`PointXYZI` 生产主路径收益成立，误差远低于预算。非覆盖类型、小邻域和非 RVV 构建保持标量 fallback。
+结论：`PointXYZI` 生产主路径收益成立，`PointXYZINormal` 覆盖范围已通过专项 QEMU
+生产对拍和 extra-field 保留测试。非覆盖类型、小邻域和非 RVV 构建保持标量 fallback。

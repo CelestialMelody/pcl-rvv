@@ -15,6 +15,7 @@
 #include <cstring>
 #include <limits>
 #include <numeric>
+#include <type_traits>
 #include <vector>
 
 #ifdef __RVV10__
@@ -59,8 +60,9 @@ accumulateWeightFromFeatures(const std::vector<NeighborFeature>& features,
   return bf / w;
 }
 
+template <typename PointT>
 inline std::vector<NeighborFeature>
-stageNeighborFeaturesStd(const pcl::PointCloud<pcl::PointXYZI>& cloud,
+stageNeighborFeaturesStd(const pcl::PointCloud<PointT>& cloud,
                          int pid,
                          const pcl::Indices& indices,
                          const std::vector<float>& squared_distances)
@@ -77,8 +79,9 @@ stageNeighborFeaturesStd(const pcl::PointCloud<pcl::PointXYZI>& cloud,
   return features;
 }
 
+template <typename PointT>
 inline double
-computePointWeightStd(const pcl::PointCloud<pcl::PointXYZI>& cloud,
+computePointWeightStd(const pcl::PointCloud<PointT>& cloud,
                       int pid,
                       const pcl::Indices& indices,
                       const std::vector<float>& squared_distances,
@@ -228,8 +231,9 @@ computePointWeightExpRVV(const pcl::PointCloud<pcl::PointXYZI>& cloud,
 #endif
 }
 
+template <typename PointT>
 inline std::uint64_t
-checksumCloudIntensity(const pcl::PointCloud<pcl::PointXYZI>& cloud)
+checksumCloudIntensity(const pcl::PointCloud<PointT>& cloud)
 {
   std::uint64_t checksum = 1469598103934665603ull;
   for (const auto& point : cloud) {
@@ -242,9 +246,10 @@ checksumCloudIntensity(const pcl::PointCloud<pcl::PointXYZI>& cloud)
   return checksum;
 }
 
+template <typename PointT>
 inline IntensityErrorStats
-compareCloudIntensity(const pcl::PointCloud<pcl::PointXYZI>& expected,
-                      const pcl::PointCloud<pcl::PointXYZI>& actual)
+compareCloudIntensity(const pcl::PointCloud<PointT>& expected,
+                      const pcl::PointCloud<PointT>& actual)
 {
   IntensityErrorStats stats;
   if (expected.empty() || expected.size() != actual.size())
@@ -283,10 +288,11 @@ errorWithinTolerance(const IntensityErrorStats& stats,
   return stats.max_abs <= max_abs && stats.max_rel <= max_rel && stats.rmse <= rmse;
 }
 
-inline pcl::PointCloud<pcl::PointXYZI>
-makeCloud(std::size_t width, std::size_t height, bool with_invalid)
+template <typename PointT>
+inline pcl::PointCloud<PointT>
+makeCloudT(std::size_t width, std::size_t height, bool with_invalid)
 {
-  pcl::PointCloud<pcl::PointXYZI> cloud;
+  pcl::PointCloud<PointT> cloud;
   cloud.width = static_cast<std::uint32_t>(width);
   cloud.height = static_cast<std::uint32_t>(height);
   cloud.is_dense = !with_invalid;
@@ -298,6 +304,12 @@ makeCloud(std::size_t width, std::size_t height, bool with_invalid)
       cloud[i].y = static_cast<float>(r) * 0.015f;
       cloud[i].z = static_cast<float>((c * 13 + r * 7) % 17) * 0.002f;
       cloud[i].intensity = 20.0f + static_cast<float>((c * 5 + r * 11) % 251) * 0.125f;
+      if constexpr (std::is_same_v<PointT, pcl::PointXYZINormal>) {
+        cloud[i].normal_x = static_cast<float>((c % 7) - 3) * 0.1f;
+        cloud[i].normal_y = static_cast<float>((r % 5) - 2) * 0.2f;
+        cloud[i].normal_z = static_cast<float>((c + r) % 9) * 0.05f;
+        cloud[i].curvature = static_cast<float>((c * 3 + r * 5) % 13) * 0.01f;
+      }
     }
   }
   if (with_invalid) {
@@ -305,6 +317,12 @@ makeCloud(std::size_t width, std::size_t height, bool with_invalid)
       cloud[i].x = std::numeric_limits<float>::quiet_NaN();
   }
   return cloud;
+}
+
+inline pcl::PointCloud<pcl::PointXYZI>
+makeCloud(std::size_t width, std::size_t height, bool with_invalid)
+{
+  return makeCloudT<pcl::PointXYZI>(width, height, with_invalid);
 }
 
 inline pcl::PointCloud<pcl::PointXYZI>
@@ -331,15 +349,16 @@ makeIndices(std::size_t n, bool subset)
   return indices;
 }
 
-inline pcl::PointCloud<pcl::PointXYZI>
-filterStd(const pcl::PointCloud<pcl::PointXYZI>& cloud,
+template <typename PointT>
+inline pcl::PointCloud<PointT>
+filterStd(const pcl::PointCloud<PointT>& cloud,
           const pcl::Indices& indices,
           double sigma_s,
           double sigma_r)
 {
   auto output = cloud;
   auto cloud_ptr = cloud.makeShared();
-  pcl::search::KdTree<pcl::PointXYZI> tree;
+  pcl::search::KdTree<PointT> tree;
   tree.setInputCloud(cloud_ptr);
   pcl::Indices k_indices;
   std::vector<float> k_distances;
@@ -397,16 +416,17 @@ filterExpRVV(const pcl::PointCloud<pcl::PointXYZI>& cloud,
   return output;
 }
 
-inline pcl::PointCloud<pcl::PointXYZI>
-filterProduction(const pcl::PointCloud<pcl::PointXYZI>& cloud,
+template <typename PointT>
+inline pcl::PointCloud<PointT>
+filterProduction(const pcl::PointCloud<PointT>& cloud,
                  double sigma_s,
                  double sigma_r)
 {
-  pcl::BilateralFilter<pcl::PointXYZI> filter;
+  pcl::BilateralFilter<PointT> filter;
   filter.setInputCloud(cloud.makeShared());
   filter.setHalfSize(sigma_s);
   filter.setStdDev(sigma_r);
-  pcl::PointCloud<pcl::PointXYZI> output;
+  pcl::PointCloud<PointT> output;
   filter.filter(output);
   return output;
 }

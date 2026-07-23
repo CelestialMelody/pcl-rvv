@@ -45,6 +45,7 @@
 #include <pcl/search/auto.h> // for autoSelectMethod
 #include <pcl/common/point_tests.h> // for isXYZFinite
 #include <pcl/common/rvv_point_load.h>
+#include <pcl/common/rvv_point_traits.h>
 
 #include <algorithm>
 #include <cstddef>
@@ -89,6 +90,33 @@ computePointWeightStd (const typename pcl::PointCloud<PointT>::ConstPtr& input,
 }
 
 #ifdef __RVV10__
+template <typename PointT, typename = void>
+struct BilateralIntensityMemberCompatible : std::false_type {};
+
+template <typename PointT>
+struct BilateralIntensityMemberCompatible<
+    PointT,
+    std::void_t<decltype(std::declval<PointT&> ().intensity)>>
+: std::bool_constant<
+      std::is_same_v<pcl::rvv::RVVFieldScalar<decltype(std::declval<PointT&> ().intensity)>, float> &&
+      std::is_assignable_v<decltype((std::declval<PointT&> ().intensity)), float>> {};
+
+template <typename PointT, bool HasIntensity = pcl::traits::has_field<PointT, pcl::fields::intensity>::value>
+struct BilateralIntensityFieldCompatible : std::false_type {};
+
+template <typename PointT>
+struct BilateralIntensityFieldCompatible<PointT, true>
+    : std::bool_constant<
+          pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::intensity>::value &&
+          BilateralIntensityMemberCompatible<PointT>::value &&
+          pcl::traits::offset<PointT, pcl::fields::intensity>::value % alignof(float) == 0> {};
+
+template <typename PointT>
+inline constexpr bool kBilateralXYZIntensityCompatible =
+    pcl::rvv::kRVVXYZPointCompatible<PointT> &&
+    pcl::rvv::RVVXYZFloatLayout<PointT>::value &&
+    BilateralIntensityFieldCompatible<PointT>::value;
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Keep GCC from auto-vectorizing the scalar BF/W accumulation that follows
 // each explicit RVV chunk.  The hand-written RVV loads/gathers/exp calls remain
@@ -113,6 +141,9 @@ computePointWeightRVV (const typename pcl::PointCloud<PointT>::ConstPtr& input,
   if (indices.size () < 16 || indices.size () != distances.size ())
     return pcl::computePointWeightStd<PointT> (input, pid, indices, distances, sigma_s, sigma_r);
 
+  static_assert (kBilateralXYZIntensityCompatible<PointT>,
+                 "PointT must provide compatible XYZ fields and a writable single-float intensity field");
+
   const auto* base_u8 = reinterpret_cast<const std::uint8_t*> (input->points.data ());
   const auto* raw_indices = reinterpret_cast<const std::uint32_t*> (indices.data ());
   const float center_intensity = (*input)[pid].intensity;
@@ -131,12 +162,13 @@ computePointWeightRVV (const typename pcl::PointCloud<PointT>::ConstPtr& input,
     const std::size_t remaining = std::min<std::size_t> (indices.size () - offset, kMaxChunkLanes);
     const std::size_t vl = __riscv_vsetvl_e32m2 (remaining);
     const vuint32m2_t v_ids = __riscv_vle32_v_u32m2 (raw_indices + offset, vl);
-    // Neighbor ids are produced by radiusSearch, so intensity is a gathered
-    // PointXYZI field load rather than a contiguous array load.
+    // Neighbor ids come from radiusSearch, so intensity is a gathered AoS field
+    // load rather than a contiguous array load.
     const vuint32m2_t v_point_offsets =
         pcl::rvv_load::byte_offsets_u32m2<PointT> (v_ids, vl);
+    constexpr std::size_t kIntensityOff = pcl::traits::offset<PointT, pcl::fields::intensity>::value;
     const vfloat32m2_t v_intensity =
-        pcl::rvv_load::gather_load_f32m2<PointT, offsetof(PointT, intensity)> (
+        pcl::rvv_load::gather_load_f32m2<PointT, kIntensityOff> (
             base_u8, v_point_offsets, vl);
     const vfloat32m2_t v_squared = __riscv_vle32_v_f32m2 (distances.data () + offset, vl);
     const vfloat32m2_t v_center = __riscv_vfmv_v_f_f32m2 (center_intensity, vl);
@@ -180,9 +212,9 @@ pcl::BilateralFilter<PointT>::computePointWeight (const int pid,
                                                   const std::vector<float> &distances)
 {
 #if defined(__RVV10__)
-  // Production coverage is intentionally limited to PointXYZI, the point type
-  // whose intensity field layout is fixed for the RVV gather helper.
-  if constexpr (std::is_same_v<PointT, pcl::PointXYZI>)
+  // RVV only needs XYZ for search/finiteness semantics and a writable float
+  // intensity field for the gathered read plus output write-back.
+  if constexpr (kBilateralXYZIntensityCompatible<PointT>)
     return (pcl::computePointWeightRVV<PointT> (input_, pid, indices, distances, sigma_s_, sigma_r_));
 #endif
   return (pcl::computePointWeightStd<PointT> (input_, pid, indices, distances, sigma_s_, sigma_r_));

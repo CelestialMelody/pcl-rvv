@@ -1,7 +1,7 @@
-Running main() from <third-party-src>/googletest/googletest/src/gtest_main.cc
-[==========] Running 10 tests from 1 test suite.
+Running main() from <riscv-build>/googletest/googletest/src/gtest_main.cc
+[==========] Running 11 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 10 tests from BilateralDiagnostic
+[----------] 11 tests from BilateralDiagnostic
 [ RUN      ] BilateralDiagnostic.ScalarFormulaMatchesManualTwoNeighbors
 [       OK ] BilateralDiagnostic.ScalarFormulaMatchesManualTwoNeighbors (1 ms)
 [ RUN      ] BilateralDiagnostic.RVVStagingMatchesScalarWeight
@@ -9,21 +9,23 @@ Running main() from <third-party-src>/googletest/googletest/src/gtest_main.cc
 [ RUN      ] BilateralDiagnostic.RVVExpWeightMatchesScalarWithinApproximation
 [       OK ] BilateralDiagnostic.RVVExpWeightMatchesScalarWithinApproximation (0 ms)
 [ RUN      ] BilateralDiagnostic.FullDiagnosticMatchesScalar
-[       OK ] BilateralDiagnostic.FullDiagnosticMatchesScalar (461 ms)
+[       OK ] BilateralDiagnostic.FullDiagnosticMatchesScalar (480 ms)
 [ RUN      ] BilateralDiagnostic.FullExpDiagnosticMatchesScalar
-[       OK ] BilateralDiagnostic.FullExpDiagnosticMatchesScalar (451 ms)
+[       OK ] BilateralDiagnostic.FullExpDiagnosticMatchesScalar (464 ms)
 [ RUN      ] BilateralDiagnostic.FullExpErrorBudgetAcrossParameters
-[       OK ] BilateralDiagnostic.FullExpErrorBudgetAcrossParameters (1289 ms)
+[       OK ] BilateralDiagnostic.FullExpErrorBudgetAcrossParameters (1308 ms)
 [ RUN      ] BilateralDiagnostic.ProductionFilterMatchesScalarWithinApproximation
-[       OK ] BilateralDiagnostic.ProductionFilterMatchesScalarWithinApproximation (427 ms)
+[       OK ] BilateralDiagnostic.ProductionFilterMatchesScalarWithinApproximation (444 ms)
+[ RUN      ] BilateralDiagnostic.ProductionPointXYZINormalMatchesScalarAndPreservesExtraFields
+[       OK ] BilateralDiagnostic.ProductionPointXYZINormalMatchesScalarAndPreservesExtraFields (435 ms)
 [ RUN      ] BilateralDiagnostic.ProductionFilterErrorBudgetAcrossParameters
-[       OK ] BilateralDiagnostic.ProductionFilterErrorBudgetAcrossParameters (1201 ms)
+[       OK ] BilateralDiagnostic.ProductionFilterErrorBudgetAcrossParameters (1243 ms)
 [ RUN      ] BilateralDiagnostic.NonDenseInvalidCentersAreSkipped
-[       OK ] BilateralDiagnostic.NonDenseInvalidCentersAreSkipped (435 ms)
+[       OK ] BilateralDiagnostic.NonDenseInvalidCentersAreSkipped (446 ms)
 [ RUN      ] BilateralDiagnostic.SmallNeighborListFallsBack
 [       OK ] BilateralDiagnostic.SmallNeighborListFallsBack (0 ms)
-[----------] 10 tests from BilateralDiagnostic (4271 ms total)
+[----------] 11 tests from BilateralDiagnostic (4826 ms total)
 
 [----------] Global test environment tear-down
-[==========] 10 tests from 1 test suite ran. (4273 ms total)
-[  PASSED  ] 10 tests.
+[==========] 11 tests from 1 test suite ran. (4829 ms total)
+[  PASSED  ] 11 tests.
