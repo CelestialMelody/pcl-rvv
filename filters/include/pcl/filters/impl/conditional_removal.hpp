@@ -796,6 +796,37 @@ pcl::ConditionalRemoval<PointT>::applyFilterStd (PointCloud &output)
 #if defined(__RVV10__)
 
 template <typename PointT> bool
+pcl::ConditionalRemoval<PointT>::applyFilterRVV (PointCloud &output)
+{
+  if (!capable_ || !input_ || condition_.get () == nullptr)
+    return false;
+
+  const auto* and_condition = dynamic_cast<const pcl::ConditionAnd<PointT>*> (condition_.get ());
+  if (and_condition == nullptr)
+    return false;
+
+  const auto* base_condition = static_cast<const pcl::ConditionBase<PointT>*> (and_condition);
+  if (!base_condition->conditions_.empty () ||
+      base_condition->comparisons_.size () != 1)
+    return false;
+
+  const auto* field_comparison =
+      dynamic_cast<const pcl::FieldComparison<PointT>*> (base_condition->comparisons_[0].get ());
+  if (field_comparison == nullptr ||
+      field_comparison->point_data_ == nullptr ||
+      field_comparison->point_data_->datatype_ != pcl::PCLPointField::FLOAT32 ||
+      field_comparison->op_ == pcl::ComparisonOps::EQ ||
+      field_comparison->compare_val_ < static_cast<double> (-std::numeric_limits<float>::max ()) ||
+      field_comparison->compare_val_ > static_cast<double> (std::numeric_limits<float>::max ()))
+    return false;
+
+  return applyFilterRVV (output,
+                         field_comparison->point_data_->offset_,
+                         field_comparison->op_,
+                         static_cast<float> (field_comparison->compare_val_));
+}
+
+template <typename PointT> bool
 pcl::ConditionalRemoval<PointT>::applyFilterRVV (PointCloud &output,
                                                 std::uint32_t field_offset,
                                                 ComparisonOps::CompareOp op,
@@ -885,33 +916,8 @@ pcl::ConditionalRemoval<PointT>::applyFilter (PointCloud &output)
 {
 #if defined(__RVV10__)
   if constexpr (pcl::kConditionalRemovalXYZCompatible<PointT>)
-  {
-    if (capable_ && input_ && condition_.get () != nullptr)
-    {
-      const auto* and_condition = dynamic_cast<const pcl::ConditionAnd<PointT>*> (condition_.get ());
-      if (and_condition != nullptr)
-      {
-        const auto* base_condition = static_cast<const pcl::ConditionBase<PointT>*> (and_condition);
-        if (base_condition->conditions_.empty () &&
-            base_condition->comparisons_.size () == 1)
-        {
-          const auto* field_comparison =
-              dynamic_cast<const pcl::FieldComparison<PointT>*> (base_condition->comparisons_[0].get ());
-          if (field_comparison != nullptr &&
-              field_comparison->point_data_ != nullptr &&
-              field_comparison->point_data_->datatype_ == pcl::PCLPointField::FLOAT32 &&
-              field_comparison->op_ != pcl::ComparisonOps::EQ &&
-              field_comparison->compare_val_ >= static_cast<double> (-std::numeric_limits<float>::max ()) &&
-              field_comparison->compare_val_ <= static_cast<double> (std::numeric_limits<float>::max ()) &&
-              applyFilterRVV (output,
-                              field_comparison->point_data_->offset_,
-                              field_comparison->op_,
-                              static_cast<float> (field_comparison->compare_val_)))
-            return;
-        }
-      }
-    }
-  }
+    if (applyFilterRVV (output))
+      return;
 #endif
 
   applyFilterStd (output);

@@ -687,6 +687,9 @@ namespace pcl
 
 #if defined(__RVV10__)
       bool
+      applyFilterRVV (PointCloud &output);
+
+      bool
       applyFilterRVV (PointCloud &output, std::uint32_t field_offset, ComparisonOps::CompareOp op, float compare_val);
 #endif
 
