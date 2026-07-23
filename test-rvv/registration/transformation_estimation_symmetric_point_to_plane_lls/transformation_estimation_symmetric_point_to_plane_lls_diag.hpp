@@ -13,7 +13,7 @@
  *   solve（Eigen LDLT 求解器）边界。
  * - production 源码用 ConstCloudIterator（常量点云迭代器）把全云、indices（索引）
  *   和 correspondences（对应关系）入口统一成逐点流；本诊断为了写清 RVV 取数成本，
- *   显式拆成全云顺序扫描和对应关系索引扫描两条路径。
+ *   显式拆成全云顺序扫描、source 单侧索引、双侧索引和对应关系索引扫描。
  * - RVV path（RVV 链路）只接管字段读取、mask（掩码）、法线选择、公式 staging
  *   （分阶段暂存）和 vcompress（保序压缩）；Eigen solve 和最终 4x4 矩阵构造保留标量。
  */
@@ -28,6 +28,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -302,6 +303,118 @@ accumulate_std_correspondences(const pcl::PointCloud<pcl::PointNormal>& source,
   return eq;
 }
 
+// source indices 标量参考链路：映射公开 `cloud_src + indices_src + cloud_tgt`
+// 入口。source 侧按 row 序号读取 indices，target 侧按 row 序号顺序读取；调用者是
+// 单侧 gather 消融测试和 bench。这里把有效 index stream 当作前提；若出现负数或越界
+// index，只是诊断参考链路的防御性跳过，不代表 production 的非法 index 语义。
+// 证据角色是隔离“source gather + target stride load”这一条数据流。
+inline NormalEquation
+accumulate_std_source_indices(const pcl::PointCloud<pcl::PointNormal>& source,
+                              const pcl::Indices& source_indices,
+                              const pcl::PointCloud<pcl::PointNormal>& target,
+                              const bool enforce_same_direction_normals,
+                              AccumulationStats* stats = nullptr)
+{
+  NormalEquation eq;
+  const std::size_t n = std::min(source_indices.size(), target.size());
+  for (std::size_t row = 0; row < n; ++row) {
+    const int raw_src_index = source_indices[row];
+    if (raw_src_index < 0)
+      continue;
+    const auto src_index = static_cast<std::size_t>(raw_src_index);
+    if (src_index >= source.size())
+      continue;
+    float nx, ny, nz;
+    select_symmetric_normal(source[src_index].normal_x,
+                            source[src_index].normal_y,
+                            source[src_index].normal_z,
+                            target[row].normal_x,
+                            target[row].normal_y,
+                            target[row].normal_z,
+                            enforce_same_direction_normals,
+                            nx,
+                            ny,
+                            nz);
+    if (!finite_xyz(source[src_index]) || !finite_xyz(target[row]) ||
+        !finite_normal(nx, ny, nz))
+      continue;
+    accumulate_symmetric_row(source[src_index].x,
+                             source[src_index].y,
+                             source[src_index].z,
+                             target[row].x,
+                             target[row].y,
+                             target[row].z,
+                             nx,
+                             ny,
+                             nz,
+                             eq);
+  }
+  if (stats) {
+    stats->input_points = n;
+    stats->accepted_points = eq.accepted_points;
+    stats->used_rvv = false;
+  }
+  return eq;
+}
+
+// 双侧 indices 标量参考链路：映射公开 `cloud_src + indices_src + cloud_tgt +
+// indices_tgt` 入口。source 和 target 都按各自 index stream 取点，但不解析
+// pcl::Correspondence，也不展开 correspondence.weight。调用者是双侧 gather 消融；
+// 这里同样按 valid-index-only（只接受有效索引）诊断合同工作，负数或越界 index 的
+// 防御性跳过只属于测试辅助，不是 production 非法 index 语义。证据角色是把双侧
+// gather 成本与 correspondences 的额外入口展开成本拆开。
+inline NormalEquation
+accumulate_std_dual_indices(const pcl::PointCloud<pcl::PointNormal>& source,
+                            const pcl::Indices& source_indices,
+                            const pcl::PointCloud<pcl::PointNormal>& target,
+                            const pcl::Indices& target_indices,
+                            const bool enforce_same_direction_normals,
+                            AccumulationStats* stats = nullptr)
+{
+  NormalEquation eq;
+  const std::size_t n = std::min(source_indices.size(), target_indices.size());
+  for (std::size_t row = 0; row < n; ++row) {
+    const int raw_src_index = source_indices[row];
+    const int raw_tgt_index = target_indices[row];
+    if (raw_src_index < 0 || raw_tgt_index < 0)
+      continue;
+    const auto src_index = static_cast<std::size_t>(raw_src_index);
+    const auto tgt_index = static_cast<std::size_t>(raw_tgt_index);
+    if (src_index >= source.size() || tgt_index >= target.size())
+      continue;
+    float nx, ny, nz;
+    select_symmetric_normal(source[src_index].normal_x,
+                            source[src_index].normal_y,
+                            source[src_index].normal_z,
+                            target[tgt_index].normal_x,
+                            target[tgt_index].normal_y,
+                            target[tgt_index].normal_z,
+                            enforce_same_direction_normals,
+                            nx,
+                            ny,
+                            nz);
+    if (!finite_xyz(source[src_index]) || !finite_xyz(target[tgt_index]) ||
+        !finite_normal(nx, ny, nz))
+      continue;
+    accumulate_symmetric_row(source[src_index].x,
+                             source[src_index].y,
+                             source[src_index].z,
+                             target[tgt_index].x,
+                             target[tgt_index].y,
+                             target[tgt_index].z,
+                             nx,
+                             ny,
+                             nz,
+                             eq);
+  }
+  if (stats) {
+    stats->input_points = n;
+    stats->accepted_points = eq.accepted_points;
+    stats->used_rvv = false;
+  }
+  return eq;
+}
+
 #ifdef __RVV10__
 // RVV 有限值 mask helper：用 abs(value) <= max_float 复刻 std::isfinite 对 NaN/Inf 的剔除效果。
 // 调用者是全云和 correspondences RVV candidate；证据角色是证明 invalid lane（无效向量通道）
@@ -471,58 +584,256 @@ accumulate_staged_rows(vfloat32m2_t a,
     ++eq.accepted_points;
   }
 }
+
+// 这一层 RVV row pipeline（按一组 source/target 向量字段生成法方程行）供多个
+// indexed 消融复用。调用者已经决定字段来自 stride load 还是 gather；本 helper 只负责
+// production symmetric 语义映射：法线同向选择、finite mask、公式 staging 和压缩尾段。
+// 它的证据角色是避免把取数形态差异和后半段公式差异混在一起。
+inline void
+accumulate_loaded_rows(vfloat32m2_t sx,
+                       vfloat32m2_t sy,
+                       vfloat32m2_t sz,
+                       vfloat32m2_t tx,
+                       vfloat32m2_t ty,
+                       vfloat32m2_t tz,
+                       vfloat32m2_t n1x,
+                       vfloat32m2_t n1y,
+                       vfloat32m2_t n1z,
+                       vfloat32m2_t n2x,
+                       vfloat32m2_t n2y,
+                       vfloat32m2_t n2z,
+                       const bool enforce_same_direction_normals,
+                       const std::size_t vl,
+                       NormalEquation& eq)
+{
+  vfloat32m2_t nx, ny, nz;
+  select_symmetric_normal_v(
+      n1x, n1y, n1z, n2x, n2y, n2z, enforce_same_direction_normals, vl, nx, ny, nz);
+  vbool16_t keep = finite_mask_f32m2(sx, vl);
+  keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(sy, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(sz, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(tx, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(ty, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(tz, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(nx, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(ny, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(nz, vl), vl);
+
+  vfloat32m2_t a, b, c, d;
+  staged_symmetric_formula(sx, sy, sz, tx, ty, tz, nx, ny, nz, vl, a, b, c, d);
+  accumulate_staged_rows(a, b, c, d, nx, ny, nz, keep, vl, eq);
+}
 #endif // __RVV10__
 
-// 全云 RVV candidate：映射公开 full-cloud 入口，使用 stride load（跨步加载）读取
-// PointNormal 的 AoS（结构数组）字段。它是板卡 1.30x 收益的证据入口；不覆盖 indices、
-// 泛型点类型或真实 production dispatch（分流逻辑）。
-inline NormalEquation
-accumulate_candidate_full(const pcl::PointCloud<pcl::PointNormal>& source,
-                          const pcl::PointCloud<pcl::PointNormal>& target,
-                          const bool enforce_same_direction_normals,
-                          AccumulationStats* stats = nullptr)
-{
-  const std::size_t n = std::min(source.size(), target.size());
+// row-source policy（行来源策略）框架：
+// 这里先把“前半段怎么取 source/target row”与“后半段怎么做 symmetric math accumulate”
+// 分开。调用者是 `accumulate_candidate_full` 和 `accumulate_candidate_source_indices`；
+// policy 只负责按 VL chunk 产出字段，common pipeline 继续复用 `accumulate_loaded_rows`。
+// 它映射 production 的 full-cloud / source-indices 行枚举语义，证据角色是让
+// source gather + target stride 的收益能独立归因。dual-indices / correspondences
+// 仍保留各自诊断链路，不接 production。
+struct FullCloudRowSource {
+  struct Context {
+    const pcl::PointCloud<pcl::PointNormal>& source;
+    const pcl::PointCloud<pcl::PointNormal>& target;
+  };
+
+  static std::size_t
+  row_count(const Context& context)
+  {
+    return std::min(context.source.size(), context.target.size());
+  }
+
 #ifdef __RVV10__
-  constexpr std::size_t kX = offsetof(pcl::PointNormal, x);
-  constexpr std::size_t kY = offsetof(pcl::PointNormal, y);
-  constexpr std::size_t kZ = offsetof(pcl::PointNormal, z);
-  constexpr std::size_t kNX = offsetof(pcl::PointNormal, normal_x);
-  constexpr std::size_t kNY = offsetof(pcl::PointNormal, normal_y);
-  constexpr std::size_t kNZ = offsetof(pcl::PointNormal, normal_z);
-  if (n >= 64 && __riscv_vsetvlmax_e32m2() <= 64 &&
-      n <= std::numeric_limits<std::uint32_t>::max() / sizeof(pcl::PointNormal)) {
+  static bool
+  can_use_rvv(const Context&, const std::size_t n)
+  {
+    return n >= 64 && __riscv_vsetvlmax_e32m2() <= 64 &&
+           n <= std::numeric_limits<std::uint32_t>::max() / sizeof(pcl::PointNormal);
+  }
+
+  static void
+  load_chunk(const Context&,
+             const std::uint8_t* source_base,
+             const std::uint8_t* target_base,
+             const std::size_t i,
+             const std::size_t vl,
+             vfloat32m2_t& sx,
+             vfloat32m2_t& sy,
+             vfloat32m2_t& sz,
+             vfloat32m2_t& tx,
+             vfloat32m2_t& ty,
+             vfloat32m2_t& tz,
+             vfloat32m2_t& n1x,
+             vfloat32m2_t& n1y,
+             vfloat32m2_t& n1z,
+             vfloat32m2_t& n2x,
+             vfloat32m2_t& n2y,
+             vfloat32m2_t& n2z)
+  {
+    constexpr std::size_t kX = offsetof(pcl::PointNormal, x);
+    constexpr std::size_t kY = offsetof(pcl::PointNormal, y);
+    constexpr std::size_t kZ = offsetof(pcl::PointNormal, z);
+    constexpr std::size_t kNX = offsetof(pcl::PointNormal, normal_x);
+    constexpr std::size_t kNY = offsetof(pcl::PointNormal, normal_y);
+    constexpr std::size_t kNZ = offsetof(pcl::PointNormal, normal_z);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kX, kY, kZ>(
+        source_base + i * sizeof(pcl::PointNormal), vl, sx, sy, sz);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kX, kY, kZ>(
+        target_base + i * sizeof(pcl::PointNormal), vl, tx, ty, tz);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kNX, kNY, kNZ>(
+        source_base + i * sizeof(pcl::PointNormal), vl, n1x, n1y, n1z);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kNX, kNY, kNZ>(
+        target_base + i * sizeof(pcl::PointNormal), vl, n2x, n2y, n2z);
+  }
+#endif // __RVV10__
+
+  static NormalEquation
+  fallback(const Context& context,
+           const bool enforce_same_direction_normals,
+           AccumulationStats* stats = nullptr)
+  {
+    return accumulate_std_full(
+        context.source, context.target, enforce_same_direction_normals, stats);
+  }
+};
+
+// 这个 policy 是本轮 test-rvv-only SourceIndexedRowSource 草案：source 侧 gather，
+// target 侧 stride load。调用者是 `accumulate_candidate_source_indices`；它映射公开
+// `cloud_src + indices_src + cloud_tgt` 的 row 顺序、重复 index 和 target 顺序读取语义。
+// 它只覆盖 valid-index-only 诊断合同，不定义非法 index 的 production 语义；证据角色是
+// 把单侧 gather 成本从 dual-indices 和 correspondences 中拆出来。
+struct SourceIndexedRowSource {
+  struct Context {
+    const pcl::PointCloud<pcl::PointNormal>& source;
+    const pcl::Indices& source_indices;
+    const pcl::PointCloud<pcl::PointNormal>& target;
+  };
+
+  static std::size_t
+  row_count(const Context& context)
+  {
+    return std::min(context.source_indices.size(), context.target.size());
+  }
+
+#ifdef __RVV10__
+  static bool
+  can_use_rvv(const Context& context, const std::size_t n)
+  {
+    return n >= 64 && __riscv_vsetvlmax_e32m2() <= 64 &&
+           context.source.size() <=
+               std::numeric_limits<std::uint32_t>::max() / sizeof(pcl::PointNormal) &&
+           context.target.size() <=
+               std::numeric_limits<std::uint32_t>::max() / sizeof(pcl::PointNormal);
+  }
+
+  static void
+  load_chunk(const Context& context,
+             const std::uint8_t* source_base,
+             const std::uint8_t* target_base,
+             const std::size_t i,
+             const std::size_t vl,
+             vfloat32m2_t& sx,
+             vfloat32m2_t& sy,
+             vfloat32m2_t& sz,
+             vfloat32m2_t& tx,
+             vfloat32m2_t& ty,
+             vfloat32m2_t& tz,
+             vfloat32m2_t& n1x,
+             vfloat32m2_t& n1y,
+             vfloat32m2_t& n1z,
+             vfloat32m2_t& n2x,
+             vfloat32m2_t& n2y,
+             vfloat32m2_t& n2z)
+  {
+    constexpr std::size_t kX = offsetof(pcl::PointNormal, x);
+    constexpr std::size_t kY = offsetof(pcl::PointNormal, y);
+    constexpr std::size_t kZ = offsetof(pcl::PointNormal, z);
+    constexpr std::size_t kNX = offsetof(pcl::PointNormal, normal_x);
+    constexpr std::size_t kNY = offsetof(pcl::PointNormal, normal_y);
+    constexpr std::size_t kNZ = offsetof(pcl::PointNormal, normal_z);
+    const vint32m2_t src_idx_i =
+        __riscv_vle32_v_i32m2(context.source_indices.data() + i, vl);
+    const vuint32m2_t src_offsets = pcl::rvv_load::byte_offsets_u32m2<pcl::PointNormal>(
+        __riscv_vreinterpret_v_i32m2_u32m2(src_idx_i), vl);
+    pcl::rvv_load::indexed_load3_fields_f32m2<pcl::PointNormal, kX, kY, kZ>(
+        source_base, src_offsets, vl, sx, sy, sz);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kX, kY, kZ>(
+        target_base + i * sizeof(pcl::PointNormal), vl, tx, ty, tz);
+    pcl::rvv_load::indexed_load3_fields_f32m2<pcl::PointNormal, kNX, kNY, kNZ>(
+        source_base, src_offsets, vl, n1x, n1y, n1z);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kNX, kNY, kNZ>(
+        target_base + i * sizeof(pcl::PointNormal), vl, n2x, n2y, n2z);
+  }
+#endif // __RVV10__
+
+  static NormalEquation
+  fallback(const Context& context,
+           const bool enforce_same_direction_normals,
+           AccumulationStats* stats = nullptr)
+  {
+    return accumulate_std_source_indices(context.source,
+                                         context.source_indices,
+                                         context.target,
+                                         enforce_same_direction_normals,
+                                         stats);
+  }
+};
+
+// 通用 row-source candidate：调用者用 policy 决定 stride/gather 取数，后半段统一进入
+// `accumulate_loaded_rows`。调用者是具体 candidate wrapper；它把 production helper 的
+// 有效行过滤、法线选择和 normal-equation 贡献语义统一保留在 common pipeline。
+// 这是 test-rvv-only 组织框架，不是 production dispatch；证据角色是让每个 row-source
+// policy 可以单独建立 correctness、asm 和板卡 bench 证据。
+template <typename RowSourcePolicy>
+inline NormalEquation
+accumulate_row_source(typename RowSourcePolicy::Context context,
+                      const bool enforce_same_direction_normals,
+                      AccumulationStats* stats = nullptr)
+{
+  const std::size_t n = RowSourcePolicy::row_count(context);
+#ifdef __RVV10__
+  if (RowSourcePolicy::can_use_rvv(context, n)) {
     NormalEquation eq;
-    const auto* src_base = reinterpret_cast<const std::uint8_t*>(source.points.data());
-    const auto* tgt_base = reinterpret_cast<const std::uint8_t*>(target.points.data());
+    const auto* source_base =
+        reinterpret_cast<const std::uint8_t*>(context.source.points.data());
+    const auto* target_base =
+        reinterpret_cast<const std::uint8_t*>(context.target.points.data());
     for (std::size_t i = 0; i < n;) {
       const std::size_t vl = __riscv_vsetvl_e32m2(n - i);
       vfloat32m2_t sx, sy, sz, tx, ty, tz, n1x, n1y, n1z, n2x, n2y, n2z;
-      pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kX, kY, kZ>(
-          src_base + i * sizeof(pcl::PointNormal), vl, sx, sy, sz);
-      pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kX, kY, kZ>(
-          tgt_base + i * sizeof(pcl::PointNormal), vl, tx, ty, tz);
-      pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kNX, kNY, kNZ>(
-          src_base + i * sizeof(pcl::PointNormal), vl, n1x, n1y, n1z);
-      pcl::rvv_load::strided_load3_fields_f32m2<sizeof(pcl::PointNormal), kNX, kNY, kNZ>(
-          tgt_base + i * sizeof(pcl::PointNormal), vl, n2x, n2y, n2z);
-
-      vfloat32m2_t nx, ny, nz;
-      select_symmetric_normal_v(
-          n1x, n1y, n1z, n2x, n2y, n2z, enforce_same_direction_normals, vl, nx, ny, nz);
-      vbool16_t keep = finite_mask_f32m2(sx, vl);
-      keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(sy, vl), vl);
-      keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(sz, vl), vl);
-      keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(tx, vl), vl);
-      keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(ty, vl), vl);
-      keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(tz, vl), vl);
-      keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(nx, vl), vl);
-      keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(ny, vl), vl);
-      keep = __riscv_vmand_mm_b16(keep, finite_mask_f32m2(nz, vl), vl);
-
-      vfloat32m2_t a, b, c, d;
-      staged_symmetric_formula(sx, sy, sz, tx, ty, tz, nx, ny, nz, vl, a, b, c, d);
-      accumulate_staged_rows(a, b, c, d, nx, ny, nz, keep, vl, eq);
+      RowSourcePolicy::load_chunk(context,
+                                  source_base,
+                                  target_base,
+                                  i,
+                                  vl,
+                                  sx,
+                                  sy,
+                                  sz,
+                                  tx,
+                                  ty,
+                                  tz,
+                                  n1x,
+                                  n1y,
+                                  n1z,
+                                  n2x,
+                                  n2y,
+                                  n2z);
+      accumulate_loaded_rows(sx,
+                             sy,
+                             sz,
+                             tx,
+                             ty,
+                             tz,
+                             n1x,
+                             n1y,
+                             n1z,
+                             n2x,
+                             n2y,
+                             n2z,
+                             enforce_same_direction_normals,
+                             vl,
+                             eq);
       i += vl;
     }
     if (stats) {
@@ -533,7 +844,120 @@ accumulate_candidate_full(const pcl::PointCloud<pcl::PointNormal>& source,
     return eq;
   }
 #endif // __RVV10__
-  return accumulate_std_full(source, target, enforce_same_direction_normals, stats);
+  return RowSourcePolicy::fallback(context, enforce_same_direction_normals, stats);
+}
+
+// 全云 RVV candidate：映射公开 full-cloud 入口，使用 stride load（跨步加载）读取
+// PointNormal 的 AoS（结构数组）字段。它是板卡 1.30x 收益的证据入口；不覆盖 indices、
+// 泛型点类型或真实 production dispatch（分流逻辑）。
+inline NormalEquation
+accumulate_candidate_full(const pcl::PointCloud<pcl::PointNormal>& source,
+                          const pcl::PointCloud<pcl::PointNormal>& target,
+                          const bool enforce_same_direction_normals,
+                          AccumulationStats* stats = nullptr)
+{
+  return accumulate_row_source<FullCloudRowSource>(
+      FullCloudRowSource::Context{source, target}, enforce_same_direction_normals, stats);
+}
+
+// source indices RVV candidate：映射公开 `cloud_src + indices_src + cloud_tgt`
+// 入口，但只存在于 test-rvv 诊断层。source 字段用 gather（离散加载），target 字段用
+// stride load（跨步加载），不包含 target index 读取或 correspondence parsing（对应关系解析）。
+// 这个 candidate 也按 valid-index-only 诊断合同工作：调用者必须先提供有效 index
+// stream；若参考链路里有负数或越界 index，只用于测试辅助跳过，不代表 production
+// 的非法 index 行为。它回答“单侧 gather 是否仍可能有板卡收益”，不能作为
+// production-ready 结论。
+inline NormalEquation
+accumulate_candidate_source_indices(const pcl::PointCloud<pcl::PointNormal>& source,
+                                    const pcl::Indices& source_indices,
+                                    const pcl::PointCloud<pcl::PointNormal>& target,
+                                    const bool enforce_same_direction_normals,
+                                    AccumulationStats* stats = nullptr)
+{
+  return accumulate_row_source<SourceIndexedRowSource>(
+      SourceIndexedRowSource::Context{source, source_indices, target},
+      enforce_same_direction_normals,
+      stats);
+}
+
+// 双侧 indices RVV candidate：映射公开 `cloud_src + indices_src + cloud_tgt +
+// indices_tgt` 入口，但仍只在 test-rvv 诊断层使用。source/target 均用 gather，
+// 输入已经是两个 index vector，因此不包含 correspondence query/match 解析或 weight 展开。
+// 这个 candidate 也只接受有效 index stream；若标量参考链路跳过负数或越界 index，
+// 那只是诊断辅助的防御动作，不是在定义 production 的非法 index 语义。它回答
+// “双侧 gather 本身的成本能否和 correspondences 额外展开成本分离”。
+inline NormalEquation
+accumulate_candidate_dual_indices(const pcl::PointCloud<pcl::PointNormal>& source,
+                                  const pcl::Indices& source_indices,
+                                  const pcl::PointCloud<pcl::PointNormal>& target,
+                                  const pcl::Indices& target_indices,
+                                  const bool enforce_same_direction_normals,
+                                  AccumulationStats* stats = nullptr)
+{
+  const std::size_t n = std::min(source_indices.size(), target_indices.size());
+#ifdef __RVV10__
+  constexpr std::size_t kX = offsetof(pcl::PointNormal, x);
+  constexpr std::size_t kY = offsetof(pcl::PointNormal, y);
+  constexpr std::size_t kZ = offsetof(pcl::PointNormal, z);
+  constexpr std::size_t kNX = offsetof(pcl::PointNormal, normal_x);
+  constexpr std::size_t kNY = offsetof(pcl::PointNormal, normal_y);
+  constexpr std::size_t kNZ = offsetof(pcl::PointNormal, normal_z);
+  if (n >= 64 && __riscv_vsetvlmax_e32m2() <= 64 &&
+      source.size() <=
+          std::numeric_limits<std::uint32_t>::max() / sizeof(pcl::PointNormal) &&
+      target.size() <=
+          std::numeric_limits<std::uint32_t>::max() / sizeof(pcl::PointNormal)) {
+    NormalEquation eq;
+    const auto* src_base = reinterpret_cast<const std::uint8_t*>(source.points.data());
+    const auto* tgt_base = reinterpret_cast<const std::uint8_t*>(target.points.data());
+    for (std::size_t i = 0; i < n;) {
+      const std::size_t vl = __riscv_vsetvl_e32m2(n - i);
+      const vint32m2_t src_idx_i =
+          __riscv_vle32_v_i32m2(source_indices.data() + i, vl);
+      const vint32m2_t tgt_idx_i =
+          __riscv_vle32_v_i32m2(target_indices.data() + i, vl);
+      const vuint32m2_t src_offsets = pcl::rvv_load::byte_offsets_u32m2<pcl::PointNormal>(
+          __riscv_vreinterpret_v_i32m2_u32m2(src_idx_i), vl);
+      const vuint32m2_t tgt_offsets = pcl::rvv_load::byte_offsets_u32m2<pcl::PointNormal>(
+          __riscv_vreinterpret_v_i32m2_u32m2(tgt_idx_i), vl);
+
+      vfloat32m2_t sx, sy, sz, tx, ty, tz, n1x, n1y, n1z, n2x, n2y, n2z;
+      pcl::rvv_load::indexed_load3_fields_f32m2<pcl::PointNormal, kX, kY, kZ>(
+          src_base, src_offsets, vl, sx, sy, sz);
+      pcl::rvv_load::indexed_load3_fields_f32m2<pcl::PointNormal, kX, kY, kZ>(
+          tgt_base, tgt_offsets, vl, tx, ty, tz);
+      pcl::rvv_load::indexed_load3_fields_f32m2<pcl::PointNormal, kNX, kNY, kNZ>(
+          src_base, src_offsets, vl, n1x, n1y, n1z);
+      pcl::rvv_load::indexed_load3_fields_f32m2<pcl::PointNormal, kNX, kNY, kNZ>(
+          tgt_base, tgt_offsets, vl, n2x, n2y, n2z);
+
+      accumulate_loaded_rows(sx,
+                             sy,
+                             sz,
+                             tx,
+                             ty,
+                             tz,
+                             n1x,
+                             n1y,
+                             n1z,
+                             n2x,
+                             n2y,
+                             n2z,
+                             enforce_same_direction_normals,
+                             vl,
+                             eq);
+      i += vl;
+    }
+    if (stats) {
+      stats->input_points = n;
+      stats->accepted_points = eq.accepted_points;
+      stats->used_rvv = true;
+    }
+    return eq;
+  }
+#endif // __RVV10__
+  return accumulate_std_dual_indices(
+      source, source_indices, target, target_indices, enforce_same_direction_normals, stats);
 }
 
 // 对应关系 RVV candidate：映射公开 correspondences 入口，但为了 gather 需要先标量展开
@@ -659,6 +1083,60 @@ estimate_candidate_full(const pcl::PointCloud<pcl::PointNormal>& source,
 {
   return solve_normal_equation(
       accumulate_candidate_full(source, target, enforce_same_direction_normals, stats));
+}
+
+// 完整 source indices 标量估计 wrapper：对应公开 source indices + target full-cloud
+// 入口。它保留 target 顺序扫描，只让 source 侧由 index stream 指定，供单侧 gather 消融对拍。
+inline Matrix4f
+estimate_std_source_indices(const pcl::PointCloud<pcl::PointNormal>& source,
+                            const pcl::Indices& source_indices,
+                            const pcl::PointCloud<pcl::PointNormal>& target,
+                            const bool enforce_same_direction_normals,
+                            AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(accumulate_std_source_indices(
+      source, source_indices, target, enforce_same_direction_normals, stats));
+}
+
+// 完整 source indices RVV 估计 wrapper：bench 用它计入 source gather、target stride、
+// mask、压缩尾段、Eigen solve 和矩阵构造；它不修改 production，也不证明 indexed 可生产接入。
+inline Matrix4f
+estimate_candidate_source_indices(const pcl::PointCloud<pcl::PointNormal>& source,
+                                  const pcl::Indices& source_indices,
+                                  const pcl::PointCloud<pcl::PointNormal>& target,
+                                  const bool enforce_same_direction_normals,
+                                  AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(accumulate_candidate_source_indices(
+      source, source_indices, target, enforce_same_direction_normals, stats));
+}
+
+// 完整双侧 indices 标量估计 wrapper：对应公开 source+target indices 入口，但不使用
+// pcl::Correspondence。它为“双侧 gather 不含 correspondence 展开”提供 same-chain 参考。
+inline Matrix4f
+estimate_std_dual_indices(const pcl::PointCloud<pcl::PointNormal>& source,
+                          const pcl::Indices& source_indices,
+                          const pcl::PointCloud<pcl::PointNormal>& target,
+                          const pcl::Indices& target_indices,
+                          const bool enforce_same_direction_normals,
+                          AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(accumulate_std_dual_indices(
+      source, source_indices, target, target_indices, enforce_same_direction_normals, stats));
+}
+
+// 完整双侧 indices RVV 估计 wrapper：用于分离双侧 gather 成本。若板卡结果仍退化，
+// 结论也只能约束这一条诊断数据流，不能把 correspondences 的退化归为单一原因。
+inline Matrix4f
+estimate_candidate_dual_indices(const pcl::PointCloud<pcl::PointNormal>& source,
+                                const pcl::Indices& source_indices,
+                                const pcl::PointCloud<pcl::PointNormal>& target,
+                                const pcl::Indices& target_indices,
+                                const bool enforce_same_direction_normals,
+                                AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(accumulate_candidate_dual_indices(
+      source, source_indices, target, target_indices, enforce_same_direction_normals, stats));
 }
 
 // 完整 correspondences 标量估计 wrapper：保留公开对应关系列表顺序和重复 index 语义，

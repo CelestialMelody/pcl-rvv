@@ -24,6 +24,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <limits>
@@ -153,10 +154,52 @@ makeSubsetIndices(const std::size_t n)
   return indices;
 }
 
-pcl::PointCloud<pcl::PointNormal>
-copyIndexedCloud(const pcl::PointCloud<pcl::PointNormal>& cloud, const pcl::Indices& indices)
+pcl::Indices
+makeIndexedRvvRows(const std::size_t n)
 {
-  pcl::PointCloud<pcl::PointNormal> subset;
+  // 生成 source 侧有效但非连续、含重复的 index stream（索引流）。新增 indexed 消融用
+  // 它覆盖 gather（离散加载）成本，同时避免非法 index 把 production 输入合同外的行为混进来。
+  pcl::Indices indices;
+  indices.reserve(n);
+  for (std::size_t i = 0; i < n; i += 2)
+    indices.push_back(static_cast<int>(i));
+  if (n > 10) {
+    indices.push_back(10);
+    indices.push_back(2);
+  }
+  for (std::size_t i = 3; i < n; i += 5)
+    indices.push_back(static_cast<int>(i));
+  for (std::size_t i = 11; i < n; i += 41)
+    indices.push_back(static_cast<int>(i));
+  return indices;
+}
+
+pcl::Indices
+makeIndependentTargetIndexedRvvRows(const std::size_t n)
+{
+  // 双侧 indices 消融需要 target 侧有独立 index stream，不能直接复用 source indices。
+  // 这里同样只生成有效 index，保留非连续和重复行，让测试能覆盖 row 配对顺序、重复 index
+  // 和两侧 gather；非法 index 行为仍明确不属于本轮 correctness 合同。
+  pcl::Indices indices;
+  indices.reserve(n);
+  for (std::size_t i = 1; i < n; i += 2)
+    indices.push_back(static_cast<int>(i));
+  if (n > 11) {
+    indices.push_back(11);
+    indices.push_back(3);
+  }
+  for (std::size_t i = 4; i < n; i += 5)
+    indices.push_back(static_cast<int>(i));
+  for (std::size_t i = 17; i < n; i += 37)
+    indices.push_back(static_cast<int>(i));
+  return indices;
+}
+
+template <typename PointT>
+pcl::PointCloud<PointT>
+copyIndexedCloud(const pcl::PointCloud<PointT>& cloud, const pcl::Indices& indices)
+{
+  pcl::PointCloud<PointT> subset;
   subset.height = 1;
   subset.is_dense = cloud.is_dense;
   subset.reserve(indices.size());
@@ -420,47 +463,213 @@ TEST(TransformationEstimationSymmetricPointToPlaneLLS,
           << "row=" << row << " col=" << col;
 }
 
-// source indices + target full-cloud overload 不在 PI2 授权范围内，应继续走 iterator 标量路径。
+// 这个测试覆盖 production SourceIndexedRowSource（source 索引 + target 全云）公开入口。
+// target 在进入入口前已压成与 indices 行数相同的紧凑 cloud，因此 public API 的 row 配对
+// 仍是 source_indices[row] 对 target[row]。RVV 构建中它应与 test-rvv candidate 对齐；
+// std 构建中则自然落回原 ConstCloudIterator 标量路径。
 TEST(TransformationEstimationSymmetricPointToPlaneLLS,
-     SourceIndicesOverloadRemainsScalarFallback)
+     ProductionDirectSourceIndicesMatchesCandidate)
 {
-  const auto source = makeSurfaceCloud(18, 0.16f);
+  const auto source = makeSurfaceCloud(8, 0.16f);
   const auto target_full = makeTargetCloud(source, true);
-  const pcl::Indices indices = makeSubsetIndices(source.size());
-  const pcl::PointCloud<pcl::PointNormal> source_subset = copyIndexedCloud(source, indices);
-  const pcl::PointCloud<pcl::PointNormal> target_subset = copyIndexedCloud(target_full, indices);
+  const pcl::Indices indices = makeIndexedRvvRows(source.size());
+  const pcl::PointCloud<pcl::PointNormal> target_subset =
+      copyIndexedCloud(target_full, indices);
 
   pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
       pcl::PointNormal,
       pcl::PointNormal>
       estimator;
   Eigen::Matrix4f public_matrix;
-  estimator.estimateRigidTransformation(source, indices, target_subset, public_matrix);
+  estimator.estimateRigidTransformation(
+      source, indices, target_subset, public_matrix);
 
+  diag::AccumulationStats candidate_stats;
+  const Eigen::Matrix4f candidate_matrix = diag::estimate_candidate_source_indices(
+      source, indices, target_subset, true, &candidate_stats);
+#ifdef __RVV10__
+  EXPECT_TRUE(candidate_stats.used_rvv);
+#else
+  EXPECT_FALSE(candidate_stats.used_rvv);
+#endif
+  expectMatrixNear(public_matrix, candidate_matrix, 4e-3f);
+}
+
+// 泛型 normal 点类型也走同一 SourceIndexedRowSource production policy。这个 case 证明
+// source gather 使用 source 布局 offset，target stride 使用 target 布局 offset，没有退回
+// PointNormal 专用假设。
+TEST(TransformationEstimationSymmetricPointToPlaneLLS,
+     ProductionDirectPointXYZINormalSourceIndicesMatchesPointNormalReference)
+{
+  const auto source_ref = makeSurfaceCloud(8, 0.16f);
+  const auto target_ref_full = makeTargetCloud(source_ref, true);
+  const auto source = copyAsGenericNormalCloud<pcl::PointXYZINormal>(source_ref);
+  const auto target_full =
+      copyAsGenericNormalCloud<pcl::PointXYZINormal>(target_ref_full);
+  const pcl::Indices indices = makeIndexedRvvRows(source_ref.size());
+  const auto target = copyIndexedCloud(target_full, indices);
+  const auto target_ref = copyIndexedCloud(target_ref_full, indices);
+
+  pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
+      pcl::PointXYZINormal,
+      pcl::PointXYZINormal>
+      estimator;
+  Eigen::Matrix4f public_matrix;
+  estimator.estimateRigidTransformation(source, indices, target, public_matrix);
+
+  const Eigen::Matrix4f reference_matrix =
+      diag::estimate_std_source_indices(source_ref, indices, target_ref, true);
+#ifdef __RVV10__
+  expectMatrixNear(public_matrix, reference_matrix, 4e-3f);
+#else
+  expectMatrixNear(public_matrix, reference_matrix, 1e-4f);
+#endif
+}
+
+// source-indexed production 也必须保住 `Scalar=double` fallback（回退路径）。
+// 这个 case 调用新接入的 `cloud_src + indices_src + cloud_tgt` overload，而不是
+// full-cloud overload，防止 RVV 分流越过 `Scalar=float` gate。
+TEST(TransformationEstimationSymmetricPointToPlaneLLS,
+     ScalarDoubleSourceIndicesFallbackStillMatchesReference)
+{
+  const auto source = makeSurfaceCloud(8, 0.16f);
+  const auto target_full = makeTargetCloud(source, true);
+  const pcl::Indices indices = makeIndexedRvvRows(source.size());
+  const pcl::PointCloud<pcl::PointNormal> target_subset =
+      copyIndexedCloud(target_full, indices);
+
+  pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
+      pcl::PointNormal,
+      pcl::PointNormal,
+      double>
+      estimator;
+  Eigen::Matrix4d public_matrix;
+  estimator.estimateRigidTransformation(
+      source, indices, target_subset, public_matrix);
+
+  const Eigen::Matrix4f reference_matrix =
+      diag::estimate_std_source_indices(source, indices, target_subset, true);
+  for (int row = 0; row < 4; ++row)
+    for (int col = 0; col < 4; ++col)
+      EXPECT_NEAR(public_matrix(row, col),
+                  static_cast<double>(reference_matrix(row, col)),
+                  1e-3)
+          << "row=" << row << " col=" << col;
+}
+
+// source-indexed mixed layout：source 使用 PointXYZINormal 触发 gather offset，target 使用
+// PointNormal 触发 stride offset。它补齐 source gather 与 target stride 分别使用两侧 traits
+// 的 production direct 证据。
+TEST(TransformationEstimationSymmetricPointToPlaneLLS,
+     ProductionDirectMixedNormalLayoutsSourceIndicesMatchPointNormalReference)
+{
+  const auto source_ref = makeSurfaceCloud(8, 0.16f);
+  const auto target_ref_full = makeTargetCloud(source_ref, true);
+  const auto source = copyAsGenericNormalCloud<pcl::PointXYZINormal>(source_ref);
+  const pcl::Indices indices = makeIndexedRvvRows(source_ref.size());
+  const auto target_ref = copyIndexedCloud(target_ref_full, indices);
+
+  pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
+      pcl::PointXYZINormal,
+      pcl::PointNormal>
+      estimator;
+  Eigen::Matrix4f public_matrix;
+  estimator.estimateRigidTransformation(source, indices, target_ref, public_matrix);
+
+  const Eigen::Matrix4f reference_matrix =
+      diag::estimate_std_source_indices(source_ref, indices, target_ref, true);
+#ifdef __RVV10__
+  expectMatrixNear(public_matrix, reference_matrix, 4e-3f);
+#else
+  expectMatrixNear(public_matrix, reference_matrix, 1e-4f);
+#endif
+}
+
+// source-indexed public invalid lane case：在有效 index stream 内注入 source NaN 和
+// compact target Inf，证明 production path 的 finite mask 与标量 reference 一样跳过
+// 对应 row。它仍不覆盖负数或越界 index 行为。
+TEST(TransformationEstimationSymmetricPointToPlaneLLS,
+     ProductionDirectSourceIndicesInvalidLaneMatchesReference)
+{
+  auto source = makeSurfaceCloud(8, 0.16f);
+  const auto target_full = makeTargetCloud(source, true);
+  const pcl::Indices indices = makeIndexedRvvRows(source.size());
+  auto target_subset = copyIndexedCloud(target_full, indices);
+  ASSERT_GE(indices.size(), std::size_t{4});
+  ASSERT_GE(target_subset.size(), std::size_t{4});
+
+  source[static_cast<std::size_t>(indices[1])].x =
+      std::numeric_limits<float>::quiet_NaN();
+  target_subset[2].normal_z = std::numeric_limits<float>::infinity();
+
+  pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
+      pcl::PointNormal,
+      pcl::PointNormal>
+      estimator;
+  Eigen::Matrix4f public_matrix;
+  estimator.estimateRigidTransformation(
+      source, indices, target_subset, public_matrix);
+
+  diag::AccumulationStats reference_stats;
+  const Eigen::Matrix4f reference_matrix = diag::estimate_std_source_indices(
+      source, indices, target_subset, true, &reference_stats);
+  EXPECT_LT(reference_stats.accepted_points, reference_stats.input_points);
+#ifdef __RVV10__
+  expectMatrixNear(public_matrix, reference_matrix, 4e-3f);
+#else
+  expectMatrixNear(public_matrix, reference_matrix, 1e-4f);
+#endif
+}
+
+// 这个测试单独隔离 source-indexed 的规模 gate。输入行数不足时，公开入口必须继续使用
+// 原 iterator 标量语义；它不证明非法 index 行为，只覆盖有效 index stream。
+TEST(TransformationEstimationSymmetricPointToPlaneLLS,
+     SourceIndicesOverloadSmallInputFallsBackToScalar)
+{
+  const auto source = makeSurfaceCloud(3, 0.16f);
+  const auto target = makeTargetCloud(source, true);
+  const pcl::Indices indices = makeSubsetIndices(source.size());
+  const pcl::PointCloud<pcl::PointNormal> target_subset =
+      copyIndexedCloud(target, indices);
+
+  pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
+      pcl::PointNormal,
+      pcl::PointNormal>
+      estimator;
+  Eigen::Matrix4f public_matrix;
+  estimator.estimateRigidTransformation(
+      source, indices, target_subset, public_matrix);
+
+  diag::AccumulationStats stats;
   const Eigen::Matrix4f diagnostic_matrix =
-      diag::estimate_std_full(source_subset, target_subset, true);
+      diag::estimate_std_source_indices(source, indices, target_subset, true, &stats);
+  EXPECT_FALSE(stats.used_rvv);
   expectMatrixNear(public_matrix, diagnostic_matrix, 1e-4f);
 }
 
-// source indices + target indices overload 同样保持标量，避免 full-cloud RVV 分流覆盖 indexed row。
+// 双侧 indexed 入口仍然不接 production RVV。它继续走 iterator，避免 source-indexed
+// policy 意外覆盖 target index stream 或 correspondence 语义。
 TEST(TransformationEstimationSymmetricPointToPlaneLLS,
      SourceAndTargetIndicesOverloadRemainsScalarFallback)
 {
-  const auto source = makeSurfaceCloud(18, 0.16f);
+  const auto source = makeSurfaceCloud(8, 0.16f);
   const auto target = makeTargetCloud(source, true);
-  const pcl::Indices indices = makeSubsetIndices(source.size());
-  const pcl::PointCloud<pcl::PointNormal> source_subset = copyIndexedCloud(source, indices);
-  const pcl::PointCloud<pcl::PointNormal> target_subset = copyIndexedCloud(target, indices);
+  pcl::Indices source_indices = makeIndexedRvvRows(source.size());
+  pcl::Indices target_indices = makeIndependentTargetIndexedRvvRows(target.size());
+  const std::size_t paired_rows = std::min(source_indices.size(), target_indices.size());
+  source_indices.resize(paired_rows);
+  target_indices.resize(paired_rows);
 
   pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
       pcl::PointNormal,
       pcl::PointNormal>
       estimator;
   Eigen::Matrix4f public_matrix;
-  estimator.estimateRigidTransformation(source, indices, target, indices, public_matrix);
+  estimator.estimateRigidTransformation(
+      source, source_indices, target, target_indices, public_matrix);
 
-  const Eigen::Matrix4f diagnostic_matrix =
-      diag::estimate_std_full(source_subset, target_subset, true);
+  const Eigen::Matrix4f diagnostic_matrix = diag::estimate_std_dual_indices(
+      source, source_indices, target, target_indices, true);
   expectMatrixNear(public_matrix, diagnostic_matrix, 1e-4f);
 }
 
@@ -581,6 +790,79 @@ TEST(TransformationEstimationSymmetricPointToPlaneLLS, CorrespondenceCandidateMa
 
   EXPECT_EQ(candidate_stats.input_points, std_stats.input_points);
   EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(candidate_stats.used_rvv);
+#else
+  EXPECT_FALSE(candidate_stats.used_rvv);
+#endif
+  expectMatrixNear(candidate_matrix, std_matrix, 5e-3f);
+}
+
+// 这个测试是本轮 source 单侧 indexed 消融的 correctness（正确性）gate，也是
+// test-rvv-only `SourceIndexedRowSource` policy 的调用者。source 侧按 indices gather，
+// target 侧是紧凑全云顺序扫描；如果失败，说明单侧 gather + target stride load（跨步加载）
+// 这条诊断数据流无法与标量 same-chain 对齐。
+TEST(TransformationEstimationSymmetricPointToPlaneLLS,
+     SourceIndicesCandidateMatchesStd)
+{
+  const auto source = makeSurfaceCloud(32, 0.10f);
+  const auto target_full = makeTargetCloud(source, true);
+  const pcl::Indices source_indices = makeIndexedRvvRows(source.size());
+  const pcl::PointCloud<pcl::PointNormal> target =
+      copyIndexedCloud(target_full, source_indices);
+
+  diag::AccumulationStats std_stats;
+  diag::AccumulationStats candidate_stats;
+  const Eigen::Matrix4f std_matrix =
+      diag::estimate_std_source_indices(source, source_indices, target, true, &std_stats);
+  const Eigen::Matrix4f candidate_matrix = diag::estimate_candidate_source_indices(
+      source, source_indices, target, true, &candidate_stats);
+
+  EXPECT_EQ(candidate_stats.input_points, std_stats.input_points);
+  EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(candidate_stats.used_rvv);
+#else
+  EXPECT_FALSE(candidate_stats.used_rvv);
+#endif
+  expectMatrixNear(candidate_matrix, std_matrix, 5e-3f);
+}
+
+// 这个测试是双侧 indexed 消融的 correctness gate。它直接传两个 index vector，
+// 不从 pcl::Correspondence 展开 query/match，也没有 correspondence.weight。
+// 因此失败只说明双侧 gather 诊断链路断开，不涉及 correspondence parsing 成本。
+TEST(TransformationEstimationSymmetricPointToPlaneLLS, DualIndicesCandidateMatchesStd)
+{
+  auto source = makeSurfaceCloud(32, 0.10f);
+  auto target = makeTargetCloud(source, true);
+  const pcl::Indices source_indices = makeIndexedRvvRows(source.size());
+  const pcl::Indices target_indices = makeIndependentTargetIndexedRvvRows(target.size());
+
+  ASSERT_FALSE(source_indices.empty());
+  ASSERT_FALSE(target_indices.empty());
+  EXPECT_NE(source_indices, target_indices);
+  ASSERT_GE(source_indices.size(), std::size_t{12});
+  ASSERT_GE(target_indices.size(), std::size_t{12});
+  EXPECT_NE(std::find(source_indices.begin() + 2, source_indices.end(), source_indices[1]),
+            source_indices.end());
+  EXPECT_NE(std::find(target_indices.begin() + 2, target_indices.end(), target_indices[1]),
+            target_indices.end());
+
+  source[static_cast<std::size_t>(source_indices[1])].x =
+      std::numeric_limits<float>::quiet_NaN();
+  target[static_cast<std::size_t>(target_indices[2])].normal_z =
+      std::numeric_limits<float>::infinity();
+
+  diag::AccumulationStats std_stats;
+  diag::AccumulationStats candidate_stats;
+  const Eigen::Matrix4f std_matrix = diag::estimate_std_dual_indices(
+      source, source_indices, target, target_indices, true, &std_stats);
+  const Eigen::Matrix4f candidate_matrix = diag::estimate_candidate_dual_indices(
+      source, source_indices, target, target_indices, true, &candidate_stats);
+
+  EXPECT_EQ(candidate_stats.input_points, std_stats.input_points);
+  EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
+  EXPECT_LT(std_stats.accepted_points, std_stats.input_points);
 #ifdef __RVV10__
   EXPECT_TRUE(candidate_stats.used_rvv);
 #else

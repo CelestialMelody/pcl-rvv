@@ -5,11 +5,15 @@
  * diagnostic case 保留用于和上一轮证据对照。
  *
  * 测量边界：
- * 输入 cloud、target 和 correspondences 在计时前构造完成。每次迭代测量 candidate
+ * 输入 cloud、target、indices 和 correspondences 在计时前构造完成。每次迭代测量 candidate
  * estimate（候选估计）本身：normal-equation（法方程）构造、Eigen LDLT solve
  *（Eigen LDLT 求解器）和 constructTransformationMatrix（构造变换矩阵）。对应关系
  * case（correspondences case，按 index_query/index_match 指定点对）包含 candidate
  * 内部的 index 展开，因为这是当前 gather（离散加载）方案为了进入 RVV 必须付出的入口成本。
+ * source indices 和 dual indices case 直接使用计时前构造好的 index vector，用于把
+ * 单侧 gather、双侧 gather 和 correspondence parsing（对应关系解析）成本分开观察。
+ * source-indices candidate 通过 test-rvv-only `SourceIndexedRowSource` policy 进入共同
+ * row pipeline；这不改变 production dispatch，也不代表 indexed production-ready。
  */
 
 #include "transformation_estimation_symmetric_point_to_plane_lls_diag.hpp"
@@ -128,6 +132,63 @@ makeCorrespondences(const std::size_t n)
   return correspondences;
 }
 
+pcl::Indices
+makeIndexedRows(const std::size_t n)
+{
+  // source 侧有效 index stream：非连续、含重复，但没有 query/match 解析阶段。
+  // 这样 source-indices bench 可以单独观察 source gather 与 target stride。
+  pcl::Indices indices;
+  indices.reserve(n);
+  for (std::size_t i = 0; i < n; i += 2)
+    indices.push_back(static_cast<int>(i));
+  if (n > 10) {
+    indices.push_back(10);
+    indices.push_back(2);
+  }
+  for (std::size_t i = 3; i < n; i += 5)
+    indices.push_back(static_cast<int>(i));
+  for (std::size_t i = 11; i < n; i += 41)
+    indices.push_back(static_cast<int>(i));
+  return indices;
+}
+
+pcl::Indices
+makeIndependentTargetIndexedRows(const std::size_t n)
+{
+  // target 侧使用另一条独立 index stream。它仍然有效、非连续且含重复，但与 source
+  // stream 不同，因此 dual-indices bench 能证明两条 index stream 的 row 配对语义。
+  // 非法 index 行为不是本轮性能诊断合同，避免把 production 输入合同外行为混进来。
+  pcl::Indices indices;
+  indices.reserve(n);
+  for (std::size_t i = 1; i < n; i += 2)
+    indices.push_back(static_cast<int>(i));
+  if (n > 11) {
+    indices.push_back(11);
+    indices.push_back(3);
+  }
+  for (std::size_t i = 4; i < n; i += 5)
+    indices.push_back(static_cast<int>(i));
+  for (std::size_t i = 17; i < n; i += 37)
+    indices.push_back(static_cast<int>(i));
+  return indices;
+}
+
+template <typename PointT>
+pcl::PointCloud<PointT>
+copyIndexedCloud(const pcl::PointCloud<PointT>& cloud, const pcl::Indices& indices)
+{
+  // source indices + target full-cloud 公开入口要求 target 行数与 indices 行数一致。
+  // bench 计时前先把 target 压成紧凑全云，使被测 candidate 内只剩 source gather 和 target stride。
+  pcl::PointCloud<PointT> subset;
+  subset.height = 1;
+  subset.is_dense = cloud.is_dense;
+  subset.reserve(indices.size());
+  for (const int index : indices)
+    subset.push_back(cloud[static_cast<std::size_t>(index)]);
+  subset.width = subset.size();
+  return subset;
+}
+
 struct BenchResult {
   std::string name;
   double average_ms = 0.0;
@@ -176,6 +237,11 @@ main()
         copyAsGenericNormalCloud<pcl::PointXYZINormal>(source);
     const auto target_xyzinormal =
         copyAsGenericNormalCloud<pcl::PointXYZINormal>(target);
+    const pcl::Indices indexed_rows = makeIndexedRows(source.size());
+    const pcl::PointCloud<pcl::PointNormal> compact_target =
+        copyIndexedCloud(target, indexed_rows);
+    const pcl::PointCloud<pcl::PointXYZINormal> compact_target_xyzinormal =
+        copyIndexedCloud(target_xyzinormal, indexed_rows);
 
     results.push_back(runCase(
         "symmetric lls production-direct full-cloud pointnormal " + std::to_string(n),
@@ -206,12 +272,66 @@ main()
         }));
 
     results.push_back(runCase(
+        "symmetric lls production-direct source-indices pointnormal " +
+            std::to_string(n),
+        kIterations,
+        [&]() {
+          pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
+              pcl::PointNormal,
+              pcl::PointNormal>
+              estimator;
+          Eigen::Matrix4f matrix;
+          estimator.estimateRigidTransformation(
+              source, indexed_rows, compact_target, matrix);
+          return diag::matrix_checksum(matrix);
+        }));
+
+    results.push_back(runCase(
+        "symmetric lls production-direct source-indices pointxyzinormal " +
+            std::to_string(n),
+        kIterations,
+        [&]() {
+          pcl::registration::TransformationEstimationSymmetricPointToPlaneLLS<
+              pcl::PointXYZINormal,
+              pcl::PointXYZINormal>
+              estimator;
+          Eigen::Matrix4f matrix;
+          estimator.estimateRigidTransformation(
+              source_xyzinormal, indexed_rows, compact_target_xyzinormal, matrix);
+          return diag::matrix_checksum(matrix);
+        }));
+
+    results.push_back(runCase(
         "symmetric lls full-cloud pointnormal " + std::to_string(n),
         kIterations,
         [&]() {
           diag::AccumulationStats stats;
           const Eigen::Matrix4f matrix =
               diag::estimate_candidate_full(source, target, true, &stats);
+          return diag::matrix_checksum(matrix) +
+                 static_cast<double>(stats.accepted_points) * 1e-6;
+        }));
+
+    const pcl::Indices target_indexed_rows =
+        makeIndependentTargetIndexedRows(target.size());
+    results.push_back(runCase(
+        "symmetric lls source-indices pointnormal " + std::to_string(n),
+        kIterations,
+        [&]() {
+          diag::AccumulationStats stats;
+          const Eigen::Matrix4f matrix = diag::estimate_candidate_source_indices(
+              source, indexed_rows, compact_target, true, &stats);
+          return diag::matrix_checksum(matrix) +
+                 static_cast<double>(stats.accepted_points) * 1e-6;
+        }));
+
+    results.push_back(runCase(
+        "symmetric lls dual-indices pointnormal " + std::to_string(n),
+        kIterations,
+        [&]() {
+          diag::AccumulationStats stats;
+          const Eigen::Matrix4f matrix = diag::estimate_candidate_dual_indices(
+              source, indexed_rows, target, target_indexed_rows, true, &stats);
           return diag::matrix_checksum(matrix) +
                  static_cast<double>(stats.accepted_points) * 1e-6;
         }));

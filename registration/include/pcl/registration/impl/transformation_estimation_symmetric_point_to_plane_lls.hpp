@@ -43,6 +43,7 @@
 #include <pcl/field_traits.h>
 #include <pcl/point_types.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <type_traits>
@@ -244,56 +245,49 @@ constructSymmetricPointNormalTransform(const Eigen::Matrix<float, 6, 1>& paramet
   return transform.matrix();
 }
 
-template <typename PointSource, typename PointTarget>
+template <typename RowSourcePolicy>
 inline bool
-estimateSymmetricPointNormalFullCloudRVV(
-    const pcl::PointCloud<PointSource>& cloud_src,
-    const pcl::PointCloud<PointTarget>& cloud_tgt,
+estimateSymmetricPointNormalRowsRVV(
+    const typename RowSourcePolicy::Context& context,
     const bool enforce_same_direction_normals,
     Eigen::Matrix4f& transformation_matrix)
 {
+  using PointSource = typename RowSourcePolicy::PointSource;
+  using PointTarget = typename RowSourcePolicy::PointTarget;
+
   if constexpr (!pcl::rvv::RVVXYZNormalFloatLayout<PointSource>::value ||
                 !pcl::rvv::RVVXYZNormalFloatLayout<PointTarget>::value) {
     return false;
   } else {
-    using SrcLayout = pcl::rvv::RVVXYZNormalFloatLayout<PointSource>;
-    using TgtLayout = pcl::rvv::RVVXYZNormalFloatLayout<PointTarget>;
-
-    const std::size_t nr_points = cloud_src.size();
-    if (nr_points < 64 || __riscv_vsetvlmax_e32m2() > 64 ||
-        nr_points > pcl::rvv::rvvMaxU32ByteOffsetElements<PointSource>() ||
-        nr_points > pcl::rvv::rvvMaxU32ByteOffsetElements<PointTarget>()) {
+    const std::size_t nr_points = RowSourcePolicy::row_count(context);
+    if (!RowSourcePolicy::can_use_rvv(context, nr_points))
       return false;
-    }
 
     SymmetricPointNormalEquation eq;
     const auto* src_base =
-        reinterpret_cast<const std::uint8_t*>(cloud_src.points.data());
+        reinterpret_cast<const std::uint8_t*>(context.source.points.data());
     const auto* tgt_base =
-        reinterpret_cast<const std::uint8_t*>(cloud_tgt.points.data());
+        reinterpret_cast<const std::uint8_t*>(context.target.points.data());
     for (std::size_t i = 0; i < nr_points;) {
       const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
       vfloat32m2_t sx, sy, sz, tx, ty, tz, n1x, n1y, n1z, n2x, n2y, n2z;
-      pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointSource),
-                                                SrcLayout::kX,
-                                                SrcLayout::kY,
-                                                SrcLayout::kZ>(
-          src_base + i * sizeof(PointSource), vl, sx, sy, sz);
-      pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointTarget),
-                                                TgtLayout::kX,
-                                                TgtLayout::kY,
-                                                TgtLayout::kZ>(
-          tgt_base + i * sizeof(PointTarget), vl, tx, ty, tz);
-      pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointSource),
-                                                SrcLayout::kNX,
-                                                SrcLayout::kNY,
-                                                SrcLayout::kNZ>(
-          src_base + i * sizeof(PointSource), vl, n1x, n1y, n1z);
-      pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointTarget),
-                                                TgtLayout::kNX,
-                                                TgtLayout::kNY,
-                                                TgtLayout::kNZ>(
-          tgt_base + i * sizeof(PointTarget), vl, n2x, n2y, n2z);
+      RowSourcePolicy::load_chunk(context,
+                                  src_base,
+                                  tgt_base,
+                                  i,
+                                  vl,
+                                  sx,
+                                  sy,
+                                  sz,
+                                  tx,
+                                  ty,
+                                  tz,
+                                  n1x,
+                                  n1y,
+                                  n1z,
+                                  n2x,
+                                  n2y,
+                                  n2z);
 
       vfloat32m2_t nx, ny, nz;
       selectSymmetricNormalRVV(n1x,
@@ -330,6 +324,185 @@ estimateSymmetricPointNormalFullCloudRVV(
     transformation_matrix = constructSymmetricPointNormalTransform(x);
     return true;
   }
+}
+
+template <typename SourceT, typename TargetT>
+struct SymmetricFullCloudRowSource {
+  using PointSource = SourceT;
+  using PointTarget = TargetT;
+
+  struct Context {
+    const pcl::PointCloud<PointSource>& source;
+    const pcl::PointCloud<PointTarget>& target;
+  };
+
+  static std::size_t
+  row_count(const Context& context)
+  {
+    return std::min(context.source.size(), context.target.size());
+  }
+
+  static bool
+  can_use_rvv(const Context&, const std::size_t nr_points)
+  {
+    return nr_points >= 64 && __riscv_vsetvlmax_e32m2() <= 64 &&
+           nr_points <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointSource>() &&
+           nr_points <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointTarget>();
+  }
+
+  static void
+  load_chunk(const Context&,
+             const std::uint8_t* source_base,
+             const std::uint8_t* target_base,
+             const std::size_t i,
+             const std::size_t vl,
+             vfloat32m2_t& sx,
+             vfloat32m2_t& sy,
+             vfloat32m2_t& sz,
+             vfloat32m2_t& tx,
+             vfloat32m2_t& ty,
+             vfloat32m2_t& tz,
+             vfloat32m2_t& n1x,
+             vfloat32m2_t& n1y,
+             vfloat32m2_t& n1z,
+             vfloat32m2_t& n2x,
+             vfloat32m2_t& n2y,
+             vfloat32m2_t& n2z)
+  {
+    using SrcLayout = pcl::rvv::RVVXYZNormalFloatLayout<PointSource>;
+    using TgtLayout = pcl::rvv::RVVXYZNormalFloatLayout<PointTarget>;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointSource),
+                                                SrcLayout::kX,
+                                                SrcLayout::kY,
+                                                SrcLayout::kZ>(
+        source_base + i * sizeof(PointSource), vl, sx, sy, sz);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointTarget),
+                                                TgtLayout::kX,
+                                                TgtLayout::kY,
+                                                TgtLayout::kZ>(
+        target_base + i * sizeof(PointTarget), vl, tx, ty, tz);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointSource),
+                                                SrcLayout::kNX,
+                                                SrcLayout::kNY,
+                                                SrcLayout::kNZ>(
+        source_base + i * sizeof(PointSource), vl, n1x, n1y, n1z);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointTarget),
+                                                TgtLayout::kNX,
+                                                TgtLayout::kNY,
+                                                TgtLayout::kNZ>(
+        target_base + i * sizeof(PointTarget), vl, n2x, n2y, n2z);
+  }
+};
+
+template <typename SourceT, typename TargetT>
+struct SymmetricSourceIndexedRowSource {
+  using PointSource = SourceT;
+  using PointTarget = TargetT;
+
+  struct Context {
+    const pcl::PointCloud<PointSource>& source;
+    const pcl::Indices& source_indices;
+    const pcl::PointCloud<PointTarget>& target;
+  };
+
+  static std::size_t
+  row_count(const Context& context)
+  {
+    return context.source_indices.size();
+  }
+
+  static bool
+  can_use_rvv(const Context& context, const std::size_t nr_points)
+  {
+    // The public indices overload inherits PCL's valid-index precondition.
+    // RVV only checks that every valid source index can fit in a 32-bit byte offset.
+    return context.target.size() == nr_points && nr_points >= 64 &&
+           __riscv_vsetvlmax_e32m2() <= 64 &&
+           context.source.size() <=
+               pcl::rvv::rvvMaxU32ByteOffsetElements<PointSource>() &&
+           context.target.size() <=
+               pcl::rvv::rvvMaxU32ByteOffsetElements<PointTarget>();
+  }
+
+  static void
+  load_chunk(const Context& context,
+             const std::uint8_t* source_base,
+             const std::uint8_t* target_base,
+             const std::size_t i,
+             const std::size_t vl,
+             vfloat32m2_t& sx,
+             vfloat32m2_t& sy,
+             vfloat32m2_t& sz,
+             vfloat32m2_t& tx,
+             vfloat32m2_t& ty,
+             vfloat32m2_t& tz,
+             vfloat32m2_t& n1x,
+             vfloat32m2_t& n1y,
+             vfloat32m2_t& n1z,
+             vfloat32m2_t& n2x,
+             vfloat32m2_t& n2y,
+             vfloat32m2_t& n2z)
+  {
+    using SrcLayout = pcl::rvv::RVVXYZNormalFloatLayout<PointSource>;
+    using TgtLayout = pcl::rvv::RVVXYZNormalFloatLayout<PointTarget>;
+    using SrcPod = typename SrcLayout::Pod;
+    const vint32m2_t source_indices =
+        __riscv_vle32_v_i32m2(context.source_indices.data() + i, vl);
+    const vuint32m2_t source_offsets =
+        pcl::rvv_load::byte_offsets_u32m2<SrcPod>(
+            __riscv_vreinterpret_v_i32m2_u32m2(source_indices), vl);
+    pcl::rvv_load::indexed_load3_fields_f32m2<SrcPod,
+                                               SrcLayout::kX,
+                                               SrcLayout::kY,
+                                               SrcLayout::kZ>(
+        source_base, source_offsets, vl, sx, sy, sz);
+    pcl::rvv_load::indexed_load3_fields_f32m2<SrcPod,
+                                               SrcLayout::kNX,
+                                               SrcLayout::kNY,
+                                               SrcLayout::kNZ>(
+        source_base, source_offsets, vl, n1x, n1y, n1z);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointTarget),
+                                                TgtLayout::kX,
+                                                TgtLayout::kY,
+                                                TgtLayout::kZ>(
+        target_base + i * sizeof(PointTarget), vl, tx, ty, tz);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointTarget),
+                                                TgtLayout::kNX,
+                                                TgtLayout::kNY,
+                                                TgtLayout::kNZ>(
+        target_base + i * sizeof(PointTarget), vl, n2x, n2y, n2z);
+  }
+};
+
+template <typename PointSource, typename PointTarget>
+inline bool
+estimateSymmetricPointNormalFullCloudRVV(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    const bool enforce_same_direction_normals,
+    Eigen::Matrix4f& transformation_matrix)
+{
+  using RowSource = SymmetricFullCloudRowSource<PointSource, PointTarget>;
+  return estimateSymmetricPointNormalRowsRVV<RowSource>(
+      typename RowSource::Context{cloud_src, cloud_tgt},
+      enforce_same_direction_normals,
+      transformation_matrix);
+}
+
+template <typename PointSource, typename PointTarget>
+inline bool
+estimateSymmetricPointNormalSourceIndicesRVV(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::Indices& indices_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    const bool enforce_same_direction_normals,
+    Eigen::Matrix4f& transformation_matrix)
+{
+  using RowSource = SymmetricSourceIndexedRowSource<PointSource, PointTarget>;
+  return estimateSymmetricPointNormalRowsRVV<RowSource>(
+      typename RowSource::Context{cloud_src, indices_src, cloud_tgt},
+      enforce_same_direction_normals,
+      transformation_matrix);
 }
 
 } // namespace detail
@@ -382,6 +555,18 @@ TransformationEstimationSymmetricPointToPlaneLLS<PointSource, PointTarget, Scala
               static_cast<std::size_t>(cloud_tgt.size()));
     return;
   }
+
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<Scalar, float>) {
+    if (detail::estimateSymmetricPointNormalSourceIndicesRVV(
+            cloud_src,
+            indices_src,
+            cloud_tgt,
+            enforce_same_direction_normals_,
+            transformation_matrix))
+      return;
+  }
+#endif // defined(__RVV10__)
 
   ConstCloudIterator<PointSource> source_it(cloud_src, indices_src);
   ConstCloudIterator<PointTarget> target_it(cloud_tgt);
