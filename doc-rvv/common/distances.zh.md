@@ -14,7 +14,7 @@
 - 语义对齐上游：仍计算最远点对长度，返回值与空输入行为保持一致（无有效点对时返回 `std::numeric_limits<double>::min()`）。
 - 数据布局约束：点云是 AoS（`PointT`），向量访存通过 `strided`/`segmented` load 从结构体中提取 `x/y/z`。
 - 不适合向量化场景：`n < 512` 直接回退标量；`indices` 版本先打包再算，避免在 $O(N^2)$ 循环内做随机 gather。
-- 横切设计参考：`rvv` 访存策略由 `pcl/common/rvv_point_load.h` 与 `impl/rvv_point_load.hpp` 统一封装（编译期在 `vlsseg3e32` 与 `3x vlse32` 间选择）。
+- 横切设计参考：`rvv` 访存策略由 `pcl/rvv_point_load.h` 与 `impl/rvv_point_load.hpp` 统一封装（编译期在 `vlsseg3e32` 与 `3x vlse32` 间选择）。
 
 ## 2. 与上游实现的差异
 
@@ -85,7 +85,7 @@ getMaxSegment (const pcl::PointCloud<PointT> &cloud, PointT &pmin, PointT &pmax)
 条带循环骨架是“外层标量 `i` + 内层 `j` 分块推进”：
 
 - 内层 `j` 使用 `vl = __riscv_vsetvl_e32m2(n - j)` 自适应尾段，`j += vl` 推进，避免额外标量 tail-loop。
-- `p_j` 的 `x/y/z` 通过 `pcl::rvv_load::strided_load3_f32m2<sizeof(PointT), offsetof(PointT,x), ...>` 从 AoS 结构体中做 stride/segment load。该封装在字段紧邻时优先走 `vlsseg3e32`，否则退化为 `3x vlse32`（见 `pcl/common/rvv_point_load.h`/`impl/rvv_point_load.hpp`）。
+- `p_j` 的 `x/y/z` 通过 `pcl::rvv_load::strided_load3_f32m2<sizeof(PointT), offsetof(PointT,x), ...>` 从 AoS 结构体中做 stride/segment load。该封装在字段紧邻时优先走 `vlsseg3e32`，否则退化为 `3x vlse32`（见 `pcl/rvv_point_load.h`/`impl/rvv_point_load.hpp`）。
 
 对应实现中“条带推进 + AoS 载入 + 归约 + lane 定位”的主干片段如下：
 

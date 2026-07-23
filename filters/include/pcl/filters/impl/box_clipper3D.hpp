@@ -35,7 +35,7 @@
 #ifndef PCL_FILTERS_IMPL_BOX_CLIPPER3D_HPP
 #define PCL_FILTERS_IMPL_BOX_CLIPPER3D_HPP
 
-#include <pcl/common/rvv_point_load.h>
+#include <pcl/rvv_point_load.h>
 #include <pcl/filters/box_clipper3D.h>
 #include <pcl/point_types.h>
 

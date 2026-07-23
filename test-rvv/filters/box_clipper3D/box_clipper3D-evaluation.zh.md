@@ -48,7 +48,7 @@ keep(p) = all(abs(q) <= 1)
 - 常驻 `clipPointCloud3DStd`，保留原标量主体；
 - `__RVV10__` 下新增 `clipPointCloud3DRVV`；
 - 公开入口用 `if constexpr (pcl::rvv::kRVVXYZPointCompatible<PointT>)` 短路调用 RVV，否则落回 Std；
-- RVV 路径复用 `pcl/common/rvv_point_load.h` 的 `strided_load3_f32m2` 读取 AoS `x/y/z`；
+- RVV 路径复用 `pcl/rvv_point_load.h` 的 `strided_load3_f32m2` 读取 AoS `x/y/z`；
 - 一个 VL chunk 内计算 4 行 affine 结果 `tx/ty/tz/tw`，用 `vfabs + vmfle` 形成与标量 `abs() <= 1` 一致的 mask，再用 `vcompress` 保序写出源 indices。
 
 ## 收益判断补充

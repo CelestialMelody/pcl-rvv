@@ -18,8 +18,8 @@ git ls-files '*.h' '*.hpp' '*.cpp'
 
 - `common/include/pcl/common/impl/centroid.hpp`
 - `common/include/pcl/common/impl/transforms.hpp`
-- `common/include/pcl/common/impl/rvv_point_load.hpp`
-- `common/include/pcl/common/impl/rvv_point_store.hpp`
+- `common/include/pcl/impl/rvv_point_load.hpp`
+- `common/include/pcl/impl/rvv_point_store.hpp`
 - `filters/include/pcl/filters/impl/*.hpp`
 - `sample_consensus/include/pcl/sample_consensus/impl/*.hpp`
 - `test-rvv/**/bench_*.cpp`、`test-rvv/**/test_*.cpp`

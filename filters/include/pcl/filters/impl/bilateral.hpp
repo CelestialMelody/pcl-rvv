@@ -44,8 +44,8 @@
 #include <pcl/common/common.h>
 #include <pcl/search/auto.h> // for autoSelectMethod
 #include <pcl/common/point_tests.h> // for isXYZFinite
-#include <pcl/common/rvv_point_load.h>
-#include <pcl/common/rvv_point_traits.h>
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_traits.h>
 
 #include <algorithm>
 #include <cstddef>

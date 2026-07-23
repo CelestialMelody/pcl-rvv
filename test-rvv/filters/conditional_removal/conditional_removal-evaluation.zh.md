@@ -29,7 +29,7 @@
 
 `applyFilter` 在进入 `applyFilterRVV` 前会执行一次条件树识别和 metadata 展开。具体包括：确认 `condition_` 为 `ConditionAnd<PointT>`，读取其已有 `conditions_` / `comparisons_`，确认无嵌套 condition 且只有一个 `FieldComparison<PointT>`；再确认字段数据存在、datatype 为 `FLOAT32`、op 为 `GT/GE/LT/LE`、比较值可转为 `float`，最后把原 comparison 的 `field_offset`、`op`、`compare_val` 传入 RVV helper。这些检查用于证明当前对象谓词等价于 `finite(x,y,z) && field op compare_val`，属于每次 filter 调用一次的覆盖条件判断，不在逐点循环或 VL chunk 内重复执行。识别失败时回退 `applyFilterStd`，因此不会扩大 `ConditionalRemoval` 的用户可见语义。
 
-RVV helper 使用 `pcl/common/rvv_point_load.h` 的 `strided_load3_f32m2` 读取 `x/y/z`，用 `strided_load_f32m2` 读取目标 float 字段。每个 VL chunk 先生成 finite xyz mask，再生成字段比较 mask；`vcompress` 压缩 kept index 到临时 buffer 后按该 buffer 逐点 `copyPoint`，保证输出点云顺序和完整字段复制与标量一致。`extract_removed_indices_` 打开时，drop mask 也用 `vcompress` 写入 removed indices。
+RVV helper 使用 `pcl/rvv_point_load.h` 的 `strided_load3_f32m2` 读取 `x/y/z`，用 `strided_load_f32m2` 读取目标 float 字段。每个 VL chunk 先生成 finite xyz mask，再生成字段比较 mask；`vcompress` 压缩 kept index 到临时 buffer 后按该 buffer 逐点 `copyPoint`，保证输出点云顺序和完整字段复制与标量一致。`extract_removed_indices_` 打开时，drop mask 也用 `vcompress` 写入 removed indices。
 
 ## 4. 风险与处理
 

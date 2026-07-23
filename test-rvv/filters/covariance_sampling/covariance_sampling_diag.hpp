@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pcl/common/rvv_point_load.h>
+#include <pcl/rvv_point_load.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 

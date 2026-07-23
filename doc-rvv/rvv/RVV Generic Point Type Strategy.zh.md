@@ -7,7 +7,7 @@ PCL 的很多算法入口使用模板点类型。同一个函数可能接收 `Po
 不同的点类型上读错内存。
 
 本文是 RVV 泛型点类型 gate 的首选入口文档。公共 API 落点是
-`common/include/pcl/common/rvv_point_traits.h`。该头文件只包含 compile-time
+`common/include/pcl/rvv_point_traits.h`。该头文件只包含 compile-time
 traits / layout gate（编译期类型特征和布局准入判断），不包含算法 dispatch
 （选择 RVV 路径还是标量路径的分流逻辑），不包含 RVV intrinsic（RVV 内建函数）
 实现，也不包含 topic 特有逻辑。

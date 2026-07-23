@@ -51,7 +51,7 @@ follow-up rescreen 已把本主题列为 bench 诊断主题。当前实现只在
 - `gridMinimumPointXYZRVV` 是 full diagnostic，对应 bench 的 `grid minimum full diag ...`，它在 RVV staging 后继续调用同一标量排序和每 cell 最小 z 扫描；
 - `GridMinimum<PointXYZ>::filter(output)` 是未修改的生产入口，当前没有接入本主题 helper。
 
-RVV cell-id helper 使用公共 `pcl/common/rvv_point_load.h`：
+RVV cell-id helper 使用公共 `pcl/rvv_point_load.h`：
 
 - `indexed_load3_f32m2<PointXYZ>` 对 `indices` 执行 `x/y/z` gather；
 - `vfcvt.rtz.x.f.v` 加负数小数校正实现 `floor`，不使用 `_rm` intrinsic，不修改 FRM/FCSR；

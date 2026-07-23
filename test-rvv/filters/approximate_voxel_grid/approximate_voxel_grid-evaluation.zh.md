@@ -58,7 +58,7 @@ XYZ-compatible `PointT` 产出保序的 `ix/iy/iz/hash/source_index`，后续 bu
 - `applyFilterStd`：原 `applyFilter` 标量实现常驻保留；
 - `applyFilterPointXYZRVV`：`__RVV10__` 下的 `PointXYZ` 主路径 helper；
 - `applyFilterXYZStagedRVV`：`__RVV10__` 下的 generic staged 生产 helper；
-- `pcl::approximate_voxel_grid_rvv::computeXYZLeafHashes<PointT>`：复用 `pcl/common/rvv_point_load.h` 的 xyz stride-load wrapper，按 VL chunk 计算 finite mask、floor、hash 和 source index；
+- `pcl::approximate_voxel_grid_rvv::computeXYZLeafHashes<PointT>`：复用 `pcl/rvv_point_load.h` 的 xyz stride-load wrapper，按 VL chunk 计算 finite mask、floor、hash 和 source index；
 - `PointXYZHistoryEntry` / `flushPointXYZHistoryEntry`：只服务 `PointXYZ` centroid-only 主路径，不处理泛型字段和 RGB。
 
 RVV helper 在一个 VL chunk 中加载 AoS `PointXYZ::x/y/z`，生成三路 finite mask，计算 `floor(xyz * inverse_leaf_size_)` 和 hash，再用 `vcompress` 保序写出有效 lane 的 `ix/iy/iz/hash/source_index`。随后 `applyFilterPointXYZRVV` 按同一顺序执行标量 history 状态机：同一 bucket 遇到不同 `(ix,iy,iz)` 时先 flush 旧 centroid，再累加当前点，末尾按 history 顺序 flush 剩余 entry。

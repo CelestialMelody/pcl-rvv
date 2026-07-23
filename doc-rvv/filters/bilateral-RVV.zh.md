@@ -75,7 +75,7 @@ fallback：
 入口。该扩展不是按名字匹配任意 `PointXYZIxxx`，而是按字段语义、成员可写性和 AoS
 offset/alignment gate 判定。
 
-生产 helper 使用 `pcl/common/rvv_point_load.h`：
+生产 helper 使用 `pcl/rvv_point_load.h`：
 
 ```cpp
 const vuint32m2_t v_ids = __riscv_vle32_v_u32m2(raw_indices + offset, vl);

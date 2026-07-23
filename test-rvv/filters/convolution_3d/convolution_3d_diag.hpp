@@ -2,7 +2,7 @@
 
 #include <pcl/common/common.h>
 #include <pcl/common/point_tests.h>
-#include <pcl/common/rvv_point_load.h>
+#include <pcl/rvv_point_load.h>
 #include <pcl/filters/convolution_3d.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>

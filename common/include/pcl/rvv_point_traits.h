@@ -150,14 +150,15 @@ namespace detail {
   *
   * This checks direct C++ members named \c x, \c y, and \c z and requires those
   * member expression types to be \c float on a standard-layout \c PointT. It is
-  * intentionally different from \c RVVXYZFloatLayout: it does not require PCL
-  * field registration, and it does not expose PCL traits offsets.
+  * intentionally different from the public \c pcl::rvv::RVVXYZFloatLayout:
+  * it does not require PCL field registration, and it does not expose PCL
+  * traits offsets.
   */
 template <typename PointT, typename = void>
-struct RVVXYZMemberFloatLayout : std::false_type {};
+struct RVVXYZFloatLayout : std::false_type {};
 
 template <typename PointT>
-struct RVVXYZMemberFloatLayout<
+struct RVVXYZFloatLayout<
     PointT,
     std::void_t<decltype(std::declval<PointT>().x),
                 decltype(std::declval<PointT>().y),
@@ -180,7 +181,7 @@ struct RVVXYZMemberFloatLayout<
   */
 template <typename PointT>
 inline constexpr bool kRVVXYZPointCompatible =
-    detail::RVVXYZMemberFloatLayout<PointT>::value;
+    detail::RVVXYZFloatLayout<PointT>::value;
 
 /** \brief Variable-template form of \c RVVXYZNormalFloatLayout<PointT>::value. */
 template <typename PointT>

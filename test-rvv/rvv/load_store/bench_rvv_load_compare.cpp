@@ -49,7 +49,7 @@
 // // Alias to avoid spelling the provider namespace at every call site.
 // namespace rvv_load = ::rvv_test::rvv_load;
 
-#include <pcl/common/rvv_point_load.h>
+#include <pcl/rvv_point_load.h>
 
 // Alias to avoid spelling the provider namespace at every call site.
 namespace rvv_load = ::pcl::rvv_load;

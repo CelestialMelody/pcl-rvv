@@ -57,8 +57,8 @@
 #include <cstddef>
 #include <type_traits>
 
-#include <pcl/common/rvv_point_load.h>
-#include <pcl/common/rvv_point_store.h>
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
 #endif
 
 namespace pcl

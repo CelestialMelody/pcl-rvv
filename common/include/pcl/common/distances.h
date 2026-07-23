@@ -49,7 +49,7 @@
 #include <cstddef>
 #include <vector>
 
-#include <pcl/common/rvv_point_load.h>
+#include <pcl/rvv_point_load.h>
 #endif
 
 /**

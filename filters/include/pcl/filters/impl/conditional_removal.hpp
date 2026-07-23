@@ -40,13 +40,13 @@
 
 #include <pcl/common/io.h>
 #include <pcl/common/copy_point.h>
-#include <pcl/common/rvv_point_load.h>
+#include <pcl/rvv_point_load.h>
 #include <pcl/filters/conditional_removal.h>
 
 #include <vector>
 
 #if defined(__RVV10__)
-#include <pcl/common/rvv_point_traits.h>
+#include <pcl/rvv_point_traits.h>
 
 #include <cstdint>
 #include <limits>

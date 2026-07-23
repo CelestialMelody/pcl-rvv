@@ -23,7 +23,7 @@
 - `Pyramid<PointT>::computeStd` 常驻标量 helper，复用原入口逻辑；函数内引入 `pcl::common` 点类型运算符以保持原标量表达式可解析；
 - `__RVV10__` 下新增 `pyramidPointXYZDenseRVV` / `pyramidPointXYZDenseLevelRVV`；
 - 公开 `compute` 保持 API 不变，`initCompute()` 后仅在 `PointT=PointXYZ`、dense、small kernel、未显式请求多线程、尺寸足够时短路到 RVV，否则落回 `computeStd`；
-- RVV load/store 复用 `pcl/common/rvv_point_load.h` 与 `pcl/common/rvv_point_store.h` 的 indexed load / strided store 封装；
+- RVV load/store 复用 `pcl/rvv_point_load.h` 与 `pcl/rvv_point_store.h` 的 indexed load / strided store 封装；
 - helper 不使用 `_rm` intrinsic，不修改 FRM/FCSR。
 
 RVV 组织：

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <pcl/common/point_tests.h>
-#include <pcl/common/rvv_point_load.h>
-#include <pcl/common/rvv_point_traits.h>
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_traits.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 

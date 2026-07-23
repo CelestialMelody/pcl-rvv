@@ -47,7 +47,7 @@
 #include <pcl/common/transforms.h> // for transformPoint
 
 #if defined(__RVV10__)
-#include <pcl/common/rvv_point_traits.h>
+#include <pcl/rvv_point_traits.h>
 
 #include <cstdint>
 #include <limits>

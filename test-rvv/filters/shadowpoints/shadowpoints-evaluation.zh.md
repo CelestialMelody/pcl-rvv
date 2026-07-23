@@ -37,7 +37,7 @@ keep = (val >= threshold_) xor negative_
 - `test-rvv/filters/shadowpoints/bench_shadowpoints.cpp` 在 `__RVV10__ && PCL_SHADOWPOINTS_RVV_BENCH_ONLY` 下保留 `shadowPointsBenchOnlyRVV`，承载诊断 RVV 指令路径；
 - 诊断 helper 只在 bench 中以 `if constexpr` 限制 `PointXYZ` + `PointNormal`、全云 fake indices；专项测试仍调用生产 `ShadowPoints`，用于证明源码回退后公开 API 语义不变。
 
-bench-diagnosis helper 按 VL chunk 同时 stride-load 点云 `x/y/z` 和 normals `normal_x/normal_y/normal_z`，计算点积、绝对值和有序 `>= threshold` mask。点云 xyz load 复用 `pcl/common/rvv_point_load.h` 的 `strided_load3_f32m2`，normal 字段 load 复用同一公共封装的 `strided_load3_fields_f32m2` primitive，避免在诊断代码中复制裸 stride-load 细节。`vcompress` 写 kept indices；当 `extract_removed_indices_` 开启时，另用反向 mask 写 removed indices。`negative_` 只反转 keep / removed mask，不改变点积公式。
+bench-diagnosis helper 按 VL chunk 同时 stride-load 点云 `x/y/z` 和 normals `normal_x/normal_y/normal_z`，计算点积、绝对值和有序 `>= threshold` mask。点云 xyz load 复用 `pcl/rvv_point_load.h` 的 `strided_load3_f32m2`，normal 字段 load 复用同一公共封装的 `strided_load3_fields_f32m2` primitive，避免在诊断代码中复制裸 stride-load 细节。`vcompress` 写 kept indices；当 `extract_removed_indices_` 开启时，另用反向 mask 写 removed indices。`negative_` 只反转 keep / removed mask，不改变点积公式。
 
 `input.is_dense` 不作为 RVV 分流条件。原标量路径没有检查 finite；若点或法线包含 NaN，`abs(dot) >= threshold` 为 false，RVV 的有序比较也会得到 false，随后按 `negative_` 反转，语义一致。
 

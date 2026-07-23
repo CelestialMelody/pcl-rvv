@@ -14,7 +14,7 @@
 
 - 对外 API 与模板签名保持不变：公开函数名与参数列表与上游一致。
 - 语义对齐：稠密路径在拆分出的 `*Standard` 中与上游稠密逻辑对齐；`is_dense == false` 仍走标量 NaN 检查分支。返回值类型、空输入与边界行为保持上游约定。
-- 数据布局：点云为 AoS，`pcl::rvv_load::strided_load3_f32m2` / `indexed_load3_f32m2` 与 `pcl::rvv_store::strided_store3_f32m2` 依赖 `PointT` 为 standard-layout 且 `x/y/z` 为 `float`（`kRVVXYZPointCompatible`）；字段紧密相邻时 load/store 封装内部可选用 `vlsseg3e32` / `vssseg3e32`，否则为按字段的 strided 访问（见 `common/include/pcl/common/impl/rvv_point_load.hpp`）。
+- 数据布局：点云为 AoS，`pcl::rvv_load::strided_load3_f32m2` / `indexed_load3_f32m2` 与 `pcl::rvv_store::strided_store3_f32m2` 依赖 `PointT` 为 standard-layout 且 `x/y/z` 为 `float`（`kRVVXYZPointCompatible`）；字段紧密相邻时 load/store 封装内部可选用 `vlsseg3e32` / `vssseg3e32`，否则为按字段的 strided 访问（见 `common/include/pcl/impl/rvv_point_load.hpp`）。
 - 不适合或未完成向量化的情形：`n < 16` 时各 `*RVV` 入口回退 `*Standard`；`!cloud.is_dense` 时不进入 RVV 分流；`ConstCloudIterator` 重载仍为标量；`computeNDCentroid` 等未加 RVV 分支。索引子集上的 gather 受随机访存带宽约束，条带内仍用 `indexed_load3`，与顺序 stride 相比收益依赖数据集与硬件（参见访存策略文档中的 indexed 微基准）。
 
 ## 2. 与上游实现的差异

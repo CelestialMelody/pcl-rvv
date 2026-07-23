@@ -35,7 +35,7 @@ return BF / W
 
 ## 3. 实现说明
 
-生产代码复用 `pcl/common/rvv_point_load.h`：
+生产代码复用 `pcl/rvv_point_load.h`：
 
 - `vle32.v` 读取 `Indices` 中连续 neighbor id；
 - `byte_offsets_u32m2<PointT>` 将 AoS point id 转成 byte offset；

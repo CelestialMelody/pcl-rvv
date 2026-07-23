@@ -59,8 +59,8 @@
 #include <type_traits>
 #include <utility>
 #include <riscv_vector.h>
-#include <pcl/common/rvv_point_load.h>
-#include <pcl/common/rvv_point_store.h>
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
 #endif
 
 

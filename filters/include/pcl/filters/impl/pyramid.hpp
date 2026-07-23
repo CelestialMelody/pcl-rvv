@@ -43,9 +43,9 @@
 
 #include <pcl/common/distances.h>
 #include <pcl/common/point_tests.h>
-#include <pcl/common/rvv_point_load.h>
-#include <pcl/common/rvv_point_store.h>
-#include <pcl/common/rvv_point_traits.h>
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
+#include <pcl/rvv_point_traits.h>
 #include <pcl/filters/pyramid.h>
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>

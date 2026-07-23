@@ -34,7 +34,7 @@ follow-up rescreen 将本主题列为 `保留 / 待诊断`，诊断点是 centro
 - `sampleFromVectors`：保留 six-list sort 与 sampling state；
 - `runDiagnostic`：把 RVV 片段与标量 solver/sort/sampling 串成 full diagnostic。
 
-RVV 片段使用 `pcl/common/rvv_point_load.h` 的 AoS gather helper：
+RVV 片段使用 `pcl/rvv_point_load.h` 的 AoS gather helper：
 
 - `PointXYZ` 的 x/y/z indexed load；
 - `Normal` 的 normal_x/normal_y/normal_z indexed load；

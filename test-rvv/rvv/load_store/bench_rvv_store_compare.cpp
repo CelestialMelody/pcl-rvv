@@ -54,7 +54,7 @@
 // Alias to avoid spelling the provider namespace at every call site.
 // namespace rvv_store = ::rvv_test::rvv_store;
 
-#include <pcl/common/rvv_point_store.h>
+#include <pcl/rvv_point_store.h>
 
 // Alias to avoid spelling the provider namespace at every call site.
 namespace rvv_store = ::pcl::rvv_store;

@@ -1,6 +1,6 @@
 #include "correspondence_estimation_organized_projection_diag.hpp"
 
-#include <pcl/common/rvv_point_traits.h>
+#include <pcl/rvv_point_traits.h>
 #include <pcl/test/gtest.h>
 
 #include <cmath>

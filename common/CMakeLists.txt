@@ -79,6 +79,9 @@ set(incs
   include/pcl/PointIndices.h
   include/pcl/register_point_struct.h
   include/pcl/conversions.h
+  include/pcl/rvv_point_load.h
+  include/pcl/rvv_point_store.h
+  include/pcl/rvv_point_traits.h
 )
 
 set(common_incs
@@ -113,9 +116,6 @@ set(common_incs
   include/pcl/common/spring.h
   include/pcl/common/intensity.h
   include/pcl/common/random.h
-  include/pcl/common/rvv_point_load.h
-  include/pcl/common/rvv_point_store.h
-  include/pcl/common/rvv_point_traits.h
   include/pcl/common/generate.h
   include/pcl/common/projection_matrix.h
   include/pcl/common/colors.h
@@ -144,8 +144,6 @@ set(common_incs_impl
   include/pcl/common/impl/intensity.hpp
   include/pcl/common/impl/random.hpp
   include/pcl/common/impl/rvv_math.hpp
-  include/pcl/common/impl/rvv_point_load.hpp
-  include/pcl/common/impl/rvv_point_store.hpp
   include/pcl/common/impl/generate.hpp
   include/pcl/common/impl/projection_matrix.hpp
   include/pcl/common/impl/accumulators.hpp
@@ -157,6 +155,8 @@ set(impl_incs
   include/pcl/impl/instantiate.hpp
   include/pcl/impl/point_types.hpp
   include/pcl/impl/cloud_iterator.hpp
+  include/pcl/impl/rvv_point_load.hpp
+  include/pcl/impl/rvv_point_store.hpp
 )
 
 set(tools_incs

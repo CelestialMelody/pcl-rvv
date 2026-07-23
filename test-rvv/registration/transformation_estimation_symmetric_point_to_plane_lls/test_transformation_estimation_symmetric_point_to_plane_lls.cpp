@@ -17,7 +17,7 @@
 
 #include "transformation_estimation_symmetric_point_to_plane_lls_diag.hpp"
 
-#include <pcl/common/rvv_point_traits.h>
+#include <pcl/rvv_point_traits.h>
 #include <pcl/common/transforms.h>
 #include <pcl/field_traits.h>
 #include <pcl/registration/transformation_estimation_symmetric_point_to_plane_lls.h>

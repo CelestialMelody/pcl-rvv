@@ -70,7 +70,7 @@ auto hash = static_cast<unsigned int> ((ix * 7171 + iy * 3079 + iz * 4231) & (hi
 - `applyFilterStd`：原 `applyFilter` 标量实现常驻保留；
 - `applyFilterPointXYZRVV`：`__RVV10__` 下的 `PointXYZ` 生产 helper；
 - `applyFilterXYZStagedRVV`：`__RVV10__` 下的 generic staged 生产 helper；
-- `pcl::approximate_voxel_grid_rvv::computeXYZLeafHashes<PointT>`：复用 `pcl/common/rvv_point_load.h` 的 xyz stride-load wrapper，并用 `pcl::rvv::kRVVXYZPointCompatible<PointT>` gate 当前点类型；
+- `pcl::approximate_voxel_grid_rvv::computeXYZLeafHashes<PointT>`：复用 `pcl/rvv_point_load.h` 的 xyz stride-load wrapper，并用 `pcl::rvv::kRVVXYZPointCompatible<PointT>` gate 当前点类型；
 - `PointXYZHistoryEntry` / `flushPointXYZHistoryEntry`：只服务 `PointXYZ` centroid-only 主路径。
 
 ### 4.1 标量流程为什么不需要中间结构
