@@ -42,6 +42,7 @@
 #define PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_SPHERE_H_
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
+#include <pcl/rvv_point_load.h>
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
@@ -394,14 +395,14 @@ pcl::SampleConsensusModelSphere<PointT>::countWithinDistanceRVV (
 
     // Load indices and compute byte offsets: offset = index * sizeof(PointT)
     const vuint32m2_t v_idx = __riscv_vle32_v_u32m2(reinterpret_cast<const uint32_t*>(indices_ptr + i), vl);
-    const vuint32m2_t v_off = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointT), vl);
+    const vuint32m2_t v_off = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
 
-    const vfloat32m2_t v_px = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, x)), v_off, vl);
-    const vfloat32m2_t v_py = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, y)), v_off, vl);
-    const vfloat32m2_t v_pz = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, z)), v_off, vl);
+    vfloat32m2_t v_px;
+    vfloat32m2_t v_py;
+    vfloat32m2_t v_pz;
+    pcl::rvv_load::indexed_load3_fields_f32m2<
+        PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
+        points_base, v_off, vl, v_px, v_py, v_pz);
     // Broadcast Sphere Center
     const vfloat32m2_t v_xc = __riscv_vfmv_v_f_f32m2(xc, vl);
     const vfloat32m2_t v_yc = __riscv_vfmv_v_f_f32m2(yc, vl);
@@ -581,4 +582,3 @@ pcl::SampleConsensusModelSphere<PointT>::doSamplesVerifyModel (
 #define PCL_INSTANTIATE_SampleConsensusModelSphere(T) template class PCL_EXPORTS pcl::SampleConsensusModelSphere<T>;
 
 #endif    // PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_SPHERE_H_
-
