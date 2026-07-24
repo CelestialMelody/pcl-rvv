@@ -72,7 +72,38 @@ constexpr std::size_t kZOff = offsetof(pcl::PointXYZ, z);
 字段、是否依赖 `getVector4fMap()` 的齐次分量、source / target 是否分别 gate，以及
 fallback 后是否保持原标量语义。
 
-## 2. PCL Traits 字段语义
+## 2. 输入字段 Gate 不等于输出 PointT 语义
+
+公共 xyz / normal traits 只能证明“某些字段可以被 RVV 读取或写入”。它们不证明算法已经
+复现了完整 `PointT` 输出语义。这个区别在只读 predicate（谓词判断）和构造新点云的算法之间
+尤其重要：
+
+- 如果算法只读 xyz 并输出 index、mask、correspondence、hash 或其它 staging metadata
+  （暂存元数据），额外字段通常不参与当前 RVV stage。此时可以用公共 traits 扩大字段读取范围，
+  后续对象构造仍可交给标量 tail。
+- 如果算法会写出 `PointT`、聚合 `FieldList`、调用 `PointT` 的 `+=` / `*` / `/=`、
+  使用 `copyPoint`、`CentroidPoint` 或类似“整点” helper，额外字段就可能是算法语义的一部分。
+  RVV 不能只写 xyz 后声称覆盖 `PointXYZI`、`PointXYZRGB/RGBA` 或 normal 复合点类型。
+- 如果 `src/*.cpp` 已有 explicit specialization（显式特化），例如 RGB/RGBA 单独处理，
+  这通常说明该点类型的非 xyz 字段有特殊语义。泛型 RVV gate 必须尊重这些特化。
+
+`Pyramid` 是典型例子。泛型 dense 标量路径通过
+`next.at(j,i) += previous.at(jj,ii) * kernel` 构造新的 `PointT`。PCL 注册点类型的
+point operator 会按注册字段执行字段级运算，所以 `PointXYZI` 会连 `intensity`
+一起平滑；而 `PointXYZRGB/RGBA` 在 `filters/src/pyramid.cpp` 有显式颜色特化，手动累加
+`r/g/b/a` 后转换回 `std::uint8_t`。因此 `Pyramid` 不能仅凭 xyz traits 泛化到所有
+“类似 PointXYZ”的类型；生产 RVV 必须逐字段定义输出语义，或保留标量 fallback。
+
+处理这类算法时先回答：
+
+- 标量路径是只读字段做判断，还是构造新的 `PointT` 输出？
+- `PointT` 运算符、`FieldList` 聚合、`copyPoint` 或 centroid helper 会碰哪些额外字段？
+- 是否有 explicit specialization 或 `src/*.cpp` 实例化暗示某些点类型有特殊语义？
+- 对每个非 xyz 输出字段，RVV 是完全复现、staging 后交给标量，还是让该点类型 fallback？
+
+只有这些问题闭合后，公共 traits gate 才能作为 production dispatch 的一部分。
+
+## 3. PCL Traits 字段语义
 
 PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心这些信息：
 
@@ -98,7 +129,7 @@ PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心
 - `normal_x/normal_y/normal_z` 都是单个 `float`；
 - 当前算法所需的 POD、standard-layout、`sizeof` 和 alignment 前提成立。
 
-## 3. 公共 API 落点
+## 4. 公共 API 落点
 
 `rvv_point_traits.h` 提供以下公共 API。新 RVV topic 应优先复用这些 API，
 不要在算法实现里重复定义本地 `XYZFloatLayout` 或 `XYZNormalFloatLayout`。
@@ -119,7 +150,7 @@ PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心
 `pcl::rvv_store::kRVVXYZPointCompatible` 是旧命名空间中的兼容别名。新文档和
 新代码应把 `pcl::rvv::*` 视为公共 API 落点。
 
-## 4. 三类 Gate 的区别
+## 5. 三类 Gate 的区别
 
 不要把所有“有 xyz”的路径都归并成同一个 gate。公共 traits 目前刻意保留三类
 不同语义边界。
@@ -139,7 +170,7 @@ PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心
 - 算法还有规模阈值、VLEN buffer、变换矩阵、输出顺序或表达式一致性要求时，这些仍是
   算法本地 dispatch / fallback 条件，不应塞进公共 traits。
 
-## 5. Source 和 Target 必须分别 Gate
+## 6. Source 和 Target 必须分别 Gate
 
 registration 类算法经常同时包含：
 
@@ -177,7 +208,7 @@ if constexpr (!pcl::rvv::RVVXYZFloatLayout<PointSource>::value ||
 如果只有 target 阶段会读取 target 点云，也可以只在该阶段 gate `PointTarget`，但不能
 用前一阶段 source 的 offset 或 stride 推导 target。
 
-## 6. 取得当前点类型 Offset
+## 7. 取得当前点类型 Offset
 
 字段 offset 应来自当前模板点类型。可以直接使用 PCL traits：
 
@@ -212,7 +243,7 @@ pcl::rvv_load::indexed_load3_fields_f32m2<
 这个形态保留 PCL 模板入口的泛型性。满足 gate 的 `PointXYZ`、`PointXYZI` 或自定义
 点类型都使用自己的 `sizeof`、POD 和 offset。
 
-## 7. 32-bit Byte Offset Helper 边界
+## 8. 32-bit Byte Offset Helper 边界
 
 当前公共 indexed gather / scatter helper 使用 32-bit byte offsets。典型计算是：
 
@@ -245,7 +276,7 @@ cloud.size() <= rvvMaxU32ByteOffsetElements<PointT>()
 - 对 staged candidate 数组的 offset gate 应按 candidate struct 的 `sizeof` 和实际
   work item count 另行判断，不要误用点云类型 helper。
 
-## 8. 选择 Load / Store Helper
+## 9. 选择 Load / Store Helper
 
 生产代码优先复用 `pcl::rvv_load` 和 `pcl::rvv_store` 的公共 wrapper。避免在每个算法里
 复制裸 intrinsic。
@@ -260,17 +291,47 @@ load helper 需要区分固定策略 primitive 和自动分发 wrapper：
 | `strided_load3_fields_f32m2` | 顺序 / strided AoS，3 次字段 load。 | 否 |
 | `strided_load3_seg_f32m2` | 顺序 / strided AoS，要求三字段连续。 | 否 |
 | `strided_load3_f32m2` | strided AoS dispatch，字段紧密连续时走 segment，否则走 fields。 | 是 |
+| `indexed_load_field_f32m2<PointT, Field>` | 基于 PCL field tag 的单字段 indexed gather，要求该字段是 traits 注册的单个 `float`。 | 否 |
+| `strided_load_field_f32m2<PointT, Field>` | 基于 PCL field tag 的单字段 strided load，要求该字段是 traits 注册的单个 `float`。 | 否 |
+
+XY 或其它双字段读写目前优先用两个单字段 field-tag helper 表达。暂不提供
+`load2` / `store2` dispatch API，除非后续有具体 production call site 和 bench 证据证明
+二字段 tuple helper 能减少真实重复或带来稳定收益。
 
 store helper 也有同样的 primitive / dispatch 分层。需要特别注意 contiguous segmented
 store 的 buffer layout：`contiguous_seg3_store_f32m2` 和
 `contiguous_seg4_store_f32m2` 写入的是 packed tuple buffer（例如 `xyzxyz...` 或
 `f0f1f2f3...`），不是三个或四个独立 SoA 数组。独立数组应使用
 `contiguous_store3_f32m2` 或 `contiguous_store4_f32m2`。
+单字段 store 可用 `strided_store_field_f32m2<PointT, Field>` 或
+`scatter_store_field_f32m2<PointT, Field>`；它们只证明并写一个 traits 注册的单个
+`float` 字段，不代表算法已经覆盖整个 `PointT` 输出语义。
 
 CEOP production 当前使用 `indexed_load3_fields_f32m2`，即固定三字段 gather。它没有
 自动切换到 segment 指令。
 
-## 9. 输入规模 Gate 不固定为 indices.size()
+### 9.1 Load / Store Helper 职责边界
+
+`rvv_point_load.h` 和 `rvv_point_store.h` 只负责在调用方已经证明字段 layout 后，
+把 AoS / indexed / strided / contiguous 访问映射到 RVV load/store intrinsic。它们不负责
+决定某个算法是否应该进入 RVV production 路径。
+
+边界应保持清楚：
+
+- helper 负责字段 offset、stride、indexed byte offset 对应的 RVV load/store 形态；
+- traits 负责 compile-time gate，例如字段是否存在、是否是单个 `float`、是否满足当前
+  helper 需要的 layout / alignment 前提；
+- 算法 dispatch 仍由各算法自己控制，包括 point type 支持范围、source / target 分别
+  gate、规模阈值、VLEN scratch buffer、索引合法性、输出顺序和 fallback；
+- 不能因为存在公共 helper，就把只验证过 `PointXYZ` 的路径自动扩展到
+  `PointXYZI`、`PointXYZINormal`、`PointXYZRGB/RGBA` 或 `PointXY`。
+
+字段语义也不能只按名称猜测。`PointXY` 没有 `z`，只能进入明确的 XY-only API 或本地
+XY helper；`PointXYZI` 的 `intensity` 是否参与算法输出要按标量路径证明；
+`PointXYZINormal` 需要分别证明 xyz、normal 和 intensity 的读写语义；`PointXYZRGB/RGBA`
+如果颜色字段参与输出，必须保留颜色语义或 fallback。
+
+## 10. 输入规模 Gate 不固定为 indices.size()
 
 小规模 fallback 是常见 production gate。文档和代码注释应描述为当前 RVV stage 的
 work item count 低于收益阈值，而不是固定写成 `indices.size()`。
@@ -288,7 +349,7 @@ CEOP 的 source staging 使用 `indices.size()`。projection-pixel staging 使�
 `candidates.size()`。target-predicate staging 使用 `projected.size()`。其它算法可能没有
 `indices`，也可能使用其它 RVV stage 输入。
 
-## 10. 稀疏输出与 Staging
+## 11. 稀疏输出与 Staging
 
 泛型点类型的字段加载通常只是 RVV 优化的前半段。若后续 predicate 会稀疏保留 lane，
 并需要输出多个字段，推荐复用“多字段压缩 staging”模式：
@@ -316,7 +377,7 @@ flush 顺序和对象构造有状态依赖”的算法。它也说明预编译 /
 具体语义设计：`PointXYZI`、`PointXYZRGB/RGBA` 可以共享 leaf/hash RVV staging，
 但 intensity 或 packed color 字段本身不因此自动 RVV 化。
 
-## 11. 什么时候不要迁移到公共 Trait
+## 12. 什么时候不要迁移到公共 Trait
 
 公共 `rvv_point_traits.h` 只收纳可复用的字段语义和布局 gate。以下判断不要默认迁移：
 
@@ -337,7 +398,7 @@ flush 顺序和对象构造有状态依赖”的算法。它也说明预编译 /
 迁移前应先回答：这个判断是否只描述“字段存在、字段类型、字段 offset / layout”。
 如果答案不是明确的 yes，就应留在算法本地。
 
-## 12. CEOP 示例
+## 13. CEOP 示例
 
 CEOP production RVV 把泛型点类型字段加载方法应用到 source 和 target 两侧：
 
@@ -378,7 +439,7 @@ CEOP 专属部分：
 这些 CEOP 细节只描述 organized projection production case。其它 PCL RVV 主题需要按
 各自标量语义重新判断。
 
-## 13. 适用边界
+## 14. 适用边界
 
 本文方法适合：
 
