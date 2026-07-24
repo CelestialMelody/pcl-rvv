@@ -2,22 +2,22 @@
 [----------] Global test environment set-up.
 [----------] 4 tests from SampleConsensusModelSphere
 [ RUN      ] SampleConsensusModelSphere.RANSAC
-[       OK ] SampleConsensusModelSphere.RANSAC (10 ms)
+[       OK ] SampleConsensusModelSphere.RANSAC (9 ms)
 [ RUN      ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke
-[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke (77 ms)
+[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke (79 ms)
 [ RUN      ] SampleConsensusModelSphere.SIMD_countWithinDistance
 
 ========================================================
 [ Performance Report: Sphere (3D Distance) ]
 Iterations          : 1000
-Standard Total Time : 21.4326 ms
-RVV Total Time      : 35.6883 ms
-Speedup (Std/RVV)   : 0.6005x
+Standard Total Time : 21.6016 ms
+RVV Total Time      : 36.2312 ms
+Speedup (Std/RVV)   : 0.5962x
 ========================================================
-[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance (1479 ms)
+[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance (1504 ms)
 [ RUN      ] SampleConsensusModelSphere.projectPoints
 [       OK ] SampleConsensusModelSphere.projectPoints (1 ms)
-[----------] 4 tests from SampleConsensusModelSphere (1569 ms total)
+[----------] 4 tests from SampleConsensusModelSphere (1596 ms total)
 
 [----------] 1 test from SampleConsensusModelNormalSphere
 [ RUN      ] SampleConsensusModelNormalSphere.RANSAC
@@ -35,12 +35,12 @@ Speedup (Std/RVV)   : 0.6005x
 [ RUN      ] SampleConsensusModelCylinder.projectPoints
 [       OK ] SampleConsensusModelCylinder.projectPoints (0 ms)
 [ RUN      ] SampleConsensusModelCylinder.RadiusAccuracy
-[       OK ] SampleConsensusModelCylinder.RadiusAccuracy (491 ms)
+[       OK ] SampleConsensusModelCylinder.RadiusAccuracy (493 ms)
 [ RUN      ] SampleConsensusModelCylinder.SampleIntersectingLines
-[       OK ] SampleConsensusModelCylinder.SampleIntersectingLines (1 ms)
+[       OK ] SampleConsensusModelCylinder.SampleIntersectingLines (0 ms)
 [ RUN      ] SampleConsensusModelCylinder.SampleModelsSymmetric
 [       OK ] SampleConsensusModelCylinder.SampleModelsSymmetric (0 ms)
-[----------] 5 tests from SampleConsensusModelCylinder (499 ms total)
+[----------] 5 tests from SampleConsensusModelCylinder (501 ms total)
 
 [----------] 4 tests from SampleConsensusModelCircle2D
 [ RUN      ] SampleConsensusModelCircle2D.RANSAC
@@ -54,12 +54,12 @@ Speedup (Std/RVV)   : 0.6005x
 ========================================================
 [ Performance Report: Circle2D ]
 Iterations          : 1000
-Standard Total Time : 21.6237 ms
-RVV Total Time      : 15.4818 ms
-Speedup (Std/RVV)   : 1.3967x
+Standard Total Time : 21.4170 ms
+RVV Total Time      : 15.2664 ms
+Speedup (Std/RVV)   : 1.4029x
 ========================================================
-[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance (575 ms)
-[----------] 4 tests from SampleConsensusModelCircle2D (655 ms total)
+[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance (566 ms)
+[----------] 4 tests from SampleConsensusModelCircle2D (646 ms total)
 
 [----------] 1 test from SampleConsensusModelCircle3D
 [ RUN      ] SampleConsensusModelCircle3D.RANSAC
@@ -68,8 +68,8 @@ Speedup (Std/RVV)   : 1.3967x
 
 [----------] 1 test from SampleConsensusModelEllipse3D
 [ RUN      ] SampleConsensusModelEllipse3D.RANSAC
-[       OK ] SampleConsensusModelEllipse3D.RANSAC (142 ms)
-[----------] 1 test from SampleConsensusModelEllipse3D (142 ms total)
+[       OK ] SampleConsensusModelEllipse3D.RANSAC (139 ms)
+[----------] 1 test from SampleConsensusModelEllipse3D (139 ms total)
 
 [----------] 1 test from SampleConsensusModelTorusOclusion
 [ RUN      ] SampleConsensusModelTorusOclusion.RANSAC
@@ -145,5 +145,5 @@ Speedup (Std/RVV)   : 1.3967x
 [----------] 11 tests from CollinearInputs/SampleConsensusModelCircle2DCollinearTest (1 ms total)
 
 [----------] Global test environment tear-down
-[==========] 33 tests from 13 test suites ran. (2912 ms total)
+[==========] 33 tests from 13 test suites ran. (2929 ms total)
 [  PASSED  ] 33 tests.
