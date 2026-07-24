@@ -2,13 +2,13 @@
 [----------] Global test environment set-up.
 [----------] 3 tests from Convolution
 [ RUN      ] Convolution.convolveRowsXYZI
-[       OK ] Convolution.convolveRowsXYZI (4 ms)
+[       OK ] Convolution.convolveRowsXYZI (2 ms)
 [ RUN      ] Convolution.convolveRowsRGB
 [       OK ] Convolution.convolveRowsRGB (3 ms)
 [ RUN      ] Convolution.convolveRowsXYZRGB
 [       OK ] Convolution.convolveRowsXYZRGB (3 ms)
-[----------] 3 tests from Convolution (12 ms total)
+[----------] 3 tests from Convolution (10 ms total)
 
 [----------] Global test environment tear-down
-[==========] 3 tests from 1 test suite ran. (15 ms total)
+[==========] 3 tests from 1 test suite ran. (13 ms total)
 [  PASSED  ] 3 tests.
