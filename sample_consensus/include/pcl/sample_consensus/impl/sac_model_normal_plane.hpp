@@ -186,7 +186,7 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceRVV (
     // --- A. 加载索引 ---
     const vuint32m2_t v_idx = __riscv_vle32_v_u32m2((const uint32_t*)(indices_ptr + i), vl);
     const vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
-    const vuint32m2_t v_off_norm = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointNT), vl);
+    const vuint32m2_t v_off_norm = pcl::rvv_load::byte_offsets_u32m2<PointNT>(v_idx, vl);
 
     // --- B. 加载数据 (Gather Load) ---
     // 加载 PointT (x, y, z)
@@ -197,17 +197,19 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceRVV (
         PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
         points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
-    // 加载 PointNT (nx, ny, nz)
-    const vfloat32m2_t v_nx = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_x)), v_off_norm, vl);
-    const vfloat32m2_t v_ny = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_y)), v_off_norm, vl);
-    const vfloat32m2_t v_nz = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_z)), v_off_norm, vl);
-
-    // 加载 Curvature (单独加载)
-    const vfloat32m2_t v_curv = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, curvature)), v_off_norm, vl);
+    // 加载 PointNT (nx, ny, nz) 与曲率。
+    const vfloat32m2_t v_nx =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_x>(
+            normals_base, v_off_norm, vl);
+    const vfloat32m2_t v_ny =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_y>(
+            normals_base, v_off_norm, vl);
+    const vfloat32m2_t v_nz =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_z>(
+            normals_base, v_off_norm, vl);
+    const vfloat32m2_t v_curv =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::curvature>(
+            normals_base, v_off_norm, vl);
 
     // --- C. 计算距离 (全程 Float) ---
     // 广播系数
@@ -515,17 +517,20 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::countWithinDistanceRVV (
         points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
     // Byte offsets for PointNT
-    const vuint32m2_t v_off_norm = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointNT), vl);
+    const vuint32m2_t v_off_norm = pcl::rvv_load::byte_offsets_u32m2<PointNT>(v_idx, vl);
 
-    const vfloat32m2_t v_nx = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_x)), v_off_norm, vl);
-    const vfloat32m2_t v_ny = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_y)), v_off_norm, vl);
-    const vfloat32m2_t v_nz = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_z)), v_off_norm, vl);
-
-    const vfloat32m2_t v_curv = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, curvature)), v_off_norm, vl);
+    const vfloat32m2_t v_nx =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_x>(
+            normals_base, v_off_norm, vl);
+    const vfloat32m2_t v_ny =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_y>(
+            normals_base, v_off_norm, vl);
+    const vfloat32m2_t v_nz =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_z>(
+            normals_base, v_off_norm, vl);
+    const vfloat32m2_t v_curv =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::curvature>(
+            normals_base, v_off_norm, vl);
 
     // Calculate Euclidean distance using the math kernel helper.
     // Data is already in registers, avoiding re-fetching.
@@ -668,23 +673,10 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModelRVV (
 
     // 计算结构体的字节偏移量 (Byte Offsets)
     vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
-    vuint32m2_t v_off_norm = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointNT), vl);
+    vuint32m2_t v_off_norm = pcl::rvv_load::byte_offsets_u32m2<PointNT>(v_idx, vl);
 
 
     // --- C. 加载数据 ---
-
-    // const vfloat32m2x3_t v_xyz = __riscv_vluxseg3ei32_v_f32m2x3(
-    //   reinterpret_cast<const float*>(points_base + offsetof(PointT, x)), v_off_pt, vl);
-    // const vfloat32m2_t v_px = __riscv_vget_v_f32m2x3_f32m2(v_xyz, 0);
-    // const vfloat32m2_t v_py = __riscv_vget_v_f32m2x3_f32m2(v_xyz, 1);
-    // const vfloat32m2_t v_pz = __riscv_vget_v_f32m2x3_f32m2(v_xyz, 2);
-
-    // const vuint32m2_t v_off_norm = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointNT), vl);
-    // const vfloat32m2x3_t v_nxyz = __riscv_vluxseg3ei32_v_f32m2x3(
-    //     reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_x)), v_off_norm, vl);
-    // const vfloat32m2_t v_nx = __riscv_vget_v_f32m2x3_f32m2(v_nxyz, 0);
-    // const vfloat32m2_t v_ny = __riscv_vget_v_f32m2x3_f32m2(v_nxyz, 1);
-    // const vfloat32m2_t v_nz = __riscv_vget_v_f32m2x3_f32m2(v_nxyz, 2);
 
     // C1. 加载 PointT (x, y, z)
     vfloat32m2_t v_px;
@@ -694,17 +686,19 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModelRVV (
         PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
         points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
-    // C2. 加载 PointNT
-    vfloat32m2_t v_nx = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_x)), v_off_norm, vl);
-    vfloat32m2_t v_ny = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_y)), v_off_norm, vl);
-    vfloat32m2_t v_nz = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(normals_base + offsetof(PointNT, normal_z)), v_off_norm, vl);
-
-    // C2.2 加载曲率 (curvature)
-    const float* curv_base_ptr = reinterpret_cast<const float*>(normals_base + offsetof(PointNT, curvature));
-    vfloat32m2_t v_curv = __riscv_vluxei32_v_f32m2(curv_base_ptr, v_off_norm, vl);
+    // C2. 加载 PointNT normal 字段与曲率。
+    vfloat32m2_t v_nx =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_x>(
+            normals_base, v_off_norm, vl);
+    vfloat32m2_t v_ny =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_y>(
+            normals_base, v_off_norm, vl);
+    vfloat32m2_t v_nz =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_z>(
+            normals_base, v_off_norm, vl);
+    vfloat32m2_t v_curv =
+        pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::curvature>(
+            normals_base, v_off_norm, vl);
 
     // --- D. 广播系数 ---
     const vfloat32m2_t v_a = __riscv_vfmv_v_f_f32m2(a, vl);
