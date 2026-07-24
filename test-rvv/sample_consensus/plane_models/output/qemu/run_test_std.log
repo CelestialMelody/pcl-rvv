@@ -21,7 +21,7 @@
 [ RUN      ] SampleConsensusModelPlane.RANSAC
 [       OK ] SampleConsensusModelPlane.RANSAC (4 ms)
 [ RUN      ] SampleConsensusModelPlane.LMedS
-[       OK ] SampleConsensusModelPlane.LMedS (11 ms)
+[       OK ] SampleConsensusModelPlane.LMedS (10 ms)
 [ RUN      ] SampleConsensusModelPlane.MSAC
 [       OK ] SampleConsensusModelPlane.MSAC (2 ms)
 [ RUN      ] SampleConsensusModelPlane.RRANSAC
@@ -31,18 +31,18 @@
 [ RUN      ] SampleConsensusModelPlane.RMSAC
 [       OK ] SampleConsensusModelPlane.RMSAC (3 ms)
 [ RUN      ] SampleConsensusModelPlane.SIMD_countWithinDistance_plane_smoke
-[       OK ] SampleConsensusModelPlane.SIMD_countWithinDistance_plane_smoke (76 ms)
+[       OK ] SampleConsensusModelPlane.SIMD_countWithinDistance_plane_smoke (75 ms)
 [ RUN      ] SampleConsensusModelPlane.SIMD_countWithinDistance
 
 ========================================================
 [ Performance Report: Plane (Geometric Distance Only) ]
 Iterations          : 1000
-Standard Total Time : 23.2240 ms
+Standard Total Time : 22.6537 ms
 ========================================================
-[       OK ] SampleConsensusModelPlane.SIMD_countWithinDistance (763 ms)
+[       OK ] SampleConsensusModelPlane.SIMD_countWithinDistance (734 ms)
 [ RUN      ] SampleConsensusModelPlane.OptimizeFarFromOrigin
 [       OK ] SampleConsensusModelPlane.OptimizeFarFromOrigin (2 ms)
-[----------] 13 tests from SampleConsensusModelPlane (887 ms total)
+[----------] 13 tests from SampleConsensusModelPlane (858 ms total)
 
 [----------] 5 tests from SampleConsensusModelNormalPlane
 [ RUN      ] SampleConsensusModelNormalPlane.RANSAC
@@ -53,39 +53,39 @@ Standard Total Time : 23.2240 ms
 [ Performance Report: NormalPlane (Select Within Distance) ]
 Points per cloud    : 2000
 Iterations          : 1000
-Standard Total Time : 413.0494 ms
+Standard Total Time : 409.6127 ms
 RVV Total Time      : N/A (RVV not enabled)
 ========================================================
-[       OK ] SampleConsensusModelNormalPlane.SIMD_selectWithinDistance (2868 ms)
+[       OK ] SampleConsensusModelNormalPlane.SIMD_selectWithinDistance (2823 ms)
 [ RUN      ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance_normal_plane_smoke
-[       OK ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance_normal_plane_smoke (14638 ms)
+[       OK ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance_normal_plane_smoke (14227 ms)
 [ RUN      ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance
 
 ========================================================
 [ Performance Report: NormalPlane (Weighted Distance) ]
 Points per cloud    : 10000
 Iterations          : 1000
-Standard Total Time : 1528.4469 ms
+Standard Total Time : 1523.2183 ms
 ========================================================
-[       OK ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance (13747 ms)
+[       OK ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance (13944 ms)
 [ RUN      ] SampleConsensusModelNormalPlane.SIMD_getDistancesToModel
 
 ========================================================
 [ Performance Report: NormalPlane (getDistancesToModel) ]
 Points per cloud    : 2000
 Iterations          : 1000
-Standard Total Time : 438.0500 ms
+Standard Total Time : 438.2305 ms
 ========================================================
 
-[       OK ] SampleConsensusModelNormalPlane.SIMD_getDistancesToModel (2892 ms)
-[----------] 5 tests from SampleConsensusModelNormalPlane (34157 ms total)
+[       OK ] SampleConsensusModelNormalPlane.SIMD_getDistancesToModel (2857 ms)
+[----------] 5 tests from SampleConsensusModelNormalPlane (33863 ms total)
 
 [----------] 1 test from SampleConsensusModelNormalParallelPlane
 [ RUN      ] SampleConsensusModelNormalParallelPlane.RANSAC
 [pcl::RandomSampleConsensus::computeModel] RANSAC found no model.
-[       OK ] SampleConsensusModelNormalParallelPlane.RANSAC (45 ms)
-[----------] 1 test from SampleConsensusModelNormalParallelPlane (45 ms total)
+[       OK ] SampleConsensusModelNormalParallelPlane.RANSAC (44 ms)
+[----------] 1 test from SampleConsensusModelNormalParallelPlane (44 ms total)
 
 [----------] Global test environment tear-down
-[==========] 19 tests from 3 test suites ran. (35094 ms total)
+[==========] 19 tests from 3 test suites ran. (34769 ms total)
 [  PASSED  ] 19 tests.

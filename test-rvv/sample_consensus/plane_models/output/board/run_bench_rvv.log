@@ -6,6 +6,6 @@ Iterations: 50
 Build: RVV
 
 selectWithinDistance     : 0.0687 ms/iter
-countWithinDistance      : 0.0532 ms/iter
-getDistancesToModel      : 0.0603 ms/iter
+countWithinDistance      : 0.0544 ms/iter
+getDistancesToModel      : 0.0592 ms/iter
 =====================================================================================

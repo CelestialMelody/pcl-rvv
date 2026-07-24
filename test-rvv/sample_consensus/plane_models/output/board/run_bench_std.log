@@ -5,7 +5,7 @@ Dataset: <board-root>/sample_consensus/plane_models/pcd/sac_plane_test.pcd (3283
 Iterations: 50
 Build: Std
 
-selectWithinDistance     : 0.6791 ms/iter
-countWithinDistance      : 0.6719 ms/iter
-getDistancesToModel      : 0.7678 ms/iter
+selectWithinDistance     : 0.6802 ms/iter
+countWithinDistance      : 0.6684 ms/iter
+getDistancesToModel      : 0.7676 ms/iter
 =====================================================================================
