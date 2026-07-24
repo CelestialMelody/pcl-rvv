@@ -44,6 +44,7 @@
 #include <unsupported/Eigen/NonLinearOptimization> // for LevenbergMarquardt
 #include <pcl/sample_consensus/sac_model_circle.h>
 #include <pcl/common/concatenate.h>
+#include <pcl/rvv_point_load.h>
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
@@ -380,13 +381,15 @@ pcl::SampleConsensusModelCircle2D<PointT>::countWithinDistanceRVV (
 
     // Load logical indices and compute byte offsets
     const vuint32m2_t v_idx = __riscv_vle32_v_u32m2(reinterpret_cast<const uint32_t*>(indices_ptr + i), vl);
-    const vuint32m2_t v_off = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointT), vl);
+    const vuint32m2_t v_off = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
 
     // Gather X and Y coordinates
-    const vfloat32m2_t v_px = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, x)), v_off, vl);
-    const vfloat32m2_t v_py = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, y)), v_off, vl);
+    const vfloat32m2_t v_px =
+        pcl::rvv_load::indexed_load_field_f32m2<PointT, pcl::fields::x>(
+            points_base, v_off, vl);
+    const vfloat32m2_t v_py =
+        pcl::rvv_load::indexed_load_field_f32m2<PointT, pcl::fields::y>(
+            points_base, v_off, vl);
 
     // Broadcast Coefficients
     const vfloat32m2_t v_a = __riscv_vfmv_v_f_f32m2(a, vl);
@@ -567,4 +570,3 @@ pcl::SampleConsensusModelCircle2D<PointT>::isModelValid (const Eigen::VectorXf &
 #define PCL_INSTANTIATE_SampleConsensusModelCircle2D(T) template class PCL_EXPORTS pcl::SampleConsensusModelCircle2D<T>;
 
 #endif    // PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_CIRCLE_H_
-
