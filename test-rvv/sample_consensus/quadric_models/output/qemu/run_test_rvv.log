@@ -2,27 +2,27 @@
 [----------] Global test environment set-up.
 [----------] 4 tests from SampleConsensusModelSphere
 [ RUN      ] SampleConsensusModelSphere.RANSAC
-[       OK ] SampleConsensusModelSphere.RANSAC (6 ms)
+[       OK ] SampleConsensusModelSphere.RANSAC (10 ms)
 [ RUN      ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke
-[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke (35 ms)
+[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke (77 ms)
 [ RUN      ] SampleConsensusModelSphere.SIMD_countWithinDistance
 
 ========================================================
 [ Performance Report: Sphere (3D Distance) ]
 Iterations          : 1000
-Standard Total Time : 23.6621 ms
-RVV Total Time      : 7.5263 ms
-Speedup (Std/RVV)   : 3.1439x
+Standard Total Time : 21.4326 ms
+RVV Total Time      : 35.6883 ms
+Speedup (Std/RVV)   : 0.6005x
 ========================================================
-[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance (541 ms)
+[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance (1479 ms)
 [ RUN      ] SampleConsensusModelSphere.projectPoints
-[       OK ] SampleConsensusModelSphere.projectPoints (0 ms)
-[----------] 4 tests from SampleConsensusModelSphere (583 ms total)
+[       OK ] SampleConsensusModelSphere.projectPoints (1 ms)
+[----------] 4 tests from SampleConsensusModelSphere (1569 ms total)
 
 [----------] 1 test from SampleConsensusModelNormalSphere
 [ RUN      ] SampleConsensusModelNormalSphere.RANSAC
-[       OK ] SampleConsensusModelNormalSphere.RANSAC (0 ms)
-[----------] 1 test from SampleConsensusModelNormalSphere (0 ms total)
+[       OK ] SampleConsensusModelNormalSphere.RANSAC (4 ms)
+[----------] 1 test from SampleConsensusModelNormalSphere (4 ms total)
 
 [----------] 1 test from SampleConsensusModelCone
 [ RUN      ] SampleConsensusModelCone.RANSAC
@@ -31,71 +31,71 @@ Speedup (Std/RVV)   : 3.1439x
 
 [----------] 5 tests from SampleConsensusModelCylinder
 [ RUN      ] SampleConsensusModelCylinder.RANSAC
-[       OK ] SampleConsensusModelCylinder.RANSAC (4 ms)
+[       OK ] SampleConsensusModelCylinder.RANSAC (5 ms)
 [ RUN      ] SampleConsensusModelCylinder.projectPoints
 [       OK ] SampleConsensusModelCylinder.projectPoints (0 ms)
 [ RUN      ] SampleConsensusModelCylinder.RadiusAccuracy
-[       OK ] SampleConsensusModelCylinder.RadiusAccuracy (330 ms)
+[       OK ] SampleConsensusModelCylinder.RadiusAccuracy (491 ms)
 [ RUN      ] SampleConsensusModelCylinder.SampleIntersectingLines
-[       OK ] SampleConsensusModelCylinder.SampleIntersectingLines (0 ms)
+[       OK ] SampleConsensusModelCylinder.SampleIntersectingLines (1 ms)
 [ RUN      ] SampleConsensusModelCylinder.SampleModelsSymmetric
 [       OK ] SampleConsensusModelCylinder.SampleModelsSymmetric (0 ms)
-[----------] 5 tests from SampleConsensusModelCylinder (335 ms total)
+[----------] 5 tests from SampleConsensusModelCylinder (499 ms total)
 
 [----------] 4 tests from SampleConsensusModelCircle2D
 [ RUN      ] SampleConsensusModelCircle2D.RANSAC
-[       OK ] SampleConsensusModelCircle2D.RANSAC (0 ms)
+[       OK ] SampleConsensusModelCircle2D.RANSAC (3 ms)
 [ RUN      ] SampleConsensusModelCircle2D.SampleValidationPointsValid
 [       OK ] SampleConsensusModelCircle2D.SampleValidationPointsValid (0 ms)
 [ RUN      ] SampleConsensusModelCircle2D.SIMD_countWithinDistance_circle2d_smoke
-[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance_circle2d_smoke (33 ms)
+[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance_circle2d_smoke (75 ms)
 [ RUN      ] SampleConsensusModelCircle2D.SIMD_countWithinDistance
 
 ========================================================
 [ Performance Report: Circle2D ]
 Iterations          : 1000
-Standard Total Time : 5.0651 ms
-RVV Total Time      : 2.6585 ms
-Speedup (Std/RVV)   : 1.9052x
+Standard Total Time : 21.6237 ms
+RVV Total Time      : 15.4818 ms
+Speedup (Std/RVV)   : 1.3967x
 ========================================================
-[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance (210 ms)
-[----------] 4 tests from SampleConsensusModelCircle2D (244 ms total)
+[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance (575 ms)
+[----------] 4 tests from SampleConsensusModelCircle2D (655 ms total)
 
 [----------] 1 test from SampleConsensusModelCircle3D
 [ RUN      ] SampleConsensusModelCircle3D.RANSAC
-[       OK ] SampleConsensusModelCircle3D.RANSAC (0 ms)
-[----------] 1 test from SampleConsensusModelCircle3D (0 ms total)
+[       OK ] SampleConsensusModelCircle3D.RANSAC (8 ms)
+[----------] 1 test from SampleConsensusModelCircle3D (8 ms total)
 
 [----------] 1 test from SampleConsensusModelEllipse3D
 [ RUN      ] SampleConsensusModelEllipse3D.RANSAC
-[       OK ] SampleConsensusModelEllipse3D.RANSAC (66 ms)
-[----------] 1 test from SampleConsensusModelEllipse3D (66 ms total)
+[       OK ] SampleConsensusModelEllipse3D.RANSAC (142 ms)
+[----------] 1 test from SampleConsensusModelEllipse3D (142 ms total)
 
 [----------] 1 test from SampleConsensusModelTorusOclusion
 [ RUN      ] SampleConsensusModelTorusOclusion.RANSAC
-[       OK ] SampleConsensusModelTorusOclusion.RANSAC (3 ms)
-[----------] 1 test from SampleConsensusModelTorusOclusion (3 ms total)
+[       OK ] SampleConsensusModelTorusOclusion.RANSAC (14 ms)
+[----------] 1 test from SampleConsensusModelTorusOclusion (14 ms total)
 
 [----------] 1 test from SampleConsensusModelTorusHorn
 [ RUN      ] SampleConsensusModelTorusHorn.RANSAC
 [       OK ] SampleConsensusModelTorusHorn.RANSAC (0 ms)
-[----------] 1 test from SampleConsensusModelTorusHorn (0 ms total)
+[----------] 1 test from SampleConsensusModelTorusHorn (1 ms total)
 
 [----------] 1 test from SampleConsensusModelTorusRefine
 [ RUN      ] SampleConsensusModelTorusRefine.RANSAC
-[       OK ] SampleConsensusModelTorusRefine.RANSAC (0 ms)
-[----------] 1 test from SampleConsensusModelTorusRefine (0 ms total)
+[       OK ] SampleConsensusModelTorusRefine.RANSAC (1 ms)
+[----------] 1 test from SampleConsensusModelTorusRefine (1 ms total)
 
 [----------] 1 test from SampleConsensusModelTorus
 [ RUN      ] SampleConsensusModelTorus.RANSAC
 [pcl::SampleConsensusModelTorus::optimizeModelCoefficients] Not enough inliers to refine/optimize the model's coefficients (4)! Returning the same coefficients.
-[       OK ] SampleConsensusModelTorus.RANSAC (0 ms)
-[----------] 1 test from SampleConsensusModelTorus (0 ms total)
+[       OK ] SampleConsensusModelTorus.RANSAC (1 ms)
+[----------] 1 test from SampleConsensusModelTorus (1 ms total)
 
 [----------] 1 test from SampleConsensusModelTorusSelfIntersectSpindle
 [ RUN      ] SampleConsensusModelTorusSelfIntersectSpindle.RANSAC
-[       OK ] SampleConsensusModelTorusSelfIntersectSpindle.RANSAC (1 ms)
-[----------] 1 test from SampleConsensusModelTorusSelfIntersectSpindle (1 ms total)
+[       OK ] SampleConsensusModelTorusSelfIntersectSpindle.RANSAC (3 ms)
+[----------] 1 test from SampleConsensusModelTorusSelfIntersectSpindle (3 ms total)
 
 [----------] 11 tests from CollinearInputs/SampleConsensusModelCircle2DCollinearTest
 [ RUN      ] CollinearInputs/SampleConsensusModelCircle2DCollinearTest.SampleValidationPointsInvalid/0
@@ -142,8 +142,8 @@ Speedup (Std/RVV)   : 1.9052x
 [pcl::SampleConsensusModelCircle2D::isSampleGood] Sample points too similar or collinear!
 [pcl::SampleConsensusModelCircle2D::computeModelCoefficients] Invalid set of samples given!
 [       OK ] CollinearInputs/SampleConsensusModelCircle2DCollinearTest.SampleValidationPointsInvalid/10 (0 ms)
-[----------] 11 tests from CollinearInputs/SampleConsensusModelCircle2DCollinearTest (0 ms total)
+[----------] 11 tests from CollinearInputs/SampleConsensusModelCircle2DCollinearTest (1 ms total)
 
 [----------] Global test environment tear-down
-[==========] 33 tests from 13 test suites ran. (1242 ms total)
+[==========] 33 tests from 13 test suites ran. (2912 ms total)
 [  PASSED  ] 33 tests.
