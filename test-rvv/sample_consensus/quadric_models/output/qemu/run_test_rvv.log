@@ -4,24 +4,24 @@
 [ RUN      ] SampleConsensusModelSphere.RANSAC
 [       OK ] SampleConsensusModelSphere.RANSAC (9 ms)
 [ RUN      ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke
-[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke (79 ms)
+[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance_sphere_smoke (77 ms)
 [ RUN      ] SampleConsensusModelSphere.SIMD_countWithinDistance
 
 ========================================================
 [ Performance Report: Sphere (3D Distance) ]
 Iterations          : 1000
-Standard Total Time : 21.6016 ms
-RVV Total Time      : 36.2312 ms
-Speedup (Std/RVV)   : 0.5962x
+Standard Total Time : 21.4951 ms
+RVV Total Time      : 35.7339 ms
+Speedup (Std/RVV)   : 0.6015x
 ========================================================
-[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance (1504 ms)
+[       OK ] SampleConsensusModelSphere.SIMD_countWithinDistance (1444 ms)
 [ RUN      ] SampleConsensusModelSphere.projectPoints
 [       OK ] SampleConsensusModelSphere.projectPoints (1 ms)
-[----------] 4 tests from SampleConsensusModelSphere (1596 ms total)
+[----------] 4 tests from SampleConsensusModelSphere (1533 ms total)
 
 [----------] 1 test from SampleConsensusModelNormalSphere
 [ RUN      ] SampleConsensusModelNormalSphere.RANSAC
-[       OK ] SampleConsensusModelNormalSphere.RANSAC (4 ms)
+[       OK ] SampleConsensusModelNormalSphere.RANSAC (3 ms)
 [----------] 1 test from SampleConsensusModelNormalSphere (4 ms total)
 
 [----------] 1 test from SampleConsensusModelCone
@@ -48,18 +48,18 @@ Speedup (Std/RVV)   : 0.5962x
 [ RUN      ] SampleConsensusModelCircle2D.SampleValidationPointsValid
 [       OK ] SampleConsensusModelCircle2D.SampleValidationPointsValid (0 ms)
 [ RUN      ] SampleConsensusModelCircle2D.SIMD_countWithinDistance_circle2d_smoke
-[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance_circle2d_smoke (75 ms)
+[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance_circle2d_smoke (74 ms)
 [ RUN      ] SampleConsensusModelCircle2D.SIMD_countWithinDistance
 
 ========================================================
 [ Performance Report: Circle2D ]
 Iterations          : 1000
-Standard Total Time : 21.4170 ms
-RVV Total Time      : 15.2664 ms
-Speedup (Std/RVV)   : 1.4029x
+Standard Total Time : 21.1602 ms
+RVV Total Time      : 15.0764 ms
+Speedup (Std/RVV)   : 1.4035x
 ========================================================
-[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance (566 ms)
-[----------] 4 tests from SampleConsensusModelCircle2D (646 ms total)
+[       OK ] SampleConsensusModelCircle2D.SIMD_countWithinDistance (559 ms)
+[----------] 4 tests from SampleConsensusModelCircle2D (638 ms total)
 
 [----------] 1 test from SampleConsensusModelCircle3D
 [ RUN      ] SampleConsensusModelCircle3D.RANSAC
@@ -68,8 +68,8 @@ Speedup (Std/RVV)   : 1.4029x
 
 [----------] 1 test from SampleConsensusModelEllipse3D
 [ RUN      ] SampleConsensusModelEllipse3D.RANSAC
-[       OK ] SampleConsensusModelEllipse3D.RANSAC (139 ms)
-[----------] 1 test from SampleConsensusModelEllipse3D (139 ms total)
+[       OK ] SampleConsensusModelEllipse3D.RANSAC (142 ms)
+[----------] 1 test from SampleConsensusModelEllipse3D (142 ms total)
 
 [----------] 1 test from SampleConsensusModelTorusOclusion
 [ RUN      ] SampleConsensusModelTorusOclusion.RANSAC
@@ -79,7 +79,7 @@ Speedup (Std/RVV)   : 1.4029x
 [----------] 1 test from SampleConsensusModelTorusHorn
 [ RUN      ] SampleConsensusModelTorusHorn.RANSAC
 [       OK ] SampleConsensusModelTorusHorn.RANSAC (0 ms)
-[----------] 1 test from SampleConsensusModelTorusHorn (1 ms total)
+[----------] 1 test from SampleConsensusModelTorusHorn (0 ms total)
 
 [----------] 1 test from SampleConsensusModelTorusRefine
 [ RUN      ] SampleConsensusModelTorusRefine.RANSAC
@@ -145,5 +145,5 @@ Speedup (Std/RVV)   : 1.4029x
 [----------] 11 tests from CollinearInputs/SampleConsensusModelCircle2DCollinearTest (1 ms total)
 
 [----------] Global test environment tear-down
-[==========] 33 tests from 13 test suites ran. (2929 ms total)
+[==========] 33 tests from 13 test suites ran. (2861 ms total)
 [  PASSED  ] 33 tests.

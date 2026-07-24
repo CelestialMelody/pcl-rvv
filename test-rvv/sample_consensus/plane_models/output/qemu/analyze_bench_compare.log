@@ -4,7 +4,7 @@
 [Benchmark Context]
   Device    : RISC-V RVV target (qemu, rv64gcv)
   VLEN      : 256-bit (vlen=256, elen=64)
-  Dataset   : <pcl-src>/test-rvv/sample_consensus/plane_models/pcd/sac_plane_test.pcd (3283 points)
+  Dataset   : /home/zoomin/codes/pcl/test-rvv/sample_consensus/plane_models/pcd/sac_plane_test.pcd (3283 points)
   Iterations: 50 （每行 Total = Avg × 50）
   Std log   : output/qemu/run_bench_std.log
   RVV log   : output/qemu/run_bench_rvv.log
@@ -12,13 +12,13 @@
 -------------------------------------------------------------------------------------
 Benchmark Item           | Impl   |       Avg (ms) |     Total (ms) |        Speedup
 -------------------------|--------|----------------|----------------|----------------
-selectWithinDistance     | Std    |      0.7606 ms |     38.0300 ms |    [   1.00x ]
-                         | RVV    |      0.3897 ms |     19.4850 ms |    [   1.95x ]
+selectWithinDistance     | Std    |      0.7633 ms |     38.1650 ms |    [   1.00x ]
+                         | RVV    |      0.3862 ms |     19.3100 ms |    [   1.98x ]
 -------------------------|--------|----------------|----------------|----------------
-countWithinDistance      | Std    |      0.7240 ms |     36.2000 ms |    [   1.00x ]
-                         | RVV    |      0.3486 ms |     17.4300 ms |    [   2.08x ]
+countWithinDistance      | Std    |      0.7259 ms |     36.2950 ms |    [   1.00x ]
+                         | RVV    |      0.3440 ms |     17.2000 ms |    [   2.11x ]
 -------------------------|--------|----------------|----------------|----------------
-getDistancesToModel      | Std    |      0.7574 ms |     37.8700 ms |    [   1.00x ]
-                         | RVV    |      0.3881 ms |     19.4050 ms |    [   1.95x ]
+getDistancesToModel      | Std    |      0.7597 ms |     37.9850 ms |    [   1.00x ]
+                         | RVV    |      0.3827 ms |     19.1350 ms |    [   1.99x ]
 -------------------------|--------|----------------|----------------|----------------
 =====================================================================================
