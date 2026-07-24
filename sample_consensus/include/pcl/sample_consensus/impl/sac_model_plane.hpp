@@ -45,6 +45,7 @@
 #include <pcl/common/centroid.h>
 #include <pcl/common/eigen.h>
 #include <pcl/common/concatenate.h>
+#include <pcl/rvv_point_load.h>
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
@@ -354,15 +355,15 @@ pcl::SampleConsensusModelPlane<PointT>::countWithinDistanceRVV (
     const vfloat32m2_t v_d = __riscv_vfmv_v_f_f32m2(d, vl);
 
     // Compute byte offset for each point: offset = index * sizeof(PointT)
-    const vuint32m2_t v_off_pt = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointT), vl);
+    const vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
 
-    // Use Unordered Indexed Load (vluxei32) to load X, Y, Z from non-contiguous memory.
-    const vfloat32m2_t v_px = __riscv_vluxei32_v_f32m2(
-      reinterpret_cast<const float*>(points_base + offsetof(PointT, x)), v_off_pt, vl);
-    const vfloat32m2_t v_py = __riscv_vluxei32_v_f32m2(
-      reinterpret_cast<const float*>(points_base + offsetof(PointT, y)), v_off_pt, vl);
-    const vfloat32m2_t v_pz = __riscv_vluxei32_v_f32m2(
-      reinterpret_cast<const float*>(points_base + offsetof(PointT, z)), v_off_pt, vl);
+    // Use 3x unordered indexed loads (vluxei32) for X, Y, Z from non-contiguous memory.
+    vfloat32m2_t v_px;
+    vfloat32m2_t v_py;
+    vfloat32m2_t v_pz;
+    pcl::rvv_load::indexed_load3_fields_f32m2<
+        PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
+        points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
     // Calculate |ax + by + cz + d|.
     // We call the pure math kernel 'distRVV' defined in the base class.
@@ -551,4 +552,3 @@ pcl::SampleConsensusModelPlane<PointT>::doSamplesVerifyModel (
 #define PCL_INSTANTIATE_SampleConsensusModelPlane(T) template class PCL_EXPORTS pcl::SampleConsensusModelPlane<T>;
 
 #endif    // PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_PLANE_H_
-

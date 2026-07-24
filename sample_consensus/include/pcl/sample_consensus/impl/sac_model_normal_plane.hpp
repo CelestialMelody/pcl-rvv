@@ -43,6 +43,7 @@
 
 #include <pcl/sample_consensus/sac_model_normal_plane.h>
 #include <pcl/common/common.h> // for getAngle3D
+#include <pcl/rvv_point_load.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT, typename PointNT> void
@@ -184,17 +185,17 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceRVV (
 
     // --- A. 加载索引 ---
     const vuint32m2_t v_idx = __riscv_vle32_v_u32m2((const uint32_t*)(indices_ptr + i), vl);
-    const vuint32m2_t v_off_pt = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointT), vl);
+    const vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
     const vuint32m2_t v_off_norm = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointNT), vl);
 
     // --- B. 加载数据 (Gather Load) ---
     // 加载 PointT (x, y, z)
-    const vfloat32m2_t v_px = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, x)), v_off_pt, vl);
-    const vfloat32m2_t v_py = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, y)), v_off_pt, vl);
-    const vfloat32m2_t v_pz = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, z)), v_off_pt, vl);
+    vfloat32m2_t v_px;
+    vfloat32m2_t v_py;
+    vfloat32m2_t v_pz;
+    pcl::rvv_load::indexed_load3_fields_f32m2<
+        PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
+        points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
     // 加载 PointNT (nx, ny, nz)
     const vfloat32m2_t v_nx = __riscv_vluxei32_v_f32m2(
@@ -504,14 +505,14 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::countWithinDistanceRVV (
     const vfloat32m2_t v_d = __riscv_vfmv_v_f_f32m2(d, vl);
 
     // Calculate byte offsets for PointT: offset = index * sizeof(PointT)
-    const vuint32m2_t v_off_pt = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointT), vl);
+    const vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
 
-    const vfloat32m2_t v_px = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, x)), v_off_pt, vl);
-    const vfloat32m2_t v_py = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, y)), v_off_pt, vl);
-    const vfloat32m2_t v_pz = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, z)), v_off_pt, vl);
+    vfloat32m2_t v_px;
+    vfloat32m2_t v_py;
+    vfloat32m2_t v_pz;
+    pcl::rvv_load::indexed_load3_fields_f32m2<
+        PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
+        points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
     // Byte offsets for PointNT
     const vuint32m2_t v_off_norm = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointNT), vl);
@@ -666,7 +667,7 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModelRVV (
     vuint32m2_t v_idx = __riscv_vle32_v_u32m2(reinterpret_cast<const uint32_t*>(indices_base + i * 4), vl);
 
     // 计算结构体的字节偏移量 (Byte Offsets)
-    vuint32m2_t v_off_pt = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointT), vl);
+    vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
     vuint32m2_t v_off_norm = __riscv_vmul_vx_u32m2(v_idx, sizeof(PointNT), vl);
 
 
@@ -686,12 +687,12 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModelRVV (
     // const vfloat32m2_t v_nz = __riscv_vget_v_f32m2x3_f32m2(v_nxyz, 2);
 
     // C1. 加载 PointT (x, y, z)
-    vfloat32m2_t v_px = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, x)), v_off_pt, vl);
-    vfloat32m2_t v_py = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, y)), v_off_pt, vl);
-    vfloat32m2_t v_pz = __riscv_vluxei32_v_f32m2(
-        reinterpret_cast<const float*>(points_base + offsetof(PointT, z)), v_off_pt, vl);
+    vfloat32m2_t v_px;
+    vfloat32m2_t v_py;
+    vfloat32m2_t v_pz;
+    pcl::rvv_load::indexed_load3_fields_f32m2<
+        PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
+        points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
     // C2. 加载 PointNT
     vfloat32m2_t v_nx = __riscv_vluxei32_v_f32m2(
@@ -750,4 +751,3 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModelRVV (
 #define PCL_INSTANTIATE_SampleConsensusModelNormalPlane(PointT, PointNT) template class PCL_EXPORTS pcl::SampleConsensusModelNormalPlane<PointT, PointNT>;
 
 #endif    // PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_NORMAL_PLANE_H_
-
