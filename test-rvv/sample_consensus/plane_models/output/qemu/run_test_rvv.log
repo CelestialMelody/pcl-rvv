@@ -1,0 +1,98 @@
+[==========] Running 19 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 13 tests from SampleConsensusModelPlane
+[ RUN      ] SampleConsensusModelPlane.Base
+[       OK ] SampleConsensusModelPlane.Base (2 ms)
+[ RUN      ] SampleConsensusModelPlane.SampleValidationPointsCollinear
+[pcl::SampleConsensusModelPlane::isSampleGood] Sample points too similar or collinear!
+[pcl::SampleConsensusModelPlane::isSampleGood] Sample points too similar or collinear!
+[pcl::SampleConsensusModelPlane::computeModelCoefficients] Chosen samples are collinear!
+[       OK ] SampleConsensusModelPlane.SampleValidationPointsCollinear (2 ms)
+[ RUN      ] SampleConsensusModelPlane.SampleValidationPointsValid
+[       OK ] SampleConsensusModelPlane.SampleValidationPointsValid (0 ms)
+[ RUN      ] SampleConsensusModelPlane.SampleValidationNotEnoughSamples
+[pcl::SampleConsensusModel::getSamples] Can not select 0 unique points out of 0!
+[pcl::SampleConsensusModelPlane::computeModelCoefficients] Invalid set of samples given (0)!
+[pcl::SampleConsensusModel::getSamples] Can not select 0 unique points out of 1!
+[pcl::SampleConsensusModelPlane::computeModelCoefficients] Invalid set of samples given (1)!
+[pcl::SampleConsensusModel::getSamples] Can not select 0 unique points out of 2!
+[pcl::SampleConsensusModelPlane::computeModelCoefficients] Invalid set of samples given (2)!
+[       OK ] SampleConsensusModelPlane.SampleValidationNotEnoughSamples (1 ms)
+[ RUN      ] SampleConsensusModelPlane.RANSAC
+[       OK ] SampleConsensusModelPlane.RANSAC (4 ms)
+[ RUN      ] SampleConsensusModelPlane.LMedS
+[       OK ] SampleConsensusModelPlane.LMedS (11 ms)
+[ RUN      ] SampleConsensusModelPlane.MSAC
+[       OK ] SampleConsensusModelPlane.MSAC (3 ms)
+[ RUN      ] SampleConsensusModelPlane.RRANSAC
+[       OK ] SampleConsensusModelPlane.RRANSAC (2 ms)
+[ RUN      ] SampleConsensusModelPlane.MLESAC
+[       OK ] SampleConsensusModelPlane.MLESAC (15 ms)
+[ RUN      ] SampleConsensusModelPlane.RMSAC
+[       OK ] SampleConsensusModelPlane.RMSAC (3 ms)
+[ RUN      ] SampleConsensusModelPlane.SIMD_countWithinDistance_plane_smoke
+[       OK ] SampleConsensusModelPlane.SIMD_countWithinDistance_plane_smoke (81 ms)
+[ RUN      ] SampleConsensusModelPlane.SIMD_countWithinDistance
+
+========================================================
+[ Performance Report: Plane (Geometric Distance Only) ]
+Iterations          : 1000
+Standard Total Time : 24.0525 ms
+RVV Total Time      : 16.0250 ms
+Speedup (Std/RVV)   : 1.5009x
+========================================================
+[       OK ] SampleConsensusModelPlane.SIMD_countWithinDistance (753 ms)
+[ RUN      ] SampleConsensusModelPlane.OptimizeFarFromOrigin
+[       OK ] SampleConsensusModelPlane.OptimizeFarFromOrigin (2 ms)
+[----------] 13 tests from SampleConsensusModelPlane (886 ms total)
+
+[----------] 5 tests from SampleConsensusModelNormalPlane
+[ RUN      ] SampleConsensusModelNormalPlane.RANSAC
+[       OK ] SampleConsensusModelNormalPlane.RANSAC (5 ms)
+[ RUN      ] SampleConsensusModelNormalPlane.SIMD_selectWithinDistance
+
+========================================================
+[ Performance Report: NormalPlane (Select Within Distance) ]
+Points per cloud    : 2000
+Iterations          : 1000
+Standard Total Time : 416.3080 ms
+RVV Total Time      : 204.3005 ms
+Speedup (Std/RVV)   : 2.0377x
+========================================================
+[       OK ] SampleConsensusModelNormalPlane.SIMD_selectWithinDistance (3053 ms)
+[ RUN      ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance_normal_plane_smoke
+[       OK ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance_normal_plane_smoke (15093 ms)
+[ RUN      ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance
+
+========================================================
+[ Performance Report: NormalPlane (Weighted Distance) ]
+Points per cloud    : 10000
+Iterations          : 1000
+Standard Total Time : 1576.1068 ms
+RVV Total Time      : 743.5974 ms
+Speedup (Std/RVV)   : 2.1196x
+========================================================
+[       OK ] SampleConsensusModelNormalPlane.SIMD_countWithinDistance (14768 ms)
+[ RUN      ] SampleConsensusModelNormalPlane.SIMD_getDistancesToModel
+
+========================================================
+[ Performance Report: NormalPlane (getDistancesToModel) ]
+Points per cloud    : 2000
+Iterations          : 1000
+Standard Total Time : 436.7437 ms
+RVV Total Time      : 225.8818 ms
+Speedup (Std/RVV)   : 1.9335x
+========================================================
+
+[       OK ] SampleConsensusModelNormalPlane.SIMD_getDistancesToModel (3271 ms)
+[----------] 5 tests from SampleConsensusModelNormalPlane (36192 ms total)
+
+[----------] 1 test from SampleConsensusModelNormalParallelPlane
+[ RUN      ] SampleConsensusModelNormalParallelPlane.RANSAC
+[pcl::RandomSampleConsensus::computeModel] RANSAC found no model.
+[       OK ] SampleConsensusModelNormalParallelPlane.RANSAC (47 ms)
+[----------] 1 test from SampleConsensusModelNormalParallelPlane (47 ms total)
+
+[----------] Global test environment tear-down
+[==========] 19 tests from 3 test suites ran. (37130 ms total)
+[  PASSED  ] 19 tests.

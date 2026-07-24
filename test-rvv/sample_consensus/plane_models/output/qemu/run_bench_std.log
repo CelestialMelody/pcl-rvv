@@ -1,0 +1,18 @@
+make[1]: Entering directory '<pcl-src>/test-rvv/sample_consensus/plane_models'
+rm -f build/riscv/bench_sac_normal_plane_std
+[BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=0)...
+<riscv-toolchain>/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-24_14-16-19.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -DEIGEN_RISCV64_DEFAULT_LMUL=2 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/test/include -I<pcl-src>/sample_consensus/include -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<pcl-src> -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include -I<rv-install>/flann/include -I<rv-install>/lz4/include -I<rv-install>/hdf5/include -I<rv-install>/zlib/include -I<rv-install>/libpng/include  bench_sac_normal_plane.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_sample_consensus -lpcl_common -lpcl_io -lpcl_search -lpcl_kdtree -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_sac_normal_plane_std
+[RUN] Benchmark on riscv (USE_PCL_RVV10=0)...
+LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_sac_normal_plane_std <pcl-src>/test-rvv/sample_consensus/plane_models/pcd/sac_plane_test.pcd
+=====================================================================================
+ PCL SampleConsensus: NormalPlane Benchmark
+=====================================================================================
+Dataset: <pcl-src>/test-rvv/sample_consensus/plane_models/pcd/sac_plane_test.pcd (3283 points)
+Iterations: 50
+Build: Std
+
+selectWithinDistance     : 0.7727 ms/iter
+countWithinDistance      : 0.7260 ms/iter
+getDistancesToModel      : 0.8449 ms/iter
+=====================================================================================
+make[1]: Leaving directory '<pcl-src>/test-rvv/sample_consensus/plane_models'

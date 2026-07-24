@@ -1,0 +1,24 @@
+=====================================================================================
+ PCL SampleConsensus: NormalPlane Benchmark (Std vs RVV)
+=====================================================================================
+[Benchmark Context]
+  Device    : Milkv-Jupiter
+  VLEN      : see SoC / ELF (board)
+  Dataset   : <board-root>/sample_consensus/plane_models/pcd/sac_plane_test.pcd (3283 points)
+  Iterations: 50 （每行 Total = Avg × 50）
+  Std log   : <board-root>/sample_consensus/plane_models/output/run_bench_std.log
+  RVV log   : <board-root>/sample_consensus/plane_models/output/run_bench_rvv.log
+
+-------------------------------------------------------------------------------------
+Benchmark Item           | Impl   |       Avg (ms) |     Total (ms) |        Speedup
+-------------------------|--------|----------------|----------------|----------------
+selectWithinDistance     | Std    |      0.6791 ms |     33.9550 ms |    [   1.00x ]
+                         | RVV    |      0.0687 ms |      3.4350 ms |    [   9.89x ]
+-------------------------|--------|----------------|----------------|----------------
+countWithinDistance      | Std    |      0.6719 ms |     33.5950 ms |    [   1.00x ]
+                         | RVV    |      0.0532 ms |      2.6600 ms |    [  12.63x ]
+-------------------------|--------|----------------|----------------|----------------
+getDistancesToModel      | Std    |      0.7678 ms |     38.3900 ms |    [   1.00x ]
+                         | RVV    |      0.0603 ms |      3.0150 ms |    [  12.73x ]
+-------------------------|--------|----------------|----------------|----------------
+=====================================================================================

@@ -1,0 +1,11 @@
+=====================================================================================
+ PCL SampleConsensus: NormalPlane Benchmark
+=====================================================================================
+Dataset: <board-root>/sample_consensus/plane_models/pcd/sac_plane_test.pcd (3283 points)
+Iterations: 50
+Build: Std
+
+selectWithinDistance     : 0.6791 ms/iter
+countWithinDistance      : 0.6719 ms/iter
+getDistancesToModel      : 0.7678 ms/iter
+=====================================================================================
