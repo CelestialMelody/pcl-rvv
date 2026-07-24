@@ -24,6 +24,8 @@
    cd test-rvv/sample_consensus/plane_models
    make run_test     # 构建 rvv_sac_plane_test，QEMU 运行；默认传入 pcd/sac_plane_test.pcd
    make run_bench    # 构建 bench_sac_normal_plane，QEMU 运行；同样可传 PCD
+   make run_test_compare
+   make run_bench_compare
   ```
    可选：`make clean` 清理产物；`ARCH` 当前以 `riscv` 为主（与 Makefile 内分支一致）。
 2. **Quadric（`quadric_models`）— 仅 GTest**
@@ -54,6 +56,7 @@
 
 - `REMOTE_TEST` / `REMOTE_BENCH`：可执行文件名（默认 `rvv_sac_plane_test`、`bench_sac_normal_plane`）。
 - `REMOTE_PCD_FILE`：传给程序的 PCD 绝对路径（默认示例为 `/root/pcl-test/...`）。
+- `REMOTE_BENCH_ARGS`：传给 Std/RVV bench 的板卡侧参数；`plane_models` 使用板卡侧 PCD 路径，不复用本机 `BENCH_ARGS`。
 - `REMOTE_LIBS_DIR`：动态库搜索路径（示例中为 `/root/pcl-test/libs`）。若已用顶层 `**test-rvv/Makefile**` 的 `**deploy_lib**` 部署到 `**~/pcl-test/lib**`，请将该变量改为与之**相同**的目录，避免 `lib` / `libs` 混用导致找不到 `.so`。
 
 若在本机使用 `deploy_files`，PCD 会同步到 `**~/pcl-test/sample_consensus/plane_models/pcd/`**（以 Makefile 中 `REMOTE_DIR` 为准）；请把 `**REMOTE_PCD_FILE**` 改成与真实部署路径一致（含是否放在 `pcd/` 子目录）。
@@ -72,6 +75,36 @@
 > 当前 `test-rvv` 的 Makefile 默认启用 `USE_PCL_SOURCE_HEADERS=1`：**优先 include** `$(WORKSPACE)/pcl/**/include`（源码树），因此修改 `pcl` 的源文件后，`test-rvv` 下的 `make run_test` 会直接生效；同时仍然链接 `$(WORKSPACE)/riscv/pcl-rvv/lib` 下已安装的 `.so`。
 >
 > 若只需对齐已安装头文件，可 `**make USE_PCL_SOURCE_HEADERS=0 ...`**。
+
+### 1.4 bench 输出规范与板卡证据
+
+`plane_models/bench_sac_normal_plane.cpp` 不再自己输出 Std/RVV 合并表格。当前规范是：
+
+- Std 和 RVV bench 各自只输出原始测量行：`Dataset:`、`Iterations:`、`Build:` 和
+  `<case> : <avg> ms/iter`；
+- `test-rvv/script/analyze_bench_compare.py` 统一读取 Std/RVV 两份日志并输出对比表；
+- 板卡路径由 `board.mk` 的 `REMOTE_BENCH_ARGS` 提供，PCD fixture 由本机
+  `Makefile` 的 `DEPLOY_EXTRA_FILES` 部署到板卡。
+
+已验证命令：
+
+```bash
+make -C test-rvv/sample_consensus/plane_models run_test_compare
+make -C test-rvv/sample_consensus/plane_models run_bench_compare
+make -C test-rvv/sample_consensus/plane_models run_board_bench_compare fetch_board_logs
+```
+
+最新 Milkv-Jupiter 板卡 compare 结果（dataset：`sac_plane_test.pcd`，3283 points，
+iterations：50）：
+
+| case | Std ms/iter | RVV ms/iter | speedup |
+| --- | ---: | ---: | ---: |
+| `selectWithinDistance` | 0.6791 | 0.0687 | 9.89x |
+| `countWithinDistance` | 0.6719 | 0.0532 | 12.63x |
+| `getDistancesToModel` | 0.7678 | 0.0603 | 12.73x |
+
+日志位于 `test-rvv/sample_consensus/plane_models/output/board/`；这些日志是证据产物，
+不作为默认提交内容。
 
 ## 2. SIMD_countWithinDistance 测试说明
 

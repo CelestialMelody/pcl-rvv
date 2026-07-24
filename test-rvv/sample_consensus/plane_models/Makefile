@@ -35,6 +35,8 @@ TEST_ARGS := $(PLANE_PCD)
 BENCH_ARGS := $(PLANE_PCD)
 
 REMOTE_DIR ?= ~/pcl-test/sample_consensus/plane_models
+# Shared board run_bench_compare uses REMOTE_BENCH_ARGS from board.mk; deploy
+# the fixture beside the board binaries so bench std/RVV logs stay comparable.
 DEPLOY_EXTRA_FILES := $(PLANE_PCD)
 DEPLOY_EXTRA_REMOTE_DIR := $(REMOTE_DIR)/pcd
 

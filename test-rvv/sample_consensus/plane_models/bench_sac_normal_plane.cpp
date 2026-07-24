@@ -13,7 +13,7 @@ using PointT = pcl::PointXYZ;
 using PointNT = pcl::Normal;
 using ModelT = pcl::SampleConsensusModelNormalPlane<PointT, PointNT>;
 
-// Proxy to expose protected RVV APIs, same style as test file
+// Proxy to expose protected RVV APIs, same style as test file.
 template <typename PointT_, typename PointNT_>
 class SampleConsensusModelNormalPlaneBench
   : public pcl::SampleConsensusModelNormalPlane<PointT_, PointNT_>
@@ -36,8 +36,6 @@ public:
 
 class Benchmarker {
 public:
-  explicit Benchmarker(const std::string& name) : name_(name) {}
-
   struct Result {
     double avg_ms_per_iter{};
     double total_ms{};
@@ -52,9 +50,6 @@ public:
     double avg_ms = total_ms / iterations;
     return {.avg_ms_per_iter = avg_ms, .total_ms = total_ms};
   }
-
-private:
-  std::string name_;
 };
 
 static void
@@ -114,152 +109,86 @@ main (int argc, char** argv)
   pcl::Indices inliers_buffer(indices.size());
   std::vector<double> distances_buffer(indices.size());
 
-  // 为了做“标量 vs RVV”对比，这里直接调用 *_Standard 和 *_RVV，避免 selectWithinDistance/countWithinDistance 的自动 dispatch。
-  // 注意：selectWithinDistanceStandard 需要 current_count（写入偏移），这里从 0 开始。
+  auto run_case = [&](const std::function<void()>& func) {
+    Benchmarker bench;
+    return bench.run(func, iters);
+  };
 
-#ifdef __RVV10__
-  const bool has_rvv = true;
-#else
-  const bool has_rvv = false;
-#endif
-
-  // --- 1) selectWithinDistance ---
-  Benchmarker bench_sel_std("Std selectWithinDistanceStandard");
-  const auto sel_std = bench_sel_std.run([&](){
-    model.error_sqr_dists_.assign(indices.size(), 0.0);
-    inliers_buffer.assign(indices.size(), 0);
-    const std::size_t nr = model.selectWithinDistanceStandard(coeffs, threshold, inliers_buffer, 0, 0);
-    pcl::utils::ignore(nr);
-  }, iters);
-
-  Benchmarker::Result sel_rvv{};
-  if (has_rvv) {
-#ifdef __RVV10__
-    Benchmarker bench_sel_rvv("RVV selectWithinDistanceRVV");
-    sel_rvv = bench_sel_rvv.run([&](){
+  auto run_select = [&]() {
+#if defined(__RVV10__)
+    return run_case([&](){
       model.error_sqr_dists_.assign(indices.size(), 0.0);
       inliers_buffer.assign(indices.size(), 0);
-      const std::size_t nr = model.selectWithinDistanceRVV (coeffs, threshold, inliers_buffer);
+      const std::size_t nr = model.selectWithinDistanceRVV(coeffs, threshold, inliers_buffer);
       pcl::utils::ignore(nr);
-    }, iters);
-#endif
-  } else {
-    std::cout << "[WARN] __RVV10__ not defined, RVV selectWithinDistance not benchmarked.\n";
-  }
-
-  // --- 2) countWithinDistance ---
-  Benchmarker bench_cnt_std("Std countWithinDistanceStandard");
-  const auto cnt_std = bench_cnt_std.run([&](){
-    const std::size_t nr = model.countWithinDistanceStandard(coeffs, threshold, 0);
-    pcl::utils::ignore(nr);
-  }, iters);
-
-  Benchmarker::Result cnt_rvv{};
-  if (has_rvv) {
-#ifdef __RVV10__
-    Benchmarker bench_cnt_rvv("RVV countWithinDistanceRVV");
-    cnt_rvv = bench_cnt_rvv.run([&](){
-      const std::size_t nr = model.countWithinDistanceRVV (coeffs, threshold, 0);
+    });
+#else
+    return run_case([&](){
+      model.error_sqr_dists_.assign(indices.size(), 0.0);
+      inliers_buffer.assign(indices.size(), 0);
+      const std::size_t nr = model.selectWithinDistanceStandard(coeffs, threshold, inliers_buffer, 0, 0);
       pcl::utils::ignore(nr);
-    }, iters);
+    });
 #endif
-  } else {
-    std::cout << "[WARN] __RVV10__ not defined, RVV countWithinDistance not benchmarked.\n";
-  }
+  };
 
-  // --- 3) getDistancesToModel ---
-  Benchmarker bench_dist_std("Std getDistancesToModelStandard");
-  const auto dist_std = bench_dist_std.run([&](){
-    model.getDistancesToModelStandard(coeffs, distances_buffer, 0);
-  }, iters);
+  auto run_count = [&]() {
+#if defined(__RVV10__)
+    return run_case([&](){
+      const std::size_t nr = model.countWithinDistanceRVV(coeffs, threshold, 0);
+      pcl::utils::ignore(nr);
+    });
+#else
+    return run_case([&](){
+      const std::size_t nr = model.countWithinDistanceStandard(coeffs, threshold, 0);
+      pcl::utils::ignore(nr);
+    });
+#endif
+  };
 
-  Benchmarker::Result dist_rvv{};
-  if (has_rvv) {
-#ifdef __RVV10__
-    Benchmarker bench_dist_rvv("RVV getDistancesToModelRVV");
-    dist_rvv = bench_dist_rvv.run([&](){
+  auto run_dist = [&]() {
+#if defined(__RVV10__)
+    return run_case([&](){
       model.getDistancesToModelRVV(coeffs, distances_buffer);
-    }, iters);
+    });
+#else
+    return run_case([&](){
+      model.getDistancesToModelStandard(coeffs, distances_buffer, 0);
+    });
 #endif
-  } else {
-    std::cout << "[WARN] __RVV10__ not defined, RVV getDistancesToModel not benchmarked.\n";
-  }
+  };
 
-  // ==========================================================
-  // 参数化表格排版设置
-  // ==========================================================
-  // 1. 定义各列的字符宽度
+  const auto sel = run_select();
+  const auto cnt = run_count();
+  const auto dist = run_dist();
+
   constexpr int w_item = 24;
-  constexpr int w_impl = 6;
-  constexpr int w_avg  = 12;
-  constexpr int w_tot  = 12;
-  constexpr int w_spd  = 12;
+  constexpr int total_width = 85;
 
-  // 2. 自动计算总宽度 (4个 " | " 分隔符，每个占3个字符)
-  constexpr int total_width = w_item + w_impl + w_avg + w_tot + w_spd + (4 * 3) + 1; // +1 for the last vertical bar
-
-  // pretty summary table
   print_bar('=', total_width);
-  std::cout << " PCL SampleConsensus: NormalPlane Benchmark (RVV 1.0)\n";
+  std::cout << " PCL SampleConsensus: NormalPlane Benchmark\n";
   print_bar('=', total_width);
-  std::cout << "[Benchmark Context]\n";
-  std::cout << "  Device     : RISC-V RVV target (rv64gcv)\n";
-  std::cout << "  VLEN       : 256-bit (zvl256b)\n";
-  std::cout << "  Dataset    : " << pcd_path << " (" << cloud->size () << " points)\n";
-  std::cout << "  Iterations : " << iters << "\n\n";
+  std::cout << "Dataset: " << pcd_path << " (" << cloud->size () << " points)\n";
+  std::cout << "Iterations: " << iters << "\n";
+  std::cout << "Build: " <<
+#if defined(__RVV10__)
+      "RVV"
+#else
+      "Std"
+#endif
+      << "\n";
+  std::cout << '\n';
 
-  print_bar('-', total_width);
-
-  // 3. 打印表头
-  std::cout << std::left  << std::setw(w_item) << "Benchmark Item" << " | "
-            << std::left  << std::setw(w_impl) << "Impl" << " | "
-            << std::right << std::setw(w_avg)  << "Avg Time"       << " | "
-            << std::right << std::setw(w_tot)  << "Total Time"     << " | "
-            << std::right << std::setw(w_spd)  << "Speedup"        << "\n";
-
-  // 4. 自动生成对应的十字分隔线
-  const std::string separator =
-      std::string(w_item + 1, '-') + "|" +
-      std::string(w_impl + 2, '-') + "|" +
-      std::string(w_avg  + 2, '-') + "|" +
-      std::string(w_tot  + 2, '-') + "|" +
-      std::string(w_spd  + 2, '-');
-  std::cout << separator << "\n";
-
-  // 5. 打印行
-  auto print_row = [&](const std::string& item,
-                       const char* impl,
-                       const Benchmarker::Result& r,
-                       double speedup) {
-    std::ostringstream avg_os, tot_os, spd_os;
-    avg_os << std::fixed << std::setprecision(4) << r.avg_ms_per_iter << " ms";
-    tot_os << std::fixed << std::setprecision(4) << r.total_ms << " ms";
-    spd_os << "[ " << std::setw(6) << std::right << std::fixed << std::setprecision(2) << speedup << "x ]";
-
-    std::cout << std::left  << std::setw(w_item) << item << " | "
-              << std::left  << std::setw(w_impl) << impl << " | "
-              << std::right << std::setw(w_avg)  << avg_os.str() << " | "
-              << std::right << std::setw(w_tot)  << tot_os.str() << " | "
-              << std::right << std::setw(w_spd)  << spd_os.str() << "\n";
+  auto print_line = [&](const std::string& item, const Benchmarker::Result& r) {
+    std::cout << std::left << std::setw(w_item) << item << " : "
+              << std::right << std::fixed << std::setprecision(4)
+              << r.avg_ms_per_iter << " ms/iter\n";
   };
 
-  auto print_group = [&](const std::string& item,
-                         const Benchmarker::Result& std_r,
-                         const Benchmarker::Result& rvv_r) {
-    const double speedup_rvv = (rvv_r.total_ms > 0.0) ? (std_r.total_ms / rvv_r.total_ms) : 0.0;
-    print_row(item, "Std", std_r, 1.00);
-    print_row("",   "RVV", rvv_r, speedup_rvv);
-    std::cout << separator << "\n";
-  };
-
-  if (has_rvv) {
-    print_group("selectWithinDistance", sel_std, sel_rvv);
-    print_group("countWithinDistance",  cnt_std, cnt_rvv);
-    print_group("getDistancesToModel",  dist_std, dist_rvv);
-  }
+  print_line("selectWithinDistance", sel);
+  print_line("countWithinDistance", cnt);
+  print_line("getDistancesToModel", dist);
 
   print_bar('=', total_width);
-
   return 0;
 }
-

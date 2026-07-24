@@ -11,6 +11,8 @@ REMOTE_BENCH_LOAD := bench_sac_normal_plane_load_compare
 REMOTE_DIR := /root/pcl-test/sample_consensus/plane_models
 REMOTE_PCD_FILE := $(REMOTE_DIR)/pcd/sac_plane_test.pcd
 REMOTE_TEST_ARGS := $(REMOTE_PCD_FILE)
+# run_bench_compare from rvv-board-run.mk passes this fixture to both Std/RVV
+# binaries; no sample_consensus-specific analyzer path is needed.
 REMOTE_BENCH_ARGS := $(REMOTE_PCD_FILE)
 REMOTE_BENCH_LOAD_OUTPUT_FILE ?= $(REMOTE_OUTPUT_DIR)/run_bench_load_compare.log
 
