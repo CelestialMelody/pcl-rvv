@@ -4,6 +4,7 @@
 
 - `vluxei32` vs `vluxseg3ei32`（indexed gather）
 - `vlse32` vs `vlsseg3e32`（strided load）
+- field-tag 单字段 load/store compile-only 覆盖
 - `vlseg3e32` 在 `xyzxyz...` 紧密交错布局下是否更有优势（contiguous segment load）
 - `vsse32` / `vssseg4e32`、`vse32` / `vsseg4e32`、`vsuxei32` / `vsuxseg4ei32`（store / scatter）
 
@@ -20,17 +21,18 @@
 | --- | --- |
 | `bench_rvv_load_compare.cpp` | load 微基准（按 Stride → Contiguous → Indexed 顺序输出） |
 | `bench_rvv_store_compare.cpp` | store 微基准（同上） |
+| `test_rvv_point_field_api_compile.cpp` | field-tag 单字段 load/store 编译期覆盖，不运行、不产出性能结论 |
 | `Makefile` | 开发机交叉编译、QEMU 运行、`deploy_*` 到板卡 |
 | `board.mk` | 板卡上运行，日志写入 `output/` |
 | `output/qemu/run_load.log`、`run_store.log` | 开发机 QEMU 运行产物（`make run_*`） |
 | `output/board/load_store.log` | 板卡汇总类记录 |
 
-封装头文件（由 bench 直接 `#include`）位于 `common/include/pcl/common/`：
+封装头文件（由 bench 直接 `#include`）位于 `common/include/pcl/`：
 
 - `rvv_point_load.h` / `impl/rvv_point_load.hpp`
 - `rvv_point_store.h` / `impl/rvv_point_store.hpp`
 
-`bench_*_compare.cpp` 内曾保留对本目录同名 `rvv_point_*.hpp` 的注释引用，当前构建以 `<pcl/common/rvv_point_*.h>` 为准。
+`bench_*_compare.cpp` 内曾保留对本目录同名 `rvv_point_*.hpp` 的注释引用，当前构建以 `<pcl/rvv_point_*.h>` 为准。
 
 ---
 
@@ -47,6 +49,9 @@
 - **Indexed AoS gather**：随机索引间接读  
   - E：`3× vluxei32`  
   - F：`vluxseg3ei32`（不可用则回退到多条 `vluxei32`）
+XY 或其它双字段 load 暂时用两个单字段
+`strided_load_field_f32m2<PointT, Field>` /
+`indexed_load_field_f32m2<PointT, Field>` 表达；本目录不提供 `load2` 性能结论。
 
 ### Store（`bench_rvv_store_compare`）
 
@@ -59,6 +64,8 @@
 - **Indexed scatter**：随机索引间接写  
   - E：`4× vsuxei32`  
   - F：`vsuxseg4ei32`（或回退）
+field-tag 单字段 store 的 API 触达由 `test_rvv_point_field_api_compile.cpp` 覆盖，不混入
+store 性能数据。
 
 ---
 

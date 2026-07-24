@@ -77,6 +77,28 @@ strided_load_f32m2(const float* field_ptr, const std::size_t vl)
   return __riscv_vlse32_v_f32m2(field_ptr, static_cast<ptrdiff_t>(kStrideBytes), vl);
 }
 
+template <typename PointT, typename Field>
+inline vfloat32m2_t
+strided_load_field_f32m2(const std::uint8_t* base_u8, const std::size_t vl)
+{
+  static_assert(pcl::rvv::RVVFloatFieldLayout<PointT, Field>::value,
+                "Field must be registered as one float scalar.");
+  constexpr std::size_t kFieldOffsetBytes = pcl::traits::offset<PointT, Field>::value;
+  static_assert(kFieldOffsetBytes % alignof(float) == 0, "Field offset must be aligned for float loads.");
+  return strided_load_f32m2<sizeof(PointT)>(
+      reinterpret_cast<const float*>(base_u8 + kFieldOffsetBytes), vl);
+}
+
+template <typename PointT, typename Field>
+inline vfloat32m2_t
+indexed_load_field_f32m2(const std::uint8_t* base_u8, vuint32m2_t v_off_bytes, const std::size_t vl)
+{
+  static_assert(pcl::rvv::RVVFloatFieldLayout<PointT, Field>::value,
+                "Field must be registered as one float scalar.");
+  constexpr std::size_t kFieldOffsetBytes = pcl::traits::offset<PointT, Field>::value;
+  return gather_load_f32m2<PointT, kFieldOffsetBytes>(base_u8, v_off_bytes, vl);
+}
+
 template <std::size_t kStrideBytes>
 inline void
 strided_load3_seg_f32m2(const float* seg_base,

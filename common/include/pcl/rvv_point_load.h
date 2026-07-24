@@ -81,6 +81,14 @@ vfloat32m2_t gather_load_f32m2(const std::uint8_t* base_u8, vuint32m2_t v_off_by
 template <std::size_t kStrideBytes>
 vfloat32m2_t strided_load_f32m2(const float* field_ptr, std::size_t vl);
 
+/** \brief PCL field-tag strided load for one registered single-float field. */
+template <typename PointT, typename Field>
+vfloat32m2_t strided_load_field_f32m2(const std::uint8_t* base_u8, std::size_t vl);
+
+/** \brief PCL field-tag indexed gather for one registered single-float field. */
+template <typename PointT, typename Field>
+vfloat32m2_t indexed_load_field_f32m2(const std::uint8_t* base_u8, vuint32m2_t v_off_bytes, std::size_t vl);
+
 /** \brief `vlsseg3e32`: `seg_base` must point to the first of three consecutive `float`s. */
 template <std::size_t kStrideBytes>
 void strided_load3_seg_f32m2(const float* seg_base,

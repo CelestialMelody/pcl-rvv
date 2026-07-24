@@ -16,9 +16,11 @@ INCLUDES = \
 
 TARGET_LOAD  := bench_rvv_load_compare
 TARGET_STORE := bench_rvv_store_compare
+TARGET_FIELD_API_COMPILE_OBJ = $(BUILD_DIR)/$(ARCH)/test_rvv_point_field_api_compile.o
 
 TARGET_BENCH := $(TARGET_LOAD)
 SRCS_BENCH   := $(TARGET_LOAD).cpp
+SRCS_FIELD_API_COMPILE := test_rvv_point_field_api_compile.cpp
 LIBS_BENCH   := -lpcl_common -lm
 HAS_BENCH    := 0
 HAS_TEST     := 0
@@ -41,10 +43,13 @@ N_POINTS ?= 262144
 ITERS    ?= 50
 WARMUP   ?= 5
 
-all: $(TARGET_LOAD_BIN) $(TARGET_STORE_BIN)
+all: $(TARGET_LOAD_BIN) $(TARGET_STORE_BIN) $(TARGET_FIELD_API_COMPILE_OBJ)
 
 $(TARGET_STORE_BIN): $(TARGET_STORE).cpp | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) $(LIBS_BENCH) -o $@
+
+$(TARGET_FIELD_API_COMPILE_OBJ): $(SRCS_FIELD_API_COMPILE) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 run_load: $(TARGET_LOAD_BIN) | $(OUTPUT_DIR_QEMU)
 	$(RUN_CMD) ./$(TARGET_LOAD_BIN) $(N_POINTS) $(ITERS) $(WARMUP) 2>&1 | tee $(OUTPUT_DIR_QEMU)/run_load.log

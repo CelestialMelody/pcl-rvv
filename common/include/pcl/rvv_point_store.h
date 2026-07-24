@@ -78,6 +78,10 @@ vuint32m2_t byte_offsets_u32m2(vuint32m2_t v_idx, std::size_t vl);
 template <std::size_t kStrideBytes>
 void strided_store_f32m2(float* field_ptr, vfloat32m2_t v, std::size_t vl);
 
+/** \brief PCL field-tag strided store for one registered single-float field. */
+template <typename PointT, typename Field>
+void strided_store_field_f32m2(std::uint8_t* base_u8, vfloat32m2_t v, std::size_t vl);
+
 /** \brief `vssseg3e32`; `seg_base` = first of three consecutive destination `float`s. */
 template <std::size_t kStrideBytes>
 void strided_store3_seg_f32m2(float* seg_base,
@@ -163,6 +167,10 @@ void contiguous_seg4_store_f32m2(float* base,
 
 template <std::size_t kFieldOffBytes>
 void scatter_store_f32m2(std::uint8_t* base_u8, vuint32m2_t v_off_bytes, vfloat32m2_t v, std::size_t vl);
+
+/** \brief PCL field-tag indexed scatter for one registered single-float field. */
+template <typename PointT, typename Field>
+void scatter_store_field_f32m2(std::uint8_t* base_u8, vuint32m2_t v_off_bytes, vfloat32m2_t v, std::size_t vl);
 
 void scatter_store3_seg_f32m2(float* indexed_seg_base,
                         vuint32m2_t v_off_bytes,

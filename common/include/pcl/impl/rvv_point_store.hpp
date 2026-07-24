@@ -66,6 +66,17 @@ strided_store_f32m2(float* field_ptr, const vfloat32m2_t v, const std::size_t vl
   __riscv_vsse32_v_f32m2(field_ptr, static_cast<ptrdiff_t>(kStrideBytes), v, vl);
 }
 
+template <typename PointT, typename Field>
+inline void
+strided_store_field_f32m2(std::uint8_t* base_u8, const vfloat32m2_t v, const std::size_t vl)
+{
+  static_assert(pcl::rvv::RVVFloatFieldLayout<PointT, Field>::value,
+                "Field must be registered as one float scalar.");
+  constexpr std::size_t kFieldOffsetBytes = pcl::traits::offset<PointT, Field>::value;
+  static_assert(kFieldOffsetBytes % alignof(float) == 0, "Field offset must be aligned for float stores.");
+  strided_store_f32m2<sizeof(PointT)>(reinterpret_cast<float*>(base_u8 + kFieldOffsetBytes), v, vl);
+}
+
 template <std::size_t kStrideBytes>
 inline void
 strided_store3_seg_f32m2(float* seg_base,
@@ -261,6 +272,19 @@ scatter_store_f32m2(std::uint8_t* base_u8,
   static_assert(kFieldOffBytes % alignof(float) == 0, "Field offset must be aligned for float stores.");
   float* base_f32 = reinterpret_cast<float*>(base_u8 + kFieldOffBytes);
   __riscv_vsuxei32_v_f32m2(base_f32, v_off_bytes, v, vl);
+}
+
+template <typename PointT, typename Field>
+inline void
+scatter_store_field_f32m2(std::uint8_t* base_u8,
+                          vuint32m2_t v_off_bytes,
+                          const vfloat32m2_t v,
+                          const std::size_t vl)
+{
+  static_assert(pcl::rvv::RVVFloatFieldLayout<PointT, Field>::value,
+                "Field must be registered as one float scalar.");
+  constexpr std::size_t kFieldOffsetBytes = pcl::traits::offset<PointT, Field>::value;
+  scatter_store_f32m2<kFieldOffsetBytes>(base_u8, v_off_bytes, v, vl);
 }
 
 inline void
