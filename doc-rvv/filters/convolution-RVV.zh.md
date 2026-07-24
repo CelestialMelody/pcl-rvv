@@ -35,6 +35,7 @@
 - 可以保证的是当前声明覆盖范围内的语义等价：dense organized `Convolution<PointXYZI, PointXYZI>`、ignore/duplicate/mirror 边界策略、`x/y/z/intensity` 四个 `float` 字段、行/列主体卷积。
 - 不满足覆盖范围的路径不会走 RVV helper，而是回到标量路径；因此 non-dense、RGB/RGBA、其他点类型和上游复杂边界语义不由本 RVV 路径承担。
 - RVV helper 与标量路径按相同 kernel tap 顺序做逐项乘加，没有引入向量归约重排；专项测试用手写标量参考对拍 rows/cols 的三种边界策略，QEMU 和板卡 bench 的 checksum 也与 std 一致。
+- `PointXYZI` 覆盖依据来自 header 泛型标量路径的整点运算语义、上游 `Convolution.convolveRowsXYZI` 的 intensity 检查，以及本目录专项 rows/cols 四字段对拍；`filters/src/convolution.cpp` 中的 `RGB` / `PointXYZRGB` 显式特化只说明 packed 颜色有独立语义，不能作为扩大 RVV 覆盖范围的依据。
 
 暂缓原因：
 
@@ -60,6 +61,7 @@
 - 行/列入口只做窄范围短路分流；
 - RVV helper 命中后完成 dense 内区；ignore 边界由 helper 写 NaN，duplicate/mirror 边界由入口标量补写；
 - 未命中范围保持原路径，避免影响泛型模板和 RGB 特化。
+- 字段级 RVV load/store 使用公共 `pcl/rvv_point_load.h` 与 `pcl/rvv_point_store.h` 的 PCL field-tag helper；traits 只验证被访问字段是注册的单个 `float` 字段，不替代本算法的 exact `PointXYZI -> PointXYZI` dispatch。
 
 ## 3. 总体设计
 

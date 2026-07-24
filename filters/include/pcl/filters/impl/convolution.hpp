@@ -50,6 +50,9 @@
 #include <type_traits>
 
 #if defined(__RVV10__)
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
+
 #include <riscv_vector.h>
 #endif
 
@@ -340,10 +343,6 @@ convolveRowsPointXYZIRVV(const pcl::filters::Convolution<pcl::PointXYZI, pcl::Po
   if (!input->is_dense || inner_width < kMinInnerWidth || kernel_width < 2)
     return false;
 
-  constexpr std::ptrdiff_t stride = static_cast<std::ptrdiff_t>(sizeof(pcl::PointXYZI));
-  static_assert(offsetof(pcl::PointXYZI, y) == offsetof(pcl::PointXYZI, x) + sizeof(float));
-  static_assert(offsetof(pcl::PointXYZI, z) == offsetof(pcl::PointXYZI, y) + sizeof(float));
-
 #pragma omp parallel for \
   default(none) \
   shared(fill_ignore_borders, height, input, kernel, kernel_width, half_width, last, output, width) \
@@ -367,22 +366,27 @@ convolveRowsPointXYZIRVV(const pcl::filters::Convolution<pcl::PointXYZI, pcl::Po
       for (int k = kernel_width, l = i - half_width; k > -1; --k, ++l)
       {
         const auto* base = reinterpret_cast<const std::uint8_t*>(&(*input) (l,j));
-        const float* x_ptr = reinterpret_cast<const float*>(base + offsetof(pcl::PointXYZI, x));
-        const float* y_ptr = reinterpret_cast<const float*>(base + offsetof(pcl::PointXYZI, y));
-        const float* z_ptr = reinterpret_cast<const float*>(base + offsetof(pcl::PointXYZI, z));
-        const float* intensity_ptr = reinterpret_cast<const float*>(base + offsetof(pcl::PointXYZI, intensity));
         const vfloat32m2_t w = __riscv_vfmv_v_f_f32m2(kernel[k], vl);
-        acc_x = __riscv_vfmacc_vv_f32m2(acc_x, w, __riscv_vlse32_v_f32m2(x_ptr, stride, vl), vl);
-        acc_y = __riscv_vfmacc_vv_f32m2(acc_y, w, __riscv_vlse32_v_f32m2(y_ptr, stride, vl), vl);
-        acc_z = __riscv_vfmacc_vv_f32m2(acc_z, w, __riscv_vlse32_v_f32m2(z_ptr, stride, vl), vl);
-        acc_intensity = __riscv_vfmacc_vv_f32m2(acc_intensity, w, __riscv_vlse32_v_f32m2(intensity_ptr, stride, vl), vl);
+        acc_x = __riscv_vfmacc_vv_f32m2(
+            acc_x, w,
+            pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::x>(base, vl), vl);
+        acc_y = __riscv_vfmacc_vv_f32m2(
+            acc_y, w,
+            pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::y>(base, vl), vl);
+        acc_z = __riscv_vfmacc_vv_f32m2(
+            acc_z, w,
+            pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::z>(base, vl), vl);
+        acc_intensity = __riscv_vfmacc_vv_f32m2(
+            acc_intensity, w,
+            pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::intensity>(base, vl), vl);
       }
 
       auto* out_base = reinterpret_cast<std::uint8_t*>(&output (i,j));
-      __riscv_vsse32_v_f32m2(reinterpret_cast<float*>(out_base + offsetof(pcl::PointXYZI, x)), stride, acc_x, vl);
-      __riscv_vsse32_v_f32m2(reinterpret_cast<float*>(out_base + offsetof(pcl::PointXYZI, y)), stride, acc_y, vl);
-      __riscv_vsse32_v_f32m2(reinterpret_cast<float*>(out_base + offsetof(pcl::PointXYZI, z)), stride, acc_z, vl);
-      __riscv_vsse32_v_f32m2(reinterpret_cast<float*>(out_base + offsetof(pcl::PointXYZI, intensity)), stride, acc_intensity, vl);
+      pcl::rvv_store::strided_store_field_f32m2<pcl::PointXYZI, pcl::fields::x>(out_base, acc_x, vl);
+      pcl::rvv_store::strided_store_field_f32m2<pcl::PointXYZI, pcl::fields::y>(out_base, acc_y, vl);
+      pcl::rvv_store::strided_store_field_f32m2<pcl::PointXYZI, pcl::fields::z>(out_base, acc_z, vl);
+      pcl::rvv_store::strided_store_field_f32m2<pcl::PointXYZI, pcl::fields::intensity>(
+          out_base, acc_intensity, vl);
       i += static_cast<int>(vl);
     }
 
@@ -409,10 +413,6 @@ convolveColsPointXYZIRVV(const pcl::filters::Convolution<pcl::PointXYZI, pcl::Po
   constexpr int kMinWidth = 32;
   if (!input->is_dense || width < kMinWidth || inner_height <= 0 || kernel_width < 2)
     return false;
-
-  constexpr std::ptrdiff_t stride = static_cast<std::ptrdiff_t>(sizeof(pcl::PointXYZI));
-  static_assert(offsetof(pcl::PointXYZI, y) == offsetof(pcl::PointXYZI, x) + sizeof(float));
-  static_assert(offsetof(pcl::PointXYZI, z) == offsetof(pcl::PointXYZI, y) + sizeof(float));
 
 #pragma omp parallel for \
   default(none) \
@@ -442,22 +442,27 @@ convolveColsPointXYZIRVV(const pcl::filters::Convolution<pcl::PointXYZI, pcl::Po
       for (int k = kernel_width, l = j - half_width; k > -1; --k, ++l)
       {
         const auto* base = reinterpret_cast<const std::uint8_t*>(&(*input) (i,l));
-        const float* x_ptr = reinterpret_cast<const float*>(base + offsetof(pcl::PointXYZI, x));
-        const float* y_ptr = reinterpret_cast<const float*>(base + offsetof(pcl::PointXYZI, y));
-        const float* z_ptr = reinterpret_cast<const float*>(base + offsetof(pcl::PointXYZI, z));
-        const float* intensity_ptr = reinterpret_cast<const float*>(base + offsetof(pcl::PointXYZI, intensity));
         const vfloat32m2_t w = __riscv_vfmv_v_f_f32m2(kernel[k], vl);
-        acc_x = __riscv_vfmacc_vv_f32m2(acc_x, w, __riscv_vlse32_v_f32m2(x_ptr, stride, vl), vl);
-        acc_y = __riscv_vfmacc_vv_f32m2(acc_y, w, __riscv_vlse32_v_f32m2(y_ptr, stride, vl), vl);
-        acc_z = __riscv_vfmacc_vv_f32m2(acc_z, w, __riscv_vlse32_v_f32m2(z_ptr, stride, vl), vl);
-        acc_intensity = __riscv_vfmacc_vv_f32m2(acc_intensity, w, __riscv_vlse32_v_f32m2(intensity_ptr, stride, vl), vl);
+        acc_x = __riscv_vfmacc_vv_f32m2(
+            acc_x, w,
+            pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::x>(base, vl), vl);
+        acc_y = __riscv_vfmacc_vv_f32m2(
+            acc_y, w,
+            pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::y>(base, vl), vl);
+        acc_z = __riscv_vfmacc_vv_f32m2(
+            acc_z, w,
+            pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::z>(base, vl), vl);
+        acc_intensity = __riscv_vfmacc_vv_f32m2(
+            acc_intensity, w,
+            pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::intensity>(base, vl), vl);
       }
 
       auto* out_base = reinterpret_cast<std::uint8_t*>(&output (i,j));
-      __riscv_vsse32_v_f32m2(reinterpret_cast<float*>(out_base + offsetof(pcl::PointXYZI, x)), stride, acc_x, vl);
-      __riscv_vsse32_v_f32m2(reinterpret_cast<float*>(out_base + offsetof(pcl::PointXYZI, y)), stride, acc_y, vl);
-      __riscv_vsse32_v_f32m2(reinterpret_cast<float*>(out_base + offsetof(pcl::PointXYZI, z)), stride, acc_z, vl);
-      __riscv_vsse32_v_f32m2(reinterpret_cast<float*>(out_base + offsetof(pcl::PointXYZI, intensity)), stride, acc_intensity, vl);
+      pcl::rvv_store::strided_store_field_f32m2<pcl::PointXYZI, pcl::fields::x>(out_base, acc_x, vl);
+      pcl::rvv_store::strided_store_field_f32m2<pcl::PointXYZI, pcl::fields::y>(out_base, acc_y, vl);
+      pcl::rvv_store::strided_store_field_f32m2<pcl::PointXYZI, pcl::fields::z>(out_base, acc_z, vl);
+      pcl::rvv_store::strided_store_field_f32m2<pcl::PointXYZI, pcl::fields::intensity>(
+          out_base, acc_intensity, vl);
       i += static_cast<int>(vl);
     }
   }
