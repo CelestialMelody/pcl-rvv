@@ -236,7 +236,11 @@ pcl::SampleConsensusModelCircle2D<PointT>::countWithinDistance (
 #elif defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
   return countWithinDistanceSSE (model_coefficients, threshold);
 #elif defined (__RVV10__)
-  return countWithinDistanceRVV (model_coefficients, threshold);
+  if constexpr (pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::x>::value &&
+                pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::y>::value)
+    return countWithinDistanceRVV (model_coefficients, threshold);
+  else
+    return countWithinDistanceStandard (model_coefficients, threshold);
 #else
   return countWithinDistanceStandard (model_coefficients, threshold);
 #endif

@@ -203,7 +203,10 @@ pcl::SampleConsensusModelPlane<PointT>::countWithinDistance (
 #elif defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
   return countWithinDistanceSSE (model_coefficients, threshold);
 #elif defined (__RVV10__)
-  return countWithinDistanceRVV (model_coefficients, threshold);
+  if constexpr (pcl::rvv::RVVXYZFloatLayout<PointT>::value)
+    return countWithinDistanceRVV (model_coefficients, threshold);
+  else
+    return countWithinDistanceStandard (model_coefficients, threshold);
 #else
   return countWithinDistanceStandard (model_coefficients, threshold);
 #endif
@@ -335,6 +338,7 @@ pcl::SampleConsensusModelPlane<PointT>::countWithinDistanceRVV (
   // We use reinterpret_cast<const uint8_t*> to enable precise byte-level
   // pointer arithmetic (base + offset) later.
   const uint8_t* points_base = reinterpret_cast<const uint8_t*>(input_->points.data());
+  using Layout = pcl::rvv::RVVXYZFloatLayout<PointT>;
 
   // Loop through all points. Unlike AVX, we don't need a separate scalar loop
   // for the "tail" because vsetvl handles arbitrary lengths automatically.
@@ -362,7 +366,7 @@ pcl::SampleConsensusModelPlane<PointT>::countWithinDistanceRVV (
     vfloat32m2_t v_py;
     vfloat32m2_t v_pz;
     pcl::rvv_load::indexed_load3_fields_f32m2<
-        PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
+        PointT, Layout::kX, Layout::kY, Layout::kZ>(
         points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
     // Calculate |ax + by + cz + d|.

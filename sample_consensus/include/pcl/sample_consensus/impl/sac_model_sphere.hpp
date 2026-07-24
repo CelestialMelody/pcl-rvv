@@ -248,7 +248,10 @@ pcl::SampleConsensusModelSphere<PointT>::countWithinDistance (
 #elif defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
   return countWithinDistanceSSE (model_coefficients, threshold);
 #elif defined (__RVV10__)
-  return countWithinDistanceRVV (model_coefficients, threshold);
+  if constexpr (pcl::rvv::RVVXYZFloatLayout<PointT>::value)
+    return countWithinDistanceRVV (model_coefficients, threshold);
+  else
+    return countWithinDistanceStandard (model_coefficients, threshold);
 #else
   return countWithinDistanceStandard (model_coefficients, threshold);
 #endif
@@ -386,6 +389,7 @@ pcl::SampleConsensusModelSphere<PointT>::countWithinDistanceRVV (
   // Base pointers for AoS data gathering
   const uint8_t* const points_base = reinterpret_cast<const uint8_t*>(input_->points.data());
   const pcl::index_t* const indices_ptr = indices_->data();
+  using Layout = pcl::rvv::RVVXYZFloatLayout<PointT>;
 
   // Main Vector Loop (VLA)
   for (; i < total_n; )
@@ -401,7 +405,7 @@ pcl::SampleConsensusModelSphere<PointT>::countWithinDistanceRVV (
     vfloat32m2_t v_py;
     vfloat32m2_t v_pz;
     pcl::rvv_load::indexed_load3_fields_f32m2<
-        PointT, offsetof(PointT, x), offsetof(PointT, y), offsetof(PointT, z)>(
+        PointT, Layout::kX, Layout::kY, Layout::kZ>(
         points_base, v_off, vl, v_px, v_py, v_pz);
     // Broadcast Sphere Center
     const vfloat32m2_t v_xc = __riscv_vfmv_v_f_f32m2(xc, vl);

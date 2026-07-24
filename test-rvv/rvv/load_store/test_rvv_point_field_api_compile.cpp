@@ -27,18 +27,26 @@ static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointXYZINormal, pcl::fields::n
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointXYZINormal, pcl::fields::normal_y>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointXYZINormal, pcl::fields::normal_z>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointXYZINormal, pcl::fields::curvature>::value);
+static_assert(pcl::rvv::RVVNormalFloatLayout<pcl::PointXYZINormal>::value);
 
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::Normal, pcl::fields::normal_x>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::Normal, pcl::fields::normal_y>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::Normal, pcl::fields::normal_z>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::Normal, pcl::fields::curvature>::value);
 static_assert(!pcl::rvv::RVVFloatFieldLayout<pcl::Normal, pcl::fields::x>::value);
+static_assert(pcl::rvv::RVVNormalFloatLayout<pcl::Normal>::value);
+static_assert(!pcl::rvv::RVVXYZFloatLayout<pcl::Normal>::value);
 
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointNormal, pcl::fields::x>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointNormal, pcl::fields::normal_x>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointNormal, pcl::fields::normal_y>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointNormal, pcl::fields::normal_z>::value);
 static_assert(pcl::rvv::RVVFloatFieldLayout<pcl::PointNormal, pcl::fields::curvature>::value);
+static_assert(pcl::rvv::RVVNormalFloatLayout<pcl::PointNormal>::value);
+static_assert(pcl::rvv::RVVXYZFloatLayout<pcl::PointNormal>::value);
+
+static_assert(!pcl::rvv::RVVNormalFloatLayout<pcl::PointXYZI>::value);
+static_assert(!pcl::rvv::RVVFloatFieldLayout<pcl::PointXYZI, pcl::fields::curvature>::value);
 
 #if defined(__RVV10__)
 namespace {

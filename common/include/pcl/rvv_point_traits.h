@@ -101,6 +101,29 @@ struct RVVXYZFloatLayout<PointT, true>
   static constexpr std::size_t kZ = pcl::traits::offset<PointT, pcl::fields::z>::value;
 };
 
+/** \brief PCL traits gate for point types with registered single-float normal fields.
+  *
+  * This is a field-semantics gate for normal clouds. It verifies registered
+  * \c normal_x, \c normal_y, and \c normal_z fields, each represented as one
+  * \c float, and exposes their PCL traits offsets. It does not imply that the
+  * same point type also has XYZ coordinates or curvature.
+  */
+template <typename PointT, bool HasNormal = pcl::traits::has_normal<PointT>::value>
+struct RVVNormalFloatLayout : std::false_type {};
+
+template <typename PointT>
+struct RVVNormalFloatLayout<PointT, true>
+: std::bool_constant<RVVFloatFieldLayout<PointT, pcl::fields::normal_x>::value &&
+                     RVVFloatFieldLayout<PointT, pcl::fields::normal_y>::value &&
+                     RVVFloatFieldLayout<PointT, pcl::fields::normal_z>::value> {
+  static constexpr std::size_t kNormalX =
+      pcl::traits::offset<PointT, pcl::fields::normal_x>::value;
+  static constexpr std::size_t kNormalY =
+      pcl::traits::offset<PointT, pcl::fields::normal_y>::value;
+  static constexpr std::size_t kNormalZ =
+      pcl::traits::offset<PointT, pcl::fields::normal_z>::value;
+};
+
 /** \brief Strong AoS layout gate for registered single-float xyz + normal fields.
   *
   * This is for algorithms that directly read \c x/y/z and
