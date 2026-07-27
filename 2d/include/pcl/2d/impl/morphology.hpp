@@ -42,6 +42,8 @@
 #include <algorithm>
 #include <limits>
 #if defined(__RVV10__)
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
 #include <riscv_vector.h>
 
 #include <cstddef>
@@ -49,6 +51,12 @@
 #endif
 
 namespace pcl {
+
+#if defined(__RVV10__)
+template <typename PointT>
+inline constexpr bool kMorphologyIntensityFieldCompatible =
+    pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::intensity>::value;
+#endif
 
 // Assumes input, kernel and output images have 0's and 1's only
 template <typename PointT>
@@ -59,7 +67,10 @@ Morphology<PointT>::erosionBinary(pcl::PointCloud<PointT>& output)
   output.height = input_->height;
   output.resize(input_->width * input_->height);
 #if defined(__RVV10__)
-  erosionBinaryRVV(output);
+  if constexpr (kMorphologyIntensityFieldCompatible<PointT>)
+    erosionBinaryRVV(output);
+  else
+    erosionBinaryStandard(output);
 #else
   erosionBinaryStandard(output);
 #endif
@@ -74,7 +85,10 @@ Morphology<PointT>::dilationBinary(pcl::PointCloud<PointT>& output)
   output.height = input_->height;
   output.resize(input_->width * input_->height);
 #if defined(__RVV10__)
-  dilationBinaryRVV(output);
+  if constexpr (kMorphologyIntensityFieldCompatible<PointT>)
+    dilationBinaryRVV(output);
+  else
+    dilationBinaryStandard(output);
 #else
   dilationBinaryStandard(output);
 #endif
@@ -110,7 +124,10 @@ Morphology<PointT>::erosionGray(pcl::PointCloud<PointT>& output)
   output.width = input_->width;
   output.height = input_->height;
 #if defined(__RVV10__)
-  erosionGrayRVV(output);
+  if constexpr (kMorphologyIntensityFieldCompatible<PointT>)
+    erosionGrayRVV(output);
+  else
+    erosionGrayStandard(output);
 #else
   erosionGrayStandard(output);
 #endif
@@ -124,10 +141,13 @@ Morphology<PointT>::dilationGray(pcl::PointCloud<PointT>& output)
   output.width = input_->width;
   output.height = input_->height;
 #if defined(__RVV10__)
-  dilationGrayRVV(output);
-  return;
-#endif
+  if constexpr (kMorphologyIntensityFieldCompatible<PointT>)
+    dilationGrayRVV(output);
+  else
+    dilationGrayStandard(output);
+#else
   dilationGrayStandard(output);
+#endif
 }
 
 template <typename PointT>
@@ -155,6 +175,8 @@ template <typename PointT>
 void
 Morphology<PointT>::erosionBinaryRVV(pcl::PointCloud<PointT>& output)
 {
+  static_assert(kMorphologyIntensityFieldCompatible<PointT>,
+                "Morphology RVV path requires a registered single-float intensity field.");
   const int iw = static_cast<int>(input_->width);
   const int ih = static_cast<int>(input_->height);
   const int kw = static_cast<int>(structuring_element_->width);
@@ -162,8 +184,6 @@ Morphology<PointT>::erosionBinaryRVV(pcl::PointCloud<PointT>& output)
   const int kh_half = kh / 2;
   const int kw_half = kw / 2;
 
-  const std::size_t point_stride = sizeof(PointT);
-  const std::size_t intensity_offset = offsetof(PointT, intensity);
   const std::uint8_t* input_base =
       reinterpret_cast<const std::uint8_t*>(input_->points.data());
   std::uint8_t* output_base = reinterpret_cast<std::uint8_t*>(output.points.data());
@@ -192,19 +212,21 @@ Morphology<PointT>::erosionBinaryRVV(pcl::PointCloud<PointT>& output)
             if ((*structuring_element_)(l, k).intensity == 0.0f)
               continue;
             const int base_col = j0 + l - kw_half;
-            const float* in_ptr = reinterpret_cast<const float*>(
+            const std::uint8_t* in_ptr =
                 input_base +
-                (row_offset + static_cast<std::size_t>(base_col)) * point_stride +
-                intensity_offset);
-            vfloat32m2_t v_in = __riscv_vlse32_v_f32m2(in_ptr, point_stride, vl);
+                (row_offset + static_cast<std::size_t>(base_col)) * sizeof(PointT);
+            vfloat32m2_t v_in =
+                pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::intensity>(
+                    in_ptr, vl);
             v_min = __riscv_vfmin_vv_f32m2(v_min, v_in, vl);
           }
         }
 
-        const float* center_ptr = reinterpret_cast<const float*>(
-            input_base + (static_cast<std::size_t>(i) * iw + j0) * point_stride +
-            intensity_offset);
-        vfloat32m2_t v_center = __riscv_vlse32_v_f32m2(center_ptr, point_stride, vl);
+        const std::uint8_t* center_ptr =
+            input_base + (static_cast<std::size_t>(i) * iw + j0) * sizeof(PointT);
+        vfloat32m2_t v_center =
+            pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::intensity>(
+                center_ptr, vl);
         vbool16_t m_center_one = __riscv_vmfeq_vf_f32m2_b16(v_center, v_one, vl);
         vbool16_t m_min_one = __riscv_vmfeq_vf_f32m2_b16(v_min, v_one, vl);
         vbool16_t mask = __riscv_vmand_mm_b16(m_center_one, m_min_one, vl);
@@ -212,10 +234,10 @@ Morphology<PointT>::erosionBinaryRVV(pcl::PointCloud<PointT>& output)
         vfloat32m2_t v_zero_vec = __riscv_vfmv_v_f_f32m2(v_zero, vl);
         vfloat32m2_t v_out = __riscv_vfmerge_vfm_f32m2(v_zero_vec, v_one, mask, vl);
 
-        float* out_ptr = reinterpret_cast<float*>(
-            output_base + (static_cast<std::size_t>(i) * iw + j0) * point_stride +
-            intensity_offset);
-        __riscv_vsse32_v_f32m2(out_ptr, point_stride, v_out, vl);
+        std::uint8_t* out_ptr =
+            output_base + (static_cast<std::size_t>(i) * iw + j0) * sizeof(PointT);
+        pcl::rvv_store::strided_store_field_f32m2<PointT, pcl::fields::intensity>(
+            out_ptr, v_out, vl);
         j0 += static_cast<int>(vl);
       }
     }
@@ -293,6 +315,8 @@ template <typename PointT>
 void
 Morphology<PointT>::dilationBinaryRVV(pcl::PointCloud<PointT>& output)
 {
+  static_assert(kMorphologyIntensityFieldCompatible<PointT>,
+                "Morphology RVV path requires a registered single-float intensity field.");
   const int iw = static_cast<int>(input_->width);
   const int ih = static_cast<int>(input_->height);
   const int kw = static_cast<int>(structuring_element_->width);
@@ -300,8 +324,6 @@ Morphology<PointT>::dilationBinaryRVV(pcl::PointCloud<PointT>& output)
   const int kh_half = kh / 2;
   const int kw_half = kw / 2;
 
-  const std::size_t point_stride = sizeof(PointT);
-  const std::size_t intensity_offset = offsetof(PointT, intensity);
   const std::uint8_t* input_base =
       reinterpret_cast<const std::uint8_t*>(input_->points.data());
   std::uint8_t* output_base = reinterpret_cast<std::uint8_t*>(output.points.data());
@@ -328,11 +350,12 @@ Morphology<PointT>::dilationBinaryRVV(pcl::PointCloud<PointT>& output)
             if ((*structuring_element_)(l, k).intensity == 0.0f)
               continue;
             const int base_col = j0 + l - kw_half;
-            const float* in_ptr = reinterpret_cast<const float*>(
+            const std::uint8_t* in_ptr =
                 input_base +
-                (row_offset + static_cast<std::size_t>(base_col)) * point_stride +
-                intensity_offset);
-            vfloat32m2_t v_in = __riscv_vlse32_v_f32m2(in_ptr, point_stride, vl);
+                (row_offset + static_cast<std::size_t>(base_col)) * sizeof(PointT);
+            vfloat32m2_t v_in =
+                pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::intensity>(
+                    in_ptr, vl);
             v_max = __riscv_vfmax_vv_f32m2(v_max, v_in, vl);
           }
         }
@@ -341,10 +364,10 @@ Morphology<PointT>::dilationBinaryRVV(pcl::PointCloud<PointT>& output)
         vfloat32m2_t v_zero_vec = __riscv_vfmv_v_f_f32m2(v_zero, vl);
         vfloat32m2_t v_out = __riscv_vfmerge_vfm_f32m2(v_zero_vec, v_one, mask, vl);
 
-        float* out_ptr = reinterpret_cast<float*>(
-            output_base + (static_cast<std::size_t>(i) * iw + j0) * point_stride +
-            intensity_offset);
-        __riscv_vsse32_v_f32m2(out_ptr, point_stride, v_out, vl);
+        std::uint8_t* out_ptr =
+            output_base + (static_cast<std::size_t>(i) * iw + j0) * sizeof(PointT);
+        pcl::rvv_store::strided_store_field_f32m2<PointT, pcl::fields::intensity>(
+            out_ptr, v_out, vl);
         j0 += static_cast<int>(vl);
       }
     }
@@ -417,6 +440,8 @@ template <typename PointT>
 void
 Morphology<PointT>::erosionGrayRVV(pcl::PointCloud<PointT>& output)
 {
+  static_assert(kMorphologyIntensityFieldCompatible<PointT>,
+                "Morphology RVV path requires a registered single-float intensity field.");
   const int iw = static_cast<int>(input_->width);
   const int ih = static_cast<int>(input_->height);
   const int kw = static_cast<int>(structuring_element_->width);
@@ -424,8 +449,6 @@ Morphology<PointT>::erosionGrayRVV(pcl::PointCloud<PointT>& output)
   const int kh_half = kh / 2;
   const int kw_half = kw / 2;
 
-  const std::size_t point_stride = sizeof(PointT);
-  const std::size_t intensity_offset = offsetof(PointT, intensity);
   const std::uint8_t* input_base =
       reinterpret_cast<const std::uint8_t*>(input_->points.data());
   std::uint8_t* output_base = reinterpret_cast<std::uint8_t*>(output.points.data());
@@ -453,19 +476,20 @@ Morphology<PointT>::erosionGrayRVV(pcl::PointCloud<PointT>& output)
               continue;
 
             const int base_col = j0 + l - kw_half;
-            const float* in_ptr = reinterpret_cast<const float*>(
+            const std::uint8_t* in_ptr =
                 input_base +
-                (row_offset + static_cast<std::size_t>(base_col)) * point_stride +
-                intensity_offset);
-            vfloat32m2_t v_in = __riscv_vlse32_v_f32m2(in_ptr, point_stride, vl);
+                (row_offset + static_cast<std::size_t>(base_col)) * sizeof(PointT);
+            vfloat32m2_t v_in =
+                pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::intensity>(
+                    in_ptr, vl);
             v_min = __riscv_vfmin_vv_f32m2(v_min, v_in, vl);
           }
         }
 
-        float* out_ptr = reinterpret_cast<float*>(
-            output_base + (static_cast<std::size_t>(i) * iw + j0) * point_stride +
-            intensity_offset);
-        __riscv_vsse32_v_f32m2(out_ptr, point_stride, v_min, vl);
+        std::uint8_t* out_ptr =
+            output_base + (static_cast<std::size_t>(i) * iw + j0) * sizeof(PointT);
+        pcl::rvv_store::strided_store_field_f32m2<PointT, pcl::fields::intensity>(
+            out_ptr, v_min, vl);
         j0 += static_cast<int>(vl);
       }
     }
@@ -537,6 +561,8 @@ template <typename PointT>
 void
 Morphology<PointT>::dilationGrayRVV(pcl::PointCloud<PointT>& output)
 {
+  static_assert(kMorphologyIntensityFieldCompatible<PointT>,
+                "Morphology RVV path requires a registered single-float intensity field.");
   const int iw = static_cast<int>(input_->width);
   const int ih = static_cast<int>(input_->height);
   const int kw = static_cast<int>(structuring_element_->width);
@@ -544,8 +570,6 @@ Morphology<PointT>::dilationGrayRVV(pcl::PointCloud<PointT>& output)
   const int kh_half = kh / 2;
   const int kw_half = kw / 2;
 
-  const std::size_t point_stride = sizeof(PointT);
-  const std::size_t intensity_offset = offsetof(PointT, intensity);
   const std::uint8_t* input_base =
       reinterpret_cast<const std::uint8_t*>(input_->points.data());
   std::uint8_t* output_base = reinterpret_cast<std::uint8_t*>(output.points.data());
@@ -573,19 +597,20 @@ Morphology<PointT>::dilationGrayRVV(pcl::PointCloud<PointT>& output)
               continue;
 
             const int base_col = j0 + l - kw_half;
-            const float* in_ptr = reinterpret_cast<const float*>(
+            const std::uint8_t* in_ptr =
                 input_base +
-                (row_offset + static_cast<std::size_t>(base_col)) * point_stride +
-                intensity_offset);
-            vfloat32m2_t v_in = __riscv_vlse32_v_f32m2(in_ptr, point_stride, vl);
+                (row_offset + static_cast<std::size_t>(base_col)) * sizeof(PointT);
+            vfloat32m2_t v_in =
+                pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::intensity>(
+                    in_ptr, vl);
             v_max = __riscv_vfmax_vv_f32m2(v_max, v_in, vl);
           }
         }
 
-        float* out_ptr = reinterpret_cast<float*>(
-            output_base + (static_cast<std::size_t>(i) * iw + j0) * point_stride +
-            intensity_offset);
-        __riscv_vsse32_v_f32m2(out_ptr, point_stride, v_max, vl);
+        std::uint8_t* out_ptr =
+            output_base + (static_cast<std::size_t>(i) * iw + j0) * sizeof(PointT);
+        pcl::rvv_store::strided_store_field_f32m2<PointT, pcl::fields::intensity>(
+            out_ptr, v_max, vl);
         j0 += static_cast<int>(vl);
       }
     }

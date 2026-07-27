@@ -42,6 +42,8 @@
 #include <pcl/common/angles.h> // for rad2deg
 #if defined(__RVV10__)
 #include <pcl/common/common.h>
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
 #include <riscv_vector.h>
 #include <cstddef>
 #include <cstdint>
@@ -51,34 +53,45 @@ namespace pcl {
 
 #if defined(__RVV10__)
 template <typename PointOutT>
+inline constexpr bool kEdgeMagnitudeDirectionFieldsCompatible =
+    pcl::rvv::RVVFloatFieldLayout<pcl::PointXYZI, pcl::fields::intensity>::value &&
+    pcl::rvv::RVVFloatFieldLayout<PointOutT, pcl::fields::magnitude_x>::value &&
+    pcl::rvv::RVVFloatFieldLayout<PointOutT, pcl::fields::magnitude_y>::value &&
+    pcl::rvv::RVVFloatFieldLayout<PointOutT, pcl::fields::magnitude>::value &&
+    pcl::rvv::RVVFloatFieldLayout<PointOutT, pcl::fields::direction>::value;
+
+template <typename PointOutT>
+inline constexpr bool kEdgeDirectionFieldCompatible =
+    pcl::rvv::RVVFloatFieldLayout<PointOutT, pcl::fields::direction>::value;
+
+template <typename PointOutT>
 static void
 computeMagnitudeDirectionRVV(const pcl::PointCloud<pcl::PointXYZI>& magnitude_x,
                              const pcl::PointCloud<pcl::PointXYZI>& magnitude_y,
                              pcl::PointCloud<PointOutT>& output,
                              std::size_t n)
 {
-  const std::size_t stride_in = sizeof(pcl::PointXYZI);
-  const std::size_t stride_out = sizeof(PointOutT);
-  const std::size_t off_mx = offsetof(pcl::PointXYZI, intensity);
-  const std::size_t off_out_magnitude_x = offsetof(PointOutT, magnitude_x);
-  const std::size_t off_out_magnitude_y = offsetof(PointOutT, magnitude_y);
-  const std::size_t off_out_magnitude = offsetof(PointOutT, magnitude);
-  const std::size_t off_out_direction = offsetof(PointOutT, direction);
-
+  static_assert(kEdgeMagnitudeDirectionFieldsCompatible<PointOutT>,
+                "Edge RVV path requires registered single-float intensity and edge output fields.");
   const std::uint8_t* base_mx =
-      reinterpret_cast<const std::uint8_t*>(magnitude_x.points.data()) + off_mx;
+      reinterpret_cast<const std::uint8_t*>(magnitude_x.points.data());
   const std::uint8_t* base_my =
-      reinterpret_cast<const std::uint8_t*>(magnitude_y.points.data()) + off_mx;
+      reinterpret_cast<const std::uint8_t*>(magnitude_y.points.data());
   std::uint8_t* base_out = reinterpret_cast<std::uint8_t*>(output.points.data());
 
   std::size_t j0 = 0;
   while (j0 < n) {
     std::size_t vl = __riscv_vsetvl_e32m2(n - j0);
+    const std::uint8_t* chunk_mx = base_mx + j0 * sizeof(pcl::PointXYZI);
+    const std::uint8_t* chunk_my = base_my + j0 * sizeof(pcl::PointXYZI);
+    std::uint8_t* chunk_out = base_out + j0 * sizeof(PointOutT);
 
-    const float* ptr_mx = reinterpret_cast<const float*>(base_mx + j0 * stride_in);
-    const float* ptr_my = reinterpret_cast<const float*>(base_my + j0 * stride_in);
-    vfloat32m2_t v_mx = __riscv_vlse32_v_f32m2(ptr_mx, stride_in, vl);
-    vfloat32m2_t v_my = __riscv_vlse32_v_f32m2(ptr_my, stride_in, vl);
+    vfloat32m2_t v_mx =
+        pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::intensity>(
+            chunk_mx, vl);
+    vfloat32m2_t v_my =
+        pcl::rvv_load::strided_load_field_f32m2<pcl::PointXYZI, pcl::fields::intensity>(
+            chunk_my, vl);
 
     vfloat32m2_t v_mag =
         __riscv_vfsqrt_v_f32m2(__riscv_vfadd_vv_f32m2(
@@ -86,14 +99,14 @@ computeMagnitudeDirectionRVV(const pcl::PointCloud<pcl::PointXYZI>& magnitude_x,
             __riscv_vfmul_vv_f32m2(v_my, v_my, vl), vl), vl);
     vfloat32m2_t v_dir = pcl::atan2_RVV_f32m2(v_my, v_mx, vl);
 
-    float* out_mx = reinterpret_cast<float*>(base_out + j0 * stride_out + off_out_magnitude_x);
-    float* out_my = reinterpret_cast<float*>(base_out + j0 * stride_out + off_out_magnitude_y);
-    float* out_mag = reinterpret_cast<float*>(base_out + j0 * stride_out + off_out_magnitude);
-    float* out_dir = reinterpret_cast<float*>(base_out + j0 * stride_out + off_out_direction);
-    __riscv_vsse32_v_f32m2(out_mx, stride_out, v_mx, vl);
-    __riscv_vsse32_v_f32m2(out_my, stride_out, v_my, vl);
-    __riscv_vsse32_v_f32m2(out_mag, stride_out, v_mag, vl);
-    __riscv_vsse32_v_f32m2(out_dir, stride_out, v_dir, vl);
+    pcl::rvv_store::strided_store_field_f32m2<PointOutT, pcl::fields::magnitude_x>(
+        chunk_out, v_mx, vl);
+    pcl::rvv_store::strided_store_field_f32m2<PointOutT, pcl::fields::magnitude_y>(
+        chunk_out, v_my, vl);
+    pcl::rvv_store::strided_store_field_f32m2<PointOutT, pcl::fields::magnitude>(
+        chunk_out, v_mag, vl);
+    pcl::rvv_store::strided_store_field_f32m2<PointOutT, pcl::fields::direction>(
+        chunk_out, v_dir, vl);
 
     j0 += vl;
   }
@@ -121,18 +134,19 @@ template <typename PointOutT>
 static void
 discretizeAnglesRVV(pcl::PointCloud<PointOutT>& thet, int height, int width)
 {
+  static_assert(kEdgeDirectionFieldCompatible<PointOutT>,
+                "Edge angle discretization RVV path requires a registered single-float direction field.");
   const int n = height * width;
-  const std::size_t stride = sizeof(PointOutT);
-  const std::size_t off_dir = offsetof(PointOutT, direction);
   const float rad2deg = 180.0f / 3.14159265358979323846f;
-  std::uint8_t* base =
-      reinterpret_cast<std::uint8_t*>(thet.points.data()) + off_dir;
+  std::uint8_t* base = reinterpret_cast<std::uint8_t*>(thet.points.data());
 
   std::size_t j0 = 0;
   while (j0 < static_cast<std::size_t>(n)) {
     std::size_t vl = __riscv_vsetvl_e32m2(static_cast<std::size_t>(n) - j0);
-    float* ptr = reinterpret_cast<float*>(base + j0 * stride);
-    vfloat32m2_t v_rad = __riscv_vlse32_v_f32m2(ptr, stride, vl);
+    std::uint8_t* chunk = base + j0 * sizeof(PointOutT);
+    vfloat32m2_t v_rad =
+        pcl::rvv_load::strided_load_field_f32m2<PointOutT, pcl::fields::direction>(
+            chunk, vl);
     vfloat32m2_t v_deg =
         __riscv_vfmul_vf_f32m2(v_rad, rad2deg, vl);
 
@@ -160,7 +174,8 @@ discretizeAnglesRVV(pcl::PointCloud<PointOutT>& thet, int height, int width)
     vfloat32m2_t result = __riscv_vmerge_vvm_f32m2(v_0, v_45, m45, vl);
     result = __riscv_vmerge_vvm_f32m2(result, v_90, m90, vl);
     result = __riscv_vmerge_vvm_f32m2(result, v_135, m135, vl);
-    __riscv_vsse32_v_f32m2(ptr, stride, result, vl);
+    pcl::rvv_store::strided_store_field_f32m2<PointOutT, pcl::fields::direction>(
+        chunk, result, vl);
     j0 += vl;
   }
 }
@@ -217,7 +232,10 @@ Edge<PointInT, PointOutT>::detectEdgeSobel(pcl::PointCloud<PointOutT>& output)
   output.width = width;
 
 #if defined(__RVV10__)
-  computeMagnitudeDirectionRVV(*magnitude_x, *magnitude_y, output, n);
+  if constexpr (kEdgeMagnitudeDirectionFieldsCompatible<PointOutT>)
+    computeMagnitudeDirectionRVV(*magnitude_x, *magnitude_y, output, n);
+  else
+    computeMagnitudeDirectionStd(*magnitude_x, *magnitude_y, output, n);
 #else
   computeMagnitudeDirectionStd(*magnitude_x, *magnitude_y, output, n);
 #endif
@@ -255,7 +273,10 @@ Edge<PointInT, PointOutT>::sobelMagnitudeDirection(
   output.width = width;
 
 #if defined(__RVV10__)
-  computeMagnitudeDirectionRVV(*magnitude_x, *magnitude_y, output, n);
+  if constexpr (kEdgeMagnitudeDirectionFieldsCompatible<PointOutT>)
+    computeMagnitudeDirectionRVV(*magnitude_x, *magnitude_y, output, n);
+  else
+    computeMagnitudeDirectionStd(*magnitude_x, *magnitude_y, output, n);
 #else
   computeMagnitudeDirectionStd(*magnitude_x, *magnitude_y, output, n);
 #endif
@@ -290,7 +311,10 @@ Edge<PointInT, PointOutT>::detectEdgePrewitt(pcl::PointCloud<PointOutT>& output)
   output.width = width;
 
 #if defined(__RVV10__)
-  computeMagnitudeDirectionRVV(*magnitude_x, *magnitude_y, output, n);
+  if constexpr (kEdgeMagnitudeDirectionFieldsCompatible<PointOutT>)
+    computeMagnitudeDirectionRVV(*magnitude_x, *magnitude_y, output, n);
+  else
+    computeMagnitudeDirectionStd(*magnitude_x, *magnitude_y, output, n);
 #else
   computeMagnitudeDirectionStd(*magnitude_x, *magnitude_y, output, n);
 #endif
@@ -325,7 +349,10 @@ Edge<PointInT, PointOutT>::detectEdgeRoberts(pcl::PointCloud<PointOutT>& output)
   output.width = width;
 
 #if defined(__RVV10__)
-  computeMagnitudeDirectionRVV(*magnitude_x, *magnitude_y, output, n);
+  if constexpr (kEdgeMagnitudeDirectionFieldsCompatible<PointOutT>)
+    computeMagnitudeDirectionRVV(*magnitude_x, *magnitude_y, output, n);
+  else
+    computeMagnitudeDirectionStd(*magnitude_x, *magnitude_y, output, n);
 #else
   computeMagnitudeDirectionStd(*magnitude_x, *magnitude_y, output, n);
 #endif
@@ -365,7 +392,10 @@ Edge<PointInT, PointOutT>::discretizeAngles(pcl::PointCloud<PointOutT>& thet)
   const int width = thet.width;
 
 #if defined(__RVV10__)
-  discretizeAnglesRVV(thet, height, width);
+  if constexpr (kEdgeDirectionFieldCompatible<PointOutT>)
+    discretizeAnglesRVV(thet, height, width);
+  else
+    discretizeAnglesStd(thet, height, width);
 #else
   discretizeAnglesStd(thet, height, width);
 #endif
