@@ -2,41 +2,41 @@
  PCL common.hpp Benchmark (Std vs RVV)
 ====================================================================================================
 [Benchmark Context]
-  Device     : RISC-V RVV target (qemu, rv64gcv)
-  VLEN       : 256-bit (vlen=256, elen=64)
-  Dataset    : workloads from log (cloud 200000 points, vector 500000 elements)
-  Iterations : 20 （每行 Total = Avg × 20）
-  Std log    : output/qemu/run_bench_std.log
-  RVV log    : output/qemu/run_bench_rvv.log
+  Device    : RISC-V RVV target (qemu, rv64gcv)
+  VLEN      : 256-bit (vlen=256, elen=64)
+  Dataset   : workloads from log (cloud 200000 points, vector 500000 elements)
+  Iterations: 20 （每行 Total = Avg × 20）
+  Std log   : output/qemu/run_bench_std.log
+  RVV log   : output/qemu/run_bench_rvv.log
 
 ----------------------------------------------------------------------------------------------------
-Benchmark Item                          | Impl   |       Avg Time |     Total Time |        Speedup
+Benchmark Item                          | Impl   |       Avg (ms) |     Total (ms) |        Speedup
 ----------------------------------------|--------|----------------|----------------|----------------
-getMeanStd (vector<float>)              | Std    |     10.2265 ms |    204.5300 ms |    [   1.00x ]
-                                        | RVV    |      3.6504 ms |     73.0080 ms |    [   2.80x ]
+getMeanStd (vector<float>)              | Std    |     10.8899 ms |    217.7980 ms |    [   1.00x ]
+                                        | RVV    |      3.3721 ms |     67.4420 ms |    [   3.23x ]
 ----------------------------------------|--------|----------------|----------------|----------------
-getPointsInBox (dense cloud)            | Std    |      2.6523 ms |     53.0460 ms |    [   1.00x ]
-                                        | RVV    |     12.5358 ms |    250.7160 ms |    [   0.21x ]
+getPointsInBox (dense cloud)            | Std    |      3.2246 ms |     64.4920 ms |    [   1.00x ]
+                                        | RVV    |     11.0251 ms |    220.5020 ms |    [   0.29x ]
 ----------------------------------------|--------|----------------|----------------|----------------
-getMaxDistance (cloud, pivot)           | Std    |      5.1040 ms |    102.0800 ms |    [   1.00x ]
-                                        | RVV    |     40.0658 ms |    801.3160 ms |    [   0.13x ]
+getMaxDistance (cloud, pivot)           | Std    |      4.3962 ms |     87.9240 ms |    [   1.00x ]
+                                        | RVV    |      8.2605 ms |    165.2100 ms |    [   0.53x ]
 ----------------------------------------|--------|----------------|----------------|----------------
-getMaxDistance (cloud, indices, pivot)  | Std    |      5.0599 ms |    101.1980 ms |    [   1.00x ]
-                                        | RVV    |     39.8865 ms |    797.7300 ms |    [   0.13x ]
+getMaxDistance (cloud, indices, pivot)  | Std    |      4.4072 ms |     88.1440 ms |    [   1.00x ]
+                                        | RVV    |      7.8270 ms |    156.5400 ms |    [   0.56x ]
 ----------------------------------------|--------|----------------|----------------|----------------
-getMinMax3D (cloud, Eigen)              | Std    |      3.8073 ms |     76.1460 ms |    [   1.00x ]
-                                        | RVV    |     18.1545 ms |    363.0900 ms |    [   0.21x ]
+getMinMax3D (cloud, Eigen)              | Std    |      3.8215 ms |     76.4300 ms |    [   1.00x ]
+                                        | RVV    |     17.2969 ms |    345.9380 ms |    [   0.22x ]
 ----------------------------------------|--------|----------------|----------------|----------------
-getMinMax3D (cloud, indices, Eigen)     | Std    |      3.9988 ms |     79.9760 ms |    [   1.00x ]
-                                        | RVV    |     19.0073 ms |    380.1460 ms |    [   0.21x ]
+getMinMax3D (cloud, indices, Eigen)     | Std    |      3.9437 ms |     78.8740 ms |    [   1.00x ]
+                                        | RVV    |     16.9514 ms |    339.0280 ms |    [   0.23x ]
 ----------------------------------------|--------|----------------|----------------|----------------
-getMinMax3D (cloud, PointT)             | Std    |      3.9366 ms |     78.7320 ms |    [   1.00x ]
-                                        | RVV    |     18.1192 ms |    362.3840 ms |    [   0.22x ]
+getMinMax3D (cloud, PointT)             | Std    |      3.8480 ms |     76.9600 ms |    [   1.00x ]
+                                        | RVV    |     17.4829 ms |    349.6580 ms |    [   0.22x ]
 ----------------------------------------|--------|----------------|----------------|----------------
-getAngle3D x1000 (Vector4f)             | Std    |      0.3004 ms |      6.0080 ms |    [   1.00x ]
-                                        | RVV    |      0.3040 ms |      6.0800 ms |    [   0.99x ]
+getAngle3D (x1000)                      | Std    |      0.1753 ms |      3.5060 ms |    [   1.00x ]
+                                        | RVV    |      0.0537 ms |      1.0740 ms |    [   3.26x ]
 ----------------------------------------|--------|----------------|----------------|----------------
-calculatePolygonArea (256 pts) x500     | Std    |      4.7332 ms |     94.6640 ms |    [   1.00x ]
-                                        | RVV    |      7.4164 ms |    148.3280 ms |    [   0.64x ]
+calculatePolygonArea (256 pts) x500     | Std    |      4.1714 ms |     83.4280 ms |    [   1.00x ]
+                                        | RVV    |      7.6185 ms |    152.3700 ms |    [   0.55x ]
 ----------------------------------------|--------|----------------|----------------|----------------
 ====================================================================================================
