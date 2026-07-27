@@ -6,7 +6,7 @@
 
 ## 1. 背景
 
-Morphology 模块提供二值/灰度形态学算子（腐蚀、膨胀、开运算、闭运算），并提供二值集合运算（并/交/差）。在典型用法中，输入与输出都是 `pcl::PointCloud<PointT>`，只读写 `PointT::intensity` 字段；数据在内存中为 AoS，因此 RVV 路径采用 `vlse32/vsse32` 做步长访存。
+Morphology 模块提供二值/灰度形态学算子（腐蚀、膨胀、开运算、闭运算），并提供二值集合运算（并/交/差）。在典型用法中，输入与输出都是 `pcl::PointCloud<PointT>`，只读写 `PointT::intensity` 字段；数据在内存中为 AoS，因此 RVV 路径通过公共 `rvv_point_load/store` field helper 表达按点 stride 的 `intensity` 访存。
 
 形态学的像素级计算有两个特征：
 
@@ -19,7 +19,7 @@ Morphology 模块提供二值/灰度形态学算子（腐蚀、膨胀、开运�
 
 ## 2. 与上游实现的差异
 
-相对上游的逐像素标量循环，本仓库增加了 `__RVV10__` 下的分流与 RVV 内核：
+相对上游的逐像素标量循环，本仓库增加了 `__RVV10__` 下的分流与 RVV 内核。RVV 入口先检查 `PointT` 是否具有 PCL 注册的单个 `float` `intensity` 字段；满足时进入 helper，否则回退到 Std。该 gate 是 intensity field 语义，不是 `PointXYZ-like` 泛型，也不读取或写回 `x/y/z`。
 
 - 二值：`erosionBinaryRVV` / `dilationBinaryRVV`，边缘回退 `computePixelErosionBinary` / `computePixelDilationBinary`
 - 灰度：`erosionGrayRVV` / `dilationGrayRVV`，边缘回退 `computePixelMin` / `computePixelMax`
@@ -33,7 +33,10 @@ Morphology<PointT>::erosionBinary(pcl::PointCloud<PointT>& output)
   output.height = input_->height;
   output.resize(input_->width * input_->height);
 #if defined(__RVV10__)
-  erosionBinaryRVV(output);
+  if constexpr (kMorphologyIntensityFieldCompatible<PointT>)
+    erosionBinaryRVV(output);
+  else
+    erosionBinaryStandard(output);
 #else
   erosionBinaryStandard(output);
 #endif
@@ -72,7 +75,7 @@ RVV 内核在进入主循环前计算中心区边界（`row_lo/row_hi`、`col_lo
 
 ### 3.2 二值：腐蚀/膨胀的中心区 RVV
 
-二值腐蚀与膨胀的中心区都以 `vlse32` 加载输入强度，结合核 tap 的 `0/1` 开关做 min/max 归约，最后用比较掩码生成 `0/1` 输出并 `vsse32` 写回。二值腐蚀需要额外检查中心像素为 1（helper 的早退条件），实现里用 `vmfeq` 组合两个掩码完成。
+二值腐蚀与膨胀的中心区都以 `pcl::rvv_load::strided_load_field_f32m2<PointT, fields::intensity>` 加载输入强度，结合核 tap 的 `0/1` 开关做 min/max 归约，最后用比较掩码生成 `0/1` 输出，并以 `pcl::rvv_store::strided_store_field_f32m2<PointT, fields::intensity>` 写回。二值腐蚀需要额外检查中心像素为 1（helper 的早退条件），实现里用 `vmfeq` 组合两个掩码完成。
 
 ```cpp
   // --- Center (safe) region: min over kernel-1 neighbors, then output = (center==1 &&
@@ -87,12 +90,15 @@ RVV 内核在进入主循环前计算中心区边界（`row_lo/row_hi`、`col_lo
         vfloat32m2_t v_min =
             __riscv_vfmv_v_f_f32m2(std::numeric_limits<float>::max(), vl);
         // ... tap loops + vfmin ...
-        vfloat32m2_t v_center = __riscv_vlse32_v_f32m2(center_ptr, point_stride, vl);
+        vfloat32m2_t v_center =
+            pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::intensity>(
+                center_ptr, vl);
         vbool16_t m_center_one = __riscv_vmfeq_vf_f32m2_b16(v_center, v_one, vl);
         vbool16_t m_min_one = __riscv_vmfeq_vf_f32m2_b16(v_min, v_one, vl);
         vbool16_t mask = __riscv_vmand_mm_b16(m_center_one, m_min_one, vl);
         vfloat32m2_t v_out = __riscv_vfmerge_vfm_f32m2(v_zero_vec, v_one, mask, vl);
-        __riscv_vsse32_v_f32m2(out_ptr, point_stride, v_out, vl);
+        pcl::rvv_store::strided_store_field_f32m2<PointT, pcl::fields::intensity>(
+            out_ptr, v_out, vl);
         j0 += static_cast<int>(vl);
       }
     }
@@ -112,7 +118,7 @@ RVV 内核在进入主循环前计算中心区边界（`row_lo/row_hi`、`col_lo
 
 ### 3.3 灰度：腐蚀/膨胀的中心区 RVV 与 helper 语义
 
-灰度腐蚀（min）与膨胀（max）在中心区分别用 `vfmin` / `vfmax` 归约。helper 中显式维护 `found` 标志：当所有 tap 都越界或 tap 在结构元素中为 0 时，输出为 `-1.0f`。这一点会影响边缘像素与小结构元素时的行为，因此 RVV 路径保留边缘回退到 helper，避免向量路径引入与 `found` 相关的额外控制流。
+灰度腐蚀（min）与膨胀（max）在中心区分别用 `vfmin` / `vfmax` 归约，`intensity` load/store 同样通过公共 field helper 表达。helper 中显式维护 `found` 标志：当所有 tap 都越界或 tap 在结构元素中为 0 时，输出为 `-1.0f`。这一点会影响边缘像素与小结构元素时的行为，因此 RVV 路径保留边缘回退到 helper，避免向量路径引入与 `found` 相关的额外控制流。
 
 ```cpp
   float min_val = (std::numeric_limits<float>::max)();
