@@ -3,7 +3,7 @@ Build: RVV (__RVV10__ enabled)
 [----------] Global test environment set-up.
 [----------] 6 tests from PassThroughRVV
 [ RUN      ] PassThroughRVV.SmallCloudMatchesScalarFormula
-[       OK ] PassThroughRVV.SmallCloudMatchesScalarFormula (2 ms)
+[       OK ] PassThroughRVV.SmallCloudMatchesScalarFormula (3 ms)
 [ RUN      ] PassThroughRVV.LargePositiveKeepsInclusiveRangeInOrder
 [       OK ] PassThroughRVV.LargePositiveKeepsInclusiveRangeInOrder (1 ms)
 [ RUN      ] PassThroughRVV.LargeNegativeKeepsOutsideRange
@@ -14,8 +14,8 @@ Build: RVV (__RVV10__ enabled)
 [       OK ] PassThroughRVV.EmptyFieldOnlyFiltersFiniteXYZ (0 ms)
 [ RUN      ] PassThroughRVV.CloudOutputUsesFilteredIndices
 [       OK ] PassThroughRVV.CloudOutputUsesFilteredIndices (0 ms)
-[----------] 6 tests from PassThroughRVV (6 ms total)
+[----------] 6 tests from PassThroughRVV (7 ms total)
 
 [----------] Global test environment tear-down
-[==========] 6 tests from 1 test suite ran. (9 ms total)
+[==========] 6 tests from 1 test suite ran. (10 ms total)
 [  PASSED  ] 6 tests.

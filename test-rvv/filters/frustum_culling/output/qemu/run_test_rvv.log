@@ -16,8 +16,8 @@ Build: RVV (__RVV10__ enabled)
 [       OK ] FrustumCullingRVV.NonDenseFlagFallbackPreservesScalarSemantics (1 ms)
 [ RUN      ] FrustumCullingRVV.LargeDensePointXYZIMatchesExplicitAll
 [       OK ] FrustumCullingRVV.LargeDensePointXYZIMatchesExplicitAll (1 ms)
-[----------] 7 tests from FrustumCullingRVV (14 ms total)
+[----------] 7 tests from FrustumCullingRVV (13 ms total)
 
 [----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (17 ms total)
+[==========] 7 tests from 1 test suite ran. (16 ms total)
 [  PASSED  ] 7 tests.

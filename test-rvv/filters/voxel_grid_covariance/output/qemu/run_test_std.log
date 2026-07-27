@@ -7,15 +7,15 @@ Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gte
 [ RUN      ] VoxelGridCovarianceRVV.SingleNegativeVoxelMatchesHandComputedCentroid
 [       OK ] VoxelGridCovarianceRVV.SingleNegativeVoxelMatchesHandComputedCentroid (1 ms)
 [ RUN      ] VoxelGridCovarianceRVV.SaveLeafLayoutAndSearchableRemainUsable
-[       OK ] VoxelGridCovarianceRVV.SaveLeafLayoutAndSearchableRemainUsable (5 ms)
+[       OK ] VoxelGridCovarianceRVV.SaveLeafLayoutAndSearchableRemainUsable (4 ms)
 [ RUN      ] VoxelGridCovarianceRVV.DistanceFieldFallbackKeepsFilterSemantics
 [       OK ] VoxelGridCovarianceRVV.DistanceFieldFallbackKeepsFilterSemantics (3 ms)
 [ RUN      ] VoxelGridCovarianceRVV.NonDenseFallbackSkipsInvalidPoints
-[       OK ] VoxelGridCovarianceRVV.NonDenseFallbackSkipsInvalidPoints (3 ms)
+[       OK ] VoxelGridCovarianceRVV.NonDenseFallbackSkipsInvalidPoints (4 ms)
 [ RUN      ] VoxelGridCovarianceRVV.SmallInputFallbackWorks
 [       OK ] VoxelGridCovarianceRVV.SmallInputFallbackWorks (0 ms)
-[----------] 6 tests from VoxelGridCovarianceRVV (21 ms total)
+[----------] 6 tests from VoxelGridCovarianceRVV (20 ms total)
 
 [----------] Global test environment tear-down
-[==========] 6 tests from 1 test suite ran. (24 ms total)
+[==========] 6 tests from 1 test suite ran. (23 ms total)
 [  PASSED  ] 6 tests.

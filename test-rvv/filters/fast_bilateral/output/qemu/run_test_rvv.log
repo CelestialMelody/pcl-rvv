@@ -1,18 +1,18 @@
-Running main() from <third-party-src>/googletest/googletest/src/gtest_main.cc
+Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gtest_main.cc
 [==========] Running 4 tests from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 4 tests from FastBilateralRVV
 [ RUN      ] FastBilateralRVV.LargeOrganizedCloudProducesFiniteSmoothedDepth
-[       OK ] FastBilateralRVV.LargeOrganizedCloudProducesFiniteSmoothedDepth (8 ms)
+[       OK ] FastBilateralRVV.LargeOrganizedCloudProducesFiniteSmoothedDepth (7 ms)
 [ RUN      ] FastBilateralRVV.NonFiniteDepthIsReplacedBeforeFiltering
-[       OK ] FastBilateralRVV.NonFiniteDepthIsReplacedBeforeFiltering (6 ms)
+[       OK ] FastBilateralRVV.NonFiniteDepthIsReplacedBeforeFiltering (5 ms)
 [ RUN      ] FastBilateralRVV.SmallCloudFallbackKeepsOrganizedOutput
-[       OK ] FastBilateralRVV.SmallCloudFallbackKeepsOrganizedOutput (1 ms)
+[       OK ] FastBilateralRVV.SmallCloudFallbackKeepsOrganizedOutput (0 ms)
 [ RUN      ] FastBilateralRVV.NonOrganizedInputReturnsEmptyOutput
 [pcl::FastBilateralFilter] Input cloud needs to be organized.
 [       OK ] FastBilateralRVV.NonOrganizedInputReturnsEmptyOutput (1 ms)
-[----------] 4 tests from FastBilateralRVV (17 ms total)
+[----------] 4 tests from FastBilateralRVV (15 ms total)
 
 [----------] Global test environment tear-down
-[==========] 4 tests from 1 test suite ran. (20 ms total)
+[==========] 4 tests from 1 test suite ran. (18 ms total)
 [  PASSED  ] 4 tests.

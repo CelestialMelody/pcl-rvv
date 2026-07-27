@@ -11,13 +11,13 @@ Build: Std (__RVV10__ disabled)
 [ RUN      ] FrustumCullingRVV.ExtractRemovedIndicesMatchesExplicitAll
 [       OK ] FrustumCullingRVV.ExtractRemovedIndicesMatchesExplicitAll (2 ms)
 [ RUN      ] FrustumCullingRVV.FarPlaneInfinityMatchesExplicitAll
-[       OK ] FrustumCullingRVV.FarPlaneInfinityMatchesExplicitAll (1 ms)
+[       OK ] FrustumCullingRVV.FarPlaneInfinityMatchesExplicitAll (2 ms)
 [ RUN      ] FrustumCullingRVV.NonDenseFlagFallbackPreservesScalarSemantics
 [       OK ] FrustumCullingRVV.NonDenseFlagFallbackPreservesScalarSemantics (1 ms)
 [ RUN      ] FrustumCullingRVV.LargeDensePointXYZIMatchesExplicitAll
 [       OK ] FrustumCullingRVV.LargeDensePointXYZIMatchesExplicitAll (1 ms)
-[----------] 7 tests from FrustumCullingRVV (12 ms total)
+[----------] 7 tests from FrustumCullingRVV (13 ms total)
 
 [----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (15 ms total)
+[==========] 7 tests from 1 test suite ran. (17 ms total)
 [  PASSED  ] 7 tests.

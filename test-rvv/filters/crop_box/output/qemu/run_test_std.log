@@ -3,9 +3,9 @@ Build: Std (__RVV10__ disabled)
 [----------] Global test environment set-up.
 [----------] 7 tests from CropBoxRVV
 [ RUN      ] CropBoxRVV.SmallCloudMatchesScalarFormula
-[       OK ] CropBoxRVV.SmallCloudMatchesScalarFormula (1 ms)
+[       OK ] CropBoxRVV.SmallCloudMatchesScalarFormula (2 ms)
 [ RUN      ] CropBoxRVV.LargeDenseKeepsInsideRangeInOrder
-[       OK ] CropBoxRVV.LargeDenseKeepsInsideRangeInOrder (0 ms)
+[       OK ] CropBoxRVV.LargeDenseKeepsInsideRangeInOrder (1 ms)
 [ RUN      ] CropBoxRVV.LargeDenseNegativeKeepsOutsideRange
 [       OK ] CropBoxRVV.LargeDenseNegativeKeepsOutsideRange (0 ms)
 [ RUN      ] CropBoxRVV.CloudOutputUsesFilteredIndices
@@ -16,8 +16,8 @@ Build: Std (__RVV10__ disabled)
 [       OK ] CropBoxRVV.NonDenseFallbackSkipsInvalidPoints (0 ms)
 [ RUN      ] CropBoxRVV.TranslationFallbackPreservesTransformedSemantics
 [       OK ] CropBoxRVV.TranslationFallbackPreservesTransformedSemantics (0 ms)
-[----------] 7 tests from CropBoxRVV (6 ms total)
+[----------] 7 tests from CropBoxRVV (7 ms total)
 
 [----------] Global test environment tear-down
-[==========] 7 tests from 1 test suite ran. (9 ms total)
+[==========] 7 tests from 1 test suite ran. (10 ms total)
 [  PASSED  ] 7 tests.

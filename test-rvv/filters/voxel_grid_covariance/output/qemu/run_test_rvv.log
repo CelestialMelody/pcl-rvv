@@ -5,7 +5,7 @@ Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gte
 [ RUN      ] VoxelGridCovarianceRVV.DenseNegativeCoordinatesMatchScalarOutput
 [       OK ] VoxelGridCovarianceRVV.DenseNegativeCoordinatesMatchScalarOutput (5 ms)
 [ RUN      ] VoxelGridCovarianceRVV.SingleNegativeVoxelMatchesHandComputedCentroid
-[       OK ] VoxelGridCovarianceRVV.SingleNegativeVoxelMatchesHandComputedCentroid (0 ms)
+[       OK ] VoxelGridCovarianceRVV.SingleNegativeVoxelMatchesHandComputedCentroid (1 ms)
 [ RUN      ] VoxelGridCovarianceRVV.SaveLeafLayoutAndSearchableRemainUsable
 [       OK ] VoxelGridCovarianceRVV.SaveLeafLayoutAndSearchableRemainUsable (4 ms)
 [ RUN      ] VoxelGridCovarianceRVV.DistanceFieldFallbackKeepsFilterSemantics

@@ -1,26 +1,26 @@
-make[1]: Entering directory '<pcl-src>/test-rvv/filters/voxel_grid_covariance'
+make[1]: Entering directory '/home/zoomin/codes/pcl/test-rvv/filters/voxel_grid_covariance'
 rm -f build/riscv/bench_voxel_grid_covariance_std
 [BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=0)...
-riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-06-03_10-40-59.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/filters/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include -I<rv-install>/flann/include -I<rv-install>/lz4/include -I<rv-install>/hdf5/include -I<rv-install>/zlib/include -I<rv-install>/libpng/include  bench_voxel_grid_covariance.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_search -lpcl_kdtree -lpcl_octree -lpcl_common -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_voxel_grid_covariance_std
+/opt/riscv64/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-24_18-48-48.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/pcl/common/include -I/home/zoomin/codes/pcl/filters/include -I/home/zoomin/codes/pcl/test/include -I/home/zoomin/codes/pcl -I/home/zoomin/codes/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/riscv/boost/include -I/home/zoomin/codes/riscv/gtest/include -I/home/zoomin/codes/riscv/flann/include -I/home/zoomin/codes/riscv/lz4/include -I/home/zoomin/codes/riscv/hdf5/include -I/home/zoomin/codes/riscv/zlib/include -I/home/zoomin/codes/riscv/libpng/include  bench_voxel_grid_covariance.cpp -L/home/zoomin/codes/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/pcl-rvv/lib -L/home/zoomin/codes/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/boost/lib -L/home/zoomin/codes/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/gtest/lib -L/home/zoomin/codes/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/flann/lib -L/home/zoomin/codes/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/lz4/lib -L/home/zoomin/codes/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/hdf5/lib -L/home/zoomin/codes/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/zlib/lib -L/home/zoomin/codes/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/libpng/lib  -lpcl_search -lpcl_kdtree -lpcl_octree -lpcl_common -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_voxel_grid_covariance_std
 [RUN] Benchmark on riscv (USE_PCL_RVV10=0)...
-LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_voxel_grid_covariance_std 
+LD_LIBRARY_PATH=/home/zoomin/codes/riscv/pcl-rvv/lib:/home/zoomin/codes/riscv/boost/lib:/home/zoomin/codes/riscv/gtest/lib:/home/zoomin/codes/riscv/flann/lib:/home/zoomin/codes/riscv/lz4/lib:/home/zoomin/codes/riscv/hdf5/lib:/home/zoomin/codes/riscv/zlib/lib:/home/zoomin/codes/riscv/libpng/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_voxel_grid_covariance_std
 ========================================================================================================
 PCL filters/voxel_grid_covariance benchmark
 Build: Std (__RVV10__ disabled)
 Dataset: synthetic PointXYZ clouds; dense leaf-index RVV cases plus distance/non-dense fallback cases
 Iterations: 8
 --------------------------------------------------------------------------------------------------------
-vgcov dense leaf-index 64K                                      : 103.2062 ms/iter
-  Total Time: 825.6499 ms, checksum: 16873979133168490664
-vgcov dense leaf-index 256K                                     : 418.5706 ms/iter
-  Total Time: 3348.5651 ms, checksum: 11578983304961162696
-vgcov dense save-layout 256K                                    : 418.1740 ms/iter
-  Total Time: 3345.3923 ms, checksum: 11578983304961162696
-vgcov dense searchable 64K                                      : 106.6890 ms/iter
-  Total Time: 853.5123 ms, checksum: 16873979133168490664
-vgcov distance-field fallback 256K                              : 275.6839 ms/iter
-  Total Time: 2205.4715 ms, checksum: 1169329825437706792
-vgcov non-dense fallback 256K                                   : 413.0441 ms/iter
-  Total Time: 3304.3525 ms, checksum: 5717660375792973828
+vgcov dense leaf-index 64K                                      : 114.9001 ms/iter
+  Total Time: 919.2010 ms, checksum: 16873979133168490664
+vgcov dense leaf-index 256K                                     : 456.3868 ms/iter
+  Total Time: 3651.0941 ms, checksum: 11578983304961162696
+vgcov dense save-layout 256K                                    : 453.9626 ms/iter
+  Total Time: 3631.7008 ms, checksum: 11578983304961162696
+vgcov dense searchable 64K                                      : 116.1073 ms/iter
+  Total Time: 928.8583 ms, checksum: 16873979133168490664
+vgcov distance-field fallback 256K                              : 299.4686 ms/iter
+  Total Time: 2395.7486 ms, checksum: 1169329825437706792
+vgcov non-dense fallback 256K                                   : 451.4038 ms/iter
+  Total Time: 3611.2306 ms, checksum: 5717660375792973828
 ========================================================================================================
-make[1]: Leaving directory '<pcl-src>/test-rvv/filters/voxel_grid_covariance'
+make[1]: Leaving directory '/home/zoomin/codes/pcl/test-rvv/filters/voxel_grid_covariance'

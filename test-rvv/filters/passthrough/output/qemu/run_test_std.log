@@ -14,8 +14,8 @@ Build: Std (__RVV10__ disabled)
 [       OK ] PassThroughRVV.EmptyFieldOnlyFiltersFiniteXYZ (0 ms)
 [ RUN      ] PassThroughRVV.CloudOutputUsesFilteredIndices
 [       OK ] PassThroughRVV.CloudOutputUsesFilteredIndices (0 ms)
-[----------] 6 tests from PassThroughRVV (6 ms total)
+[----------] 6 tests from PassThroughRVV (7 ms total)
 
 [----------] Global test environment tear-down
-[==========] 6 tests from 1 test suite ran. (9 ms total)
+[==========] 6 tests from 1 test suite ran. (10 ms total)
 [  PASSED  ] 6 tests.

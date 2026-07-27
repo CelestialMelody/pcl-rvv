@@ -3,7 +3,7 @@ Build: RVV (__RVV10__ enabled)
 [----------] Global test environment set-up.
 [----------] 5 tests from PlaneClipper3DRVV
 [ RUN      ] PlaneClipper3DRVV.SmallCloudMatchesScalarFormula
-[       OK ] PlaneClipper3DRVV.SmallCloudMatchesScalarFormula (0 ms)
+[       OK ] PlaneClipper3DRVV.SmallCloudMatchesScalarFormula (1 ms)
 [ RUN      ] PlaneClipper3DRVV.LargeDensePointXYZKeepsOrder
 [       OK ] PlaneClipper3DRVV.LargeDensePointXYZKeepsOrder (0 ms)
 [ RUN      ] PlaneClipper3DRVV.AppendsToExistingOutput

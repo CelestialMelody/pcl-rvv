@@ -1,30 +1,30 @@
-make[1]: Entering directory '<pcl-src>/test-rvv/filters/crop_box'
+make[1]: Entering directory '/home/zoomin/codes/pcl/test-rvv/filters/crop_box'
 rm -f build/riscv/bench_crop_box_std
 [BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=0)...
-riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-06-02_22-03-44.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/filters/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include -I<rv-install>/flann/include -I<rv-install>/lz4/include -I<rv-install>/hdf5/include -I<rv-install>/zlib/include -I<rv-install>/libpng/include  bench_crop_box.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_common -lm -o build/riscv/bench_crop_box_std
+/opt/riscv64/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-24_18-48-48.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -DPCL_NO_PRECOMPILE -I/home/zoomin/codes/pcl/common/include -I/home/zoomin/codes/pcl/filters/include -I/home/zoomin/codes/pcl/test/include -I/home/zoomin/codes/pcl -I/home/zoomin/codes/riscv/pcl-rvv/include/pcl-1.15 -I/home/zoomin/codes/riscv/eigen-rvv/include/eigen3 -I/home/zoomin/codes/riscv/boost/include -I/home/zoomin/codes/riscv/gtest/include -I/home/zoomin/codes/riscv/flann/include -I/home/zoomin/codes/riscv/lz4/include -I/home/zoomin/codes/riscv/hdf5/include -I/home/zoomin/codes/riscv/zlib/include -I/home/zoomin/codes/riscv/libpng/include  bench_crop_box.cpp -L/home/zoomin/codes/riscv/pcl-rvv/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/pcl-rvv/lib -L/home/zoomin/codes/riscv/boost/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/boost/lib -L/home/zoomin/codes/riscv/gtest/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/gtest/lib -L/home/zoomin/codes/riscv/flann/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/flann/lib -L/home/zoomin/codes/riscv/lz4/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/lz4/lib -L/home/zoomin/codes/riscv/hdf5/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/hdf5/lib -L/home/zoomin/codes/riscv/zlib/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/zlib/lib -L/home/zoomin/codes/riscv/libpng/lib -Wl,-rpath-link=/home/zoomin/codes/riscv/libpng/lib  -lpcl_common -lm -o build/riscv/bench_crop_box_std
 [RUN] Benchmark on riscv (USE_PCL_RVV10=0)...
-LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_crop_box_std 
+LD_LIBRARY_PATH=/home/zoomin/codes/riscv/pcl-rvv/lib:/home/zoomin/codes/riscv/boost/lib:/home/zoomin/codes/riscv/gtest/lib:/home/zoomin/codes/riscv/flann/lib:/home/zoomin/codes/riscv/lz4/lib:/home/zoomin/codes/riscv/hdf5/lib:/home/zoomin/codes/riscv/zlib/lib:/home/zoomin/codes/riscv/libpng/lib:$LD_LIBRARY_PATH qemu-riscv64 -L /opt/riscv64/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_crop_box_std
 ================================================================================================
 PCL filters/crop_box benchmark
 Build: Std (__RVV10__ disabled)
 Dataset: synthetic PointXYZ clouds; dense identity CropBox RVV cases and fallback cases
 Iterations: 30
 ------------------------------------------------------------------------------------------------
-crop_box indices identity 64K                             : 0.5348 ms/iter
-  Total Time: 16.0443 ms, checksum: 436806403086562635
-crop_box indices identity 1M                              : 8.5657 ms/iter
-  Total Time: 256.9724 ms, checksum: 6395470658558783535
-crop_box indices negative 1M                              : 9.2401 ms/iter
-  Total Time: 277.2037 ms, checksum: 5383944230370452337
-crop_box indices removed 1M                               : 9.0925 ms/iter
-  Total Time: 272.7741 ms, checksum: 1330490903423013726
-crop_box cloud-out identity 1M                            : 8.8275 ms/iter
-  Total Time: 264.8239 ms, checksum: 52328
-crop_box explicit subset fallback 1M                      : 4.7348 ms/iter
-  Total Time: 142.0450 ms, checksum: 10381555933082240775
-crop_box non-dense fallback 1M                            : 13.7033 ms/iter
-  Total Time: 411.0993 ms, checksum: 205086950085835447
-crop_box translation fallback 1M                          : 17.8199 ms/iter
-  Total Time: 534.5975 ms, checksum: 17812529225773059046
+crop_box indices identity 64K                             : 0.6108 ms/iter
+  Total Time: 18.3233 ms, checksum: 436806403086562635
+crop_box indices identity 1M                              : 9.8317 ms/iter
+  Total Time: 294.9508 ms, checksum: 6395470658558783535
+crop_box indices negative 1M                              : 10.4813 ms/iter
+  Total Time: 314.4404 ms, checksum: 5383944230370452337
+crop_box indices removed 1M                               : 10.5915 ms/iter
+  Total Time: 317.7447 ms, checksum: 1330490903423013726
+crop_box cloud-out identity 1M                            : 10.7245 ms/iter
+  Total Time: 321.7338 ms, checksum: 52328
+crop_box explicit subset fallback 1M                      : 5.3131 ms/iter
+  Total Time: 159.3919 ms, checksum: 10381555933082240775
+crop_box non-dense fallback 1M                            : 15.2119 ms/iter
+  Total Time: 456.3557 ms, checksum: 205086950085835447
+crop_box translation fallback 1M                          : 17.8499 ms/iter
+  Total Time: 535.4968 ms, checksum: 17812529225773059046
 ================================================================================================
-make[1]: Leaving directory '<pcl-src>/test-rvv/filters/crop_box'
+make[1]: Leaving directory '/home/zoomin/codes/pcl/test-rvv/filters/crop_box'

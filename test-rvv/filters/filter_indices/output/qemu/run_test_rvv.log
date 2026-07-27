@@ -3,7 +3,7 @@ Build: RVV (__RVV10__ enabled)
 [----------] Global test environment set-up.
 [----------] 7 tests from FilterIndicesRVV
 [ RUN      ] FilterIndicesRVV.RemoveNaNIndicesOnlyKeepsFiniteXYZInOrder
-[       OK ] FilterIndicesRVV.RemoveNaNIndicesOnlyKeepsFiniteXYZInOrder (1 ms)
+[       OK ] FilterIndicesRVV.RemoveNaNIndicesOnlyKeepsFiniteXYZInOrder (0 ms)
 [ RUN      ] FilterIndicesRVV.DenseIndicesOnlyKeepsLegacyIdentityMapping
 [       OK ] FilterIndicesRVV.DenseIndicesOnlyKeepsLegacyIdentityMapping (0 ms)
 [ RUN      ] FilterIndicesRVV.RemoveNaNCloudCompressesPointsAndIndices
