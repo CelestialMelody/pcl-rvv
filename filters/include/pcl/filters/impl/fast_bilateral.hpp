@@ -49,6 +49,9 @@
 #include <limits>
 
 #if defined(__RVV10__)
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
+
 #include <cstdint>
 #include <riscv_vector.h>
 #include <type_traits>
@@ -127,14 +130,13 @@ fastBilateralComputeBaseRangeRVV (const pcl::PointCloud<PointT>& output,
   std::size_t finite_count = 0;
 
   const auto* base = reinterpret_cast<const std::uint8_t*> (output.data ());
-  const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
   std::size_t i = 0;
 
   while (i < n)
   {
     const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
     const auto* z_ptr = reinterpret_cast<const float*> (base + i * sizeof (PointT) + offsetof (PointT, z));
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (z_ptr, stride, vl);
+    const vfloat32m2_t vz = pcl::rvv_load::strided_load_f32m2<sizeof (PointT)> (z_ptr, vl);
 
     // FastBilateral only needs the finite z range before the lattice pass.  The
     // AoS stride load plus finite mask preserves the scalar rule that NaN/Inf
@@ -173,14 +175,13 @@ fastBilateralReplaceNonFiniteZRVV (pcl::PointCloud<PointT>& output,
     return false;
 
   auto* base = reinterpret_cast<std::uint8_t*> (output.data ());
-  const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
   std::size_t i = 0;
 
   while (i < n)
   {
     const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
     auto* z_ptr = reinterpret_cast<float*> (base + i * sizeof (PointT) + offsetof (PointT, z));
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (z_ptr, stride, vl);
+    const vfloat32m2_t vz = pcl::rvv_load::strided_load_f32m2<sizeof (PointT)> (z_ptr, vl);
 
     vbool16_t finite = __riscv_vmfeq_vv_f32m2_b16 (vz, vz, vl);
     finite = __riscv_vmand_mm_b16 (
@@ -190,7 +191,7 @@ fastBilateralReplaceNonFiniteZRVV (pcl::PointCloud<PointT>& output,
         vl);
     const vbool16_t replace = __riscv_vmnot_m_b16 (finite, vl);
     const vfloat32m2_t vmax = __riscv_vfmv_v_f_f32m2 (base_max, vl);
-    __riscv_vsse32_v_f32m2_m (replace, z_ptr, stride, vmax, vl);
+    pcl::rvv_store::masked_strided_store_f32m2<sizeof (PointT)> (replace, z_ptr, vmax, vl);
 
     i += vl;
   }

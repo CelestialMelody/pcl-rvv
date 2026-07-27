@@ -303,9 +303,11 @@ store 的 buffer layout：`contiguous_seg3_store_f32m2` 和
 `contiguous_seg4_store_f32m2` 写入的是 packed tuple buffer（例如 `xyzxyz...` 或
 `f0f1f2f3...`），不是三个或四个独立 SoA 数组。独立数组应使用
 `contiguous_store3_f32m2` 或 `contiguous_store4_f32m2`。
-单字段 store 可用 `strided_store_field_f32m2<PointT, Field>` 或
-`scatter_store_field_f32m2<PointT, Field>`；它们只证明并写一个 traits 注册的单个
-`float` 字段，不代表算法已经覆盖整个 `PointT` 输出语义。
+单字段 store 可用 `strided_store_f32m2<sizeof(PointT)>`、
+`masked_strided_store_f32m2<sizeof(PointT)>`、
+`strided_store_field_f32m2<PointT, Field>` 或
+`scatter_store_field_f32m2<PointT, Field>`；field-tag helper 只证明并写一个 traits
+注册的单个 `float` 字段，不代表算法已经覆盖整个 `PointT` 输出语义。
 
 CEOP production 当前使用 `indexed_load3_fields_f32m2`，即固定三字段 gather。它没有
 自动切换到 segment 指令。

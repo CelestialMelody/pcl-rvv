@@ -42,6 +42,7 @@
 #include <pcl/point_types.h>             // for PointXYZ
 
 #if defined(__RVV10__)
+#include <pcl/rvv_point_load.h>
 #include <pcl/rvv_point_traits.h>
 
 #include <cstdint>
@@ -111,14 +112,13 @@ removeNaNFromPointCloudIndicesRVV(const pcl::PointCloud<PointT> &cloud_in, Indic
   {
     const std::size_t vl = __riscv_vsetvl_e32m2(n - i);
     const auto* chunk = base + i * sizeof(PointT);
-    const auto stride = static_cast<ptrdiff_t>(sizeof(PointT));
-
-    const auto* x_ptr = reinterpret_cast<const float*>(chunk + offsetof(PointT, x));
-    const auto* y_ptr = reinterpret_cast<const float*>(chunk + offsetof(PointT, y));
-    const auto* z_ptr = reinterpret_cast<const float*>(chunk + offsetof(PointT, z));
-    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2(x_ptr, stride, vl);
-    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2(y_ptr, stride, vl);
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2(z_ptr, stride, vl);
+    vfloat32m2_t vx;
+    vfloat32m2_t vy;
+    vfloat32m2_t vz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (chunk, vl, vx, vy, vz);
 
     // NaN fails x == x; +/-Inf is rejected by abs(v) < Inf. vcompress keeps the
     // scalar scan order while each VL chunk writes only finite source indices.

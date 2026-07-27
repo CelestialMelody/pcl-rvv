@@ -9,7 +9,7 @@
 `common/include/pcl/rvv_point_load.h` 与 `common/include/pcl/rvv_point_store.h` 只负责把已经由调用方证明安全的字段布局映射到 RVV load/store/scatter 指令形态。它们不决定某个算法是否应该进入 RVV，也不把某个 `PointT` 的业务语义扩大为“所有 xyz-like 点都等价”。
 
 - traits 层负责 compile-time gate：`pcl::rvv::RVVXYZFloatLayout<PointT>` 表达 PCL 注册的单个 `float x/y/z` 字段；`pcl::rvv::RVVNormalFloatLayout<PointT>` 表达注册单 `float normal_x/y/z` 字段；`pcl::rvv::RVVFloatFieldLayout<PointT, Field>` 表达单个注册 float 字段，例如 `curvature` 或 `intensity`；`pcl::rvv::kRVVXYZPointCompatible<PointT>` 保留给旧的 direct-member `x/y/z`、standard-layout 场景。
-- helper 层负责访存形态：例如 strided/indexed XYZ、单字段 field-tag load/store、3/4 字段底层 store/scatter。字段紧密相邻时 helper 可以在内部选择 segment 指令，否则使用逐字段指令。
+- helper 层负责访存形态：例如 strided/indexed XYZ、单字段 load/store、单字段 masked store、field-tag load/store、3/4 字段底层 store/scatter。字段紧密相邻时 helper 可以在内部选择 segment 指令，否则使用逐字段指令。
 - 算法层仍负责 dispatch / fallback：规模阈值、索引有效性、`uint32_t` byte offset 可表示性、VLEN 栈缓冲限制、输出顺序、数值近似、source/target 点类型分别 gate 等，都必须留在对应算法的生产 helper 中。
 - `PointXY` 应按 `x/y` 字段语义处理，不应套用 XYZ gate；`PointXYZI` 只有在算法确实需要 `intensity` 且 traits 证明该字段为单个 float 时才可读取/写回；`PointXYZINormal` 需要分别证明 `x/y/z`、`intensity`、`normal_x/y/z`、`curvature` 等实际使用字段，不能只凭点类型名放行。
 - 写回额外字段的算法不能只看 XYZ layout。例如 dense `PointXYZI` convolution 同时读写 `x/y/z/intensity`，还包含边界填充语义，因此需要单独的算法 gate 与测试证据。

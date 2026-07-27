@@ -43,6 +43,7 @@
 #include <pcl/filters/passthrough.h>
 
 #if defined(__RVV10__)
+#include <pcl/rvv_point_load.h>
 #include <pcl/rvv_point_traits.h>
 
 #include <cstdint>
@@ -197,12 +198,16 @@ pcl::PassThrough<PointT>::applyFilterIndicesRVV (Indices &indices, std::size_t f
   {
     const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
     const auto* chunk = base + i * sizeof (PointT);
-    const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
-
-    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, x)), stride, vl);
-    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, y)), stride, vl);
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, z)), stride, vl);
-    const vfloat32m2_t vf = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + field_offset), stride, vl);
+    vfloat32m2_t vx;
+    vfloat32m2_t vy;
+    vfloat32m2_t vz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk, vl, vx, vy, vz);
+    const vfloat32m2_t vf = pcl::rvv_load::strided_load_f32m2<sizeof (PointT)> (
+        reinterpret_cast<const float*> (chunk + field_offset), vl);
 
     // This path only covers identity input indices.  AoS fields are read with
     // byte stride, and vcompress preserves scalar scan order inside each VL chunk.

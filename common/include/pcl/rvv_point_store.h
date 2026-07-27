@@ -51,7 +51,7 @@ namespace pcl {
 /** \brief RVV point/field store helpers.
   *
   * API layers (symmetric with `pcl::rvv_load` / `rvv_point_load.h`):
-  * - **Primitives (`*_seg_*`, `*_fields_*`, `strided_store_f32m2`, `scatter_store_f32m2`)** each map to one
+  * - **Primitives (`*_seg_*`, `*_fields_*`, `strided_store_f32m2`, `masked_strided_store_f32m2`, `scatter_store_f32m2`)** each map to one
   *   fixed instruction strategy (no `if constexpr` dispatch). Use in micro-benchmarks to compare
   *   e.g. `vssseg3e32` vs 3×`vsse32`, or `vsuxseg3ei32` vs 3×`vsuxei32`, fairly.
   * - **Dispatch** (`strided_store3_f32m2`, `strided_store4_f32m2`, `scatter_store3_f32m2`, `scatter_store4_f32m2`) choose seg vs fields at compile
@@ -77,6 +77,10 @@ vuint32m2_t byte_offsets_u32m2(vuint32m2_t v_idx, std::size_t vl);
 
 template <std::size_t kStrideBytes>
 void strided_store_f32m2(float* field_ptr, vfloat32m2_t v, std::size_t vl);
+
+/** \brief Masked single-field strided store (`vsse32_m`). */
+template <std::size_t kStrideBytes>
+void masked_strided_store_f32m2(vbool16_t mask, float* field_ptr, vfloat32m2_t v, std::size_t vl);
 
 /** \brief PCL field-tag strided store for one registered single-float field. */
 template <typename PointT, typename Field>

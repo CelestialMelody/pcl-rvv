@@ -42,6 +42,7 @@
 #include <pcl/filters/filter.h>
 
 #if defined(__RVV10__)
+#include <pcl/rvv_point_load.h>
 #include <pcl/rvv_point_traits.h>
 
 #include <cstdint>
@@ -219,11 +220,11 @@ removeNaNFromPointCloudMask(const pcl::PointCloud<PointT> &cloud_in,
   {
     const std::size_t vl = __riscv_vsetvl_e32m2(n - i);
     const auto* chunk = base + i * sizeof(PointT);
-    const auto stride = static_cast<ptrdiff_t>(sizeof(PointT));
-
-    const vfloat32m2_t v0 = __riscv_vlse32_v_f32m2(reinterpret_cast<const float*>(chunk + kF0Off), stride, vl);
-    const vfloat32m2_t v1 = __riscv_vlse32_v_f32m2(reinterpret_cast<const float*>(chunk + kF1Off), stride, vl);
-    const vfloat32m2_t v2 = __riscv_vlse32_v_f32m2(reinterpret_cast<const float*>(chunk + kF2Off), stride, vl);
+    vfloat32m2_t v0;
+    vfloat32m2_t v1;
+    vfloat32m2_t v2;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointT), kF0Off, kF1Off, kF2Off> (
+        chunk, vl, v0, v1, v2);
     vbool16_t finite = pcl::finiteMask3F32M2(v0, v1, v2, vl);
 
     const vuint32m2_t local = __riscv_vid_v_u32m2(vl);

@@ -66,6 +66,17 @@ strided_store_f32m2(float* field_ptr, const vfloat32m2_t v, const std::size_t vl
   __riscv_vsse32_v_f32m2(field_ptr, static_cast<ptrdiff_t>(kStrideBytes), v, vl);
 }
 
+template <std::size_t kStrideBytes>
+inline void
+masked_strided_store_f32m2(const vbool16_t mask,
+                           float* field_ptr,
+                           const vfloat32m2_t v,
+                           const std::size_t vl)
+{
+  static_assert(kStrideBytes % alignof(float) == 0, "Stride must be aligned for float stores.");
+  __riscv_vsse32_v_f32m2_m(mask, field_ptr, static_cast<ptrdiff_t>(kStrideBytes), v, vl);
+}
+
 template <typename PointT, typename Field>
 inline void
 strided_store_field_f32m2(std::uint8_t* base_u8, const vfloat32m2_t v, const std::size_t vl)
