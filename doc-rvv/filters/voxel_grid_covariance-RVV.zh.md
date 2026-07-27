@@ -92,9 +92,12 @@ const unsigned int saved_rounding_mode = pcl::getVoxelGridCovarianceRoundingMode
 
 while (i < n)
 {
-  const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (... offsetof (PointT, x) ..., stride, vl);
-  const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (... offsetof (PointT, y) ..., stride, vl);
-  const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (... offsetof (PointT, z) ..., stride, vl);
+  vfloat32m2_t vx, vy, vz;
+  pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                            offsetof (PointT, x),
+                                            offsetof (PointT, y),
+                                            offsetof (PointT, z)> (
+      chunk, vl, vx, vy, vz);
 
   const vfloat32m2_t sx = __riscv_vfmul_vf_f32m2 (vx, inverse_leaf_size[0], vl);
   const vfloat32m2_t sy = __riscv_vfmul_vf_f32m2 (vy, inverse_leaf_size[1], vl);
@@ -119,7 +122,7 @@ pcl::setVoxelGridCovarianceRoundingMode (saved_rounding_mode);
 
 这段代码的维护重点：
 
-- AoS 只能用 stride load 读取 xyz；
+- AoS xyz 通过公共 `rvv_point_load` 字段 helper 读取，helper 不改变 VoxelGridCovariance 的类型和运行时分流边界；
 - `vfcvt_x_f_v_i32m2_rm(..., kRoundDownMode, ...)` 对齐 `Eigen::floor`，避免负坐标被截断到 0 方向；
 - 显式 round-down 转换可能修改 FRM；helper 进入时保存、退出前恢复 FRM，保证同一进程后续 distance / non-dense 等标量 fallback 不继承 RDN 舍入模式；
 - `idx` 只作为后续标量 `leaves_[idx]` 的输入，不改变 leaf 插入和累加顺序；
@@ -239,7 +242,7 @@ AoS memory: p[c]      p[c+1]    p[c+2]    p[c+3]
             x y z ... x y z ... x y z ... x y z ...
 
 RVV:
-  vlse32(x/y/z) -> scale -> floor/RDN -> linear idx -> vse32 leaf_indices
+  strided_load3_fields_f32m2(x/y/z) -> scale -> floor/RDN -> linear idx -> vse32 leaf_indices
 
 Scalar continuation:
   for each c+lane:

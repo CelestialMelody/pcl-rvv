@@ -87,7 +87,8 @@ while (i < n)
 {
   const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
   const auto* z_ptr = reinterpret_cast<const float*> (base + i * sizeof (PointT) + offsetof (PointT, z));
-  const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (z_ptr, stride, vl);
+  const vfloat32m2_t vz =
+      pcl::rvv_load::strided_load_f32m2<sizeof (PointT)> (z_ptr, vl);
 
   vbool16_t finite = __riscv_vmfeq_vv_f32m2_b16 (vz, vz, vl);
   finite = __riscv_vmand_mm_b16 (
@@ -106,7 +107,7 @@ while (i < n)
 
 维护重点：
 
-- AoS 点云只能通过 `sizeof(PointT)` stride load 读取 `z`；
+- AoS 点云的 `z` 通过公共 `rvv_point_load` 单字段 helper 读取，helper 只覆盖字段 load，不把算法语义扩展为完整 XYZ-compatible；
 - finite mask 使用 `z == z` 排除 NaN，使用 `abs(z) < inf` 排除 `+Inf/-Inf`；
 - masked reduction 只让 finite lane 参与；
 - 全部 lane 都非 finite 时通过 `finite_count == 0` 返回 `found_finite=false`，对应原标量 warning / return；
@@ -117,7 +118,7 @@ masked replace helper 只写无效 `z`：
 ```cpp
 const vbool16_t replace = __riscv_vmnot_m_b16 (finite, vl);
 const vfloat32m2_t vmax = __riscv_vfmv_v_f_f32m2 (base_max, vl);
-__riscv_vsse32_v_f32m2_m (replace, z_ptr, stride, vmax, vl);
+pcl::rvv_store::masked_strided_store_f32m2<sizeof (PointT)> (replace, z_ptr, vmax, vl);
 ```
 
 该 store 不触碰 `x/y` 或其它字段，保持 `copyPointCloud` 后的非 z 字段语义。
@@ -178,8 +179,8 @@ cloud(c, r) linear chunk:
   x y z ... x y z ... x y z ... x y z ...
 
 RVV:
-  vlse32(z) -> finite mask -> masked min/max
-  vlse32(z) -> !finite mask -> vsse32(base_max)
+  strided_load_f32m2(z) -> finite mask -> masked min/max
+  strided_load_f32m2(z) -> !finite mask -> masked_strided_store_f32m2(base_max)
 
 Scalar continuation:
   splat output(x,y).z into Array3D

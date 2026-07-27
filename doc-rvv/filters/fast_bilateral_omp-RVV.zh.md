@@ -75,17 +75,17 @@ cloud(c+1, r)    -> x y z ...
 cloud(c+2, r)    -> x y z ...
 ```
 
-RVV 不能把 `z` 当成连续数组读取，因此使用 stride load/store：
+RVV 不能把 `z` 当成连续数组读取，因此通过公共单字段 load/store helper 表达 `sizeof(PointT)` stride 访问：
 
 ```text
 VL chunk 起点: cloud(c, r)
 z_ptr       : &cloud(c, r).z
 stride      : sizeof(PointT)
 
-vlse32(z_ptr, stride) -> [z(c,r), z(c+1,r), ...]
-mask finite           -> z == z && abs(z) < inf
-vfredmin/vfredmax     -> 更新 base_min/base_max
-vsse32(mask !finite)  -> 只把 invalid z 写成 base_max
+strided_load_f32m2<sizeof(PointT)>(z_ptr)             -> [z(c,r), z(c+1,r), ...]
+mask finite                                           -> z == z && abs(z) < inf
+vfredmin/vfredmax                                     -> 更新 base_min/base_max
+masked_strided_store_f32m2<sizeof(PointT)>(!finite)   -> 只把 invalid z 写成 base_max
 ```
 
 mask 的作用是保持标量公式：

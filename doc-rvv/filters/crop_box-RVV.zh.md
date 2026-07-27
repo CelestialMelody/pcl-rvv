@@ -85,11 +85,12 @@ while (i < n)
 {
   const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
   const auto* chunk = base + i * sizeof (PointT);
-  const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
-
-  const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, x)), stride, vl);
-  const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, y)), stride, vl);
-  const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (reinterpret_cast<const float*> (chunk + offsetof (PointT, z)), stride, vl);
+  vfloat32m2_t vx, vy, vz;
+  pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                            offsetof (PointT, x),
+                                            offsetof (PointT, y),
+                                            offsetof (PointT, z)> (
+      chunk, vl, vx, vy, vz);
 
   vbool16_t inside = ...;             // six scalar-equivalent bound comparisons
   const vbool16_t keep = negative_ ? __riscv_vmnot_m_b16 (inside, vl) : inside;
@@ -98,7 +99,7 @@ while (i < n)
 }
 ```
 
-这段代码展示了三个维护边界：运行时 fallback 只放行 dense identity 主路径；AoS 用 stride load 读取 xyz；输出只压缩 identity source index，因此能保持标量扫描顺序。
+这段代码展示了三个维护边界：运行时 fallback 只放行 dense identity 主路径；AoS xyz load 通过公共 `rvv_point_load` 字段 helper 表达，但算法 dispatch 仍由 CropBox 自己控制；输出只压缩 identity source index，因此能保持标量扫描顺序。
 
 ## RVV 数据组织
 
@@ -110,9 +111,8 @@ PCL 点云是 AoS。一个 VL chunk 里，RVV 用 `sizeof(PointT)` 作为 stride
   x y z ...  x y z ...  x y z ...  x y z ...
 
 RVV:
-  vx = vlse32(base + offsetof(x), stride)
-  vy = vlse32(base + offsetof(y), stride)
-  vz = vlse32(base + offsetof(z), stride)
+  strided_load3_fields_f32m2<sizeof(PointT), offsetof(x/y/z)>(chunk)
+    -> vx, vy, vz
 ```
 
 mask 组织：

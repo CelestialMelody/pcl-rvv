@@ -33,9 +33,8 @@ cloud.points:
   x y z ...  x y z ...  x y z ...
 
 RVV:
-  vx = vlse32(base + offsetof(PointT, x), sizeof(PointT))
-  vy = vlse32(base + offsetof(PointT, y), sizeof(PointT))
-  vz = vlse32(base + offsetof(PointT, z), sizeof(PointT))
+  strided_load3_fields_f32m2<sizeof(PointT), offsetof(x/y/z)>(chunk)
+    -> vx, vy, vz
   m  = finite(vx) & finite(vy) & finite(vz)
   source = c + vid
   vcompress(source, m) -> ordered original indices
@@ -128,11 +127,18 @@ indices-only 入口只做短路选择，不把 RVV 主体塞进公开 API：
 
 cloud-out 路径同样先尝试 `removeNaNFromPointCloudRVV`，未命中自然回到 `removeNaNFromPointCloudStd`。运行时 fallback 放在 RVV helper 内部处理，包括 dense、小规模和 indices 溢出风险；这样公开入口只表达“能尝试 RVV 就尝试，失败则保持原路径”。
 
-### 5.4 finite mask 与 ordered compaction
+### 5.4 finite mask、公共 xyz load helper 与 ordered compaction
 
-indices-only RVV 主体按 VL chunk 处理 AoS 点云。每个 chunk 通过 `vlse32` 以 `sizeof(PointT)` 为 stride 分别读取 `x/y/z`，再生成 finite mask：
+indices-only RVV 主体按 VL chunk 处理 AoS 点云。每个 chunk 通过公共 `pcl::rvv_load::strided_load3_fields_f32m2` 读取 `x/y/z`，字段 offset 仍是 `offsetof(PointT, x/y/z)`，点间步长仍是 `sizeof(PointT)`。该 helper 只负责字段 layout 下的 load；indices-only 的 dense/sparse 判断、阈值、`int` 下标边界仍由 `removeNaNFromPointCloudIndicesRVV` 控制。
 
 ```cpp
+vfloat32m2_t vx, vy, vz;
+pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                          offsetof (PointT, x),
+                                          offsetof (PointT, y),
+                                          offsetof (PointT, z)> (
+    chunk, vl, vx, vy, vz);
+
 // NaN fails x == x; +/-Inf is rejected by abs(v) < Inf. vcompress keeps the
 // scalar scan order while each VL chunk writes only finite source indices.
 vbool16_t finite = __riscv_vmfeq_vv_f32m2_b16(vx, vx, vl);

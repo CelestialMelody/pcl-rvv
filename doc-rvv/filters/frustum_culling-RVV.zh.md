@@ -58,9 +58,12 @@ fc.filter(indices or output_cloud)
 核心 RVV 片段：
 
 ```cpp
-const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (... x ..., stride, vl);
-const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (... y ..., stride, vl);
-const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (... z ..., stride, vl);
+vfloat32m2_t vx, vy, vz;
+pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                          offsetof (PointT, x),
+                                          offsetof (PointT, y),
+                                          offsetof (PointT, z)> (
+    chunk, vl, vx, vy, vz);
 
 auto plane_leq_zero = [&](const Eigen::Vector4f& plane) {
   vfloat32m2_t distance = __riscv_vfmul_vf_f32m2 (vx, plane[0], vl);
@@ -77,7 +80,7 @@ const vbool16_t keep = negative ? __riscv_vmnot_m_b16 (inside, vl) : inside;
 const vint32m2_t kept_i32 = __riscv_vcompress_vm_i32m2 (source_i32, keep, vl);
 ```
 
-这段代码展示了主要边界：AoS 通过当前 `sizeof(PointT)` stride 读取 x/y/z；每个平面复用同一 VL chunk；mask 合并对应标量 6 个 `&&`；`negative_` 只反转最终 mask；`vcompress` 保持扫描顺序。
+这段代码展示了主要边界：AoS x/y/z 通过公共字段 load helper 读取，helper 不扩大 FrustumCulling 的 production dispatch；每个平面复用同一 VL chunk；mask 合并对应标量 6 个 `&&`；`negative_` 只反转最终 mask；`vcompress` 保持扫描顺序。
 
 这个 `plane_leq_zero` 组织方式是本轮 filters 里首次使用的“同一 VL chunk 上重复套用多个小型线性谓词”的 RVV 模式，和此前主题有明显区别：
 

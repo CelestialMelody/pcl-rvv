@@ -131,7 +131,7 @@ acc  : [10*C + 20*B + 30*A,
 ```text
 内存点序: P0        P1        P2        P3
 字段 x : P0.x  ... P1.x  ... P2.x  ... P3.x
-RVV x  : vlse32(base=&P0.x, stride=sizeof(PointXYZI))
+RVV x  : strided_load_field_f32m2<PointXYZI, fields::x>(base=&P0)
 ```
 
 ### 4.2 列方向

@@ -60,11 +60,12 @@ while (i < n)
 {
   const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
   const auto* chunk = base + i * sizeof (PointT);
-  const auto stride = static_cast<ptrdiff_t> (sizeof (PointT));
-
-  const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (... x ..., stride, vl);
-  const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (... y ..., stride, vl);
-  const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (... z ..., stride, vl);
+  vfloat32m2_t vx, vy, vz;
+  pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                            offsetof (PointT, x),
+                                            offsetof (PointT, y),
+                                            offsetof (PointT, z)> (
+      chunk, vl, vx, vy, vz);
 
   vfloat32m2_t distance = __riscv_vfmul_vf_f32m2 (vy, b, vl);
   distance = __riscv_vfmacc_vf_f32m2 (distance, a, vx, vl);
@@ -76,7 +77,7 @@ while (i < n)
 }
 ```
 
-这段代码展示了维护边界：先记录 `old_size` 保持追加语义；AoS 使用 `sizeof(PointT)` stride 读取 `x/y/z`；RVV 的 `vfmul` / `vfmacc` 求值顺序贴近当前标量编译形状，避免边界点因浮点舍入进入不同分支；`vcompress` 保持扫描顺序。
+这段代码展示了维护边界：先记录 `old_size` 保持追加语义；AoS `x/y/z` 使用公共字段 load helper 读取，PlaneClipper3D 的覆盖条件仍由算法本地 traits / runtime gate 决定；RVV 的 `vfmul` / `vfmacc` 求值顺序贴近当前标量编译形状，避免边界点因浮点舍入进入不同分支；`vcompress` 保持扫描顺序。
 
 ## RVV 数据组织
 

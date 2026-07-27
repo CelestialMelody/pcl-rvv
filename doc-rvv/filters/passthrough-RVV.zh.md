@@ -74,7 +74,7 @@ PassThrough<PointT>::applyFilterIndices(Indices &indices)
 
 ## RVV 数据组织
 
-PCL 点云是 AoS。一个 VL chunk 里，RVV 用 `sizeof(PointT)` 作为 stride，从同一批点中分别读 `x/y/z/field`：
+PCL 点云是 AoS。一个 VL chunk 里，RVV 通过公共字段 load helper 读取 `x/y/z`，动态过滤字段经 `strided_load_f32m2<sizeof(PointT)>` 按同样点间 stride 读取。helper 只表达字段访问；PassThrough 是否可进入 RVV 仍由本地 `kPassThroughXYZCompatible`、字段 metadata 和 runtime gate 决定。
 
 ```text
 内存:
@@ -82,10 +82,10 @@ PCL 点云是 AoS。一个 VL chunk 里，RVV 用 `sizeof(PointT)` 作为 stride
   x y z f    x y z f    x y z f    x y z f
 
 RVV:
-  vx = vlse32(base + offsetof(x), stride)
-  vy = vlse32(base + offsetof(y), stride)
-  vz = vlse32(base + offsetof(z), stride)
-  vf = vlse32(base + field_offset, stride)
+  strided_load3_fields_f32m2<sizeof(PointT), offsetof(x/y/z)>(chunk)
+    -> vx, vy, vz
+  strided_load_f32m2<sizeof(PointT)>(chunk + field_offset)
+    -> vf
 ```
 
 mask 组织：
