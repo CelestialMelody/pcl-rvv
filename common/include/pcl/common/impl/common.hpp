@@ -123,6 +123,7 @@ pcl::getAcuteAngle3DAVX (const __m256 &x1, const __m256 &y1, const __m256 &z1, c
 
 #if defined(__RVV10__)
 #include <pcl/common/impl/rvv_math.hpp>
+#include <pcl/rvv_point_load.h>
 #endif
 
 ///////////////////////////////////////////////////////////////////////////
@@ -251,7 +252,6 @@ getPointsInBoxRVV (const pcl::PointCloud<PointT> &cloud,
   if (!cloud.is_dense || n < 16)
     return getPointsInBoxStandard (cloud, min_pt, max_pt, indices);
 
-  const std::size_t stride = sizeof (PointT);
   const uint8_t* base = reinterpret_cast<const uint8_t*>(cloud.data ());
   const float min_x = min_pt[0], min_y = min_pt[1], min_z = min_pt[2];
   const float max_x = max_pt[0], max_y = max_pt[1], max_z = max_pt[2];
@@ -260,12 +260,15 @@ getPointsInBoxRVV (const pcl::PointCloud<PointT> &cloud,
   while (i < n)
   {
     const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
-    const float* ptr_x = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, x));
-    const float* ptr_y = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, y));
-    const float* ptr_z = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, z));
-    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (ptr_x, stride, vl);
-    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (ptr_y, stride, vl);
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (ptr_z, stride, vl);
+    const uint8_t* chunk = base + i * sizeof (PointT);
+    vfloat32m2_t vx;
+    vfloat32m2_t vy;
+    vfloat32m2_t vz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk, vl, vx, vy, vz);
 
     vbool16_t in_x = __riscv_vmfge_vf_f32m2_b16 (vx, min_x, vl);
     in_x = __riscv_vmand_mm_b16 (in_x, __riscv_vmfle_vf_f32m2_b16 (vx, max_x, vl), vl);
@@ -386,22 +389,21 @@ inline void getMaxDistanceRVV (const pcl::PointCloud<PointT> &cloud, const Eigen
     return;
   }
 
-  const std::size_t stride = sizeof(PointT);
   const uint8_t* base = reinterpret_cast<const uint8_t*>(cloud.data());
   float max_chunk = -1.0f;
   int idx_chunk = -1;
   std::size_t i = 0;
   while (i < n) {
     const std::size_t vl = __riscv_vsetvl_e32m2(n - i);
-    const float* ptr_x =
-        reinterpret_cast<const float*>(base + i * stride + offsetof(PointT, x));
-    const float* ptr_y =
-        reinterpret_cast<const float*>(base + i * stride + offsetof(PointT, y));
-    const float* ptr_z =
-        reinterpret_cast<const float*>(base + i * stride + offsetof(PointT, z));
-    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2(ptr_x, stride, vl);
-    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2(ptr_y, stride, vl);
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2(ptr_z, stride, vl);
+    const uint8_t* chunk = base + i * sizeof (PointT);
+    vfloat32m2_t vx;
+    vfloat32m2_t vy;
+    vfloat32m2_t vz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk, vl, vx, vy, vz);
     const vfloat32m2_t v_dx = __riscv_vfrsub_vf_f32m2(vx, px, vl);
     const vfloat32m2_t v_dy = __riscv_vfrsub_vf_f32m2(vy, py, vl);
     const vfloat32m2_t v_dz = __riscv_vfrsub_vf_f32m2(vz, pz, vl);
@@ -631,7 +633,6 @@ inline void getMinMax3DRVV (const pcl::PointCloud<PointT> &cloud, Eigen::Vector4
   const std::size_t vlmax = __riscv_vsetvl_e32m2 (static_cast<std::size_t> (-1));
   const float init_min = std::numeric_limits<float>::max ();
   const float init_max = std::numeric_limits<float>::lowest ();
-  const std::size_t stride = sizeof (PointT);
   const uint8_t* base = reinterpret_cast<const uint8_t*>(cloud.data ());
 
   // 循环内按 lane 做 vfmin/vfmax 归并；_tu 避免末段 vl<vlmax 时 TA 破坏高 lane 上已有极值。循环外各维一次 vfred。
@@ -646,15 +647,15 @@ inline void getMinMax3DRVV (const pcl::PointCloud<PointT> &cloud, Eigen::Vector4
   while (i < n)
   {
     const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
-    const float* ptr_x =
-        reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, x));
-    const float* ptr_y =
-        reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, y));
-    const float* ptr_z =
-        reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, z));
-    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (ptr_x, stride, vl);
-    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (ptr_y, stride, vl);
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (ptr_z, stride, vl);
+    const uint8_t* chunk = base + i * sizeof (PointT);
+    vfloat32m2_t vx;
+    vfloat32m2_t vy;
+    vfloat32m2_t vz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk, vl, vx, vy, vz);
     v_acc_min_x = __riscv_vfmin_vv_f32m2_tu (v_acc_min_x, v_acc_min_x, vx, vl);
     v_acc_min_y = __riscv_vfmin_vv_f32m2_tu (v_acc_min_y, v_acc_min_y, vy, vl);
     v_acc_min_z = __riscv_vfmin_vv_f32m2_tu (v_acc_min_z, v_acc_min_z, vz, vl);
@@ -838,7 +839,6 @@ inline float calculatePolygonAreaRVV (const pcl::PointCloud<PointT> &polygon)
     return calculatePolygonAreaStandard (polygon);
 
   const std::size_t n = static_cast<std::size_t>(num_points);
-  const std::size_t stride = sizeof (PointT);
   const uint8_t* base = reinterpret_cast<const uint8_t*>(polygon.data ());
   const std::size_t n_pairs = n - 1;
   const std::size_t vlmax = __riscv_vsetvl_e32m2 (static_cast<std::size_t> (-1));
@@ -851,18 +851,24 @@ inline float calculatePolygonAreaRVV (const pcl::PointCloud<PointT> &polygon)
   while (i < n_pairs)
   {
     const std::size_t vl = __riscv_vsetvl_e32m2 (n_pairs - i);
-    const float* ptr_ax = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, x));
-    const float* ptr_ay = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, y));
-    const float* ptr_az = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, z));
-    const float* ptr_bx = reinterpret_cast<const float*>(base + (i + 1) * stride + offsetof (PointT, x));
-    const float* ptr_by = reinterpret_cast<const float*>(base + (i + 1) * stride + offsetof (PointT, y));
-    const float* ptr_bz = reinterpret_cast<const float*>(base + (i + 1) * stride + offsetof (PointT, z));
-    const vfloat32m2_t ax = __riscv_vlse32_v_f32m2 (ptr_ax, stride, vl);
-    const vfloat32m2_t ay = __riscv_vlse32_v_f32m2 (ptr_ay, stride, vl);
-    const vfloat32m2_t az = __riscv_vlse32_v_f32m2 (ptr_az, stride, vl);
-    const vfloat32m2_t bx = __riscv_vlse32_v_f32m2 (ptr_bx, stride, vl);
-    const vfloat32m2_t by = __riscv_vlse32_v_f32m2 (ptr_by, stride, vl);
-    const vfloat32m2_t bz = __riscv_vlse32_v_f32m2 (ptr_bz, stride, vl);
+    const uint8_t* chunk_a = base + i * sizeof (PointT);
+    const uint8_t* chunk_b = base + (i + 1) * sizeof (PointT);
+    vfloat32m2_t ax;
+    vfloat32m2_t ay;
+    vfloat32m2_t az;
+    vfloat32m2_t bx;
+    vfloat32m2_t by;
+    vfloat32m2_t bz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk_a, vl, ax, ay, az);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk_b, vl, bx, by, bz);
     // vfmsac.vv：vd = vs1*vs2 - vd（规范正文，非 vd - vs1*vs2；后者为 vfnmsac）。用 vd=az*by 再 vfmsac(_, ay, bz) 得 ay*bz - az*by = (a×b)_x。
     const vfloat32m2_t cx = __riscv_vfmsac_vv_f32m2 (__riscv_vfmul_vv_f32m2 (az, by, vl), ay, bz, vl);
     const vfloat32m2_t cy = __riscv_vfmsac_vv_f32m2 (__riscv_vfmul_vv_f32m2 (ax, bz, vl), az, bx, vl);

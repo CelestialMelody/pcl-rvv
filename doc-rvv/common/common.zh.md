@@ -9,6 +9,7 @@
 上游文件以标量循环与 Eigen 表达式为主：`getMeanStd` 对 `std::vector<float>` 逐元素累加到 `double`；`getPointsInBox`、`getMaxDistance`、`getMinMax3D` 在 dense 与非 dense 分支上分别处理；`calculatePolygonArea` 用顶点叉积累加再取范数。x86 上另有 `__SSE__` / `__AVX__` 的 `acos` 近似与 `getAcuteAngle3D` 批量版本，RISC-V 目标没有对应条目。
 
 本仓库在 `__RVV10__` 下需要：模板签名与调用约定不变；行为与标量路径可对应；在点数与数据布局允许时，用步进 load、indexed load 与浮点归约缩短热点路径。点云多为 AoS，相邻点的 `x` 之间隔 `sizeof(PointT)`，向量侧以 `vlse32`、`vluxei32` 为主。
+dense / 顺序条带的 `x/y/z` strided load 使用公共 `pcl::rvv_load::strided_load3_fields_f32m2<sizeof(PointT), offsetof(PointT,x/y/z)>`，以减少重复地址生成代码，并保持原来的 3×`vlse32` 指令策略。带 `indices` 的 gather 路径仍保留局部 `vluxei32`：公共 `indexed_load3_fields_f32m2<T,...>` 会加入 `std::is_standard_layout_v<T>` 静态断言，而 `common.hpp` 旧路径是 direct-member `.x/.y/.z` + `offsetof(PointT, field)` 语义；为避免扩大或收窄现有自定义点类型行为，不把 indices gather 迁到公共 indexed helper。
 
 strip-mine 与 tail 语义见 [`doc-rvv/rvv/Tail-Agnostic-Tail-Undisturbed.zh.md`](../rvv/Tail-Agnostic-Tail-Undisturbed.zh.md)；选用 `vfloat32m2_t` 的说明见 [`doc-rvv/rvv/Why vfloat32m2_t.zh.md`](../rvv/Why%20vfloat32m2_t.zh.md)。
 
@@ -177,12 +178,13 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
 
 在轴对齐盒（`min_pt` / `max_pt` 给出各轴 `[min,max]`）内筛选点，把命中点的全局下标顺序写入 `indices` 前缀，返回个数 `l`。标量路径 `getPointsInBoxStandard` 对 dense 逐点六比较；非 dense 另做 `isfinite` 检查。
 
-#### 条带内：vlse32 与盒内掩码
+#### 条带内：公共 xyz stride load helper 与盒内掩码
 
-`stride`、`base` 与盒边界标量 `min_x`…`max_z` 在进入 `while` 前取好；`ptr_x/y/z` 指向条带起点处各分量。`vlse32` 步长为 `sizeof(PointT)`，对应 AoS。各轴用 `vmfge`/`vmfle` 与 `min_*`、`max_*` 比较，`vmand` 合成 `mask`：三轴同时落在闭区间内为真。
+`base` 与盒边界标量 `min_x`…`max_z` 在进入 `while` 前取好；每个条带的 `chunk` 指向当前点。dense / 顺序条带的 xyz 访问通过公共 `pcl::rvv_load::strided_load3_fields_f32m2` 表达，字段 offset 仍来自 `offsetof(PointT, x/y/z)`，AoS 点间步长仍是 `sizeof(PointT)`。helper 只封装字段 layout 下的 RVV load，不决定 `getPointsInBox` 是否进入 RVV；dense、小规模、identity 等运行时分流仍由算法 helper 自己控制。
+
+各轴用 `vmfge`/`vmfle` 与 `min_*`、`max_*` 比较，`vmand` 合成 `mask`：三轴同时落在闭区间内为真。实现保持 3×`vlse32` 指令策略，公共 helper 只是消除重复地址生成代码。
 
 ```cpp
-  const std::size_t stride = sizeof (PointT);
   const uint8_t* base = reinterpret_cast<const uint8_t*>(cloud.data ());
   const float min_x = min_pt[0], min_y = min_pt[1], min_z = min_pt[2];
   const float max_x = max_pt[0], max_y = max_pt[1], max_z = max_pt[2];
@@ -191,12 +193,13 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
   while (i < n)
   {
     const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
-    const float* ptr_x = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, x));
-    const float* ptr_y = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, y));
-    const float* ptr_z = reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, z));
-    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (ptr_x, stride, vl);
-    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (ptr_y, stride, vl);
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (ptr_z, stride, vl);
+    const std::uint8_t* const chunk = base + i * sizeof (PointT);
+    vfloat32m2_t vx, vy, vz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk, vl, vx, vy, vz);
 
     vbool16_t in_x = __riscv_vmfge_vf_f32m2_b16 (vx, min_x, vl);
     in_x = __riscv_vmand_mm_b16 (in_x, __riscv_vmfle_vf_f32m2_b16 (vx, max_x, vl), vl);
@@ -248,15 +251,13 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
 ```cpp
   while (i < n) {
     const std::size_t vl = __riscv_vsetvl_e32m2(n - i);
-    const float* ptr_x =
-        reinterpret_cast<const float*>(base + i * stride + offsetof(PointT, x));
-    const float* ptr_y =
-        reinterpret_cast<const float*>(base + i * stride + offsetof(PointT, y));
-    const float* ptr_z =
-        reinterpret_cast<const float*>(base + i * stride + offsetof(PointT, z));
-    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2(ptr_x, stride, vl);
-    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2(ptr_y, stride, vl);
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2(ptr_z, stride, vl);
+    const std::uint8_t* const chunk = base + i * sizeof (PointT);
+    vfloat32m2_t vx, vy, vz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk, vl, vx, vy, vz);
     const vfloat32m2_t v_dx = __riscv_vfrsub_vf_f32m2(vx, px, vl);
     const vfloat32m2_t v_dy = __riscv_vfrsub_vf_f32m2(vy, py, vl);
     const vfloat32m2_t v_dz = __riscv_vfrsub_vf_f32m2(vz, pz, vl);
@@ -285,9 +286,9 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
 
 求点云（或 `indices` 子集）在 `x,y,z` 上的轴对齐包围盒，写入 `min_pt` / `max_pt` 的前三分量。标量路径用 Eigen 的 `cwiseMin` / `cwiseMax` 逐点更新。
 
-#### 条带内归并与 `_tu`
+#### 条带内归并、公共 load helper 与 `_tu`
 
-每个 `vl` 用 `vlse32`（或 indices 版的 `vluxei32`）取一批点的 `x,y,z`。六路寄存器分别维护当前已见的最小/最大 `x,y,z`；对每条新向量做 `vfmin` / `vfmax` 的 `_tu`。原因与 4.1 类似：末条 `vl` 变短时，`_ta` 可能弄脏高 lane，而后面 `vfredmin` / `vfredmax` 仍按 `vlmax` 扫整寄存器，会读到无效极值。
+dense 全云路径每个 `vl` 用 `pcl::rvv_load::strided_load3_fields_f32m2` 取一批点的 `x,y,z`；indices 版仍保留局部 `vluxei32` gather。六路寄存器分别维护当前已见的最小/最大 `x,y,z`；对每条新向量做 `vfmin` / `vfmax` 的 `_tu`。原因与 4.1 类似：末条 `vl` 变短时，`_ta` 可能弄脏高 lane，而后面 `vfredmin` / `vfredmax` 仍按 `vlmax` 扫整寄存器，会读到无效极值。
 
 #### 条带外归约
 
@@ -297,12 +298,13 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
   while (i < n)
   {
     const std::size_t vl = __riscv_vsetvl_e32m2 (n - i);
-    const float* ptr_x =
-        reinterpret_cast<const float*>(base + i * stride + offsetof (PointT, x));
-    // ... ptr_y, ptr_z, vlse32 ...
-    const vfloat32m2_t vx = __riscv_vlse32_v_f32m2 (ptr_x, stride, vl);
-    const vfloat32m2_t vy = __riscv_vlse32_v_f32m2 (ptr_y, stride, vl);
-    const vfloat32m2_t vz = __riscv_vlse32_v_f32m2 (ptr_z, stride, vl);
+    const std::uint8_t* const chunk = base + i * sizeof (PointT);
+    vfloat32m2_t vx, vy, vz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk, vl, vx, vy, vz);
     v_acc_min_x = __riscv_vfmin_vv_f32m2_tu (v_acc_min_x, v_acc_min_x, vx, vl);
     v_acc_min_y = __riscv_vfmin_vv_f32m2_tu (v_acc_min_y, v_acc_min_y, vy, vl);
     v_acc_min_z = __riscv_vfmin_vv_f32m2_tu (v_acc_min_z, v_acc_min_z, vz, vl);
@@ -319,13 +321,28 @@ pcl::getPointsInBox (const pcl::PointCloud<PointT> &cloud,
 
 #### 向量边 \((i,i+1)\)
 
-点云为 AoS，对条带用 `vlse32` 同时加载一批边的两端点坐标（步长 `sizeof(PointT)`）。叉积分量与标量 \(\mathbf{a}\times\mathbf{b}\) 同分量式。`vfmsac.vv` 的规范为 \(vd \leftarrow vs1 \times vs2 - vd_{\text{old}}\)（与 `vfnmsac` 不同），代码用 `vfmul` 与 `vfmsac` 的操作数顺序与 Eigen 对齐。
+点云为 AoS，对条带用公共 `strided_load3_fields_f32m2` 分别加载一批边的两端点坐标（步长语义仍是 `sizeof(PointT)`）。叉积分量与标量 \(\mathbf{a}\times\mathbf{b}\) 同分量式。`vfmsac.vv` 的规范为 \(vd \leftarrow vs1 \times vs2 - vd_{\text{old}}\)（与 `vfnmsac` 不同），代码用 `vfmul` 与 `vfmsac` 的操作数顺序与 Eigen 对齐。
 
 #### 累加、归约与闭合边
 
 各分量在条带间用 `vfadd_tu` 累到 `v_acc_*`；最后用 `vfredusum` 折到标量。边 \((0,1)\ldots(n-2,n-1)\) 在向量化循环里处理；闭合边 \((n-1,0)\) 只出现一次且跨过头尾，用标量叉积加进 `rx,ry,rz`，避免为单条边再写一套掩码循环。
 
 ```cpp
+    const std::uint8_t* const chunk_a = base + i * sizeof (PointT);
+    const std::uint8_t* const chunk_b = base + (i + 1) * sizeof (PointT);
+    vfloat32m2_t ax, ay, az;
+    vfloat32m2_t bx, by, bz;
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk_a, vl, ax, ay, az);
+    pcl::rvv_load::strided_load3_fields_f32m2<sizeof (PointT),
+                                              offsetof (PointT, x),
+                                              offsetof (PointT, y),
+                                              offsetof (PointT, z)> (
+        chunk_b, vl, bx, by, bz);
+
     const vfloat32m2_t cx = __riscv_vfmsac_vv_f32m2 (__riscv_vfmul_vv_f32m2 (az, by, vl), ay, bz, vl);
     const vfloat32m2_t cy = __riscv_vfmsac_vv_f32m2 (__riscv_vfmul_vv_f32m2 (ax, bz, vl), az, bx, vl);
     const vfloat32m2_t cz = __riscv_vfmsac_vv_f32m2 (__riscv_vfmul_vv_f32m2 (ay, bx, vl), ax, by, vl);
