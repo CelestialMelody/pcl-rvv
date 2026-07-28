@@ -101,6 +101,36 @@ struct RVVXYZFloatLayout<PointT, true>
   static constexpr std::size_t kZ = pcl::traits::offset<PointT, pcl::fields::z>::value;
 };
 
+/** \brief Strong AoS layout gate for registered single-float xyz fields.
+  *
+  * This is for algorithms that directly read \c x/y/z from an AoS point cloud
+  * using byte offsets. Besides the field-semantics checks, it verifies the POD
+  * standard-layout assumption, that \c PointT and its POD representation have
+  * the same size, and that the stride and field offsets are aligned for
+  * \c float access.
+  *
+  * It is still only a point layout gate: size thresholds, index/correspondence
+  * overload policy, Scalar type policy, and output-order guarantees remain
+  * algorithm dispatch/fallback decisions.
+  */
+template <typename PointT, bool HasXYZ = pcl::traits::has_xyz<PointT>::value>
+struct RVVXYZAoSFloatLayout : std::false_type {};
+
+template <typename PointT>
+struct RVVXYZAoSFloatLayout<PointT, true> {
+  using Pod = typename pcl::traits::POD<PointT>::type;
+
+  static constexpr std::size_t kX = RVVXYZFloatLayout<PointT>::kX;
+  static constexpr std::size_t kY = RVVXYZFloatLayout<PointT>::kY;
+  static constexpr std::size_t kZ = RVVXYZFloatLayout<PointT>::kZ;
+
+  static constexpr bool value =
+      RVVXYZFloatLayout<PointT>::value && std::is_standard_layout_v<Pod> &&
+      sizeof(PointT) == sizeof(Pod) && sizeof(PointT) % alignof(float) == 0 &&
+      kX % alignof(float) == 0 && kY % alignof(float) == 0 &&
+      kZ % alignof(float) == 0;
+};
+
 /** \brief PCL traits gate for point types with registered single-float normal fields.
   *
   * This is a field-semantics gate for normal clouds. It verifies registered
@@ -156,7 +186,7 @@ struct RVVXYZNormalFloatLayout<PointT, true, true> {
       pcl::traits::offset<PointT, pcl::fields::normal_z>::value;
 
   static constexpr bool value =
-      RVVXYZFloatLayout<PointT>::value &&
+      RVVXYZAoSFloatLayout<PointT>::value &&
       RVVFloatFieldLayout<PointT, pcl::fields::normal_x>::value &&
       RVVFloatFieldLayout<PointT, pcl::fields::normal_y>::value &&
       RVVFloatFieldLayout<PointT, pcl::fields::normal_z>::value &&
@@ -205,6 +235,11 @@ struct RVVXYZFloatLayout<
 template <typename PointT>
 inline constexpr bool kRVVXYZPointCompatible =
     detail::RVVXYZFloatLayout<PointT>::value;
+
+/** \brief Variable-template form of \c RVVXYZAoSFloatLayout<PointT>::value. */
+template <typename PointT>
+inline constexpr bool kRVVXYZAoSPointCompatible =
+    RVVXYZAoSFloatLayout<PointT>::value;
 
 /** \brief Variable-template form of \c RVVXYZNormalFloatLayout<PointT>::value. */
 template <typename PointT>
