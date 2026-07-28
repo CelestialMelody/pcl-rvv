@@ -126,6 +126,13 @@ public:
                               Matrix4& transformation_matrix) const override;
 
 protected:
+  /** \brief Scalar full-cloud fallback after public overload checks. */
+  inline void
+  estimateRigidTransformationFullCloudStd(
+      const pcl::PointCloud<PointSource>& cloud_src,
+      const pcl::PointCloud<PointTarget>& cloud_tgt,
+      Matrix4& transformation_matrix) const;
+
   /** \brief Estimate a rigid rotation transformation between a source and a target
    * \param[in] source_it an iterator over the source point cloud dataset
    * \param[in] target_it an iterator over the target point cloud dataset
