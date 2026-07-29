@@ -23,7 +23,7 @@ second-pass 是模块实施说明 / 执行队列。文档必须：
 - 逐项交代 first-pass high/mid 候选去向。
 - 新增补充候选时说明来源、证据和边界。
 - 写完整统计：first-pass 总数和 high/mid/low、初始候选基线数量、新增补充候选、第二轮候选总数、三类队列数量、合并/删除/源码冲突数量、high/mid 降级数量。
-- 使用主成本覆盖类型：`direct-main-path`、`partial-preprocess`、`tail-compress`、`diagnostic-only`、`non-standalone`。
+- 使用主成本覆盖类型：`direct-main-path`、`partial-preprocess`、`tail-compress`、`diagnostic`、`non-standalone`。
 - 在“文件级变化理由”逐项说明保持、升级、降级、合并、转入 `bench 诊断主题`、暂缓或删除的原因。
 - 按 `建议进行 RVV 优化的文件`、`保留实施的候选文件`、`暂缓或不推荐考虑 RVV 优化的文件` 分组。
 - 对每个候选下钻到函数入口或函数族。

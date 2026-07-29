@@ -19,7 +19,7 @@ doc-rvv/library-screening/<module>/<module>-module-second-pass.zh.md
 - 每个 first-pass `high/mid` 候选的去向。
 - 新增补充候选的来源、证据和边界。
 - 具体函数入口或函数族，而不是只按文件名判断。
-- 主成本覆盖类型：`direct-main-path`、`partial-preprocess`、`tail-compress`、`diagnostic-only`、`non-standalone`。
+- 主成本覆盖类型：`direct-main-path`、`partial-preprocess`、`tail-compress`、`diagnostic`、`non-standalone`。
 - 预期覆盖条件、fallback 条件、测试和 bench 可行性。
 
 `high/mid` 是必须复核的下限集合，不得静默丢弃。纳入 first-pass `low` 或未列入候选的文件时，必须说明来源、源码证据、为什么属于漏判，以及为什么没有扩展成重新全模块或全库筛选。
@@ -39,7 +39,7 @@ doc-rvv/library-screening/<module>/<module>-module-second-pass.zh.md
 - `direct-main-path`：RVV 覆盖公开入口主成本或输出生成主路径，优先考虑纳入建议队列。
 - `partial-preprocess`：只覆盖前置预处理，例如 min/max、leaf id、字段预扫描，需评估后续 sort/search/map/lattice/Eigen/整点复制是否稀释收益。
 - `tail-compress`：只覆盖后处理压缩、threshold 或拷贝前置 mask，通常不宜单独纳入建议队列，除非入口极常用且覆盖面明确。
-- `diagnostic-only`：有清晰局部实验价值，但不承诺生产分流。
+- `diagnostic`：有清晰局部实验价值，需要用诊断证据判断是否可进入 production，不承诺生产分流。
 - `non-standalone`：公开头、薄 wrapper、显式实例化、伴随 src 或真实循环在其它主题中，不单独实施。
 
 ## 固定分类

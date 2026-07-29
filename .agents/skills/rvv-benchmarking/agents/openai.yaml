@@ -1,3 +1,0 @@
-display_name: RVV Benchmarking
-short_description: 管理 RVV test、bench、QEMU、反汇编、板卡和证据日志。
-default_prompt: 使用 RVV benchmarking skill，检查专项 test/bench、QEMU、反汇编、板卡日志和 evidence logs 是否能支撑当前性能结论。

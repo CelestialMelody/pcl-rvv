@@ -25,11 +25,14 @@
 - `rvv-screening/SKILL.md`：确认当前主题来自 second-pass 还是 follow-up，不重新筛选。
 - `rvv-documentation/references/evaluation-doc-structure.md`：函数级评估是 production gate。
 - `rvv-documentation/references/function-evaluation-and-closeout.zh.md`：S2 evaluation 与 S11 closeout 的文档职责分工。
-- `rvv-diagnostics/SKILL.md`：local fragment、full diagnostic、production decision 的证据层级。
-- `rvv-diagnostics/references/semantic-alignment.md`：浮点、FRM/FCSR、FMA contraction 和反汇编语义对齐。
-- `rvv-diagnostics/references/staging-and-evidence.md`：staging、标量 tail、测试矩阵和 bench 命名。
+- `rvv-test/SKILL.md`：测试、诊断、benchmark、消融和 evidence logs 的统一规则。
+- `rvv-test/references/test-taxonomy.zh.md`：unit、边界 / 对抗、回归、production-shaped、production direct、fallback 和 smoke 测试分类。
+- `rvv-test/references/entry-shapes-and-test-support.zh.md`：local fragment、row source policy、production-shaped diagnostic 和 production direct 分层。
+- `rvv-test/references/numerical-consistency.zh.md`：浮点、FRM/FCSR、FMA、reduction、finite mask 和反汇编归属。
+- `rvv-test/references/performance-and-ablation.zh.md`：QEMU、板卡、bench 输出、component ablation 和负向归因。
+- `rvv-test/references/evidence-output-policy.zh.md`：summary-only、sanitized-logs、raw-logs 和提交边界。
+- `rvv-test/references/registration-topic-evidence.zh.md`：registration 主题的变换估计、对应关系估计、row source 和法方程证据清单。
 - `rvv-implementation/SKILL.md`：Std/RVV 分发、fallback、注释粒度和 PCL 代码风格。
-- `rvv-benchmarking/SKILL.md`：QEMU、反汇编、目标硬件、bench 输出合同和 evidence logs。
 - `rvv-project-config/references/makefile-env.md`：专项 Makefile、board 入口和本机配置隔离。
 - `rvv-documentation/SKILL.md`：主题文档、评估文档、筛选状态、诊断文档和 closeout 同步。
 
@@ -66,7 +69,10 @@
 - QEMU 不写成性能结论。
 - 板卡或目标硬件结果才是性能结论。
 - bench 输出必须能解析 `Dataset:`、`Iterations:`、case avg、`Total Time` 和 checksum；格式异常先修 bench 或脚本。
+- full-cloud、source-indexed、dual-indices 和 correspondences 是不同 row source policy；production 必须逐 policy 独立批准。
+- production-shaped diagnostic 和 production direct 分层记录；diagnostic evidence 不能替代 production evidence。
 - 若手工展开浮点表达式，检查源码公式、标量反汇编和 RVV intrinsic 求值顺序。
+- FMA / reduction 测试需要反汇编归属、误差预算和必要板卡 A/B；不能仅凭源码表达式判断是否允许 fused 指令。
 - 若使用显式舍入或修改 FRM/FCSR，保存并恢复调用者浮点环境。
 - 若使用 `no-tree-vectorize` 或同类局部优化限制，评估、主题文档和源码注释都要说明限制范围、保护的语义和反汇编证据。
 - 如果 RVV 只覆盖前置片段或 staging，文档和 bench 必须区分 local fragment、full diagnostic 和 production case，不能引用局部 speedup 作为生产结论。
@@ -74,7 +80,7 @@
 - 上游原始测试不是每个主题强制项；有对应测试时优先复用仓库测试数据和参数，链接/运行失败先补依赖与 Makefile，不直接写成环境阻塞。
 - x86 SIMD 只做同平台 baseline vs SIMD 对照；可参考思路，但不能照搬 x86 单点寄存器粒度。
 - 板卡 SSH/rsync 属于 Makefile、workflow 或工作日志层；技术文档只记录目标硬件、日志、数据集、iterations 和真实性能结论。
-- evidence logs 单独分组，不能混入源码、文档或本机配置。
+- evidence logs 默认 `summary-only`，单独分组，不能混入源码、文档或本机配置。
 - 已经改入上游但板卡性能不成立时，回收生产分流；正确但不加速的实验保留为诊断证据。
 - closeout 同步评估文档、主题文档、模块工作日志和状态表。
 - 讨论型问题、实现策略取舍和 workflow 规则来源写入模块“问题与讨论”；模块工作日志只记录推进事实、证据链和状态同步。

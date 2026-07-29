@@ -13,9 +13,10 @@
 7. 数值算例与 VL chunk 图示。
 8. Bench case 说明。
 9. 测试、QEMU、反汇编和板卡证据。
-10. 生产接入评估。
-11. 生产接入后的 closeout 更新。
-12. 结论与后续方向。
+10. 正确性与高效性证据链。
+11. 生产接入评估。
+12. 生产接入后的 closeout 更新。
+13. 结论与后续方向。
 
 ## 必写要点
 
@@ -30,8 +31,23 @@
 - 当前主题属于 production direct、production-shaped diagnostic、bench 诊断主题，还是生产回退说明。
 - 每个 bench case 的入口、规模、参数、是否命中 RVV、speedup 计算方式和证明点。
 - 板卡收益是否足以覆盖 staging、buffer 和维护成本。
+- closeout 或 production-candidate 阶段必须包含“正确性与高效性证据链”小节。该小节是 reviewer 判断依据，不能只写说明文字。
 - 若当前结论是 partial-production-candidate（局部生产候选），必须写清“候选范围”和“尚不能生产接入的原因”。候选范围要窄到入口形态、点类型、数据布局、规模、fallback 条件和目标硬件；不能把局部诊断收益写成整个函数族可接入。
 - 若已经接入 production（生产源码），主题文档必须从“诊断原型说明”升级为“生产实现说明”：写清真实 production patch（生产补丁）、真实 dispatch / fallback、production direct（真实生产入口直连）测试、反汇编符号归属、板卡 production bench 和 PI5 EvidenceDecision（生产证据决策）。不要把早期诊断 speedup 当作最终生产结论。
+
+## 正确性与高效性证据链
+
+closeout（收尾）或 production-candidate 文档必须新增或更新本小节。小节至少回答：
+
+- correctness（正确性）：public entry（公开入口）是否真实命中目标路径；row semantics（行语义）是否清楚；`accepted_points`、中间态、matrix（矩阵）和 fallback 是否有测试、日志或源码证据。
+- performance（性能）：性能结论是否来自 repeated board（重复板卡测试）或目标硬件结果；QEMU timing（QEMU 计时）不能作为性能结论。
+- boundary（证据边界）：EvidenceDecision 是否只覆盖证据已经证明的入口、点类型、row source policy（行来源策略）、indices、correspondences、`Scalar`、数据布局和规模。
+- risk（风险）：未覆盖范围、保留标量路径、后续扩展条件和需要补的 test、bench、asm（反汇编）或板卡证据。
+
+未接 production 的诊断结论应写对应“诊断证据链”。该小节必须说明 diagnostic evidence（诊断证据）
+能证明什么，不能写成 production evidence（生产证据）。如果只有 representative pointtypes
+（代表性点类型）、public-entry-shaped wrapper（公开入口形态包装）或 production-shaped diagnostic，
+必须写清真实 production dispatch、indexed / correspondences、泛型点类型或 fallback 仍未闭合。
 
 ## Staging 与特殊实体
 

@@ -65,4 +65,4 @@ doc-rvv/library-screening/modules/<module>-function-triage.zh.md
 - first-pass 文档位置。
 - high/mid/low 数量。
 - second-pass 应读取的下一份文档。
-- 是否发现需要补充到 workflow、diagnostics、implementation、benchmarking 或 documentation skill 的通用规则。
+- 是否发现需要补充到 workflow、rvv-test、implementation 或 documentation skill 的通用规则。

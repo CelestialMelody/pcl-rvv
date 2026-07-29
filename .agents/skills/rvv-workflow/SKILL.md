@@ -1,6 +1,6 @@
 ---
 name: rvv-workflow
-description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适用于选择下一主题、从筛选队列进入函数级评估、协调 project-config/screening/diagnostics/implementation/benchmarking/documentation skills、中断恢复、closeout 同步和交接 prompt。
+description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适用于选择下一主题、从筛选队列进入函数级评估、协调 project-config/screening/testing/implementation/documentation skills、中断恢复、closeout 同步和交接 prompt。
 ---
 
 # RVV Agent 工作流
@@ -9,9 +9,8 @@ description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适
 
 - 项目配置：`rvv-project-config`
 - 候选筛选：`rvv-screening`
-- 诊断和证据层级：`rvv-diagnostics`
+- 测试、诊断、benchmark 和证据层级：`rvv-test`
 - 生产实现：`rvv-implementation`
-- test/bench/QEMU/反汇编/板卡：`rvv-benchmarking`
 - 文档和 closeout：`rvv-documentation`
 
 如果后续发现新规则，只补对应 skill/reference，不把大段历史材料重新塞回本入口。
@@ -22,7 +21,8 @@ description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适
 短 prompt 只简化用户输入，不降低 topic 产物质量。worker 选中 topic 后、开始写文件前，
 必须按 [references/worker-quality-gates.zh.md](references/worker-quality-gates.zh.md)
 检查标量路径、production/diagnostic 数据流映射、文档结构、test-rvv 注释、bench 边界、
-证据模型和 stop condition（停止条件）；命中复杂 RVV 模式时再读取对应细则。
+证据模型和 stop condition（停止条件）；命中复杂 RVV 模式时再读取对应细则。测试、
+诊断、benchmark、消融和证据日志规则集中在 `rvv-test`。
 
 所有 RVV 工作的回复、文档、测试输出和 `test-rvv` / prototype 注释应遵循 [references/reviewability-and-language.zh.md](references/reviewability-and-language.zh.md)：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释），必要时再补中文解释。中文说明要自然，避免翻译腔、名词堆叠和模板填空；长测试/诊断文件提供“本文件做什么”这类阅读提示，非平凡函数用自然句说明作用、调用者和证据角色。
 
@@ -34,11 +34,16 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 
 普通主题在 S0 必须先记录本轮工作偏好，之后再进入实现。至少冻结：
 
+- 偏好来源：先读 `.agents/config/defaults.yaml`，再读可选 `.agents/local/user-preferences.yaml`，最后应用当前 prompt 覆盖。
+- `preferences_loaded`：报告 defaults、local override（本机私有覆盖）和 prompt override（提示词覆盖）的读取结果。
 - 代码注释策略：不注释、简要注释、详细注释。
 - 注释语言策略：仅中文、仅英文、中英双写；中英双写时说明先后顺序。
 - production 源码注释上限：默认克制，只解释维护边界、fallback、dispatch、数值风险和数据布局。
 - `test-rvv`、diagnostic、prototype 注释下限：默认详细中文注释，除非用户明确选择更轻量策略。
+- 文档策略：closeout 当前状态优先，必须有数值算例，长期文档不保留对话流程话术。
 - 提交策略：默认不创建 commit；如果用户授权提交，先冻结是否提交 evidence logs、是否使用已脱敏日志、是否拆分 commit。
+- 证据策略：默认 `summary-only`，raw logs 不默认提交。
+- agent asset 反馈策略：默认 `report-only`（只报告建议），不自动修改 skill、knowledge map 或 prompt。
 - 校准模式：如果用户要求单 topic 反复校准，先确认是否需要清理上一轮 worker 产物；未清理前不要在旧产物上继续扩写。
 
 偏好冻结不是长篇计划。它应以几行清单出现在 S0 报告和最终 handoff packet 中，便于 reviewer 判断 worker 是否按本轮约束执行。
@@ -80,8 +85,7 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 最终 Handoff Packet 应包含 `agent_asset_trace`，用短清单把关键决策映射到实际读取过的 agent 资产或规则。例如：
 
 - `rvv-workflow/references/reviewability-and-language.zh.md` -> `TEST` 说明、术语解释和注释策略。
-- `rvv-diagnostics` -> fallback gate 隔离和 production-shaped diagnostic 边界。
-- `rvv-benchmarking` -> QEMU / asm / board 证据边界和日志提交边界。
+- `rvv-test` -> test taxonomy、diagnostic policy、数值一致性、bench / ablation 和 evidence logs。
 - `pcl-rvv-knowledge-map.md` -> 读取范围控制。
 
 只写真正影响了本轮行为的资产；不要把未读取或未使用的 skill 机械列入 trace。

@@ -36,4 +36,4 @@ closeout 时报告：
 - 筛选文档位置；
 - high/mid/low 或三类队列数量；
 - 第一条未完成主题；
-- 是否发现需要补充到 workflow、diagnostics、implementation、benchmarking 或 documentation skill 的通用规则。
+- 是否发现需要补充到 workflow、rvv-test、implementation 或 documentation skill 的通用规则。

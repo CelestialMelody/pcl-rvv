@@ -1,0 +1,48 @@
+language:
+  primary: zh
+  explain_english_terms: true
+
+comments:
+  test_rvv: detailed_zh
+  diagnostic: detailed_zh
+  prototype: detailed_zh
+  production: concise_boundary_only
+  production_comment_scope:
+    - maintenance_boundary
+    - fallback
+    - dispatch
+    - numeric_risk
+    - data_layout
+
+documentation:
+  closeout_current_state_first: true
+  require_numeric_example: true
+  forbid_conversation_process_phrasing: true
+  long_term_docs_use_source_evidence: true
+
+evidence:
+  default_policy: summary-only
+  keep_raw_logs: false
+  submit_raw_logs_by_default: false
+  allow_sanitized_logs_when_user_requests_logs: true
+
+agent_assets:
+  feedback_mode: report-only
+  allow_auto_update: false
+  report_at_phase_boundaries: true
+
+paths:
+  work_log_root: tmp/rvv-work-logs
+  board_archive_root: work/rvv-evidence-raw-archive
+  test_root: test-rvv
+  doc_root: doc-rvv
+  dependency_root_env_var: PCL_RVV_DEP_ROOT
+  cross_toolchain_env_var: PCL_RVV_TOOLCHAIN_ROOT
+
+board:
+  target_env_var: PCL_RVV_BOARD_TARGET
+  user_env_var: PCL_RVV_BOARD_USER
+  host_env_var: PCL_RVV_BOARD_HOST
+  remote_root_env_var: PCL_RVV_BOARD_REMOTE_ROOT
+  label_env_var: PCL_RVV_BOARD_LABEL
+  store_private_values_in_local_override: true

@@ -16,6 +16,22 @@
 second-pass（第二轮筛选）或 follow-up（复筛）状态表自动选择模块；若模块仍然
 不唯一，才先询问模块名。模块一旦确定，worker 默认选择该模块下第一条未完成 topic（主题）。
 
+worker（执行者）和 reviewer（审查者）启动时先读取：
+
+1. `AGENTS.md`
+2. `.agents/config/defaults.yaml`
+3. 如果存在，`.agents/local/user-preferences.yaml`
+4. `.agents/knowledge/pcl-rvv-knowledge-map.md`
+5. `.agents/skills/rvv-workflow/SKILL.md`
+6. `.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md`
+7. `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`
+
+S0 必须在输出中写明 `preferences_loaded`，并冻结注释、文档、证据、日志和 agent asset（代理资产）反馈偏好。若 local override
+存在，worker 还要报告读取到的本机覆盖范围；若不存在，写明只使用 defaults。
+默认 agent asset feedback mode（代理资产反馈模式）是 `report-only`（只报告建议）。worker 在 S4 测试计划、
+S10 EvidenceDecision（证据决策）、S11 closeout（收尾）或 blocked（阻塞）边界发现可复用规则、资产缺口或冗余规则时，
+才输出 `agent_asset_feedback`；没有发现时省略。reviewer 在 closeout review（收尾审查）中按同一规则报告建议。
+
 ## 最短启动写法
 
 worker 可用：
@@ -129,10 +145,12 @@ final-closeout.md
 所有角色先读：
 
 1. `AGENTS.md`
-2. `.agents/knowledge/pcl-rvv-knowledge-map.md`
-3. `.agents/skills/rvv-workflow/SKILL.md`
-4. `.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md`
-5. `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`
+2. `.agents/config/defaults.yaml`
+3. 如果存在，`.agents/local/user-preferences.yaml`
+4. `.agents/knowledge/pcl-rvv-knowledge-map.md`
+5. `.agents/skills/rvv-workflow/SKILL.md`
+6. `.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md`
+7. `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`
 
 worker 再读：
 
@@ -148,8 +166,13 @@ worker 选中 topic 后、开始写 `test-rvv/`、`doc-rvv/` 或 production 前�
 `worker-quality-gates.zh.md` 做一次轻量自查。若 topic 涉及 staging（分阶段暂存）、
 gather（离散加载）、`vcompress`、scalar tail（标量尾段）、vector reduction（向量规约）、
 FMA（融合乘加）、板卡性能或 no-production closeout（不接入生产收尾），继续读取该文件指向的
-`rvv-documentation`、`rvv-diagnostics` 和 `rvv-benchmarking` 详细 reference。短 prompt
+`rvv-documentation`、`rvv-test` 和 `rvv-implementation` 详细 reference。短 prompt
 只负责启动变短，不降低 worker 产物质量门槛。
+
+registration（配准）topic 如果涉及 transformation estimation（变换估计）、correspondence
+estimation（对应关系估计）、row source policy（行来源策略）、`accepted_points`、`ATA/ATb`
+或 matrix（矩阵）证据，必须读取
+`.agents/skills/rvv-test/references/registration-topic-evidence.zh.md`。
 
 短 prompt worker 不要求用户显式写“检索历史经验”。worker 选中 topic 并读取当前源码/文档后，
 如果发现多公开入口、indices、correspondences、weights、staging、policy、row source、
@@ -175,7 +198,8 @@ reviewer 再读：
 3. `.agents/skills/rvv-workflow/references/topic-lifecycle.zh.md`
 4. `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md`
 5. `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
-6. worker 输出、Handoff Packet（交接数据包）、当前 diff（差异）和 topic 证据；如果用户没有给 worker 输出路径，就读当前对话中最近一轮 worker 回复或用户贴入的交接内容。
+6. `.agents/skills/rvv-test/SKILL.md`，以及当前证据类型需要的窄 reference。
+7. worker 输出、Handoff Packet（交接数据包）、当前 diff（差异）和 topic 证据；如果用户没有给 worker 输出路径，就读当前对话中最近一轮 worker 回复或用户贴入的交接内容。
 
 workflow improvement 再读：
 
@@ -195,6 +219,7 @@ worker 默认权限：
 - 如果证据支持 production-ready（可接入生产），先输出 Handoff Packet，等待用户确认后进入 production integration loop（生产接入闭环）。
 - 默认不创建 commit（提交）。
 - 默认不要求用户预先指定输出路径；只有用户要求落盘、保存到固定 work-log（工作日志）或跨对话复用时，才写入路径。
+- S0 必须记录 `preferences_loaded`，并写明是否读取了 `.agents/config/defaults.yaml` 与 `.agents/local/user-preferences.yaml`。
 
 reviewer 默认权限：
 
@@ -205,9 +230,10 @@ reviewer 默认权限：
 
 workflow improvement 默认权限：
 
-- 只修改 `.agents/skills/`、`.agents/knowledge/`、`AGENTS.md` 和用户指定的 prompt 模板。
+- 只修改 `.agents/skills/`、`.agents/knowledge/`、`.agents/config/`、`AGENTS.md`、必要的 `.gitignore` 和用户指定的 prompt 模板。
 - 不修改 production、`doc-rvv/` 或 `test-rvv/` topic 产物。
 - 不创建 commit。
+- 批量修改 skill、knowledge map 或入口 prompt 前，先创建 `.agents/backup/` 下的不提交备份目录。
 
 ## 默认输出合同
 
@@ -219,7 +245,9 @@ worker 最终输出必须包含：
 - EvidenceDecision。
 - `language_check`。
 - `worker_quality_gate_check`，使用 `gate | status | evidence | missing_items` 证据化表格。
+- `preferences_loaded`。
 - `agent_asset_trace`。
+- `agent_asset_feedback`，仅在本轮发现可沉淀规则、资产缺口或冗余规则时输出；默认只报告建议，不自动改 agent asset。
 - Handoff Packet。
 - 若当前结论是窄范围、局部候选、不接入生产但仍有可复用后续方向，输出给用户的后续路径选项：
   默认建议、继续当前 topic、另开 follow-up topic、当前不建议做的方向。
@@ -231,12 +259,14 @@ reviewer 最终输出必须符合 reviewer protocol（审查协议）：
 - Suggested next worker actions（建议 worker 下一步动作）。
 - Worker prompt patch（给 worker 的提示词补丁）。
 - Suggested skill / knowledge-map updates（建议更新的 skill 或知识索引）。
+- `agent_asset_feedback` 或等价小节，仅在发现可沉淀规则、资产缺口或冗余规则时输出。
 
 workflow improvement 最终输出必须包含：
 
 - Findings。
 - Asset gaps（资产缺口）。
 - Changes made in Workflow improvement mode（工作流改进模式的实际改动）。
+- `backup_path`，如果本轮创建了备份。
 - Validation（验证命令和结果）。
 - New short prompt example（新的短 prompt 示例）。
 
@@ -244,12 +274,13 @@ workflow improvement 最终输出必须包含：
 
 用户未覆盖时，worker 在 S0 记录：
 
-- `test-rvv`、diagnostic（诊断代码）和 prototype（原型代码）使用详细中文注释。
-- production 注释克制，只解释维护边界、fallback（回退路径）、dispatch（分流逻辑）、数值风险和数据布局。
-- 英文专有术语首次出现时写中文解释。
-- QEMU（仿真器）只作为 correctness（正确性）、路径和日志形状证据。
+- 偏好来源：`.agents/config/defaults.yaml`、可选 `.agents/local/user-preferences.yaml` 和当前 prompt。
+- `test-rvv`、diagnostic（诊断代码）和 prototype（原型代码）默认使用详细中文注释。
+- production 注释默认克制，只解释维护边界、fallback（回退路径）、dispatch（分流逻辑）、数值风险和数据布局。
+- 英文专有术语首次出现时默认写中文解释。
+- QEMU（仿真器）默认只作为 correctness（正确性）、路径和日志形状证据。
 - 板卡或目标硬件结果才支撑性能结论。
-- evidence logs（证据日志）默认不提交；用户要求提交时先脱敏并拆分 commit。
+- evidence logs（证据日志）默认 `summary-only`，不提交 raw logs（原始日志）；用户要求提交时先脱敏并拆分 commit。
 
 ## 短 prompt 自查
 

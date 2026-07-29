@@ -15,7 +15,7 @@ description: 实现或审查 C/C++ 高性能库中的 RVV 生产路径。适用�
 
 - 公开 API 不变。
 - 常驻 `*_Std` 标量 helper。
-- `__RVV10__` 下提供 `*_RVV` helper。
+- `__RVV10__` 下提供 `*_RVV` helper；承载 RVV 指令或 RVV 分流语义的 helper 默认不要在非 RVV 构建中以“只返回 false”的 stub 常驻，公开入口用条件编译包住 RVV 尝试并自然落回 Std。
 - 公开入口用短路分流选择 RVV 或自然落回 Std。
 - 不强制新增 dispatch helper；只有多个公开入口共享复杂选择逻辑时才增加。
 - 主路径 helper 放在对应分发入口附近，命名空间遵循所在文件风格。
@@ -49,6 +49,8 @@ description: 实现或审查 C/C++ 高性能库中的 RVV 生产路径。适用�
 
 - 泛型接入：用 PCL traits（点类型字段特征）、字段 offset、POD / standard-layout 和 alignment gate 证明当前 `PointSource` / `PointTarget` 可走 RVV；不满足时 fallback。
 - 窄范围接入：明确只对已证明的具体点类型或布局分流，其它模板实例 fallback；文档和 Handoff Packet 不能把它写成泛型成立。
+
+模板点类型的标量语义应先按源码字段访问理解：例如 source 只读 `x/y/z`、target 读 `x/y/z/normal_x/normal_y/normal_z` 时，原标量路径支持的是“这些字段访问能编译且语义成立”的点型组合，不是一定 `PointSource == PointTarget`，也不是一定 exact `PointNormal`。RVV 若只覆盖 `PointNormal -> PointNormal`，这是有意收窄的 production gate；若要扩成泛型，必须分别证明 source 和 target 当前读取字段、布局、stride/gather、Scalar 和数据流证据，不能把某个 exact 点型的 bench 或测试外推成模板泛型成立。
 
 point-to-plane、normal-based registration（基于法线的配准）还必须额外证明 normal 字段。`x/y/z` traits 成立不代表 `normal_x/normal_y/normal_z` 成立；若公共 normal field gate 不足，先收窄到已证明点类型，或补 traits gate 后再接入。
 

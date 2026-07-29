@@ -1,13 +1,53 @@
 ---
 name: rvv-project-config
-description: 标准化 C/C++ 高性能库在 RISC-V RVV 优化前后的项目本地配置与测试工作流。适用于审查或重构硬编码路径、交叉工具链配置、依赖安装目录、板卡部署参数、Makefile 公共片段、config 示例文件、README 配置说明，以及 RVV 优化项目的构建/测试验证入口。
+description: 标准化 C/C++ 高性能库的 RVV 项目环境和测试运行环境。适用于依赖库、交叉编译工具链、PCL 交叉编译、QEMU、board、Makefile harness、sanitize logs、run/fetch/analyze 入口、配置文件读取和 env var 边界；不承载测试策略本身。
 ---
 
 # RVV 项目配置工作流
 
-使用这个 skill 时，目标不是直接写 RVV 优化代码，而是先把项目的测试与构建环境整理成可复用、可审查、可迁移的 adapter 层。核心原则是：本机私有配置不提交，公共构建逻辑不写死个人路径，测试行为保持不变，并留下可复现的验证证据。
+使用这个 skill（技能）时，目标不是直接写 RVV 优化代码，也不是决定应该写哪些测试。目标是把项目依赖、交叉编译、QEMU（仿真器）、board（板卡）、Makefile harness（测试运行框架）和配置读取整理成可复用、可审查、可迁移的环境层。
+
+测试策略属于 `rvv-test`。例如 unit test（单元测试）、production-shaped diagnostic（生产形态诊断）、benchmark（性能测试）、component ablation（组件消融）和 evidence logs（证据日志）策略，应写入 `rvv-test`。本 skill 只解释这些测试如何通过工具链、Makefile、QEMU、board 和环境变量运行。
+
+核心原则：
+
+- 本机私有配置不提交。
+- 公共构建逻辑不写死个人路径、私有 IP、用户名或单台设备默认值。
+- 可提交配置只放默认偏好、目录约定和 env var（环境变量）名称。
+- 本机覆盖项放入 `.agents/local/user-preferences.yaml`、`config.mk` 或 shell 环境变量。
+- 测试行为保持可复现，环境缺失时错误信息要指向配置入口。
 
 Makefile 分层模式和检查清单见 [references/makefile-env.md](references/makefile-env.md)。跨库适配、测试入口和验证能力声明见 [references/library-adapter.md](references/library-adapter.md)。
+
+## 职责范围
+
+### 1. 项目环境搭建
+
+- PCL 源码根、测试根和文档根。
+- PCL 依赖库安装前缀。
+- RISC-V 交叉编译工具链和 sysroot（系统根目录）。
+- PCL 交叉编译产物和链接路径。
+- 本机路径、依赖路径和工具链路径如何通过 local override（本机私有覆盖）或 env var 注入。
+
+### 2. 测试环境搭建
+
+- QEMU runner（仿真运行器）。
+- board 部署、运行、抓回日志和分析入口。
+- Makefile harness 的公共片段、topic Makefile 和 board.mk 分层。
+- sanitize logs（日志脱敏）、run/fetch/analyze 目标如何接线。
+- 哪些命令会生成 `build/`、`output/`、`log/`，以及这些目录默认不提交。
+
+### 3. 配置读取
+
+- 解释 `.agents/config/defaults.yaml` 和 `.agents/local/user-preferences.yaml` 如何影响环境变量名、work log 路径、依赖路径和板卡配置。
+- 说明可提交默认配置只保存 env var 名和占位符。
+- 私有信息只能放 local override、`config.mk` 或 shell 环境变量。
+
+## 非职责范围
+
+- 不决定测试矩阵。测试矩阵属于 `rvv-test`。
+- 不决定 production（生产源码）是否接入。生产接入属于 `rvv-workflow` 生命周期和 `rvv-implementation`。
+- 不写 topic 文档结构。文档结构属于 `rvv-documentation`。
 
 ## 工作流
 
@@ -22,6 +62,7 @@ Makefile 分层模式和检查清单见 [references/makefile-env.md](references/
    - 本机覆盖项放进被忽略的 `config.mk`。
    - `config.mk.example` 放在测试根目录，作为用户入口，而不是放进 `mk/` 这类实现目录。
    - library adapter 只声明项目结构和验证能力，不保存个人路径、私有地址或单台设备默认值。
+   - agent 偏好默认值放入 `.agents/config/defaults.yaml`；本机私有覆盖放入 `.agents/local/user-preferences.yaml`。
 
 3. **优先推导，减少复制**
    - 从共享片段或测试根目录的位置推导源码根目录。
@@ -50,6 +91,13 @@ Makefile 分层模式和检查清单见 [references/makefile-env.md](references/
    - 记录源码根、测试根、主题目录命名、文档位置、QEMU 入口、板卡入口和日志归档约定。
    - 明确哪些能力可用、哪些需要用户本机配置后才可用。
    - 示例使用 `<repo>`、`<module>`、`<topic>`、`<board-host>`、`<ssh-user>` 等占位符。
+
+## Makefile / Board 边界
+
+- “如何运行某个测试类别”属于 `rvv-test`，例如 production direct test、fallback tests 或 component ablation。
+- “如何配置工具链、QEMU、board、部署目录和日志抓回”属于本 skill。
+- Makefile / board.mk 的公共变量应使用占位符和 env var 名，例如 `PCL_RVV_BOARD_HOST`，不能写真实 IP 或用户名。
+- 只在 board 目标中检查 board 配置。普通 QEMU 或本机构建不应因为板卡配置缺失而失败。
 
 ## 提交边界
 

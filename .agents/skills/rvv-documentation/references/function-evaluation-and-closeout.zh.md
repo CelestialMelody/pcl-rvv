@@ -18,7 +18,7 @@ S2 阶段创建或更新 evaluation 文档，至少覆盖：
 - 目标源码中的关键循环、helper（辅助函数）、normal equation（正规方程）、solver（求解器）或状态机边界。
 - 可 RVV 化片段、不可 RVV 化片段和成本归因。
 - 数据布局，例如 AoS（结构数组）、SoA（数组结构）、indices（索引）或 gather（离散加载）风险。
-- 初步判断：production-candidate（生产候选）、diagnostic-first（先诊断）、bench-only（仅性能诊断）、rollback/no-production（不接入生产）或 blocked（阻塞）。
+- 初步判断：production-candidate（生产候选）、diagnostic（诊断）、bench-only（仅性能诊断）、rollback/no-production（不接入生产）或 blocked（阻塞）。
 - 需要哪些 test（测试）、benchmark（性能测试）、QEMU、反汇编或 board（板卡）证据才能改变初步判断。
 
 S2 文档可以包含计划和假设，但必须标清哪些内容尚未由证据证明。
@@ -30,6 +30,7 @@ S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必�
 - 本轮最终 EvidenceDecision（证据决策）。
 - 实际创建或修改了哪些 production（生产源码）、diagnostic（诊断代码）、test、bench 或文档。
 - correctness（正确性）、QEMU path evidence（QEMU 路径证据）、disassembly evidence（反汇编证据）和 board performance（板卡性能证据）分别证明什么。
+- 主题文档是否包含“正确性与高效性证据链”小节；未接 production 的诊断结论是否包含对应“诊断证据链”。
 - 如果不接入生产，说明原因是收益不足、语义风险、证据不足、维护成本过高，还是工具 / 板卡阻塞。
 - 如果接入生产，说明真实生产入口、fallback（回退路径）、dispatch（分流逻辑）、`__RVV10__` 关闭行为、生产直连测试和板卡性能结果。
 - 未闭合项必须说明是什么、为什么没闭合、完成后能证明什么、当前是否必须完成。
@@ -66,6 +67,7 @@ S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必�
 - 后续选择：如果当前只接入窄范围，明确是否建议继续扩大当前 topic。例如 exact `PointNormal` 接入后，
   应说明泛型 normal traits（法线字段特征）扩展是否值得继续、需要读取哪些策略文档、哪些测试和板卡证据必须补齐；
   同时说明 indices / correspondences 或 `Scalar=double` 是否应另开消融或保持标量。
+- 正确性与高效性证据链：public entry 是否真实命中；row semantics、`accepted_points`、中间态、matrix 和 fallback 的证据；性能结论是否只来自 repeated board 或目标硬件；EvidenceDecision 是否没有超过证据范围；未覆盖范围和扩展条件。
 
 若生产补丁最终回退，文档也要写成 rollback/no-production closeout：说明回退了哪些生产改动、保留了哪些
 diagnostic / bench 资产、为什么生产证据不成立。
@@ -90,6 +92,7 @@ reviewer 检查文档时应确认：
 - 是否有 S2 评估，而不是只在最终 closeout 才解释函数。
 - S2 评估是否足以让人判断为什么继续或停止。
 - S11 closeout 是否覆盖最终证据，而不是重复早期计划。
+- closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”；未接 production 的诊断结论是否包含“诊断证据链”。
 - 生产接入 topic 是否在生产证据重跑后才写最终文档。
 - 生产接入后的主题文档是否以真实生产补丁和 production direct 证据为中心，而不是继续复述诊断原型。
 - fallback、未覆盖入口和未闭合项是否能让下一轮 worker 用短 prompt 恢复。

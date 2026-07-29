@@ -14,7 +14,8 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 | Class（稳定标签）                               | Location（位置）                                                                  | Role（作用）                                                                     | Default loading rule（默认读取规则）                                             |
 | ----------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `repo_rules`（仓库规则）                      | `AGENTS.md`、`.agents/skills/`                                                | 持久仓库约定和可复用 agent workflow（代理工作流）。                              | 先读适用的`AGENTS.md`，再读匹配的 skill（技能）。                              |
-| `role_entry_defaults`（角色入口默认值）       | `.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md`、`worker-quality-gates.zh.md` | 短 prompt（提示词）启动时的 worker（执行者）、reviewer（审查者）和 workflow improvement（工作流改进）默认读取链；worker 写文件前的轻量质量门禁。 | 用户只给角色、工作目录和目标时读取；worker 选中 topic 后按质量门禁决定是否继续读取 documentation / diagnostics / benchmarking 细则。 |
+| `role_entry_defaults`（角色入口默认值）       | `.agents/config/defaults.yaml`、`.agents/local/user-preferences.yaml`、`.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md`、`worker-quality-gates.zh.md` | 短 prompt（提示词）启动时的 worker（执行者）、reviewer（审查者）和 workflow improvement（工作流改进）默认读取链；worker 写文件前的轻量质量门禁。 | 用户只给角色、工作目录和目标时读取；worker 选中 topic 后按质量门禁决定是否继续读取 documentation / testing / implementation 细则。 |
+| `agent_preferences`（代理偏好）               | `.agents/config/defaults.yaml`、`.agents/local/user-preferences.yaml`                  | 可提交默认偏好、本机私有覆盖和 env var 名。                                      | S0 读取后冻结注释、文档、证据和工作日志偏好。                                      |
 | `normative_rvv_knowledge`（通用 RVV 知识）    | `doc-rvv/rvv/`                                                                  | 跨 topic（主题）的 RVV 知识、数学函数向量化说明和可复用 RVV 约定。               | 需要通用 RVV 规则时，优先从这里选择窄文件读取。                                  |
 | `historical_topic_reports`（历史 topic 报告） | `doc-rvv/<module>/`                                                             | topic 文档、closeout（收尾记录）记录、实现说明和历史决策。                       | 只读当前模块或 topic 相关文档，并用当前源码复核。                                |
 | `screening_and_queue_docs`（筛选和队列文档）  | `doc-rvv/library-screening/`                                                    | 模块筛选、候选队列、状态表和下一主题建议。                                       | 选择、恢复或复筛 topic 时读取。                                                  |
@@ -25,17 +26,20 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 ## Recommended Retrieval Order（推荐读取顺序）
 
 1. 读取 `AGENTS.md`，确认仓库级边界。
-2. 如果用户使用短 prompt，读取 `rvv-workflow/references/short-prompt-entry.zh.md`；worker 选中 topic 后再读取 `rvv-workflow/references/worker-quality-gates.zh.md`。
-3. 选择匹配的 `.agents/skills/<skill-name>/SKILL.md`。
-4. 读取本知识索引，决定下一步需要打开哪类证据。
-5. 如果任务是选题或恢复工作，读取 `doc-rvv/library-screening/` 中的状态和队列文档。
-6. 如果任务需要通用 RVV 规则，读取 `doc-rvv/rvv/` 下的相关窄文件；涉及模板点类型、traits、字段 offset、POD / standard-layout、或从具体点类型诊断扩展到 production 泛型入口时，优先读取 `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`。
-7. 如果任务针对已有 topic，读取 `doc-rvv/<module>/` 下的对应 topic 文档。
-8. 如果当前 topic 暴露出多种公开入口、indices、correspondences、weights、staging、
+2. 读取 `.agents/config/defaults.yaml`；如果存在，读取 `.agents/local/user-preferences.yaml`。
+3. 如果用户使用短 prompt，读取 `rvv-workflow/references/short-prompt-entry.zh.md`；worker 选中 topic 后再读取 `rvv-workflow/references/worker-quality-gates.zh.md`。
+4. 选择匹配的 `.agents/skills/<skill-name>/SKILL.md`。测试、诊断、benchmark、消融和证据日志优先读取 `rvv-test`；
+   registration topic 涉及变换估计、对应关系估计、row source 或法方程时，读取
+   `rvv-test/references/registration-topic-evidence.zh.md`。
+5. 读取本知识索引，决定下一步需要打开哪类证据。
+6. 如果任务是选题或恢复工作，读取 `doc-rvv/library-screening/` 中的状态和队列文档。
+7. 如果任务需要通用 RVV 规则，读取 `doc-rvv/rvv/` 下的相关窄文件；涉及模板点类型、traits、字段 offset、POD / standard-layout、或从具体点类型诊断扩展到 production 泛型入口时，优先读取 `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`。
+8. 如果任务针对已有 topic，读取 `doc-rvv/<module>/` 下的对应 topic 文档。
+9. 如果当前 topic 暴露出多种公开入口、indices、correspondences、weights、staging、
    policy、row source 或相似数据流分发问题，按“Historical Analogy Retrieval Pattern”
    做同模块历史类比检索。
-9. 用当前源码和当前 git diff 复核文档结论。
-10. 只在需要证明具体结论时，读取 `test-rvv/<module>/<topic>/` 下的测试、bench、脚本或日志。
+10. 用当前源码和当前 git diff 复核文档结论。
+11. 只在需要证明具体结论时，读取 `test-rvv/<module>/<topic>/` 下的测试、bench、脚本或日志。
 
 ## Authority and Freshness（权威性与新鲜度）
 
@@ -45,6 +49,7 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 - `test-rvv/<module>/<topic>/` 是可执行证据入口；结论取决于具体测试、构建参数、日志、目标硬件和时间。
 - QEMU evidence（QEMU 证据）只支持 correctness（正确性）、log shape（日志形状）和 path/instruction coverage（路径或指令覆盖）判断，不能支撑真实性能结论。
 - Board/target-hardware benchmark（板卡或目标硬件 benchmark）日志才能支撑性能结论。
+- evidence logs（证据日志）默认 `summary-only`；raw logs（原始日志）只在明确授权时进入提交边界。
 
 ## What Not To Load By Default（默认不要读取什么）
 
@@ -65,7 +70,8 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 4. 如果存在对应 topic 文档，打开 `doc-rvv/<module>/` 下的窄文档。
 5. 检查当前源码里的公开入口、helper、fallback 和 `__RVV10__` 分支。
 6. 只为验证当前问题，读取 `test-rvv/<module>/<topic>/` 下必要的测试、bench、脚本或日志。
-7. 结论中分开说明 correctness（正确性）、QEMU path evidence（QEMU 路径证据）、disassembly evidence（反汇编证据）、board performance（板卡性能）和 production decision（生产接入判断）。
+7. closeout 或 production-candidate topic 要读取主题文档的“正确性与高效性证据链”；未接 production 的诊断结论要读取“诊断证据链”。
+8. 结论中分开说明 correctness（正确性）、QEMU path evidence（QEMU 路径证据）、disassembly evidence（反汇编证据）、board performance（板卡性能）和 production decision（生产接入判断）。
 
 ## Historical Analogy Retrieval Pattern（历史类比检索模式）
 

@@ -13,10 +13,27 @@
   （生产接入计划），必须读取 `rvv-implementation/SKILL.md`、`point-load-store.md`、
   `fallback-and-dispatch.md`；若生产入口是模板点类型或要从 `PointNormal` 诊断扩展到泛型入口，
   必须读取 `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`。
+- 如果模板点类型算法会构造或写回 `PointT` 输出，或使用 `PointT` 运算符、`FieldList`、
+  `copyPoint`、`CentroidPoint`、RGB/RGBA 特化等整点语义，不能只按 xyz traits gate 判断；
+  必须读取 `RVV Generic Point Type Strategy.zh.md` 中“输入字段 Gate 不等于输出 PointT 语义”。
 
 ## 最小门禁
 
-### 1. 标量路径重建
+### 1. 偏好配置冻结
+
+S0 必须读取 `.agents/config/defaults.yaml`。如果存在 `.agents/local/user-preferences.yaml`，也必须读取。
+当前 prompt（提示词）中的明确要求覆盖配置文件。
+
+worker 必须在 S0 报告和最终 Handoff Packet（交接数据包）中写清：
+
+- `preferences_loaded`：读取了 defaults、local override（本机私有覆盖）或 prompt override（提示词覆盖）中的哪些层。
+- `comment_policy_frozen`：`test-rvv`、diagnostic（诊断代码）、prototype（原型代码）和 production（生产源码）的注释策略。
+- `evidence_policy_frozen`：evidence logs（证据日志）策略，默认 `summary-only`；raw logs（原始日志）不默认提交。
+- `documentation_policy_frozen`：closeout（收尾文档）是否 current-state-first（当前状态优先）、是否必须有数值算例、长期文档是否禁止保留对话流程话术。
+
+如果 local override 中配置了板卡、依赖库、交叉编译工具链或私有路径，Handoff 只报告“已读取对应覆盖项”和使用的 env var（环境变量）名。不要复制 IP、用户名或个人绝对路径。
+
+### 2. 标量路径重建
 
 S2 evaluation（函数级评估）不能只写函数名或数学名词。worker 必须写清：
 
@@ -27,7 +44,7 @@ S2 evaluation（函数级评估）不能只写函数名或数学名词。worker 
 
 详细规则见 `rvv-documentation/references/evaluation-doc-structure.md`。
 
-### 2. Production 数据流与诊断数据流映射
+### 3. Production 数据流与诊断数据流映射
 
 如果 production 源码通过 iterator、indices、correspondences、wrapper 或 dispatch 把多种入口统一，
 而 diagnostic（诊断代码）为了 RVV 显式拆成 full-cloud（全云顺序扫描）、gather、scatter 或 staging，
@@ -37,9 +54,10 @@ worker 必须写清映射关系：
 - 额外 index/weight 展开、offset 计算、buffer 写回是否计入 bench；
 - 这些拆分能证明什么，不能证明什么。
 
-详细规则见 `rvv-diagnostics/SKILL.md` 和 `rvv-documentation/references/topic-doc-structure.md`。
+详细规则见 `rvv-test/SKILL.md`、`rvv-test/references/entry-shapes-and-test-support.zh.md`、
+`rvv-test/references/registration-topic-evidence.zh.md` 和 `rvv-documentation/references/topic-doc-structure.md`。
 
-### 3. 主题文档质量
+### 4. 主题文档质量
 
 主题 RVV 文档至少要包含：
 
@@ -48,6 +66,7 @@ worker 必须写清映射关系：
 - 实现选择审计，例如 buffer、`vcompress`、scalar tail、FMA、vector reduction 或数学函数向量化；
 - bench case 的输入构造、计时边界、证明点和不能证明的边界；
 - QEMU、反汇编、板卡证据分别支持什么；
+- closeout 或 production-candidate 阶段的“正确性与高效性证据链”小节；未接 production 的诊断结论的“诊断证据链”；
 - no-production 时的受证据约束归因和后续消融条件；
 - partial-production-candidate（局部生产候选）时的生产直连缺口，例如真实公开入口 direct test、fallback、点类型 traits、`Scalar=double`、indices / correspondences 策略、生产 bench 重跑和人工确认点。
 
@@ -55,7 +74,7 @@ worker 必须写清映射关系：
 
 详细规则见 `rvv-documentation/SKILL.md`、`topic-doc-structure.md` 和 `evaluation-doc-structure.md`。
 
-### 4. Test-rvv / diagnostic 注释
+### 5. Test-rvv / diagnostic 注释
 
 `test-rvv` 和 diagnostic 代码必须面向 reviewer（审查者）可读：
 
@@ -67,7 +86,7 @@ worker 必须写清映射关系：
 
 详细规则见 `rvv-workflow/references/reviewability-and-language.zh.md`。
 
-### 5. 证据和归因
+### 6. 证据和归因
 
 worker 必须分开写：
 
@@ -81,9 +100,47 @@ worker 必须分开写：
 QEMU 不能作为性能结论。板卡退化只能支持 no-production，不能自动证明 gather、buffer、
 FMA 或 tail 是单一主因；没有消融 bench 或 profile 时必须写成假设。
 
-详细规则见 `rvv-benchmarking/SKILL.md` 和 `rvv-benchmarking/references/qemu-board-disassembly.md`。
+closeout 或 production-candidate topic 文档必须包含“正确性与高效性证据链”小节。该小节至少检查：
 
-### 6. PI1 生产接入计划门禁
+- correctness：public entry 是否真实命中；row semantics 是否清楚；`accepted_points`、中间态、matrix 和 fallback 是否有证据。
+- performance：性能结论是否只来自 repeated board 或目标硬件；QEMU timing 不能作为性能结论。
+- boundary：EvidenceDecision 是否没有超过证据范围；representative pointtypes（代表性点类型）、indexed、correspondences 和 row source policy 边界是否写清。
+- risk：未覆盖范围、保留标量路径和后续扩展条件。
+
+未接 production 的诊断结论必须写“诊断证据链”。该小节必须说明 diagnostic evidence 不能写成 production evidence；
+public-entry-shaped、production-shaped diagnostic 或代表性点类型证据不能替代真实 production dispatch。
+
+详细规则见 `rvv-test/SKILL.md`、`rvv-test/references/performance-and-ablation.zh.md`
+和 `rvv-test/references/evidence-output-policy.zh.md`。
+
+### 7. 测试矩阵与 evidence policy
+
+worker 在测试计划和 Handoff 中必须分开列出当前 topic 需要覆盖的测试类别：
+
+- unit test（单元测试）、boundary/adversarial test（边界 / 对抗测试）、numerical consistency（数值一致性）、regression（回归测试）。
+- production-shaped diagnostic、production direct、fallback tests。
+- benchmark、component ablation（组件消融）、diagnostic/probing（诊断 / 探针测试）和 upstream/integration smoke（上游 / 集成冒烟）。
+- sanitizer（运行时检查工具）和 profiling（性能剖析）为可选项；只有当前风险需要时才列为必须项。
+
+full-cloud（全云顺序扫描）、source-indexed（源索引路径）、dual-indices（双索引路径）和
+correspondences（对应关系路径）是不同 row source policy（行来源策略）。production 必须逐 policy
+独立批准。RowSourcePolicy 只负责 row source；shared math pipeline（共享数学流水线）负责
+finite mask（有限值掩码）、formula（公式）、staging/reduction、accepted_points、ATA/ATb。
+
+mixed fields（混合字段）、point traits（点类型字段特征）、AoS stride（数组结构跨步）、
+gather、valid-index-only（仅有效索引）、production predicate（生产谓词）和 invalid lane finite mask
+（无效 lane 有限值掩码）应作为测试矩阵条目。staged candidate、production-shaped diagnostic
+和 production direct 必须分层；public-entry-shaped 不能当作 production dispatch 证据。
+
+FMA 和 reduction 相关测试必须说明反汇编归属、误差预算和必要板卡 A/B（对照测试）。不能因为源码写法看起来没有 fused（融合）表达式，就默认禁止 fused 指令。
+
+correspondences 或 indexed 路径退化时，归因必须列出 query/match 展开、容器访问、baseline、分布局部性、后段成本、gather、`vcompress`、buffer 和自动规约等候选原因。没有消融或 profile 证据时，只能写成假设。
+
+详细规则见 `rvv-test/references/test-taxonomy.zh.md`、`rvv-test/references/entry-shapes-and-test-support.zh.md`、
+`rvv-test/references/registration-topic-evidence.zh.md`、`rvv-test/references/numerical-consistency.zh.md`
+和 `rvv-test/references/performance-and-ablation.zh.md`。
+
+### 8. PI1 生产接入计划门禁
 
 当 worker 继续一个 `partial-production-candidate` topic 并进入 PI1 时，先产出 production integration plan，
 再考虑生产补丁。若用户目标是“进入 / 推进 production integration loop（生产接入闭环）”，PI1 是同轮
@@ -100,7 +157,7 @@ fallback、测试或泛型策略不能闭合，才停在 PI1。PI1 至少写清�
 
 PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 后 production direct 证据闭合，才能升级 EvidenceDecision。
 
-### 7. PI2-PI5 连续推进门禁
+### 9. PI2-PI5 连续推进门禁
 
 当用户用短 prompt 授权继续 production integration loop（生产接入闭环），且最近 Handoff Packet 的
 `next_worker_action_if_review_passes` 已给出 PI2 范围时，worker 可以同轮连续推进 PI2-PI5。连续推进前必须冻结：
@@ -111,6 +168,8 @@ PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 �
 - `entry_structure`：公开入口是否只做上游语义检查和短路分流；标量权威路径是否抽成清晰的
   `*_Std` helper；RVV 主路径是否抽成清晰的 `*_RVV` helper；多个入口共享 policy 时，public
   overload 仍不能堆叠大段 RVV gate 或标量主体。
+- 复杂 eligibility（适用性）解析，例如动态 condition / field metadata / policy 分解，应收进窄
+  RVV wrapper 或 `*_RVV` helper，由 public overload 维持“语义检查 -> RVV 短路 -> Std fallback”的形状。
 - `evidence_commands`：PI3/PI4 需要运行的 test、bench、asm 和 board 命令。
 - `pause_conditions`：命中 `topic-lifecycle.zh.md` 中连续推进暂停条件时停止并输出 Handoff Packet。
 
@@ -134,7 +193,7 @@ PI2-PI5 结束后必须继续完成 S11 文档 closeout（收尾文档）。work
 - `production_doc_decision_delta`：是否说明诊断阶段结论如何被生产证据确认、缩窄、推翻或回退。
 - `production_doc_remaining_scope`：是否写清仍保持标量或未覆盖的入口，以及下一轮扩展必须补的证据。
 
-### 8. 窄范围结论后的后续路径门禁
+### 10. 窄范围结论后的后续路径门禁
 
 当当前结论不是“整个模板入口都完成”，而是 `narrow`、`partial`、`bench-only`、`no-production`
 或带有明确 fallback / 未覆盖范围时，worker 不能只写“进入下一个 topic”。必须在最终输出和
@@ -159,6 +218,10 @@ Handoff Packet 中给出 `followup_options_for_user`：
 worker 在创建或更新 topic 产物前，先确认：
 
 ```text
+preferences_loaded:
+comment_policy_frozen:
+evidence_policy_frozen:
+documentation_policy_frozen:
 scalar_path_ready:
 production_to_diagnostic_mapping_ready:
 doc_quality_refs_loaded:
@@ -166,6 +229,7 @@ test_comment_strategy_frozen:
 bench_timing_boundary_defined:
 alternative_designs_listed:
 evidence_model_defined:
+correctness_efficiency_evidence_chain_ready:
 stop_condition_defined:
 pi1_production_scope_ready:
 generic_point_type_strategy_ready:
@@ -198,6 +262,9 @@ followup_options_ready:
 - `status` 可写 `pass`、`partial`、`fail` 或 `not_applicable`；不要用没有证据的 `true`。
 - `evidence` 至少指向当前 topic 的 evaluation、主题文档、test-rvv 注释、bench 说明、证据日志或 Handoff 段落。
 - `missing_items` 必须写成陈述句；没有缺口时写 `none`。
+- 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
+  和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
+- 表格必须包含 `correctness_efficiency_evidence_chain_ready`。证据指向主题文档中的“正确性与高效性证据链”或“诊断证据链”小节。
 - 若 `language_check` 声称通过，必须能在同一张表或相邻段落中指出诊断代码、测试、bench 和文档的术语 / 中文注释证据。
 - 若当前结论强于 no-production，例如 `partial-production-candidate`，表格必须额外列出 production direct 尚未闭合的证据项，避免把诊断收益误写成 production-ready。
 - 若本轮进入 PI1，表格必须额外列出 `pi1_production_scope_ready`、`generic_point_type_strategy_ready`、

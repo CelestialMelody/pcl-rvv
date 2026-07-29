@@ -4,11 +4,11 @@
 
 ```text
 public entry
-  -> if RVV gate 命中: *_RVV(...)
+  -> #if defined(__RVV10__) && RVV gate 命中: *_RVV(...)
   -> else: *_Std(...)
 ```
 
-`*_Std` 保留原标量语义，非 RVV 构建、未覆盖类型、小规模、non-dense、indexed 等路径必须自然落回 Std。
+`*_Std` 保留原标量语义，非 RVV 构建、未覆盖类型、小规模、non-dense、indexed 等路径必须自然落回 Std。`*_RVV` 名字应只用于真实 RVV 路径或公开短路分流层；这类 helper 默认放在 `__RVV10__` 条件编译内。不要为了让公开入口少写一层 `#if`，在非 RVV 构建里常驻一个名字带 `RVV`、只返回 false 的 helper，除非有跨文件 ABI、模板兼容或已有 SIMD 风格要求，并在主题文档里说明原因。
 
 公开入口应尽量只保留上游语义检查和短路 dispatch（分流）。如果 RVV 接入后公开入口里同时出现
 非平凡 RVV gate、iterator 构造和标量主体调用，优先抽成命名清楚的 `*_Std` / `*_RVV`

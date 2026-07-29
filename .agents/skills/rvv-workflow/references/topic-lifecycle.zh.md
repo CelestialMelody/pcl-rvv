@@ -15,9 +15,13 @@
 ### S0 恢复和偏好冻结
 
 - 读取 `AGENTS.md`、`rvv-workflow` 和 knowledge map（知识索引）。
+- 读取 `.agents/config/defaults.yaml`，如果存在 `.agents/local/user-preferences.yaml` 也读取。
+- 在 S0 输出 `preferences_loaded`，并记录 defaults、local override（本机私有覆盖）和 prompt override（提示词覆盖）的来源。
 - 检查 git status（工作区差异）。
 - 冻结本轮工作偏好：注释详细度、注释语言、production（生产源码）注释上限、`test-rvv` / diagnostic（诊断代码）注释下限。
+- 冻结文档偏好：closeout（收尾文档）当前状态优先、数值算例要求、长期文档不保留对话流程话术。
 - 冻结提交偏好：默认不提交；如果用户授权提交，再确认 topic、日志和 agent asset（代理资产）是否拆分。
+- 冻结 evidence logs（证据日志）策略：默认 `summary-only`，raw logs（原始日志）不默认提交。
 - 检查同 topic 是否残留上一轮 worker 产物；若存在且用户未确认复用，先停止。
 
 ### S1-S2 目标确认和函数级评估
@@ -29,7 +33,7 @@ S2 建立函数级评估。评估不是只在对话里口头完成；如果 topi
 - 函数入口、调用链和输入输出职责。
 - 关键循环、helper（辅助函数）或 solver（求解器）边界。
 - 可向量化点、不可向量化点和 RVV 优先级。
-- production-candidate（生产候选）、diagnostic-first（先诊断）、bench-only（仅性能诊断）或 no-go（不继续）的初步判断。
+- production-candidate（生产候选）、diagnostic（诊断）、bench-only（仅性能诊断）或 no-go（不继续）的初步判断。
 - 需要哪些证据才能改变当前判断。
 
 小 topic 可以把 S2 评估写在主题文档的“函数级评估”章节；复杂 topic 建议单独写 evaluation（评估）文档。
@@ -50,6 +54,13 @@ S4 形成测试和证据计划，区分：
 - board performance（板卡性能证据）。
 - negative evidence（负向证据，例如证据显示不值得接入生产）。
 
+测试类别、row source policy（行来源策略）、production-shaped diagnostic（生产形态诊断）、
+production direct（真实生产路径证据）、component ablation（组件消融）和 evidence logs 策略按
+`rvv-test` 执行。
+
+S4 如果暴露出可跨 topic 复用的测试矩阵、证据缺口或冗余规则，应在 Handoff Packet（交接数据包）的
+`agent_asset_feedback` 中按 `report-only`（只报告建议）记录；没有发现时省略，避免短 prompt（短提示词）输出膨胀。
+
 ### S5-S9 产物和验证
 
 S5 创建或复查 topic scaffold（脚手架），包括 `test-rvv`、Makefile、board 配置、评估文档或诊断原型。
@@ -67,23 +78,29 @@ S9 在板卡或目标硬件上运行必要 smoke（小型验证）、test 和 be
 S10 汇总 evidence bundle（证据包）并给出明确决策：
 
 - `production-ready`：证据支持进入生产接入闭环。
-- `diagnostic-first`：需要继续诊断，暂不接入生产。
+- `diagnostic`：需要继续诊断，暂不接入 production（生产源码）。
 - `bench-only`：作为性能诊断或局部证据保留，不接入生产。
 - `rollback/no-production`：现有证据反对生产接入，应回收或避免生产改动。
 - `blocked`：缺少工具、板卡、用户判断或必要源码条件。
 
 S10 必须写清“证据证明了什么”和“不能证明什么”。QEMU 或反汇编不能被写成生产性能结论。
+进入 closeout 或 production-candidate 后，主题文档必须包含“正确性与高效性证据链”小节。
+未接 production 的诊断结论写“诊断证据链”，并说明 diagnostic evidence（诊断证据）不能替代
+production evidence（生产证据）。
+S10 如果发现 EvidenceDecision（证据决策）依赖了尚未写入 `rvv-test`、`rvv-implementation`
+或 `rvv-documentation` 的通用规则，应输出 `agent_asset_feedback`，但默认不修改 agent asset（代理资产）。
 
 ## S10 后分支
 
 ### Branch A: no-production closeout（不接入生产收尾）
 
-适用于 `diagnostic-first`、`bench-only`、`rollback/no-production` 或非性能 blocked。
+适用于 `diagnostic`、`bench-only`、`rollback/no-production` 或非性能 blocked。
 
 进入 S11 文档 closeout：
 
 - 更新函数级评估文档，记录为什么不接入生产。
 - 更新主题文档或诊断文档，解释测试、bench、QEMU、反汇编、板卡证据和遗留风险。
+- 在主题文档中新增或更新“正确性与高效性证据链”；未接 production 的诊断结论写“诊断证据链”。
 - 更新模块队列表和状态表。
 - 写清下一轮如果要重新评估，需要补什么证据。
 
@@ -143,6 +160,7 @@ PI1 若涉及模板点类型、PCL traits（点类型字段特征）、字段 of
 - 生产直连证据：真实公开入口测试、fallback 测试、反汇编符号归属和板卡 production bench。
 - 结论修正：诊断阶段 speedup 与 production direct speedup 是否一致；若不一致，最终文档以生产证据为准。
 - 未闭合项：哪些扩展仍不能接入，以及下一轮必须补什么证据。
+- 正确性与高效性证据链：public entry（公开入口）真实命中、row semantics（行语义）、`accepted_points`、中间态、matrix（矩阵）、fallback、repeated board（重复板卡测试）、EvidenceDecision 边界和未覆盖范围。
 
 ### Branch C: blocked handoff（阻塞交接）
 
@@ -154,6 +172,7 @@ PI1 若涉及模板点类型、PCL traits（点类型字段特征）、字段 of
 - 阻塞条件是什么。
 - 缺少的命令、工具、证据或用户判断是什么。
 - 下一轮从哪个文件、命令和文档恢复。
+- 如果 blocked（阻塞）来自 agent asset 缺口、规则冲突或短 prompt 恢复信息不足，写入 `agent_asset_feedback`。
 
 ## S11 文档 Closeout
 
@@ -161,6 +180,8 @@ S11 是最终文档收口，不是所有文档的首次出现。
 
 - S2 文档回答“为什么值得或不值得继续”。
 - S11 文档回答“本轮实际证明了什么、接入了什么、没有接入什么、下一步该做什么”。
+- closeout 或 production-candidate 文档必须包含“正确性与高效性证据链”；未接 production 的诊断结论使用“诊断证据链”并标清 production direct 缺口。
+- S11 closeout 如果沉淀出新的跨 topic 规则、发现旧规则冗余，或发现后续回访文档需要统一整改，按 `agent_asset_feedback` 报告建议；只有用户授权 workflow improvement（工作流改进）时才修改 `.agents`。
 
 如果 topic 进入生产接入闭环，S11 必须发生在 PI5 之后。若 topic 不接入生产，S11 可以直接发生在第一次 S10 之后。
 
@@ -169,7 +190,7 @@ S11 是最终文档收口，不是所有文档的首次出现。
 `done` 可以表示：
 
 - 生产接入成立并完成生产证据闭环。
-- bench-only 或 diagnostic-first 结论成立，且文档和队列表同步完成。
+- bench-only 或 diagnostic 结论成立，且文档和队列表同步完成。
 - rollback/no-production 结论成立，且生产改动已回收或未发生。
 
 `blocked` 必须带恢复条件，不能只写“等待板卡”或“需要更多测试”。

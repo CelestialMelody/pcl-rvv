@@ -155,6 +155,11 @@ caller-shaped smoke now has a sanity gate and batch RVV path.
 
 如果某个英文词已经出现在函数名、benchmark case 名或反汇编指令里，可以保留英文原词，但附近要用一句话说明它在当前 topic 中的具体含义和证据边界。
 
+不要在新 agent asset 或新 topic closeout 中使用带 only 后缀的 diagnostic 标签。
+诊断已经是 RVV 证据链的必要层级；真正需要表达的是是否已经接入 production（生产源码）
+以及证据能覆盖到哪里。未接 production 时写“未接 production 的诊断结论”；作为阶段性策略时写
+`diagnostic`（诊断）。历史文档中保留的旧词，应在回头完善该 topic 时按上述语义改写。
+
 纯英文文本中也必须解释术语，推荐：
 
 ```text
@@ -203,6 +208,8 @@ production 代码注释应克制，只解释维护边界、fallback、语义风�
 - solve、矩阵构造或数学函数 helper：说明它是否在逐点热点循环内。如果每次 estimate 只执行一次，通常保留标量；若要向量化，必须先有调用频率和收益证据。
 
 这些说明不需要逐行解释 intrinsic（内建函数），但要让 reviewer 能在不回看对话的情况下回答：“这段 helper 为什么存在，和 production 哪段语义对齐，失败会破坏哪条证据？”
+
+如果 diagnostic 或 test support 头文件已经长到难以审查，可以保持外部 `*_diag.hpp` 作为 aggregator header（聚合头文件），把内部实现拆到相邻 `test_support/` 子目录；只有内容确实是狭义 diagnostic/probing（诊断 / 探针）时才优先使用 `diag/`。拆出的每个内部头文件仍要有文件级中文说明，说明职责、test-rvv 测试证据边界，以及不能证明 production dispatch。
 
 fallback（回退路径）测试要能隔离触发原因。如果一个候选同时有规模阈值、identity gate（顺序一一对应验收条件）、类型 gate 或布局 gate，测试矩阵至少要有一个 case 单独覆盖每个重要 gate，避免一个小规模 case 同时绕开所有分支却被误写成完整 fallback 证据。
 

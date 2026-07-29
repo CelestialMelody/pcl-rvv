@@ -27,6 +27,8 @@ reviewer 的目标不是替 worker（执行者）重做任务，而是发现证�
 reviewer 至少应读取：
 
 - `AGENTS.md`
+- `.agents/config/defaults.yaml`
+- `.agents/local/user-preferences.yaml`，如果存在。只检查覆盖范围和 env var（环境变量）名，不复制私有值。
 - `.agents/knowledge/pcl-rvv-knowledge-map.md`
 - `.agents/skills/rvv-workflow/SKILL.md`
 - `.agents/skills/rvv-workflow/references/topic-lifecycle.zh.md`
@@ -34,10 +36,14 @@ reviewer 至少应读取：
 - `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md`
 - `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`
 - `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
+- `.agents/skills/rvv-test/SKILL.md`
+- registration（配准）topic 若涉及变换估计、对应关系估计、row source 或法方程，读取
+  `.agents/skills/rvv-test/references/registration-topic-evidence.zh.md`
 - 与当前 topic 相关的 worker Handoff Packet（交接数据包）
 - 当前 topic 的 diff（差异）、评估文档、主题文档、测试 / bench / QEMU / 反汇编 / 板卡证据
 
-后续按任务需要读取 `rvv-diagnostics`、`rvv-implementation`、`rvv-benchmarking`、`rvv-documentation` 的细则。
+后续按任务需要读取 `rvv-test`、`rvv-implementation`、`rvv-documentation` 的细则。
+旧 diagnostics / benchmarking 职责已经迁移到 `rvv-test`，reviewer 不再读取独立旧 skill。
 
 ## Findings First（问题优先）输出格式
 
@@ -68,12 +74,13 @@ Evidence reviewed（本轮复核过的证据）
 Suggested next worker actions（建议 worker 下一步动作）
 Worker prompt patch（可转发给 worker 的提示词补丁）
 Suggested skill / knowledge-map updates（建议更新的 skill 或知识索引）
+Agent asset feedback（代理资产反馈）
 Language/reviewability issues（语言和可审查性问题）
 Workflow improvement decision（工作流改进决策）
 Files changed in workflow improvement mode（若启用工作流改进模式，本轮改动文件）
 ```
 
-可以省略空章节，但不能省略 `Evidence reviewed`、`Suggested next worker actions` 和 `Worker prompt patch`。
+可以省略空章节，但不能省略 `Evidence reviewed`、`Suggested next worker actions` 和 `Worker prompt patch`。`Agent asset feedback` 只在发现可沉淀规则、资产缺口或冗余规则时输出。
 
 ## Worker Prompt Patch（给 worker 的提示词补丁）要求
 
@@ -101,6 +108,11 @@ reviewer 应至少检查：
 - S10 EvidenceDecision（证据决策）后是否按 `topic-lifecycle.zh.md` 进入正确分支。
 - production integration loop（生产接入闭环）是否包含生产补丁、生产直连测试、生产证据重跑和再次证据决策。
 - QEMU、反汇编和板卡证据是否分层正确。
+- closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”小节；未接 production 的诊断结论是否包含“诊断证据链”小节。
+- 证据链是否写清 correctness（正确性）、performance（性能）、boundary（证据边界）和 risk（风险）：public entry 是否真实命中；row semantics 是否清楚；`accepted_points`、中间态、matrix 和 fallback 是否有证据；性能结论是否只来自 repeated board 或目标硬件。
+- 证据链是否把 QEMU timing、diagnostic evidence、representative pointtypes、indexed / correspondences 边界写清。QEMU timing 不能写成性能结论，diagnostic evidence 不能写成 production evidence。
+- registration 主题是否按 `registration-topic-evidence.zh.md` 审计 `accepted_points`、`ATA/ATb`、
+  matrix、weights、symmetric normals、query/match 输出语义和 production direct 边界。
 - `test-rvv`、diagnostic（诊断代码）、prototype（原型代码）是否有足够中文注释和文件级阅读提示。
 - doc-rvv 文档是否区分 S2 evaluation 和 S11 closeout（收尾）。
 - 文档是否能让读者理解标量实现做了什么、RVV 方案如何实现、bench case 如何构造和证明什么；如果只列公式、helper 名、指令名或 speedup，视为可审查性缺口。
@@ -108,11 +120,17 @@ reviewer 应至少检查：
 - 负向性能结论是否有受证据约束的归因；不能把未验证猜测写成事实，也不能只写“不接生产”而不解释为什么慢。
 - 是否存在不该提交的 build（构建）产物、日志、本机路径、私有地址或 `config.mk`。
 - Handoff Packet 是否字段完整，`agent_asset_trace` 是否真实反映读取并使用过的资产。
+- 如果 worker 发现可沉淀规则、资产缺口或冗余规则，Handoff Packet 是否包含 `agent_asset_feedback`；默认配置下该字段只能报告建议，不能代表已修改 agent asset。
+- Handoff Packet 是否包含 `evidence_decision_summary`，并与主题文档的“正确性与高效性证据链”或“诊断证据链”一致。
+- Handoff Packet 是否包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`，并与 S0 报告、defaults、local override 和当前 prompt 一致。
+- 可提交配置是否只包含默认值、占位符和 env var 名；私有 IP、用户名、个人绝对路径和 raw logs 是否仍留在被忽略的 local override、工作区日志或本机环境中。
 - Handoff Packet 是否把重要后续选择暴露给用户。若当前结论是窄范围 production-ready、partial-production-candidate、
   bench-only/no-production 或保留重要未覆盖范围，reviewer 应检查 `followup_options_for_user` 是否列出默认动作、
   继续当前 topic 的扩展动作、应另开 topic 的消融 / 扩展动作和当前不建议做的方向。
 - 如果 worker 使用短 prompt 启动，Handoff Packet 是否包含 `worker_quality_gate_check`，且该字段真实覆盖标量路径、production/diagnostic 数据流映射、文档结构、test-rvv 注释、bench 边界、替代方案审计、证据模型和 stop condition。缺失或虚写时，应视为 workflow/worker 执行缺口。
 - `worker_quality_gate_check` 是否是证据化表格，而不是只有 `true` / `false`。reviewer 应抽查每项 `evidence` 是否能在当前 topic 产物中定位；若找不到对应文件、章节、日志或代码注释，应把该项判为未闭合。
+- `worker_quality_gate_check` 是否覆盖 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`。
+- `worker_quality_gate_check` 是否覆盖 `correctness_efficiency_evidence_chain_ready`。
 - `language_check` 是否同样有证据支撑。若 worker 声称通过，但诊断 helper、测试、bench 或主题文档仍有非平凡段落缺少中文说明，应指出具体文件和行号。
 - 当前结论若为 `partial-production-candidate`、`production-ready` 或其它强于 no-production 的状态，reviewer 必须检查 worker 是否列出 production direct 缺口。诊断路径上的板卡收益不能自动升级成 production-ready。
 - 当前结论若为 `production-ready/narrow`，reviewer 必须检查 worker 是否主动指出“窄在哪里、是否存在常见泛型扩展价值、继续扩展需要哪些证据”。如果 worker 只建议进入下一个 topic，却没有给出当前 topic 的重要扩展选项，应视为 handoff 可决策性缺口。
@@ -120,6 +138,8 @@ reviewer 应至少检查：
 ## Agent Asset（代理资产）更新判断
 
 reviewer 可以建议修改 agent asset，但不要把每个 topic 的一次性偏好都上升为通用规则。
+默认 feedback mode（反馈模式）是 `report-only`。reviewer 只能建议进入 Workflow improvement mode；除非用户明确授权，不修改 `.agents`、prompt 或 knowledge map。
+reviewer closeout（收尾审查）只有在发现 cross-topic（跨主题）规则、资产缺口、规则冲突或可删除冗余时才输出 `agent_asset_feedback`；普通 topic-specific（当前主题特有）观察可放入风险或后续动作，不必升级为 agent asset 建议。
 
 适合进入 asset 的经验：
 
