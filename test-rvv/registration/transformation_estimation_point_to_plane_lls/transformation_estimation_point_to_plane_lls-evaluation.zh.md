@@ -154,7 +154,7 @@ make -C test-rvv/registration/transformation_estimation_point_to_plane_lls fetch
 python3 test-rvv/script/analyze_bench_repeated.py <five fetched analyze_bench_compare.log files>
 ```
 
-板卡 5-run 使用 summary-only 策略：每轮 fetch 后只把脱敏摘要数字写入文档和 summary artifact，不提交 raw run 目录。当前 production stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md`，其中记录的 `/tmp/teptpl_production_dispatch_current_5run_20260729_150811` 和 `/tmp/teptpl_production_dispatch_fused_5run_20260729_151217` 是当轮本机临时归档，不是长期依赖；长期审计以 summary artifact 的 values、命令和 analyzer hash 为准。fused-formula direct diagnostic A/B 的 stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md`。文档、输出清理、注释整理或不改变 RVV hot path/bench 逻辑的入口 wrapper 重构不要求重跑板卡。若后续修改 RVV hot path 指令逻辑、bench case 或 production dispatch gate，则需要补反汇编/QEMU bench，并按变更风险判断是否复跑板卡。
+板卡 5-run 使用 summary-only 策略：每轮 fetch 后只把脱敏摘要数字写入文档和 summary artifact，不提交 raw run 目录。当前 production stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md`，其中记录的 `<local-raw-archive>/production-dispatch-current` 和 `<local-raw-archive>/production-dispatch-fused` 是当轮本机临时归档，不是长期依赖；长期审计以 summary artifact 的 values、命令和 analyzer hash 为准。fused-formula direct diagnostic A/B 的 stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md`。文档、输出清理、注释整理或不改变 RVV hot path/bench 逻辑的入口 wrapper 重构不要求重跑板卡。若后续修改 RVV hot path 指令逻辑、bench case 或 production dispatch gate，则需要补反汇编/QEMU bench，并按变更风险判断是否复跑板卡。
 
 ## Production 接入判断
 

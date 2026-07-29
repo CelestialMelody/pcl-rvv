@@ -32,22 +32,22 @@ fused-formula production-dispatch 使用默认 RVV build：
 make -C test-rvv/registration/transformation_estimation_point_to_plane_lls run_board_bench_compare BENCH_ARGS="--size 65536,262144 --case-filter production-dispatch"
 make -C test-rvv/registration/transformation_estimation_point_to_plane_lls fetch_board_logs
 python3 test-rvv/script/analyze_bench_repeated.py \
-  /tmp/teptpl_production_dispatch_fused_5run_20260729_151217/analyze_bench_compare_1.log \
-  /tmp/teptpl_production_dispatch_fused_5run_20260729_151217/analyze_bench_compare_2.log \
-  /tmp/teptpl_production_dispatch_fused_5run_20260729_151217/analyze_bench_compare_3.log \
-  /tmp/teptpl_production_dispatch_fused_5run_20260729_151217/analyze_bench_compare_4.log \
-  /tmp/teptpl_production_dispatch_fused_5run_20260729_151217/analyze_bench_compare_5.log
+  <local-raw-archive>/production-dispatch-fused/analyze_bench_compare_1.log \
+  <local-raw-archive>/production-dispatch-fused/analyze_bench_compare_2.log \
+  <local-raw-archive>/production-dispatch-fused/analyze_bench_compare_3.log \
+  <local-raw-archive>/production-dispatch-fused/analyze_bench_compare_4.log \
+  <local-raw-archive>/production-dispatch-fused/analyze_bench_compare_5.log
 ```
 
 current historical production-shaped baseline 重算命令：
 
 ```text
 python3 test-rvv/script/analyze_bench_repeated.py \
-  /tmp/teptpl_production_dispatch_current_5run_20260729_150811/analyze_bench_compare_1.log \
-  /tmp/teptpl_production_dispatch_current_5run_20260729_150811/analyze_bench_compare_2.log \
-  /tmp/teptpl_production_dispatch_current_5run_20260729_150811/analyze_bench_compare_3.log \
-  /tmp/teptpl_production_dispatch_current_5run_20260729_150811/analyze_bench_compare_4.log \
-  /tmp/teptpl_production_dispatch_current_5run_20260729_150811/analyze_bench_compare_5.log
+  <local-raw-archive>/production-dispatch-current/analyze_bench_compare_1.log \
+  <local-raw-archive>/production-dispatch-current/analyze_bench_compare_2.log \
+  <local-raw-archive>/production-dispatch-current/analyze_bench_compare_3.log \
+  <local-raw-archive>/production-dispatch-current/analyze_bench_compare_4.log \
+  <local-raw-archive>/production-dispatch-current/analyze_bench_compare_5.log
 ```
 
 Analyzer:
@@ -59,8 +59,8 @@ Analyzer:
 Raw evidence archives:
 
 ```text
-/tmp/teptpl_production_dispatch_current_5run_20260729_150811
-/tmp/teptpl_production_dispatch_fused_5run_20260729_151217
+<local-raw-archive>/production-dispatch-current
+<local-raw-archive>/production-dispatch-fused
 ```
 
 这些路径是当轮本机临时归档，不是长期提交内容，也不要求永久存在。每个 archive 当前保留 `analyze_bench_compare_1.log` 到 `analyze_bench_compare_5.log`；repeated summary 从这些 analyze log 中的 std/RVV raw ms 重新计算 speedup。

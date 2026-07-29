@@ -321,7 +321,7 @@ QEMU timing 不作为性能结论。性能结论只来自板卡或目标硬件�
 
 当前验证记录包含 QEMU correctness、dump bench、production-dispatch QEMU bench，以及三类 representative pointtypes production-dispatch 板卡 5-run。generic EvidenceDecision 已基于这些摘要升级为 fused-formula 默认 production candidate，但结论名保留 `representative-pointtypes` 边界。
 
-fused-formula variant 另有 `block_fused_formula_5run_summary.md` 作为 diagnostic-only board A/B 摘要。near-cancellation 数值测试已经加入 `run_test_compare`，并且 production-facing fused correctness、asm attribution 和 5-run production-dispatch A/B 已闭合。
+fused-formula variant 另有 `block_fused_formula_5run_summary.md` 作为 diagnostic direct board A/B 摘要。near-cancellation 数值测试已经加入 `run_test_compare`，并且 production-facing fused correctness、asm attribution 和 5-run production-dispatch A/B 已闭合。
 
 ## 13. 后续方向
 

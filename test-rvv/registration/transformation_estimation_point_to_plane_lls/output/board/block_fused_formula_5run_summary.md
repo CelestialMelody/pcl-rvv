@@ -29,11 +29,11 @@ production-candidate/full-cloud-f32-aos-layout-gated-source-xyz-target-xyznormal
 make -C test-rvv/registration/transformation_estimation_point_to_plane_lls run_board_bench_compare BENCH_ARGS="--size 65536,262144 --case-filter block"
 make -C test-rvv/registration/transformation_estimation_point_to_plane_lls fetch_board_logs
 python3 test-rvv/script/analyze_bench_repeated.py \
-  /tmp/teptpl_block_fused_formula_board_5run_20260729_134638/analyze_bench_compare_1.log \
-  /tmp/teptpl_block_fused_formula_board_5run_20260729_134638/analyze_bench_compare_2.log \
-  /tmp/teptpl_block_fused_formula_board_5run_20260729_134638/analyze_bench_compare_3.log \
-  /tmp/teptpl_block_fused_formula_board_5run_20260729_134638/analyze_bench_compare_4.log \
-  /tmp/teptpl_block_fused_formula_board_5run_20260729_134638/analyze_bench_compare_5.log
+  <local-raw-archive>/block-fused-formula/analyze_bench_compare_1.log \
+  <local-raw-archive>/block-fused-formula/analyze_bench_compare_2.log \
+  <local-raw-archive>/block-fused-formula/analyze_bench_compare_3.log \
+  <local-raw-archive>/block-fused-formula/analyze_bench_compare_4.log \
+  <local-raw-archive>/block-fused-formula/analyze_bench_compare_5.log
 ```
 
 Analyzer:
@@ -45,7 +45,7 @@ Analyzer:
 Raw evidence archive:
 
 ```text
-/tmp/teptpl_block_fused_formula_board_5run_20260729_134638
+<local-raw-archive>/block-fused-formula
 ```
 
 该路径是当轮本机临时归档，不是长期提交内容，也不要求永久存在。长期审计以本文件内的 values、命令和 analyzer hash 为准。
