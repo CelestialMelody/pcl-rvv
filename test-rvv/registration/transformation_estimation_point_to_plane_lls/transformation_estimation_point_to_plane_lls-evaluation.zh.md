@@ -9,7 +9,7 @@
 当前 EvidenceDecision：
 
 ```text
-production-candidate/full-cloud-f32-aos-layout-gated-source-xyz-target-xyznormal-float-rvv-block-dispatch-representative-pointtypes
+production-candidate/full-cloud-f32-aos-layout-gated-source-xyz-target-xyznormal-float-rvv-fused-formula-block-dispatch-representative-pointtypes
 ```
 
 本评估文档只负责决策审计。长期实现说明、算法解释和证据边界见 `doc-rvv/registration/transformation_estimation_point_to_plane_lls-RVV.zh.md`。
@@ -46,9 +46,21 @@ RowSourcePolicy（行来源策略）是 test-rvv diagnostic 框架，用来分�
 | local fragment | test-rvv RowSourcePolicy、finite mask、staging、block-reduction helper 对拍标量。 | 数学路径可审查，但 diagnostic evidence 不等于 production evidence。 |
 | full diagnostic | block-reduction diagnostic direct 5-run 板卡 median 64K/256K 均为 `1.27x`。 | full-cloud block 方向值得进入窄 production dispatch。 |
 | public-entry-shaped | std 侧 public overload、RVV 侧 bench-only block shim，5-run median 64K `2.67x`、256K `2.69x`。 | 证明公开入口形态兼容强信号，但 public-entry-shaped 不等于 production dispatch。 |
-| production direct | std/RVV 两侧都调用真实 public full-cloud overload，三类 production-dispatch 板卡 5-run median：`pointnormal` 64K/256K `2.73x/2.71x`，`pointxyz-to-pointnormal` `2.93x/2.77x`，`pointxyz-to-pointxyzinormal` `2.92x/2.81x`。 | 支撑当前 generic production-candidate。 |
+| production direct | std/RVV 两侧都调用真实 public full-cloud overload。fused-formula 三类 production-dispatch 板卡 5-run median：`pointnormal` 64K/256K `2.80x/2.82x`，`pointxyz-to-pointnormal` `3.13x/3.15x`，`pointxyz-to-pointxyzinormal` `3.11x/3.14x`。 | 支撑 fused-formula 成为默认 generic production-candidate。 |
 
 QEMU timing 不作为性能结论。QEMU 只用于 correctness、checksum、case filter 和日志格式。
+
+## 为什么当前证据足够支撑 Candidate
+
+当前 EvidenceDecision 可以升级到 production candidate，是因为 correctness（正确性）、performance（性能）和 boundary（边界）三层证据同时闭合：
+
+| 层级 | 判据 | 当前证据 | 审计结论 |
+| --- | --- | --- | --- |
+| correctness | 真实 public overload、finite mask、`accepted_points`、`ATA/ATb`、matrix 和 fallback 都有覆盖。 | `ProductionFullCloud*` tests、generic point tests、invalid-lane tests、scale-stress tests、小规模和 `Scalar=double` fallback tests。 | 当前 full-cloud f32 AoS layout-gated `Scalar=float` path 在预算内对齐标量 reference。 |
+| performance | 只使用目标硬件 production-dispatch A/B，不使用 QEMU timing。 | Milkv-Jupiter 三类代表点型 fused 5-run summary；std/RVV 两侧都调用同一 public full-cloud overload。 | 64K/256K median/min 均正向，未见明显低谷；不外推到未上板点型。 |
+| boundary | EvidenceDecision 不超过证据覆盖面。 | `representative-pointtypes` 命名、dataflow 表、remaining risks 和 summary-only artifact。 | 不外推到 indexed、dual-indices、correspondences、weighted、`Scalar=double` 或所有 gate-allowed 点型。 |
+
+这个判断允许 fused-formula 接入默认 production hot path，是因为新增 production-facing fused tests 已覆盖可见输出、法方程中间态、无效 lane、计数、fallback、representative generic source/target gate、scale-stress 和 near-cancellation。后续只有在再次改变 RVV hot path 指令逻辑、bench case、dispatch gate 或扩大覆盖范围时，才需要新增专项测试或重新取证。
 
 ## 标量流程与 RVV 流程对照
 
@@ -57,21 +69,26 @@ QEMU timing 不作为性能结论。QEMU 只用于 correctness、checksum、case
 | 入口 | full-cloud overload 检查 source/target size。 | 同一入口先做窄 gate。 |
 | row 读取 | `ConstCloudIterator` 顺序读取 `source[k]`、`target[k]`。 | `vlse32` strided load 分别按 `PointSource` / `PointTarget` 的 layout offset 和 stride 读取字段。 |
 | finite 检查 | 逐 row 检查 9 个字段。 | 每个 VL chunk 生成 finite mask，invalid lane 置零。 |
-| normal-equation | 按 row 顺序 double 累加上三角 `ATA` 和 `ATb`。 | 按 a/b/c/normal 四组做 vector partial sums 后横向规约，改变 reduction tree。 |
+| normal-equation | 按 row 顺序 double 累加上三角 `ATA` 和 `ATb`。 | fused-formula 逐点计算 `a/b/c/d` 后，按 A/B/C/N 四组做 vector partial sums 和横向规约，改变逐点计算树与 reduction tree。 |
 | accepted_points | 每个有效 row 加一。 | block A 组用 `vcpop` 统计有效 lane。 |
 | 求解和矩阵 | Eigen inverse + matrix construct。 | 复用同一求解和矩阵构造。 |
 | fallback | 不适用。 | gate 失败回标量 helper。 |
 | debug loss | 标量 helper 在 debug verbosity 下会复算并打印 loss。 | RVV fast path 成功后提前返回，当前不打印该 debug loss。 |
 
-`a/b/c/d` 逐点公式当前显式使用 `vfmul`、`vfadd` 和 `vfsub` intrinsic（内建函数）组织，没有改成 fused-formula（融合公式）形态，用于让语义审计变量边界收敛；这不是禁止 FMA。normal-equation 的 `ATA/ATb` product accumulation（乘积累加）阶段已经使用 `vfmacc`。若未来把逐点公式也改为 fused intrinsic（融合乘加内建函数），需要单独做反汇编归属、误差预算和板卡 A/B。
+默认 production hot path 现在只有 fused-formula block。它保留 current block 的 A/B/C/N reduction 组织，但把 `a/b/c` 改为 `vfmsac` 形态，把 `d` 改为 `nx*(dx-sx) + ny*(dy-sy) + nz*(dz-sz)` 后用 `vfmacc` 累加，因此改变逐点计算树。current multiply/add/subtract block 只保留在 `test_support/` 作为 diagnostic A/B、benchmark 和历史证据 baseline，不作为 production selector 或长期 production 可配置行为。
+
+`FullCloudBlockFusedFormulaNearCancellationMatchesStdWithinBudget` 已加入 test-rvv。它把 source/target 推到大绝对坐标、保留小相对位移，并叠加 invalid lane 和 scale-stress 条件，以约束 d 公式里的近似抵消区间。production-facing fused tests 还覆盖 `PointNormal -> PointNormal`、`PointXYZ -> PointNormal`、`PointXYZ -> PointXYZINormal`、小规模 fallback、layout gate 失败 fallback 和 `Scalar=double` fallback。
+
+板卡 diagnostic direct 5-run 摘要索引为 `output/board/block_fused_formula_5run_summary.md`。最终 production-dispatch current vs fused 5-run 摘要索引为 `output/board/production_dispatch_generic_representative_5run_summary.md`。fused production-dispatch 三类代表点型 64K/256K median 分别为 `2.80x/2.82x`、`3.13x/3.15x`、`3.11x/3.14x`，min 均稳定正向；current baseline 在 256K generic rows 中出现 `1.33x` 和 `1.23x` 低谷。fused-formula 因此替换 current baseline 成为默认 production hot path。
 
 ## 测试 Inventory
 
 | 测试组 | 测试 | 保留理由 |
 | --- | --- | --- |
-| production direct | `ProductionFullCloudPublicOverloadMatrixMatchesStdWithinBudget`、`ProductionFullCloudNormalEquationMatchesStdWithinBudget`、`ProductionFullCloudInvalidLanesMatchStdWithinBudget`、`ProductionFullCloudScaleStressMatchesStdWithinBudget`、generic `PointXYZ -> PointNormal` 和 `PointXYZ -> PointXYZINormal` case | 当前 production correctness 证据，覆盖 public overload、`accepted_points`、`ATA/ATb`、matrix、invalid lane、数值压力和 generic source/target layout gate。 |
+| production direct | `ProductionFullCloudPublicOverloadMatrixMatchesStdWithinBudget`、`ProductionFullCloudNormalEquationMatchesStdWithinBudget`、`ProductionFullCloudInvalidLanesMatchStdWithinBudget`、`ProductionFullCloudScaleStressMatchesStdWithinBudget`、generic `PointXYZ -> PointNormal` 和 `PointXYZ -> PointXYZINormal` case | 默认 fused production correctness 证据，覆盖 public overload、`accepted_points`、`ATA/ATb`、matrix、invalid lane、数值压力和 generic source/target layout gate。 |
 | fallback | `ProductionFullCloudSmallInputFallsBackToScalar`、`ProductionFullCloudScalarDoubleFallbackSmoke`、`SmallInputFallsBackForIsolatedSizeGate` | 保护小规模和 `Scalar=double` 不误命中 RVV。 |
 | RVV-only diagnostic | `FullCloudBlockReduction*`、`InvalidLaneMaskMatchesStd` | 保护当前 block-reduction math、invalid lane 和 reduction-tree 预算。 |
+| fused-formula production-facing | `FullCloudBlockFusedFormulaReductionMatchesStdWithinBudget`、`FullCloudBlockFusedFormulaNearCancellationMatchesStdWithinBudget`、`ProductionFusedFullCloud*` tests | 保护 fused-formula direct helper 与默认 production path 的普通样本、near-cancellation、三类代表点型和 fallback。 |
 | historical diagnostic | std/public 对拍、source-indexed、dual-indices、correspondences、trusted-dense、fused、grouped tests | 解释历史方案和未扩展范围，防止未来误把旧诊断收益当 production 证据。 |
 | bench-only | `bench_transformation_estimation_point_to_plane_lls.cpp` 中 component-only、public-entry-shaped 和 historical rows | 用于归因或形态复核，不单独决定 production。 |
 
@@ -83,17 +100,18 @@ QEMU timing 不作为性能结论。QEMU 只用于 correctness、checksum、case
 | --- | --- | --- |
 | diagnostic direct | `lls normal-equation full-cloud block-reduction pointnormal` | 只证明 test-rvv helper 的目标硬件表现；不能替代 production-dispatch。 |
 | public-entry-shaped | `lls public-entry-shaped full-cloud block-reduction pointnormal` | 证明公开入口输入/输出形态下 block helper 有稳定正向；它不是真实 dispatch。 |
-| production-dispatch | `lls production-dispatch full-cloud pointnormal`、`pointxyz-to-pointnormal`、`pointxyz-to-pointxyzinormal` | 三类 case 均为真实 public full-cloud overload 的 std/RVV A/B；支撑当前 generic EvidenceDecision。 |
+| production-dispatch | `lls production-dispatch full-cloud pointnormal`、`pointxyz-to-pointnormal`、`pointxyz-to-pointxyzinormal` | 三类 case 均为真实 public full-cloud overload 的 std/RVV A/B；current baseline 来自历史 production-shaped A/B，最终支撑 fused generic EvidenceDecision。 |
+| fused-formula A/B | `lls normal-equation full-cloud block-fused-formula pointnormal`、`lls component full-cloud block-fused-formula no-solve pointnormal` | direct helper 只用于归因；默认接入依据是 production-dispatch fused A/B。 |
 | indexed/correspondences historical | source-indexed、dual-indices、correspondences rows | 用于解释不扩展。退化不能单因归因为 gather，还可能来自 query/match 展开、容器访问、baseline、分布局部性和后段成本。 |
 | component-only | load/gather、formula、mask/compress、tail、no-solve rows | 只提供局部线索，不等价于端到端 profile。 |
 
-板卡 production-dispatch 5-run speedup summary：
+板卡 fused production-dispatch 5-run speedup summary：
 
 | Benchmark Item | runs | 64K speedup median/min/p10 | 256K speedup median/min/p10 | 备注 |
 | --- | ---: | --- | --- | --- |
-| `pointnormal` | 5 | `2.73x/2.69x/2.70x` | `2.71x/2.49x/2.53x` | exact PointNormal 子集。 |
-| `pointxyz-to-pointnormal` | 5 | `2.93x/2.90x/2.91x` | `2.77x/2.24x/2.39x` | generic source xyz gate。 |
-| `pointxyz-to-pointxyzinormal` | 5 | `2.92x/2.89x/2.90x` | `2.81x/1.52x/2.04x` | generic target xyz+normal gate；256K 有一次低谷。 |
+| `pointnormal` | 5 | `2.80x/2.77x/2.78x` | `2.82x/2.81x/2.81x` | exact PointNormal 子集。 |
+| `pointxyz-to-pointnormal` | 5 | `3.13x/3.11x/3.12x` | `3.15x/3.14x/3.14x` | generic source xyz gate。 |
+| `pointxyz-to-pointxyzinormal` | 5 | `3.11x/3.11x/3.11x` | `3.14x/3.12x/3.12x` | generic target xyz+normal gate；未见明显低谷。 |
 
 稳定 summary-only 证据索引：
 
@@ -101,7 +119,15 @@ QEMU timing 不作为性能结论。QEMU 只用于 correctness、checksum、case
 test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md
 ```
 
-该 summary artifact（只提交摘要的证据文件）记录了 run1..run5 的命令、case filter、analyzer SHA256、完整 values 和当轮本机临时 raw archive 路径。长期审计以 summary artifact 内的 values、命令和 analyzer hash 为准，不依赖临时 raw archive 永久存在；顶层 board 日志仍可能被 runner 覆盖，不作为当前 generic 5-run 的稳定来源。用户后续单轮 production-dispatch smoke 与 5-run 结论方向一致，但不作为替代证据。
+该 summary artifact（只提交摘要的证据文件）记录了 current/fused 两份 run1..run5 的命令、case filter、analyzer SHA256、完整 values 和当轮本机临时 archive 路径。长期审计以 summary artifact 内的 values、命令和 analyzer hash 为准，不依赖临时 archive 永久存在；顶层 board 日志仍可能被 runner 覆盖，不作为当前 generic 5-run 的稳定来源。
+
+反汇编归属：
+
+| 层级 | 证据 | 结论 |
+| --- | --- | --- |
+| helper-level asm | `buildPointToPlaneLLSFullCloudBlockRVVFusedFormula<...>` 三个实例化符号：`PointNormal -> PointNormal`、`PointXYZ -> PointNormal`、`PointXYZ -> PointXYZINormal`。符号内可见逐点 fused `vfmsac.vv` 和 `d` 公式/normal-equation 的 `vfmacc.vv`。 | fused production helper 自身包含预期指令。 |
+| production-symbol asm | production-dispatch public overload case 的 call site 跳到上述 fused helper；例如 asm 中有 `jal` 到 `PointNormal, PointNormal`、`PointXYZ, PointNormal`、`PointXYZ, PointXYZINormal` 三个 fused 符号。 | 默认 public full-cloud RVV path 已归属到 fused production helper。 |
+| unrelated bench/test helper asm | 直接 grep 到的其它 `vfmsac/vfmacc` 行可能来自 component/direct diagnostic 或其它 Eigen/vectorized helper。 | 这些行不能单独作为 production hot path 证据。 |
 
 ## Evidence / Output 审计
 
@@ -128,16 +154,16 @@ make -C test-rvv/registration/transformation_estimation_point_to_plane_lls fetch
 python3 test-rvv/script/analyze_bench_repeated.py <five fetched analyze_bench_compare.log files>
 ```
 
-板卡 5-run 使用 summary-only 策略：每轮 fetch 后只把脱敏摘要数字写入文档和 summary artifact，不提交 raw run 目录。当前 stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md`，其中记录的 `/tmp/teptpl_generic_board_5run_fetch_20260728_173246` 是当轮本机临时归档，不是长期依赖；长期审计以 summary artifact 的 values、命令和 analyzer hash 为准。文档、输出清理、注释整理或不改变 RVV hot path/bench 逻辑的入口 wrapper 重构不要求重跑板卡。若后续修改 RVV hot path 指令逻辑、bench case 或 production dispatch gate，则需要补反汇编/QEMU bench，并按变更风险判断是否复跑板卡。
+板卡 5-run 使用 summary-only 策略：每轮 fetch 后只把脱敏摘要数字写入文档和 summary artifact，不提交 raw run 目录。当前 production stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md`，其中记录的 `/tmp/teptpl_production_dispatch_current_5run_20260729_150811` 和 `/tmp/teptpl_production_dispatch_fused_5run_20260729_151217` 是当轮本机临时归档，不是长期依赖；长期审计以 summary artifact 的 values、命令和 analyzer hash 为准。fused-formula direct diagnostic A/B 的 stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md`。文档、输出清理、注释整理或不改变 RVV hot path/bench 逻辑的入口 wrapper 重构不要求重跑板卡。若后续修改 RVV hot path 指令逻辑、bench case 或 production dispatch gate，则需要补反汇编/QEMU bench，并按变更风险判断是否复跑板卡。
 
 ## Production 接入判断
 
-结论升级为 `production-candidate/full-cloud-f32-aos-layout-gated-source-xyz-target-xyznormal-float-rvv-block-dispatch-representative-pointtypes`。理由：
+结论升级为 `production-candidate/full-cloud-f32-aos-layout-gated-source-xyz-target-xyznormal-float-rvv-fused-formula-block-dispatch-representative-pointtypes`。理由：
 
 1. 覆盖范围足够窄，fallback 矩阵清晰。
 2. production direct tests 覆盖 public overload、fallback、invalid lane、`accepted_points`、`ATA/ATb` 和 matrix。
-3. 三类代表点型 production-dispatch 板卡 A/B 都是正向；64K 稳定，256K 有个别低谷但 median/p10 仍正向。
-4. 历史 negative evidence 支持不扩展到 indexed、correspondences、trusted-dense、fused、grouped 或 weighted。
+3. fused-formula 三类代表点型 production-dispatch 板卡 A/B 都稳定正向；没有 current block 在 256K generic rows 中出现的明显低谷。
+4. 历史 negative evidence 支持不扩展到 indexed、correspondences、trusted-dense、grouped 或 weighted。
 
 仍不覆盖范围必须保持显式：full-cloud f32 AoS layout-gated `Scalar=float` 之外的入口全部是标量或独立 topic；满足 layout gate 但未落在三类代表组合内的点型，不具备逐类型板卡结论。
 
@@ -150,9 +176,9 @@ python3 test-rvv/script/analyze_bench_repeated.py <five fetched analyze_bench_co
 | debug loss 日志差异 | RVV fast path 成功后提前 `return`，绕过原 scalar helper 的 `PCL_DEBUG` loss 复算。默认矩阵输出不变，但 debug verbosity 下日志行为不同。 | 若要求日志等价，需要抽出 debug loss helper 或在 RVV fast path 后复刻调试计算，并重跑专项测试。 |
 | production helper size / duplication | 公开入口已收束为 `*_RVV` 尝试和 `*_Std` fallback，但 block A/B/C/N 组仍重复 load/formula；helper 规模和重复度仍是 reviewer 审查项。 | 合入前若审查要求，可压缩 helper 或拆清 Std/RVV/reference 边界，并重跑 correctness。 |
 | `buildPointToPlaneLLSFullCloudStd` / solve / matrix helper 职责 | 这些 helper 当前服务 production-facing tests 和 RVV 对拍，也与 production 源码同文件共存。 | 审查时需要确认它们作为 reference/test 支撑是否可接受；若不接受，应移动或收窄职责后重跑测试。 |
-| generic board variability | 新增三类 production-dispatch 板卡 5-run 都正向，但 `PointXYZ -> PointXYZINormal` 256K 有一次 1.52x 低谷。 | 若 reviewer 要求更稳定的泛型目标证据，可追加 repeated runs 或拆分板卡负载/调度波动；当前作为性能波动风险记录。 |
+| generic board variability | fused-formula 三类 production-dispatch 板卡 5-run 都稳定正向；current block 的 256K 低谷已作为替换依据之一记录在 summary artifact。 | 若 reviewer 要求更多泛型目标证据，可追加 repeated runs 或拆分板卡负载/调度波动；当前不外推到未上板点型。 |
 | gate-allowed point-type coverage | 当前 production gate 允许更多 source xyz / target xyz+normal f32 AoS 组合，但板卡只覆盖三类代表组合。 | 若新增点型实例进入 release 风险面，需要补该点型的 production direct、asm 和板卡抽样，或临时收窄 production gate。 |
-| FMA formula variant | 标量源码不是 fused 写法，但编译器可能做 FMA contraction。当前逐点公式显式使用 `vfmul`、`vfadd` 和 `vfsub`，没有做 fused-formula；`ATA/ATb` 乘积累加已使用 `vfmacc`。 | 若未来推进 fused formula，需要反汇编归属、`accepted_points`、`ATA/ATb`、matrix、invalid/scale-stress 误差预算和板卡 A/B。 |
+| fused-formula 数值树 | 默认 hot path 改为 fused-formula 后，逐点 `a/b/c/d` 的舍入树和标量/current block 不同；当前 tests 和板卡 A/B 在预算内通过，但不承诺 bitwise 等价。 | 若扩大点型、规模、Scalar 或公式结构，需要重新做 near-cancellation、scale-stress、production-dispatch A/B 和 asm attribution。 |
 | indexed/correspondences 扩展 | 历史负向证据分布敏感，不能单因归因为 gather。 | 需要独立 profile 或消融拆分 gather、query/match 展开、容器访问、baseline、分布局部性和后段成本。 |
 
 可选 follow-up 应另开范围：
