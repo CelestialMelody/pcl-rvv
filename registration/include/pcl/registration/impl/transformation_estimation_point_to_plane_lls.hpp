@@ -253,7 +253,10 @@ reducePointToPlaneLLSSumF32M1(vfloat32m1_t value, const std::size_t vl)
   return __riscv_vfmv_f_s_f32m1_f32(reduced);
 }
 
-template <typename PointSource, typename PointTarget, typename SrcLayout, typename TgtLayout>
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
 inline void
 loadPointToPlaneLLSFullReductionVectors(const std::uint8_t* source_base,
                                         const std::uint8_t* target_base,
@@ -309,23 +312,20 @@ loadPointToPlaneLLSFullReductionVectors(const std::uint8_t* source_base,
   keep = __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSF32M1(ny, vl), vl);
   keep = __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSF32M1(nz, vl), vl);
 
-  // Keep the point formula staged for auditability; the ATA/ATb accumulation
-  // groups below use vfmacc for the reduction products.
-  a = __riscv_vfsub_vv_f32m1(__riscv_vfmul_vv_f32m1(nz, sy, vl),
-                             __riscv_vfmul_vv_f32m1(ny, sz, vl),
-                             vl);
-  b = __riscv_vfsub_vv_f32m1(__riscv_vfmul_vv_f32m1(nx, sz, vl),
-                             __riscv_vfmul_vv_f32m1(nz, sx, vl),
-                             vl);
-  c = __riscv_vfsub_vv_f32m1(__riscv_vfmul_vv_f32m1(ny, sx, vl),
-                             __riscv_vfmul_vv_f32m1(nx, sy, vl),
-                             vl);
-  d = __riscv_vfmul_vv_f32m1(nx, dx, vl);
-  d = __riscv_vfadd_vv_f32m1(d, __riscv_vfmul_vv_f32m1(ny, dy, vl), vl);
-  d = __riscv_vfadd_vv_f32m1(d, __riscv_vfmul_vv_f32m1(nz, dz, vl), vl);
-  d = __riscv_vfsub_vv_f32m1(d, __riscv_vfmul_vv_f32m1(nx, sx, vl), vl);
-  d = __riscv_vfsub_vv_f32m1(d, __riscv_vfmul_vv_f32m1(ny, sy, vl), vl);
-  d = __riscv_vfsub_vv_f32m1(d, __riscv_vfmul_vv_f32m1(nz, sz, vl), vl);
+  // vfmsac(dst, lhs, rhs) is used here to construct the original signs:
+  // lhs * rhs - dst. The fused tree changes rounding, not formula semantics.
+  a = __riscv_vfmul_vv_f32m1(ny, sz, vl);
+  a = __riscv_vfmsac_vv_f32m1(a, nz, sy, vl);
+  b = __riscv_vfmul_vv_f32m1(nz, sx, vl);
+  b = __riscv_vfmsac_vv_f32m1(b, nx, sz, vl);
+  c = __riscv_vfmul_vv_f32m1(nx, sy, vl);
+  c = __riscv_vfmsac_vv_f32m1(c, ny, sx, vl);
+  const vfloat32m1_t dsx = __riscv_vfsub_vv_f32m1(dx, sx, vl);
+  const vfloat32m1_t dsy = __riscv_vfsub_vv_f32m1(dy, sy, vl);
+  const vfloat32m1_t dsz = __riscv_vfsub_vv_f32m1(dz, sz, vl);
+  d = __riscv_vfmul_vv_f32m1(nx, dsx, vl);
+  d = __riscv_vfmacc_vv_f32m1(d, ny, dsy, vl);
+  d = __riscv_vfmacc_vv_f32m1(d, nz, dsz, vl);
 
   const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, vl);
   a = __riscv_vmerge_vvm_f32m1(zero, a, keep, vl);
@@ -339,7 +339,10 @@ loadPointToPlaneLLSFullReductionVectors(const std::uint8_t* source_base,
 
 // A/B/C/N groups deliberately reload the same row block to reduce live vector
 // accumulator pressure; this is the production block-reduction trade-off.
-template <typename PointSource, typename PointTarget, typename SrcLayout, typename TgtLayout>
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
 inline void
 accumulatePointToPlaneLLSBlockGroupA(const std::uint8_t* source_base,
                                      const std::uint8_t* target_base,
@@ -355,7 +358,11 @@ accumulatePointToPlaneLLSBlockGroupA(const std::uint8_t* source_base,
     const std::size_t vl = __riscv_vsetvl_e32m1(end - i);
     vfloat32m1_t a, b, c, d, nx, ny, nz;
     vbool32_t keep;
-    loadPointToPlaneLLSFullReductionVectors<PointSource, PointTarget, SrcLayout, TgtLayout>(
+    loadPointToPlaneLLSFullReductionVectors<
+        PointSource,
+        PointTarget,
+        SrcLayout,
+        TgtLayout>(
         source_base, target_base, i, vl, a, b, c, d, nx, ny, nz, keep);
     eq.accepted_points += __riscv_vcpop_m_b32(keep, vl);
     aa = __riscv_vfmacc_vv_f32m1_tu(aa, a, a, vl);
@@ -376,7 +383,10 @@ accumulatePointToPlaneLLSBlockGroupA(const std::uint8_t* source_base,
   eq.atb.coeffRef(0) += reducePointToPlaneLLSSumF32M1(ad, vlmax);
 }
 
-template <typename PointSource, typename PointTarget, typename SrcLayout, typename TgtLayout>
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
 inline void
 accumulatePointToPlaneLLSBlockGroupB(const std::uint8_t* source_base,
                                      const std::uint8_t* target_base,
@@ -391,7 +401,11 @@ accumulatePointToPlaneLLSBlockGroupB(const std::uint8_t* source_base,
     const std::size_t vl = __riscv_vsetvl_e32m1(end - i);
     vfloat32m1_t a, b, c, d, nx, ny, nz;
     vbool32_t keep;
-    loadPointToPlaneLLSFullReductionVectors<PointSource, PointTarget, SrcLayout, TgtLayout>(
+    loadPointToPlaneLLSFullReductionVectors<
+        PointSource,
+        PointTarget,
+        SrcLayout,
+        TgtLayout>(
         source_base, target_base, i, vl, a, b, c, d, nx, ny, nz, keep);
     bb = __riscv_vfmacc_vv_f32m1_tu(bb, b, b, vl);
     bc = __riscv_vfmacc_vv_f32m1_tu(bc, b, c, vl);
@@ -409,7 +423,10 @@ accumulatePointToPlaneLLSBlockGroupB(const std::uint8_t* source_base,
   eq.atb.coeffRef(1) += reducePointToPlaneLLSSumF32M1(bd, vlmax);
 }
 
-template <typename PointSource, typename PointTarget, typename SrcLayout, typename TgtLayout>
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
 inline void
 accumulatePointToPlaneLLSBlockGroupC(const std::uint8_t* source_base,
                                      const std::uint8_t* target_base,
@@ -424,7 +441,11 @@ accumulatePointToPlaneLLSBlockGroupC(const std::uint8_t* source_base,
     const std::size_t vl = __riscv_vsetvl_e32m1(end - i);
     vfloat32m1_t a, b, c, d, nx, ny, nz;
     vbool32_t keep;
-    loadPointToPlaneLLSFullReductionVectors<PointSource, PointTarget, SrcLayout, TgtLayout>(
+    loadPointToPlaneLLSFullReductionVectors<
+        PointSource,
+        PointTarget,
+        SrcLayout,
+        TgtLayout>(
         source_base, target_base, i, vl, a, b, c, d, nx, ny, nz, keep);
     cc = __riscv_vfmacc_vv_f32m1_tu(cc, c, c, vl);
     cnx = __riscv_vfmacc_vv_f32m1_tu(cnx, c, nx, vl);
@@ -440,7 +461,10 @@ accumulatePointToPlaneLLSBlockGroupC(const std::uint8_t* source_base,
   eq.atb.coeffRef(2) += reducePointToPlaneLLSSumF32M1(cd, vlmax);
 }
 
-template <typename PointSource, typename PointTarget, typename SrcLayout, typename TgtLayout>
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
 inline void
 accumulatePointToPlaneLLSBlockGroupN(const std::uint8_t* source_base,
                                      const std::uint8_t* target_base,
@@ -457,7 +481,11 @@ accumulatePointToPlaneLLSBlockGroupN(const std::uint8_t* source_base,
     const std::size_t vl = __riscv_vsetvl_e32m1(end - i);
     vfloat32m1_t a, b, c, d, nx, ny, nz;
     vbool32_t keep;
-    loadPointToPlaneLLSFullReductionVectors<PointSource, PointTarget, SrcLayout, TgtLayout>(
+    loadPointToPlaneLLSFullReductionVectors<
+        PointSource,
+        PointTarget,
+        SrcLayout,
+        TgtLayout>(
         source_base, target_base, i, vl, a, b, c, d, nx, ny, nz, keep);
     nxnx = __riscv_vfmacc_vv_f32m1_tu(nxnx, nx, nx, vl);
     nxny = __riscv_vfmacc_vv_f32m1_tu(nxny, nx, ny, vl);
@@ -483,7 +511,7 @@ accumulatePointToPlaneLLSBlockGroupN(const std::uint8_t* source_base,
 
 template <typename PointSource, typename PointTarget>
 inline bool
-buildPointToPlaneLLSFullCloudBlockRVV(
+buildPointToPlaneLLSFullCloudBlockRVVFusedFormula(
     const pcl::PointCloud<PointSource>& cloud_src,
     const pcl::PointCloud<PointTarget>& cloud_tgt,
     PointToPlaneLLSNormalEquation& eq,
@@ -529,13 +557,29 @@ buildPointToPlaneLLSFullCloudBlockRVV(
         reinterpret_cast<const std::uint8_t*>(cloud_tgt.points.data());
     for (std::size_t begin = 0; begin < nr_points; begin += block_rows) {
       const std::size_t end = std::min(nr_points, begin + block_rows);
-      accumulatePointToPlaneLLSBlockGroupA<PointSource, PointTarget, SrcLayout, TgtLayout>(
+      accumulatePointToPlaneLLSBlockGroupA<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(
           source_base, target_base, begin, end, eq);
-      accumulatePointToPlaneLLSBlockGroupB<PointSource, PointTarget, SrcLayout, TgtLayout>(
+      accumulatePointToPlaneLLSBlockGroupB<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(
           source_base, target_base, begin, end, eq);
-      accumulatePointToPlaneLLSBlockGroupC<PointSource, PointTarget, SrcLayout, TgtLayout>(
+      accumulatePointToPlaneLLSBlockGroupC<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(
           source_base, target_base, begin, end, eq);
-      accumulatePointToPlaneLLSBlockGroupN<PointSource, PointTarget, SrcLayout, TgtLayout>(
+      accumulatePointToPlaneLLSBlockGroupN<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(
           source_base, target_base, begin, end, eq);
     }
     if (stats) {
@@ -549,7 +593,7 @@ buildPointToPlaneLLSFullCloudBlockRVV(
 
 template <typename PointSource, typename PointTarget>
 inline bool
-estimatePointToPlaneLLSFullCloudBlockRVV(
+estimatePointToPlaneLLSFullCloudBlockRVVFusedFormula(
     const pcl::PointCloud<PointSource>& cloud_src,
     const pcl::PointCloud<PointTarget>& cloud_tgt,
     Eigen::Matrix4f& transformation_matrix,
@@ -557,7 +601,7 @@ estimatePointToPlaneLLSFullCloudBlockRVV(
     PointToPlaneLLSNormalEquation* equation = nullptr)
 {
   PointToPlaneLLSNormalEquation eq;
-  if (!buildPointToPlaneLLSFullCloudBlockRVV(cloud_src, cloud_tgt, eq, stats))
+  if (!buildPointToPlaneLLSFullCloudBlockRVVFusedFormula(cloud_src, cloud_tgt, eq, stats))
     return false;
   if (equation)
     *equation = eq;
@@ -573,7 +617,7 @@ estimatePointToPlaneLLSFullCloudRVV(
     Eigen::Matrix<Scalar, 4, 4>& transformation_matrix)
 {
   if constexpr (std::is_same_v<Scalar, float>) {
-    return estimatePointToPlaneLLSFullCloudBlockRVV(
+    return estimatePointToPlaneLLSFullCloudBlockRVVFusedFormula(
         cloud_src, cloud_tgt, transformation_matrix);
   }
   return false;

@@ -794,6 +794,19 @@ main(int argc, char** argv)
             return normalEquationChecksum(eq) +
                    static_cast<double>(stats.accepted_points) * 1e-9;
           });
+      appendCase(
+          results,
+          options,
+          "lls component full-cloud block-fused-formula no-solve pointnormal " +
+              std::to_string(n),
+          [&]() {
+            support::AccumulationStats stats;
+            const support::NormalEquation eq =
+                support::accumulate_candidate_full_block_fused_formula_reduction(
+                    source, target, &stats);
+            return normalEquationChecksum(eq) +
+                   static_cast<double>(stats.accepted_points) * 1e-9;
+          });
       continue;
     }
 
@@ -856,6 +869,19 @@ main(int argc, char** argv)
           support::AccumulationStats stats;
           const Eigen::Matrix4f matrix =
               support::estimate_candidate_full_block_reduction(source, target, &stats);
+          return support::matrix_checksum(matrix) +
+                 static_cast<double>(stats.accepted_points) * 1e-6;
+        });
+    appendCase(
+        results,
+        options,
+        "lls normal-equation full-cloud block-fused-formula pointnormal " +
+            std::to_string(n),
+        [&]() {
+          support::AccumulationStats stats;
+          const Eigen::Matrix4f matrix =
+              support::estimate_candidate_full_block_fused_formula_reduction(
+                  source, target, &stats);
           return support::matrix_checksum(matrix) +
                  static_cast<double>(stats.accepted_points) * 1e-6;
         });

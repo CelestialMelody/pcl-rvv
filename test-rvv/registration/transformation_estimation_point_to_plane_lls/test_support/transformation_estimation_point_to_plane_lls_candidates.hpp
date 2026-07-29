@@ -6,8 +6,8 @@
  *
  * 证据边界：
  * wrapper 只把 test-support normal-equation 接到 4x4 输出，方便测试和 bench 复用。
- * 它不是 production dispatch，不能把 full-cloud f32 AoS layout-gated / Scalar=float
- * 之外的路径写成已接入。
+ * 这些 direct helper 是 A/B、historical baseline 和 probing 入口；production dispatch
+ * 证据来自 production-facing tests、asm attribution 和 production-dispatch board 5-run。
  */
 
 #pragma once
@@ -194,6 +194,50 @@ accumulate_candidate_full_block_reduction(
       accumulate_full_block_reduction_group_b(source_base, target_base, begin, end, eq);
       accumulate_full_block_reduction_group_c(source_base, target_base, begin, end, eq);
       accumulate_full_block_reduction_group_n(source_base, target_base, begin, end, eq);
+    }
+    if (stats) {
+      stats->input_points = n;
+      stats->accepted_points = eq.accepted_points;
+      stats->used_rvv = true;
+    }
+    return eq;
+  }
+#endif // __RVV10__
+  return accumulate_std_full(source, target, stats);
+}
+
+// fused-formula block variant（逐点公式融合的分块规约变体）保留 block A/B/C/N
+// reduction 组织，只替换 load_full_reduction_vectors 内的 a/b/c/d 公式。它用于
+// current block vs fused-formula block direct A/B 和 historical baseline。当前 production
+// 默认也使用同一 fused 公式树；test_support direct helper 本身不证明 production dispatch。
+inline NormalEquation
+accumulate_candidate_full_block_fused_formula_reduction(
+    const pcl::PointCloud<pcl::PointNormal>& source,
+    const pcl::PointCloud<pcl::PointNormal>& target,
+    AccumulationStats* stats = nullptr)
+{
+  const std::size_t n = std::min(source.size(), target.size());
+#ifdef __RVV10__
+  if (n >= 64 && __riscv_vsetvlmax_e32m1() <= 64 &&
+      n <= std::numeric_limits<std::uint32_t>::max() / sizeof(pcl::PointNormal)) {
+    constexpr std::size_t kBlockChunks = 8;
+    const std::size_t vlmax = __riscv_vsetvlmax_e32m1();
+    const std::size_t block_rows = std::max<std::size_t>(vlmax, vlmax * kBlockChunks);
+    NormalEquation eq;
+    const auto* source_base =
+        reinterpret_cast<const std::uint8_t*>(source.points.data());
+    const auto* target_base =
+        reinterpret_cast<const std::uint8_t*>(target.points.data());
+    for (std::size_t begin = 0; begin < n; begin += block_rows) {
+      const std::size_t end = std::min(n, begin + block_rows);
+      accumulate_full_block_fused_formula_group_a(
+          source_base, target_base, begin, end, eq);
+      accumulate_full_block_fused_formula_group_b(
+          source_base, target_base, begin, end, eq);
+      accumulate_full_block_fused_formula_group_c(
+          source_base, target_base, begin, end, eq);
+      accumulate_full_block_fused_formula_group_n(
+          source_base, target_base, begin, end, eq);
     }
     if (stats) {
       stats->input_points = n;
@@ -407,6 +451,16 @@ estimate_candidate_full_block_reduction(
 {
   return solve_normal_equation(
       accumulate_candidate_full_block_reduction(source, target, stats));
+}
+
+inline Matrix4f
+estimate_candidate_full_block_fused_formula_reduction(
+    const pcl::PointCloud<pcl::PointNormal>& source,
+    const pcl::PointCloud<pcl::PointNormal>& target,
+    AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(
+      accumulate_candidate_full_block_fused_formula_reduction(source, target, stats));
 }
 
 inline Matrix4f

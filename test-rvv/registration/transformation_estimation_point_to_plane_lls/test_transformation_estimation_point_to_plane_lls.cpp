@@ -27,12 +27,25 @@
 #include "test_support_transformation_estimation_point_to_plane_lls.hpp"
 
 #include <pcl/common/transforms.h>
+#include <pcl/register_point_struct.h>
 #include <pcl/registration/transformation_estimation_point_to_plane_lls.h>
 
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <limits>
+#include <utility>
+
+struct TEPTPLDoubleXYZPoint {
+  double x = 0.0;
+  double y = 0.0;
+  double z = 0.0;
+};
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(TEPTPLDoubleXYZPoint,
+                                  (double, x, x)
+                                  (double, y, y)
+                                  (double, z, z))
 
 namespace support = pcl::registration::rvv_te_pt2plane_lls_support;
 namespace prod_detail = pcl::registration::detail;
@@ -111,6 +124,24 @@ copySourceAsXYZ(const pcl::PointCloud<pcl::PointNormal>& source)
   return xyz;
 }
 
+pcl::PointCloud<TEPTPLDoubleXYZPoint>
+copySourceAsDoubleXYZ(const pcl::PointCloud<pcl::PointNormal>& source)
+{
+  pcl::PointCloud<TEPTPLDoubleXYZPoint> xyz;
+  xyz.height = 1;
+  xyz.is_dense = source.is_dense;
+  xyz.reserve(source.size());
+  for (const auto& point : source) {
+    TEPTPLDoubleXYZPoint copy;
+    copy.x = point.x;
+    copy.y = point.y;
+    copy.z = point.z;
+    xyz.push_back(copy);
+  }
+  xyz.width = xyz.size();
+  return xyz;
+}
+
 pcl::PointCloud<pcl::PointXYZINormal>
 copyTargetAsXYZINormal(const pcl::PointCloud<pcl::PointNormal>& target)
 {
@@ -153,6 +184,37 @@ makeScaleStressCloud()
     cloud[i].normal_z = nz / norm;
   }
   return cloud;
+}
+
+std::pair<pcl::PointCloud<pcl::PointNormal>, pcl::PointCloud<pcl::PointNormal>>
+makeNearCancellationCloudPair()
+{
+  // 这个样本把 source/target 坐标推到较大的绝对值，同时只保留很小的相对位移。
+  // current formula 需要先算大项再相减，fused-formula 则先算差值再乘法，因此这类
+  // 点能专门约束 d 公式里 dx-sx / dy-sy / dz-sz 的抵消误差。
+  auto source = makeScaleStressCloud();
+  auto target = source;
+  constexpr float kBaseX = 4096.0f;
+  constexpr float kBaseY = -2048.0f;
+  constexpr float kBaseZ = 1024.0f;
+  constexpr float kSmallDx = 0.03125f;
+  constexpr float kSmallDy = -0.046875f;
+  constexpr float kSmallDz = 0.0625f;
+  for (std::size_t i = 0; i < source.size(); ++i) {
+    const float scale = (i % 8 == 0) ? 64.0f : ((i % 5 == 0) ? 8.0f : 1.0f);
+    const float jitter = static_cast<float>(static_cast<int>(i % 7) - 3) * 0.00390625f;
+    source[i].x = kBaseX + source[i].x * scale + jitter;
+    source[i].y = kBaseY + source[i].y * scale - jitter * 0.5f;
+    source[i].z = kBaseZ + source[i].z * scale + jitter * 0.25f;
+    target[i] = source[i];
+    const float drift = static_cast<float>(static_cast<int>(i % 9) - 4) * 0.0009765625f;
+    target[i].x += kSmallDx + drift;
+    target[i].y += kSmallDy - drift * 0.5f;
+    target[i].z += kSmallDz + drift * 0.25f;
+  }
+  source[3].x = std::numeric_limits<float>::quiet_NaN();
+  target[11].normal_y = std::numeric_limits<float>::infinity();
+  return {std::move(source), std::move(target)};
 }
 
 pcl::Correspondences
@@ -290,14 +352,15 @@ expectProductionEquationNear(
 
 template <typename PointSource, typename PointTarget>
 prod_detail::PointToPlaneLLSNormalEquation
-buildProductionCandidateEquation(
+buildProductionDefaultEquation(
     const pcl::PointCloud<PointSource>& source,
     const pcl::PointCloud<PointTarget>& target,
     prod_detail::PointToPlaneLLSFullCloudStats* stats)
 {
 #ifdef __RVV10__
   prod_detail::PointToPlaneLLSNormalEquation eq;
-  if (prod_detail::buildPointToPlaneLLSFullCloudBlockRVV(source, target, eq, stats))
+  if (prod_detail::buildPointToPlaneLLSFullCloudBlockRVVFusedFormula(
+          source, target, eq, stats))
     return eq;
 #endif
   return prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, stats);
@@ -638,6 +701,88 @@ TEST(TransformationEstimationPointToPlaneLLS, FullCloudBlockReductionScaleStress
   EXPECT_LE((candidate_eq.atb - std_eq.atb).norm(), atb_budget);
 }
 
+// fused-formula block 变体只替换 a/b/c/d 的 lane 内公式，保留 current block 的
+// A/B/C/N 分组。这个探索测试证明它在现有正常样本下仍落在 normal-equation 预算内；
+// 近似抵消和 scale-stress 的额外风险由后面的专门样本覆盖。
+TEST(TransformationEstimationPointToPlaneLLS,
+     FullCloudBlockFusedFormulaReductionMatchesStdWithinBudget)
+{
+  const auto source = makeSurfaceCloud(20, 0.14f);
+  const auto target = makeTargetCloud(source);
+
+  support::AccumulationStats std_stats;
+  support::AccumulationStats candidate_stats;
+  const support::NormalEquation std_eq = support::accumulate_std_full(source, target, &std_stats);
+  const support::NormalEquation candidate_eq =
+      support::accumulate_candidate_full_block_fused_formula_reduction(
+          source, target, &candidate_stats);
+  const Eigen::Matrix4f std_matrix = support::solve_normal_equation(std_eq);
+  const Eigen::Matrix4f candidate_matrix = support::solve_normal_equation(candidate_eq);
+
+  EXPECT_EQ(candidate_stats.input_points, std_stats.input_points);
+  EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
+  EXPECT_EQ(candidate_eq.accepted_points, std_eq.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(candidate_stats.used_rvv);
+#else
+  EXPECT_FALSE(candidate_stats.used_rvv);
+#endif
+  EXPECT_NEAR((candidate_eq.ata - std_eq.ata).norm(), 0.0, 1.0);
+  EXPECT_NEAR((candidate_eq.atb - std_eq.atb).norm(), 0.0, 1.0);
+  expectMatrixNear(candidate_matrix, std_matrix, 5e-4f);
+}
+
+// fused-formula near-cancellation 样本专门把 d 公式的 dx-sx、dy-sy、dz-sz 做成“两个大项
+// 相减只剩小余量”的形态，同时叠加 scale-stress 和一个无效 lane。它用来约束：
+// 1) accepted_points 只统计 finite row；
+// 2) ATA/ATb 和矩阵仍在预算内；
+// 3) 逐点 fused 写法不会在抵消区间里比 current block 更脆弱。
+TEST(TransformationEstimationPointToPlaneLLS,
+     FullCloudBlockFusedFormulaNearCancellationMatchesStdWithinBudget)
+{
+  const auto [source, target] = makeNearCancellationCloudPair();
+
+  support::AccumulationStats std_stats;
+  support::AccumulationStats current_stats;
+  support::AccumulationStats fused_stats;
+  const support::NormalEquation std_eq = support::accumulate_std_full(source, target, &std_stats);
+  const support::NormalEquation current_eq =
+      support::accumulate_candidate_full_block_reduction(source, target, &current_stats);
+  const support::NormalEquation fused_eq =
+      support::accumulate_candidate_full_block_fused_formula_reduction(
+          source, target, &fused_stats);
+  const Eigen::Matrix4f std_matrix = support::solve_normal_equation(std_eq);
+  const Eigen::Matrix4f current_matrix = support::solve_normal_equation(current_eq);
+  const Eigen::Matrix4f fused_matrix = support::solve_normal_equation(fused_eq);
+
+  EXPECT_EQ(std_stats.input_points, source.size());
+  EXPECT_EQ(current_stats.input_points, std_stats.input_points);
+  EXPECT_EQ(fused_stats.input_points, std_stats.input_points);
+  EXPECT_EQ(current_stats.accepted_points, std_stats.accepted_points);
+  EXPECT_EQ(fused_stats.accepted_points, std_stats.accepted_points);
+  EXPECT_EQ(current_eq.accepted_points, std_eq.accepted_points);
+  EXPECT_EQ(fused_eq.accepted_points, std_eq.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(current_stats.used_rvv);
+  EXPECT_TRUE(fused_stats.used_rvv);
+#else
+  EXPECT_FALSE(current_stats.used_rvv);
+  EXPECT_FALSE(fused_stats.used_rvv);
+#endif
+  const double current_ata_delta = (current_eq.ata - std_eq.ata).norm();
+  const double current_atb_delta = (current_eq.atb - std_eq.atb).norm();
+  const double fused_ata_delta = (fused_eq.ata - std_eq.ata).norm();
+  const double fused_atb_delta = (fused_eq.atb - std_eq.atb).norm();
+  const double ata_budget = std::max(256.0, std_eq.ata.norm() * 1e-4);
+  const double atb_budget = std::max(16.0, std_eq.atb.norm() * 1e-4);
+  EXPECT_LE(fused_ata_delta, ata_budget);
+  EXPECT_LE(fused_atb_delta, atb_budget);
+  EXPECT_LE(fused_ata_delta, std::max(1.0, current_ata_delta * 1.25));
+  EXPECT_LE(fused_atb_delta, std::max(1.0, current_atb_delta * 1.25));
+  expectMatrixNear(current_matrix, std_matrix, 8e-4f);
+  expectMatrixNear(fused_matrix, std_matrix, 8e-4f);
+}
+
 // Public-entry-shaped check: inputs and output matrix follow the public
 // full-cloud overload contract, while the RVV side still calls only the
 // test-rvv block shim. This proves shape compatibility, not production dispatch.
@@ -705,7 +850,7 @@ TEST(TransformationEstimationPointToPlaneLLS,
   const auto std_eq =
       prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
   const auto candidate_eq =
-      buildProductionCandidateEquation(source, target, &candidate_stats);
+      buildProductionDefaultEquation(source, target, &candidate_stats);
 
   EXPECT_EQ(candidate_stats.input_points, std_stats.input_points);
   EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
@@ -740,7 +885,7 @@ TEST(TransformationEstimationPointToPlaneLLS,
   const auto std_eq =
       prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
   const auto candidate_eq =
-      buildProductionCandidateEquation(source, target, &candidate_stats);
+      buildProductionDefaultEquation(source, target, &candidate_stats);
 
   EXPECT_LT(std_stats.accepted_points, std_stats.input_points);
   EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
@@ -773,7 +918,7 @@ TEST(TransformationEstimationPointToPlaneLLS,
   const auto std_eq =
       prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
   const auto candidate_eq =
-      buildProductionCandidateEquation(source, target, &candidate_stats);
+      buildProductionDefaultEquation(source, target, &candidate_stats);
 
   EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
 #ifdef __RVV10__
@@ -809,7 +954,7 @@ TEST(TransformationEstimationPointToPlaneLLS,
   const auto std_eq =
       prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
   const auto candidate_eq =
-      buildProductionCandidateEquation(source, target, &candidate_stats);
+      buildProductionDefaultEquation(source, target, &candidate_stats);
 
   EXPECT_LT(std_stats.accepted_points, std_stats.input_points);
   EXPECT_EQ(candidate_stats.input_points, std_stats.input_points);
@@ -844,7 +989,7 @@ TEST(TransformationEstimationPointToPlaneLLS,
   const auto std_eq =
       prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
   const auto candidate_eq =
-      buildProductionCandidateEquation(source, target, &candidate_stats);
+      buildProductionDefaultEquation(source, target, &candidate_stats);
 
   EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
 #ifdef __RVV10__
@@ -877,7 +1022,7 @@ TEST(TransformationEstimationPointToPlaneLLS,
   const auto std_eq =
       prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
   const auto candidate_eq =
-      buildProductionCandidateEquation(source, target, &candidate_stats);
+      buildProductionDefaultEquation(source, target, &candidate_stats);
 
   EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
 #ifdef __RVV10__
@@ -886,6 +1031,147 @@ TEST(TransformationEstimationPointToPlaneLLS,
   EXPECT_FALSE(candidate_stats.used_rvv);
 #endif
   expectProductionEquationNear(candidate_eq, std_eq);
+  expectMatrixNear(public_matrix, solveProductionEquation(std_eq), 5e-4f);
+}
+
+// fused production path 的 PointNormal 代表样本：用 near-cancellation + scale-stress
+// 形态覆盖 a/b/c/d 的逐点公式树、accepted_points、ATA/ATb 和矩阵预算。
+TEST(TransformationEstimationPointToPlaneLLS,
+     ProductionFusedFullCloudPointNormalNearCancellationMatchesStdWithinBudget)
+{
+  const auto [source, target] = makeNearCancellationCloudPair();
+  prod_detail::PointToPlaneLLSFullCloudStats std_stats;
+  prod_detail::PointToPlaneLLSFullCloudStats fused_stats;
+  const auto std_eq = prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
+  const auto fused_eq =
+      buildProductionDefaultEquation(source, target, &fused_stats);
+
+  EXPECT_EQ(std_stats.input_points, source.size());
+  EXPECT_LT(std_stats.accepted_points, std_stats.input_points);
+  EXPECT_EQ(fused_stats.input_points, std_stats.input_points);
+  EXPECT_EQ(fused_stats.accepted_points, std_stats.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(fused_stats.used_rvv);
+#else
+  EXPECT_FALSE(fused_stats.used_rvv);
+#endif
+  expectProductionEquationNear(fused_eq, std_eq);
+  expectMatrixNear(solveProductionEquation(fused_eq), solveProductionEquation(std_eq), 8e-4f);
+}
+
+// fused production path 的 generic source 样本：PointXYZ source + PointNormal target。
+// invalid lane 必须继续用同一 finite mask 剔除，不能改变 accepted_points 或 matrix。
+TEST(TransformationEstimationPointToPlaneLLS,
+     ProductionFusedFullCloudGenericPointXYZInvalidLanesMatchStdWithinBudget)
+{
+  auto source_normal = makeSurfaceCloud(28, 0.12f);
+  auto target = makeTargetCloud(source_normal);
+  auto source = copySourceAsXYZ(source_normal);
+  source[3].x = std::numeric_limits<float>::quiet_NaN();
+  target[9].normal_z = std::numeric_limits<float>::infinity();
+  target[17].y = std::numeric_limits<float>::quiet_NaN();
+
+  prod_detail::PointToPlaneLLSFullCloudStats std_stats;
+  prod_detail::PointToPlaneLLSFullCloudStats fused_stats;
+  const auto std_eq = prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
+  const auto fused_eq =
+      buildProductionDefaultEquation(source, target, &fused_stats);
+
+  EXPECT_LT(std_stats.accepted_points, std_stats.input_points);
+  EXPECT_EQ(fused_stats.input_points, std_stats.input_points);
+  EXPECT_EQ(fused_stats.accepted_points, std_stats.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(fused_stats.used_rvv);
+#else
+  EXPECT_FALSE(fused_stats.used_rvv);
+#endif
+  expectProductionEquationNear(fused_eq, std_eq);
+  expectMatrixNear(solveProductionEquation(fused_eq), solveProductionEquation(std_eq), 5e-4f);
+}
+
+// fused production path 的 generic target 样本：PointXYZINormal target 证明 target gate 仍
+// 只要求 xyz+normal 的 f32 AoS 语义，不要求 exact PointNormal。
+TEST(TransformationEstimationPointToPlaneLLS,
+     ProductionFusedFullCloudPointXYZToPointXYZINormalScaleStressMatchesStdWithinBudget)
+{
+  const auto source_normal = makeScaleStressCloud();
+  const auto target_normal = makeTargetCloud(source_normal);
+  const auto source = copySourceAsXYZ(source_normal);
+  const auto target = copyTargetAsXYZINormal(target_normal);
+
+  prod_detail::PointToPlaneLLSFullCloudStats std_stats;
+  prod_detail::PointToPlaneLLSFullCloudStats fused_stats;
+  const auto std_eq = prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
+  const auto fused_eq =
+      buildProductionDefaultEquation(source, target, &fused_stats);
+
+  EXPECT_EQ(fused_stats.accepted_points, std_stats.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(fused_stats.used_rvv);
+#else
+  EXPECT_FALSE(fused_stats.used_rvv);
+#endif
+  expectProductionEquationNear(fused_eq, std_eq);
+  expectMatrixNear(solveProductionEquation(fused_eq), solveProductionEquation(std_eq), 5e-4f);
+}
+
+// fused production path 的 fallback smoke：小规模输入必须继续走标量。
+TEST(TransformationEstimationPointToPlaneLLS,
+     ProductionFusedFullCloudSmallInputFallsBackToScalar)
+{
+  const auto source = makeSurfaceCloud(3, 0.2f);
+  const auto target = makeTargetCloud(source);
+
+  pcl::registration::TransformationEstimationPointToPlaneLLS<pcl::PointNormal,
+                                                             pcl::PointNormal>
+      estimator;
+  Eigen::Matrix4f public_matrix = Eigen::Matrix4f::Identity();
+  estimator.estimateRigidTransformation(source, target, public_matrix);
+
+  prod_detail::PointToPlaneLLSFullCloudStats stats;
+#ifdef __RVV10__
+  prod_detail::PointToPlaneLLSNormalEquation rvv_eq;
+  EXPECT_FALSE(prod_detail::buildPointToPlaneLLSFullCloudBlockRVVFusedFormula(
+      source, target, rvv_eq, &stats));
+  EXPECT_FALSE(stats.used_rvv);
+#endif
+  const auto std_eq = prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &stats);
+  EXPECT_FALSE(stats.used_rvv);
+  EXPECT_EQ(stats.accepted_points, source.size());
+  expectMatrixNear(public_matrix, solveProductionEquation(std_eq), 1e-3f);
+}
+
+// fused production path 的 fallback smoke：layout gate 失败时也必须回到标量。
+TEST(TransformationEstimationPointToPlaneLLS,
+     ProductionFusedFullCloudLayoutGateFailureFallsBackToScalar)
+{
+  const auto source_normal = makeSurfaceCloud(28, 0.12f);
+  const auto target = makeTargetCloud(source_normal);
+  const auto source = copySourceAsDoubleXYZ(source_normal);
+  static_assert(!pcl::rvv::RVVXYZAoSFloatLayout<TEPTPLDoubleXYZPoint>::value);
+
+  pcl::registration::TransformationEstimationPointToPlaneLLS<TEPTPLDoubleXYZPoint,
+                                                             pcl::PointNormal>
+      estimator;
+  Eigen::Matrix4f public_matrix = Eigen::Matrix4f::Identity();
+  estimator.estimateRigidTransformation(source, target, public_matrix);
+
+  prod_detail::PointToPlaneLLSFullCloudStats fused_stats;
+  prod_detail::PointToPlaneLLSFullCloudStats std_stats;
+  const auto fused_eq = buildProductionDefaultEquation(source, target, &fused_stats);
+  const auto std_eq =
+      prod_detail::buildPointToPlaneLLSFullCloudStd(source, target, &std_stats);
+
+#ifdef __RVV10__
+  prod_detail::PointToPlaneLLSNormalEquation rvv_eq;
+  prod_detail::PointToPlaneLLSFullCloudStats rvv_stats;
+  EXPECT_FALSE(prod_detail::buildPointToPlaneLLSFullCloudBlockRVVFusedFormula(
+      source, target, rvv_eq, &rvv_stats));
+  EXPECT_FALSE(rvv_stats.used_rvv);
+#endif
+  EXPECT_FALSE(fused_stats.used_rvv);
+  EXPECT_EQ(fused_stats.accepted_points, std_stats.accepted_points);
+  expectProductionEquationNear(fused_eq, std_eq);
   expectMatrixNear(public_matrix, solveProductionEquation(std_eq), 5e-4f);
 }
 
@@ -907,7 +1193,7 @@ TEST(TransformationEstimationPointToPlaneLLS,
 #ifdef __RVV10__
   prod_detail::PointToPlaneLLSNormalEquation rvv_eq;
   EXPECT_FALSE(
-      prod_detail::buildPointToPlaneLLSFullCloudBlockRVV(source, target, rvv_eq, &stats));
+      prod_detail::buildPointToPlaneLLSFullCloudBlockRVVFusedFormula(source, target, rvv_eq, &stats));
   EXPECT_FALSE(stats.used_rvv);
 #endif
   const auto std_eq =
@@ -932,6 +1218,11 @@ TEST(TransformationEstimationPointToPlaneLLS,
   Eigen::Matrix4d double_matrix = Eigen::Matrix4d::Identity();
   double_estimator.estimateRigidTransformation(source_normal, target, double_matrix);
   EXPECT_TRUE(double_matrix.allFinite());
+#ifdef __RVV10__
+  Eigen::Matrix4d rvv_matrix = Eigen::Matrix4d::Identity();
+  EXPECT_FALSE(prod_detail::estimatePointToPlaneLLSFullCloudRVV(
+      source_normal, target, rvv_matrix));
+#endif
 }
 
 // trusted-dense diagnostic 是一个显式消融入口：它依赖 source/target 的 is_dense 合同，
