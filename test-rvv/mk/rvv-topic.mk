@@ -254,7 +254,7 @@ deploy_board: $(DEPLOY_BOARD_TARGETS)
 run_board_test: deploy_board | $(OUTPUT_DIR_BOARD)
 	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_test"
 run_board_bench_compare: deploy_board | $(OUTPUT_DIR_BOARD)
-	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_bench_compare BENCH_COMPARE_SAVE=output/analyze_bench_compare.log BOARD_LABEL='$(BOARD_LABEL)'"
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_bench_compare BENCH_COMPARE_SAVE=output/analyze_bench_compare.log BOARD_LABEL='$(BOARD_LABEL)' REMOTE_BENCH_ARGS='$(BENCH_ARGS)'"
 fetch_board_logs: | $(OUTPUT_DIR_BOARD)
 	@rsync -e "$(RSYNC_SSH)" -avzP $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_BOARD_OUTPUT_DIR)/ $(OUTPUT_DIR_BOARD)/
 board_smoke: run_board_test run_board_bench_compare fetch_board_logs
