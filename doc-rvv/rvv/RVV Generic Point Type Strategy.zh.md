@@ -72,6 +72,30 @@ constexpr std::size_t kZOff = offsetof(pcl::PointXYZ, z);
 字段、是否依赖 `getVector4fMap()` 的齐次分量、source / target 是否分别 gate，以及
 fallback 后是否保持原标量语义。
 
+### 1.2 模板字段访问合同不等于 exact 点型
+
+模板算法源码里的字段访问本身就是标量路径的编译期合同。看到
+`PointSource` / `PointTarget` 模板参数时，不能先假设它们实际一定是同一种 PCL
+点类型，也不能因为某个 topic 的诊断样本使用 `PointNormal` 就把 production API
+写成 exact `PointNormal` 语义。
+
+例如 point-to-plane LLS 这类算法可能只从 source 读取 `x/y/z`，从 target 读取
+`x/y/z` 和 `normal_x/normal_y/normal_z`。这表示原标量模板支持的是“source xyz
+字段访问可编译、target xyz/normal 字段访问可编译且算法语义成立”的点型组合；
+`PointXYZ -> PointNormal` 这类组合可以属于标量合同，而 `PointNormal -> PointNormal`
+只是其中一个具体实例。RVV production 如果只批准 exact `PointNormal -> PointNormal`
+路径，必须写成有意收窄的 gate，并保证其它可编译模板实例自然 fallback。
+
+决定是否做泛型 RVV 时，先列出：
+
+- source 实际读取哪些字段；
+- target 实际读取哪些字段；
+- 两侧字段是否可以不同；
+- `Scalar` 是否参与布局或数值合同；
+- 当前证据覆盖 exact 点型、traits-gated 泛型，还是仅覆盖诊断样本。
+
+只有这些问题闭合后，才能把 exact 点型实现扩展成泛型分流。
+
 ## 2. 输入字段 Gate 不等于输出 PointT 语义
 
 公共 xyz / normal traits 只能证明“某些字段可以被 RVV 读取或写入”。它们不证明算法已经
@@ -139,8 +163,10 @@ PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心
 | `pcl::rvv::RVVFieldScalar<T>` | 去掉 cv/ref，得到字段表达式的实际标量类型。 | 兼容旧 member gate 中的 `decltype(point.x)` 判断。 |
 | `pcl::rvv::RVVFloatFieldLayout<PointT, Field>` | 判断 PCL traits 注册字段是否为单个 `float`。 | 组合 xyz、normal 或其它字段语义 gate。 |
 | `pcl::rvv::RVVXYZFloatLayout<PointT>` | 判断 `x/y/z` 是否是 PCL traits 注册的单个 `float` 字段，并暴露 `kX/kY/kZ` offset。 | CEOP 这类只需要 xyz 字段语义、并由具体 helper / 本地 gate 承担底层访问前提的路径。 |
+| `pcl::rvv::RVVXYZAoSFloatLayout<PointT>` | 判断 `x/y/z` 是 PCL traits 注册的单个 `float` 字段，并检查 POD standard-layout、`sizeof(PointT)==sizeof(POD)`、stride 和字段 offset 的 float alignment；暴露 `kX/kY/kZ`。 | TEPTPL 这类 source 只直接按 AoS byte offset 读取 xyz 的 full-cloud production 路径。 |
 | `pcl::rvv::RVVXYZNormalFloatLayout<PointT>` | 判断 `x/y/z/normal_x/normal_y/normal_z` 是否都是单个 `float`，并检查 POD、standard-layout、`sizeof(PointT)==sizeof(POD)`、`sizeof(PointT)` 和字段 offset 的 float alignment；暴露 `kX/kY/kZ/kNX/kNY/kNZ`。 | symmetric LLS 这类直接按 AoS byte offset 读取 xyz 和 normal 的 full-cloud production 路径。 |
 | `pcl::rvv::kRVVXYZPointCompatible<PointT>` | 旧 load/store 兼容 gate：要求成员 `x/y/z` 存在、类型都是 `float`，且 `PointT` 是 standard-layout。 | 保持 `rvv_point_load/store` 旧接口和 common 调用点语义稳定。 |
+| `pcl::rvv::kRVVXYZAoSPointCompatible<PointT>` | `RVVXYZAoSFloatLayout<PointT>::value` 的变量模板形式。 | 需要变量模板风格 strong xyz AoS gate 的调用点。 |
 | `pcl::rvv::kRVVXYZNormalPointCompatible<PointT>` | `RVVXYZNormalFloatLayout<PointT>::value` 的变量模板形式。 | 需要变量模板风格 gate 的调用点。 |
 | `pcl::rvv::rvvMaxU32ByteOffsetElements<PointT>()` | 返回 `UINT32_MAX / sizeof(PointT)`，即当前 32-bit byte offset helper 可表达的最大合法元素数。 | indexed gather/scatter 使用 32-bit byte offset 时的云规模 gate。 |
 
@@ -150,21 +176,24 @@ PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心
 `pcl::rvv_store::kRVVXYZPointCompatible` 是旧命名空间中的兼容别名。新文档和
 新代码应把 `pcl::rvv::*` 视为公共 API 落点。
 
-## 5. 三类 Gate 的区别
+## 5. 四类 Gate 的区别
 
-不要把所有“有 xyz”的路径都归并成同一个 gate。公共 traits 目前刻意保留三类
+不要把所有“有 xyz”的路径都归并成同一个 gate。公共 traits 目前刻意保留四类
 不同语义边界。
 
 | gate 类别 | 公共 API | 证明内容 | 不证明内容 | 适用示例 |
 | --- | --- | --- | --- | --- |
 | member `x/y/z` + standard-layout | `kRVVXYZPointCompatible<PointT>` | C++ 成员 `x/y/z` 存在、成员表达式类型为 `float`、`PointT` 是 standard-layout。 | 不依赖 PCL traits 的 `has_xyz` / `datatype` 语义；不证明 normal；不证明 `sizeof(PointT)==sizeof(POD)`。 | load/store 旧兼容 gate，以及沿用旧 helper 名称的 common 调用点。 |
 | PCL traits xyz 单 float | `RVVXYZFloatLayout<PointT>` | PCL traits 注册了 `x/y/z`，且三个字段都是单个 `float`；提供当前点类型的 xyz offset。 | 不额外要求 POD / standard-layout / `sizeof(PointT)==sizeof(POD)`；不证明 normal。 | CEOP 这类只需要 xyz 字段语义的算法 gate。底层 helper 的 standard-layout / alignment 前提仍需由 helper `static_assert` 或本地 gate 保证。 |
-| xyz + normal 单 float + AoS layout 前提 | `RVVXYZNormalFloatLayout<PointT>` 或 `kRVVXYZNormalPointCompatible<PointT>` | PCL traits 注册了 xyz 和 normal，六个字段都是单个 `float`；POD standard-layout；`sizeof(PointT)==sizeof(POD)`；stride 和字段 offset 满足 float alignment。 | 不代表所有 normal 算法都可直接接入；仍不包含算法规模、VLEN、索引类型、输出语义等 dispatch 条件。 | symmetric LLS full-cloud production RVV 路径，直接按 AoS byte offset 读取 source / target 的 xyz 和 normal。 |
+| xyz 单 float + AoS layout 前提 | `RVVXYZAoSFloatLayout<PointT>` 或 `kRVVXYZAoSPointCompatible<PointT>` | PCL traits 注册了 xyz，三个字段都是单个 `float`；POD standard-layout；`sizeof(PointT)==sizeof(POD)`；stride 和字段 offset 满足 float alignment。 | 不证明 normal；不代表构造完整 `PointT` 输出语义；仍不包含算法规模、VLEN、索引类型或输出 `Scalar` 条件。 | TEPTPL full-cloud source 侧只读 xyz 的 production RVV 路径。 |
+| xyz + normal 单 float + AoS layout 前提 | `RVVXYZNormalFloatLayout<PointT>` 或 `kRVVXYZNormalPointCompatible<PointT>` | PCL traits 注册了 xyz 和 normal，六个字段都是单个 `float`；POD standard-layout；`sizeof(PointT)==sizeof(POD)`；stride 和字段 offset 满足 float alignment。 | 不代表所有 normal 算法都可直接接入；仍不包含算法规模、VLEN、索引类型、输出语义等 dispatch 条件。 | TEPTPL target 侧、symmetric LLS full-cloud production RVV 路径，直接按 AoS byte offset 读取 xyz 和 normal。 |
 
 选择原则：
 
 - 只是保持旧 load/store common helper 的兼容判断时，用 `kRVVXYZPointCompatible`。
 - 算法只需要 PCL 注册的 xyz 单 float 字段语义时，用 `RVVXYZFloatLayout`。
+- 算法要直接用 AoS byte offset 读取 xyz，且不读取 normal 时，用
+  `RVVXYZAoSFloatLayout`。
 - 算法要直接用 AoS byte offset 读取 xyz 和 normal，且依赖 POD / alignment 前提时，
   用 `RVVXYZNormalFloatLayout`。
 - 算法还有规模阈值、VLEN buffer、变换矩阵、输出顺序或表达式一致性要求时，这些仍是
@@ -187,20 +216,20 @@ source load 使用：
 - `sizeof(PointSource)`；
 - `typename pcl::traits::POD<PointSource>::type`；
 - `pcl::traits::offset<PointSource, pcl::fields::x/y/z>`，或
-  `RVVXYZFloatLayout<PointSource>::kX/kY/kZ`。
+  `RVVXYZAoSFloatLayout<PointSource>::kX/kY/kZ`。
 
 target load 使用：
 
 - `sizeof(PointTarget)`；
 - `typename pcl::traits::POD<PointTarget>::type`；
-- `pcl::traits::offset<PointTarget, pcl::fields::x/y/z>`，或
-  `RVVXYZFloatLayout<PointTarget>::kX/kY/kZ`。
+- `pcl::traits::offset<PointTarget, pcl::fields::x/y/z/normal_x/normal_y/normal_z>`，或
+  `RVVXYZNormalFloatLayout<PointTarget>::kX/kY/kZ/kNX/kNY/kNZ`。
 
 典型入口 gate：
 
 ```cpp
-if constexpr (!pcl::rvv::RVVXYZFloatLayout<PointSource>::value ||
-              !pcl::rvv::RVVXYZFloatLayout<PointTarget>::value) {
+if constexpr (!pcl::rvv::RVVXYZAoSFloatLayout<PointSource>::value ||
+              !pcl::rvv::RVVXYZNormalFloatLayout<PointTarget>::value) {
   return false;
 }
 ```
