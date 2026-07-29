@@ -17,7 +17,7 @@
 | 入口 | 标量职责 | 诊断结论 |
 | --- | --- | --- |
 | `ExtractIndices<PointT>::applyFilterIndices(Indices&)` | `negative=false` 时直接返回 `indices_`；需要 removed 或 `negative=true` 时构造全量 `[0,n)`、排序输入 indices、用 `std::set_difference` 求补集 | 可诊断补集生成局部片段；生产语义涉及无序 / 重复 indices，暂不接入 |
-| `ExtractIndices<PointT>::applyFilter(PointCloud&)` | 非 organized 时调用 `applyFilterIndices` 后 `copyPointCloud`；organized 时复制整云并把 removed 位置所有字段写为 `user_filter_value_` | 整点复制和所有字段写回主导，当前只诊断 `PointXYZ x/y/z` sparse 写坏点 |
+| `ExtractIndices<PointT>::applyFilter(PointCloud&)` | 非 organized 时调用 `applyFilterIndices` 后 `copyPointCloud`；organized 时复制整云并把 removed 位置所有字段写为 `user_filter_value_` | 整点复制和所有字段写回主导，当前诊断范围为 `PointXYZ x/y/z` sparse 写坏点 |
 | `ExtractIndices<PointT>::filterDirectly(PointCloudPtr&)` | 原地把 removed 点的所有字段写为 `user_filter_value_` | 与 organized sparse 写回同类；生产泛型字段列表暂不 RVV 化 |
 | `ExtractIndices<PCLPointCloud2>::applyFilter` | 字节云按 `point_step` 拷贝或按字段 offset 写坏点 | 字段数量和字节布局更泛化，本轮不做 RVV |
 

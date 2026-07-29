@@ -65,20 +65,20 @@
 | 文件                                             | 主成本覆盖类型       | 保留原因 / 后续验证问题                                                                 |
 | ------------------------------------------------ | -------------------- | ---------------------------------------------------------------------------------------- |
 | `impl/approximate_voxel_grid.hpp`                | `partial-preprocess` | voxel 类路径，需先与标准 `voxel_grid` 的数据流和收益对比。                              |
-| `impl/bilateral.hpp`                             | `diagnostic-only`    | 邻域权重和 intensity 计算有空间，但 search / 邻域组织和 `exp` 成本需要专项诊断。         |
+| `impl/bilateral.hpp`                             | `diagnostic`    | 邻域权重和 intensity 计算有空间，但 search / 邻域组织和 `exp` 成本需要专项诊断。         |
 | `impl/box_clipper3D.hpp`                         | `direct-main-path`   | 几何裁剪入口较规整，适合后续与 `crop_box`、`plane_clipper3D` 一起评估。                  |
 | `impl/conditional_removal.hpp`                   | `direct-main-path`   | 简单字段条件可能成立，但通用条件树、多态比较、字段复制和 keep_organized 语义复杂。       |
-| `impl/convolution_3d.hpp`                        | `diagnostic-only`    | 三维邻域和 search 关系复杂，需先证明 kernel loop 能代表真实入口主成本。                  |
+| `impl/convolution_3d.hpp`                        | `diagnostic`    | 三维邻域和 search 关系复杂，需先证明 kernel loop 能代表真实入口主成本。                  |
 | `impl/covariance_sampling.hpp`                   | `partial-preprocess` | 统计采样、矩阵构造和 Eigen 相关路径复杂，需隔离 solver / 采样状态成本。                  |
-| `impl/crop_hull.hpp`                             | `diagnostic-only`    | 多边形 / 多面体判定控制流不规则，需限定 hull 形态并证明局部判定占主成本。                |
-| `impl/extract_indices.hpp`                       | `diagnostic-only`    | 索引提取和整点复制占比高，需诊断 bitmap / set-difference 是否能带动 full 入口。           |
-| `impl/farthest_point_sampling.hpp`               | `diagnostic-only`    | 采样状态和每轮依赖强，不适合作为直接生产主题；需证明距离更新和 max 查找是瓶颈。          |
+| `impl/crop_hull.hpp`                             | `diagnostic`    | 多边形 / 多面体判定控制流不规则，需限定 hull 形态并证明局部判定占主成本。                |
+| `impl/extract_indices.hpp`                       | `diagnostic`    | 索引提取和整点复制占比高，需诊断 bitmap / set-difference 是否能带动 full 入口。           |
+| `impl/farthest_point_sampling.hpp`               | `diagnostic`    | 采样状态和每轮依赖强，不适合作为直接生产主题；需证明距离更新和 max 查找是瓶颈。          |
 | `impl/frustum_culling.hpp`                       | `direct-main-path`   | 6 平面几何筛选适合 RVV，但需单独处理 camera plane、far plane、negative 和输出保序语义。   |
 | `impl/grid_minimum.hpp`                          | `partial-preprocess` | grid id / floor 预计算可评估，但 sort 和 per-cell min z 可能稀释整体收益。               |
-| `impl/local_maximum.hpp`                         | `diagnostic-only`    | 局部邻域比较和 search / visited 状态主导，访存不如线性扫描规整。                         |
-| `impl/median_filter.hpp`                         | `diagnostic-only`    | window gather 与 finite mask 有局部空间，但 median / `nth_element` 类操作主导。           |
+| `impl/local_maximum.hpp`                         | `diagnostic`    | 局部邻域比较和 search / visited 状态主导，访存不如线性扫描规整。                         |
+| `impl/median_filter.hpp`                         | `diagnostic`    | window gather 与 finite mask 有局部空间，但 median / `nth_element` 类操作主导。           |
 | `impl/model_outlier_removal.hpp`                 | `tail-compress`      | threshold + compress 可诊断，但 `getDistancesToModel` 和模型多态通常是主成本。           |
-| `impl/morphological_filter.hpp`                  | `diagnostic-only`    | octree / boxSearch 与邻域结果 min/max 交织，需证明 search-result 处理占比。               |
+| `impl/morphological_filter.hpp`                  | `diagnostic`    | octree / boxSearch 与邻域结果 min/max 交织，需证明 search-result 处理占比。               |
 | `impl/normal_space.hpp`                          | `partial-preprocess` | normal bin id 可预计算，但 list/bin/random sampling 状态主导。                            |
 | `impl/plane_clipper3D.hpp`                       | `direct-main-path`   | 平面裁剪是直接几何筛选，适合后续与 frustum / box clipper 一起复筛。                       |
 | `impl/project_inliers.hpp`                       | `non-standalone`     | 主要分派到 sample_consensus 模型，实际投影热点不在 filters 文件本身。                    |
@@ -88,7 +88,7 @@
 | `impl/shadowpoints.hpp`                          | `direct-main-path`   | point + normal 几何判定可做直接主路径评估，但双输入 stride 和 cloud-out 语义需验证。       |
 | `impl/statistical_outlier_removal.hpp`           | `tail-compress`      | KNN search 主导，统计和 threshold 尾段需证明占比。                                        |
 | `impl/uniform_sampling.hpp`                      | `partial-preprocess` | leaf id 和 voxel center distance 有空间，但 map / per-leaf conflict update 主导。          |
-| `impl/voxel_grid_occlusion_estimation.hpp`       | `diagnostic-only`    | ray traversal 状态机和 occupancy 访问不规则，需构造可归因诊断 case。                     |
+| `impl/voxel_grid_occlusion_estimation.hpp`       | `diagnostic`    | ray traversal 状态机和 occupancy 访问不规则，需构造可归因诊断 case。                     |
 | `src/voxel_grid_label.cpp`                       | `partial-preprocess` | 固定 `PointXYZRGBL`，但 sort、label histogram、`std::map` 和字段聚合主导。                |
 
 ### 3.3 暂缓或不推荐考虑 RVV 优化的文件
