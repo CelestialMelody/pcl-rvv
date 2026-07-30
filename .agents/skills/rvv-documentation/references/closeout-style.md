@@ -6,10 +6,13 @@
 
 历史过程只保留能解释当前设计的内容，例如 FMA contraction、阈值谓词、`vcompress` 保序、fallback tail 或 traits gate。
 
+closeout 后的主题文档应单独说明“当前采用的优化方式”。这段说明解释当前实际使用的 RVV 组织方式、采用原因、VL chunk 内部流程、分组职责、fallback 边界和暂缓方案。它不是历史实验清单，也不替代后面的“正确性与高效性证据链”。
+
 closeout 后的主题文档应回答：
 
 - 原标量循环中哪几段已经由 production RVV 或 diagnostic RVV 接管。
 - 哪些阶段仍是标量，为什么不继续 RVV 化。
+- 当前采用的优化方式如何工作，例如 load / gather、mask、staging、reduction、store、scalar tail 或 block group 分工。
 - 哪些 gate 会触发 fallback，fallback 后语义如何保持。
 - 哪些测试、反汇编和目标硬件证据证明边界成立。
 - 收益是否足以覆盖 staging、buffer、分流和维护成本。

@@ -100,6 +100,7 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 - 函数入口作用和标量路径；
 - RVV 数据流、VL chunk（可变向量长度分块）、mask（掩码）、staging、tail 和 fallback（回退路径）；
 - 实现选择审计，例如 buffer、`vcompress`、scalar tail、FMA、vector reduction 或数学函数向量化；
+- closeout 或 production-candidate 阶段的“当前采用的优化方式”小节，写清当前真实采用的 RVV 组织方式、采用理由、chunk 内部流程、分组职责、暂缓方案和证据边界；
 - bench case 的输入构造、计时边界、证明点和不能证明的边界；
 - QEMU、反汇编、板卡证据分别支持什么；
 - closeout 或 production-candidate 阶段的“正确性与高效性证据链”小节；未接 production 的诊断结论的“诊断证据链”；
@@ -270,6 +271,7 @@ scalar_path_ready:
 production_to_diagnostic_mapping_ready:
 experience_migration_audit_ready:
 doc_quality_refs_loaded:
+current_optimization_section_ready:
 test_comment_strategy_frozen:
 test_support_split_decision_ready:
 bench_timing_boundary_defined:
@@ -311,6 +313,7 @@ followup_options_ready:
 - 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
   和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
 - 表格必须包含 `correctness_efficiency_evidence_chain_ready`。证据指向主题文档中的“正确性与高效性证据链”或“诊断证据链”小节。
+- closeout 或 production-candidate 文档必须列出 `current_optimization_section_ready`。证据指向主题文档中的“当前采用的优化方式”小节，并说明该小节是否覆盖 dispatch / fallback、layout gate、当前优化机制、chunk 内部流程、分组职责、暂缓方案和证据边界。
 - 如果 worker 声明采用 sibling topic 经验，表格必须包含 `experience_migration_audit_ready`；
   证据指向 adopted / attempted / deferred / rejected 对照表。若未声明且无相邻经验可迁移，可写 `not_applicable` 并说明原因。
 - 如果当前 topic 的测试支撑 helper header 命中行数或职责阈值，表格必须包含

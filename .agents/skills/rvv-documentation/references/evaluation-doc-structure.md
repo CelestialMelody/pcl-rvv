@@ -9,6 +9,7 @@
 - 函数族评估表。
 - RVV 诊断或实现设计。
 - 标量流程与 RVV 流程对照。
+- 实现方式审计。
 - 测试计划和 bench 计划。
 - 当前状态。
 - 验证结果。
@@ -99,6 +100,27 @@ PI5 后，evaluation 文档必须更新 production decision（生产接入判断
 - 是否值得向量化只偶尔调用的数学函数、矩阵构造、solver 前后处理或 wrapper。
 
 每个取舍至少写清：替代方案是什么，当前为什么选择或暂缓，语义风险是什么，性能风险是什么，需要哪些 correctness、asm、消融 bench 或板卡证据才能改变判断。
+
+## 实现方式审计
+
+evaluation（函数级评估）文档应保留轻量“实现方式审计”表，用来帮助 reviewer 复核当前实现选择和证据边界。主题 RVV 文档负责长文解释“当前采用的优化方式”；evaluation 文档只记录决策矩阵，避免复制大段实现说明。
+
+推荐表格：
+
+```text
+| 实现维度 | 当前状态 | 证据 | 边界 / 恢复条件 |
+```
+
+`当前状态` 可使用 `adopted`、`attempted`、`deferred`、`rejected`、`not_now` 或当前 EvidenceDecision。表格至少按当前 topic 风险覆盖这些维度：
+
+- dispatch / fallback：真实 public entry（公开入口）是否命中 RVV，非覆盖路径如何回退。
+- layout / traits gate：点类型、字段 offset、stride、AoS / SoA、weight、index 或 correspondence 的布局条件。
+- staging / reduction：固定 buffer、`vcompress`、block reduction、vector reduction、scatter、scalar tail 或其它组织方式。
+- formula / FMA：公式树、FMA contraction、误差预算、反汇编归属和是否需要消融。
+- row source policy：full-cloud、source-indexed、dual-indices、correspondences 或其它入口形态是否逐 policy 独立批准。
+- production scope：production direct、production-shaped diagnostic、bench 诊断主题或 no-production 的最终边界。
+
+如果主题文档已经有完整“当前采用的优化方式”小节，evaluation 文档可以只保留表格和证据路径；不要把聊天过程或历史流水账搬进长期评估文档。
 
 ## Bench 说明要求
 

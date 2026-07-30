@@ -9,14 +9,15 @@
 3. 生产接入前置观察：对象状态、staging、隐藏标量 tail、成本归因或语义风险。
 4. 覆盖范围与 fallback：点类型、dense/indexed、小规模、NaN/Inf、FRM/FCSR、非 RVV 行为。
 5. 详细设计：helper、traits、staging、mask helper、数值 helper、对象状态展开。
-6. 关键实现片段：展示完整阶段边界，不能只贴公式。
-7. 数值算例与 VL chunk 图示。
-8. Bench case 说明。
-9. 测试、QEMU、反汇编和板卡证据。
-10. 正确性与高效性证据链。
-11. 生产接入评估。
-12. 生产接入后的 closeout 更新。
-13. 结论与后续方向。
+6. 当前采用的优化方式：当前真实使用的 RVV 组织方式、采用理由、内部流程和暂缓方案。
+7. 关键实现片段：展示完整阶段边界，不能只贴公式。
+8. 数值算例与 VL chunk 图示。
+9. Bench case 说明。
+10. 测试、QEMU、反汇编和板卡证据。
+11. 正确性与高效性证据链。
+12. 生产接入评估。
+13. 生产接入后的 closeout 更新。
+14. 结论与后续方向。
 
 ## 必写要点
 
@@ -31,9 +32,33 @@
 - 当前主题属于 production direct、production-shaped diagnostic、bench 诊断主题，还是生产回退说明。
 - 每个 bench case 的入口、规模、参数、是否命中 RVV、speedup 计算方式和证明点。
 - 板卡收益是否足以覆盖 staging、buffer 和维护成本。
+- closeout 或 production-candidate 阶段必须包含“当前采用的优化方式”小节。该小节面向维护者解释当前代码实际采用的优化组织方式，不能只列历史尝试、bench 数字或最终 EvidenceDecision。
 - closeout 或 production-candidate 阶段必须包含“正确性与高效性证据链”小节。该小节是 reviewer 判断依据，不能只写说明文字。
 - 若当前结论是 partial-production-candidate（局部生产候选），必须写清“候选范围”和“尚不能生产接入的原因”。候选范围要窄到入口形态、点类型、数据布局、规模、fallback 条件和目标硬件；不能把局部诊断收益写成整个函数族可接入。
 - 若已经接入 production（生产源码），主题文档必须从“诊断原型说明”升级为“生产实现说明”：写清真实 production patch（生产补丁）、真实 dispatch / fallback、production direct（真实生产入口直连）测试、反汇编符号归属、板卡 production bench 和 PI5 EvidenceDecision（生产证据决策）。不要把早期诊断 speedup 当作最终生产结论。
+
+## 当前采用的优化方式
+
+closeout（收尾）或 production-candidate（生产候选）文档必须新增或更新本小节。该小节回答“当前到底采用了什么优化方式、为什么采用、如何工作、证据支持到哪里”。它放在详细设计之后、证据链之前，作为维护者理解代码形态的入口。
+
+本小节至少覆盖：
+
+- dispatch（分流逻辑）与 fallback（回退路径）：公开入口如何命中 RVV，哪些 gate 会回退到标量或既有实现。
+- 输入布局和对象状态：source、target、weight、index、correspondence、对象成员或外部 buffer 分别由什么 traits、offset、stride、mask 或状态 gate 证明。
+- 当前采用的优化机制：例如 block reduction（分块规约）、vector reduction、`vcompress` staging（压缩暂存）、gather staging（离散加载暂存）、scatter 写回或 scalar tail（标量尾段）。
+- 采用理由：为什么当前机制替代早期 baseline，或为什么继续保留某个 fixed buffer、staging、tail 或 scalar stage。
+- VL chunk（可变向量长度分块）内部流程：如何 load / gather，如何构造 mask，如何计算公式，如何 staging、store 或 reduction，如何处理 tail。
+- 分组或阶段职责：如果有 A/B/C/N、predicate group、staging group、lane helper 或 block group，必须说明每组累加、筛选、写回或交给后续阶段的标量语义。
+- 暂缓或拒绝的替代方案：例如 fused formula（融合公式）、FMA contraction（融合乘加收缩）、额外 row source policy、`Scalar=double`、泛型点类型或更多 production 入口。每项写清状态、原因和恢复条件。
+- 证据边界：当前证据覆盖哪些入口、点类型、`Scalar`、数据布局、规模和目标硬件；不能把 representative pointtypes（代表性点类型）、diagnostic bench 或 QEMU timing（QEMU 计时）写成更宽范围的生产性能结论。
+
+推荐用一张表把采用和暂缓状态列清：
+
+```text
+| 维度 | 当前状态 | 采用或暂缓原因 | 证据 | 边界 / 下一步 |
+```
+
+状态建议使用 `adopted`、`attempted`、`deferred`、`rejected` 或 `not_now`。如果当前主题迁移了 sibling topic（同模块相邻主题）经验，该表可以和 experience-migration audit（经验迁移审计）互相引用，但不能只写“参考了相邻经验”。
 
 ## 正确性与高效性证据链
 
