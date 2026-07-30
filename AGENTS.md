@@ -15,7 +15,7 @@ S0 输出必须显式记录 `preferences_loaded`，并把注释、文档、证�
 worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固定工作日志或跨对话复用时才指定。
 若需要保存，默认路径由 `PCL_RVV_WORK_LOG_ROOT` 控制；未设置时使用 `<repo>/tmp/rvv-work-logs/`。
 短 prompt 只减少用户输入，不降低 worker 产物门槛。worker 选中 topic 后、开始写
-`test-rvv/`、`doc-rvv/` 或 production 前，必须按
+配置解析出的 topic 测试资产、topic 文档或 production 前，必须按
 `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md` 自查；需要详细规则时再按该文件
 渐进读取 `rvv-documentation`、`rvv-test` 和 `rvv-implementation` 的窄 reference。
 
@@ -30,7 +30,7 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
   reviewer 和 workflow improvement 的短启动入口、默认读取链和默认权限。
 - `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md` 定义短 prompt worker
   写文件前的轻量质量门禁，避免为了 prompt 变短而丢失文档、注释、bench 和证据质量要求。
-- `.agents/knowledge/pcl-rvv-knowledge-map.md` 是轻量知识索引入口，只说明读取策略，不复制 `doc-rvv/` 或 `test-rvv/` 内容。
+- `.agents/knowledge/pcl-rvv-knowledge-map.md` 是轻量知识索引入口，只说明按配置解析出的文档 / 测试资产读取策略，不复制具体产物内容。
 - 未提交的本地迁移材料不作为正式 agent 资产；正常 RVV topic（主题）工作不要读取或依赖这些材料，除非用户明确要求做历史追溯或规则迁移。
 
 ## RVV 工作规则
@@ -39,12 +39,12 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
 - `rvv-test` 是统一测试与证据 skill。旧 diagnostics / benchmarking 职责已经迁移到 `rvv-test`，
   不再保留独立 skill 入口。
 - 回复、代码注释、测试说明、文档、汇报必须遵循 `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`：面向中文读者时不要堆英文术语，英文专有术语首次出现必须用括号解释中文含义。
-- 除非用户明确要求，不修改 PCL 生产源码。短 prompt 中“处理 topic”视为授权修改该 topic 对应的
-  `test-rvv/` 和 `doc-rvv/` 产物；不要把该授权扩展到其它 topic。
+- 除非用户明确要求，不修改 PCL 生产源码。短 prompt 中“处理 topic”视为授权修改该 topic 对应的、
+  由 `artifact_layout` 解析出的测试资产和主题文档产物；不要把该授权扩展到其它 topic。
 - RVV 结论必须有证据链，区分 correctness（正确性）、QEMU 证据、反汇编证据、板卡性能、fallback（回退路径）边界和生产接入判断。
 - closeout（收尾）或 production-candidate（生产候选）topic 文档必须包含“正确性与高效性证据链”小节。未接 production（生产源码）的诊断结论使用“诊断证据链”，并写清 diagnostic evidence（诊断证据）不能替代 production evidence（生产证据）。
 - QEMU 只用于正确性、日志格式和路径命中证据；性能结论必须来自目标硬件或板卡。
-- 默认不提交生成日志、本地 build（构建）输出、个人绝对路径、私有板卡地址、本机 `config.mk` 或聊天记录。用户明确要求提交 evidence logs（证据日志）时，优先提交已脱敏日志，必须按 `rvv-workflow` 和 `rvv-test` 冻结日志策略、运行 `test-rvv/script/sanitize_evidence_logs.py` 或对应 Make target 检查、拆分 commit，并说明保留或排除哪些日志。
+- 默认不提交生成日志、本地 build（构建）输出、个人绝对路径、私有板卡地址、本机 `config.mk` 或聊天记录。用户明确要求提交 evidence logs（证据日志）时，优先提交已脱敏日志，必须按 `rvv-workflow` 和 `rvv-test` 冻结日志策略、运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本或对应 Make target 检查、拆分 commit，并说明保留或排除哪些日志。
 
 ## 变更边界
 

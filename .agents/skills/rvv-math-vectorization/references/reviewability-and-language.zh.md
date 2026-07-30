@@ -1,6 +1,6 @@
 # RVV 数学函数原型的术语补充
 
-通用的术语解释、`test-rvv` 注释密度、Makefile/Python 注释和 reviewer 汇报规则见：
+通用的术语解释、配置解析出的测试资产注释密度、Makefile/Python 注释和 reviewer 汇报规则见：
 
 ```text
 ../../rvv-workflow/references/reviewability-and-language.zh.md

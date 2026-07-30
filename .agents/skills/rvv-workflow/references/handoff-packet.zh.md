@@ -32,10 +32,10 @@ agent_assets_used (本次读取或调用的 agent 资产，例如 skills（技�
 agent_asset_trace (资产使用追踪，关键工作行为分别来自哪些实际读取并使用过的资产 / 规则):
 agent_asset_feedback (可选；本轮发现的可沉淀规则、资产缺口或冗余规则，默认 report-only):
 preferences_loaded (S0 读取的偏好层级，例如 defaults、local override、prompt override，以及是否只报告 env var 名):
-work_preferences (S0 冻结的工作偏好，例如注释详细度、注释语言、production（生产源码）注释上限、test-rvv / diagnostic 注释下限、是否处于单 topic 校准重跑):
+work_preferences (S0 冻结的工作偏好，例如注释详细度、注释语言、production（生产源码）注释上限、测试资产 / diagnostic 注释下限、是否处于单 topic 校准重跑):
 commit_preferences (S0 冻结的提交偏好，例如是否允许 commit（提交）、topic / log / agent asset 是否拆分、evidence log policy（证据日志策略）是 summary-only / sanitized-logs / raw-logs):
 experience_migration_audit (可选；声明采用 sibling topic 经验时，列出 adopted / attempted / deferred / rejected 对照表):
-test_support_split_decision (可选；长 helper 或多职责 helper 是否已拆到 test_support/，或暂缓理由):
+test_support_split_decision (可选；长 helper 或多职责 helper 是否已按 test_support 配置拆分，或暂缓理由):
 language_check (语言规范校验结果，例如术语解释、文档和代码注释是否达标):
 worker_quality_gate_check (worker 写文件前质量门禁执行结果，例如标量路径、数据流映射、文档结构、注释策略、bench 边界、证据模型是否闭合):
 risks_or_open_questions (遗留风险、未解决疑问):
@@ -48,7 +48,7 @@ next_worker_action_if_review_passes (评审通过后 worker 应执行的下一�
 
 - `phase_reached` 必须使用当前状态机中的阶段或分支，例如 `S4 test_plan_ready`、`S10 EvidenceDecision`、`PI1 production_integration_plan`、`S12 blocked`。
 - `current_decision` 必须是陈述句，不能只写 `done`、`ok` 或 `needs review`。
-- `files_changed` 应区分 production（生产源码）、`test-rvv`、`doc-rvv`、agent asset（代理资产）和本地证据文件。
+- `files_changed` 应区分 production（生产源码）、配置解析出的 topic 测试资产、topic 文档、agent asset（代理资产）和本地证据文件。
 - `artifacts_created_or_updated` 应说明产物作用，不要只列路径。
 - `commands_run` 应保留关键参数、工作目录和失败命令；如果没有运行命令，要写明原因。
 - `evidence_paths` 只列当前结论真正依赖的证据。大型日志可以列路径和摘要，不要复制长日志。
@@ -59,9 +59,9 @@ next_worker_action_if_review_passes (评审通过后 worker 应执行的下一�
 - `preferences_loaded` 必须写清 `.agents/config/defaults.yaml` 是否读取、`.agents/local/user-preferences.yaml` 是否存在、当前 prompt 是否覆盖配置。涉及板卡、用户名、私有路径时，只写 env var（环境变量）名或 local override 覆盖范围，不写实际值。
 - `work_preferences` 和 `commit_preferences` 应与 S0 报告一致；若中途改变，写明用户授权或改变原因。`work_preferences` 至少覆盖 `comment_policy_frozen` 和 `documentation_policy_frozen`；`commit_preferences` 至少覆盖 `evidence_policy_frozen`。
 - `experience_migration_audit` 在 worker 声明采用 sibling topic（同模块相邻主题）经验时必须输出。它至少覆盖 row source、source / weight policy、shared math pipeline、staging / reduction、formula / FMA、evidence model 和 production boundary，并用 `adopted`、`attempted`、`deferred` 或 `rejected` 说明每个历史经验维度的处理结果。该字段不要求当前 topic 实现 sibling 的具体算法，但要求未采用的成功或负向方案有理由或下一轮验证计划。
-- `test_support_split_decision` 在单个 `test-rvv` helper header 超过配置阈值，或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation 中三类以上职责时必须输出。若已拆分，说明 aggregator（聚合头文件）和 `test_support/` 子目录职责；若暂缓，说明 deferred reason 以及对 reviewer 可读性和后续维护的影响。
-- `language_check` 不允许虚写。若 `test-rvv`、diagnostic（诊断代码）或 prototype（原型代码）没有详细中文注释，必须写成未达标。通过时应列出覆盖面，例如“诊断 helper 注释、TEST 注释、bench 文件头、主题文档术语解释”，并给出文件或章节证据。
-- `worker_quality_gate_check` 不允许虚写。必须使用证据化表格，至少覆盖 `worker-quality-gates.zh.md` 中的 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen`、标量路径、production/diagnostic 数据流映射、文档结构、test-rvv 注释、bench 边界、替代方案审计、证据模型和 stop condition（停止条件）。表格列建议为 `gate | status | evidence | missing_items`；未完成项要列入 `risks_or_open_questions`。
+- `test_support_split_decision` 在单个测试支撑 helper header 超过配置阈值，或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation 中三类以上职责时必须输出。若已拆分，说明 aggregator（聚合头文件）和按 `test_support` 配置解析出的内部结构职责；若暂缓，说明 deferred reason 以及对 reviewer 可读性和后续维护的影响。
+- `language_check` 不允许虚写。若配置解析出的测试资产、diagnostic（诊断代码）或 prototype（原型代码）没有详细中文注释，必须写成未达标。通过时应列出覆盖面，例如“诊断 helper 注释、TEST 注释、bench 文件头、主题文档术语解释”，并给出文件或章节证据。
+- `worker_quality_gate_check` 不允许虚写。必须使用证据化表格，至少覆盖 `worker-quality-gates.zh.md` 中的 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen`、标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、证据模型和 stop condition（停止条件）。表格列建议为 `gate | status | evidence | missing_items`；未完成项要列入 `risks_or_open_questions`。
 - `worker_quality_gate_check` 中的 `status` 不应只有 `true` / `false`。使用 `pass`、`partial`、`fail` 或 `not_applicable`，并为每项提供文件 / 章节 / 日志路径证据。
 - 如果 `current_decision` 是 `partial-production-candidate` 或任何强于 no-production 的结论，`worker_quality_gate_check` 必须额外列出 production direct 尚未闭合项，例如真实公开入口 direct test、fallback、点类型 traits、`Scalar=double`、indices / correspondences 策略、生产 bench 重跑和人工确认点。
 - `recommended_reviewer_focus` 应指向具体风险，例如“检查 fallback gate 是否被单独覆盖”，不要写成“请全面审查”。
@@ -98,7 +98,7 @@ worker 输出 Handoff Packet 前应检查：
 - `worker_quality_gate_check` 是否真实反映写文件前质量门禁，且每项带 reviewer 可定位的证据；如果短 prompt 启动后产物质量下降，应在这里暴露，而不是只写 agent asset trace。
 - 是否明确哪些日志、build（构建）产物和本机配置只作为工作区证据，不进入提交。
 - 如果 topic 进入 production integration loop，是否写明生产接入计划和需要人工确认的风险。
-- 如果 topic 完成 production integration loop，是否写明最终 doc-rvv 文档已经按生产证据重写，而不是沿用诊断阶段结论。
+- 如果 topic 完成 production integration loop，是否写明最终主题文档已经按生产证据重写，而不是沿用诊断阶段结论。
 - 窄范围结论或局部候选是否提供 `followup_options_for_user`，让用户能选择“进入下个 topic”还是“继续扩展当前 topic”。
 - `next_worker_action_if_review_passes` 是否足够让下一轮 worker 用一句短 prompt 恢复工作；如果缺少范围、权限或停止条件，应在 Handoff Packet 中补齐。
 - `preferences_loaded` 和三个冻结策略是否能让下一轮 worker 复用同一注释、文档和证据策略。

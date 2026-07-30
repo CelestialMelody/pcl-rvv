@@ -22,7 +22,7 @@
 
 提交 evidence logs 前必须：
 
-- 运行 topic 目录提供的 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或运行 `test-rvv/script/sanitize_evidence_logs.py --check <logs>`。
+- 运行 topic 目录提供的 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本并传入 `--check <logs>`。
 - 列出将加入的文件和排除的文件。
 - 说明是否仍包含本机路径、远端路径、用户名、私有地址或设备标签。
 - 说明脱敏是否改变 benchmark（性能测试）数值、checksum（校验和）或命令参数。

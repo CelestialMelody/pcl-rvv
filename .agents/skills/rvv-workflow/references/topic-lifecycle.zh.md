@@ -18,7 +18,7 @@
 - 读取 `.agents/config/defaults.yaml`，如果存在 `.agents/local/user-preferences.yaml` 也读取。
 - 在 S0 输出 `preferences_loaded`，并记录 defaults、local override（本机私有覆盖）和 prompt override（提示词覆盖）的来源。
 - 检查 git status（工作区差异）。
-- 冻结本轮工作偏好：注释详细度、注释语言、production（生产源码）注释上限、`test-rvv` / diagnostic（诊断代码）注释下限。
+- 冻结本轮工作偏好：注释详细度、注释语言、production（生产源码）注释上限、配置解析出的测试资产 / diagnostic（诊断代码）注释下限。
 - 冻结文档偏好：closeout（收尾文档）当前状态优先、数值算例要求、长期文档不保留对话流程话术。
 - 冻结提交偏好：默认不提交；如果用户授权提交，再确认 topic、日志和 agent asset（代理资产）是否拆分。
 - 冻结 evidence logs（证据日志）策略：默认 `summary-only`，raw logs（原始日志）不默认提交。
@@ -63,7 +63,7 @@ S4 如果暴露出可跨 topic 复用的测试矩阵、证据缺口或冗余规�
 
 ### S5-S9 产物和验证
 
-S5 创建或复查 topic scaffold（脚手架），包括 `test-rvv`、Makefile、board 配置、评估文档或诊断原型。
+S5 创建或复查 topic scaffold（脚手架），包括配置解析出的测试资产、Makefile、board 配置、评估文档或诊断原型。
 
 S6 根据 S3 决策实现 production RVV、production-shaped diagnostic（生产形态诊断）或 bench-only 原型。证据不足时不要强行修改生产源码。
 
@@ -148,11 +148,11 @@ PI1 若涉及模板点类型、PCL traits（点类型字段特征）、字段 of
 - `rvv-implementation/SKILL.md`
 - `rvv-implementation/references/point-load-store.md`
 - `rvv-implementation/references/fallback-and-dispatch.md`
-- `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`
+- 配置或 adapter 指定的 generic point type strategy（泛型点类型策略）文档
 
 如果这些 gate 不能闭合，PI1 应停止在计划或窄范围候选，不进入 PI2。
 
-生产接入后，S11 文档 closeout 必须重新检查 doc-rvv 文档。早期 S2 评估或诊断文档不能直接当作最终生产文档；它们只能作为输入。最终文档必须反映真实生产源码、生产直连测试、fallback、板卡结果和未闭合项。生产接入后的最终文档至少同步：
+生产接入后，S11 文档 closeout 必须重新检查 `artifact_layout.topic_doc_template` 解析出的主题文档。早期 S2 评估或诊断文档不能直接当作最终生产文档；它们只能作为输入。最终文档必须反映真实生产源码、生产直连测试、fallback、板卡结果和未闭合项。生产接入后的最终文档至少同步：
 
 - 生产补丁范围：新增 / 修改的生产 helper、dispatch、编译宏和未触碰路径。
 - 覆盖范围：入口、点类型、`Scalar`、数据布局、规模 gate、目标硬件。

@@ -7,7 +7,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 
 使用本 skill 时，目标是产出离开当前对话后仍可维护的技术文档。读者应能仅凭源码、测试、bench 日志和文档恢复函数职责、标量路径、RVV 边界、证据链、生产接入判断和遗留风险。
 
-术语解释和可审查性规则见 `rvv-workflow/references/reviewability-and-language.zh.md`。文档中英文术语首次出现时必须解释；中文主导文档给中文解释，英文主导文档也要给 plain-English explanation（白话解释），必要时补中文解释。中文文档应使用自然工程说明，避免翻译腔、名词堆叠和模板填空。如果文档引用 `test-rvv` prototype、诊断入口或 bench case，应解释其证据角色和不能覆盖的边界。
+术语解释和可审查性规则见 `rvv-workflow/references/reviewability-and-language.zh.md`。文档中英文术语首次出现时必须解释；中文主导文档给中文解释，英文主导文档也要给 plain-English explanation（白话解释），必要时补中文解释。中文文档应使用自然工程说明，避免翻译腔、名词堆叠和模板填空。如果文档引用配置解析出的测试资产、prototype、诊断入口或 bench case，应解释其证据角色和不能覆盖的边界。
 
 ## 文档类型
 
@@ -28,7 +28,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - 评估文档负责决策审计；主题文档负责长期维护。
 - S2 函数级评估阶段就应创建或更新 evaluation（评估）文档，用来记录函数功能、可向量化点、RVV 优先级、初步接入判断和需要补齐的证据。不要把这些判断只留到 S11 closeout（收尾）阶段。
 - S11 closeout 文档负责记录实验后的最终状态、证据边界、生产接入或不接入理由、遗留风险和队列表同步。如果 topic 进入 production integration loop（生产接入闭环），S11 必须发生在生产补丁、生产直连测试、生产证据重跑和再次 EvidenceDecision（证据决策）之后。
-- 生产接入后的 doc-rvv 文档必须以真实 production patch（生产补丁）和 production direct（真实生产入口直连）证据为中心，不能只复述 diagnostic prototype（诊断原型）或早期 bench 结果。必须同步覆盖范围、fallback 矩阵、生产直连测试、反汇编归属、板卡 production bench、最终 EvidenceDecision 和未覆盖路径。
+- 生产接入后的主题文档必须按 `artifact_layout.topic_doc_template` 解析位置，并以真实 production patch（生产补丁）和 production direct（真实生产入口直连）证据为中心，不能只复述 diagnostic prototype（诊断原型）或早期 bench 结果。必须同步覆盖范围、fallback 矩阵、生产直连测试、反汇编归属、板卡 production bench、最终 EvidenceDecision 和未覆盖路径。
 - 筛选文档负责队列和状态，不承担实现事实的长期解释。
 - 诊断文档必须区分授权边界：局部实验、production-shaped diagnostic、production direct 或生产回退。
 - 技术结论以源码、测试、日志和反汇编为依据，不写成对话来源。

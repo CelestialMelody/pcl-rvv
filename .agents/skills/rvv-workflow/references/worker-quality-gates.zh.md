@@ -5,14 +5,14 @@
 
 ## 何时读取
 
-- 短 prompt 进入普通 topic 后、开始写 `test-rvv/`、`doc-rvv/` 或 production 前读取。
+- 短 prompt 进入普通 topic 后、开始写配置解析出的 topic 测试资产、topic 文档或 production 前读取。
 - 如果 topic 涉及 staging（分阶段暂存）、gather（离散加载）、`vcompress`、scalar tail（标量尾段）、
   vector reduction（向量规约）、FMA（融合乘加）、目标硬件性能或 no-production closeout，
   必须继续读取本文列出的详细 reference。
 - 如果 topic 从 `partial-production-candidate`（局部生产候选）继续到 PI1 production integration plan
   （生产接入计划），必须读取 `rvv-implementation/SKILL.md`、`point-load-store.md`、
   `fallback-and-dispatch.md`；若生产入口是模板点类型或要从 `PointNormal` 诊断扩展到泛型入口，
-  必须读取 `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`。
+  必须读取配置或 adapter 指定的 generic point type strategy（泛型点类型策略）文档。
 - 如果模板点类型算法会构造或写回 `PointT` 输出，或使用 `PointT` 运算符、`FieldList`、
   `copyPoint`、`CentroidPoint`、RGB/RGBA 特化等整点语义，不能只按 xyz traits gate 判断；
   必须读取 `RVV Generic Point Type Strategy.zh.md` 中“输入字段 Gate 不等于输出 PointT 语义”。
@@ -30,7 +30,7 @@ S0 必须读取 `.agents/config/defaults.yaml`。如果存在 `.agents/local/use
 worker 必须在 S0 报告和最终 Handoff Packet（交接数据包）中写清：
 
 - `preferences_loaded`：读取了 defaults、local override（本机私有覆盖）或 prompt override（提示词覆盖）中的哪些层。
-- `comment_policy_frozen`：`test-rvv`、diagnostic（诊断代码）、prototype（原型代码）和 production（生产源码）的注释策略。
+- `comment_policy_frozen`：配置解析出的测试资产、diagnostic（诊断代码）、prototype（原型代码）和 production（生产源码）的注释策略。
 - `evidence_policy_frozen`：evidence logs（证据日志）策略，默认 `summary-only`；raw logs（原始日志）不默认提交。
 - `documentation_policy_frozen`：closeout（收尾文档）是否 current-state-first（当前状态优先）、是否必须有数值算例、长期文档是否禁止保留对话流程话术。
 
@@ -89,7 +89,7 @@ worker 必须写清映射关系：
 - evidence model（证据模型）：correctness、QEMU path、反汇编归属、component ablation、repeated board A/B。
 - production boundary（生产边界）：dispatch、fallback、点类型 traits、代表点型、`Scalar` 和不扩大范围。
 
-若相邻 topic 有成功的 `test_support/reductions`、block-reduction、fused formula、staging split、
+若相邻 topic 有成功的 test support reduction role（测试支撑规约职责）、block-reduction、fused formula、staging split、
 component ablation 或负向历史方案，worker 必须在表中审计它们。可以合理拒绝或暂缓，但不能只写
 “已参考相邻经验”而不列出未采用的主线。
 
@@ -110,9 +110,9 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 
 详细规则见 `rvv-documentation/SKILL.md`、`topic-doc-structure.md` 和 `evaluation-doc-structure.md`。
 
-### 6. Test-rvv / diagnostic 注释
+### 6. 测试资产 / diagnostic 注释
 
-`test-rvv` 和 diagnostic 代码必须面向 reviewer（审查者）可读：
+配置解析出的测试资产和 diagnostic 代码必须面向 reviewer（审查者）可读：
 
 - 长文件有“本文件做什么”和阅读提示；
 - 非平凡 helper 说明作用、调用者、production 语义映射和证据角色；
@@ -122,11 +122,11 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 
 详细规则见 `rvv-workflow/references/reviewability-and-language.zh.md`。
 
-如果单个 `test-rvv` helper header 超过 `.agents/config/defaults.yaml` 中
+如果单个测试支撑 helper header 超过 `.agents/config/defaults.yaml` 中
 `test_support.helper_split_soft_line_limit` / `helper_split_hard_line_limit` 配置的约 800-1000 行，
 或同时包含 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation
-中不少于 `test_support.helper_split_responsibility_threshold` 类职责，worker 必须优先拆到
-`test_support/`，或在 Handoff Packet 中写清 `deferred reason`。拆分本身不应扩大算法范围；
+中不少于 `test_support.helper_split_responsibility_threshold` 类职责，worker 必须优先按
+`test_support` 配置拆分，或在 Handoff Packet 中写清 `deferred reason`。拆分本身不应扩大算法范围；
 若暂缓拆分，必须说明暂缓是否影响 reviewer 可读性、后续测试维护和当前证据复核。
 
 ### 7. 证据和归因
@@ -305,15 +305,15 @@ followup_options_ready:
 要求：
 
 - `status` 可写 `pass`、`partial`、`fail` 或 `not_applicable`；不要用没有证据的 `true`。
-- `evidence` 至少指向当前 topic 的 evaluation、主题文档、test-rvv 注释、bench 说明、证据日志或 Handoff 段落。
+- `evidence` 至少指向当前 topic 的 evaluation、主题文档、测试资产注释、bench 说明、证据日志或 Handoff 段落。
 - `missing_items` 必须写成陈述句；没有缺口时写 `none`。
 - 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
   和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
 - 表格必须包含 `correctness_efficiency_evidence_chain_ready`。证据指向主题文档中的“正确性与高效性证据链”或“诊断证据链”小节。
 - 如果 worker 声明采用 sibling topic 经验，表格必须包含 `experience_migration_audit_ready`；
   证据指向 adopted / attempted / deferred / rejected 对照表。若未声明且无相邻经验可迁移，可写 `not_applicable` 并说明原因。
-- 如果当前 topic 的 `test-rvv` helper header 命中行数或职责阈值，表格必须包含
-  `test_support_split_decision_ready`；证据指向拆分后的 `test_support/` 结构，或 Handoff 中的 deferred reason。
+- 如果当前 topic 的测试支撑 helper header 命中行数或职责阈值，表格必须包含
+  `test_support_split_decision_ready`；证据指向按 `test_support` 配置拆分后的结构，或 Handoff 中的 deferred reason。
 - 若 `language_check` 声称通过，必须能在同一张表或相邻段落中指出诊断代码、测试、bench 和文档的术语 / 中文注释证据。
 - 若当前结论强于 no-production，例如 `partial-production-candidate`，表格必须额外列出 production direct 尚未闭合的证据项，避免把诊断收益误写成 production-ready。
 - 若本轮进入 PI1，表格必须额外列出 `pi1_production_scope_ready`、`generic_point_type_strategy_ready`、

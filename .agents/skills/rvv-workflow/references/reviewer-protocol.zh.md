@@ -11,7 +11,7 @@ reviewer 的目标不是替 worker（执行者）重做任务，而是发现证�
 - 只读审查 worker 产物。
 - 可以运行 `git diff`、`rg`、`sed`、`find` 等只读命令。
 - 必要测试如果会产生 build/log（构建 / 日志）输出，应先说明目的和影响，再判断是否需要执行。
-- 不修改 PCL 生产源码、`doc-rvv`、`test-rvv`。
+- 不修改 PCL 生产源码、配置解析出的 topic 文档或测试产物。
 - 不直接修 worker 产物。
 - 不创建 commit（提交）。
 
@@ -19,7 +19,7 @@ reviewer 的目标不是替 worker（执行者）重做任务，而是发现证�
 
 - 可以修改 prompt（提示词）、skill（技能）、knowledge map（知识索引）、`AGENTS.md` 等 agent asset（代理资产）。
 - 只修改与本轮发现直接相关的 workflow / skill / knowledge map / prompt。
-- 不修改 PCL 生产源码、`doc-rvv`、`test-rvv`，除非用户另行明确要求。
+- 不修改 PCL 生产源码、配置解析出的 topic 文档或测试产物，除非用户另行明确要求。
 - 修改前先说明计划；修改后列出文件、理由和验证方式。
 
 ## 必查输入
@@ -113,12 +113,12 @@ reviewer 应至少检查：
 - 证据链是否把 QEMU timing、diagnostic evidence、representative pointtypes、indexed / correspondences 边界写清。QEMU timing 不能写成性能结论，diagnostic evidence 不能写成 production evidence。
 - registration 主题是否按 `registration-topic-evidence.zh.md` 审计 `accepted_points`、`ATA/ATb`、
   matrix、weights、symmetric normals、query/match 输出语义和 production direct 边界。
-- `test-rvv`、diagnostic（诊断代码）、prototype（原型代码）是否有足够中文注释和文件级阅读提示。
-- doc-rvv 文档是否区分 S2 evaluation 和 S11 closeout（收尾）。
+- 配置解析出的测试资产、diagnostic（诊断代码）、prototype（原型代码）是否有足够中文注释和文件级阅读提示。
+- 主题文档是否区分 S2 evaluation 和 S11 closeout（收尾）。
 - 文档是否能让读者理解标量实现做了什么、RVV 方案如何实现、bench case 如何构造和证明什么；如果只列公式、helper 名、指令名或 speedup，视为可审查性缺口。
 - 对 buffer/staging、scalar tail（标量尾段）、fused multiply-add（融合乘加）、vector reduction（向量规约）、数学函数是否向量化等实现取舍，worker 是否给出理由、替代方案和需要补的证据。
 - 如果 worker 声明采用 sibling topic（同模块相邻主题）经验，是否输出 experience-migration audit（经验迁移审计）表，并覆盖 row source、source / weight policy、shared math pipeline、staging / reduction、formula / FMA、evidence model 和 production boundary。缺少 adopted / attempted / deferred / rejected 对照表，或只说“已参考相邻经验”但没有说明未采用的成功 / 负向方案，应视为 workflow/worker 执行缺口。
-- 如果单个 `test-rvv` helper header 超过配置的约 800-1000 行，或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation 中三类以上职责，worker 是否拆到 `test_support/`，或在 Handoff Packet 中写清 deferred reason。没有拆分也没有理由时，应作为可审查性和维护性缺口。
+- 如果单个测试支撑 helper header 超过配置的约 800-1000 行，或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation 中三类以上职责，worker 是否按 `test_support` 配置拆分，或在 Handoff Packet 中写清 deferred reason。没有拆分也没有理由时，应作为可审查性和维护性缺口。
 - 负向性能结论是否有受证据约束的归因；不能把未验证猜测写成事实，也不能只写“不接生产”而不解释为什么慢。
 - 是否存在不该提交的 build（构建）产物、日志、本机路径、私有地址或 `config.mk`。
 - Handoff Packet 是否字段完整，`agent_asset_trace` 是否真实反映读取并使用过的资产。
@@ -129,7 +129,7 @@ reviewer 应至少检查：
 - Handoff Packet 是否把重要后续选择暴露给用户。若当前结论是窄范围 production-ready、partial-production-candidate、
   bench-only/no-production 或保留重要未覆盖范围，reviewer 应检查 `followup_options_for_user` 是否列出默认动作、
   继续当前 topic 的扩展动作、应另开 topic 的消融 / 扩展动作和当前不建议做的方向。
-- 如果 worker 使用短 prompt 启动，Handoff Packet 是否包含 `worker_quality_gate_check`，且该字段真实覆盖标量路径、production/diagnostic 数据流映射、文档结构、test-rvv 注释、bench 边界、替代方案审计、证据模型和 stop condition。缺失或虚写时，应视为 workflow/worker 执行缺口。
+- 如果 worker 使用短 prompt 启动，Handoff Packet 是否包含 `worker_quality_gate_check`，且该字段真实覆盖标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、证据模型和 stop condition。缺失或虚写时，应视为 workflow/worker 执行缺口。
 - `worker_quality_gate_check` 是否是证据化表格，而不是只有 `true` / `false`。reviewer 应抽查每项 `evidence` 是否能在当前 topic 产物中定位；若找不到对应文件、章节、日志或代码注释，应把该项判为未闭合。
 - `worker_quality_gate_check` 是否在适用时覆盖 `experience_migration_audit_ready` 和 `test_support_split_decision_ready`。若 worker 声称不适用，reviewer 应抽查当前 topic 是否确实没有 sibling topic 经验、长 helper 或多职责 helper 信号。
 - `worker_quality_gate_check` 是否覆盖 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`。

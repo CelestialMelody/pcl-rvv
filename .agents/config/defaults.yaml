@@ -19,6 +19,10 @@ documentation:
   require_numeric_example: true
   forbid_conversation_process_phrasing: true
   long_term_docs_use_source_evidence: true
+  markdown_extension: md
+  language_suffix: zh
+  topic_doc_suffix: RVV
+  evaluation_doc_suffix: evaluation
 
 evidence:
   default_policy: summary-only
@@ -42,6 +46,21 @@ test_support:
   helper_split_soft_line_limit: 800
   helper_split_hard_line_limit: 1000
   helper_split_responsibility_threshold: 3
+  aggregator_prefix: test_support
+  aggregator_extension: hpp
+  topic_abbrev_required: true
+  internal_directory: test_support
+  internal_header_extension: hpp
+  prefer_topic_prefixed_internal_headers: true
+  compatibility_aggregator_alias_allowed: true
+  compatibility_aggregator_alias_requires_handoff_reason: true
+  internal_header_roles:
+    - common
+    - row_sources
+    - reductions
+    - candidates
+    - ablation
+    - bench_support
 
 paths:
   work_log_root: tmp/rvv-work-logs
@@ -50,6 +69,33 @@ paths:
   doc_root: doc-rvv
   dependency_root_env_var: PCL_RVV_DEP_ROOT
   cross_toolchain_env_var: PCL_RVV_TOOLCHAIN_ROOT
+
+artifact_layout:
+  topic_test_dir_template: "{paths.test_root}/{module}/{topic}"
+  module_doc_dir_template: "{paths.doc_root}/{module}"
+  reusable_rvv_knowledge_dir_template: "{paths.doc_root}/rvv"
+  topic_doc_template: "{paths.doc_root}/{module}/{topic}-{documentation.topic_doc_suffix}.{documentation.language_suffix}.{documentation.markdown_extension}"
+  evaluation_doc_template: "{paths.test_root}/{module}/{topic}/{topic}-{documentation.evaluation_doc_suffix}.{documentation.language_suffix}.{documentation.markdown_extension}"
+  screening_root_template: "{paths.doc_root}/library-screening"
+  screening_modules_subdir: modules
+  module_triage_doc_template: "{artifact_layout.screening_root_template}/{artifact_layout.screening_modules_subdir}/{module}-function-triage.{documentation.language_suffix}.{documentation.markdown_extension}"
+  module_second_pass_doc_template: "{artifact_layout.screening_root_template}/{module}/{module}-module-second-pass.{documentation.language_suffix}.{documentation.markdown_extension}"
+  module_followup_rescreen_doc_template: "{artifact_layout.screening_root_template}/{module}/{module}-module-followup-rescreen.{documentation.language_suffix}.{documentation.markdown_extension}"
+  generic_point_type_strategy_doc_template: "{artifact_layout.reusable_rvv_knowledge_dir_template}/RVV Generic Point Type Strategy.{documentation.language_suffix}.{documentation.markdown_extension}"
+  math_test_subdir: rvv/math
+  math_doc_subdir: rvv/math
+  math_test_root_template: "{paths.test_root}/{artifact_layout.math_test_subdir}"
+  math_test_dir_template: "{artifact_layout.math_test_root_template}/{function}"
+  math_doc_dir_template: "{paths.doc_root}/{artifact_layout.math_doc_subdir}"
+  qemu_output_subdir: output/qemu
+  board_output_subdir: output/board
+  shared_make_subdir: mk
+  makefile_name: Makefile
+  board_makefile_name: board.mk
+  test_source_prefix: test
+  bench_source_prefix: bench
+  source_extension: cpp
+  sanitize_logs_script_template: "{paths.test_root}/script/sanitize_evidence_logs.py"
 
 board:
   target_env_var: PCL_RVV_BOARD_TARGET

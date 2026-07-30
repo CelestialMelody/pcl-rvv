@@ -11,15 +11,15 @@ description: 用于 C/C++ 高性能库中 RISC-V RVV 数学函数向量化拟合
 
 规划新函数、评审候选系数或准备替换提交时，阅读 [references/math-workflow.md](references/math-workflow.md) 获取详细检查清单和案例模式。
 
-新增或迁移测试资产时，阅读 [references/testing-layout.zh.md](references/testing-layout.zh.md)。在本仓库中，数学 helper / std-libm RVV 向量化专项测试优先放 `test-rvv/rvv/math/<function>/`；其它项目应使用等价的 RVV math 专项目录。caller smoke、benchmark、参数脚本和数学专项测试必须分层管理。
+新增或迁移测试资产时，阅读 [references/testing-layout.zh.md](references/testing-layout.zh.md)。数学 helper / std-libm RVV 向量化专项测试目录按 `artifact_layout.math_test_dir_template` 解析；其它项目应在 adapter 中提供等价的 RVV math 专项目录。caller smoke、benchmark、参数脚本和数学专项测试必须分层管理。
 
-新增或迁移实现/证据文档时，本仓库的 RVV 数学函数专项文档默认写入 `doc-rvv/rvv/math/`。PCL common 模块函数文档仍放 `doc-rvv/common/`，只记录 common 入口、调用关系、分派和回退边界；如果 common 函数依赖数学 helper，应以链接方式引用 `doc-rvv/rvv/math/` 下的专项文档，不要复制系数、误差口径或特殊值合同。
+新增或迁移实现/证据文档时，RVV 数学函数专项文档按 `artifact_layout.math_doc_dir_template` 解析位置。业务模块或 common 模块函数文档按该项目 adapter 的模块文档模板定位，只记录调用关系、输入域、分派和回退边界；如果模块函数依赖数学 helper，应以链接方式引用数学专项文档，不要复制系数、误差口径或特殊值合同。
 
-写作或评审接近 std/libm 的 RVV 数学 helper 时，先读 `doc-rvv/rvv/math/std-math-vectorization.zh.md`。它是长期总则；具体函数的系数、阈值和板卡结果仍写在对应专题文档中。
+写作或评审接近 std/libm 的 RVV 数学 helper 时，先按 `artifact_layout.math_doc_dir_template` 解析并读取数学向量化总则文档。它是长期总则；具体函数的系数、阈值和板卡结果仍写在对应专题文档中。
 
 写测试、文档或给 reviewer 汇报时，先遵循 `rvv-workflow/references/reviewability-and-language.zh.md` 的通用规则，再阅读 [references/reviewability-and-language.zh.md](references/reviewability-and-language.zh.md) 获取数学函数专用术语。英文术语首次出现时必须解释；中文主导时给中文解释，例如 `kernel（约化区间上的多项式核函数）`、`lane-level helper（只处理 RVV 向量寄存器和 vl 的单段向量 helper）`；英文主导注释中也要给 plain-English explanation（白话解释），例如 `kernel (the polynomial on the reduced interval, not the full sin/cos helper)`。后续可使用“中文 + 英文缩写/原词”的形式，避免读者只能靠英文术语猜含义；同时避免翻译腔，优先写自然工程说明。
 
-scratch C++、Python 脚本和 Makefile target 应保留审查型注释，说明样本来源、scalar/RVV/reference 角色、gate 条件和不可泛化边界。production 代码注释应克制；`test-rvv` / prototype 代码可以更详细，长文件必须有自然的文件级阅读提示和函数级“作用/调用者/证据角色”说明，不要写成“中文执行地图”或“作用/类别”模板。
+scratch C++、Python 脚本和 Makefile target 应保留审查型注释，说明样本来源、scalar/RVV/reference 角色、gate 条件和不可泛化边界。production 代码注释应克制；配置解析出的测试资产 / prototype 代码可以更详细，长文件必须有自然的文件级阅读提示和函数级“作用/调用者/证据角色”说明，不要写成“中文执行地图”或“作用/类别”模板。
 
 数学函数文档中的 production gate（生产接入门禁）和未闭合项必须逐条说明含义和作用，不能只列名词。例如 domain-out/fallback 合同应说明“域外输入如何处理：回退标量、返回 NaN、还是要求调用方保证输入合法”，caller 白名单应说明“哪些调用方允许使用 helper，并已证明输入域满足合同”。使用陈述句说明当前是否必须闭合。
 

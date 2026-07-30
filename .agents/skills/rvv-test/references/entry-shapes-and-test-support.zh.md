@@ -33,19 +33,28 @@ row source -> field load/gather -> finite mask -> formula -> staging/reduction -
 
 ## 长 Test Support 文件拆分
 
-当 `test-rvv` helper header（辅助头文件）过长，或同时包含标量 reference、RVV math、row source policy、reduction candidate、component ablation 和 bench/test wrapper 时，应优先拆成稳定聚合头和内部头文件：
+当配置解析出的测试资产中的 helper header（辅助头文件）过长，或同时包含标量 reference、RVV math、row source policy、reduction candidate、component ablation 和 bench/test wrapper 时，应优先拆成稳定聚合头和内部头文件：
 
 - 默认偏好来自 `.agents/config/defaults.yaml` 的 `test_support` 配置：helper header 超过
   `helper_split_soft_line_limit`（默认约 800 行）时应评估拆分；超过
   `helper_split_hard_line_limit`（默认约 1000 行），或同时包含不少于
   `helper_split_responsibility_threshold`（默认 3）类职责时，worker 必须优先拆到
-  `test_support/`，或在 Handoff Packet 中写清 deferred reason（暂缓理由）。
-- 外部 include 入口保持当前 topic 的稳定命名，优先使用 `*_test_support*.hpp` 或
-  `test_support_*.hpp` 这类宽口径名称；历史 topic 若已有 `*_diag.hpp`，可以暂作
-  aggregator header（聚合头文件）保留兼容。
-- 内部实现优先放到相邻 `test_support/` 子目录，按职责拆成 common、RVV math、row sources、reductions、candidates、ablation 等文件。
-- 如果内部实现确实只包含狭义 diagnostic/probing helper，也可以使用 `diag/`；一旦混入 bench-facing wrapper 或 component ablation，优先使用 `test_support/`。
-- 每个内部头文件开头写中文说明：本文件负责什么，属于 test-rvv 测试证据支撑，不能证明 production dispatch。
+  配置指定的内部目录，或在 Handoff Packet 中写清 deferred reason（暂缓理由）。
+- 外部 include 入口保持当前 topic 的稳定命名。新 topic 默认按 `test_support.aggregator_prefix`、
+  topic abbreviation（主题缩写）和 `test_support.aggregator_extension` 生成宽口径 aggregator header
+  （聚合头文件）；本文不固定任何 topic abbreviation 或完整文件名。
+- `.agents/local/user-preferences.yaml` 可覆盖本机命名偏好，例如聚合入口前缀、是否必须提供 topic
+  abbreviation、内部目录、扩展名和内部头文件是否带 topic abbreviation 前缀。不要默认创建或提交本机
+  override（覆盖）文件；若使用本机覆盖，Handoff Packet 只说明读取了哪些覆盖项和最终生效行为。
+- 历史 topic 若已有兼容聚合入口，在 `test_support.compatibility_aggregator_alias_allowed` 为 true 时可暂作
+  compatibility alias（兼容别名）保留；它不是新 topic 的默认命名。若继续保留兼容别名，且
+  `test_support.compatibility_aggregator_alias_requires_handoff_reason` 为 true，Handoff Packet 必须说明保留原因。
+- 只有内容确实是狭义 diagnostic/probing（诊断 / 探针）时，才使用配置或当前 topic 既有结构指定的狭义诊断位置。
+- 内部实现优先放到 `test_support.internal_directory` 指定的目录，按 `test_support.internal_header_roles` 中的职责拆分；
+  是否使用 topic abbreviation 前缀由 `test_support.prefer_topic_prefixed_internal_headers` 决定。例如该配置为
+  true 时，内部头文件名应由 topic abbreviation、职责名和 `test_support.internal_header_extension` 组合生成。
+- 如果内部实现确实只包含狭义 diagnostic/probing helper，也可以使用狭义诊断位置；一旦混入 bench-facing wrapper 或 component ablation，优先使用宽口径 test support 位置。
+- 每个内部头文件开头写中文说明：本文件负责什么，属于 RVV 测试证据支撑，不能证明 production dispatch。
 - 拆分应先保持算法逻辑、case 名、bench 逻辑和证据口径不变；若同时重写算法或 bench，应作为单独变更说明并重跑对应验证。
 - 文档和 handoff 要说明 aggregator 入口仍稳定，避免 reviewer 误以为 public test/bench include 合同改变。
 

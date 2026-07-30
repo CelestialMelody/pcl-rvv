@@ -50,12 +50,12 @@
 - `rvv-implementation/SKILL.md`
 - `rvv-implementation/references/point-load-store.md`
 - `rvv-implementation/references/fallback-and-dispatch.md`
-- `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`
+- 配置或 adapter 指定的 generic point type strategy（泛型点类型策略）文档
 
 ## 目标
 
 - 从状态表选择第一条未完成主题。
-- 复查或建立 `test-rvv/<module>/<topic>/<topic>-evaluation.zh.md`。
+- 按 `artifact_layout.evaluation_doc_template` 复查或建立函数级评估文档。
 - 先回答生产价值：RVV 是否覆盖入口主成本，fallback 和维护边界是否可控。
 - 证据不足时收敛为 bench 诊断主题、暂缓或不接生产。
 - 证据成立时再进入 RVV 实现、专项 test/bench、QEMU、反汇编、板卡验证和文档 closeout。

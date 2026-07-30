@@ -23,17 +23,18 @@ RVV 优化 agent 不应把某个项目的目录、测试命令或板卡部署方
 
 ```text
 repo_root: <repo>
-rvv_test_root: <repo>/test-rvv
-rvv_doc_root: <repo>/doc-rvv
-screening_root: <repo>/doc-rvv/library-screening
-topic_test_dir: <repo>/test-rvv/<module>/<topic>
-topic_doc: <repo>/doc-rvv/<module>/<topic>-RVV.zh.md
-evaluation_doc: <repo>/test-rvv/<module>/<topic>/<topic>-evaluation.zh.md
-qemu_output: <repo>/test-rvv/<module>/<topic>/output/qemu
-board_output: <repo>/test-rvv/<module>/<topic>/output/board
+paths.test_root: <repo>/<configured-test-root>
+paths.doc_root: <repo>/<configured-doc-root>
+artifact_layout.screening_root_template: <configured-doc-root>/<configured-screening-root>
+artifact_layout.topic_test_dir_template: <configured-test-root>/<module>/<topic>
+artifact_layout.topic_doc_template: <configured-doc-root>/<module>/<topic-doc-name>
+artifact_layout.evaluation_doc_template: <configured-test-root>/<module>/<topic>/<evaluation-doc-name>
+artifact_layout.qemu_output_subdir: <configured-qemu-output-subdir>
+artifact_layout.board_output_subdir: <configured-board-output-subdir>
 ```
 
-字段值应允许项目覆盖。公共规则只依赖命名约定，不依赖本机配置。
+字段值应允许项目覆盖。公共规则只依赖配置键和 adapter（适配层）声明，不依赖本机配置，也不把某个库的
+目录名、文档后缀或输出子目录写成通用规则。
 
 ## 验证能力声明
 
@@ -47,18 +48,11 @@ adapter 应把验证能力分成三类：
 
 ## PCL 当前 adapter 经验
 
-PCL 当前验证项目使用下列约定；迁移到其它库时应由该库 adapter 替换：
+PCL 当前验证项目的默认目录、文档命名、筛选目录、公共 Makefile include、QEMU 输出目录和目标硬件日志目录
+来自 `.agents/config/defaults.yaml` 的 `paths` 与 `artifact_layout`。迁移到其它库时，应由该库 adapter 或
+local override（本机私有覆盖）替换这些默认值。
 
-- RVV 专项测试根为 `<repo>/test-rvv`。
-- 主题实现文档位于 `<repo>/doc-rvv/<module>/<topic>-RVV.zh.md`。
-- 函数级评估位于 `<repo>/test-rvv/<module>/<topic>/<topic>-evaluation.zh.md`。
-- 模块筛选位于 `<repo>/doc-rvv/library-screening`。
-- 模块 first-pass 位于 `<repo>/doc-rvv/library-screening/modules/<module>-function-triage.zh.md`。
-- 模块 second-pass 和 follow-up rescreen 位于 `<repo>/doc-rvv/library-screening/<module>/`。
-- 公共 Makefile include 位于 `<repo>/test-rvv/mk`。
-- 目标硬件日志位于 `<repo>/test-rvv/<module>/<topic>/output/board`。
-- QEMU 日志位于 `<repo>/test-rvv/<module>/<topic>/output/qemu`。
-- 模块工作日志和问题讨论文档位于 PCL adapter 的 `chats` 约定目录；这些路径只用于恢复上下文和记录流程，不写入提交型 `doc-rvv` 技术文档。
+模块工作日志和问题讨论文档也应通过 adapter 声明。它们只用于恢复上下文和记录流程，不写入提交型技术文档。
 
 快速定位已有 RVV 生产实现时，在 PCL 源码中优先搜索：
 
@@ -67,9 +61,12 @@ PCL 当前验证项目使用下列约定；迁移到其它库时应由该库 ada
 #if defined(__RVV10__)
 ```
 
-快速定位专项证据时，从 `<repo>/test-rvv/<module>/<topic>/` 查看 `Makefile`、`board.mk`、`test_*.cpp`、`bench_*.cpp`、`output/qemu/` 和 `output/board/`。
+快速定位专项证据时，先用 `artifact_layout.topic_test_dir_template` 解析当前 topic 的测试资产目录，再按
+`artifact_layout.makefile_name`、`artifact_layout.board_makefile_name`、`artifact_layout.test_source_prefix`、
+`artifact_layout.bench_source_prefix`、`artifact_layout.qemu_output_subdir` 和
+`artifact_layout.board_output_subdir` 查找测试、bench、脚本和日志入口。
 
-上述路径、文件名和搜索入口都是 PCL adapter 规则，不是 generic RVV agent 的硬编码要求。迁移到其它 C/C++ 库时，由该库 adapter 提供等价的源码、测试、文档、日志和筛选入口。
+上述路径、文件名和搜索入口都是配置解析结果，不是 generic RVV agent 的硬编码要求。迁移到其它 C/C++ 库时，由该库 adapter 提供等价的源码、测试、文档、日志和筛选入口。
 
 PCL 的某些路径在共享库中实现。此类主题需要明确“可执行文件宏是否影响库内路径”。如果不影响，应使用双库或双构建对拍，并在文档中写清构建、部署和日志来源。
 

@@ -7,7 +7,7 @@ description: 实现或审查 C/C++ 高性能库中的 RVV 生产路径。适用�
 
 使用本 skill 前，应已有函数级评估或诊断证据，说明目标函数、覆盖条件、fallback 条件和生产接入价值。
 
-回复、实现说明和 `test-rvv` prototype 注释遵循 `rvv-workflow/references/reviewability-and-language.zh.md`：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释）。中文说明要自然，避免翻译腔和模板填空。production 代码注释保持克制；test/prototype 代码可以更详细，说明 helper 作用、调用者、fallback/gate 边界和证据角色。
+回复、实现说明、配置解析出的测试资产和 prototype 注释遵循 `rvv-workflow/references/reviewability-and-language.zh.md`：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释）。中文说明要自然，避免翻译腔和模板填空。production 代码注释保持克制；test/prototype 代码可以更详细，说明 helper 作用、调用者、fallback/gate 边界和证据角色。
 
 中优先级函数不等于默认放弃。应先尝试 RVV 可行性；只有实现困难、语义风险、覆盖条件过窄、验证成本过高、收益不可证明或破坏可维护性时才暂缓，并把原因写入评估和文档。
 
@@ -45,7 +45,7 @@ description: 实现或审查 C/C++ 高性能库中的 RVV 生产路径。适用�
 
 访存封装细则见 [references/point-load-store.md](references/point-load-store.md)。
 
-如果 production 入口是模板点类型，或诊断证据只覆盖 `PointNormal` / `PointXYZ` 等具体类型但生产补丁准备接入模板入口，必须读取 `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`。实现时二选一：
+如果 production 入口是模板点类型，或诊断证据只覆盖 `PointNormal` / `PointXYZ` 等具体类型但生产补丁准备接入模板入口，必须读取 `artifact_layout.generic_point_type_strategy_doc_template` 解析出的文档。实现时二选一：
 
 - 泛型接入：用 PCL traits（点类型字段特征）、字段 offset、POD / standard-layout 和 alignment gate 证明当前 `PointSource` / `PointTarget` 可走 RVV；不满足时 fallback。
 - 窄范围接入：明确只对已证明的具体点类型或布局分流，其它模板实例 fallback；文档和 Handoff Packet 不能把它写成泛型成立。

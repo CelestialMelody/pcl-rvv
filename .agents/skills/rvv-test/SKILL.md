@@ -39,7 +39,12 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
   写成“未接 production 的诊断结论”；需要表达筛选或 EvidenceDecision 的诊断阶段时，写成
   `diagnostic`。历史 topic 中的旧标签可在回头完善文档时同步改写。
 - `benchmarking` 只表示性能测量子领域，不单独承载 QEMU、反汇编、日志、数值一致性或生产证据规则。
-- topic 内部若有混合用途 helper（reference、diagnostic、ablation、candidate wrapper、bench-facing helper），优先使用 `test_support/` 这类宽口径目录；只有内容确实是狭义诊断时才使用 `diag/`。
+- test support（测试支撑代码）的聚合入口、topic abbreviation（主题缩写）要求、内部目录、内部头文件
+  前缀、扩展名和 compatibility alias（兼容别名）策略，默认从 `.agents/config/defaults.yaml` 的
+  `test_support` 读取；`.agents/local/user-preferences.yaml` 可覆盖本机偏好，当前 prompt 的明确要求优先。
+- topic 内部若有混合用途 helper（reference、diagnostic、ablation、candidate wrapper、bench-facing helper），默认使用
+  `test_support` 配置指定的宽口径目录；只有内容确实是狭义 diagnostic/probing（诊断 / 探针）时才使用
+  配置或当前 topic 既有结构指定的狭义诊断位置。
 
 ## 必读 References
 

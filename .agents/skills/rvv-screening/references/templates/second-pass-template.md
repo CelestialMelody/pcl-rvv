@@ -4,14 +4,14 @@
 
 ## 输入
 
-- `doc-rvv/library-screening/modules/<module>-function-triage.zh.md`
-- `doc-rvv/library-screening/module-optimization-workflow.zh.md` 或同类模块优化流程。
+- `artifact_layout.module_triage_doc_template` 解析出的 first-pass 文档。
+- `artifact_layout.screening_root_template` 解析出的模块优化流程或同类文档。
 - 模块源码、上游 test/benchmark 入口、同类已完成 RVV 文档。
 
 ## 输出
 
 ```text
-doc-rvv/library-screening/<module>/<module>-module-second-pass.zh.md
+artifact_layout.module_second_pass_doc_template
 ```
 
 ## 必须回答
@@ -100,7 +100,7 @@ doc-rvv/library-screening/<module>/<module>-module-second-pass.zh.md
 ## 输出限制
 
 - 不修改模块源码。
-- 不建立 `test-rvv/<module>/<topic>/`。
+- 不建立 `artifact_layout.topic_test_dir_template` 解析出的 topic 测试资产目录。
 - 不运行目标硬件 bench。
 - 可以做非破坏性源码阅读、搜索、静态分析和必要的轻量构建或测试入口确认。
 - 发现 first-pass 与当前源码冲突时，在 second-pass 文档中记录并修正去向；不要扩展成全库重新筛选。

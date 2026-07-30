@@ -13,7 +13,7 @@
 ## 输出
 
 ```text
-doc-rvv/library-screening/<module>/<module>-module-followup-rescreen.zh.md
+artifact_layout.module_followup_rescreen_doc_template
 ```
 
 ## 已完成主题证据包
@@ -81,6 +81,6 @@ doc-rvv/library-screening/<module>/<module>-module-followup-rescreen.zh.md
 
 第 5 节解释分类理由，第 6 节只负责执行顺序和状态跟踪。执行清单字段优先使用 `顺序`、`主题`、`主文件`、`推荐入口 / 第一 RVV 目标`、`依据模式 / 证据来源`、`状态`、`当前结论 / 下一步条件`。
 
-提交型复筛文档不要写入内部操作入口、prompt 路径、对话路径或 `chats/` 路径。此类信息只保留在工作日志或入口模板中，不能成为 `doc-rvv` 技术文档内容。
+提交型复筛文档不要写入内部操作入口、prompt 路径、对话路径或 adapter 标记为工作日志 / 讨论记录的路径。此类信息只保留在工作日志或入口模板中，不能成为提交型技术文档内容。
 
 本轮不进入 RVV 实现，不建立专项目录，不运行板卡 bench。

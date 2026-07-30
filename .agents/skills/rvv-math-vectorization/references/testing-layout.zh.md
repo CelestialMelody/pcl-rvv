@@ -4,67 +4,71 @@
 
 ## 1. 测试目录归属
 
-本仓库的数学 helper / std-libm RVV 向量化专项测试应优先放在：
+数学 helper / std-libm RVV 向量化专项测试应优先放在 `artifact_layout.math_test_dir_template`
+解析出的函数目录。顶层 Makefile 所在目录由 `artifact_layout.math_test_root_template` 解析；
+函数专属资产目录由 `artifact_layout.math_test_dir_template` 解析。二者不要混用。
 
 ```text
-test-rvv/rvv/math/<function>/
+<math-test-dir>/
 ```
 
-例如：
+典型结构：
 
 ```text
-test-rvv/rvv/math/
-  Makefile
-  board.mk
-  README.zh.md
+<math-test-root>/
+  <makefile-name>
+  <board-makefile-name>
+  <readme-name>
   script/
     lp_minimax.py
     sollya_utils.py
-  sincos/
-    sincos_test.cpp
-    sincos_range_smoke.cpp
-    script/parms_sincos.py
+  <function>/
+    <function>_test.<source-extension>
+    <function>_<caller>_smoke.<source-extension>
+    script/parms_<function>.py
 ```
 
 选择规则：
 
-- 测试数学 helper 本体、参数脚本、系数候选、RVV intrinsic 链路、板卡 microbench 时，放 `test-rvv/rvv/math/<function>/`。
+- 测试数学 helper 本体、参数脚本、系数候选、RVV intrinsic 链路、板卡 microbench 时，放 `artifact_layout.math_test_dir_template` 解析出的函数目录。
 - 其它项目使用等价的 RVV math 专项目录；不要把数学 helper 专项测试混进业务 module 测试目录。
 - 测试某个 PCL module 的 production caller 行为时，才放该 module 对应目录。
 - 如果数学 helper 已经从 module 代码抽到 `common/include/pcl/common/impl/rvv_math.hpp` 等公共位置，测试也应从 module 目录迁到 RVV math 专项目录。
-- 不要让同一个数学函数长期同时存在 `common/common` 和 `rvv/math` 两套入口；迁移后旧目录应只保留迁移说明或删除旧 target。
+- 不要让同一个数学函数长期同时存在业务模块目录和数学专项目录两套入口；迁移后旧目录应只保留迁移说明或删除旧 target。
 
 ## 1.1 文档目录归属
 
-本仓库的 RVV 数学函数实现/证据文档默认放在：
+RVV 数学函数实现/证据文档默认放在 `artifact_layout.math_doc_dir_template` 解析出的目录。
 
 ```text
-doc-rvv/rvv/math/
+<math-doc-dir>/
 ```
 
 选择规则：
 
-- 数学 helper 本体文档、系数来源、参数脚本口径、特殊值合同、scalar/RVV 同构链路、QEMU/板卡证据，放 `doc-rvv/rvv/math/`。
-- PCL common 模块函数文档仍放 `doc-rvv/common/`，用于记录 common 公开入口、数据路径、分派策略、回退条件和模块级验证。
-- common 函数如果调用数学 helper，只在 common 文档中写调用关系、输入域是否满足 helper 合同、下游误差或 fallback 边界；数学细节通过链接指向 `doc-rvv/rvv/math/`。
-- 目录迁移时同步修正旧的 `doc-rvv/common/<math-helper>.zh.md` 引用，避免后续 worker 继续把数学 helper 文档写回 common 目录。
+- 数学 helper 本体文档、系数来源、参数脚本口径、特殊值合同、scalar/RVV 同构链路、QEMU/板卡证据，放 `artifact_layout.math_doc_dir_template` 解析出的目录。
+- 业务模块或 common 模块函数文档按项目 adapter 的模块文档模板定位，用于记录公开入口、数据路径、分派策略、回退条件和模块级验证。
+- common 函数如果调用数学 helper，只在 common 文档中写调用关系、输入域是否满足 helper 合同、下游误差或 fallback 边界；数学细节通过链接指向数学专项文档。
+- 目录迁移时同步修正旧模块文档引用，避免后续 worker 继续把数学 helper 文档写回业务模块目录。
 
 ## 2. 顶层与函数子目录
 
-推荐顶层聚合、函数子目录自治：
+推荐顶层聚合、函数子目录自治。`<math-test-root>` 来自
+`artifact_layout.math_test_root_template`，`<math-test-dir>` 来自
+`artifact_layout.math_test_dir_template`：
 
-- `test-rvv/rvv/math/Makefile`：聚合显式 target、统一构建/输出/部署规则。
-- `test-rvv/rvv/math/board.mk`：板卡侧单函数运行规则。
-- `test-rvv/rvv/math/README.zh.md`：说明目录职责、target 和证据边界。
-- `test-rvv/rvv/math/script/`：只放跨函数复用脚本，例如 LP/minimax、Sollya 工具、公共常量脚本。
-- `test-rvv/rvv/math/<function>/script/`：放函数专属参数脚本和 Sollya 文件。
+- `artifact_layout.makefile_name`：聚合显式 target、统一构建/输出/部署规则。
+- `artifact_layout.board_makefile_name`：板卡侧单函数运行规则。
+- README 或等价说明文件：说明目录职责、target 和证据边界，文件名由 adapter 决定。
+- 数学专项公共脚本目录：只放跨函数复用脚本，例如 LP/minimax、Sollya 工具、公共常量脚本。
+- 函数专属脚本目录：放函数专属参数脚本和 Sollya 文件。
 
 产物按函数分桶，避免日志互相覆盖：
 
 ```text
 build/<arch>/<function>/
-output/qemu/<function>/
-output/board/<function>/
+<qemu-output-subdir>/<function>/
+<board-output-subdir>/<function>/
 log/<function>/
 ```
 
@@ -100,7 +104,7 @@ scratch C++、Python 脚本和 Makefile target 应保留审查型注释，帮助
 - 说明 caller smoke 的下游误差计算是否只覆盖 local shape，是否跳过 production transform / dispatch / fallback。
 - 说明 gate 检查哪些条件，以及哪些输出只是诊断值。
 
-production 代码不要写逐行复述语法的注释；但 `test-rvv` / prototype 代码可以更详细，尤其是长文件、复杂 gate、caller-shaped smoke 和 RVV intrinsic 链路。注释应服务审查者理解合同、证据和不可泛化的边界。
+production 代码不要写逐行复述语法的注释；但配置解析出的测试资产 / prototype 代码可以更详细，尤其是长文件、复杂 gate、caller-shaped smoke 和 RVV intrinsic 链路。注释应服务审查者理解合同、证据和不可泛化的边界。
 
 ## 4. Caller smoke 必须是 gate
 
@@ -149,24 +153,24 @@ Caller smoke 只证明下游风险，不替代：
 
 ```bash
 git diff --check
-make -C test-rvv/rvv/math parms_<function>
-make -C test-rvv/rvv/math ARCH=x86 run_<function>_test
-make -C test-rvv/rvv/math run_<function>_test
+make -C <math-test-root> parms_<function>
+make -C <math-test-root> ARCH=x86 run_<function>_test
+make -C <math-test-root> run_<function>_test
 ```
 
 若有 caller smoke：
 
 ```bash
-make -C test-rvv/rvv/math run_<function>_<caller>_smoke
+make -C <math-test-root> run_<function>_<caller>_smoke
 ```
 
 若有板卡证据：
 
 ```bash
-make -C test-rvv/rvv/math deploy_<function>_test
-ssh <board> 'cd <board_repo>/rvv/math && make -f board.mk run_<function>_test'
+make -C <math-test-root> deploy_<function>_test
+ssh <board> 'cd <board-math-test-root> && make -f <board-makefile-name> run_<function>_test'
 ```
 
-其中 `<board_repo>` 表示板卡上的 PCL 测试部署目录，不应在 agent 资产中写死成本机或个人远端路径。
+其中 `<board-math-test-root>` 表示板卡上的数学专项测试部署目录，不应在 agent 资产中写死成本机或个人远端路径。
 
 最后清理 `build/`、`output/`、`log/`、`.venv`、`__pycache__` 等生成物，确认 `git status --short` 只剩预期源码/文档改动。

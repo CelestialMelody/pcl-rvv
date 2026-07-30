@@ -20,11 +20,11 @@ description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适
 重复列出“请先读取哪些文件”。
 短 prompt 只简化用户输入，不降低 topic 产物质量。worker 选中 topic 后、开始写文件前，
 必须按 [references/worker-quality-gates.zh.md](references/worker-quality-gates.zh.md)
-检查标量路径、production/diagnostic 数据流映射、文档结构、test-rvv 注释、bench 边界、
+检查标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、
 证据模型和 stop condition（停止条件）；命中复杂 RVV 模式时再读取对应细则。测试、
 诊断、benchmark、消融和证据日志规则集中在 `rvv-test`。
 
-所有 RVV 工作的回复、文档、测试输出和 `test-rvv` / prototype 注释应遵循 [references/reviewability-and-language.zh.md](references/reviewability-and-language.zh.md)：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释），必要时再补中文解释。中文说明要自然，避免翻译腔、名词堆叠和模板填空；长测试/诊断文件提供“本文件做什么”这类阅读提示，非平凡函数用自然句说明作用、调用者和证据角色。
+所有 RVV 工作的回复、文档、测试输出、配置解析出的测试资产和 prototype 注释应遵循 [references/reviewability-and-language.zh.md](references/reviewability-and-language.zh.md)：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释），必要时再补中文解释。中文说明要自然，避免翻译腔、名词堆叠和模板填空；长测试/诊断文件提供“本文件做什么”这类阅读提示，非平凡函数用自然句说明作用、调用者和证据角色。
 
 单个 RVV topic（主题）的状态机见 [references/topic-lifecycle.zh.md](references/topic-lifecycle.zh.md)。S0-S12 是主干状态，不是线性流水账；S10 `EvidenceDecision`（证据决策）之后必须按证据进入 no-production closeout（不接入生产收尾）、production integration loop（生产接入闭环）或 blocked handoff（阻塞交接）。不要把生产接入简单追加成固定 S13；如果进入生产接入，必须完成生产补丁、生产直连测试、生产证据重跑和再次证据决策后，才进入最终文档 closeout。
 
@@ -39,7 +39,7 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 - 代码注释策略：不注释、简要注释、详细注释。
 - 注释语言策略：仅中文、仅英文、中英双写；中英双写时说明先后顺序。
 - production 源码注释上限：默认克制，只解释维护边界、fallback、dispatch、数值风险和数据布局。
-- `test-rvv`、diagnostic、prototype 注释下限：默认详细中文注释，除非用户明确选择更轻量策略。
+- 配置解析出的测试资产、diagnostic、prototype 注释下限：默认详细中文注释，除非用户明确选择更轻量策略。
 - 文档策略：closeout 当前状态优先，必须有数值算例，长期文档不保留对话流程话术。
 - 提交策略：默认不创建 commit；如果用户授权提交，先冻结是否提交 evidence logs、是否使用已脱敏日志、是否拆分 commit。
 - 证据策略：默认 `summary-only`，raw logs 不默认提交。
@@ -57,7 +57,7 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 - `topic-plus-raw-logs`：提交 topic，并把 raw evidence logs（原始证据日志）作为单独 commit；只在用户明确要求保留原文、脱敏日志不足以复核、且 reviewer 已确认没有凭据或私有地址风险时使用。
 - `split-topic-logs-agent-assets`：topic、evidence logs、agent asset 改动分拆成多个 commit。适合 workflow 校准和证据归档同时发生的任务。
 
-提交 evidence logs 前必须优先运行 topic 目录提供的 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或直接运行 `test-rvv/script/sanitize_evidence_logs.py --check <logs>`；如果 topic 未接入公共 Makefile，再说明等效检查方式。提交前列出将加入的文件、排除的文件、是否仍包含本机路径 / 远端路径 / 用户名 / 私有地址，以及脱敏是否改变 benchmark（性能测试）数值、checksum（校验和）或命令参数。不要把 `build/` 二进制、临时编译日志、`config.mk`、私有地址或聊天记录混入 topic commit。agent asset 改动应单独提交，不和 topic 内容混在同一 commit，除非用户明确要求。
+提交 evidence logs 前必须优先运行 topic 目录提供的 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或直接运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本并传入 `--check <logs>`；如果 topic 未接入公共 Makefile，再说明等效检查方式。提交前列出将加入的文件、排除的文件、是否仍包含本机路径 / 远端路径 / 用户名 / 私有地址，以及脱敏是否改变 benchmark（性能测试）数值、checksum（校验和）或命令参数。不要把 `build/` 二进制、临时编译日志、`config.mk`、私有地址或聊天记录混入 topic commit。agent asset 改动应单独提交，不和 topic 内容混在同一 commit，除非用户明确要求。
 
 ## 普通主题入口
 

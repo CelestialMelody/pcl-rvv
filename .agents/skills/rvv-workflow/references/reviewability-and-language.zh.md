@@ -7,7 +7,7 @@
 默认使用中文主导：
 
 - 回复和文档：中文解释为主，保留必要英文术语、函数名、target 名和日志原文。
-- `test-rvv`、scratch prototype、诊断代码注释：中文解释为主；必要英文 API / 术语可以保留。
+- 配置解析出的测试资产、scratch prototype、诊断代码注释：中文解释为主；必要英文 API / 术语可以保留。
 - production 代码注释：保持克制，只解释维护边界、fallback、语义风险和数据布局理由。
 
 如果用户或项目要求英文主导，也不能省略术语解释。英文注释、英文文档或英文输出中的专有术语首次出现时，也要写成：
@@ -35,7 +35,7 @@ lane-level helper (a helper that operates on one RVV vector register group and v
 
 worker 开始写代码或文档前，应在 S0 报告中冻结本轮注释策略。没有用户特别指定时，默认使用：
 
-- `test-rvv`、diagnostic（诊断代码）和 prototype（原型代码）：详细中文注释。文件级说明、非平凡函数说明、复杂循环和 gate（可失败验收条件）前的块级说明都要保留。
+- 配置解析出的测试资产、diagnostic（诊断代码）和 prototype（原型代码）：详细中文注释。文件级说明、非平凡函数说明、复杂循环和 gate（可失败验收条件）前的块级说明都要保留。
 - production（生产源码）：适中注释。只解释维护边界、fallback（回退路径）、dispatch（分流逻辑）、数值风险、数据布局和与标量路径衔接的理由，不写逐行教材。
 - 文档、测试输出、Makefile 和 board.mk：中文主导，英文术语首次出现带中文解释。
 
@@ -45,7 +45,7 @@ worker 开始写代码或文档前，应在 S0 报告中冻结本轮注释策略
 2. 注释语言策略：仅中文 / 仅英文 / 中英双写。
 3. 中英双写顺序：中文在前 / 英文在前。
 
-注释策略是本轮工作合同，不是事后润色项。若 reviewer 指出 test-rvv 或 diagnostic 注释不足，worker 应先补可审查性，再继续扩大实现。
+注释策略是本轮工作合同，不是事后润色项。若 reviewer 指出测试资产或 diagnostic 注释不足，worker 应先补可审查性，再继续扩大实现。
 
 ## 2. 自然中文工程说明
 
@@ -182,9 +182,9 @@ caller-shaped smoke (a downstream smoke test shaped like a real caller; 调用�
 - `board bench（板卡性能测试）` / `board bench (performance measurement on target hardware)` 证明目标硬件上的性能信号，但仍要看覆盖面、fallback 和维护成本。
 - `production-shaped diagnostic（生产形态诊断）` / `production-shaped diagnostic (a test-only diagnostic shaped like the real production entry)` 比局部片段更接近真实入口，但仍不是 production direct。
 
-## 5. test-rvv / prototype 代码注释标准
+## 5. 测试资产 / Prototype 代码注释标准
 
-production 代码注释应克制，只解释维护边界、fallback、语义风险和数据布局理由。`test-rvv`、scratch prototype、诊断代码和参数脚本的读者主要是 reviewer，注释可以更详细。
+production 代码注释应克制，只解释维护边界、fallback、语义风险和数据布局理由。配置解析出的测试资产、scratch prototype、诊断代码和参数脚本的读者主要是 reviewer，注释可以更详细。
 
 长 C++ 测试或诊断文件应包含：
 
@@ -199,7 +199,7 @@ production 代码注释应克制，只解释维护边界、fallback、语义风�
 
 ### 5.1 诊断 helper 注释下限
 
-`test-rvv/*_diag.hpp` 这类 production-shaped diagnostic（生产形态诊断）通常是 reviewer 最难读的文件，不能只靠文件头说明。下列非平凡 helper 需要在函数前或相邻块中有中文说明：
+配置解析出的测试资产中的 production-shaped diagnostic（生产形态诊断）或 test support（测试支撑代码）通常是 reviewer 最难读的部分，不能只靠文件头说明。下列非平凡 helper 需要在函数前或相邻块中有中文说明：
 
 - 标量参考 helper：说明它复刻哪段 production 语义，哪些输入检查、公式、状态更新或 solver 边界必须保持一致。
 - RVV lane / mask helper：说明 mask（掩码）代表什么，和 production 的有限值检查、predicate（谓词）或分支语义如何对应。
@@ -209,7 +209,7 @@ production 代码注释应克制，只解释维护边界、fallback、语义风�
 
 这些说明不需要逐行解释 intrinsic（内建函数），但要让 reviewer 能在不回看对话的情况下回答：“这段 helper 为什么存在，和 production 哪段语义对齐，失败会破坏哪条证据？”
 
-如果 diagnostic 或 test support 头文件已经长到难以审查，可以保持外部 `*_diag.hpp` 作为 aggregator header（聚合头文件），把内部实现拆到相邻 `test_support/` 子目录；只有内容确实是狭义 diagnostic/probing（诊断 / 探针）时才优先使用 `diag/`。拆出的每个内部头文件仍要有文件级中文说明，说明职责、test-rvv 测试证据边界，以及不能证明 production dispatch。
+如果 diagnostic 或 test support 头文件已经长到难以审查，聚合入口、内部目录、兼容别名和狭义诊断位置都按 `.agents/config/defaults.yaml` 的 `test_support` 配置、可选本机覆盖和当前 topic 既有结构决定。拆出的每个内部头文件仍要有文件级中文说明，说明职责、RVV 测试证据边界，以及不能证明 production dispatch。
 
 fallback（回退路径）测试要能隔离触发原因。如果一个候选同时有规模阈值、identity gate（顺序一一对应验收条件）、类型 gate 或布局 gate，测试矩阵至少要有一个 case 单独覆盖每个重要 gate，避免一个小规模 case 同时绕开所有分支却被误写成完整 fallback 证据。
 

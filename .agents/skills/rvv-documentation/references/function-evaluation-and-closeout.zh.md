@@ -47,7 +47,7 @@ S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必�
 4. 生产证据重跑。
 5. 再次 EvidenceDecision。
 
-之后再做 S11 closeout。最终 doc-rvv 文档必须反映真实生产源码，而不是只反映 diagnostic prototype（诊断原型）或 bench-only 原型。
+之后再做 S11 closeout。最终主题文档必须按 `artifact_layout.topic_doc_template` 解析位置，并反映真实生产源码，而不是只反映 diagnostic prototype（诊断原型）或 bench-only 原型。
 
 如果用户授权进入生产接入闭环，且没有明确要求“只做 PI1 计划”，worker 默认应在同一轮完成 PI1-PI5
 和 S11 closeout。PI1 是继续生产补丁前的范围 gate，不是默认交付终点；只有命中生命周期中的暂停条件，

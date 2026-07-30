@@ -2,13 +2,13 @@
 
 本参考用于 C/C++ 库把 scalar `std::*` 或 libm 数学热点替换为 RVV intrinsic 近似实现时使用。示例来自一次 PCL 清理，但这里抽象为通用工作流。
 
-测试目录、target 拆分、caller smoke gate 和迁移规则见 [RVV 数学测试目录与证据分层规则](testing-layout.zh.md)。在本仓库新增数学函数时优先按 `test-rvv/rvv/math/<function>/` 组织资产；其它项目使用等价的 RVV math 专项目录。
+测试目录、target 拆分、caller smoke gate 和迁移规则见 [RVV 数学测试目录与证据分层规则](testing-layout.zh.md)。新增数学函数时优先按 `artifact_layout.math_test_dir_template` 解析出的目录组织资产；其它项目使用 adapter 提供的等价 RVV math 专项目录。
 
-实现/证据文档的默认落点是 `doc-rvv/rvv/math/`。PCL common 模块函数文档仍放 `doc-rvv/common/`，用于说明 common 入口、调用关系、分派和回退边界。common 文档如果依赖数学 helper，应链接到 `doc-rvv/rvv/math/` 的专项文档；不要在 common 文档里复制数学系数、拟合脚本结果或特殊值合同，避免同一事实在多个位置分叉。
+实现/证据文档的默认落点按 `artifact_layout.math_doc_dir_template` 解析。业务模块或 common 模块函数文档按项目 adapter 的模块文档模板定位，用于说明入口、调用关系、分派和回退边界。common 文档如果依赖数学 helper，应链接到数学专项文档；不要在 common 文档里复制数学系数、拟合脚本结果或特殊值合同，避免同一事实在多个位置分叉。
 
-开始新的 std/libm 风格数学 helper 前，先读 `doc-rvv/rvv/math/std-math-vectorization.zh.md`。该文档记录跨函数通用规则；本 workflow 负责把这些规则落到具体候选、测试和收尾步骤。
+开始新的 std/libm 风格数学 helper 前，先按 `artifact_layout.math_doc_dir_template` 解析并读取数学向量化总则文档。该文档记录跨函数通用规则；本 workflow 负责把这些规则落到具体候选、测试和收尾步骤。
 
-文档、reviewer 汇报和 `test-rvv` prototype 注释还应遵循 `rvv-workflow/references/reviewability-and-language.zh.md` 的通用规则，以及 [RVV 数学函数原型的术语补充](reviewability-and-language.zh.md)：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释）。长测试文件应提供自然的阅读提示，非平凡函数说明作用、调用者和证据角色。
+文档、reviewer 汇报、配置解析出的测试资产和 prototype 注释还应遵循 `rvv-workflow/references/reviewability-and-language.zh.md` 的通用规则，以及 [RVV 数学函数原型的术语补充](reviewability-and-language.zh.md)：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释）。长测试文件应提供自然的阅读提示，非平凡函数说明作用、调用者和证据角色。
 
 ## 1. 语义合同
 
@@ -112,7 +112,7 @@
 
 ### 测试资产边界
 
-本仓库的数学 helper / std-libm RVV 向量化专项资产应优先放在 `test-rvv/rvv/math/<function>/`；其它项目使用等价的 RVV math 专项目录：
+数学 helper / std-libm RVV 向量化专项资产应优先放在 `artifact_layout.math_test_dir_template` 解析出的目录；其它项目使用 adapter 提供的等价 RVV math 专项目录：
 
 - 参数脚本和 Sollya / LP 工具。
 - C++ 数学专项测试。
@@ -124,13 +124,15 @@ Module 目录只放 module production caller 或 common.hpp 本体测试。迁�
 
 ## 6. 验证矩阵模板
 
-命令名按项目替换，但形状保持一致：
+命令名按项目替换，但形状保持一致。命令中的 `<math-test-root>` 来自
+`artifact_layout.math_test_root_template`；函数专属文件和脚本仍放在
+`artifact_layout.math_test_dir_template` 解析出的目录。
 
 ```bash
 git diff --check
-make -C test-rvv/rvv/math parms_<function>
-make -C test-rvv/rvv/math run_<function>_test
-make -C test-rvv/rvv/math deploy_<function>_test
+make -C <math-test-root> parms_<function>
+make -C <math-test-root> run_<function>_test
+make -C <math-test-root> deploy_<function>_test
 ssh <board> 'cd <deployed-dir> && make run_<function>_test'
 ```
 
@@ -197,4 +199,4 @@ Caller smoke 必须有失败条件，不能只打印统计。至少报告 domain
 
 把数学 helper 移到 `impl/rvv_math.hpp`、补 CMake 安装头、创建 workflow skill 都是有价值的清理，但不属于数学拟合本体。等数学行为验证完成后，单独提交这些结构改动。
 
-测试目录迁移也属于结构重构。迁移时优先建立 `test-rvv/rvv/math/<function>/` 这样的专项目录，按函数分桶移动参数脚本、测试和 smoke；迁移完成后再继续数学候选探索或 production 接入。
+测试目录迁移也属于结构重构。迁移时优先建立 `artifact_layout.math_test_dir_template` 解析出的专项目录，按函数分桶移动参数脚本、测试和 smoke；迁移完成后再继续数学候选探索或 production 接入。

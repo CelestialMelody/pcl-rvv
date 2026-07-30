@@ -2,13 +2,15 @@
 
 ## 推荐目录结构
 
-当一个 C/C++ RVV 测试树中有多个手写 Makefile 时，优先整理成下面的结构：
+当一个 C/C++ RVV 测试树中有多个手写 Makefile 时，优先按 `paths.test_root`、
+`artifact_layout.shared_make_subdir`、`artifact_layout.makefile_name` 和
+`artifact_layout.board_makefile_name` 解析目录和文件名，整理成下面的逻辑结构：
 
 ```text
-test-rvv/
+<test-root>/
 ├── config.mk.example      # 提交：用户可复制的本机配置模板
 ├── config.mk              # 不提交：本机覆盖配置
-└── mk/
+└── <shared-make-subdir>/
     ├── rvv-env.mk         # 路径、工具链、依赖根、板卡配置
     ├── rvv-topic.mk       # test/bench 构建与运行规则
     └── rvv-board-run.mk   # 板卡侧运行规则
@@ -64,7 +66,7 @@ RSYNC_SSH   ?= ssh $(SSH_OPTS)
 
 ## PCL Board / SSH Adapter 规则
 
-PCL 当前专项目录应能从主题 Makefile 看出板卡闭环是否接上。需要目标硬件性能结论的主题，主 `Makefile` 应提供或通过公共 include 提供：
+项目当前专项目录应能从主题 `artifact_layout.makefile_name` 解析出的文件看出板卡闭环是否接上。需要目标硬件性能结论的主题，主 Makefile 或等价构建入口应提供或通过公共 include 提供：
 
 ```text
 deploy_files
@@ -74,7 +76,7 @@ run_board_bench_compare
 fetch_board_logs
 ```
 
-板卡侧 `board.mk` 或公共片段至少支持：
+板卡侧 `artifact_layout.board_makefile_name` 解析出的文件或公共片段至少支持：
 
 ```text
 run_test
@@ -88,9 +90,9 @@ analyze_bench_compare
 
 - `deploy_*` 只同步脚本、板卡侧 Makefile 和二进制。
 - `run_board_*` 只触发板卡侧测试或 bench。
-- `fetch_board_logs` 只把板卡输出拉回本地 `output/board/`。
-- 主题 `Makefile` / `board.mk` 只声明 `TOPIC`、`MODULE`、目标名、源码、参数、特殊库和少量覆盖变量。
-- 公共规则放在 `test-rvv/mk/rvv-topic.mk` 和 `test-rvv/mk/rvv-board-run.mk`；无法使用公共 include 时，在函数级评估或问题记录中说明原因。
+- `fetch_board_logs` 只把板卡输出拉回 `artifact_layout.board_output_subdir` 解析出的本地输出目录。
+- 主题 Makefile / board Makefile 只声明 `TOPIC`、`MODULE`、目标名、源码、参数、特殊库和少量覆盖变量；具体文件名由 `artifact_layout.makefile_name` 和 `artifact_layout.board_makefile_name` 决定。
+- 公共规则放在 `paths.test_root` 与 `artifact_layout.shared_make_subdir` 解析出的公共 include 目录；无法使用公共 include 时，在函数级评估或问题记录中说明原因。
 
 SSH / rsync 变量：
 
@@ -149,7 +151,7 @@ endif
 - 先只搜索源码和配置文件；默认忽略 `output/`、`build/`、`log/` 和生成的 `.log`。
 - 分别列出已使用公共模板的测试和自包含 legacy Makefile。
 - 确认共享变量能提供同名路径后，再删除 topic Makefile 里的硬编码路径。
-- 用户示例保持通用，例如 `/path/to/riscv`、`192.0.2.10`、`my-rvv-board`。
+- 用户示例保持通用，只使用占位符、env var 名或文档保留地址，不写个人路径、真实私有地址、用户名或单台设备名。
 - 本机配置用本地 ignore 或项目约定排除，不要提交。
 - 每迁移一批至少跑一个真实 build/test。
 - 同时验证一次错误路径诊断。

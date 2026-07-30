@@ -5,14 +5,14 @@
 ## 输入
 
 - `<repo>` 当前源码。
-- `doc-rvv/library-screening/README.zh.md` 或同类筛选总入口。
-- `doc-rvv/library-screening/module-screening.zh.md` 或同类模块索引。
+- `artifact_layout.screening_root_template` 解析出的筛选总入口。
+- `artifact_layout.screening_root_template` 解析出的模块索引或同类文档。
 - 目标模块源码、上游 test/benchmark 入口和已完成同类 RVV 主题文档。
 
 ## 输出
 
 ```text
-doc-rvv/library-screening/modules/<module>-function-triage.zh.md
+artifact_layout.module_triage_doc_template
 ```
 
 ## 判断口径
@@ -55,7 +55,7 @@ doc-rvv/library-screening/modules/<module>-function-triage.zh.md
 ## 限制
 
 - 不修改源码。
-- 不建立 `test-rvv/<module>/<topic>/`。
+- 不建立 `artifact_layout.topic_test_dir_template` 解析出的 topic 测试资产目录。
 - 不承诺生产分流、最终收益或公开入口主成本覆盖。
 
 ## Closeout

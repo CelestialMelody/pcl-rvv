@@ -93,7 +93,7 @@ workflow improvement 可用：
 
 ```text
 在 <repo> 中，以 RVV workflow improvement 身份复核 <path>。
-允许修改 agent asset，不修改 production、doc-rvv 或 test-rvv topic 产物。
+允许修改 agent asset，不修改 production 或配置解析出的 topic 文档 / 测试产物。
 ```
 
 用户补充的规则优先级高于本文默认值。用户没有覆盖时，使用本文默认值。
@@ -162,7 +162,7 @@ worker 再读：
 6. 当前模块的筛选状态表。
 7. 命中的 topic 源码、文档和测试证据。
 
-worker 选中 topic 后、开始写 `test-rvv/`、`doc-rvv/` 或 production 前，必须按
+worker 选中 topic 后、开始写配置解析出的 topic 测试资产、topic 文档或 production 前，必须按
 `worker-quality-gates.zh.md` 做一次轻量自查。若 topic 涉及 staging（分阶段暂存）、
 gather（离散加载）、`vcompress`、scalar tail（标量尾段）、vector reduction（向量规约）、
 FMA（融合乘加）、板卡性能或 no-production closeout（不接入生产收尾），继续读取该文件指向的
@@ -189,7 +189,7 @@ production 决策，就跳过当前源码复核、QEMU correctness、反汇编�
 1. `.agents/skills/rvv-implementation/SKILL.md`
 2. `.agents/skills/rvv-implementation/references/point-load-store.md`
 3. `.agents/skills/rvv-implementation/references/fallback-and-dispatch.md`
-4. `doc-rvv/rvv/RVV Generic Point Type Strategy.zh.md`，仅在目标 production 入口是模板点类型、需要 traits / offset / layout gate，或从 `PointNormal` 诊断扩展到泛型入口时读取。
+4. 配置或 adapter 指定的 generic point type strategy（泛型点类型策略）文档，仅在目标 production 入口是模板点类型、需要 traits / offset / layout gate，或从 `PointNormal` 诊断扩展到泛型入口时读取。
 
 reviewer 再读：
 
@@ -213,8 +213,8 @@ workflow improvement 再读：
 
 worker 默认权限：
 
-- 短 prompt 中“处理 topic”视为授权修改该 topic 对应的 `test-rvv/` 和 `doc-rvv/` 产物。
-- 不把该授权扩展到其它 topic 的 `test-rvv/`、`doc-rvv/` 或生产源码。
+- 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产和主题文档产物。
+- 不把该授权扩展到其它 topic 的测试资产、主题文档或生产源码。
 - S10 `EvidenceDecision`（证据决策）前不修改 production（生产源码）。
 - 如果证据支持 production-ready（可接入生产），先输出 Handoff Packet，等待用户确认后进入 production integration loop（生产接入闭环）。
 - 默认不创建 commit（提交）。
@@ -225,13 +225,13 @@ reviewer 默认权限：
 
 - 只读审查。
 - 可以运行 `git diff`、`git status`、`rg`、`sed`、`find` 等只读命令。
-- 不修改 production、`doc-rvv/`、`test-rvv/` 或 agent asset。
+- 不修改 production、配置解析出的 topic 文档 / 测试产物或 agent asset。
 - 不创建 commit。
 
 workflow improvement 默认权限：
 
 - 只修改 `.agents/skills/`、`.agents/knowledge/`、`.agents/config/`、`AGENTS.md`、必要的 `.gitignore` 和用户指定的 prompt 模板。
-- 不修改 production、`doc-rvv/` 或 `test-rvv/` topic 产物。
+- 不修改 production 或配置解析出的 topic 文档 / 测试产物。
 - 不创建 commit。
 - 批量修改 skill、knowledge map 或入口 prompt 前，先创建 `.agents/backup/` 下的不提交备份目录。
 
@@ -275,7 +275,7 @@ workflow improvement 最终输出必须包含：
 用户未覆盖时，worker 在 S0 记录：
 
 - 偏好来源：`.agents/config/defaults.yaml`、可选 `.agents/local/user-preferences.yaml` 和当前 prompt。
-- `test-rvv`、diagnostic（诊断代码）和 prototype（原型代码）默认使用详细中文注释。
+- 配置解析出的测试资产、diagnostic（诊断代码）和 prototype（原型代码）默认使用详细中文注释。
 - production 注释默认克制，只解释维护边界、fallback（回退路径）、dispatch（分流逻辑）、数值风险和数据布局。
 - 英文专有术语首次出现时默认写中文解释。
 - QEMU（仿真器）默认只作为 correctness（正确性）、路径和日志形状证据。
