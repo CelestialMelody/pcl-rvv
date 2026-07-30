@@ -19,7 +19,7 @@
 
 ## 泛化方向
 
-后续迁移到其它库时，应替换 library adapter，而不是改写 RVV 核心 workflow：
+后续迁移到其它库时，应替换 library adapter，而不是改写 RVV workflow：
 
 - 源码组织。
 - 测试框架。

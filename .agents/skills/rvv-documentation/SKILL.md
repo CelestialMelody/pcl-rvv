@@ -34,6 +34,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - 技术结论以源码、测试、日志和反汇编为依据，不写成对话来源。
 - 如果规则来自一次讨论或复盘，技术文档写技术事实；规则来源写入 workflow 或问题讨论记录。
 - 未闭合项、剩余风险和 production gate 不能只列术语；必须用陈述句说明每项是什么、为什么未闭合、完成后能证明什么或降低什么风险、当前阶段是否必须完成。具体写法见 `rvv-workflow/references/reviewability-and-language.zh.md`。
+- 长期技术文档和 evaluation / closeout 文档不要把证据写成“最新一次”“最新日志”“截至今日”或孤立日期。优先写“本轮”“当前证据”“历史基线”“rerun 结果”，并用 evidence path（证据路径）或 run label（运行标签）承载溯源。日期只放在 work log、manifest、run id、handoff / recovery path（交接 / 恢复路径）和用户指定目录名里；术语、checksum（校验和）、常量和 run id 不因命中日期样式而改写。
 
 ## 术语
 
@@ -59,7 +60,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 新文档至少应回答：
 
 - 入口是什么，调用链如何进入目标函数。
-- 标量路径做了什么，核心公式、循环、状态或输出如何形成；读者不看源码也应能理解被优化函数的作用和原实现流程。
+- 标量路径做了什么，关键公式、循环、状态或输出如何形成；读者不看源码也应能理解被优化函数的作用和原实现流程。
 - RVV 方案如何实现，哪一段标量路径被 RVV 接管，数据如何 load/gather、mask、staging、store 或 reduction（规约），哪一段仍是标量以及原因。
 - 关键实现取舍为什么成立或暂缓，例如 buffer/staging、scalar tail（标量尾段）、fused multiply-add（融合乘加）、vector reduction（向量规约）、显式舍入或数学函数向量化；不能只写“保持语义”。
 - gate 和 fallback 如何保持公开语义。

@@ -3,7 +3,7 @@
 ## Purpose（用途）
 
 本文件是给 Codex 和未来 `rvv-agent`（RVV 优化代理）使用的轻量读取索引。它只说明
-PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真相放在哪里，
+PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码状态放在哪里，
 以及在上下文有限时应该如何按需读取。
 
 不要把配置解析出的主题文档或测试资产内容复制到 `.agents/knowledge/`。
@@ -20,7 +20,7 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 | `historical_topic_reports`（历史 topic 报告） | `artifact_layout.module_doc_dir_template`                                       | topic 文档、closeout（收尾记录）记录、实现说明和历史决策。                       | 只读当前模块或 topic 相关文档，并用当前源码复核。                                |
 | `screening_and_queue_docs`（筛选和队列文档）  | `artifact_layout.screening_root_template`                                       | 模块筛选、候选队列、状态表和下一主题建议。                                       | 选择、恢复或复筛 topic 时读取。                                                  |
 | `executable_evidence`（可执行证据）           | `artifact_layout.topic_test_dir_template`                                       | test（测试）、bench（性能测试）、QEMU、反汇编检查、board（板卡）脚本和日志入口。 | 只读取当前结论需要的具体测试、脚本或日志。                                       |
-| `source_truth`（当前源码真相）                | 当前 PCL 源码、当前 git diff、`__RVV10__` 路径                                  | 当前实现行为的权威来源。                                                         | 下结论前必须用当前源码和当前 diff 复核文档与测试。                               |
+| `current_source_state`（当前源码状态）        | 当前 PCL 源码、当前 git diff、`__RVV10__` 路径                                  | 用于复核当前实现行为。                                                           | 下结论前必须用当前源码和当前 diff 复核文档与测试。                               |
 | `migration_only`（仅迁移材料）                | local migration sources（本地迁移来源，可能不存在；例如已移入`tmp` 的历史材料） | 历史 prompt（提示词）材料和旧 skill（技能）草稿。                                | 正常 topic runtime（主题运行过程）不读取；只有用户要求迁移、追溯或审计时才读取。 |
 
 ## Recommended Retrieval Order（推荐读取顺序）
@@ -41,11 +41,11 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 10. 用当前源码和当前 git diff 复核文档结论。
 11. 只在需要证明具体结论时，读取 `artifact_layout.topic_test_dir_template` 解析出的测试、bench、脚本或日志。
 
-## Authority and Freshness（权威性与新鲜度）
+## Source Priority（来源优先级）
 
-- 当前源码和当前 git diff 是实现行为的最新真相。
+- 下结论前，用当前源码和当前 git diff 复核实现行为。
 - `artifact_layout.reusable_rvv_knowledge_dir_template` 解析出的目录可以作为可复用 RVV 约定入口；如果它描述的代码已经变化，以当前源码为准。
-- `artifact_layout.module_doc_dir_template` 解析出的目录记录历史案例和 closeout 结论，是强线索，但不自动代表当前源码。
+- `artifact_layout.module_doc_dir_template` 解析出的目录记录历史案例和 closeout 结论，可用于定位旧结论，但不自动代表当前源码。
 - `artifact_layout.topic_test_dir_template` 解析出的目录是可执行证据入口；结论取决于具体测试、构建参数、日志、目标硬件和时间。
 - QEMU evidence（QEMU 证据）只支持 correctness（正确性）、log shape（日志形状）和 path/instruction coverage（路径或指令覆盖）判断，不能支撑真实性能结论。
 - Board/target-hardware benchmark（板卡或目标硬件 benchmark）日志才能支撑性能结论。

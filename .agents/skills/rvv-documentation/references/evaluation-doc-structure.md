@@ -1,6 +1,6 @@
 # 函数级评估文档结构
 
-函数级评估面向决策审计，强调测试矩阵、bench case、最新验证结果、测试保留策略和最终接入判断。
+函数级评估面向决策审计，强调测试矩阵、bench case、当前证据 / rerun 结果 / 历史基线、测试保留策略和最终接入判断。
 
 推荐结构：
 
@@ -40,6 +40,16 @@ local fragment -> full diagnostic -> production case -> production decision
 
 如果当前只适合 bench 诊断主题，应明确授权边界：诊断代码位于专项测试区域，上游生产入口保持不变，直到补齐 production-like 证据。
 
+## 日期和“最新”表述
+
+evaluation 文档会长期保留，不应把证据锚定到“最新一次”“最新日志”“截至目前”这类会随时间漂移的词。推荐写法：
+
+- 写“本轮 board rerun 结果”“当前证据”“历史基线”“rerun 结果 supersedes 历史基线”。
+- 用 `output/board/...`、`output/qemu/...`、summary 文件、manifest 或 run label 说明证据来源。
+- 若有多轮结果，把旧结果写成“历史基线”或“rerun 前对照”，把新结果写成“rerun 结果”，不要写“最新结果”。
+
+日期允许出现在 work log、manifest、run id、handoff / recovery path 和用户指定目录名中。不要批量改这些位置；它们承担恢复和审计语义。扫描清理时应白名单保留 ICP “最近点”、checksum、常量、指令立即数、数据规模和 run id。
+
 如果当前结论是 partial-production-candidate（局部生产候选），评估文档必须把“有收益的诊断路径”和“可以进入 production integration loop 的范围”分开写。至少列出：
 
 - 哪个公开入口形态或诊断路径有板卡收益。
@@ -71,7 +81,7 @@ PI5 后，evaluation 文档必须更新 production decision（生产接入判断
 函数级评估必须先回答：
 
 - 具体可 RVV 化函数、loop 或 helper 是什么。
-- 标量路径如何工作：关键循环、核心局部变量、公式、状态更新、solver 或输出写回分别做什么。
+- 标量路径如何工作：关键循环、关键局部变量、公式、状态更新、solver 或输出写回分别做什么。
 - 源码真实数据流是什么：公开入口是否已经通过 iterator（迭代器）、indices（索引）、correspondences（对应关系）、mask（掩码）、wrapper（包装层）或 dispatch（分流逻辑）把不同输入形态统一；如果统一了，必须说明统一前后各自是什么。
 - 候选 RVV 路径准备如何工作：load/gather（加载/离散加载）、mask（掩码）、staging（分阶段暂存）、store/reduction（写回/规约）、scalar tail（标量尾段）和 fallback（回退路径）的职责边界。若 RVV 诊断把源码统一流重新拆成多条显式数据流，说明每条流的入口来源、访存形态、额外展开成本和 bench 计时边界。
 - RVV 是否覆盖入口主成本。

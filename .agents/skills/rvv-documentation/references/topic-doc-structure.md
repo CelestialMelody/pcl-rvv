@@ -23,7 +23,7 @@
 - 被优化函数对象或函数入口在库中的作用。
 - 公开入口、wrapper、dispatch、真实实现层之间的调用链。
 - 源码中的数据流形态和诊断中的显式数据流形态是否一致。若 production 通过 iterator（迭代器）、wrapper（包装层）、callback（回调）、dispatch（分流逻辑）或模板 helper 隐藏了全云顺序扫描（full-cloud）、indices（索引）、mask（掩码）、correspondences（对应关系）等差异，主题文档必须先说明源码如何统一这些入口，再说明 RVV 诊断为什么要重新拆成跨步加载（stride load）、离散加载（gather）、连续加载（contiguous load）、离散写回（scatter）或分阶段暂存（staging）路径。
-- 标量实现的可读解释：输入如何进入关键循环，核心局部变量/公式/状态如何生成，输出或 solver 如何使用这些中间量。不要只列函数名或公式片段。
+- 标量实现的可读解释：输入如何进入关键循环，关键局部变量、公式和状态如何生成，输出或 solver 如何使用这些中间量。不要只列函数名或公式片段。
 - RVV 实现的可读解释：每个 VL chunk 如何取数，使用 stride/gather/segment/contiguous load 的原因，mask 如何构造，staging 或输出如何写回，后续消费者是谁。
 - RVV 覆盖原标量代码的哪一段，哪些阶段仍是标量，原因是什么。
 - 实现选择审计：如果使用 buffer/staging、`vcompress`、scatter、标量 tail、显式/非显式 fused multiply-add（融合乘加）、vector reduction（向量规约）或数学函数 helper，必须说明为什么这样做、替代方案是什么、当前证据是否足以排除或暂缓替代方案。

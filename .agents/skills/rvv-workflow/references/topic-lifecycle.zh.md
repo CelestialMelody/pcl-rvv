@@ -2,7 +2,7 @@
 
 本文定义单个 RVV topic（主题）的推荐状态机。它用于 worker（执行者）规划、reviewer（审查者）检查和未来 `rvv-agent` 的内部任务状态，不要求每个 topic 都机械产出同样数量的文件。
 
-核心原则：
+原则：
 
 - S0-S12 是主干状态，不是线性流水账。
 - S10 `EvidenceDecision`（证据决策）是分支点。

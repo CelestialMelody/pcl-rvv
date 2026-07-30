@@ -92,7 +92,7 @@ worker 输出 Handoff Packet 前应检查：
 - 是否列出了能复现当前结论的命令和证据路径。
 - `agent_asset_trace` 是否是真实使用记录。
 - 如果本轮发现可沉淀规则、资产缺口或冗余规则，是否按 `agent_asset_feedback` 报告；没有发现时可以省略该字段。
-- 如果声明采用 sibling topic 经验，是否输出 `experience_migration_audit`，且没有遗漏相邻成功或负向方案中的核心维度。
+- 如果声明采用 sibling topic 经验，是否输出 `experience_migration_audit`，且没有遗漏相邻成功或负向方案中的主要维度。
 - 如果长 helper 或多职责 helper 命中拆分阈值，是否输出 `test_support_split_decision`，并说明拆分或暂缓理由。
 - `language_check` 是否覆盖文档、代码注释、测试输出和最终回复。
 - `worker_quality_gate_check` 是否真实反映写文件前质量门禁，且每项带 reviewer 可定位的证据；如果短 prompt 启动后产物质量下降，应在这里暴露，而不是只写 agent asset trace。

@@ -32,7 +32,7 @@ scratch C++、Python 脚本和 Makefile target 应保留审查型注释，说明
 - Caller smoke 不能替代参数脚本、专项 C++ 测试和 scalar/RVV 同构对拍。
 - Caller smoke 必须是可失败 gate；若用于证明 RVV helper 风险，应覆盖 RVV path，或明确声明只覆盖 scalar approximation。
 
-## 核心流程
+## 流程
 
 1. 先定义语义合同：
    - 判断目标是 strict libm replacement，还是 finite-domain fast approximation。

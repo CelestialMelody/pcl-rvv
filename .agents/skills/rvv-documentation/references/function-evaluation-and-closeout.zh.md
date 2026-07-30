@@ -36,6 +36,7 @@ S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必�
 - 未闭合项必须说明是什么、为什么没闭合、完成后能证明什么、当前是否必须完成。
 - 如果结论是窄范围 production-ready、partial-production-candidate、bench-only/no-production 或仍保留重要未覆盖范围，
   closeout 必须给用户可选择的后续路径：默认建议、继续当前 topic 的扩展、应另开 topic 的消融 / 扩展、当前不建议做的方向。
+- 长期 evaluation / closeout 文档中的时间表述必须稳定。不要写“最新一次”“最新日志”“截至今日”或单独日期来表示证据新鲜度；改写为“本轮”“当前证据”“历史基线”“rerun 结果”，并用 evidence path 或 run label 溯源。work log、manifest、run id、handoff / recovery path 和用户指定目录名里的日期保留，不作为批量清理对象。
 
 ## 生产接入后的文档顺序
 

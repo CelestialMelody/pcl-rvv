@@ -20,7 +20,7 @@ production 升级后先做测试 inventory，不要因为已有真实生产入�
 
 - `production direct` 测试是生产接入后的主证据，应覆盖真实入口、真实 gate、真实 fallback、checksum 或输出顺序。
 - RVV-only adversarial 测试如果保护已知语义风险，应继续保留，例如 bit-level、threshold boundary、rounding、mask / `vcompress` ordering、traits、fallback 或同进程先 RVV 后 fallback 的顺序测试。
-- `production-shaped diagnostic` 可继续作为阶段归因、边界复现或 fallback 验证工具保留；名称和注释要说明用途，不再写成未来接入的唯一证据。
+- `production-shaped diagnostic` 可继续作为阶段归因、边界复现或 fallback 验证工具保留；名称和注释要说明用途，不再写成未来接入的单独证据。
 - 只有测试的入口形态、输入构造、参数、断言和覆盖边界都被其它测试完全包含时，才适合删除或合并。
 
 如果测试被删除、合并或改名，评估文档和主题文档必须记录：

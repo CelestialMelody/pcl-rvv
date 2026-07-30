@@ -52,7 +52,7 @@ production-shaped 证据必须列出尚未覆盖的生产面，常见项包括�
 
 - 接入前：local fragment correctness、local microbench、full diagnostic checksum、full diagnostic target hardware 结果。
 - 接入后：真实公开入口专项测试、真实 production case checksum、QEMU 路径和反汇编、目标硬件 production case。
-- 仍保留的 diagnostic：用于局部归因、边界复现、fallback 验证或回归，不再写成未来生产候选的唯一证据。
+- 仍保留的 diagnostic：用于局部归因、边界复现、fallback 验证或回归，不再写成未来生产候选的单独证据。
 
 若当前环境无法跑目标硬件或 production case，closeout 写清待补的具体命令和缺口，不把缺口写成已完成结论。
 

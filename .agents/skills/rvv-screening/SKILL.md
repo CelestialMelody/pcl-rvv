@@ -13,7 +13,7 @@ description: 组织 C/C++ 高性能库的 RVV 候选筛选流程。适用于全�
 - 已有 first-pass 后形成实施队列：使用 [references/templates/second-pass-template.md](references/templates/second-pass-template.md)。
 - 建议队列完成或已完成主题反哺排序：使用 [references/templates/followup-rescreen-template.md](references/templates/followup-rescreen-template.md)。
 
-## 核心规则
+## 规则
 
 1. first-pass 回答“文件中是否存在值得继续下钻的可 SIMD/RVV 片段”，只形成 `high/mid/low` 粗筛基线。
 2. second-pass 必须把 first-pass 的 `high/mid` 候选逐项交代去向；如果纳入 `low` 或遗漏文件，必须说明源码证据和补入边界。

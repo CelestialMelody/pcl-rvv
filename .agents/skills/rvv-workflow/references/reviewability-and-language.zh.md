@@ -191,7 +191,7 @@ production 代码注释应克制，只解释维护边界、fallback、语义风�
 - 文件级阅读提示：本文件做什么，`main()` 或 Makefile target 会按什么顺序运行。可以写“本文件做什么”，不要固定写成“中文执行地图”。
 - 术语说明：reference、scalar same-chain、RVV path、smoke、bench 分别是什么意思。即使整段注释是英文，也要用括号解释这些词。
 - 函数级说明：每个非平凡函数至少说明作用、调用者、证据角色。可以写成自然句，不要机械套用“作用/调用者/类别”模板。
-- 测试级说明：每个非显而易见的 `TEST`、`TEST_F`、`TYPED_TEST` 或同等 benchmark case 前，用 1-2 句中文说明“这个测试验证什么、为什么需要、失败时说明哪条证据断了”。如果测试名已经非常清楚，也至少在附近的表格或文件级说明中逐项解释。
+- 测试级说明：如果 `TEST`、`TEST_F`、`TYPED_TEST` 或同等 benchmark case 的作用不能只从名称看出，在前面用 1-2 句中文说明“这个测试验证什么、为什么需要、失败时说明哪条证据断了”。如果测试名已经非常清楚，也至少在附近的表格或文件级说明中逐项解释。
 - 块级说明：复杂循环、mask、staging、特殊值、误差统计、checksum、gate 判断前应有短注释。
 - 边界说明：明确不覆盖哪些 production 行为，例如真实 dispatch、fallback、world transform、完整对象状态、其它 caller 形态。
 

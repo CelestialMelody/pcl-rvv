@@ -9,7 +9,7 @@ description: 标准化 C/C++ 高性能库的 RVV 项目环境和测试运行环�
 
 测试策略属于 `rvv-test`。例如 unit test（单元测试）、production-shaped diagnostic（生产形态诊断）、benchmark（性能测试）、component ablation（组件消融）和 evidence logs（证据日志）策略，应写入 `rvv-test`。本 skill 只解释这些测试如何通过工具链、Makefile、QEMU、board 和环境变量运行。
 
-核心原则：
+原则：
 
 - 本机私有配置不提交。
 - 公共构建逻辑不写死个人路径、私有 IP、用户名或单台设备默认值。

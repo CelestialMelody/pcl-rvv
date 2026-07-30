@@ -14,7 +14,7 @@ public entry
 非平凡 RVV gate、iterator 构造和标量主体调用，优先抽成命名清楚的 `*_Std` / `*_RVV`
 helper，让 reviewer 可以一眼看出：
 
-- 哪段是原标量权威路径。
+- 哪段是原标量路径。
 - 哪段是 RVV 候选路径。
 - 哪些公开 overload 只自然落回 Std。
 - 哪些 fallback 没有改变原入口语义。

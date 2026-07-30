@@ -188,7 +188,7 @@ Caller smoke 必须有失败条件，不能只打印统计。至少报告 domain
 
 ### atan2
 
-决策模式：已有成熟核且测试结果好时，不为了“整理”而替换。
+决策模式：已有核函数通过测试时，不为了“整理”而替换。
 
 示例结果：
 
@@ -197,6 +197,6 @@ Caller smoke 必须有失败条件，不能只打印统计。至少报告 domain
 
 ## 8. 结构重构单独处理
 
-把数学 helper 移到 `impl/rvv_math.hpp`、补 CMake 安装头、创建 workflow skill 都是有价值的清理，但不属于数学拟合本体。等数学行为验证完成后，单独提交这些结构改动。
+把数学 helper 移到 `impl/rvv_math.hpp`、补 CMake 安装头、创建 workflow skill 都属于结构清理，不属于数学拟合本体。等数学行为验证完成后，单独提交这些结构改动。
 
 测试目录迁移也属于结构重构。迁移时优先建立 `artifact_layout.math_test_dir_template` 解析出的专项目录，按函数分桶移动参数脚本、测试和 smoke；迁移完成后再继续数学候选探索或 production 接入。

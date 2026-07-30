@@ -41,7 +41,7 @@ worker 必须在 S0 报告和最终 Handoff Packet（交接数据包）中写清
 S2 evaluation（函数级评估）不能只写函数名或数学名词。worker 必须写清：
 
 - public entry（公开入口）和 wrapper / iterator / dispatch（包装层 / 迭代器 / 分流逻辑）如何进入目标 helper；
-- 关键循环、有限值检查、核心公式、状态更新、solver（求解器）和输出构造；
+- 关键循环、有限值检查、关键公式、状态更新、solver（求解器）和输出构造；
 - 哪些阶段在逐点热点循环内，哪些阶段每次调用只执行一次；
 - RVV 计划覆盖哪一段标量路径，哪些阶段保留标量以及原因。
 
@@ -106,7 +106,7 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 - no-production 时的受证据约束归因和后续消融条件；
 - partial-production-candidate（局部生产候选）时的生产直连缺口，例如真实公开入口 direct test、fallback、点类型 traits、`Scalar=double`、indices / correspondences 策略、生产 bench 重跑和人工确认点。
 
-如果当前模块已有最近通过 reviewer 的 sibling topic（同模块相邻主题）文档，worker 应把它作为质量标杆读取或抽样对照。对照目标是结构深度、解释粒度和证据边界，不是复制 topic 特有结论、参数或性能数字。
+如果当前模块已有最近通过 reviewer 的 sibling topic（同模块相邻主题）文档，worker 应读取或抽样对照其结构、解释粒度和证据边界，不复制 topic 特有结论、参数或性能数字。
 
 详细规则见 `rvv-documentation/SKILL.md`、`topic-doc-structure.md` 和 `evaluation-doc-structure.md`。
 
@@ -208,7 +208,7 @@ PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 �
 - `pi2_scope`：入口、点类型、`Scalar`、数据布局、规模 gate 和不可触碰路径。
 - `forbidden_expansion`：不得扩大到 PI1 未授权的泛型、indices、correspondences、public API 或公共 helper 变更。
 - `fallback_matrix`：非 RVV 构建、非覆盖点类型、`Scalar=double`、小输入、VLEN/buffer、indices、correspondences 等回退项。
-- `entry_structure`：公开入口是否只做上游语义检查和短路分流；标量权威路径是否抽成清晰的
+- `entry_structure`：公开入口是否只做上游语义检查和短路分流；原标量路径是否抽成清晰的
   `*_Std` helper；RVV 主路径是否抽成清晰的 `*_RVV` helper；多个入口共享 policy 时，public
   overload 仍不能堆叠大段 RVV gate 或标量主体。
 - 复杂 eligibility（适用性）解析，例如动态 condition / field metadata / policy 分解，应收进窄
@@ -265,6 +265,7 @@ preferences_loaded:
 comment_policy_frozen:
 evidence_policy_frozen:
 documentation_policy_frozen:
+markdown_time_wording_check:
 scalar_path_ready:
 production_to_diagnostic_mapping_ready:
 experience_migration_audit_ready:
@@ -323,5 +324,6 @@ followup_options_ready:
   和 production doc closeout。
 - 若当前结论是窄范围 production-ready、partial-production-candidate、bench-only/no-production 或保留重要未覆盖范围，
   表格必须列出 `followup_options_ready`，并指向 Handoff Packet 或文档中的可选后续路径。
+- 文档 cleanup 或 closeout 任务必须列出 `markdown_time_wording_check`。检查范围是非 raw output/log 的长期 Markdown 和 evaluation / closeout 文档；禁止把“最新一次”“最新日志”“截至今日”当作长期事实。允许日期保留在 work log、manifest、run id、handoff / recovery path、用户指定目录名、checksum、常量、指令立即数、数据规模和 ICP “最近点”等技术术语中。
 
 这张表是给 reviewer 复核的，不是为了加长最终回复。证据可以用章节名或稳定路径摘要，不需要复制长文档内容。
