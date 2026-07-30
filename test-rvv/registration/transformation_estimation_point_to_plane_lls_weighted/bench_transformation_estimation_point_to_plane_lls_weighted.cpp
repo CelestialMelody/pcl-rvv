@@ -9,19 +9,25 @@
  * 输入 cloud、target、weights 和 correspondences 在计时前构造完成。每次迭代测量
  * candidate estimate（候选估计）本身：normal-equation（法方程）构造、Eigen solve
  *（Eigen 求解器）和 constructTransformationMatrix（构造变换矩阵）。全云 case
- *（full-cloud case，一一对应扫描）不包含权重生成；对应关系 case（correspondences
- * case，按 index_query/index_match 指定点对）包含 candidate 内部的 index/weight
- * 展开，因为这是当前 gather（离散加载）方案为了进入 RVV 必须付出的入口成本。
+ *（full-cloud case，一一对应扫描）不包含权重生成；source-indexed（源索引路径）和
+ * dual-indices（双索引路径）的 pcl::Indices 在计时前构造，但 candidate 内部的
+ * valid-index scan（有效索引扫描）、uint32 staging（32 位索引暂存）和 byte-offset
+ * prepare（字节偏移准备）属于每次 estimate，计入计时；其后的 index load、gather
+ *（离散加载）和连续 weight load 也计入。对应关系 case（correspondences case，按
+ * index_query/index_match 指定点对）包含 candidate 内部的 index/weight 展开，因为
+ * 这是当前 gather 方案为了进入 RVV 必须付出的入口成本。
  */
 
-#include "transformation_estimation_point_to_plane_lls_weighted_diag.hpp"
+#include "test_support_teptplw.hpp"
 
 #include <pcl/common/transforms.h>
+#include <pcl/registration/transformation_estimation_point_to_plane_lls_weighted.h>
 
 #include <chrono>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -105,12 +111,121 @@ makeCorrespondences(const std::size_t n)
   return correspondences;
 }
 
+pcl::PointCloud<pcl::PointXYZ>
+copySourceAsXYZ(const pcl::PointCloud<pcl::PointNormal>& source)
+{
+  pcl::PointCloud<pcl::PointXYZ> cloud;
+  cloud.reserve(source.size());
+  cloud.height = source.height;
+  cloud.is_dense = source.is_dense;
+  for (const auto& point : source) {
+    pcl::PointXYZ copied;
+    copied.x = point.x;
+    copied.y = point.y;
+    copied.z = point.z;
+    cloud.push_back(copied);
+  }
+  cloud.width = cloud.size();
+  return cloud;
+}
+
+pcl::PointCloud<pcl::PointXYZINormal>
+copyTargetAsXYZINormal(const pcl::PointCloud<pcl::PointNormal>& target)
+{
+  pcl::PointCloud<pcl::PointXYZINormal> cloud;
+  cloud.reserve(target.size());
+  cloud.height = target.height;
+  cloud.is_dense = target.is_dense;
+  for (const auto& point : target) {
+    pcl::PointXYZINormal copied;
+    copied.x = point.x;
+    copied.y = point.y;
+    copied.z = point.z;
+    copied.normal_x = point.normal_x;
+    copied.normal_y = point.normal_y;
+    copied.normal_z = point.normal_z;
+    copied.intensity = 0.5f;
+    copied.curvature = 0.0f;
+    cloud.push_back(copied);
+  }
+  cloud.width = cloud.size();
+  return cloud;
+}
+
+pcl::Indices
+makeSourceIndices(const std::size_t n)
+{
+  // source-indexed bench 只覆盖有效索引；乱序和重复 row 用来暴露单侧 gather 成本。
+  pcl::Indices indices;
+  indices.reserve(n);
+  for (std::size_t i = 0; i < n; ++i)
+    indices.push_back(static_cast<int>((i * 37 + 11) % n));
+  return indices;
+}
+
+pcl::Indices
+makeTargetIndices(const std::size_t n)
+{
+  // target 侧使用独立分布，让 dual-indices 可以和 source-indexed 分开归因。
+  pcl::Indices indices;
+  indices.reserve(n);
+  for (std::size_t i = 0; i < n; ++i)
+    indices.push_back(static_cast<int>((i * 19 + 5) % n));
+  return indices;
+}
+
 struct BenchResult {
   std::string name;
   double average_ms = 0.0;
   double total_ms = 0.0;
   double checksum = 0.0;
 };
+
+struct BenchOptions {
+  std::vector<std::size_t> sizes = {65536u, 262144u};
+  std::string case_filter;
+};
+
+std::vector<std::size_t>
+parseSizes(const std::string& value)
+{
+  std::vector<std::size_t> sizes;
+  std::stringstream stream(value);
+  std::string token;
+  while (std::getline(stream, token, ',')) {
+    if (!token.empty())
+      sizes.push_back(static_cast<std::size_t>(std::stoul(token)));
+  }
+  return sizes.empty() ? std::vector<std::size_t>{65536u, 262144u} : sizes;
+}
+
+BenchOptions
+parseOptions(const int argc, char** argv)
+{
+  BenchOptions options;
+  for (int i = 1; i < argc; ++i) {
+    const std::string arg = argv[i];
+    const auto read_value = [&](const std::string& prefix) -> std::string {
+      if (arg.rfind(prefix + "=", 0) == 0)
+        return arg.substr(prefix.size() + 1);
+      if (arg == prefix && i + 1 < argc)
+        return argv[++i];
+      return {};
+    };
+
+    std::string value = read_value("--size");
+    if (!value.empty()) {
+      options.sizes = parseSizes(value);
+      continue;
+    }
+    value = read_value("--case-filter");
+    if (!value.empty()) {
+      options.case_filter = value;
+      continue;
+    }
+  }
+  return options;
+}
 
 template <typename Fn>
 BenchResult
@@ -130,13 +245,16 @@ runCase(const std::string& name, const int iterations, Fn&& fn)
 } // namespace
 
 int
-main()
+main(int argc, char** argv)
 {
   constexpr int kIterations = 20;
+  const BenchOptions options = parseOptions(argc, argv);
   std::cout << std::fixed << std::setprecision(6);
   std::cout
       << "Dataset: synthetic PointNormal weighted point-to-plane LLS diagnostic\n";
   std::cout << "Iterations: " << kIterations << "\n";
+  if (!options.case_filter.empty())
+    std::cout << "Case filter: " << options.case_filter << "\n";
 #ifdef __RVV10__
   std::cout << "Build: rvv\n";
 #else
@@ -144,11 +262,61 @@ main()
 #endif
 
   std::vector<BenchResult> results;
-  for (const auto n : {65536u, 262144u}) {
+  for (const auto n : options.sizes) {
     pcl::PointCloud<pcl::PointNormal> source = makeCloudWithAtLeast(n);
     pcl::PointCloud<pcl::PointNormal> target;
     pcl::transformPointCloudWithNormals(source, target, makeTransform());
     const std::vector<float> weights = makeWeights(source.size());
+
+    if (options.case_filter == "production-dispatch") {
+      auto run_public_full_cloud = [&](auto& estimator, const auto& src, const auto& tgt) {
+        estimator.setCorrespondenceWeights(weights);
+        Eigen::Matrix4f matrix = Eigen::Matrix4f::Identity();
+        estimator.estimateRigidTransformation(src, tgt, matrix);
+        return diag::matrix_checksum(matrix);
+      };
+
+      pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+          pcl::PointNormal,
+          pcl::PointNormal>
+          pointnormal_estimator;
+      results.push_back(runCase(
+          "weighted lls production-dispatch full-cloud pointnormal " +
+              std::to_string(n),
+          kIterations,
+          [&]() {
+            return run_public_full_cloud(pointnormal_estimator, source, target);
+          }));
+
+      const auto source_xyz = copySourceAsXYZ(source);
+      pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+          pcl::PointXYZ,
+          pcl::PointNormal>
+          pointxyz_pointnormal_estimator;
+      results.push_back(runCase(
+          "weighted lls production-dispatch full-cloud pointxyz-to-pointnormal " +
+              std::to_string(n),
+          kIterations,
+          [&]() {
+            return run_public_full_cloud(
+                pointxyz_pointnormal_estimator, source_xyz, target);
+          }));
+
+      const auto target_xyzinormal = copyTargetAsXYZINormal(target);
+      pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+          pcl::PointXYZ,
+          pcl::PointXYZINormal>
+          pointxyz_xyzinormal_estimator;
+      results.push_back(runCase(
+          "weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal " +
+              std::to_string(n),
+          kIterations,
+          [&]() {
+            return run_public_full_cloud(
+                pointxyz_xyzinormal_estimator, source_xyz, target_xyzinormal);
+          }));
+      continue;
+    }
 
     results.push_back(runCase(
         "weighted lls full-cloud pointnormal " + std::to_string(n),
@@ -157,6 +325,41 @@ main()
           diag::AccumulationStats stats;
           const Eigen::Matrix4f matrix =
               diag::estimate_candidate_full(source, target, weights, &stats);
+          return diag::matrix_checksum(matrix) +
+                 static_cast<double>(stats.accepted_points) * 1e-6;
+        }));
+
+    results.push_back(runCase(
+        "weighted lls full-cloud block-reduction pointnormal " + std::to_string(n),
+        kIterations,
+        [&]() {
+          diag::AccumulationStats stats;
+          const Eigen::Matrix4f matrix = diag::estimate_candidate_full_block_reduction(
+              source, target, weights, &stats);
+          return diag::matrix_checksum(matrix) +
+                 static_cast<double>(stats.accepted_points) * 1e-6;
+        }));
+
+    const pcl::Indices source_indices = makeSourceIndices(source.size());
+    results.push_back(runCase(
+        "weighted lls source-indices pointnormal " + std::to_string(n),
+        kIterations,
+        [&]() {
+          diag::AccumulationStats stats;
+          const Eigen::Matrix4f matrix = diag::estimate_candidate_source_indices(
+              source, source_indices, target, weights, &stats);
+          return diag::matrix_checksum(matrix) +
+                 static_cast<double>(stats.accepted_points) * 1e-6;
+        }));
+
+    const pcl::Indices target_indices = makeTargetIndices(source.size());
+    results.push_back(runCase(
+        "weighted lls dual-indices pointnormal " + std::to_string(n),
+        kIterations,
+        [&]() {
+          diag::AccumulationStats stats;
+          const Eigen::Matrix4f matrix = diag::estimate_candidate_dual_indices(
+              source, source_indices, target, target_indices, weights, &stats);
           return diag::matrix_checksum(matrix) +
                  static_cast<double>(stats.accepted_points) * 1e-6;
         }));
