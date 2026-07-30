@@ -30,6 +30,18 @@ agent_assets:
   feedback_mode: report-only
   allow_auto_update: false
   report_at_phase_boundaries: true
+  experience_migration_audit:
+    required_when_sibling_experience_claimed: true
+    statuses:
+      - adopted
+      - attempted
+      - deferred
+      - rejected
+
+test_support:
+  helper_split_soft_line_limit: 800
+  helper_split_hard_line_limit: 1000
+  helper_split_responsibility_threshold: 3
 
 paths:
   work_log_root: tmp/rvv-work-logs

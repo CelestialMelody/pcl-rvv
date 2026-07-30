@@ -35,6 +35,11 @@ row source -> field load/gather -> finite mask -> formula -> staging/reduction -
 
 当 `test-rvv` helper header（辅助头文件）过长，或同时包含标量 reference、RVV math、row source policy、reduction candidate、component ablation 和 bench/test wrapper 时，应优先拆成稳定聚合头和内部头文件：
 
+- 默认偏好来自 `.agents/config/defaults.yaml` 的 `test_support` 配置：helper header 超过
+  `helper_split_soft_line_limit`（默认约 800 行）时应评估拆分；超过
+  `helper_split_hard_line_limit`（默认约 1000 行），或同时包含不少于
+  `helper_split_responsibility_threshold`（默认 3）类职责时，worker 必须优先拆到
+  `test_support/`，或在 Handoff Packet 中写清 deferred reason（暂缓理由）。
 - 外部 include 入口保持当前 topic 的稳定命名，优先使用 `*_test_support*.hpp` 或
   `test_support_*.hpp` 这类宽口径名称；历史 topic 若已有 `*_diag.hpp`，可以暂作
   aggregator header（聚合头文件）保留兼容。

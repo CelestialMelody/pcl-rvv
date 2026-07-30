@@ -96,7 +96,13 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码真
 3. 只打开命中的窄文档和必要段落；不要全量加载 `doc-rvv/` 或无关模块。
 4. 把历史经验写成候选设计或风险清单，例如“可以尝试 row-source policy”、
    “weight 来源应拆成独立 policy”、“correspondence append 保持标量尾段”等。
-5. 用当前源码、当前 diff、QEMU correctness、反汇编和板卡证据重新闭合结论；历史 topic
+5. 如果 worker 在 prompt、设计文档、Handoff Packet（交接数据包）或最终回复中声明采用
+   sibling topic（同模块相邻主题）经验，应输出 experience-migration audit（经验迁移审计）
+   对照表。该表不强制当前 topic 采用 sibling 的具体 helper 或算法；它只要求把相邻成功或
+   负向方案逐维审计清楚。至少覆盖 row source、source / weight policy、shared math pipeline、
+   staging / reduction、formula / FMA、evidence model 和 production boundary，并用
+   `adopted`、`attempted`、`deferred` 或 `rejected` 说明采用、尝试、暂缓或拒绝的理由。
+6. 用当前源码、当前 diff、QEMU correctness、反汇编和板卡证据重新闭合结论；历史 topic
    只能启发检索和设计，不能替代当前 topic 的证据。
 
 这个模式沉淀的是“如何找相似经验”，不是某个 topic 的固定做法。不要在 agent 资产中写死某个

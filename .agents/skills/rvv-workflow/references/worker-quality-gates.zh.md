@@ -16,6 +16,9 @@
 - 如果模板点类型算法会构造或写回 `PointT` 输出，或使用 `PointT` 运算符、`FieldList`、
   `copyPoint`、`CentroidPoint`、RGB/RGBA 特化等整点语义，不能只按 xyz traits gate 判断；
   必须读取 `RVV Generic Point Type Strategy.zh.md` 中“输入字段 Gate 不等于输出 PointT 语义”。
+- 如果 worker 声明采用 sibling topic（同模块相邻主题）经验，或当前 topic 的设计明显来自
+  相邻成功 / 负向案例，S0 后、写文件前必须做 experience-migration audit（经验迁移审计）。
+  该审计不要求照搬相邻 topic 的具体算法，只要求列清哪些经验被采用、尝试、暂缓或拒绝。
 
 ## 最小门禁
 
@@ -57,7 +60,40 @@ worker 必须写清映射关系：
 详细规则见 `rvv-test/SKILL.md`、`rvv-test/references/entry-shapes-and-test-support.zh.md`、
 `rvv-test/references/registration-topic-evidence.zh.md` 和 `rvv-documentation/references/topic-doc-structure.md`。
 
-### 4. 主题文档质量
+### 4. Sibling Experience Migration Audit
+
+如果 worker 在 prompt、设计说明、Handoff Packet 或最终回复中写到“参考 / 迁移 / 复用 sibling topic
+经验”，必须在 S3/S4 前输出 experience-migration audit（经验迁移审计）表。该表是防止历史经验只被
+口头引用的输出合同，不是要求所有 topic 都实现相同候选。
+
+推荐列：
+
+```text
+| sibling 经验维度 | sibling topic 里的机制 | 当前 topic 是否适用 | 状态 | 证据 / 理由 | 下一步 |
+```
+
+`状态` 使用：
+
+- `adopted`：已经采用，并说明当前 topic 的落点和验证证据。
+- `attempted`：已经尝试，但结果、风险或证据不足以采用；必须说明命令、diff 或实验记录。
+- `deferred`：暂缓到下一轮或另开 topic；必须说明暂停条件和恢复所需证据。
+- `rejected`：明确不适用或不建议；必须说明当前源码、数据流、语义或性能边界为什么不同。
+
+至少覆盖这些维度：
+
+- row source（行来源）：full-cloud、source-indexed、dual-indices、correspondences 或其它入口形态。
+- source / weight policy（源 / 权重策略）：index、weight、field offset、valid-index-only 和展开成本。
+- shared math pipeline（共享数学流水线）：finite mask、formula、accepted_points、ATA/ATb、输出容器或状态更新。
+- staging / reduction（暂存 / 规约）：`vcompress`、buffer 写回、scalar tail、vector reduction、block reduction 或其它候选组织。
+- formula / FMA（公式 / 融合乘加）：逐点公式树、FMA contraction（融合乘加收缩）、reduction tree 和误差预算。
+- evidence model（证据模型）：correctness、QEMU path、反汇编归属、component ablation、repeated board A/B。
+- production boundary（生产边界）：dispatch、fallback、点类型 traits、代表点型、`Scalar` 和不扩大范围。
+
+若相邻 topic 有成功的 `test_support/reductions`、block-reduction、fused formula、staging split、
+component ablation 或负向历史方案，worker 必须在表中审计它们。可以合理拒绝或暂缓，但不能只写
+“已参考相邻经验”而不列出未采用的主线。
+
+### 5. 主题文档质量
 
 主题 RVV 文档至少要包含：
 
@@ -74,7 +110,7 @@ worker 必须写清映射关系：
 
 详细规则见 `rvv-documentation/SKILL.md`、`topic-doc-structure.md` 和 `evaluation-doc-structure.md`。
 
-### 5. Test-rvv / diagnostic 注释
+### 6. Test-rvv / diagnostic 注释
 
 `test-rvv` 和 diagnostic 代码必须面向 reviewer（审查者）可读：
 
@@ -86,7 +122,14 @@ worker 必须写清映射关系：
 
 详细规则见 `rvv-workflow/references/reviewability-and-language.zh.md`。
 
-### 6. 证据和归因
+如果单个 `test-rvv` helper header 超过 `.agents/config/defaults.yaml` 中
+`test_support.helper_split_soft_line_limit` / `helper_split_hard_line_limit` 配置的约 800-1000 行，
+或同时包含 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation
+中不少于 `test_support.helper_split_responsibility_threshold` 类职责，worker 必须优先拆到
+`test_support/`，或在 Handoff Packet 中写清 `deferred reason`。拆分本身不应扩大算法范围；
+若暂缓拆分，必须说明暂缓是否影响 reviewer 可读性、后续测试维护和当前证据复核。
+
+### 7. 证据和归因
 
 worker 必须分开写：
 
@@ -113,7 +156,7 @@ public-entry-shaped、production-shaped diagnostic 或代表性点类型证据�
 详细规则见 `rvv-test/SKILL.md`、`rvv-test/references/performance-and-ablation.zh.md`
 和 `rvv-test/references/evidence-output-policy.zh.md`。
 
-### 7. 测试矩阵与 evidence policy
+### 8. 测试矩阵与 evidence policy
 
 worker 在测试计划和 Handoff 中必须分开列出当前 topic 需要覆盖的测试类别：
 
@@ -140,7 +183,7 @@ correspondences 或 indexed 路径退化时，归因必须列出 query/match 展
 `rvv-test/references/registration-topic-evidence.zh.md`、`rvv-test/references/numerical-consistency.zh.md`
 和 `rvv-test/references/performance-and-ablation.zh.md`。
 
-### 8. PI1 生产接入计划门禁
+### 9. PI1 生产接入计划门禁
 
 当 worker 继续一个 `partial-production-candidate` topic 并进入 PI1 时，先产出 production integration plan，
 再考虑生产补丁。若用户目标是“进入 / 推进 production integration loop（生产接入闭环）”，PI1 是同轮
@@ -157,7 +200,7 @@ fallback、测试或泛型策略不能闭合，才停在 PI1。PI1 至少写清�
 
 PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 后 production direct 证据闭合，才能升级 EvidenceDecision。
 
-### 9. PI2-PI5 连续推进门禁
+### 10. PI2-PI5 连续推进门禁
 
 当用户用短 prompt 授权继续 production integration loop（生产接入闭环），且最近 Handoff Packet 的
 `next_worker_action_if_review_passes` 已给出 PI2 范围时，worker 可以同轮连续推进 PI2-PI5。连续推进前必须冻结：
@@ -193,7 +236,7 @@ PI2-PI5 结束后必须继续完成 S11 文档 closeout（收尾文档）。work
 - `production_doc_decision_delta`：是否说明诊断阶段结论如何被生产证据确认、缩窄、推翻或回退。
 - `production_doc_remaining_scope`：是否写清仍保持标量或未覆盖的入口，以及下一轮扩展必须补的证据。
 
-### 10. 窄范围结论后的后续路径门禁
+### 11. 窄范围结论后的后续路径门禁
 
 当当前结论不是“整个模板入口都完成”，而是 `narrow`、`partial`、`bench-only`、`no-production`
 或带有明确 fallback / 未覆盖范围时，worker 不能只写“进入下一个 topic”。必须在最终输出和
@@ -224,8 +267,10 @@ evidence_policy_frozen:
 documentation_policy_frozen:
 scalar_path_ready:
 production_to_diagnostic_mapping_ready:
+experience_migration_audit_ready:
 doc_quality_refs_loaded:
 test_comment_strategy_frozen:
+test_support_split_decision_ready:
 bench_timing_boundary_defined:
 alternative_designs_listed:
 evidence_model_defined:
@@ -265,6 +310,10 @@ followup_options_ready:
 - 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
   和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
 - 表格必须包含 `correctness_efficiency_evidence_chain_ready`。证据指向主题文档中的“正确性与高效性证据链”或“诊断证据链”小节。
+- 如果 worker 声明采用 sibling topic 经验，表格必须包含 `experience_migration_audit_ready`；
+  证据指向 adopted / attempted / deferred / rejected 对照表。若未声明且无相邻经验可迁移，可写 `not_applicable` 并说明原因。
+- 如果当前 topic 的 `test-rvv` helper header 命中行数或职责阈值，表格必须包含
+  `test_support_split_decision_ready`；证据指向拆分后的 `test_support/` 结构，或 Handoff 中的 deferred reason。
 - 若 `language_check` 声称通过，必须能在同一张表或相邻段落中指出诊断代码、测试、bench 和文档的术语 / 中文注释证据。
 - 若当前结论强于 no-production，例如 `partial-production-candidate`，表格必须额外列出 production direct 尚未闭合的证据项，避免把诊断收益误写成 production-ready。
 - 若本轮进入 PI1，表格必须额外列出 `pi1_production_scope_ready`、`generic_point_type_strategy_ready`、

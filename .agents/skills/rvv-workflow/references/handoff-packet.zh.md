@@ -34,6 +34,8 @@ agent_asset_feedback (可选；本轮发现的可沉淀规则、资产缺口或�
 preferences_loaded (S0 读取的偏好层级，例如 defaults、local override、prompt override，以及是否只报告 env var 名):
 work_preferences (S0 冻结的工作偏好，例如注释详细度、注释语言、production（生产源码）注释上限、test-rvv / diagnostic 注释下限、是否处于单 topic 校准重跑):
 commit_preferences (S0 冻结的提交偏好，例如是否允许 commit（提交）、topic / log / agent asset 是否拆分、evidence log policy（证据日志策略）是 summary-only / sanitized-logs / raw-logs):
+experience_migration_audit (可选；声明采用 sibling topic 经验时，列出 adopted / attempted / deferred / rejected 对照表):
+test_support_split_decision (可选；长 helper 或多职责 helper 是否已拆到 test_support/，或暂缓理由):
 language_check (语言规范校验结果，例如术语解释、文档和代码注释是否达标):
 worker_quality_gate_check (worker 写文件前质量门禁执行结果，例如标量路径、数据流映射、文档结构、注释策略、bench 边界、证据模型是否闭合):
 risks_or_open_questions (遗留风险、未解决疑问):
@@ -56,6 +58,8 @@ next_worker_action_if_review_passes (评审通过后 worker 应执行的下一�
 - `agent_asset_feedback` 只在发现可复用规则、资产缺口或冗余规则时输出。默认模式是 `report-only`：只写建议，不修改 `.agents`、prompt 或 knowledge map。该字段至少说明发现项、建议更新的 skill/reference、适用范围是 topic-specific 还是 cross-topic（跨主题），以及是否建议进入 workflow improvement（工作流改进）。
 - `preferences_loaded` 必须写清 `.agents/config/defaults.yaml` 是否读取、`.agents/local/user-preferences.yaml` 是否存在、当前 prompt 是否覆盖配置。涉及板卡、用户名、私有路径时，只写 env var（环境变量）名或 local override 覆盖范围，不写实际值。
 - `work_preferences` 和 `commit_preferences` 应与 S0 报告一致；若中途改变，写明用户授权或改变原因。`work_preferences` 至少覆盖 `comment_policy_frozen` 和 `documentation_policy_frozen`；`commit_preferences` 至少覆盖 `evidence_policy_frozen`。
+- `experience_migration_audit` 在 worker 声明采用 sibling topic（同模块相邻主题）经验时必须输出。它至少覆盖 row source、source / weight policy、shared math pipeline、staging / reduction、formula / FMA、evidence model 和 production boundary，并用 `adopted`、`attempted`、`deferred` 或 `rejected` 说明每个历史经验维度的处理结果。该字段不要求当前 topic 实现 sibling 的具体算法，但要求未采用的成功或负向方案有理由或下一轮验证计划。
+- `test_support_split_decision` 在单个 `test-rvv` helper header 超过配置阈值，或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation 中三类以上职责时必须输出。若已拆分，说明 aggregator（聚合头文件）和 `test_support/` 子目录职责；若暂缓，说明 deferred reason 以及对 reviewer 可读性和后续维护的影响。
 - `language_check` 不允许虚写。若 `test-rvv`、diagnostic（诊断代码）或 prototype（原型代码）没有详细中文注释，必须写成未达标。通过时应列出覆盖面，例如“诊断 helper 注释、TEST 注释、bench 文件头、主题文档术语解释”，并给出文件或章节证据。
 - `worker_quality_gate_check` 不允许虚写。必须使用证据化表格，至少覆盖 `worker-quality-gates.zh.md` 中的 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen`、标量路径、production/diagnostic 数据流映射、文档结构、test-rvv 注释、bench 边界、替代方案审计、证据模型和 stop condition（停止条件）。表格列建议为 `gate | status | evidence | missing_items`；未完成项要列入 `risks_or_open_questions`。
 - `worker_quality_gate_check` 中的 `status` 不应只有 `true` / `false`。使用 `pass`、`partial`、`fail` 或 `not_applicable`，并为每项提供文件 / 章节 / 日志路径证据。
@@ -88,6 +92,8 @@ worker 输出 Handoff Packet 前应检查：
 - 是否列出了能复现当前结论的命令和证据路径。
 - `agent_asset_trace` 是否是真实使用记录。
 - 如果本轮发现可沉淀规则、资产缺口或冗余规则，是否按 `agent_asset_feedback` 报告；没有发现时可以省略该字段。
+- 如果声明采用 sibling topic 经验，是否输出 `experience_migration_audit`，且没有遗漏相邻成功或负向方案中的核心维度。
+- 如果长 helper 或多职责 helper 命中拆分阈值，是否输出 `test_support_split_decision`，并说明拆分或暂缓理由。
 - `language_check` 是否覆盖文档、代码注释、测试输出和最终回复。
 - `worker_quality_gate_check` 是否真实反映写文件前质量门禁，且每项带 reviewer 可定位的证据；如果短 prompt 启动后产物质量下降，应在这里暴露，而不是只写 agent asset trace。
 - 是否明确哪些日志、build（构建）产物和本机配置只作为工作区证据，不进入提交。

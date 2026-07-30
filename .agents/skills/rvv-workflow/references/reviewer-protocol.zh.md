@@ -117,6 +117,8 @@ reviewer 应至少检查：
 - doc-rvv 文档是否区分 S2 evaluation 和 S11 closeout（收尾）。
 - 文档是否能让读者理解标量实现做了什么、RVV 方案如何实现、bench case 如何构造和证明什么；如果只列公式、helper 名、指令名或 speedup，视为可审查性缺口。
 - 对 buffer/staging、scalar tail（标量尾段）、fused multiply-add（融合乘加）、vector reduction（向量规约）、数学函数是否向量化等实现取舍，worker 是否给出理由、替代方案和需要补的证据。
+- 如果 worker 声明采用 sibling topic（同模块相邻主题）经验，是否输出 experience-migration audit（经验迁移审计）表，并覆盖 row source、source / weight policy、shared math pipeline、staging / reduction、formula / FMA、evidence model 和 production boundary。缺少 adopted / attempted / deferred / rejected 对照表，或只说“已参考相邻经验”但没有说明未采用的成功 / 负向方案，应视为 workflow/worker 执行缺口。
+- 如果单个 `test-rvv` helper header 超过配置的约 800-1000 行，或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation 中三类以上职责，worker 是否拆到 `test_support/`，或在 Handoff Packet 中写清 deferred reason。没有拆分也没有理由时，应作为可审查性和维护性缺口。
 - 负向性能结论是否有受证据约束的归因；不能把未验证猜测写成事实，也不能只写“不接生产”而不解释为什么慢。
 - 是否存在不该提交的 build（构建）产物、日志、本机路径、私有地址或 `config.mk`。
 - Handoff Packet 是否字段完整，`agent_asset_trace` 是否真实反映读取并使用过的资产。
@@ -129,6 +131,7 @@ reviewer 应至少检查：
   继续当前 topic 的扩展动作、应另开 topic 的消融 / 扩展动作和当前不建议做的方向。
 - 如果 worker 使用短 prompt 启动，Handoff Packet 是否包含 `worker_quality_gate_check`，且该字段真实覆盖标量路径、production/diagnostic 数据流映射、文档结构、test-rvv 注释、bench 边界、替代方案审计、证据模型和 stop condition。缺失或虚写时，应视为 workflow/worker 执行缺口。
 - `worker_quality_gate_check` 是否是证据化表格，而不是只有 `true` / `false`。reviewer 应抽查每项 `evidence` 是否能在当前 topic 产物中定位；若找不到对应文件、章节、日志或代码注释，应把该项判为未闭合。
+- `worker_quality_gate_check` 是否在适用时覆盖 `experience_migration_audit_ready` 和 `test_support_split_decision_ready`。若 worker 声称不适用，reviewer 应抽查当前 topic 是否确实没有 sibling topic 经验、长 helper 或多职责 helper 信号。
 - `worker_quality_gate_check` 是否覆盖 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`。
 - `worker_quality_gate_check` 是否覆盖 `correctness_efficiency_evidence_chain_ready`。
 - `language_check` 是否同样有证据支撑。若 worker 声称通过，但诊断 helper、测试、bench 或主题文档仍有非平凡段落缺少中文说明，应指出具体文件和行号。
