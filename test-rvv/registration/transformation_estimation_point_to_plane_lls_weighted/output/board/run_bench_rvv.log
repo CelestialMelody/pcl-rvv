@@ -1,17 +1,24 @@
 Dataset: synthetic PointNormal weighted point-to-plane LLS diagnostic
 Iterations: 20
+Case filter: production-dispatch
 Build: rvv
-weighted lls full-cloud pointnormal 65536: 6.044039 ms/iter
-  Total Time: 120.880776 ms
-  Checksum: 736.028364
-weighted lls correspondences pointnormal 65536: 10.413670 ms/iter
-  Total Time: 208.273391 ms
-  Checksum: 735.633720
-weighted lls full-cloud pointnormal 262144: 30.342456 ms/iter
-  Total Time: 606.849119 ms
-  Checksum: 733.333214
-weighted lls correspondences pointnormal 262144: 46.249895 ms/iter
-  Total Time: 924.997901 ms
-  Checksum: 731.725511
-Total Time: 1861.001187 ms
-Checksum: 2936.720808
+weighted lls production-dispatch full-cloud pointnormal 65536: 5.159015 ms/iter
+  Total Time: 103.180292 ms
+  Checksum: 734.718011
+weighted lls production-dispatch full-cloud pointxyz-to-pointnormal 65536: 4.786023 ms/iter
+  Total Time: 95.720458 ms
+  Checksum: 734.718011
+weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal 65536: 4.766327 ms/iter
+  Total Time: 95.326542 ms
+  Checksum: 734.718011
+weighted lls production-dispatch full-cloud pointnormal 262144: 26.225946 ms/iter
+  Total Time: 524.518917 ms
+  Checksum: 728.090347
+weighted lls production-dispatch full-cloud pointxyz-to-pointnormal 262144: 19.133227 ms/iter
+  Total Time: 382.664542 ms
+  Checksum: 728.090347
+weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal 262144: 18.857815 ms/iter
+  Total Time: 377.156292 ms
+  Checksum: 728.090347
+Total Time: 1578.567043 ms
+Checksum: 4388.425076

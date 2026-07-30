@@ -1,24 +1,31 @@
 make[1]: Entering directory '<pcl-src>/test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted'
 rm -f build/riscv/bench_transformation_estimation_point_to_plane_lls_weighted_rvv
 [BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
-<riscv-toolchain>/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-18_14-44-38.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/registration/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include  bench_transformation_estimation_point_to_plane_lls_weighted.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_registration -lpcl_common -lboost_filesystem -lboost_iostreams -lboost_system -lm -o build/riscv/bench_transformation_estimation_point_to_plane_lls_weighted_rvv
+<riscv-toolchain>/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-30_17-17-37.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/registration/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include  bench_transformation_estimation_point_to_plane_lls_weighted.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_registration -lpcl_common -lboost_filesystem -lboost_iostreams -lboost_system -lm -o build/riscv/bench_transformation_estimation_point_to_plane_lls_weighted_rvv
 [RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
-LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_transformation_estimation_point_to_plane_lls_weighted_rvv 
+LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_transformation_estimation_point_to_plane_lls_weighted_rvv --size 65536,262144 --case-filter production-dispatch
 Dataset: synthetic PointNormal weighted point-to-plane LLS diagnostic
 Iterations: 20
+Case filter: production-dispatch
 Build: rvv
-weighted lls full-cloud pointnormal 65536: 26.711166 ms/iter
-  Total Time: 534.223312 ms
-  Checksum: 736.028364
-weighted lls correspondences pointnormal 65536: 20.358201 ms/iter
-  Total Time: 407.164016 ms
-  Checksum: 735.633720
-weighted lls full-cloud pointnormal 262144: 106.212067 ms/iter
-  Total Time: 2124.241342 ms
-  Checksum: 733.333214
-weighted lls correspondences pointnormal 262144: 84.187356 ms/iter
-  Total Time: 1683.747129 ms
-  Checksum: 731.725511
-Total Time: 4749.375799 ms
-Checksum: 2936.720808
+weighted lls production-dispatch full-cloud pointnormal 65536: 37.974902 ms/iter
+  Total Time: 759.498032 ms
+  Checksum: 734.718011
+weighted lls production-dispatch full-cloud pointxyz-to-pointnormal 65536: 38.334994 ms/iter
+  Total Time: 766.699873 ms
+  Checksum: 734.718011
+weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal 65536: 38.474896 ms/iter
+  Total Time: 769.497930 ms
+  Checksum: 734.718011
+weighted lls production-dispatch full-cloud pointnormal 262144: 151.235604 ms/iter
+  Total Time: 3024.712087 ms
+  Checksum: 728.090347
+weighted lls production-dispatch full-cloud pointxyz-to-pointnormal 262144: 151.547064 ms/iter
+  Total Time: 3030.941283 ms
+  Checksum: 728.090347
+weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal 262144: 153.501396 ms/iter
+  Total Time: 3070.027924 ms
+  Checksum: 728.090347
+Total Time: 11421.377129 ms
+Checksum: 4388.425076
 make[1]: Leaving directory '<pcl-src>/test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted'
