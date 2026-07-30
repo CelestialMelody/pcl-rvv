@@ -65,7 +65,7 @@ make deploy_lib
 
 ## 构建模板结构
 
-`test-rvv/mk` 目前分为两层：
+`test-rvv/mk` 分为两层：
 
 - `rvv-env.mk`：负责本机/板卡环境配置，包括源码路径、RISC-V 依赖路径、工具链、QEMU 运行命令、板卡 SSH 配置等。
 - `rvv-topic.mk`：在 `rvv-env.mk` 之上提供统一的 test/bench/build/deploy 规则。

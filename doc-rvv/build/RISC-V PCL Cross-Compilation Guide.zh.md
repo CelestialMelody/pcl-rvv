@@ -315,7 +315,7 @@ file "${RV_INSTALL_DIR}/boost/lib/libboost_system.so.1.88.0"
 
 Eigen 是 header-only，但仍建议通过 CMake 安装，以便生成 `Eigen3Config.cmake`，供 PCL 的 `find_package(Eigen3)` 使用。
 
-当前脚本从 Eigen `master` 拉取最新代码；RVV10 支持位于 `Eigen/src/Core/arch/RVV10`，历史背景可参考 Eigen RVV1.0 支持相关讨论。
+脚本默认跟随 Eigen `master` 的 HEAD；RVV10 支持位于 `Eigen/src/Core/arch/RVV10`，历史背景可参考 Eigen RVV1.0 支持相关讨论。
 
 ```bash
 export RV_INSTALL_DIR=

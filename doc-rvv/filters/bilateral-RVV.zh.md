@@ -203,7 +203,7 @@ Milkv-Jupiter，`Iterations: 3`，speedup = `Std avg / RVV avg`：
 | `bilateral production filter 256` | 公开 `BilateralFilter<PointXYZI>` | 10.8279 | 3.1566 | 3.43x | 生产主路径收益明显 |
 | `bilateral production filter 1K` | 公开 `BilateralFilter<PointXYZI>` | 91.8276 | 44.5187 | 2.06x | 生产主路径收益明显 |
 
-QEMU 最新日志另包含 `PointXYZINormal` production case，用于证明新增覆盖范围可编译、
+QEMU rerun 日志另包含 `PointXYZINormal` production case，用于证明新增覆盖范围可编译、
 可运行并维持同一误差预算；QEMU 时间只作为日志/路径证据，不作为板卡性能结论。
 
 误差预算：

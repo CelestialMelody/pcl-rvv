@@ -36,10 +36,9 @@ undefined reference to `pcl::console::Logger::print(pcl::console::LogRecord cons
 
 按上述步骤处理后，**无需** 改动 `test-rvv/2d/Makefile` 的包含顺序即可正常链接。
 
-**验证（2026-04-02）**：在重装 PCL 后的环境中执行 `make -C test-rvv/2d clean_bench && make -C test-rvv/2d build/riscv/bench_2d`，链接成功。
+**验证记录**：在重装 PCL 后的环境中执行 `make -C test-rvv/2d clean_bench && make -C test-rvv/2d build/riscv/bench_2d`，链接成功。
 
 ## 相关文档
 
 - [RISC-V PCL Cross-Compilation Guide.zh.md](./RISC-V%20PCL%20Cross-Compilation%20Guide.zh.md) — 交叉编译与安装流程
 - [RISCV Environment Setup.zh.md](./RISCV%20Environment%20Setup.zh.md) — 环境准备
-

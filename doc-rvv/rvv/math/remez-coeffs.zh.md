@@ -83,7 +83,7 @@ static const float kExpfRemezC7 = 0.0001986611354469939f;
 
 对「约化 + 核函数」的进一步优化（不互相排斥）：
 
-- 持续改进 **atan remez1**（`remez_atan_odd_first`）的交换点筛选与收敛判据（例如波瓣分段 + 极值窗口），可进一步提升稳定性；目前主实现已采用稳健交换策略，历史退化逻辑仅保留在 `remez_atan_odd_first_algorithm_legacy` 供对照。
+- 持续改进 **atan remez1**（`remez_atan_odd_first`）的交换点筛选与收敛判据（例如波瓣分段 + 极值窗口），可进一步提升稳定性；主实现已采用稳健交换策略，历史退化逻辑仅保留在 `remez_atan_odd_first_algorithm_legacy` 供对照。
 - 对 exp / log1p 的「单项式 P」：用 Sollya `fpminimax` 在闭区间上求连续意义下的多项式，再量化到 `float`（仓库内已加示例 `.sollya` 文件，见下节）。
 - 在 Chebyshev 基或缩放变量下做 LP，再把系数变回 `r^i` 或 `u^i` 形式，减轻 Vandermonde 病态（需额外实现与验证）。
 

@@ -286,7 +286,7 @@ Production gate（生产接入门禁）未闭合项如下。
 
 - domain-out/fallback 合同尚未定稿。当前 helper 对 NaN、Inf 和 `[-pi, pi]` 外输入返回 quiet NaN；RangeImageSpherical 仅测试接入依赖输入域证明，因此不会触发该策略。这一项没有闭合，是因为通用 helper 可能需要回退标量 libm、返回 NaN，或要求 caller 保证合法输入。完成这一项可以降低域外角度被错误静默处理的风险。当前阶段对 RangeImageSpherical 评估不是必须完成，但进入通用 production helper 前必须完成。
 
-- caller 白名单（允许使用该 helper 的真实调用方集合）目前只包含 RangeImageSpherical 候选。它还没有闭合为 production 白名单，是因为 base RangeImage 的输入域不同，`angle_x` 可能被 `cos(angle_y)` 除法放大到 `[-pi, pi]` 之外。完成这一项可以证明每个接入点都有输入域证据，不会把有限域 helper 用到任意周期输入上。当前阶段必须明确只评估 RangeImageSpherical，不能扩展到 base RangeImage。
+- caller 白名单（允许使用该 helper 的真实调用方集合）只包含 RangeImageSpherical 候选。它还没有闭合为 production 白名单，是因为 base RangeImage 的输入域不同，`angle_x` 可能被 `cos(angle_y)` 除法放大到 `[-pi, pi]` 之外。完成这一项可以证明每个接入点都有输入域证据，不会把有限域 helper 用到任意周期输入上。当前阶段必须明确只评估 RangeImageSpherical，不能扩展到 base RangeImage。
 
 - RangeImageSpherical 仅测试接入已经通过 QEMU correctness，但还不是建议保留的生产代码。它没有闭合为 production，是因为当前实现位于 `test-rvv` 的测试专用头文件覆盖中，只服务验证；同时单点 `calculate3DPoint` 使用 `vl=2`，性能价值还没有通过真实调用方批量场景证明。完成这一项可以证明真实调用方收益和维护成本是否匹配。当前阶段必须把它作为实验代码对待，建议只保留仅测试使用的 prototype 与文档证据，除非另开正式 production patch。
 

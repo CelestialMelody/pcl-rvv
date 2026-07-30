@@ -158,8 +158,8 @@ QEMU bench 只用于确认构建、日志格式和 RVV 指令路径，不用于�
 
 板卡结论：
 
-- `transformPointCloud` 的 RVV 路径有稳定收益，最新一次为 2.50x–3.54x。
-- `transformPointCloudWithNormals` 在 fused 条带循环后转为正收益，最新一次为 1.58x–1.86x。
+- `transformPointCloud` 的 RVV 路径有稳定收益，板卡证据为 2.50x–3.54x。
+- `transformPointCloudWithNormals` 在 fused 条带循环后转为正收益，板卡证据为 1.58x–1.86x。
 - normals 的改进说明瓶颈主要来自第一版的两次完整 AoS 扫描；合并到单个 VL chunk 后，重复访存和写回压力明显下降。
 
 ### 4.4 x86 bench
@@ -213,6 +213,6 @@ make -C test-rvv/common/transforms dump_bench_rvv
 
 本轮在 `transforms.hpp` 中为 dense、非 indexed、`Scalar=float` 的整云变换增加了 RVV 路径。`transformPointCloud` 通过 AoS strided load/store 批量处理 x/y/z；`transformPointCloudWithNormals` 采用 fused 条带循环，在同一 VL chunk 内处理 xyz 与 normal，避免第一版“两次完整扫描”的访存放大。
 
-功能上，RVV 专项 Std/RVV 单测均通过，上游原始 `test/common/test_transforms.cpp` 的 Std/RVV 构建也均通过；构建和指令路径可由 QEMU、自动向量化诊断和反汇编辅助确认。性能上，QEMU 不用于判断加速，真实结论以板卡为准。最新 Milkv-Jupiter bench 显示：xyz 路径为 2.50x–3.54x，xyz+normal 路径为 1.58x–1.86x。
+功能上，RVV 专项 Std/RVV 单测均通过，上游原始 `test/common/test_transforms.cpp` 的 Std/RVV 构建也均通过；构建和指令路径可由 QEMU、自动向量化诊断和反汇编辅助确认。性能上，QEMU 不用于判断加速，真实结论以板卡为准。Milkv-Jupiter bench 证据显示：xyz 路径为 2.50x–3.54x，xyz+normal 路径为 1.58x–1.86x。
 
 后续若沉淀到 Prompt/SKILL，需要保留三条规则：文档路径使用仓库相对路径，不写个人机器绝对路径；QEMU 结果只说明正确性和路径可达，不说明相对标量是否提速；修改公共模板头时，除专项 RVV 单测外，应尽量补跑对应上游原始测试作为回归门槛。

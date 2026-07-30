@@ -105,7 +105,7 @@ QEMU bench 当前只证明 RVV 二进制可运行、目标 helper 可被编译�
 
 ## 7. 当前 closeout 状态
 
-`voxel_grid` 目前不是“未开始”，也不是“完全结束”，而是“首个实现点已完成，主题 closeout 仍在进行中”。
+`voxel_grid` 的 closeout 状态不是“未开始”，也不是“完全结束”，而是“首个实现点已完成，主题 closeout 仍在进行中”。
 
 已完成：
 

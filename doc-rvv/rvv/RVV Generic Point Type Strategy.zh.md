@@ -178,7 +178,7 @@ PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心
 
 ## 5. 四类 Gate 的区别
 
-不要把所有“有 xyz”的路径都归并成同一个 gate。公共 traits 目前刻意保留四类
+不要把所有“有 xyz”的路径都归并成同一个 gate。公共 traits 刻意保留四类
 不同语义边界。
 
 | gate 类别 | 公共 API | 证明内容 | 不证明内容 | 适用示例 |
@@ -323,7 +323,7 @@ load helper 需要区分固定策略 primitive 和自动分发 wrapper：
 | `indexed_load_field_f32m2<PointT, Field>` | 基于 PCL field tag 的单字段 indexed gather，要求该字段是 traits 注册的单个 `float`。 | 否 |
 | `strided_load_field_f32m2<PointT, Field>` | 基于 PCL field tag 的单字段 strided load，要求该字段是 traits 注册的单个 `float`。 | 否 |
 
-XY 或其它双字段读写目前优先用两个单字段 field-tag helper 表达。暂不提供
+XY 或其它双字段读写优先用两个单字段 field-tag helper 表达。暂不提供
 `load2` / `store2` dispatch API，除非后续有具体 production call site 和 bench 证据证明
 二字段 tuple helper 能减少真实重复或带来稳定收益。
 

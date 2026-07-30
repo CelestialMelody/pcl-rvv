@@ -125,7 +125,7 @@ bench 输出包含 `Dataset:`、`Iterations:`、每 case `Total Time`、checksum
 - 反汇编：`output/qemu/rvv_asm_check.log` 确认生产 helper 命中 `vsetvli`、`vle32.v`、`vluxei32.v`、`vfsub.vv`、`vfmul.vv`、`vfcvt.*.v`、`vsll.vi`、`vfmacc.vv`、`vse32.v` 等路径。
 - 板卡：`make -C test-rvv/filters/bilateral run_board_test run_board_bench_compare fetch_board_logs` 通过，日志在 `test-rvv/filters/bilateral/output/board/`。
 
-Milkv-Jupiter 最新结果：
+Milkv-Jupiter 板卡结果：
 
 | case | Std ms/iter | RVV ms/iter | speedup | 说明 |
 | --- | ---: | ---: | ---: | --- |
@@ -135,7 +135,7 @@ Milkv-Jupiter 最新结果：
 | `bilateral production filter 256` | 10.8279 | 3.1566 | 3.43x | 公开生产入口，命中 `PointXYZI` RVV 主路径 |
 | `bilateral production filter 1K` | 91.8276 | 44.5187 | 2.06x | 公开生产入口，命中 `PointXYZI` RVV 主路径 |
 
-QEMU 最新日志新增 `PointXYZINormal` production case：`bilateral production normal 256`
+QEMU rerun 日志新增 `PointXYZINormal` production case：`bilateral production normal 256`
 与 `bilateral production normal 1K` 均通过误差检查，用于证明新增覆盖范围可编译、可运行；
 QEMU 时间不作为板卡性能结论。
 

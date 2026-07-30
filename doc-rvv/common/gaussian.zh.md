@@ -299,7 +299,7 @@ acc[1] = 3*C+4*B+5*A  对应 j=3
 
 `GaussianKernel::convolveRows` / `convolveCols` 的实现位于共享库，是否调用 `*RVV` 或 `*Standard` 由把 `common/src/gaussian.cpp` 编入 `libpcl_common` 时是否定义 `__RVV10__` 决定。若只替换 `bench_gaussian_std` / `bench_gaussian_rvv` 而不重编库，两次 bench 仍可能执行同一条库内路径，表观加速比接近 $1$。因此，Std 与 RVV 的计时对比需两次在交叉工具链下构建 `pcl_common`，通过 `CMAKE_CXX_FLAGS` 中的 `ARCH_FLAGS` 区分是否带 `-D__RVV10__`（见 [RISC-V PCL Cross-Compilation Guide.zh.md](../build/RISC-V PCL Cross-Compilation Guide.zh.md) 第 9 节全量安装与第 10 节增量 `make pcl_common` + 拷贝 `libpcl_common.so*`）：一次产物中 `gaussian.cpp` 走 `convolveRowsStandard` / `convolveColsStandard`，一次走 `convolveRowsRVV` / `convolveColsRVV`。切换 `-D__RVV10__` 后应重新 `cmake` 或清理缓存再配置，否则 `CXXFLAGS` 可能仍用旧缓存。将安装前缀下的 `libpcl_common.so*` 同步到板卡 `LD_LIBRARY_PATH` 所指目录（例如 `test-rvv/common/gaussian` 的 `deploy_lib`）。
 
-**目前操作顺序**（两次库构建之间勿混用同一前缀下的 `.so`）：
+**推荐操作顺序**（两次库构建之间勿混用同一前缀下的 `.so`）：
 
 1. 配置时使 `ARCH_FLAGS` 不含 `-D__RVV10__`（仅 `-march=... -mabi=... -O3` 等），可参考 [编译指南](doc-rvv/build/RISC-V PCL Cross-Compilation Guide.zh.md) 第 10 节执行 `make pcl_common` 后将 `lib/libpcl_common.so*` 拷入安装前缀，得到标量卷积库。
 2. 在 `test-rvv/common/gaussian` 执行 `make deploy_lib deploy_bench_std`，将库与 `bench_gaussian_std` 部署到板卡。

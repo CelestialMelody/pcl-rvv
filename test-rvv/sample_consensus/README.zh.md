@@ -70,7 +70,7 @@
 
 ### 1.3 头文件与链接库（本机 Makefile）
 
-> **重要：头文件优先级（是否使用最新源码）**
+> **重要：头文件优先级（是否使用源码树头文件）**
 >
 > 当前 `test-rvv` 的 Makefile 默认启用 `USE_PCL_SOURCE_HEADERS=1`：**优先 include** `$(WORKSPACE)/pcl/**/include`（源码树），因此修改 `pcl` 的源文件后，`test-rvv` 下的 `make run_test` 会直接生效；同时仍然链接 `$(WORKSPACE)/riscv/pcl-rvv/lib` 下已安装的 `.so`。
 >
@@ -94,7 +94,7 @@ make -C test-rvv/sample_consensus/plane_models run_bench_compare
 make -C test-rvv/sample_consensus/plane_models run_board_bench_compare fetch_board_logs
 ```
 
-最新 Milkv-Jupiter 板卡 compare 结果（dataset：`sac_plane_test.pcd`，3283 points，
+Milkv-Jupiter 板卡 compare 结果（dataset：`sac_plane_test.pcd`，3283 points，
 iterations：50）：
 
 | case | Std ms/iter | RVV ms/iter | speedup |
