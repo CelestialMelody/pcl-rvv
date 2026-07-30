@@ -1,7 +1,7 @@
 make[1]: Entering directory '<pcl-src>/test-rvv/registration/transformation_validation_euclidean'
 rm -f build/riscv/bench_transformation_validation_euclidean_rvv
 [BUILD] Compiling Benchmark (riscv, USE_PCL_RVV10=1)...
-riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-06-17_22-11-52.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/registration/include -I<pcl-src>/search/include -I<pcl-src>/kdtree/include -I<pcl-src>/octree/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include -I<rv-install>/flann/include -I<rv-install>/lz4/include -I<rv-install>/hdf5/include -I<rv-install>/zlib/include -I<rv-install>/libpng/include  bench_transformation_validation_euclidean.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_search -lpcl_kdtree -lpcl_octree -lpcl_common -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_transformation_validation_euclidean_rvv
+<riscv-toolchain>/bin/riscv64-unknown-linux-gnu-g++ -std=c++17 -O3 -g -march=rv64gcv -mabi=lp64d -fopt-info-vec-missed=log/vec_missed_log/vec_missed_2026-07-30_14-26-51.log -DPCL_SILENCE_MALLOC_WARNING=1 -DEIGEN_RISCV64_USE_RVV10 -march=rv64gcv_zvl256b -mrvv-vector-bits=zvl -D__RVV10__ -DPCL_NO_PRECOMPILE -I<pcl-src>/common/include -I<pcl-src>/registration/include -I<pcl-src>/search/include -I<pcl-src>/kdtree/include -I<pcl-src>/octree/include -I<pcl-src>/test/include -I<pcl-src> -I<rv-install>/pcl-rvv/include/pcl-1.15 -I<rv-install>/eigen-rvv/include/eigen3 -I<rv-install>/boost/include -I<rv-install>/gtest/include -I<rv-install>/flann/include -I<rv-install>/lz4/include -I<rv-install>/hdf5/include -I<rv-install>/zlib/include -I<rv-install>/libpng/include  bench_transformation_validation_euclidean.cpp -L<rv-install>/pcl-rvv/lib -Wl,-rpath-link=<rv-install>/pcl-rvv/lib -L<rv-install>/boost/lib -Wl,-rpath-link=<rv-install>/boost/lib -L<rv-install>/gtest/lib -Wl,-rpath-link=<rv-install>/gtest/lib -L<rv-install>/flann/lib -Wl,-rpath-link=<rv-install>/flann/lib -L<rv-install>/lz4/lib -Wl,-rpath-link=<rv-install>/lz4/lib -L<rv-install>/hdf5/lib -Wl,-rpath-link=<rv-install>/hdf5/lib -L<rv-install>/zlib/lib -Wl,-rpath-link=<rv-install>/zlib/lib -L<rv-install>/libpng/lib -Wl,-rpath-link=<rv-install>/libpng/lib  -lpcl_search -lpcl_kdtree -lpcl_octree -lpcl_common -lflann_cpp -lboost_filesystem -lboost_iostreams -lboost_system -lz -lhdf5 -llz4 -lpng -lm -o build/riscv/bench_transformation_validation_euclidean_rvv
 [RUN] Benchmark on riscv (USE_PCL_RVV10=1)...
 LD_LIBRARY_PATH=<runtime-libs> qemu-riscv64 -L <riscv-toolchain>/sysroot -cpu rv64,v=true,vlen=256,elen=64 ./build/riscv/bench_transformation_validation_euclidean_rvv 
 ========================================================================================================
@@ -10,13 +10,25 @@ Build: RVV (__RVV10__ enabled)
 Dataset: synthetic PointXYZ clouds; transform staging microbench and full KdTree validation diagnostic
 Iterations: 20
 --------------------------------------------------------------------------------------------------------
-tve transform-staging pointxyz 64K                                      : 4.0724 ms/iter
-  Total Time: 81.4483 ms, checksum: 2825629992724132138
-tve transform-staging pointxyz 256K                                     : 15.9534 ms/iter
-  Total Time: 319.0680 ms, checksum: 1850937584657094995
-tve full-validation pointxyz 64K                                        : 266.9153 ms/iter
-  Total Time: 5338.3060 ms, checksum: 0
-tve full-validation pointxyz 256K                                       : 1090.0860 ms/iter
-  Total Time: 21801.7202 ms, checksum: 0
+tve transform-staging pointxyz 64K                                      : 4.0315 ms/iter
+  Total Time: 80.6300 ms, checksum: 2825629992724132138
+tve transform-staging pointxyz 256K                                     : 16.0217 ms/iter
+  Total Time: 320.4342 ms, checksum: 1850937584657094995
+tve kdtree-setup pointxyz 64K                                           : 30.6182 ms/iter
+  Total Time: 612.3638 ms, checksum: 65536
+tve kdtree-setup pointxyz 256K                                          : 131.7440 ms/iter
+  Total Time: 2634.8794 ms, checksum: 262144
+tve search-only negative-control pointxyz 64K                           : 232.6862 ms/iter
+  Total Time: 4653.7232 ms, checksum: 65536
+tve search-only negative-control pointxyz 256K                          : 950.5579 ms/iter
+  Total Time: 19011.1589 ms, checksum: 262144
+tve full-validation fresh-tree pointxyz 64K                             : 267.4739 ms/iter
+  Total Time: 5349.4790 ms, checksum: 0
+tve full-validation fresh-tree pointxyz 256K                            : 1097.2042 ms/iter
+  Total Time: 21944.0836 ms, checksum: 0
+tve full-validation prebuilt-tree pointxyz 64K                          : 234.6807 ms/iter
+  Total Time: 4693.6139 ms, checksum: 65536
+tve full-validation prebuilt-tree pointxyz 256K                         : 964.0065 ms/iter
+  Total Time: 19280.1309 ms, checksum: 262144
 ========================================================================================================
 make[1]: Leaving directory '<pcl-src>/test-rvv/registration/transformation_validation_euclidean'

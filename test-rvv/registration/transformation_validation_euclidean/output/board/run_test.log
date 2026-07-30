@@ -1,17 +1,23 @@
-Running main() from <third-party-src>/googletest/googletest/src/gtest_main.cc
-[==========] Running 4 tests from 1 test suite.
+Running main() from <riscv-build>/googletest/googletest/src/gtest_main.cc
+[==========] Running 7 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 4 tests from TransformationValidationEuclideanDiag
+[----------] 7 tests from TransformationValidationEuclideanDiag
 [ RUN      ] TransformationValidationEuclideanDiag.TransformCandidateMatchesScalar
 [       OK ] TransformationValidationEuclideanDiag.TransformCandidateMatchesScalar (1 ms)
 [ RUN      ] TransformationValidationEuclideanDiag.SmallInputFallbackMatchesScalar
 [       OK ] TransformationValidationEuclideanDiag.SmallInputFallbackMatchesScalar (0 ms)
 [ RUN      ] TransformationValidationEuclideanDiag.FullValidationScoreMatchesScalar
-[       OK ] TransformationValidationEuclideanDiag.FullValidationScoreMatchesScalar (14 ms)
+[       OK ] TransformationValidationEuclideanDiag.FullValidationScoreMatchesScalar (11 ms)
+[ RUN      ] TransformationValidationEuclideanDiag.PrebuiltTreeScoreMatchesFreshTree
+[       OK ] TransformationValidationEuclideanDiag.PrebuiltTreeScoreMatchesFreshTree (11 ms)
+[ RUN      ] TransformationValidationEuclideanDiag.SearchOnlyScoreMatchesFullValidationTail
+[       OK ] TransformationValidationEuclideanDiag.SearchOnlyScoreMatchesFullValidationTail (5 ms)
+[ RUN      ] TransformationValidationEuclideanDiag.ProductionForceNoRecomputeMatchesFreshTree
+[       OK ] TransformationValidationEuclideanDiag.ProductionForceNoRecomputeMatchesFreshTree (5 ms)
 [ RUN      ] TransformationValidationEuclideanDiag.MaxRangeRejectsAllMatchesScalar
 [       OK ] TransformationValidationEuclideanDiag.MaxRangeRejectsAllMatchesScalar (17 ms)
-[----------] 4 tests from TransformationValidationEuclideanDiag (34 ms total)
+[----------] 7 tests from TransformationValidationEuclideanDiag (53 ms total)
 
 [----------] Global test environment tear-down
-[==========] 4 tests from 1 test suite ran. (34 ms total)
-[  PASSED  ] 4 tests.
+[==========] 7 tests from 1 test suite ran. (53 ms total)
+[  PASSED  ] 7 tests.

@@ -4,12 +4,24 @@ Build: Std (__RVV10__ disabled)
 Dataset: synthetic PointXYZ clouds; transform staging microbench and full KdTree validation diagnostic
 Iterations: 20
 --------------------------------------------------------------------------------------------------------
-tve transform-staging pointxyz 64K                                      : 3.2105 ms/iter
-  Total Time: 64.2110 ms, checksum: 1451503591193771390
-tve transform-staging pointxyz 256K                                     : 12.1858 ms/iter
-  Total Time: 243.7169 ms, checksum: 3082555291703023099
-tve full-validation pointxyz 64K                                        : 269.2100 ms/iter
-  Total Time: 5384.1999 ms, checksum: 0
-tve full-validation pointxyz 256K                                       : 1255.8260 ms/iter
-  Total Time: 25116.5193 ms, checksum: 0
+tve transform-staging pointxyz 64K                                      : 3.2473 ms/iter
+  Total Time: 64.9463 ms, checksum: 1451503591193771390
+tve transform-staging pointxyz 256K                                     : 12.0023 ms/iter
+  Total Time: 240.0459 ms, checksum: 3082555291703023099
+tve kdtree-setup pointxyz 64K                                           : 86.3713 ms/iter
+  Total Time: 1727.4262 ms, checksum: 65536
+tve kdtree-setup pointxyz 256K                                          : 454.2784 ms/iter
+  Total Time: 9085.5687 ms, checksum: 262144
+tve search-only negative-control pointxyz 64K                           : 176.3510 ms/iter
+  Total Time: 3527.0205 ms, checksum: 65536
+tve search-only negative-control pointxyz 256K                          : 776.1762 ms/iter
+  Total Time: 15523.5248 ms, checksum: 262144
+tve full-validation fresh-tree pointxyz 64K                             : 262.6956 ms/iter
+  Total Time: 5253.9113 ms, checksum: 0
+tve full-validation fresh-tree pointxyz 256K                            : 1267.0592 ms/iter
+  Total Time: 25341.1846 ms, checksum: 0
+tve full-validation prebuilt-tree pointxyz 64K                          : 179.0340 ms/iter
+  Total Time: 3580.6803 ms, checksum: 65536
+tve full-validation prebuilt-tree pointxyz 256K                         : 785.7998 ms/iter
+  Total Time: 15715.9960 ms, checksum: 262144
 ========================================================================================================

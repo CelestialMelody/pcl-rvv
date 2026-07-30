@@ -1,17 +1,23 @@
-Running main() from <third-party-src>/googletest/googletest/src/gtest_main.cc
-[==========] Running 4 tests from 1 test suite.
+Running main() from <riscv-build>/googletest/googletest/src/gtest_main.cc
+[==========] Running 7 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 4 tests from TransformationValidationEuclideanDiag
+[----------] 7 tests from TransformationValidationEuclideanDiag
 [ RUN      ] TransformationValidationEuclideanDiag.TransformCandidateMatchesScalar
 [       OK ] TransformationValidationEuclideanDiag.TransformCandidateMatchesScalar (3 ms)
 [ RUN      ] TransformationValidationEuclideanDiag.SmallInputFallbackMatchesScalar
 [       OK ] TransformationValidationEuclideanDiag.SmallInputFallbackMatchesScalar (0 ms)
 [ RUN      ] TransformationValidationEuclideanDiag.FullValidationScoreMatchesScalar
-[       OK ] TransformationValidationEuclideanDiag.FullValidationScoreMatchesScalar (20 ms)
+[       OK ] TransformationValidationEuclideanDiag.FullValidationScoreMatchesScalar (22 ms)
+[ RUN      ] TransformationValidationEuclideanDiag.PrebuiltTreeScoreMatchesFreshTree
+[       OK ] TransformationValidationEuclideanDiag.PrebuiltTreeScoreMatchesFreshTree (17 ms)
+[ RUN      ] TransformationValidationEuclideanDiag.SearchOnlyScoreMatchesFullValidationTail
+[       OK ] TransformationValidationEuclideanDiag.SearchOnlyScoreMatchesFullValidationTail (8 ms)
+[ RUN      ] TransformationValidationEuclideanDiag.ProductionForceNoRecomputeMatchesFreshTree
+[       OK ] TransformationValidationEuclideanDiag.ProductionForceNoRecomputeMatchesFreshTree (8 ms)
 [ RUN      ] TransformationValidationEuclideanDiag.MaxRangeRejectsAllMatchesScalar
-[       OK ] TransformationValidationEuclideanDiag.MaxRangeRejectsAllMatchesScalar (27 ms)
-[----------] 4 tests from TransformationValidationEuclideanDiag (54 ms total)
+[       OK ] TransformationValidationEuclideanDiag.MaxRangeRejectsAllMatchesScalar (31 ms)
+[----------] 7 tests from TransformationValidationEuclideanDiag (94 ms total)
 
 [----------] Global test environment tear-down
-[==========] 4 tests from 1 test suite ran. (57 ms total)
-[  PASSED  ] 4 tests.
+[==========] 7 tests from 1 test suite ran. (97 ms total)
+[  PASSED  ] 7 tests.
