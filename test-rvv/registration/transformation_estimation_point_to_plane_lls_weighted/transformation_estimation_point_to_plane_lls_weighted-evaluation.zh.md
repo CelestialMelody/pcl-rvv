@@ -1,215 +1,195 @@
 # registration/transformation_estimation_point_to_plane_lls_weighted 函数级 RVV 评估
 
-## 范围
+## 范围与结论
 
 - 主题：`transformation_estimation_point_to_plane_lls_weighted`
-- 主文件：`registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls_weighted.hpp`
+- production 文件：`registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls_weighted.hpp`
+- 专项测试目录：`test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/`
 - 公开入口：`TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation`
-- 专项目录：`test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/`
-- 模块依据：`doc-rvv/library-screening/registration/registration-module-second-pass.zh.md` 建议优化队列第四项。
 
-## S0 偏好冻结
+当前 EvidenceDecision：
 
-- 本轮从干净 topic 状态重新执行；不继续扩写旧产物。
-- `test-rvv`、diagnostic（诊断代码）和 prototype（原型代码）使用详细中文注释，英文术语首次出现带中文解释。
-- production（生产源码）注释保持克制；S10 前不修改 production。
-- 提交策略：默认不创建 commit（提交）；evidence logs（证据日志）采用 summary-only（只在文档和 handoff 摘要路径）。
+```text
+production-candidate/full-cloud-f32-aos-layout-gated-weighted-block-dispatch-representative-pointtypes
+```
 
-## 函数级结论
+生产候选只覆盖 full-cloud public overload（全云公开入口）、`Scalar=float`、连续 `weights_`、source `RVVXYZAoSFloatLayout`、target `RVVXYZNormalFloatLayout`、size/VLEN/byte-offset gate 均满足的路径。source-indexed（源索引路径）、dual-indices（双索引路径）、correspondences（对应关系路径）、`Scalar=double` 和非连续权重都保持标量。
 
-当前结论是 `bench-only/no-production`：本轮已经建立 weighted LLS 的 production-shaped diagnostic（生产形态诊断，尽量复用真实入口数据形状的测试专用诊断）、QEMU correctness（QEMU 正确性验证，不代表真实性能）、bench（性能测试）输出合同、反汇编路径证据和 board performance（板卡真实性能证据）。板卡显示全云顺序扫描（full-cloud）64K 只有弱收益 `1.18x`，全云 256K 退化到 `0.92x`，对应关系索引路径（correspondences）明显退化到 `0.50x` / `0.45x`。因此不能判定 production-ready（可进入生产接入），也没有修改 production。
+主文档负责长期算法说明和设计理由：`doc-rvv/registration/transformation_estimation_point_to_plane_lls_weighted-RVV.zh.md`。本评估文档只记录测试矩阵、bench 边界、证据索引和决策审计。
 
-QEMU 结果显示 std/RVV 两个构建各 6 个专项测试通过，bench checksum（校验和）基本对齐；反汇编显示当前 RVV helper 命中了 `vlse32.v`、`vluxei32.v`、`vle32.v`、`vcompress.vm` 和 `vfredosum.vs`。其中 `vfredosum.vs` 是压缩 buffer tail（临时缓冲尾段）被编译器自动向量化后的 partial vector accumulation（部分向量累加），不是手写 intrinsic（内建函数），必须在 reviewer 审查中重点确认语义和生产可控性。板卡结果已经证明当前诊断方案的收益不稳定，不能接入生产。
+## Production patch scope
 
-## 标量实现说明
-
-公开 API（应用程序接口）共有四个入口：
-
-| 入口 | 权重来源 | 进入 helper 前的检查 |
+| 项 | 当前状态 | 证据 |
 | --- | --- | --- |
-| `estimateRigidTransformation(cloud_src, cloud_tgt, matrix)` | `weights_`，需先调用 `setCorrespondenceWeights` | source/target 点数一致；`weights_.size() == nr_points` |
-| `estimateRigidTransformation(cloud_src, indices_src, cloud_tgt, matrix)` | `weights_` | `indices_src.size() == cloud_tgt.size()`；`weights_.size() == nr_points` |
-| `estimateRigidTransformation(cloud_src, indices_src, cloud_tgt, indices_tgt, matrix)` | `weights_` | source/target indices 数量一致；`weights_.size() == nr_points` |
-| `estimateRigidTransformation(cloud_src, cloud_tgt, correspondences, matrix)` | `correspondence.weight` 被复制到局部 `weights` vector（向量容器） | 没有 `weights_` 尺寸检查；权重来自 correspondences 字段 |
+| dispatch | 只在 full-cloud overload 中尝试 RVV；命中后提前返回，否则进入原 iterator 标量 helper。 | production direct tests、源码审查。 |
+| generic gate | source 用 `RVVXYZAoSFloatLayout`，target 用 `RVVXYZNormalFloatLayout`，两侧分别 offset/stride。 | `PointXYZ -> PointNormal`、`PointXYZ -> PointXYZINormal` tests。 |
+| weights | 只读成员 `weights_` 连续 vector。 | public overload tests 和 production-dispatch bench 都调用 `setCorrespondenceWeights(weights)`。 |
+| reduction | 采用 weighted full-cloud block-reduction；每个 chunk 用 `vfmacc` 更新 A/B/C/N partial sums，每组扫完 block 后显式 `vfredosum`。 | normal-equation tests、asm attribution、board 5-run。 |
+| fallback | 非 RVV、非 float、小规模、layout miss、VL miss、byte-offset miss、indexed/correspondences 均标量。 | fallback tests 和源码审查。 |
 
-四个公开入口最终都构造 `ConstCloudIterator`，进入 protected helper（受保护辅助函数）：
+## 标量流程与 RVV 流程对照
 
-```text
-estimateRigidTransformation(source_it, target_it, weights_it, transformation_matrix)
-```
-
-protected helper 的逐点流程如下：
-
-1. 初始化 `ATA` 为 6x6 double 矩阵、`ATb` 为 6x1 double 向量，并清零。
-2. 每个 source/target pair（点对）先做逐点 finite check（有限值检查）：检查 source `x/y/z`、target `x/y/z`、target `normal_x/y/z`。当前 production 不检查 weight 是否有限。
-3. 如果任一被检查字段不是 finite，标量循环递增 `source_it`、`target_it` 和 `weights_it` 后 `continue`，该点不贡献 `ATA/ATb`。
-4. 对有效点读取 `sx/sy/sz`、`dx/dy/dz`，并先计算 `nx = target.normal[0] * weight`、`ny = target.normal[1] * weight`、`nz = target.normal[2] * weight`。这里权重先乘到 normal（法线），后续所有公式都使用加权 normal。
-5. 使用加权 normal 构造 point-to-plane LLS（点到平面线性最小二乘）的一行：
-
-```text
-a = nz * sy - ny * sz
-b = nx * sz - nz * sx
-c = ny * sx - nx * sy
-d = nx * dx + ny * dy + nz * dz - nx * sx - ny * sy - nz * sz
-```
-
-6. `ATA` 只累加上三角 21 项，例如 `a*a`、`a*b`、`a*nx`、`nx*ny`；`ATb` 累加 6 项，例如 `a*d`、`nx*d`。这些累加是主要可批处理阶段，但也是数值规约边界。
-7. 循环结束后把 `ATA` 下三角从上三角补齐。
-8. 每次公开 estimate 调用只执行一次 `ATA.inverse() * ATb` Eigen solve（Eigen 求解器）。这是 6x6 小矩阵，不是 VL chunk（可变向量长度分块）批处理热点。
-9. 每次公开 estimate 调用只执行一次 `constructTransformationMatrix`，把 `x(0..5)` 的欧拉角和平移构造成 4x4 矩阵。该函数内部调用少量 `sin/cos`，调用频率是每次 estimate 一次，不随点数增长。
-
-源码层面的数据流需要和诊断实现区分开看。production 源码的四个公开入口在进入 protected helper 前负责准备不同的 iterator（迭代器）和权重来源：全云入口直接按点云顺序构造 source/target iterator；indices（索引）入口把一个或两个点云访问序列交给 iterator；correspondences（对应关系）入口用 `index_query/index_match` 构造 source/target iterator，并把 `correspondence.weight` 复制到局部权重 vector。进入 protected helper 后，这些差异被统一成 `source_it`、`target_it`、`weights_it` 三个同步前进的逐点流。
-
-RVV 诊断不能直接依赖 iterator 抽象高效取数，所以把源码中的统一逐点流重新显式拆成两条可向量化数据流：全云顺序扫描路径和对应关系索引扫描路径。前者用于验证规则顺序点对，后者用于验证 indexed row（带索引行）如何展开并 gather（离散加载）点字段；这两条诊断路径都对应 production 的真实入口形态，但不是 production 直连分流。
+| 阶段 | 标量路径 | 当前 RVV production |
+| --- | --- | --- |
+| 入口检查 | full-cloud overload 检查 source/target 点数和 `weights_.size()`。 | 保留原检查。 |
+| row source | `ConstCloudIterator` 同步读取 `source[k]` 和 `target[k]`。 | 只接 full-cloud，source/target 直接按 AoS stride load。 |
+| weight | `weights_it` 顺序读取。 | `vle32.v` 连续加载 `weights_[k]`。 |
+| finite mask | 检查 source xyz、target xyz 和 target normal，不检查 weight。 | 同语义，invalid lane merge to zero。 |
+| formula | `normal *= weight` 后计算 `a/b/c/d`。 | 同公式，当前不使用 `a/b/c/d` 逐点公式树 fused contraction。 |
+| accumulation | 按 row 顺序用 double 累加 `ATA/ATb`。 | 每个 block 用 A/B/C/N vector partial sums；chunk 内用 `vfmacc` 累加，组结束后再 `vfredosum` 到 double normal-equation。 |
+| solve / matrix | Eigen 6x6 inverse solve，构造 4x4 matrix。 | 保留标量。 |
 
 ## 函数族评估表
 
-| 函数 / 路径 | 当前决策 | 覆盖与边界 |
+| 路径 | 当前决策 | 证据边界 |
 | --- | --- | --- |
-| 全云顺序扫描 normal-equation 构造 | diagnostic 已建，暂不接 production | 连续 `PointNormal`、`float` 权重 vector、`n >= 64`、`vlmax_e32m2 <= 64`。 |
-| 对应关系索引 normal-equation 构造 | diagnostic 已建，暂不接 production | 有效 correspondence 先展开 source index、target index 和 weight，再进行 gather。 |
-| Eigen solve / `constructTransformationMatrix` | 保留标量 | 每次 estimate 调用一次，规模固定，当前没有证据说明值得手写 RVV。 |
-| 泛型 production 模板 | 未接入 | 未闭合泛型点类型 traits、`Scalar=double`、真实 dispatch（分流逻辑）和目标硬件收益。 |
+| full-cloud current diagnostic | 保留为 baseline | `vcompress + fixed buffer + tail` 可对拍，但不是 production 默认。 |
+| full-cloud block-reduction | production candidate | 已有 production direct/fallback、numeric stress、asm 和 representative board 5-run。 |
+| source-indexed | 仅保留诊断证据 | correctness 已建，board single-run 弱正向，缺 repeated board 和 production direct/fallback。 |
+| dual-indices | 仅保留诊断证据 | correctness 已建，board single-run 负向。 |
+| correspondences | 仅保留诊断证据 | correctness 已建，board single-run 负向，且混入 index/weight 展开和 gather 多个成本源。 |
+| fused formula | deferred | 当前 block-reduction 已用 `vfmacc` 做 partial-sum accumulation；缺的是 `a/b/c/d` 逐点公式树 fused contraction 的 weighted same-chain、near-cancellation、非有限 weight、asm 和 board A/B。 |
+| `Scalar=double` | fallback | 有 fallback smoke；不进入 RVV。 |
 
-## RVV 诊断设计
+## RowSourcePolicy + WeightPolicy 测试矩阵
 
-当前 RVV candidate（RVV 候选链路）位于 `transformation_estimation_point_to_plane_lls_weighted_diag.hpp`，只在 `test-rvv` 中使用。
+| 入口形态 | RowSourcePolicy 取点 | WeightPolicy 取权重 | 关键测试 | Bench case | 当前判断 |
+| --- | --- | --- | --- | --- | --- |
+| full-cloud | `source[k] + target[k]` | `weights_[k]` 连续读取 | `StdDiagnosticMatchesPublicEstimator`、`FullCloudCandidateMatchesStd` | `weighted lls full-cloud pointnormal` | diagnostic baseline。 |
+| full-cloud block-reduction | 同 full-cloud | `weights_[k]` 连续读取 | `FullCloudBlockReductionMatchesStdWithinBudget`、production direct/fallback tests | `weighted lls full-cloud block-reduction pointnormal`、production-dispatch representative rows | production candidate。 |
+| source-indexed | `source[indices_src[k]] + target[k]` | `weights_[k]` 连续读取 | `StdSourceIndexedMatchesPublicEstimator`、`SourceIndexedCandidateMatchesStd` | `weighted lls source-indices pointnormal` | 仅保留诊断证据。 |
+| dual-indices | `source[indices_src[k]] + target[indices_tgt[k]]` | `weights_[k]` 连续读取 | `StdDualIndicesMatchesPublicEstimator`、`DualIndicesCandidateMatchesStd` | `weighted lls dual-indices pointnormal` | 仅保留诊断证据。 |
+| correspondences | 展开 `index_query/index_match` 后 gather | 展开 `correspondence.weight` | `StdCorrespondencesMatchesPublicEstimator`、`CorrespondenceCandidateMatchesStd` | `weighted lls correspondences pointnormal` | 仅保留诊断证据。 |
 
-### 两种诊断数据流的差异
+Weight finite semantics（权重有限性语义）由 `NonFiniteWeightsAreNotMaskedWhenPointsAreFinite` 和 `ProductionFullCloudPreservesNonFiniteWeightSemantics` 保护：point/normal 非有限会被剔除，weight 非有限但 point/normal 有限时仍参与计算。
 
-全云顺序扫描（full-cloud）和对应关系索引路径（correspondences）最终都在构造同一组 weighted normal-equation row（带权法方程行），也都复用 finite mask（有限值掩码）、`weight * normal`、`a/b/c/d` 公式、`vcompress`（向量压缩）和 buffer tail（缓冲尾段）。区别在于 row 如何进入 RVV chunk（可变向量长度分块）：
+## Production direct 与 fallback 测试
 
-- 全云顺序扫描是一一对应扫描。第 `i` 个 source 点、第 `i` 个 target 点和 `weights[i]` 直接形成一行，lane 顺序等于数组下标顺序。`PointNormal` 是 AoS（结构数组）布局，所以点字段用 stride load（跨步加载），权重用 contiguous load（连续加载）。这条路径没有额外 index 展开，主要成本来自 stride load、mask、公式 staging、压缩和 tail。
-- 对应关系索引路径先把公开入口中的 `pcl::Correspondence` 列表变成 row 列表。candidate 需要标量扫描每个 correspondence，跳过负 index 或越界 index，把 `index_query`、`index_match` 和 `correspondence.weight` 展开成三个连续 vector，再把 index 转成 `PointNormal` 字节偏移并用 gather（离散加载）读取 source/target 字段。lane 顺序等于 correspondence 列表顺序，而不等于点云物理下标顺序。
-
-因此，全云顺序扫描路径主要验证连续 row 的批处理收益；对应关系索引路径验证 indexed row（带索引行）能否保持公开入口语义，但它天然多了 index/weight 展开、offset 计算和 gather 不规则访存。当前板卡结果只能证明对应关系索引 candidate 整体退化，不能单独判断退化来自 gather、展开、`vcompress`、buffer 写回、自动规约或 bench case 构造。
-
-### 全云顺序扫描数据流
-
-1. fallback gate（回退验收条件）：`n >= 64`、`__riscv_vsetvlmax_e32m2() <= 64`、点数量可转换成 32-bit byte offset（32 位字节偏移）。
-2. strip-mined loop（分块循环）按 `vl = vsetvl_e32m2(n - i)` 处理 VL chunk。
-3. source/target `PointNormal` 是 AoS（结构数组）布局；用 `vlse32.v` stride load（跨步加载）读取 source `x/y/z`、target `x/y/z`、target normal `x/y/z`。
-4. 权重是连续 `std::vector<float>`；用 `vle32.v` contiguous load（连续加载）读取当前 chunk 的 weight。
-5. mask（掩码）按生产语义只检查 source/target 坐标和 target normal 有限性，不检查 weight。
-6. `staged_weighted_formula` 先做 `weight * normal`，再计算 `a/b/c/d`。手写部分使用 `vfmul.vv`、`vfadd.vv`、`vfsub.vv`，暂不手写 fused multiply-add（融合乘加）intrinsic。
-7. `vcpop.m` 计算有效 lane 数；`vcompress.vm` 把 `a/b/c/d/nx/ny/nz` 保序压缩到固定 64 lane buffer。
-8. buffer tail（缓冲尾段）在源码上按压缩后顺序消费。反汇编显示 GCC `-O3` 把部分 buffer 累加自动变成 `vfredosum.vs`，这是 partial vector accumulation（部分向量累加），会改变线性累加树；当前只作为诊断观察，不作为 production 语义承诺。
-
-### 对应关系索引数据流
-
-1. candidate 先标量扫描 correspondences，过滤负 index 和越界 index，展开 `src_indices`、`tgt_indices` 和 `weights` 三个连续 vector。这个展开成本包含在 bench case 计时内，因为当前 RVV gather 方案需要它。
-2. RVV chunk 用 `vle32.v` 读取展开后的 index 和 weight。
-3. source/target 点字段用 `vluxei32.v` indexed gather（离散加载）读取；normal 与 weight 相乘后进入同一套 finite mask、公式 staging、`vcompress` 和 buffer tail。
-4. correspondences 的乱序、重复输入通过专项测试覆盖；非法 index 只在 defensive helper 中跳过，本轮没有单独作为测试 case，因为 production 当前公开入口通常假设有效 correspondences。
-
-## 方案取舍审计
-
-| 方案 | 当前处理 | 理由 | 语义风险 | 还需要的证据 |
-| --- | --- | --- | --- | --- |
-| 直接向量规约 raw lane | 暂缓 | 可减少 buffer 写回和 tail 成本，但会直接改变 21 个 `ATA` 项和 6 个 `ATb` 项的累加树。 | 6x6 solve 对累加误差敏感，可能改变最终矩阵；需要明确误差预算。 | same-chain（同构链路）对抗样本、绝对/相对误差预算、目标硬件 bench、热点 asm。 |
-| 部分 vector accumulation | 诊断中被采用但未手写 | 源码写成 buffer tail；反汇编显示 `-O3` 自动把压缩 buffer 累加变成 `vfredosum.vs`。这提供了“压缩后部分规约”的可观察证据。 | 不是显式 intrinsic，编译器版本和优化选项可能改变；累加顺序不同于 production 标量。 | 需要固定 asm gate、更多 adversarial case、板卡结果；若接 production，应考虑手写可控规约或禁用自动规约。 |
-| fused multiply-add intrinsic | 暂缓 | 当前手写公式保留 `vfmul` + `vfadd/vfsub`，便于审查 `weight * normal` 和 `a/b/c/d`。全二进制中有 FMA，但热点 helper 的手写 staging 公式主要不是 FMA；部分 FMA 来自 Eigen 或自动生成代码。 | FMA contraction（融合乘加收缩）可能改变 float 中间舍入，特别是 `d` 的六项和。 | 比较标量/RVV 热点 asm、加 FMA same-chain 测试、边界样本、目标硬件 bench。 |
-| 数学函数 / 矩阵构造向量化 | 暂缓 | `constructTransformationMatrix` 和 `sin/cos` 每次 estimate 只调用一次，不随点数增长；Eigen solve 也是固定 6x6。 | 手写数学函数会引入精度、特殊值和维护风险，收益上限很低。 | profile 证明 solve/矩阵构造成为热点，且目标硬件上 normal-equation 已不再主导时再评估。 |
-
-这里的 `vcompress + buffer + tail` 不是被性能证据证明过的最佳方案，而是本轮为了保持 finite lane 顺序、降低首轮诊断语义风险而采用的保守方案。它避免在没有误差预算的情况下直接改变所有 `ATA/ATb` 项的跨 lane 累加树，但也引入了额外 store/load 和自动规约风险。下一轮如果要判断“当前实现方式是否拖慢”，应把这套方案与无压缩 masked reduction（带掩码规约）、手写长期向量累加、禁用自动 tail 向量化和 FMA 版本分别对照。
-
-## 测试计划与结果
-
-专项测试：`test_transformation_estimation_point_to_plane_lls_weighted.cpp`
-
-| 测试 | 层级 | 作用 |
+| 测试 | 层级 | 覆盖内容 |
 | --- | --- | --- |
-| `StdDiagnosticMatchesPublicEstimator` | reference path | 证明全云顺序扫描标量诊断与公开 estimator 一致，权重来自 `setCorrespondenceWeights`。 |
-| `StdCorrespondencesMatchesPublicEstimator` | reference path / entry shape（入口形态） | 证明对应关系入口直接使用 `correspondence.weight`，不同于 `weights_` 路径。 |
-| `FullCloudCandidateMatchesStd` | RVV candidate | 大规模连续 `PointNormal` + 连续权重对拍，RVV 构建要求命中 staging。 |
-| `CorrespondenceCandidateMatchesStd` | RVV candidate / gather | 乱序、重复对应关系和 weight 字段对拍，覆盖 index/weight 展开和 gather。 |
-| `SmallInputFallsBackForIsolatedSizeGate` | fallback | 单独覆盖 `n < 64` 规模 gate，不混入 invalid 数据。 |
-| `InvalidLaneMaskMatchesStd` | finite mask | 单独覆盖 NaN/Inf lane 被剔除；weight 保持有限，因为 production 不检查 weight。 |
+| `ProductionFullCloudPublicOverloadMatchesStdWithinBudget` | production direct | 真实 public full-cloud overload 的 matrix 对拍。 |
+| `ProductionFullCloudNormalEquationMatchesStdWithinBudget` | production direct / normal-equation | `accepted_points`、`ATA/ATb` 和 matrix 预算。 |
+| `ProductionFullCloudScaleStressMatchesStdWithinBudget` | numeric stress | 大尺度输入和权重动态范围下的 matrix / normal-equation。 |
+| `ProductionFullCloudPreservesNonFiniteWeightSemantics` | numerical consistency | point/normal finite mask 与非有限 weight 语义。 |
+| `ProductionFullCloudSmallInputFallsBackToScalar` | fallback | `n < 64` 回标量。 |
+| `ProductionFullCloudPredicateGatesAreNarrow` | gate | size、weights size、VL 和 byte-offset predicate。 |
+| `ProductionFullCloudPointXYZSourceMatchesStdWithinBudget` | generic source | `PointXYZ -> PointNormal` 命中 source xyz f32 AoS gate。 |
+| `ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget` | generic target | `PointXYZ -> PointXYZINormal` 命中 target xyz+normal f32 AoS gate。 |
+| `ProductionFullCloudDoubleNormalTargetFallsBackToScalar` | layout fallback | target normal 不是单个 float 字段时回标量。 |
+| `ProductionFullCloudScalarDoubleFallsBackToScalar` | scalar fallback | `Scalar=double` 回标量。 |
 
-QEMU `run_test_compare` 结果：std 构建 6 个测试通过，RVV 构建 6 个测试通过。QEMU 只证明构建、正确性、日志形状和 RVV 路径命中，不证明真实性能。
+完整专项矩阵还保留 diagnostic tests：四条 row source 对拍、小规模 isolated gate、invalid lane mask、非有限 weight 语义和 block-reduction A/B。保留这些测试是为了把 row source、weight source、mask、reduction tree 和 production dispatch 分层审查。
 
-## Bench 计划与 QEMU 日志形状
+## Bench 边界
 
-专项 bench：`bench_transformation_estimation_point_to_plane_lls_weighted.cpp`
+输入在计时前构造：source 是确定性曲面，target 由 `transformPointCloudWithNormals` 生成，full/source/dual 权重是周期序列，indices 和 correspondences 是确定性有效输入。
 
-输入构造：
+测量包含 normal-equation 构造、Eigen solve 和 matrix 构造。full-cloud 不包含权重生成；source-indexed 和 dual-indices 的 `pcl::Indices` 输入在计时前构造，但 candidate 内部 valid-index scan、`uint32_t` staging、byte-offset prepare、index load/gather 和连续 weight load 计入；correspondences case 包含 candidate 内部 index/weight 展开。
 
-- source 是确定性的解析二次曲面 `PointNormal`，target 由 `pcl::transformPointCloudWithNormals` 使用温和刚体变换生成。
-- full-cloud 权重是确定性周期序列 `0.55 + 0.07 * (i % 9)`，覆盖小于、等于和大于 1 的 normal 缩放。
-- correspondences 是 deterministic subset（确定性子集），包含非连续、重复 index 和不同 `correspondence.weight`；当前不模拟非法 index，也不模拟任意乱序 target pairing（目标配对）。它更适合暴露 index/weight 展开和 gather 路径成本，不代表所有真实 correspondence 分布。
+| case | 入口 | 证明点 | 不能证明什么 |
+| --- | --- | --- | --- |
+| `weighted lls full-cloud pointnormal` | 测试专用 `estimate_candidate_full` | full-cloud current baseline 的 stride load、contiguous weight、mask/staging。 | production dispatch、generic 点型、indexed/correspondences。 |
+| `weighted lls full-cloud block-reduction pointnormal` | 测试专用 block helper | A/B/C/N partial sums 和显式 `vfredosum`。 | production dispatch；生产性能由 production-dispatch 5-run 证明。 |
+| `weighted lls source-indices pointnormal` | 测试专用 source-indexed helper | 单侧 source gather + target stride + continuous weight。 | dual gather、correspondence weight 展开、生产收益。 |
+| `weighted lls dual-indices pointnormal` | 测试专用 dual helper | 双侧 gather 与连续 weight stream。 | correspondence parsing 和生产收益。 |
+| `weighted lls correspondences pointnormal` | 测试专用 correspondences helper | index/weight 展开 + gather 语义。 | 单因归因到 gather、任意真实 correspondence 分布。 |
+| `weighted lls production-dispatch full-cloud pointnormal` | 真实 public overload | `PointNormal -> PointNormal` 子集的 public dispatch 性能。 | 所有泛型点型、indexed/correspondences。 |
+| `weighted lls production-dispatch full-cloud pointxyz-to-pointnormal` | 真实 public overload | generic source representative 性能。 | 所有 source 点型。 |
+| `weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal` | 真实 public overload | generic target representative 性能。 | 所有 target normal 点型。 |
 
-测量边界：
+## 证据索引与结果
 
-- 输入 cloud、target、weights 和 correspondences 在计时前构造完成。
-- 每次迭代测量 candidate estimate：normal-equation 构造、Eigen solve 和 `constructTransformationMatrix`。
-- full-cloud case 不包含权重生成；correspondences case 包含 candidate 内部的 index/weight 展开，因为这是当前 gather 方案进入 RVV 的必要成本。
+| 证据 | 路径 / 命令 | 结果 |
+| --- | --- | --- |
+| QEMU tests | `make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted run_test_compare` | std/RVV 各 25 tests passed。 |
+| board tests | `output/board/run_test.log` | board 25 tests passed。 |
+| QEMU bench shape | `make -C ... run_bench_compare` 和 production-dispatch case-filter | 可解析，checksum 基本对齐；QEMU timing 不作性能结论。 |
+| asm | `make -C ... dump_bench_rvv` | production helper 独立符号内确认 stride load、contiguous weight load、A/B/C/N partial sums、`vcpop/vmerge` 和显式 `vfredosum`。 |
+| 10-case board diagnostic | 文档 summary；顶层 log 会被 case-filter 覆盖 | single-run diagnostic signal，不是 production performance evidence。 |
+| representative board 5-run | `output/board/production_dispatch_weighted_generic_representative_5run_summary.md` | 三类代表点型 64K/256K median 均正向。 |
 
-| case | 入口 | 规模 | 证明点 | 不能证明什么 |
-| --- | --- | --- | --- | --- |
-| `weighted lls full-cloud pointnormal 65536` | `estimate_candidate_full` | 64K | 全云顺序扫描的中等规模路径：连续 row、stride load、contiguous weight load 和 mask/staging。 | 不能证明泛型点类型、真实 production dispatch 或目标硬件性能。 |
-| `weighted lls correspondences pointnormal 65536` | `estimate_candidate_correspondences` | 64K 输入点的 subset | 对应关系索引路径能否通过 index/weight 展开和 gather 正确形成 weighted equations。 | 不能单独归因 gather、展开、压缩或 tail 哪一项最慢。 |
-| `weighted lls full-cloud pointnormal 262144` | `estimate_candidate_full` | 256K | 放大全云顺序扫描后检查 setup 外的 staging/tail 成本能否摊薄。 | 不能单独证明 64K 弱收益可以外推到更大规模；板卡结果已经显示该规模退化。 |
-| `weighted lls correspondences pointnormal 262144` | `estimate_candidate_correspondences` | 256K 输入点的 subset | 大规模对应关系索引路径的日志形状和 checksum。 | 不能代表所有真实 correspondence 分布。 |
+production-dispatch representative 5-run 摘要：
 
-QEMU bench compare 可解析，std/RVV checksum 基本对齐。QEMU timing 显示 RVV 构建更慢，但这只作为日志形状和路径证据，不写成真实性能结论。
-
-板卡 `board_smoke` 已通过专项测试并生成真实性能数据：
-
-| case | Std ms/iter | RVV ms/iter | speedup | 结论 |
+| case | runs | 64K median/min | 256K median/min | 说明 |
 | --- | ---: | ---: | ---: | --- |
-| 全云顺序扫描 64K | 7.1234 | 6.0440 | 1.18x | 弱收益，只覆盖中等规模连续输入。 |
-| 对应关系索引 64K | 5.2553 | 10.4137 | 0.50x | index/weight 展开、gather、compress/tail 组合明显退化；主因尚未拆分定位。 |
-| 全云顺序扫描 256K | 28.0058 | 30.3425 | 0.92x | 放大规模后退化，说明 64K 弱收益不稳定。 |
-| 对应关系索引 256K | 20.9287 | 46.2499 | 0.45x | 大规模 indexed row 路径退化更明显；仍不能单独归因 gather 或 buffer。 |
+| `pointnormal` | 5 | `2.69x / 2.66x` | `2.71x / 2.11x` | `PointNormal -> PointNormal` 子集；256K 有一轮低谷但仍正向。 |
+| `pointxyz-to-pointnormal` | 5 | `2.81x / 2.79x` | `2.83x / 2.69x` | source generic gate representative。 |
+| `pointxyz-to-pointxyzinormal` | 5 | `2.81x / 2.80x` | `2.85x / 2.83x` | source + target generic gate representative。 |
 
-这些板卡结果来自 Milkv-Jupiter，日志在 `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/output/board/analyze_bench_compare.log`。由于收益只在一个 full-cloud 中等规模 case 出现，且幅度属于弱收益区间，不能覆盖 correspondences 入口和更大规模退化。
+QEMU 10-case diagnostic table 和 board 10-case diagnostic table 只用于日志形状和诊断信号。当前性能结论只使用 representative 5-run board summary。
 
-## 反汇编热点归属
+## 反汇编归属
 
-反汇编文件：
+`buildPointToPlaneLLSWeightedFullCloudBlockRVV` 是当前 production helper 的关键符号。该符号范围内确认：
 
-- `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/build/asm/riscv/bench_transformation_estimation_point_to_plane_lls_weighted_rvv.full.asm`
-- `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/build/asm/riscv/bench_transformation_estimation_point_to_plane_lls_weighted_rvv.asm`
+- `vlse32.v`：source xyz、target xyz 和 target normal 的 AoS stride load。
+- `vle32.v`：连续 `weights_` load。
+- `vcpop.m` / `vmerge`：finite mask 和 invalid lane 归零。
+- `vfmacc.vv`：每个 chunk 更新 A/B/C/N partial sums。
+- `vfredosum.vs`：每个 A/B/C/N group 扫完 block 后，对该组 partial sums 做显式横向规约。
 
-热点 helper 归属：
+全二进制中的其它 `vfmadd/vfmacc` 或 `vfred*` 可能来自 Eigen、bench harness 或自动向量化，不能归因到当前 helper。当前 production 行为已经包含 normal-equation partial-sum `vfmacc`；fused formula deferred 指的是 `a/b/c/d` 逐点公式树 contraction，不是禁止或缺失所有 FMA 指令。
 
-- `accumulate_candidate_full` 符号内出现 `vlse32.v` 读取 `PointNormal` 字段、`vle32.v` 读取 weight、`vfmul.vv/vfadd.vv/vfsub.vv` 计算加权公式、`vcpop.m` 和 `vcompress.vm` 压缩有效 lane。
-- 同一 helper 内还出现 `vfredosum.vs`，归因于压缩 buffer tail 的自动向量化 partial accumulation，不是手写 raw-lane direct reduction。
-- `accumulate_candidate_correspondences` 符号存在；全二进制和 helper 区域可见 `vluxei32.v` gather。需要 reviewer 进一步用符号范围或更细 asm 脚本确认 gather 指令是否全部来自当前 helper，而不是 STL vector、Eigen 或 bench harness（性能测试外壳）。
-- 全二进制中存在大量 `vfmadd/vfmacc` 和其它 `vfred*`，其中相当一部分位于 Eigen kernel、checksum/bench 周边或编译器自动向量化代码。不能把这些写成当前手写 staging 公式采用了 FMA。
+## 正确性与高效性证据链
 
-当前负向性能归因仍应写成受证据约束的假设：板卡已经证明当前 candidate 在 full-cloud 256K 和 correspondences 上变慢，但还不能单独确认主因。可能来源包括 `vcompress` 后 buffer 读写、自动 vector reduction 的额外 `vsetvli`/宽窄转换、correspondences 的 index/weight 展开、`vluxei32.v` 不规则访存，或 Eigen solve / bench harness 占比稀释。确认主因需要消融 bench 或 profile（性能剖析）。
+| 维度 | 证据 | 结论 | 边界 |
+| --- | --- | --- | --- |
+| correctness | 25 tests QEMU + board；production direct/fallback；numeric stress；非有限语义。 | `accepted_points`、`ATA/ATb`、matrix 和 fallback 均有覆盖。 | 不覆盖非法 index、所有 correspondence 分布、`Scalar=double` RVV。 |
+| path/asm | production helper 符号内指令归属。 | RVV 热点确实来自 weighted block-reduction helper。 | 不把全二进制 FMA/reduction 当作当前公式证据。 |
+| performance | representative production-dispatch board 5-run。 | 支持 full-cloud f32 AoS layout-gated weighted block dispatch。 | 只覆盖三类代表点型，不证明所有 gate-allowed 点型逐类型性能。 |
+| boundary | RowSourcePolicy / WeightPolicy 矩阵和 fallback tests。 | source/dual/correspondences、`Scalar=double`、非连续权重保持标量。 | diagnostic 10-case 不能替代 production evidence。 |
 
-worker2 复核后应把这条归因边界视为当前文档的关键审查点：反汇编能够证明这些指令形状存在，板卡能够证明整体退化，但二者合起来仍不能证明某个单项成本是主因。若下一轮继续，应优先补四个消融 case：只做 correspondences 展开不 gather、固定连续 index 但保留 gather 形态、去掉 `vcompress`/buffer 写回的 masked reduction 原型、禁用或固定自动 `vfredosum` tail。
+## EvidenceDecision 审计
 
-## EvidenceDecision
+支持当前 production candidate 的条件：
 
-`EvidenceDecision = bench-only/no-production`。
+- full-cloud public overload 已有真实 direct tests。
+- size、VL、layout、byte-offset、`Scalar` 和 small-input fallback 均有测试或源码审查。
+- production helper 独立符号内完成 asm attribution。
+- board gtest 是 25 tests。
+- representative production-dispatch 5-run board summary 在三类点型、64K/256K 上正向。
 
-证据支持：
+证据不支持的扩展：
 
-- 专项 diagnostic 已建，且不修改 production。
-- QEMU correctness 通过，说明 std/RVV 构建在测试矩阵下语义可对齐。
-- QEMU bench 输出合同可解析，checksum 基本对齐。
-- 反汇编证明当前 RVV helper 路径存在，并揭示了自动 partial vector accumulation。
-- 板卡专项测试通过，证明 RVV candidate 在目标硬件上能正确运行。
+- source-indexed production：缺 repeated board、production direct/fallback 和符号级生产归属。
+- dual-indices production：single-run board diagnostic 负向，缺 production direct/fallback。
+- correspondences production：single-run board diagnostic 负向，且成本源包含 index/weight 展开、gather、压缩和 tail；缺消融。
+- fused formula：当前 block-reduction 已有 partial-sum `vfmacc`；后续只评估 `a/b/c/d` 逐点公式树 contraction。缺 weighted same-chain、非有限 weight、near-cancellation、asm 和 board A/B。
+- `Scalar=double` 和未逐类型上板的点型性能。
 
-证据不支持：
+因此 current EvidenceDecision 保持为 `production-candidate/full-cloud-f32-aos-layout-gated-weighted-block-dispatch-representative-pointtypes`。
 
-- board/target-hardware benchmark（板卡或目标硬件性能测试）显示收益不稳定：full-cloud 64K 为 `1.18x`，full-cloud 256K 为 `0.92x`，correspondences 为 `0.50x` / `0.45x`。
-- 自动 `vfredosum` 规约改变累加树，当前只由专项容差测试覆盖，尚未形成 production 误差预算。
-- 泛型 production dispatch、fallback 和点类型 traits 未闭合。
+## 遗留风险
 
-因此本轮不进入 production integration loop（生产接入闭环）。当前保留为 bench-only diagnostic（仅性能诊断主题），下一轮若继续投入，应先做消融诊断，而不是把当前方案接入 production。
+- 代表点型不是逐类型证明。新增 gate-allowed 点型的性能结论需要对应 board evidence。
+- `PointNormal 262144` representative row 有一轮 `2.11x` 低谷，仍为正向，但不应写成零波动稳定性。
+- source/dual/correspondences 的负向归因尚未消融，不能写成“唯一主因是 gather”。
+- current diagnostic 的 `vcompress + buffer + tail` 仍可作为消融 baseline，但 production 默认已采用 block-reduction。
 
-## 遗留风险与后续条件
+## Fused formula follow-up design
 
-板卡性能已经闭合为负向生产信号。当前 `make board_smoke` 在 Milkv-Jupiter 上通过，但只有 full-cloud 64K 达到 `1.18x`，full-cloud 256K 与 correspondences 均退化。若后续重做，需要新增消融 bench：只测 weight load、只测 stride staging、禁用/固定自动规约、去掉 `vcompress` 或分离 correspondences 展开成本。
+unweighted TEPTPL 的 fused formula 已经迁移到 production：它保留 A/B/C/N block-reduction，逐点 `a/b/c` 使用 `vfmsac`，`d` 使用 `nx*(dx-sx) + ny*(dy-sy) + nz*(dz-sz)` 后用 `vfmacc` 累加。weighted TEPTPLW 不能直接采用同一结论，因为 weighted 先执行 `normal *= weight`，非有限 weight 不参与 finite mask，并且 current production evidence 只批准 block-reduction partial sums。
 
-自动 partial vector accumulation 尚未语义闭合。反汇编显示 `vfredosum.vs` 位于 helper 内，说明 tail 不再是严格线性标量累加。当前 QEMU 测试只证明选定样本矩阵近似一致；production 前需要 adversarial case、误差预算和明确的 asm gate。
+建议下一轮只做 test_support diagnostic/component A/B，不先改 production：
 
-FMA 归属尚需更细脚本确认。全二进制里有大量 `vfmadd/vfmacc`，但不能默认归因到当前手写 staging 公式。下一轮应按符号范围输出 FMA、reduction、vcompress、gather 的归属摘要。
+| 候选 | 变化 | 测试预算 | bench 角色 |
+| --- | --- | --- | --- |
+| `abc-fused` | `a/b/c` 使用 `vfmsac`，`d` 保持当前展开。 | weighted same-chain、scale-stress、`ATA/ATb`、matrix。 | isolate `a/b/c` 公式树成本。 |
+| `d-six-term-fma` | 保留 `d` 六项形态，但用 FMA 累加。 | 非有限 weight、near-cancellation、`accepted_points`、`ATA/ATb`。 | isolate `d` 六项舍入树。 |
+| `d-displacement-fused` | 使用 `dx-sx`、`dy-sy`、`dz-sz` 后 `vfmacc`。 | 非有限 weight 传播、near-cancellation、scale-stress、matrix。 | 对照 unweighted 同款 `d` 公式树。 |
+| `abcd-fused` | 组合 `abc-fused` 和通过预算的 `d` candidate。 | 上述预算全量覆盖。 | 只在 isolated candidates 通过后做组合 A/B。 |
 
-correspondences 负向归因仍是假设。当前设计包含 index/weight 展开、gather、vcompress 和 partial reduction 多个成本源；若板卡结果慢，需要 profile（性能剖析）或消融 bench 分别关闭 gather、关闭压缩、关闭自动规约，才能确认主要原因。
+测试需要显式检查非有限 weight 语义、near-cancellation、scale-stress、`accepted_points`、`ATA/ATb` 和 matrix。非有限 point/normal 仍由 finite mask 排除；非有限 weight 不能改变 `accepted_points`，但会继续影响 normal-equation，这一点必须和标量 reference 对齐。
 
-因此当前 closeout 可以接受 bench-only/no-production（仅性能诊断/不接入生产）生产决策；如果目标是回答“当前 RVV 实现方式是否不好导致退化”，则不应直接接 production，也不应只扩写文档，应先做消融 bench。
+test_support 设计建议在 `teptplw_reductions.hpp` 增加 fused formula lane helper，在 `teptplw_candidates.hpp` 增加 direct diagnostic candidate。bench 先加 component no-solve 和 normal-equation direct cases，例如：
+
+```text
+weighted lls component full-cloud block-fused-abc no-solve pointnormal
+weighted lls component full-cloud block-fused-d-six-term no-solve pointnormal
+weighted lls component full-cloud block-fused-d-displacement no-solve pointnormal
+weighted lls normal-equation full-cloud block-fused-abcd pointnormal
+```
+
+asm gate 需要在 fused diagnostic helper 符号范围内区分两类 FMA：逐点公式树里的 `vfmsac/vfmacc`，以及当前 already-adopted A/B/C/N partial-sum `vfmacc`。`vfredosum` 仍应只归属于每组结束后的横向规约。板卡性能需要 representative 5-run A/B summary-only artifact；第一轮建议只做 `PointNormal -> PointNormal` 64K/256K，若稳定正向且 correctness/numeric 预算闭合，再扩到 `PointXYZ -> PointNormal` 和 `PointXYZ -> PointXYZINormal`。QEMU timing 不作为性能结论。
+
+建议先提交当前 block candidate，再另开 fused formula worker。当前 block-reduction production candidate 的 correctness、fallback、asm 和 representative board 证据已经闭合；fused formula 会改变逐点舍入树和非有限 weight 传播，适合独立 review 和独立 evidence artifact。
