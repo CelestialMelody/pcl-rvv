@@ -267,6 +267,7 @@ comment_policy_frozen:
 evidence_policy_frozen:
 documentation_policy_frozen:
 markdown_time_wording_check:
+writing_style_trigger_check:
 scalar_path_ready:
 production_to_diagnostic_mapping_ready:
 experience_migration_audit_ready:
@@ -319,6 +320,7 @@ followup_options_ready:
 - 如果当前 topic 的测试支撑 helper header 命中行数或职责阈值，表格必须包含
   `test_support_split_decision_ready`；证据指向按 `test_support` 配置拆分后的结构，或 Handoff 中的 deferred reason。
 - 若 `language_check` 声称通过，必须能在同一张表或相邻段落中指出诊断代码、测试、bench 和文档的术语 / 中文注释证据。
+- 表格必须包含 `writing_style_trigger_check`。检查范围至少覆盖主题文档、evaluation / closeout 文档、workflow 文档、Handoff Packet、worker / reviewer 最终回复和 `agent_asset_feedback`；触发词清单来自 `rvv-documentation/references/writing-style.md`。若某个命中词是必要技术术语，必须写清保留理由。
 - 若当前结论强于 no-production，例如 `partial-production-candidate`，表格必须额外列出 production direct 尚未闭合的证据项，避免把诊断收益误写成 production-ready。
 - 若本轮进入 PI1，表格必须额外列出 `pi1_production_scope_ready`、`generic_point_type_strategy_ready`、
   `fallback_dispatch_strategy_ready` 和 `production_direct_test_plan_ready`。不适用时写明原因，不能省略。

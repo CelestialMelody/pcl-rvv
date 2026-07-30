@@ -287,3 +287,4 @@ base RangeImage 输入域尚未闭合。base RangeImage 的 angle_x 会除以 co
 - 是否区分局部片段、入口形态、生产路径、QEMU、板卡。
 - 未闭合项是否逐条说明“是什么、为什么没闭合、做了有什么用、当前是否必须做”。
 - 文档是否让读者不看对话也能恢复证据链。
+- 最终回复、reviewer 报告、Handoff Packet 和 `agent_asset_feedback` 是否按 `rvv-documentation/references/writing-style.md` 执行触发词检查；如需保留命中词，是否写清技术原因。
