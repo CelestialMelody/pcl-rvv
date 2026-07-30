@@ -45,6 +45,19 @@ tz = m20*x + m21*y + m22*z + m23
 
 诊断 helper 没有使用 `_rm` intrinsic，也不修改 FRM/FCSR。
 
+## test_support_split_decision
+
+当前决策：`deferred`（暂缓拆分）。
+
+`transformation_validation_euclidean_diag.hpp` 当前为 227 行，已经混合四类职责：
+
+- scalar reference（标量参考）：`transformPointXYZStd`、`validateTransformationStd*`；
+- RVV math（RVV 数学链路）：`transformPointXYZRVV` 和 `transformPointXYZCandidate`；
+- KdTree/search diagnostic（搜索树诊断）：`setupTargetTree`、`scoreTransformedWithTree`、fresh-tree 和 prebuilt-tree full validation；
+- component ablation support（组件消融支撑）：供 bench 拆分 transform、tree setup、search-only negative control 和 full validation。
+
+按 `rvv-test` 的长 test support 文件拆分规则，若后续继续扩展，建议把内部实现拆成相邻 `test_support/` 子目录，例如 `transform_staging.hpp`、`kdtree_validation.hpp` 和 `ablation_support.hpp`，当前 `transformation_validation_euclidean_diag.hpp` 保持稳定 aggregator header（聚合头文件）。本轮暂不拆分，原因是本次 closeout 修正只允许修改审查性文档 / work log，不允许再改 test-rvv 代码；而且当前 227 行仍可由文件头和函数级注释审查。若未来执行拆分，即使逻辑保持不变，也应至少重跑 `run_test_compare`、`run_bench_compare` 和 `dump_bench_rvv`；若移动代码可能影响内联或符号归属，还需要补板卡 summary-only evidence，避免 reviewer 无法区分纯机械拆分和行为变化。
+
 ## 风险和处理
 
 | 风险                                      | 处理                                                                                                             |
@@ -62,6 +75,9 @@ tz = m20*x + m21*y + m22*z + m23
 - 大规模 transform candidate 与 scalar 对拍；
 - 小规模 fallback 对拍；
 - full validation score 对拍；
+- prebuilt KdTree / tree reuse score 对拍；
+- search-only tail 与 full validation 尾段对拍；
+- 真实公开类 `setSearchMethodTarget(..., force_no_recompute=true)` 与默认 fresh tree 对拍；
 - `max_range` 全拒绝时返回 `double::max()`。
 
 上游测试：当前上游 `test/registration/test_registration.cpp` 只是间接包含 `transformation_validation_euclidean.h`，没有直接覆盖本类的独立 gtest。因为本轮不修改上游生产源码，暂不强制新增上游测试目标；若后续升级生产分流，应补定向上游或专项公开类测试。
@@ -80,26 +96,32 @@ tz = m20*x + m21*y + m22*z + m23
 | --------------------------------------- | ----------------------------------- | ------------------------------------------------------------- | -------------------------------------------------- |
 | `tve transform-staging pointxyz 64K`  | `transformPointXYZCandidate`      | 64K `PointXYZ`，固定 4x4 transform                          | 局部片段诊断，不直接代表生产收益                   |
 | `tve transform-staging pointxyz 256K` | `transformPointXYZCandidate`      | 256K `PointXYZ`，固定 4x4 transform                         | 局部片段规模放大诊断                               |
-| `tve full-validation pointxyz 64K`    | `validateTransformationCandidate` | 64K source，target 为同一 transform 后点云，`max_range=1.0` | 接近真实入口的 full diagnostic，包含 KdTree search |
-| `tve full-validation pointxyz 256K`   | `validateTransformationCandidate` | 256K source / target，同上                                    | 判断 search 稀释后是否仍有生产价值                 |
+| `tve kdtree-setup pointxyz 64K` | `setupTargetTree` | 64K target | 只测 target tree setup，用于解释默认 fresh-tree 入口成本 |
+| `tve kdtree-setup pointxyz 256K` | `setupTargetTree` | 256K target | 放大规模后 tree setup 组件消融 |
+| `tve search-only negative-control pointxyz 64K` | `scoreTransformedWithTree` | 64K transformed source，target tree 预建 | 只测 `nearestKSearch`、`max_range` 和 score tail |
+| `tve search-only negative-control pointxyz 256K` | `scoreTransformedWithTree` | 256K transformed source，target tree 预建 | 搜索主成本负向对照 |
+| `tve full-validation fresh-tree pointxyz 64K` | `validateTransformationCandidateDetailed` | 64K source，target 为同一 transform 后点云，`max_range=1.0` | 接近 production 默认形态，包含 tree setup / search |
+| `tve full-validation fresh-tree pointxyz 256K` | `validateTransformationCandidateDetailed` | 256K source / target，同上 | 判断默认 full 形态是否有生产价值 |
+| `tve full-validation prebuilt-tree pointxyz 64K` | `validateTransformationCandidateWithTree` | 64K source，target tree 预建 | 对应 tree reuse / `force_no_recompute` 生产形态诊断 |
+| `tve full-validation prebuilt-tree pointxyz 256K` | `validateTransformationCandidateWithTree` | 256K source，target tree 预建 | 判断 tree reuse 后 full 是否仍被 search 稀释 |
 
 ## 当前状态
 
 - 函数级评估：已完成。
 - RVV 实现：仅在 `test-rvv` 中建立 bench-diagnosis helper；上游生产入口未修改。
-- 专项 test / bench / Makefile / board.mk：已建立。
+- 专项 test / bench / Makefile / board.mk：已建立并在本轮 rerun 中扩展到 tree reuse、`force_no_recompute`、search-only negative control 和 component ablation。
 - QEMU：专项 test、bench compare 通过。
-- 反汇编：已确认 `vlsseg3e32.v`、`vfmacc.vf`、`vssseg3e32.v`、`vsetvli` 路径。
-- 板卡：已完成 smoke；full validation 仅 `1.01x`~`1.03x`，transform-staging microbench 约 `2.89x`~`3.89x`，因此不接生产分流。
+- 反汇编：已确认 `vlsseg3e32.v`、`vfmacc.vf`、`vssseg3e32.v`、`vsetvli e32,m2` 路径仍归属 transform staging；`scoreTransformedWithTree` 作为标量 search tail 单独存在。
+- 板卡：本轮 rerun 已完成 smoke；transform-staging microbench 约 `2.73x`~`3.92x`，但 fresh-tree 和 prebuilt-tree full validation 都只有约 `1.01x`，因此仍不接生产分流。
 
 ## 验证结果
 
-- QEMU 专项测试：`make -C test-rvv/registration/transformation_validation_euclidean run_test_compare` 通过，std/RVV 两套构建均通过 4 个专项测试。
+- QEMU 专项测试：`make -C test-rvv/registration/transformation_validation_euclidean run_test_compare` 通过。本轮 rerun 中 std/RVV 两套构建均通过 7 个专项测试；历史首轮为 4 个专项测试。
 - QEMU bench：`make -C test-rvv/registration/transformation_validation_euclidean run_bench_compare` 通过，`output/qemu/analyze_bench_compare.log` 无 `未解析`、`n/a`、`Total Time 不计算`。QEMU 只作为构建、checksum、日志格式和指令路径证据。
 - 反汇编：`make -C test-rvv/registration/transformation_validation_euclidean dump_bench_rvv` 生成 `build/asm/riscv/bench_transformation_validation_euclidean_rvv.full.asm`；`output/qemu/rvv_asm_check.log` 确认 `vlsseg3e32.v`、`vfmacc.vf`、`vssseg3e32.v`、`vsetvli ... e32,m2`。
 - 板卡验证：`make -C test-rvv/registration/transformation_validation_euclidean board_smoke` 通过，日志在 `output/board/`。
 
-Milkv-Jupiter 结果：
+Milkv-Jupiter 历史基线结果（首轮 4-case 表，仅作 rerun 前对照）：
 
 | case                                    | Std ms/iter | RVV ms/iter | speedup | 结论                                                      |
 | --------------------------------------- | ----------: | ----------: | ------: | --------------------------------------------------------- |
@@ -107,6 +129,56 @@ Milkv-Jupiter 结果：
 | `tve transform-staging pointxyz 256K` |     12.1858 |      4.2220 |   2.89x | 局部片段在更大规模仍有收益                                |
 | `tve full-validation pointxyz 64K`    |    269.2100 |    267.4663 |   1.01x | full 入口包含 KdTree setup/search，局部收益被 search 稀释 |
 | `tve full-validation pointxyz 256K`   |   1255.8260 |   1219.2291 |   1.03x | full 入口仍是弱收益，不足以支撑生产接入                   |
+
+## 本轮 rerun：tree reuse 与组件消融
+
+本轮在不修改 production 源码的前提下，把 test-only 诊断拆成四个可计时边界：
+
+| case | 层级 | 计时边界 | 证明点 | 不能证明什么 |
+| --- | --- | --- | --- | --- |
+| `tve transform-staging pointxyz ...` | local fragment（局部片段） | 只测 `PointXYZ` 4x4 transform staging | 证明前置 affine transform 可被 RVV 加速 | 不代表完整 `validateTransformation` |
+| `tve kdtree-setup pointxyz ...` | component ablation（组件消融） | 只测 target `KdTree::setInputCloud` | 估算默认入口每次重建 target tree 的成本 | 不证明 search 或 RVV staging |
+| `tve search-only negative-control pointxyz ...` | negative control（负向对照） | transformed cloud 和 target tree 都预建，计时内只做 `nearestKSearch`、`max_range` 和 score tail | 证明 std/RVV 构建在搜索主成本上应接近 `1x` | 不证明 production dispatch 或 transform staging 收益 |
+| `tve full-validation fresh-tree pointxyz ...` | production-shaped diagnostic（生产形态诊断） | transform staging + target tree setup + search + score | 对应 production 默认 `force_no_recompute_=false` 形态 | 仍不是 production direct，因为 RVV 只在 test-only helper 中 |
+| `tve full-validation prebuilt-tree pointxyz ...` | production-shaped diagnostic | 预建 target tree，计时内 transform staging + search + score | 对应 `setSearchMethodTarget(..., force_no_recompute=true)` / tree reuse 场景 | 不证明真实 production RVV dispatch |
+
+新增专项测试：
+
+| 测试 | 层级 | 作用 |
+| --- | --- | --- |
+| `PrebuiltTreeScoreMatchesFreshTree` | production-shaped diagnostic correctness | 预建 KdTree 后，std 与 RVV candidate 的 score 和 accepted point 数一致。 |
+| `SearchOnlyScoreMatchesFullValidationTail` | component correctness | transformed cloud 直接进入 search tail 时，分数等于 fresh full validation 的尾段结果。 |
+| `ProductionForceNoRecomputeMatchesFreshTree` | public-entry-shaped correctness | 真实 `TransformationValidationEuclidean` 使用预建 tree 和 `force_no_recompute=true` 时，分数等于默认 fresh tree 形态。它只证明公开入口语义，不证明 RVV production dispatch。 |
+
+QEMU 结果：
+
+- `make -C test-rvv/registration/transformation_validation_euclidean run_test_compare`：std/RVV 各 7 个专项测试通过。
+- `make -C test-rvv/registration/transformation_validation_euclidean run_bench_compare`：10 个 bench case 均可解析，checksum 对齐或符合预期；QEMU timing 不作为性能结论。
+- `make -C test-rvv/registration/transformation_validation_euclidean dump_bench_rvv`：当前 asm 中可见 `vsetvli e32,m2`、`vlsseg3e32.v`、`vfmacc.vf` 和 `vssseg3e32.v`；`scoreTransformedWithTree` 是独立标量 search tail。
+
+Milkv-Jupiter rerun 结果：
+
+| case | Std ms/iter | RVV ms/iter | speedup | 结论 |
+| --- | ---: | ---: | ---: | --- |
+| `tve transform-staging pointxyz 64K` | 3.2473 | 0.8280 | 3.92x | 局部 4x4 staging 仍有明确收益。 |
+| `tve transform-staging pointxyz 256K` | 12.0023 | 4.3998 | 2.73x | 放大规模后局部 staging 仍有收益。 |
+| `tve kdtree-setup pointxyz 64K` | 86.3713 | 86.3952 | 1.00x | target tree setup 不受 RVV staging 影响。 |
+| `tve kdtree-setup pointxyz 256K` | 454.2784 | 467.1076 | 0.97x | setup 成本很大且非 RVV 覆盖段。 |
+| `tve search-only negative-control pointxyz 64K` | 176.3510 | 174.8610 | 1.01x | 搜索尾段基本同速，说明 full 小收益有运行波动 / 非 staging 成分。 |
+| `tve search-only negative-control pointxyz 256K` | 776.1762 | 769.9378 | 1.01x | 搜索主成本支配 prebuilt-tree 形态。 |
+| `tve full-validation fresh-tree pointxyz 64K` | 262.6956 | 259.4601 | 1.01x | 默认 production-shaped full 仍只有弱收益。 |
+| `tve full-validation fresh-tree pointxyz 256K` | 1267.0592 | 1255.5100 | 1.01x | 放大规模后仍没有稳定明显收益。 |
+| `tve full-validation prebuilt-tree pointxyz 64K` | 179.0340 | 176.9088 | 1.01x | tree reuse 后 full 仍被 search tail 主导。 |
+| `tve full-validation prebuilt-tree pointxyz 256K` | 785.7998 | 776.7294 | 1.01x | `force_no_recompute` 形态仍不足以进入 production-candidate。 |
+
+归因：
+
+- 64K fresh-tree 中，标量 transform staging 为 `3.2473 ms`，fresh full 为 `262.6956 ms`，staging 只占约 `1.24%`。即使只看 prebuilt-tree full，staging 也只占 `1.81%`。
+- 256K fresh-tree 中，标量 transform staging 为 `12.0023 ms`，fresh full 为 `1267.0592 ms`，staging 只占约 `0.95%`。prebuilt-tree 中 staging 占约 `1.53%`。
+- tree setup 本身占 fresh full 的约 `32.9%`（64K）和 `35.9%`（256K），但 RVV transform staging 不覆盖这部分。
+- search-only negative control 与 full validation 的 speedup 同为约 `1.01x`，说明 full validation 里的微弱差异不能可靠归因到 RVV transform；它也可能来自 KdTree/search 运行波动或坐标 FMA 微差导致的搜索路径细微变化。
+
+EvidenceDecision：`bench-only/no-production`。本轮补齐 tree reuse、`force_no_recompute`、full validation production-shaped diagnostic、search-dominated negative control 和 component ablation 后，仍没有发现稳定明显的 full validation 收益。若后续要重新评估，必须先有能减少 / 批量化 `nearestKSearch` 或复用 target tree 后仍显著提高 staging 占比的生产形态证据。
 
 transform-staging microbench 的 std/RVV checksum 不完全相同，原因是 RVV helper 使用 FMA 组合，标量表达式按编译器生成的浮点求值顺序执行，逐点结果存在约 `1e-7` 量级差异。专项测试使用 `1e-6f` 容差验证坐标一致；full validation 的 score 对拍通过。该差异不涉及 FRM/FCSR，helper 未使用 `_rm` intrinsic，也未修改浮点舍入环境。
 
@@ -120,10 +192,11 @@ tree.nearestKSearch(point, 1, nn_indices, nn_dists);
 
 以及每次 validation 前的 target tree 设置 / 构建成本。RVV helper 只替换 source 点的前置坐标变换，不改变 tree 构建、tree traversal、`max_range` 判断和 score 累加。
 
-板卡时间可以解释这个判断：
+本轮 rerun 的板卡时间可以解释这个判断：
 
-- 64K：标量 transform staging 为 `3.2105 ms`，full validation 为 `269.2100 ms`，staging 只占 full 的约 `1.19%`。即使把 staging 降到 0，理论上 full speedup 也只有约 `1.012x`；实测 `1.01x` 与这个上限一致。
-- 256K：标量 transform staging 为 `12.1858 ms`，full validation 为 `1255.8260 ms`，staging 只占 full 的约 `0.97%`。实测 full 为 `1.03x`，高于简单片段占比可解释的部分，可能来自 KdTree traversal / cache / 运行波动或 FMA 后坐标微差对搜索路径的影响；当前没有 search-only counter 能把这部分归因到 RVV transform，因此不能作为生产收益依据。
+- 64K：标量 transform staging 为 `3.2473 ms`，fresh-tree full validation 为 `262.6956 ms`，staging 只占 fresh full 的约 `1.24%`；prebuilt-tree full validation 为 `179.0340 ms`，staging 也只占约 `1.81%`。
+- 256K：标量 transform staging 为 `12.0023 ms`，fresh-tree full validation 为 `1267.0592 ms`，staging 只占 fresh full 的约 `0.95%`；prebuilt-tree full validation 为 `785.7998 ms`，staging 也只占约 `1.53%`。
+- search-only negative control 为 `1.01x` / `1.01x`，与 fresh-tree 和 prebuilt-tree full validation 的 speedup 接近。因此 full validation 的微弱差异不能可靠归因到 RVV transform staging，也不能作为生产收益依据。
 
 结论是：`nearestKSearch` 及其相关 KdTree 成本确实是 full validation 只剩弱收益的主要原因。这个主题只能证明 transform staging 局部可 RVV 化，不能证明公开入口主成本可被 RVV 覆盖。
 
@@ -164,6 +237,6 @@ knn_search(*flann_index_,
 
 ## 结论
 
-`TransformationValidationEuclidean` 的 4x4 transform staging 可以 RVV 化并保持函数级语义，板卡片段收益为 `2.89x` 到 `3.89x`。但 full validation 只有 `1.01x` 到 `1.03x`，且主要成本来自 KdTree setup / `nearestKSearch`，当前 RVV 方案没有覆盖入口主成本。
+`TransformationValidationEuclidean` 的 4x4 transform staging 可以 RVV 化并保持函数级语义，本轮板卡 rerun 的片段收益为 `2.73x` 到 `3.92x`。但 fresh-tree 和 prebuilt-tree full validation 都只有约 `1.01x`，且主要成本来自 KdTree setup / `nearestKSearch`，当前 RVV 方案没有覆盖入口主成本。
 
-因此本主题收敛为 bench-diagnosis，不接入上游生产分流。后续若重新评估，需要先证明 search 之外的 staging 在真实调用场景中占比显著提高，或提出能减少 / 批量化 KdTree 查询成本的方案；否则单独优化 transform staging 不值得增加生产模板分流和泛型点类型维护边界。
+因此本主题继续收敛为 bench-diagnosis，不接入上游生产分流。后续若重新评估，需要先证明 search 之外的 staging 在真实调用场景中占比显著提高，或提出能减少 / 批量化 KdTree 查询成本的方案；否则单独优化 transform staging 不值得增加生产模板分流和泛型点类型维护边界。

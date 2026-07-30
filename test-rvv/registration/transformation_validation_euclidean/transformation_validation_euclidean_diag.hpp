@@ -1,5 +1,12 @@
 #pragma once
 
+// 本文件做什么：
+// 这里的 helper 只服务 transformation_validation_euclidean 的 test-rvv 诊断。
+// 它把 production 标量入口拆成 transform staging（变换暂存）、KdTree setup
+//（搜索树构建）、nearestKSearch（最近邻查询）和 score tail（分数累加尾段），
+// 方便测试和 bench 分别证明“局部 RVV staging 成立”和“完整入口是否被搜索成本稀释”。
+// 这些函数不会修改 production dispatch（生产分流），也不能单独证明 production direct。
+
 #include <pcl/rvv_point_load.h>
 #include <pcl/rvv_point_store.h>
 #include <pcl/point_cloud.h>
@@ -9,12 +16,20 @@
 #include <Eigen/Core>
 
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <vector>
 
 namespace pcl::registration::transformation_validation_euclidean_diag {
 
 using Matrix4f = Eigen::Matrix4f;
+using KdTree = pcl::search::KdTree<pcl::PointXYZ>;
+
+struct ValidationResult {
+  double score{std::numeric_limits<double>::max()};
+  double distance_sum{0.0};
+  int accepted_points{0};
+};
 
 inline void
 transformPointXYZStd(const pcl::PointCloud<pcl::PointXYZ>& src,
@@ -39,6 +54,9 @@ transformPointXYZStd(const pcl::PointCloud<pcl::PointXYZ>& src,
 }
 
 #if defined(__RVV10__)
+// RVV 诊断链路只覆盖 PointXYZ AoS（结构数组）里的 x/y/z 字段。
+// 它复刻 production 入口前置 4x4 affine transform（仿射变换）公式，
+// 后续 KdTree 查询和 score 累加仍由标量 helper 执行。
 inline void
 transformPointXYZRVV(const pcl::PointCloud<pcl::PointXYZ>& src,
                      pcl::PointCloud<pcl::PointXYZ>& dst,
@@ -105,33 +123,95 @@ transformPointXYZCandidate(const pcl::PointCloud<pcl::PointXYZ>& src,
   transformPointXYZStd(src, dst, transformation);
 }
 
+inline void
+setupTargetTree(KdTree& tree, const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& target)
+{
+  tree.setInputCloud(target);
+}
+
+// search-only 负向对照使用这段 helper：输入已经完成 transform staging，
+// 计时内只保留 nearestKSearch 和 max_range 过滤。若 std/RVV 构建在这个
+// case 上接近 1x，说明 RVV staging 并没有覆盖入口主成本。
+inline ValidationResult
+scoreTransformedWithTree(const pcl::PointCloud<pcl::PointXYZ>& transformed,
+                         KdTree& tree,
+                         double max_range)
+{
+  pcl::Indices nn_indices(1);
+  std::vector<float> nn_dists(1);
+  ValidationResult result;
+  for (const auto& point : transformed) {
+    tree.nearestKSearch(point, 1, nn_indices, nn_dists);
+    if (nn_dists[0] > max_range)
+      continue;
+    result.distance_sum += nn_dists[0];
+    ++result.accepted_points;
+  }
+
+  if (result.accepted_points > 0)
+    result.score = result.distance_sum / result.accepted_points;
+  return result;
+}
+
+inline ValidationResult
+validateTransformationStdWithTree(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& src,
+                                  KdTree& tree,
+                                  const Matrix4f& transformation,
+                                  double max_range)
+{
+  pcl::PointCloud<pcl::PointXYZ> transformed;
+  transformPointXYZStd(*src, transformed, transformation);
+  return scoreTransformedWithTree(transformed, tree, max_range);
+}
+
+inline ValidationResult
+validateTransformationCandidateWithTree(
+    const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& src,
+    KdTree& tree,
+    const Matrix4f& transformation,
+    double max_range)
+{
+  pcl::PointCloud<pcl::PointXYZ> transformed;
+  transformPointXYZCandidate(*src, transformed, transformation);
+  return scoreTransformedWithTree(transformed, tree, max_range);
+}
+
+// fresh-tree 形态对应 production 默认行为：每次 validation 设置 target tree。
+// prebuilt-tree 形态对应 setSearchMethodTarget(..., force_no_recompute=true)
+// 这类 tree reuse 场景：计时内跳过 tree setup，但仍保留 transform staging 和 search tail。
+inline ValidationResult
+validateTransformationStdDetailed(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& src,
+                                  const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& target,
+                                  const Matrix4f& transformation,
+                                  double max_range)
+{
+  KdTree tree;
+  setupTargetTree(tree, target);
+  return validateTransformationStdWithTree(src, tree, transformation, max_range);
+}
+
+inline ValidationResult
+validateTransformationCandidateDetailed(
+    const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& src,
+    const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& target,
+    const Matrix4f& transformation,
+    double max_range)
+{
+  // Full diagnostic keeps the original KdTree search scalar. This measures
+  // whether RVV transform staging survives the search cost that dominates the
+  // production validateTransformation entry.
+  KdTree tree;
+  setupTargetTree(tree, target);
+  return validateTransformationCandidateWithTree(src, tree, transformation, max_range);
+}
+
 inline double
 validateTransformationStd(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& src,
                           const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& target,
                           const Matrix4f& transformation,
                           double max_range)
 {
-  pcl::PointCloud<pcl::PointXYZ> transformed;
-  transformPointXYZStd(*src, transformed, transformation);
-
-  pcl::search::KdTree<pcl::PointXYZ> tree;
-  tree.setInputCloud(target);
-
-  pcl::Indices nn_indices(1);
-  std::vector<float> nn_dists(1);
-  double fitness_score = 0.0;
-  int nr = 0;
-  for (const auto& point : transformed) {
-    tree.nearestKSearch(point, 1, nn_indices, nn_dists);
-    if (nn_dists[0] > max_range)
-      continue;
-    fitness_score += nn_dists[0];
-    ++nr;
-  }
-
-  if (nr > 0)
-    return fitness_score / nr;
-  return std::numeric_limits<double>::max();
+  return validateTransformationStdDetailed(src, target, transformation, max_range).score;
 }
 
 inline double
@@ -140,30 +220,8 @@ validateTransformationCandidate(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& 
                                 const Matrix4f& transformation,
                                 double max_range)
 {
-  pcl::PointCloud<pcl::PointXYZ> transformed;
-  transformPointXYZCandidate(*src, transformed, transformation);
-
-  // Full diagnostic keeps the original KdTree search scalar. This measures
-  // whether RVV transform staging survives the search cost that dominates the
-  // production validateTransformation entry.
-  pcl::search::KdTree<pcl::PointXYZ> tree;
-  tree.setInputCloud(target);
-
-  pcl::Indices nn_indices(1);
-  std::vector<float> nn_dists(1);
-  double fitness_score = 0.0;
-  int nr = 0;
-  for (const auto& point : transformed) {
-    tree.nearestKSearch(point, 1, nn_indices, nn_dists);
-    if (nn_dists[0] > max_range)
-      continue;
-    fitness_score += nn_dists[0];
-    ++nr;
-  }
-
-  if (nr > 0)
-    return fitness_score / nr;
-  return std::numeric_limits<double>::max();
+  return validateTransformationCandidateDetailed(src, target, transformation, max_range)
+      .score;
 }
 
 } // namespace pcl::registration::transformation_validation_euclidean_diag

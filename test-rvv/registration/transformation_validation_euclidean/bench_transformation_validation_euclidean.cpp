@@ -1,5 +1,11 @@
 #include "transformation_validation_euclidean_diag.hpp"
 
+// 本文件做什么：
+// 这个 benchmark（性能测试）把 TransformationValidationEuclidean 的 test-only
+// 诊断拆成四类计时边界：transform staging、KdTree setup、search-only negative
+// control（只测最近邻搜索的负向对照）和 full validation。QEMU 运行只用于
+// 构建、checksum 和日志形状；真实性能结论必须来自板卡或目标硬件。
+
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -122,6 +128,46 @@ benchTransform(const std::string& name, const pcl::PointCloud<pcl::PointXYZ>& so
   });
 }
 
+// 只测 target KdTree setup。它回答“force_no_recompute/tree reuse 能省掉多少
+// 一次性准备成本”，不包含 transform staging 或 nearestKSearch。
+void
+benchTreeSetup(const std::string& name,
+               const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& target)
+{
+  Benchmarker bench(name);
+  bench.run([&]() {
+    diag::KdTree tree;
+    diag::setupTargetTree(tree, target);
+    bench.setChecksum(target->size());
+    doNotOptimize(&tree);
+  });
+}
+
+// search-only negative control（负向对照）把 transformed cloud 和 KdTree 都提前准备好。
+// std/RVV 两个构建理论上走同一条标量 search tail，因此 speedup 应接近 1x。
+void
+benchSearchOnly(const std::string& name,
+                const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& source)
+{
+  const auto transform = makeTransform();
+  auto target = pcl::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+  pcl::PointCloud<pcl::PointXYZ> transformed;
+  diag::transformPointXYZStd(*source, *target, transform);
+  diag::transformPointXYZStd(*source, transformed, transform);
+
+  diag::KdTree tree;
+  diag::setupTargetTree(tree, target);
+  Benchmarker bench(name);
+  bench.run([&]() {
+    const auto result = diag::scoreTransformedWithTree(transformed, tree, 1.0);
+    bench.setChecksum(checksumScore(result.score) ^
+                      static_cast<std::uint64_t>(result.accepted_points));
+    doNotOptimize(result.score);
+  });
+}
+
+// fresh-tree full validation 对应 production 默认形态：每次计分都设置 target tree，
+// 然后对 transformed source 逐点 nearestKSearch。
 void
 benchFullValidation(const std::string& name, const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& source)
 {
@@ -133,6 +179,27 @@ benchFullValidation(const std::string& name, const pcl::PointCloud<pcl::PointXYZ
     const double score = diag::validateTransformationCandidate(source, target, transform, 1.0);
     bench.setChecksum(checksumScore(score));
     doNotOptimize(score);
+  });
+}
+
+// prebuilt-tree full validation 对应 force_no_recompute/tree reuse 场景。它跳过
+// KdTree setup，但仍保留 transform staging、nearestKSearch 和 score tail。
+void
+benchFullValidationPrebuiltTree(const std::string& name,
+                                const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& source)
+{
+  const auto transform = makeTransform();
+  auto target = pcl::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+  diag::transformPointXYZStd(*source, *target, transform);
+  diag::KdTree tree;
+  diag::setupTargetTree(tree, target);
+  Benchmarker bench(name);
+  bench.run([&]() {
+    const auto result =
+        diag::validateTransformationCandidateWithTree(source, tree, transform, 1.0);
+    bench.setChecksum(checksumScore(result.score) ^
+                      static_cast<std::uint64_t>(result.accepted_points));
+    doNotOptimize(result.score);
   });
 }
 
@@ -154,11 +221,24 @@ main()
 
   const auto source_64k = makeCloud(64 * 1024);
   const auto source_256k = makeCloud(256 * 1024);
+  auto target_64k = pcl::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+  auto target_256k = pcl::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+  const auto transform = makeTransform();
+  diag::transformPointXYZStd(*source_64k, *target_64k, transform);
+  diag::transformPointXYZStd(*source_256k, *target_256k, transform);
 
   benchTransform("tve transform-staging pointxyz 64K", *source_64k);
   benchTransform("tve transform-staging pointxyz 256K", *source_256k);
-  benchFullValidation("tve full-validation pointxyz 64K", source_64k);
-  benchFullValidation("tve full-validation pointxyz 256K", source_256k);
+  benchTreeSetup("tve kdtree-setup pointxyz 64K", target_64k);
+  benchTreeSetup("tve kdtree-setup pointxyz 256K", target_256k);
+  benchSearchOnly("tve search-only negative-control pointxyz 64K", source_64k);
+  benchSearchOnly("tve search-only negative-control pointxyz 256K", source_256k);
+  benchFullValidation("tve full-validation fresh-tree pointxyz 64K", source_64k);
+  benchFullValidation("tve full-validation fresh-tree pointxyz 256K", source_256k);
+  benchFullValidationPrebuiltTree(
+      "tve full-validation prebuilt-tree pointxyz 64K", source_64k);
+  benchFullValidationPrebuiltTree(
+      "tve full-validation prebuilt-tree pointxyz 256K", source_256k);
 
   printBanner('=');
   return 0;
