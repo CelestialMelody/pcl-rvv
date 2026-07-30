@@ -466,7 +466,7 @@ full-cloud 是最规则的入口。source 和 target 按相同 row 序号顺序�
 
 correspondences 是 ICP（迭代最近点）配准中常见的匹配结果入口。它按 `index_query/index_match` 枚举点对，weighted 版本还从 `correspondence.weight` 生成权重流。这个入口能暴露最不规则的 indexed row 组合：source gather、target gather、correspondence 展开、权重来源切换，以及 row 分布带来的 cache locality 风险。
 
-source indices 和 source+target indices 是公开入口中真实存在的中间形态。此前 transformation estimation normal-equation 诊断没有对它们做独立 RVV 性能诊断；已有工作只证明这些入口在 production fallback（回退路径）下继续走标量语义。2026-07-22 本轮已在 symmetric point-to-plane LLS 的 test-rvv 诊断层补了 source 单侧 indices 和双侧 indices 消融。point-to-plane LLS 与 weighted point-to-plane LLS 仍没有这两条中间形态的板卡证据。
+source indices 和 source+target indices 是公开入口中真实存在的中间形态。此前 transformation estimation normal-equation 诊断没有对它们做独立 RVV 性能诊断；已有工作只证明这些入口在 production fallback（回退路径）下继续走标量语义。本轮已在 symmetric point-to-plane LLS 的 test-rvv 诊断层补了 source 单侧 indices 和双侧 indices 消融。point-to-plane LLS 与 weighted point-to-plane LLS 仍没有这两条中间形态的板卡证据。
 
 已有板卡证据可以作为边界：
 
@@ -480,7 +480,7 @@ source indices 和 source+target indices 是公开入口中真实存在的中间
 
 ## 11. symmetric LLS 已补的两个 indexed 消融
 
-2026-07-22 本轮在 `test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls/` 中补了两个 diagnostic（诊断）消融，并在 reviewer 认可后把 source indices + target full-cloud 接成 production direct。dual-indices 仍不修改 production，也不把 source+target indices 公开入口接到 RVV 分流；价值是把 correspondences 的混合成本拆开，让后续 worker 或 reviewer 能用板卡数据判断下一步。
+本轮在 `test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls/` 中补了两个 diagnostic（诊断）消融，并在 reviewer 认可后把 source indices + target full-cloud 接成 production direct。dual-indices 仍不修改 production，也不把 source+target indices 公开入口接到 RVV 分流；价值是把 correspondences 的混合成本拆开，让后续 worker 或 reviewer 能用板卡数据判断下一步。
 
 第一个消融是 source 单侧索引：
 

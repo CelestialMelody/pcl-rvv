@@ -135,7 +135,7 @@ test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/
 
 - 不提交大量 raw run 目录。
 - 不保留临时 QEMU 子目录作为长期证据。
-- 已跟踪顶层 output 日志如果只是被最近 run 覆盖，应恢复为干净状态。
+- 已跟踪顶层 output 日志如果只是被 rerun 覆盖，应恢复为干净状态。
 - 文档只记录摘要数字、命令、证据边界和不能证明的范围。
 
 若未来选择提交日志，必须先使用 topic Makefile 的 `sanitize_output_logs` / `check_output_logs_sanitized`，或 `test-rvv/script/sanitize_evidence_logs.py --check <logs>`。

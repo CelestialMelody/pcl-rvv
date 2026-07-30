@@ -14,7 +14,7 @@
 
 ## 2. 标量路径与诊断边界
 
-生产源码位于 `registration/include/pcl/registration/impl/correspondence_estimation_organized_projection.hpp`。核心流程是：
+生产源码位于 `registration/include/pcl/registration/impl/correspondence_estimation_organized_projection.hpp`。主要流程是：
 
 ```cpp
 for (const auto& src_idx : (*indices_)) {
@@ -198,7 +198,7 @@ vcompress 保序输出 source_index + x/y/z
 生产 RVV 覆盖：
 
 - 通过 PCL traits 证明有 `x/y/z` 字段，且三个字段都是单个 `float` 的 source / target 点类型；
-- 2026-07-22 起，该字段 gate 由公共 `pcl::rvv::RVVXYZFloatLayout<PointT>` 表达；本地 `OrganizedProjectionXYZFloatLayout` 已删除。该公共 trait 与 CEOP 原语义一致，只检查 PCL traits 注册的单个 `float x/y/z` 字段，不额外要求 POD / standard-layout，因此没有收窄 `PointXYZI` 等已验证组合。
+- 公共 trait 重构后，该字段 gate 由 `pcl::rvv::RVVXYZFloatLayout<PointT>` 表达；本地 `OrganizedProjectionXYZFloatLayout` 已删除。该公共 trait 与 CEOP 原语义一致，只检查 PCL traits 注册的单个 `float x/y/z` 字段，不额外要求 POD / standard-layout，因此没有收窄 `PointXYZI` 等已验证组合。
 - 当前专项测试覆盖 `PointXYZ -> PointXYZ`、`PointXYZ -> PointXYZI`、`PointXYZI -> PointXYZI`；
 - test-only 派生类和生产 direct class 测试覆盖公开调用形状 `determineCorrespondences(correspondences, max_distance)`；
 - 上游 `initCompute()`、`CorrespondenceEstimationBase` fake indices 和 `setIndices()` subset 已纳入专项对拍与生产入口测试；
@@ -295,7 +295,7 @@ Segment store 可以在字段同宽、同类型、结构体连续且 LMUL / fiel
 | `projectOrganizedProjectionCandidatesRVV`               | 生产 RVV helper      | `input_ / target_ / indices_` -> candidates | source finite、4x4 transform、`z>0`     | 生产 source transform staging 分流              |
 | `organizedProjectionTransformIsIdentity`                | 生产分支 helper      | `src_to_tgt_transformation_` -> bool          | identity transform 下 `p_src3` 等于原始 source xyz      | 选择 identity fast path 或 non-identity FMA staging |
 | `finishOrganizedProjectionCorrespondences`              | 生产标量 tail        | candidates -> correspondences                 | 原循环投影、target、depth/distance、append                | 生产 RVV path 的标量尾段              |
-| `determineCorrespondencesOrganizedProjectionStd`        | 生产 fallback helper | 上游对象状态展开参数 -> correspondences       | 原 `determineCorrespondences` 循环                      | 非 RVV 与 fallback 权威路径           |
+| `determineCorrespondencesOrganizedProjectionStd`        | 生产 fallback helper | 上游对象状态展开参数 -> correspondences       | 原 `determineCorrespondences` 循环                      | 非 RVV 与 fallback 的标量路径         |
 
 早期诊断曾把 `u/v` 截断和图像范围检查放在 RVV 阶段。QEMU 对拍显示 correspondence 数量不一致，原因是投影表达式中的 FMA contraction 与普通乘加顺序在像素边界附近会改变 `static_cast<int>` 的输入。本轮把 RVV projection-pixel 诊断改为 `vfmacc` 后，`ProjectionPixelRvvDiagnosticMatchesScalar`、`IdentityProjectionPixelDiagnosticFakeIndicesMatchesScalar` 和 `IdentityProjectionPixelDiagnosticSubsetIndicesMatchesScalar` 均通过。non-identity transform staging 已按 Eigen 4x4 evaluator 的两个 FMA 部分和结构重写，`NonIdentityTransformRvvStagingBoundaryMatchesScalar` 及其 fake indices、subset、small z、`PointXYZI` 扩展测试均通过。production helper 已采用同一 FMA 结构，并新增 production non-identity direct class 测试。
 
@@ -381,7 +381,7 @@ ce.determineCorrespondences(correspondences, max_distance);
 
 生产入口采用相同阶段边界，并把原循环抽成 fallback helper。第一版生产代码没有新增类成员，也没有改变公开 API；所有新增实体都在 impl header 的 `pcl::registration::detail` 中。
 
-这些 `detail` helper 是 free helper，内部没有 `this`，也不能直接访问 `input_`、`target_`、`indices_`、`projection_matrix_`、`depth_threshold_` 等类成员。因此生产入口会把 helper 实际需要的对象状态显式传入。这个拆分只改变源码组织方式；`determineCorrespondencesOrganizedProjectionStd` 保存原标量循环语义，作为非 RVV 和 fallback 的权威实现。
+这些 `detail` helper 是 free helper，内部没有 `this`，也不能直接访问 `input_`、`target_`、`indices_`、`projection_matrix_`、`depth_threshold_` 等类成员。因此生产入口会把 helper 实际需要的对象状态显式传入。这个拆分只改变源码组织方式；`determineCorrespondencesOrganizedProjectionStd` 保存原标量循环语义，用于非 RVV 和 fallback 路径。
 
 `finishOrganizedProjectionCorrespondences` 和 `finishOrganizedProjectionCorrespondencesFromProjected` 保留为分阶段 fallback tail。当前 production RVV 是逐级扩大覆盖面的结构：
 
@@ -506,7 +506,7 @@ const double dist = (p_src3 - pt_tgt.getVector3fMap()).norm();
 if (dist < max_distance) append;
 ```
 
-其中 `(p_src3 - pt_tgt.getVector3fMap())` 是 `Eigen::Vector3f`，`norm()` 的核心计算先发生在 float 域，赋给 `double` 是结果拓宽。float 到 double 的拓宽符合标量路径；真正需要保留的是 `double(float_norm) < max_distance`，不能简化成 `float_norm < float(max_distance)`。当前反汇编显示 production scalar tail 使用 `fmul.s + fmadd.s + fmadd.s + fsqrt.s + fcvt.d.s + flt.d`。production RVV 按同一 float32 结构写为 `vfmul.vv + vfmacc.vv + vfmacc.vv + vfsqrt.v`；当 `static_cast<double>(float(max_distance)) < max_distance` 时使用 `vmfle.vf`，否则使用 `vmflt.vf`，从而等价于标量 double predicate。`DistanceRvvMatchesEigenNormBits` 证明 RVV distance 与 Eigen `Vector3f::norm()` 的 float bit pattern 一致；`DistanceRvvThresholdPredicateMatchesDoubleScalarPredicate` 证明 `<` / `<=` 选择覆盖 double threshold 边界。
+其中 `(p_src3 - pt_tgt.getVector3fMap())` 是 `Eigen::Vector3f`，`norm()` 的主要计算先发生在 float 域，赋给 `double` 是结果拓宽。float 到 double 的拓宽符合标量路径；真正需要保留的是 `double(float_norm) < max_distance`，不能简化成 `float_norm < float(max_distance)`。当前反汇编显示 production scalar tail 使用 `fmul.s + fmadd.s + fmadd.s + fsqrt.s + fcvt.d.s + flt.d`。production RVV 按同一 float32 结构写为 `vfmul.vv + vfmacc.vv + vfmacc.vv + vfsqrt.v`；当 `static_cast<double>(float(max_distance)) < max_distance` 时使用 `vmfle.vf`，否则使用 `vmflt.vf`，从而等价于标量 double predicate。`DistanceRvvMatchesEigenNormBits` 证明 RVV distance 与 Eigen `Vector3f::norm()` 的 float bit pattern 一致；`DistanceRvvThresholdPredicateMatchesDoubleScalarPredicate` 证明 `<` / `<=` 选择覆盖 double threshold 边界。
 
 #### 4.1.1 FMA contraction 语义对齐诊断
 
@@ -579,7 +579,7 @@ QEMU bench 只记录 checksum 和日志格式，时间不参与性能判断：
 
 因此 projection-pixel 增量诊断结论已经从语义失败推进到 correctness 通过，并成为 production 前段。target 间接读取、target finite、depth mask 和 final distance predicate 也已作为第三阶段 production helper 接入；剩余标量边界是 `pcl::Correspondence` append 和 stored distance 写出。
 
-### 4.2 核心片段
+### 4.2 关键片段
 
 ```cpp
 const vint32m2_t v_indices = __riscv_vle32_v_i32m2(indices.data() + i, vl);
@@ -696,7 +696,7 @@ tail scalar:   project -> target.at(u,v) -> append correspondence
 - 反汇编：`build/asm/riscv/bench_correspondence_estimation_organized_projection_rvv.asm` 确认 `vsetvli ... e32,m2`、`vluxei32.v`、`vfmul.vf`、`vfmacc.vf`、`vfdiv.vv`、`vcompress.vm`、`vcpop.m`、`vse32.v`，并确认 projection-pixel 诊断路径出现 `vfcvt.rtz.x.f.v`。production 符号 `acceptProjectedOrganizedProjectionCandidatesRVV<PointXYZ>` 附近可见 target/projected gather 的 `vluxei32.v`、depth mask `vmfle.vf`、distance predicate 的 `vfmul.vv`、`vfmacc.vv`、`vfsqrt.v`、`vmfle.vf` / `vmflt.vf`、以及 `vcompress.vm`、`vcpop.m` 和 `vse32.v`；压缩后 stored distance 标量重算仍可见 `fsqrt.s`、`fcvt.d.s` 和 `flt.d`。
 - 板卡：`output/board/run_test.log`、`run_bench_std.log`、`run_bench_rvv.log`、`analyze_bench_compare.log`。
 
-Milkv-Jupiter 最新结果：
+Milkv-Jupiter 板卡结果：
 
 | case                                                       | Std ms/iter | RVV ms/iter | speedup | 结论 |
 | ---------------------------------------------------------- | ----------: | ----------: | ------: | ---- |
@@ -727,7 +727,7 @@ target-predicate production-shaped prototype 已补板卡结果，并已按 fina
 
 - 可证明语义一致的生产 RVV 范围清晰：source `x/y/z` gather、source finite、identity fast path 或 Eigen-aligned non-identity transform staging、transformed `z > 0` 和 `vcompress` staging。
 - production-shaped 诊断已经覆盖真实 `initCompute()`、fake indices、`setIndices()` subset、`PointXYZI` 组合和 full 输出顺序。
-- 板卡 identity production fake/explicit case 最新为 `1.64x` / `1.65x`，non-identity production fake/explicit case 均为 `2.36x`；生产改动保持在 source staging helper、pixel staging helper、target-predicate staging helper、标量 accepted tail 和原循环 fallback helper 内。
+- 板卡 identity production fake/explicit case rerun 结果为 `1.64x` / `1.65x`，non-identity production fake/explicit case 均为 `2.36x`；生产改动保持在 source staging helper、pixel staging helper、target-predicate staging helper、标量 accepted tail 和原循环 fallback helper 内。
 - 投影截断和图像范围检查已经进入第二阶段 production RVV；target gather、target finite 和 depth mask 已进入第三阶段 production RVV。
 - distance mask 在 test-rvv prototype 中保留，production 已接入 final distance predicate。新增 RVV-only bit 对拍证明 `vfmul + vfmacc + vfmacc + vfsqrt.f32` 与 Eigen `Vector3f::norm()` 一致，新增 threshold 诊断证明 RVV `<` / `<=` 分支等价于 `double(float_norm) < max_distance`。板卡 prototype 显示 target-predicate staging `1.68x` / `1.69x`，identity target-predicate full diagnostic `1.60x` / `1.62x`，上游式 accepted prototype fake/explicit 为 `1.63x` / `1.62x`，non-identity fake/explicit 均为 `2.12x`。
 
@@ -735,7 +735,7 @@ target-predicate production-shaped prototype 已补板卡结果，并已按 fina
 
 1. 在 `correspondence_estimation_organized_projection.hpp` 的 impl header 内增加 `pcl::registration::detail` helper，RVV helper 限定在 `#if defined(__RVV10__)`。
 2. traits gate 只作为 RVV staging 入口条件：source / target 必须有 PCL 注册的单个 `float x/y/z` 字段；`Scalar` 必须是 `float`；identity transform 走原始 xyz 快路径，non-identity transform 走 Eigen-aligned FMA staging；尺寸和 `vlmax_e32m2 <= 64` 条件失败时回退。
-3. 原标量循环抽为 `determineCorrespondencesOrganizedProjectionStd`，作为所有 fallback 的权威路径。
+3. 原标量循环抽为 `determineCorrespondencesOrganizedProjectionStd`，作为所有 fallback 的标量路径。
 4. RVV 分流先生成 `OrganizedProjectionCandidate{source_index, x, y, z}`，再尝试生成 `ProjectedOrganizedProjectionCandidate{source_index, target_index, x, y, z}`；projected staging 成功后尝试 `AcceptedOrganizedProjectionCandidate{source_index, target_index, distance}`，其中 target gather、target finite、depth mask 和 final distance predicate 用 RVV，stored distance 值用标量 Eigen `norm()` 重算。
 5. `determineCorrespondences` 的公开 API、类成员布局和 `determineReciprocalCorrespondences` 行为保持不变。
 
@@ -755,6 +755,6 @@ target-predicate production-shaped prototype 已补板卡结果，并已按 fina
 
 - 投影与阈值边界扩展：当前已用 `vfmacc` 对齐标量 contraction，并通过 QEMU / 板卡测试；后续可继续补更密集的整数边界、负投影坐标、小 `z` 和阈值邻域数据。
 - VLEN 与临时 buffer 泛化：当前固定 `[64]` 栈 buffer 与 `vlmax_e32m2 <= 64` gate 配套；若目标板卡出现更大 VLEN，可评估动态 scratch、固定 VL 分块或 SoA staging，但需要重新验证复杂度和板卡收益。
-- 输出写入：当前 accepted lane 到 `pcl::Correspondence` 的 append 和 stored distance 写出保留标量。继续 RVV 化需要证明结构体布局、scatter 地址、可变数量保序写出和 stored distance bit pattern 都可控；目前收益风险比不支持作为下一步默认方向。
+- 输出写入：当前 accepted lane 到 `pcl::Correspondence` 的 append 和 stored distance 写出保留标量。继续 RVV 化需要证明结构体布局、scatter 地址、可变数量保序写出和 stored distance bit pattern 都可控；在当前证据下，收益风险比不支持作为下一步默认方向。
 
 这些增量需要在独立诊断中重新证明语义和 full production case 收益。当前 production-ready 边界是 source transform staging、projection-pixel staging 和 target-predicate staging；最终 append / stored distance 写出仍是刻意保留的标量边界。

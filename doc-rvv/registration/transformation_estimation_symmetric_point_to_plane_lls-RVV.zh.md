@@ -2,7 +2,7 @@
 
 ## 收尾摘要
 
-`TransformationEstimationSymmetricPointToPlaneLLS::estimateRigidTransformation` 已完成第三轮 production integration loop（生产接入闭环），并在后续 dispatch structure cleanup（分流结构收口）中对齐 PCL 既有 SIMD 源码组织风格。production（生产源码）现在用 row-source policy（行来源策略）统一两条已获证据支持的数据流：full-cloud（全云顺序扫描）和 source indices + target full-cloud（source 索引 + target 全云）。两条路径共用后半段 RVV symmetric row pipeline（对称行公式流水线）：法线同向选择、finite mask（有限值掩码）、`(p + q).cross(n)` 公式、`vcompress` 压缩和 `ATA/ATb` 尾段累加；policy 只负责“前半段如何取 source/target row”。公开 overload 现在保持为“语义检查 -> RVV 短路 -> Std fallback”的小型分发层，标量权威路径集中到 `estimateSymmetricPointNormal*Std` helper，RVV 路径仍由 `estimateSymmetricPointNormal*RVV` helper 负责。`PointSource` 和 `PointTarget` 仍必须分别满足 `x/y/z/normal_x/normal_y/normal_z` 都是单个 `float` 字段、POD（普通数据布局）/ standard-layout（标准布局）和 offset alignment（字段偏移对齐）条件，`Scalar=float`。source+target indices、correspondences 和 `Scalar=double` 继续走 `Std` 标量路径。
+`TransformationEstimationSymmetricPointToPlaneLLS::estimateRigidTransformation` 已完成第三轮 production integration loop（生产接入闭环），并在后续 dispatch structure cleanup（分流结构收口）中对齐 PCL 既有 SIMD 源码组织风格。production（生产源码）现在用 row-source policy（行来源策略）统一两条已获证据支持的数据流：full-cloud（全云顺序扫描）和 source indices + target full-cloud（source 索引 + target 全云）。两条路径共用后半段 RVV symmetric row pipeline（对称行公式流水线）：法线同向选择、finite mask（有限值掩码）、`(p + q).cross(n)` 公式、`vcompress` 压缩和 `ATA/ATb` 尾段累加；policy 只负责“前半段如何取 source/target row”。公开 overload 现在保持为“语义检查 -> RVV 短路 -> Std fallback”的小型分发层，原标量路径集中到 `estimateSymmetricPointNormal*Std` helper，RVV 路径仍由 `estimateSymmetricPointNormal*RVV` helper 负责。`PointSource` 和 `PointTarget` 仍必须分别满足 `x/y/z/normal_x/normal_y/normal_z` 都是单个 `float` 字段、POD（普通数据布局）/ standard-layout（标准布局）和 offset alignment（字段偏移对齐）条件，`Scalar=float`。source+target indices、correspondences 和 `Scalar=double` 继续走 `Std` 标量路径。
 
 QEMU correctness（QEMU 正确性验证，不代表真实性能）通过，bench（性能测试）输出合同可解析，反汇编证明真实 public estimator（公开估计器）会调用 `pcl::registration::detail::estimateSymmetricPointNormalRowsRVV<RowSourcePolicy>`。生产 helper 模板实例覆盖 full-cloud 的 `PointNormal -> PointNormal`、`PointXYZINormal -> PointXYZINormal`，以及 source-indexed 的 `PointNormal -> PointNormal`、`PointXYZINormal -> PointXYZINormal`。反汇编中 full-cloud policy 可见 `vlse32.v` stride load；source-indexed policy 可见 `vle32.v` 读取 source index stream、`vmul.vx` 生成 byte offset、source `vluxei32.v` gather 和 target `vlse32.v` stride load。板卡 `board_smoke` 已在 Milkv-Jupiter 上通过 25 个专项测试；production-direct full-cloud `PointNormal` 64K / 256K 为 `2.71x` / `2.70x`，`PointXYZINormal` 64K / 256K 为 `2.71x` / `2.48x`；production-direct source-indexed `PointNormal` 为 `2.11x` / `1.87x`，`PointXYZINormal` 为 `2.10x` / `1.90x`。diagnostic dual-indices 仍为 `0.80x` / `0.63x`，correspondences 为 `0.77x` / `0.86x`。因此本主题当前 production 结论升级为 `production-ready/generic-normal-full-cloud-and-source-indexed`（泛型 normal 全云和 source 单侧索引入口可生产接入）：只批准 full-cloud 与 source-indexed `Scalar=float` 且满足 normal traits gate 的点类型分流；dual-indices 和 correspondences 不接 production，correspondences 退化主因仍是多因素待消融假设。
 
@@ -34,7 +34,7 @@ source / target iterator
 
 ## 2. 标量路径与诊断边界
 
-标量源码通过 `estimateSymmetricPointNormal*Std` helper 构造 `ConstCloudIterator`（常量点云迭代器），把不同入口统一成 source/target 同步逐点流。核心标量 helper 内部看不到“这是全云还是 correspondences”的显式分支；它只看到两个 iterator 依次给出的当前点。公开 overload 不再直接展开 iterator fallback，而是只做参数检查、RVV 短路和 Std helper 调用。
+标量源码通过 `estimateSymmetricPointNormal*Std` helper 构造 `ConstCloudIterator`（常量点云迭代器），把不同入口统一成 source/target 同步逐点流。该标量 helper 内部看不到“这是全云还是 correspondences”的显式分支；它只看到两个 iterator 依次给出的当前点。公开 overload 不再直接展开 iterator fallback，而是只做参数检查、RVV 短路和 Std helper 调用。
 
 逐点标量语义是：
 
@@ -74,7 +74,7 @@ RVV 诊断为了让取数成本和入口形态可审查，把 production helper 
 当前 production 覆盖：
 
 - 满足 `RVV Generic Point Type Strategy` 的 full-cloud generic normal 点类型：source 和 target 分别有单个 `float x/y/z/normal_x/normal_y/normal_z` 字段，POD / standard-layout、`sizeof(PointT) == sizeof(POD)` 和字段 offset 对齐均成立。
-- 2026-07-22 起，该 gate 由公共 `pcl::rvv::RVVXYZNormalFloatLayout<PointT>` 表达；本地 `SymmetricXYZNormalFloatLayout` 已删除。公共 trait 只负责编译期字段/layout 判断，不包含 symmetric LLS 的 full-cloud dispatch、normal equation 构造或 RVV intrinsic 实现。
+- 公共 trait 重构后，该 gate 由 `pcl::rvv::RVVXYZNormalFloatLayout<PointT>` 表达；本地 `SymmetricXYZNormalFloatLayout` 已删除。公共 trait 只负责编译期字段/layout 判断，不包含 symmetric LLS 的 full-cloud dispatch、normal equation 构造或 RVV intrinsic 实现。
 
 当前 production 不覆盖：
 
@@ -393,7 +393,7 @@ bench 包含 `PointNormal` 和 `PointXYZINormal` production direct case，分别
 
 PI5 结论：`production-ready/generic-normal-full-cloud-and-source-indexed`。它不是所有 symmetric LLS 入口 production-ready；`Scalar=double`、dual-indices 和 correspondences 路径保持标量，不能声称 correspondences 退化主因已经定位。
 
-2026-07-22 公共 trait 重构提供了 layout 判断和 32-bit byte offset helper；本轮 source-indexed 接入复用这些 gate。production 行为仍限定在 full-cloud 与 source indices + target full-cloud、`Scalar=float`、generic normal traits gate 命中时尝试 RVV；source+target indices、correspondences 和 `Scalar=double` 继续按本节 fallback 走标量。
+公共 trait 重构提供了 layout 判断和 32-bit byte offset helper；本轮 source-indexed 接入复用这些 gate。production 行为仍限定在 full-cloud 与 source indices + target full-cloud、`Scalar=float`、generic normal traits gate 命中时尝试 RVV；source+target indices、correspondences 和 `Scalar=double` 继续按本节 fallback 走标量。
 
 ## 13. 后续方向
 

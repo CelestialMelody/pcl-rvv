@@ -308,7 +308,7 @@ QEMU timing 不作为性能结论。性能结论只来自板卡或目标硬件�
 - 更复杂对象生命周期或上游完整 registration 场景。
 - debug verbosity 下的 loss 日志等价性。
 
-实现结构还留有审查者需要确认的可维护性风险：`buildPointToPlaneLLSFullCloudStd`、求解和矩阵 helper 目前同时服务 production-facing tests 和 production RVV helper 对拍；RVV block helper 内部也有 A/B/C/N 四组重复 load/formula。它们让边界清晰，但 helper size 和重复逻辑是审查项。若合入前要求更紧凑的源码形态，可考虑压缩 helper 或进一步拆清 Std/RVV/reference 边界；当前 production phase 不做大规模重构。
+实现结构还留有审查者需要确认的可维护性风险：`buildPointToPlaneLLSFullCloudStd`、求解和矩阵 helper 同时服务 production-facing tests 和 production RVV helper 对拍；RVV block helper 内部也有 A/B/C/N 四组重复 load/formula。它们让边界清晰，但 helper size 和重复逻辑是审查项。若合入前要求更紧凑的源码形态，可考虑压缩 helper 或进一步拆清 Std/RVV/reference 边界；当前 production phase 不做大规模重构。
 
 ## 12. Evidence / Output 策略
 
