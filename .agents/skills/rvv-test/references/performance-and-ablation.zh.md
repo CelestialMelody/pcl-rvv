@@ -15,6 +15,14 @@ bench 输出必须可解析。至少保留：
 
 QEMU timing（QEMU 计时）不作为性能结论。QEMU 只用于 correctness（正确性）、路径和日志形状。
 
+## 对比口径
+
+A/B 是实验设计：A 是 baseline（基线），B 是 candidate（候选）。文档和 summary 中必须写清 A/B 两侧各自调用什么路径，例如 test-only helper、public-like wrapper、真实 public overload 或 production dispatch。
+
+若使用 `B/A` 表示候选相对基线的收益，必须同时写清公式和方向，例如 `B/A = A_rvv_ms / B_rvv_ms`，其中 `>1` 表示 B 比 A 更快，`<1` 表示 B 退化。不要把每个 case 自身的 `std/RVV speedup` 当成候选相对 baseline 的收益；`std/RVV speedup = std_ms / rvv_ms` 只说明同一个 case 的标量与 RVV 构建差异。
+
+direct diagnostic、production-shaped diagnostic 和 production direct 若同时出现，必须分表或分段报告。diagnostic 的 B/A 只能支持候选筛选或消融归因；只有真实 public overload / production dispatch 的 repeated board 结果才能作为 production performance evidence。
+
 ## 性能证据
 
 板卡或目标硬件 benchmark 才能支撑性能结论。结论中必须写清：

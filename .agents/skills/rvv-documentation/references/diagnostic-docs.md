@@ -32,6 +32,16 @@ production direct case: real public API -> real production RVV gate -> checksum 
 - 真实 production gate 位于哪里，哪些条件命中 RVV，哪些条件落回 Std。
 - test-only helper、诊断宏或局部 staging 是否仍存在，以及是否参与默认生产分流。
 
+## A/B 对比口径
+
+报告 A/B、fused-vs-baseline 或其它候选对比时，文档必须有单独的“对比口径”段落或表格，至少列出：
+
+- A/B 含义：A 是哪个 baseline，B 是哪个 candidate。
+- A/B 两侧调用路径：test-only helper、public-like wrapper、真实 public overload、production dispatch 等。
+- `std/RVV speedup` 的定义：同一个 case 内 `std_ms / rvv_ms`，不能直接解释为 candidate 相对 baseline 的收益。
+- candidate-vs-baseline 指标的定义和方向，例如 `B/A = A_rvv_ms / B_rvv_ms`，并说明 `>1` 才表示 B 更快。
+- direct diagnostic、production-shaped diagnostic、production direct 各自能证明什么，是否可作为 production evidence。
+
 ## 未覆盖生产面
 
 production-shaped 证据必须列出尚未覆盖的生产面，常见项包括：
