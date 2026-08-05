@@ -289,9 +289,19 @@ fallback_matrix_ready:
 pi2_to_pi5_pause_conditions_ready:
 production_direct_results_ready:
 fallback_results_ready:
+dirty_isolation_ready:
+implementation_review_ready:
+candidates_added_or_deferred_ready:
+ilp_lmul_decision_ready:
+numerical_budget_result_ready:
 asm_hotspot_attribution_ready:
+asm_attribution_ready:
 board_production_results_ready:
+board_evidence_paths_ready:
 pi5_evidence_decision_ready:
+evidence_decision_ready:
+production_decision_ready:
+validation_summary_ready:
 production_doc_closeout_ready:
 followup_options_ready:
 ```
@@ -314,6 +324,15 @@ followup_options_ready:
 - 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
   和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
 - 表格必须包含 `correctness_efficiency_evidence_chain_ready`。证据指向主题文档中的“正确性与高效性证据链”或“诊断证据链”小节。
+- 表格必须包含 `dirty_isolation_ready`。证据指向 Handoff Packet 的 `dirty_isolation`，说明当前 worktree 的无关 diff、raw logs、build 输出和本轮可审查 / 可提交路径边界。
+- 表格必须包含 `implementation_review_ready`。若本轮改了 production、diagnostic helper、bench-facing helper 或 RVV kernel，证据指向 Handoff Packet 的 `implementation_review` 或主题文档“当前采用的优化方式”；若纯文档 cleanup，写 `not_applicable` 并说明原因。
+- 表格必须包含 `candidates_added_or_deferred_ready`。证据指向本轮候选路线表、experience-migration audit 或 Handoff Packet 的 `candidates_added_or_deferred`，说明新增、尝试、暂缓或拒绝的候选。
+- 表格必须包含 `ilp_lmul_decision_ready`。含 RVV kernel、reduction、staging 或性能候选时，证据必须说明 LMUL、VLEN gate、accumulator 数、ILP / unroll、寄存器压力或 spill 风险；不适用时说明原因。
+- 表格必须包含 `numerical_budget_result_ready`。含 FMA、reduction、浮点阈值、`ATA/ATb`、matrix 或 checksum 风险时，证据必须指向误差预算和结果；不适用时说明原因。
+- 表格必须包含 `asm_attribution_ready`。证据指向反汇编归属字段或未运行原因；若只有 QEMU correctness 没有反汇编，不能写成已闭合。
+- 表格必须包含 `board_evidence_paths_ready`。证据指向 summary / sanitized / raw 的板卡证据边界；未跑板卡时说明阻塞原因和当前 EvidenceDecision 限制。
+- 表格必须包含 `evidence_decision_ready` 和 `production_decision_ready`。前者写 S10 / PI5 证据决策，后者独立说明是否进入 production integration loop、是否修改 production、哪些路径保持标量。
+- 表格必须包含 `validation_summary_ready`。证据指向 Handoff Packet 的 `validation`，列出已运行和未运行的 test、bench、asm、board 或 sanitizer。
 - closeout 或 production-candidate 文档必须列出 `current_optimization_section_ready`。证据指向主题文档中的“当前采用的优化方式”小节，并说明该小节是否覆盖 dispatch / fallback、layout gate、当前优化机制、chunk 内部流程、分组职责、暂缓方案和证据边界。
 - 如果 worker 声明采用 sibling topic 经验，表格必须包含 `experience_migration_audit_ready`；
   证据指向 adopted / attempted / deferred / rejected 对照表。若未声明且无相邻经验可迁移，可写 `not_applicable` 并说明原因。

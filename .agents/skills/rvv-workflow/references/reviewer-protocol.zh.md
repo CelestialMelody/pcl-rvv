@@ -122,6 +122,15 @@ reviewer 应至少检查：
 - 负向性能结论是否有受证据约束的归因；不能把未验证猜测写成事实，也不能只写“不接生产”而不解释为什么慢。
 - 是否存在不该提交的 build（构建）产物、日志、本机路径、私有地址或 `config.mk`。
 - Handoff Packet 是否字段完整，`agent_asset_trace` 是否真实反映读取并使用过的资产。
+- Handoff Packet 是否包含 `dirty_isolation`，并明确区分本轮 topic diff、无关 topic diff、agent asset diff、raw logs、build 输出和提交边界。缺失时应视为 commit-boundary 风险。
+- Handoff Packet 是否包含 `implementation_review`，并能让 reviewer 复核 public entry / `*_Std` / `*_RVV` 或 diagnostic helper 分层、fallback、gate、公共 API 边界、维护风险和本轮是否只限 diagnostic。
+- Handoff Packet 是否包含 `candidates_added_or_deferred`，列清新增、尝试、暂缓或拒绝的候选；如果 worker 只给最终方案、没有说明未采用路线，应视为可审查性缺口。
+- Handoff Packet 是否包含 `ilp_lmul_decision`。对 RVV kernel、reduction、staging 或性能候选，reviewer 应检查 LMUL、VLEN gate、accumulator 数、ILP / unroll、寄存器压力和 spill 风险是否有说明；不适用时理由是否成立。
+- Handoff Packet 是否包含 `numerical_budget_result`。对 FMA、reduction、浮点阈值、near-cancellation、`ATA/ATb`、matrix 或 checksum 风险，reviewer 应检查参考链路、误差阈值、关键结果和失败样本状态是否闭合。
+- Handoff Packet 是否包含 `asm_attribution`，并说明关键 RVV 指令归属当前 helper、production 符号、bench harness、Eigen/libm、编译器自动向量化或无关代码；仅说“二进制中出现指令”不够。
+- Handoff Packet 是否包含 `board_evidence_paths`，并区分 summary artifact、sanitized log 和 raw log；默认 summary-only 策略下 raw logs 不应进入默认提交边界。
+- Handoff Packet 是否显式包含 `evidence_decision` 与 `production_decision`。Reviewer 应检查二者是否一致但不混淆：性能或诊断收益成立不自动等于生产接入成立。
+- Handoff Packet 是否包含 `validation` 摘要，列出已运行和未运行的 test、bench、反汇编、板卡或 sanitizer；未运行项是否说明原因。
 - 如果 worker 发现可沉淀规则、资产缺口或冗余规则，Handoff Packet 是否包含 `agent_asset_feedback`；默认配置下该字段只能报告建议，不能代表已修改 agent asset。
 - Handoff Packet 是否包含 `evidence_decision_summary`，并与主题文档的“正确性与高效性证据链”或“诊断证据链”一致。
 - Handoff Packet 是否包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`，并与 S0 报告、defaults、local override 和当前 prompt 一致。
@@ -134,6 +143,7 @@ reviewer 应至少检查：
 - `worker_quality_gate_check` 是否在适用时覆盖 `experience_migration_audit_ready` 和 `test_support_split_decision_ready`。若 worker 声称不适用，reviewer 应抽查当前 topic 是否确实没有 sibling topic 经验、长 helper 或多职责 helper 信号。
 - `worker_quality_gate_check` 是否覆盖 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`。
 - `worker_quality_gate_check` 是否覆盖 `correctness_efficiency_evidence_chain_ready`。
+- `worker_quality_gate_check` 是否覆盖 `dirty_isolation_ready`、`implementation_review_ready`、`candidates_added_or_deferred_ready`、`ilp_lmul_decision_ready`、`numerical_budget_result_ready`、`asm_attribution_ready`、`board_evidence_paths_ready`、`evidence_decision_ready`、`production_decision_ready` 和 `validation_summary_ready`。不适用项必须有理由，不能直接省略。
 - `language_check` 是否同样有证据支撑。若 worker 声称通过，但诊断 helper、测试、bench 或主题文档仍有非平凡段落缺少中文说明，应指出具体文件和行号。
 - 当前结论若为 `partial-production-candidate`、`production-ready` 或其它强于 no-production 的状态，reviewer 必须检查 worker 是否列出 production direct 缺口。诊断路径上的板卡收益不能自动升级成 production-ready。
 - 当前结论若为 `production-ready/narrow`，reviewer 必须检查 worker 是否主动指出“窄在哪里、是否存在常见泛型扩展价值、继续扩展需要哪些证据”。如果 worker 只建议进入下一个 topic，却没有给出当前 topic 的重要扩展选项，应视为 handoff 可决策性缺口。
