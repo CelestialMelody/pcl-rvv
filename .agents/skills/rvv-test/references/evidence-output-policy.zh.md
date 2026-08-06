@@ -7,6 +7,7 @@
 默认使用 `summary-only`：
 
 - 文档和 Handoff Packet（交接数据包）写摘要、命令和路径。
+- output summary（输出摘要）作为 bench / evidence 统计的主归属时，应列出生成脚本、输入日志、被测代码或 bench wrapper、相关文档章节和 Traceability Map 入口。
 - raw run 目录、完整反汇编、build（构建）输出和本机日志不默认提交。
 - 如果日志包含个人路径、板卡 IP、用户名或私有远端路径，只能留在本机工作区或先脱敏。
 - summary artifact（摘要产物）可以临时记录本机 raw archive（原始归档）位置用于当轮溯源，但长期文档和可提交摘要优先使用

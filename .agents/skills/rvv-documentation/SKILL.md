@@ -14,6 +14,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - 主题 RVV 文档：见 [references/topic-doc-structure.md](references/topic-doc-structure.md)。
 - 函数级评估文档：见 [references/evaluation-doc-structure.md](references/evaluation-doc-structure.md)。
 - 函数级评估与 closeout 分工：见 [references/function-evaluation-and-closeout.zh.md](references/function-evaluation-and-closeout.zh.md)。
+- 文档归属矩阵与 Traceability Map（可追踪性地图）：见 [references/document-ownership-and-traceability.zh.md](references/document-ownership-and-traceability.zh.md)。
 - 筛选文档：见 [references/screening-docs.md](references/screening-docs.md)。
 - 诊断和回退文档：见 [references/diagnostic-docs.md](references/diagnostic-docs.md)。
 - closeout 重排和写作风格：见 [references/closeout-style.md](references/closeout-style.md)。
@@ -26,6 +27,8 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - QEMU 只写成正确性、日志格式和路径证据；性能结论来自板卡或目标硬件。
 - 生产接入判断必须连接 local fragment、full diagnostic、production case、fallback 和维护成本。
 - 评估文档负责决策审计；主题文档负责长期维护。
+- 文档归属矩阵负责分清长期事实、候选取舍、bench 统计、output summary（输出摘要）和 Handoff Packet（交接数据包）的主归属；其它位置只引用路径、章节、run label（运行标签）或证据角色，不复制长段正文或 raw log（原始日志）。
+- 复杂 topic 必须在 evaluation 或主题文档中维护 Traceability Map，列出关键 production、test-rvv、script、output 和文档位置；默认不新建巨型函数文档，除非 map 已经大到影响主文档可读性。
 - S2 函数级评估阶段就应创建或更新 evaluation（评估）文档，用来记录函数功能、可向量化点、RVV 优先级、初步接入判断和需要补齐的证据。不要把这些判断只留到 S11 closeout（收尾）阶段。
 - S11 closeout 文档负责记录实验后的最终状态、证据边界、生产接入或不接入理由、遗留风险和队列表同步。如果 topic 进入 production integration loop（生产接入闭环），S11 必须发生在生产补丁、生产直连测试、生产证据重跑和再次 EvidenceDecision（证据决策）之后。
 - 生产接入后的主题文档必须按 `artifact_layout.topic_doc_template` 解析位置，并以真实 production patch（生产补丁）和 production direct（真实生产入口直连）证据为中心，不能只复述 diagnostic prototype（诊断原型）或早期 bench 结果。必须同步覆盖范围、fallback 矩阵、生产直连测试、反汇编归属、板卡 production bench、最终 EvidenceDecision 和未覆盖路径。
@@ -60,6 +63,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 新文档至少应回答：
 
 - 入口是什么，调用链如何进入目标函数。
+- 复杂 topic 的读者能否通过 Traceability Map 从文档跳到 production 入口、diagnostic / candidate helper、bench wrapper、analysis script 和 output summary。
 - 标量路径做了什么，关键公式、循环、状态或输出如何形成；读者不看源码也应能理解被优化函数的作用和原实现流程。
 - RVV 方案如何实现，哪一段标量路径被 RVV 接管，数据如何 load/gather、mask、staging、store 或 reduction（规约），哪一段仍是标量以及原因。
 - 关键实现取舍为什么成立或暂缓，例如 buffer/staging、scalar tail（标量尾段）、fused multiply-add（融合乘加）、vector reduction（向量规约）、显式舍入或数学函数向量化；不能只写“保持语义”。

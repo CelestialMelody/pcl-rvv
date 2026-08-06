@@ -1,0 +1,132 @@
+# 文档归属矩阵与 Traceability Map
+
+本文定义 RVV topic（主题）工作中各类事实的主归属，以及复杂 topic 的 traceability map（可追踪性地图）规则。目标是让 reviewer（审查者）和下一轮 worker（执行者）能从文档定位到代码、测试、脚本和 output（输出证据），同时避免把同一段事实复制到多个长期文档。
+
+## 何时读取
+
+- 新建、重排或 closeout（收尾）`doc-rvv` 主题文档时读取。
+- 新建或更新 `test-rvv` evaluation（函数级评估）文档时读取。
+- Handoff Packet（交接数据包）需要说明文档、测试、输出和代码位置如何互相定位时读取。
+- reviewer 审查文档重复、证据错放、恢复路径不清或函数关系看不懂时读取。
+
+## 文档归属矩阵
+
+每类事实只设一个主归属。其它文档可以引用主归属的路径、章节、表格、run label（运行标签）或 evidence path（证据路径），但不要复制长段正文、raw log（原始日志）或完整实验流水。
+
+| 信息类型 | 主归属 | 允许引用 | 不应复制 |
+| --- | --- | --- | --- |
+| 当前采用的优化方式、覆盖范围、fallback（回退路径）和生产边界 | `doc-rvv/<module>/<topic>-RVV.zh.md` 主题文档 | evaluation 的实现方式审计表、Handoff 摘要、模块状态表 | output summary 的 raw 表、每轮 bench 全量日志、对话过程 |
+| S2 evaluation、候选路线、采用 / 尝试 / 暂缓 / 拒绝理由 | `test-rvv/<module>/<topic>/<topic>-evaluation.zh.md` | 主题文档引用最终采用状态和证据路径；Handoff 引用下一步动作 | 主题文档复制完整候选流水账；Handoff 写成完整实验报告 |
+| test、diagnostic、bench case 的输入构造、计时边界和证明点 | evaluation 文档和对应测试 / bench 源码注释 | 主题文档只引用能支撑结论的 case；Handoff 列命令和路径 | 主题文档复制每个 TEST 的长注释；output summary 承担测试设计说明 |
+| bench 统计、A/B 公式、异常值口径、run label 和复现命令 | `test-rvv/.../output/board/*.md` summary 或 analysis script（分析脚本） | evaluation / 主题文档引用 summary 路径、脚本路径和关键结论 | 主题文档或 Handoff 复制 raw log；把 QEMU timing 写成性能结论 |
+| QEMU、反汇编、board（板卡）和 production direct（真实生产路径证据）的证据边界 | 证据 summary、evaluation 证据表和主题文档证据链共同引用同一批路径 | Handoff 列 evidence paths；reviewer 抽查路径 | 多处写互相矛盾的“最新结果”或无路径结论 |
+| 真实 production（生产源码）补丁、dispatch（分流逻辑）、public API（公开接口）和维护解释 | production 源码 + 主题文档 | evaluation 记录 production decision（生产接入判断）；Handoff 列 production diff | evaluation 复述生产实现长文；output summary 解释生产维护边界 |
+| reviewer 恢复动作、dirty isolation（脏工作区隔离）、提交边界和下一轮动作 | Handoff Packet、work log（工作日志）或 CURRENT_STATUS（当前状态入口） | evaluation / 主题文档只保留稳定后续方向 | 主题文档写成当前待办清单；长期文档依赖聊天上下文 |
+| screening（筛选）队列、模块级优先级和 topic 状态 | `doc-rvv/library-screening/...` 或配置解析出的状态表 | Handoff 和 closeout 引用状态同步结果 | 主题文档复制模块队列表 |
+| 通用 workflow、reviewer 或文档规则 | `.agents/skills/`、`.agents/knowledge/` 和 `agent_asset_feedback` | Handoff 说明建议更新位置 | topic 文档写成通用 agent 规则 |
+
+## 写入顺序
+
+1. 先判断本轮事实类型和主归属。
+2. 在主归属文档写完整解释、表格或证据摘要。
+3. 在其它文档只写短引用：仓库相对路径、章节名、符号名、run label 或 output summary 路径。
+4. 如果两个文档都需要同一事实，拆成“长期事实”和“决策审计”。主题文档写当前状态；evaluation 文档写候选取舍和证据如何改变判断。
+5. Handoff 只写 reviewer 恢复需要的定位信息、验证结果和下一步动作，不替代主题文档或 evaluation。
+
+## Traceability Map 触发条件
+
+复杂 topic 必须在 evaluation 或主题文档中加入 `Traceability Map（可追踪性地图）` 章节。确实需要时可以拆成独立 `*-traceability.zh.md`，但默认不新建大型长期函数文档。
+
+命中任一条件即可视为复杂 topic：
+
+- 存在多个 public entry（公开入口）、dispatch / fallback、row source policy（行来源策略）或数据布局路径。
+- 同时存在 production helper、Std helper、RVV helper、diagnostic reference、candidate helper、bench wrapper 或 analysis script 中的三类以上角色。
+- 存在多个 candidate（候选实现）、component ablation（组件消融）、RVV-vs-RVV A/B 或 repeated board（重复板卡测试）结果。
+- 证据分布在 QEMU、反汇编、board summary、analysis script 和 raw output 多个位置。
+- reviewer 或用户难以从文档回答“这个函数 / helper / 脚本在候选链路中是哪一层”。
+
+## Traceability Map 最小表格
+
+推荐表格如下。`位置` 使用仓库相对路径；长期文档优先写文件 + 符号 / target / 章节。行号可以出现在 Handoff 或 reviewer 当前 diff 中，长期文档不要依赖易漂移的行号。
+
+```text
+| 符号 / 文件 | 层级 | 作用 | 调用者 / 上游入口 | 被调用者 / 下游消费者 | 证据角色 | 位置 |
+```
+
+`层级` 使用通用标签，不写 topic 专用算法名称：
+
+- production public entry
+- production dispatch / fallback
+- production Std helper
+- production RVV helper
+- diagnostic reference
+- row source / input policy
+- candidate formula / reduction / staging
+- bench wrapper
+- analysis script
+- evidence output summary
+- evidence raw log（只列本机路径边界或不提交说明）
+- documentation section
+
+## Traceability Map 覆盖要求
+
+复杂 topic 的 map 至少覆盖本轮结论依赖的对象，不要求枚举每个小函数。
+
+- production 侧：public entry、dispatch / fallback gate、`*_Std` / `*_RVV` helper、traits / layout gate、保持标量的入口。
+- test-rvv 侧：reference path（参考链路）、row source、candidate helper、reduction / staging helper、production-shaped diagnostic、production direct test、bench wrapper。
+- script / output 侧：分析脚本、summary artifact（摘要证据）、QEMU / board output、反汇编或 profiling 证据入口。
+- 文档侧：主题文档的“当前采用的优化方式”或“正确性与高效性证据链”、evaluation 的实现方式审计表、Handoff Packet 的恢复字段。
+
+每一行的 `证据角色` 必须说明该对象能证明什么，不能只写“测试”或“bench”。示例：
+
+- `correctness gate（正确性验收）`
+- `RVV-vs-RVV candidate B/A summary（候选相对基线性能摘要）`
+- `fallback coverage（回退路径覆盖）`
+- `asm attribution（反汇编归属）`
+- `production boundary（生产边界）`
+- `recovery pointer（恢复入口）`
+
+## 交叉引用格式
+
+跨文档引用至少包含以下三件信息中的两件；复杂结论尽量三件都给出。
+
+```text
+path: <repo-relative-path>
+anchor: <section title / symbol / make target / run label>
+role: <该对象在证据链中的角色>
+```
+
+例如：
+
+```text
+path: test-rvv/<module>/<topic>/<topic>-evaluation.zh.md
+anchor: 实现方式审计
+role: candidate 取舍主归属；主题文档只引用最终采用状态
+```
+
+```text
+path: test-rvv/<module>/<topic>/output/board/<summary>.md
+anchor: RVV-vs-RVV B/A summary
+role: 板卡性能摘要；raw log 不进入默认提交边界
+```
+
+## Reviewer 检查点
+
+reviewer 审查文档和 Handoff 时应确认：
+
+- 是否能用文档归属矩阵指出每类事实的主归属。
+- 主题文档、evaluation、output summary 和 Handoff 是否存在长段重复、互相矛盾或证据错放。
+- 复杂 topic 是否有 Traceability Map；如果没有，Handoff 是否给出 `not_applicable` 理由。
+- Traceability Map 是否能从关键文档跳到代码、测试、脚本和 output，而不是只写自然语言说明。
+- Handoff 是否列出 `document_ownership_check` 和 `traceability_map_status`，并给出 reviewer 可抽查的路径。
+
+## Handoff 字段要求
+
+worker 的 Handoff Packet 应补充：
+
+```text
+document_ownership_check: 本轮长期事实、候选取舍、bench 统计、output summary、恢复动作分别写到哪里；是否存在重复或错放。
+traceability_map_status: required / updated / not_required / deferred；列出 map 所在文档章节，或说明暂缓原因和下一轮补齐条件。
+```
+
+这两个字段不要求复制 map 内容。它们只给 reviewer 一个入口，用来抽查文档、测试、输出和代码位置是否能互相定位。

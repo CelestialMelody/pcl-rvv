@@ -36,6 +36,8 @@ evidence_decision (本轮 EvidenceDecision，例如 production-ready、partial-p
 production_decision (生产接入判断；说明是否修改 production、是否进入 / 暂缓 production integration loop，以及原因):
 implementation_review (实现自审；说明入口分层、fallback、helper 边界、维护风险和本轮是否只限 diagnostic):
 candidates_added_or_deferred (候选实现或诊断路线；列出新增、尝试、暂缓、拒绝的候选及理由):
+document_ownership_check (文档归属检查；说明长期事实、候选取舍、bench 统计、output summary 和恢复动作分别写到哪里):
+traceability_map_status (可追踪性地图状态；required / updated / not_required / deferred，并列出 map 位置或暂缓理由):
 ilp_lmul_decision (ILP / LMUL 取舍；说明寄存器压力、accumulator 数、VL/LMUL、unroll 或暂不适用原因):
 numerical_budget_result (数值预算结果；说明 FMA、reduction tree、误差阈值、near-cancellation 和矩阵 / checksum 结果):
 agent_assets_used (本次读取或调用的 agent 资产，例如 skills（技能）、knowledge map（知识索引）、PCL adapter（PCL 适配器）、规则集):
@@ -71,6 +73,8 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `production_decision` 必须独立于性能结论写清是否修改 production（生产源码）、是否进入 production integration loop（生产接入闭环）、是否只保留 diagnostic，以及哪些入口 / 点类型 / `Scalar` / row source 仍保持标量。诊断板卡收益不能自动写成 production-ready。
 - `implementation_review` 适用于任何实现或诊断 helper 改动。它至少说明 public entry / `*_Std` / `*_RVV` 或 diagnostic helper 分层、fallback 与 gate、是否新增 public API、是否复用公共 load/store / traits / policy、维护风险，以及 reviewer 应重点看哪些实现边界。
 - `candidates_added_or_deferred` 应列出本轮新增、尝试、暂缓或拒绝的候选路线。可复用 `adopted`、`attempted`、`deferred`、`rejected`、`not_applicable` 状态；每项必须写理由、证据或下一轮恢复条件。
+- `document_ownership_check` 应按文档归属矩阵说明本轮长期事实、候选取舍、bench 统计、output summary、恢复动作和通用 asset feedback 分别写到哪里。若只是引用其它文档，必须给出 path、anchor（章节 / 符号 / run label）或 role（证据角色）。
+- `traceability_map_status` 应说明复杂 topic 的 Traceability Map 是 `required`、`updated`、`not_required` 还是 `deferred`。`updated` 时列出章节或独立文档；`not_required` 时说明 topic 为什么简单；`deferred` 时说明缺少哪些代码、测试、脚本或 output 路径。
 - `ilp_lmul_decision` 适用于含 RVV kernel、reduction、staging 或性能候选的 topic。必须说明 LMUL（向量寄存器分组）、VLEN gate、accumulator 数、unroll / ILP（指令级并行）、寄存器压力或 spill 风险；若不适用，写清为什么当前工作没有新的 ILP / LMUL 决策。
 - `numerical_budget_result` 适用于手写浮点、FMA、reduction、近抵消、阈值谓词、`ATA/ATb`、matrix 或 checksum 证据。它必须写清参考链路、误差阈值、最大 / 关键误差或 checksum 结果、失败样本状态和反汇编 / FMA 归属。若只做文档或整数路径，可写 `not_applicable` 并说明原因。
 - `agent_assets_used` 只列实际读取或调用过的资产，不要机械列全量 skill。
@@ -111,7 +115,7 @@ worker 输出 Handoff Packet 前应检查：
 - 字段是否完整，没有用“见上文”替代关键内容。
 - 是否列出了能复现当前结论的命令和证据路径。
 - 是否输出 `dirty_isolation`，并把本轮可审查 / 可提交路径与其它脏 diff 分开。
-- 是否输出 `implementation_review`、`candidates_added_or_deferred`、`ilp_lmul_decision`、`numerical_budget_result`、`asm_attribution`、`board_evidence_paths`、`evidence_decision`、`production_decision` 和 `validation`；不适用项是否写明原因。
+- 是否输出 `implementation_review`、`candidates_added_or_deferred`、`document_ownership_check`、`traceability_map_status`、`ilp_lmul_decision`、`numerical_budget_result`、`asm_attribution`、`board_evidence_paths`、`evidence_decision`、`production_decision` 和 `validation`；不适用项是否写明原因。
 - `agent_asset_trace` 是否是真实使用记录。
 - 如果本轮发现可沉淀规则、资产缺口或冗余规则，是否按 `agent_asset_feedback` 报告；没有发现时可以省略该字段。
 - 如果声明采用 sibling topic 经验，是否输出 `experience_migration_audit`，且没有遗漏相邻成功或负向方案中的主要维度。

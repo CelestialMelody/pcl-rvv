@@ -10,11 +10,14 @@ Closeout 用于回答“本轮最终证明了什么”。它应该在测试、QE
 
 二者可以写在同一个物理文档中，但章节职责必须分开。复杂 topic 建议拆成 evaluation 文档和主题 RVV 文档。
 
+如果一个 topic 同时存在主题文档、evaluation、output summary 和 Handoff Packet，先用文档归属矩阵分清长期事实、候选取舍、bench 统计和恢复动作的主归属，再写具体章节。这样 reviewer 才能从主归属一路追到代码、测试和输出。
+
 ## S2 Evaluation（函数级评估）应回答什么
 
 S2 阶段创建或更新 evaluation 文档，至少覆盖：
 
 - 函数入口、公开 API、调用链和输入输出。
+- 如果 topic 较复杂，evaluation 还应提供或引用 Traceability Map（可追踪性地图），说明关键函数、测试、脚本、输出和文档章节如何互相定位。
 - 目标源码中的关键循环、helper（辅助函数）、normal equation（正规方程）、solver（求解器）或状态机边界。
 - 可 RVV 化片段、不可 RVV 化片段和成本归因。
 - 数据布局，例如 AoS（结构数组）、SoA（数组结构）、indices（索引）或 gather（离散加载）风险。
@@ -28,6 +31,7 @@ S2 文档可以包含计划和假设，但必须标清哪些内容尚未由证�
 S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必要工作日志，至少覆盖：
 
 - 本轮最终 EvidenceDecision（证据决策）。
+- 复杂 topic 的 Traceability Map 是否仍然可用，能否从最终文档跳到 production 入口、diagnostic / candidate helper、bench wrapper、analysis script 和 output summary。
 - 实际创建或修改了哪些 production（生产源码）、diagnostic（诊断代码）、test、bench 或文档。
 - correctness（正确性）、QEMU path evidence（QEMU 路径证据）、disassembly evidence（反汇编证据）和 board performance（板卡性能证据）分别证明什么。
 - 主题文档是否包含“正确性与高效性证据链”小节；未接 production 的诊断结论是否包含对应“诊断证据链”。
@@ -91,6 +95,8 @@ diagnostic / bench 资产、为什么生产证据不成立。
 reviewer 检查文档时应确认：
 
 - 是否有 S2 评估，而不是只在最终 closeout 才解释函数。
+- 文档归属矩阵是否清楚区分主题文档、evaluation、output summary 和 Handoff Packet 的职责，是否避免把长期事实、实验结果和恢复动作混写。
+- 复杂 topic 是否有 Traceability Map，且表格能把 production、test-rvv、analysis script、output summary 和文档章节互相定位。
 - S2 评估是否足以让人判断为什么继续或停止。
 - S11 closeout 是否覆盖最终证据，而不是重复早期计划。
 - closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”；未接 production 的诊断结论是否包含“诊断证据链”。

@@ -12,6 +12,7 @@ bench 输出必须可解析。至少保留：
 - total time（总耗时）或等价摘要。
 - checksum（校验和）。
 - 构建模式、目标硬件或 QEMU 标记。
+- 被测代码路径、bench wrapper、analysis script（分析脚本）和 output summary（输出摘要）的仓库相对路径；复杂 topic 应引用 Traceability Map（可追踪性地图）章节或说明 `not_required` 理由。
 
 QEMU timing（QEMU 计时）不作为性能结论。QEMU 只用于 correctness（正确性）、路径和日志形状。
 
@@ -32,6 +33,7 @@ direct diagnostic、production-shaped diagnostic 和 production direct 若同时
 - case 覆盖的 row source policy（行来源策略）或 production 入口。
 - 计时边界是否包含 index/weight 展开、buffer 写回、solver、输出构造或 wrapper。
 - speedup（加速比）来自哪条日志或分析脚本。
+- 文档、测试、脚本和 output 如何互相定位；如果 summary 是 bench 结论主归属，evaluation / 主题文档只引用 summary 路径和关键结论，不复制 raw log。
 - 当前不能证明什么。
 
 弱收益、退化或不同规模趋势不一致时，不要写成单一原因。必须列出可验证假设和下一轮消融条件。

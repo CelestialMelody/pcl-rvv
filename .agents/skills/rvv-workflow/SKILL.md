@@ -28,7 +28,7 @@ description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适
 
 单个 RVV topic（主题）的状态机见 [references/topic-lifecycle.zh.md](references/topic-lifecycle.zh.md)。S0-S12 是主干状态，不是线性流水账；S10 `EvidenceDecision`（证据决策）之后必须按证据进入 no-production closeout（不接入生产收尾）、production integration loop（生产接入闭环）或 blocked handoff（阻塞交接）。不要把生产接入简单追加成固定 S13；如果进入生产接入，必须完成生产补丁、生产直连测试、生产证据重跑和再次证据决策后，才进入最终文档 closeout。
 
-worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（阻塞）时，应按 [references/handoff-packet.zh.md](references/handoff-packet.zh.md) 输出 Handoff Packet（交接数据包）。reviewer 审查 worker 产物时，应按 [references/reviewer-protocol.zh.md](references/reviewer-protocol.zh.md) 输出 findings（问题清单）、worker prompt patch（给 worker 的提示词补丁）和 agent asset（代理资产）更新建议。
+worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（阻塞）时，应按 [references/handoff-packet.zh.md](references/handoff-packet.zh.md) 输出 Handoff Packet（交接数据包）。涉及文档 closeout、evaluation、output summary 或复杂 topic 定位时，Handoff 还要包含 document ownership（文档归属）和 Traceability Map（可追踪性地图）状态。reviewer 审查 worker 产物时，应按 [references/reviewer-protocol.zh.md](references/reviewer-protocol.zh.md) 输出 findings（问题清单）、worker prompt patch（给 worker 的提示词补丁）和 agent asset（代理资产）更新建议。
 
 ## 开工前偏好冻结
 

@@ -159,7 +159,8 @@ worker 再读：
 3. `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md`
 4. `.agents/skills/rvv-workflow/references/topic-entry-template.md`
 5. `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
-6. 当前模块的筛选状态表。
+6. `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`，当本轮要写 closeout、evaluation、主题文档、Handoff Packet，或 topic 涉及多处代码 / 测试 / 输出定位时读取。
+7. 当前模块的筛选状态表。
 7. 命中的 topic 源码、文档和测试证据。
 
 worker 选中 topic 后、开始写配置解析出的 topic 测试资产、topic 文档或 production 前，必须按
@@ -198,7 +199,8 @@ reviewer 再读：
 3. `.agents/skills/rvv-workflow/references/topic-lifecycle.zh.md`
 4. `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md`
 5. `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
-6. `.agents/skills/rvv-test/SKILL.md`，以及当前证据类型需要的窄 reference。
+6. `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`
+7. `.agents/skills/rvv-test/SKILL.md`，以及当前证据类型需要的窄 reference。
 7. worker 输出、Handoff Packet（交接数据包）、当前 diff（差异）和 topic 证据；如果用户没有给 worker 输出路径，就读当前对话中最近一轮 worker 回复或用户贴入的交接内容。
 
 workflow improvement 再读：
@@ -244,7 +246,7 @@ worker 最终输出必须包含：
 - 证据路径。
 - EvidenceDecision。
 - `language_check`。
-- `worker_quality_gate_check`，使用 `gate | status | evidence | missing_items` 证据化表格。
+- `worker_quality_gate_check`，使用 `gate | status | evidence | missing_items` 证据化表格，并覆盖 `document_ownership_matrix_ready` 与 `traceability_map_ready`。
 - `preferences_loaded`。
 - `agent_asset_trace`。
 - `agent_asset_feedback`，仅在本轮发现可沉淀规则、资产缺口或冗余规则时输出；默认只报告建议，不自动改 agent asset。
@@ -265,9 +267,11 @@ workflow improvement 最终输出必须包含：
 
 - Findings。
 - Asset gaps（资产缺口）。
+- Diff-level summary（diff 级别摘要），按文件说明新增、修改和未触碰范围。
 - Changes made in Workflow improvement mode（工作流改进模式的实际改动）。
 - `backup_path`，如果本轮创建了备份。
 - Validation（验证命令和结果）。
+- Handoff Packet（交接数据包），至少包含 files_changed、implementation_review、candidates_added_or_deferred、document_ownership_check、traceability_map_status、dirty_isolation、validation、remaining_risks 和 next_worker_action。
 - New short prompt example（新的短 prompt 示例）。
 
 ## 缺省工作偏好
