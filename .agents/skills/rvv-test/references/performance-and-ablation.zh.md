@@ -38,6 +38,17 @@ direct diagnostic、production-shaped diagnostic 和 production direct 若同时
 
 弱收益、退化或不同规模趋势不一致时，不要写成单一原因。必须列出可验证假设和下一轮消融条件。
 
+## Production Evidence 决策优先级
+
+判断 RVV production（生产源码）是否接入或保留时，按下列优先级组织证据：
+
+1. RVV 实现比 std（当前标量 / 标准实现基线）更好。若没有比 std 好，不能只靠局部消融或源码形态写成可接入 production。
+2. 静态实现质量更高。这一项和第 1 项是主要参考因素，必须审计公式形态、目标指令吞吐、RAW dependency（read-after-write，写后读依赖）、寄存器压力或 spill 风险、ILP / unroll（指令级并行 / 展开）、LMUL `m1/m2/m4`（向量寄存器分组）取舍，以及 asm attribution（反汇编归属，关键 RVV 指令是否归属于 production 符号或 hot path）。
+3. 平均情况更好。文档必须声明使用的平均口径，例如 summary 脚本定义的 mean、median 或 repeated-board 汇总代表值。
+4. 异常频率不算很高。异常值不能先验剔除，除非能证明是测量污染；异常频率应作为人工风险判断输入。
+
+第 1 和第 2 是主门槛。若二者闭合，而第 3 或第 4 存在争议，例如平均值受少数异常点影响、个别 case 的 `B/A < 1` 频率偏高但有合理解释，人工仍可决定接入；此时 output summary、evaluation 或主题文档必须说明数据分析口径、异常值情况、可能原因、风险边界，以及为什么仍接受接入。
+
 ## 组件消融
 
 component-only ablation（仅组件消融）只是瓶颈线索，不等于端到端 profile（剖析），也不能单独决定 production。
