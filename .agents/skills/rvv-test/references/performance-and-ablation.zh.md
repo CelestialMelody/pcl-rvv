@@ -59,3 +59,11 @@ component-only ablation（仅组件消融）只是瓶颈线索，不等于端到
 ## 负向归因
 
 correspondences / indexed 路径退化不能单因归因为 gather。可疑来源包括 query/match 展开、容器访问、baseline 更短、分布局部性、后段成本、`vcompress`、buffer 写回和自动 reduction。没有消融 bench 或 profile 时，这些只能写成假设。
+
+## Fused formula 消融口径
+
+fused formula（融合公式）候选必须拆分成独立候选再判断，不要把一个理论上的大改动直接当 production 结论。registration 类题目里，至少应把 `abc`、`d-six-term`、`d-displacement`、`abcd` 以及各自的 `ILP` 变体拆开看；LMUL `m1/m2/m4` 也应作为独立候选验证，不能默认同一机器码形态会保留收益。
+
+对比口径必须统一到同一份 RVV binary（RVV 二进制）或同一份 log（日志）内的 RVV-vs-RVV B/A；不要拿不同 std/RVV speedup 互相比候选。`QEMU timing` 只能用于 build、correctness 和日志形状，不作为性能证据。
+
+板卡摘要必须记录 warm-up、run count、taskset、governor、freq 和温度；异常值不能先验剔除，除非能证明是测量污染。报告应同时给出 median / min 和 `B/A < 1` 的频率，并在必要时扩大轮数判断某个点型或候选是否稳定绑定。

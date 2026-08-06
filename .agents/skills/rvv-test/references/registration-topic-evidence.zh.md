@@ -43,6 +43,14 @@ Packet（交接数据包）必须同时写清：
 - FMA（融合乘加）和 reduction（规约）相关变体必须有误差预算、反汇编归属和必要的板卡 A/B；不能因为源码表面不是 fused 写法就默认禁止 fused，也不能跳过 near-cancellation（近抵消）样本。
 - production direct 只批准已经有真实 dispatch、fallback、反汇编符号归属和 repeated board（重复板卡测试）性能证据的入口、点类型、`Scalar`、布局和规模。
 
+### fused formula 证据闭环
+
+fused formula（融合公式）在 registration topic 里要把四层证据闭起来：`correctness`、`component no-solve`、`production-shaped full estimate`、`representative point types`。如果任一层缺证据，就只能写成 diagnostic（诊断）或 candidate（候选），不能直接写 production。
+
+当前这类 topic 的写法还应区分两种“看起来更快”的来源：一种是源码层面的 code-shape preference，另一种是真实不同机器码。像 `AbcdFused` 与 `AbcdFusedIlp` 这种 case，如果 asm 等价，就只能把 `Ilp` 写成源码调度诊断，不要把它当成已证实的独立机器码收益；只有 production-symbol asm attribution 和多轮板卡 B/A 都闭合后，才可以把它写成 production 候选。
+
+board summary 里还要保留 warm-up、run count、绑核、governor、freq 和温度，并且用同一份 RVV binary 内的 RVV-vs-RVV B/A 做判断；不要把不同 std/RVV speedup 互相比较，也不要用 QEMU timing 代替板卡证据。
+
 ## Correspondence Estimation
 
 对应关系估计 topic 至少审计：

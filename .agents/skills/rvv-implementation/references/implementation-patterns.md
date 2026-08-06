@@ -58,3 +58,11 @@ helper，让 reviewer 可以一眼看出：
 低风险且已有强模式支撑的候选可以先做生产实现再验证；但目标硬件结果不成立时，必须回收默认生产路径。可把正确但不加速的实验移动或保留到专项诊断代码中，并在评估、主题文档和工作日志中说明不接生产原因。
 
 中风险、收益不确定、访存形态不规则、需要新组织模式、或同类模式已有退化记录的候选，优先在专项 test/bench 中做诊断原型。只有原型在目标硬件上证明收益、checksum、fallback、反汇编路径和维护边界都成立后，再改生产分流。
+
+## Fused formula 与 ILP 取舍
+
+fused formula（融合公式）写法能否接 production，不能只看源码有没有更少的算术步骤，要看最终机器码、hot path、寄存器压力和 helper 边界。对 registration 这类 RVV topic，`vfmsac/vfmacc` 是否进入 hot path、是否引入 out-of-line helper、是否出现 vector spill/reload、以及 `vsetvli` / load / reduction 的整体形态，都比“理论上更短”更重要。
+
+如果某个 `ILP` 变体和非 `ILP` 变体在当前二进制里 asm 等价，就不要把它写成独立机器码候选；它最多是源码层面的 code-shape preference（代码形态偏好）或调度诊断。只有当当前二进制、同一编译配置和同一 helper 符号里，`ILP` 真的产生不同 hot path，才把它记成独立候选。
+
+`AbcdFused` / `AbcdFusedIlp` 可以作为这条规则的典型例子：当前 asm 等价，所以不能声称 `Ilp` 有独立机器码收益；但如果 correctness、production-symbol asm attribution 和 warm-up 多轮 RVV-vs-RVV bench 都闭合，生产实现可以优先采用更显式暴露独立 multiply 和依赖链的源码写法，再由反汇编和板卡证据确认是否真的值得保留。
