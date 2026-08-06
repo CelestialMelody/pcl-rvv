@@ -13,6 +13,31 @@
 - summary artifact（摘要产物）可以临时记录本机 raw archive（原始归档）位置用于当轮溯源，但长期文档和可提交摘要优先使用
   `<local-raw-archive>/...`、`<board-output>/...` 或 env var（环境变量）名等占位符，不把绝对 `/tmp/...`、个人 home（主目录）路径或私有远端路径写成稳定证据入口。
 
+## 脚本归属与目录边界
+
+`paths.test_root/script`，只放跨 topic（主题）复用的通用脚本。典型例子包括
+日志脱敏、通用 bench（性能测试）统计、通用反汇编比较、VLEN 探测或多个模块都能直接复用的工具。
+`artifact_layout.sanitize_logs_script_template` 这类配置项指向的是通用脚本，不表示所有分析脚本都应放入全局
+`script/` 目录。
+
+与当前优化对象强绑定的脚本应放在配置解析出的 topic 测试目录下，例如
+`{artifact_layout.topic_test_dir_template}/script/`，或该 topic 既有的等价本地脚本目录。满足任一条件时，
+默认视为 topic-bound（主题绑定）脚本：
+
+- 脚本名、参数、正则、case label（用例标签）或输出字段包含当前 topic 的缩写、函数名、helper 名、公式变体或 row source policy（行来源策略）。
+- 脚本只解析某个 topic 的 board / QEMU output（板卡 / QEMU 输出）、summary、trace、反汇编符号或候选命名。
+- 脚本假设某个 topic 的数据规模、字段布局、点类型、bench wrapper、output 目录结构或日志格式。
+- 脚本虽然被同一 topic 的多个 Make target（Make 目标）调用，但离开该 topic 不能作为通用工具直接复用。
+
+数学函数专项按同一原则处理：单个函数强绑定脚本放在 `artifact_layout.math_test_dir_template`
+解析出的函数目录或其 `script/` 下；数学函数家族共享脚本可以放在 `artifact_layout.math_test_root_template`
+解析出的数学专项根目录；只有跨模块、跨 topic 可复用的脚本才放到 `paths.test_root/script`。
+
+如果发现 topic-bound 脚本误放到 `paths.test_root/script`，应迁回对应 topic 目录，并同步 Makefile、summary、
+Traceability Map（可追踪性地图）、evaluation（函数级评估）或 Handoff Packet 中引用的路径。具体误放案例
+属于当前 topic 的问题记录、review finding（审查问题）或 Handoff 恢复信息；agent asset 只记录通用归属规则，
+不要把单个 topic 的误放案例追加到统一案例文件。
+
 ## 可选策略
 
 - `summary-only`：默认策略。不提交日志文件。

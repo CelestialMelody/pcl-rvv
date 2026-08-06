@@ -54,7 +54,7 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 - [references/entry-shapes-and-test-support.zh.md](references/entry-shapes-and-test-support.zh.md)：入口形态、row source policy（行来源策略）和诊断 / 生产分层。
 - [references/numerical-consistency.zh.md](references/numerical-consistency.zh.md)：数值一致性、FMA（融合乘加）、reduction（规约）和反汇编归属。
 - [references/performance-and-ablation.zh.md](references/performance-and-ablation.zh.md)：bench 合同、板卡性能、组件消融和负向归因。
-- [references/evidence-output-policy.zh.md](references/evidence-output-policy.zh.md)：证据日志、脱敏、提交边界和 summary-only 默认策略。
+- [references/evidence-output-policy.zh.md](references/evidence-output-policy.zh.md)：证据日志、脚本归属、脱敏、提交边界和 summary-only 默认策略。
 - [references/registration-topic-evidence.zh.md](references/registration-topic-evidence.zh.md)：registration（配准）topic 的
   transformation estimation（变换估计）、correspondence estimation（对应关系估计）和 row source 证据清单。
 
@@ -67,6 +67,7 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 - diagnostic evidence（诊断证据）不等于 production evidence（生产证据）。
 - component-only ablation（仅组件消融）只能提供瓶颈线索，不能替代端到端 profile（剖析），也不能单独决定 production。
 - full-cloud（全云顺序扫描）、source-indexed（源索引路径）、dual-indices（双索引路径）和 correspondences（对应关系路径）是不同 row source policy。production 必须逐 policy 独立批准。
+- `test-rvv/script/` 只放跨 topic 可复用脚本；与当前优化对象强绑定的脚本放在对应 topic 测试目录的本地 `script/` 下。
 - evidence logs 默认 `summary-only`。raw run 目录不默认提交。
 - closeout 或 production-candidate 文档必须把 test、bench、QEMU、反汇编和板卡证据汇总到“正确性与高效性证据链”。未接 production 的诊断结论使用“诊断证据链”，并写清 diagnostic evidence 不能替代 production evidence。
 
