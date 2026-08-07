@@ -1,0 +1,73 @@
+Running main() from <gtest_main>
+[==========] Running 32 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 32 tests from TransformationEstimationPointToPlaneLLSWeighted
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd (6 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionMatchesStdWithinBudget (6 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionNearCancellationStressMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionNearCancellationStressMatchesStd (5 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionScaleStressMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionScaleStressMatchesStd (6 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionPreservesNonFiniteWeightSemantics
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionPreservesNonFiniteWeightSemantics (3 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaCandidatesMatchBlockAndStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaCandidatesMatchBlockAndStdWithinBudget (42 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaNearCancellationStressMatchesBlockAndStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaNearCancellationStressMatchesBlockAndStd (45 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaScaleStressMatchesBlockAndStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaScaleStressMatchesBlockAndStd (58 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaPreservesNonFiniteWeightSemantics
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaPreservesNonFiniteWeightSemantics (9 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudGenericAbcFusedRepresentativePointTypesMatchStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudGenericAbcFusedRepresentativePointTypesMatchStd (22 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudGenericDAndAbcdFusedRepresentativePointTypesMatchStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudGenericDAndAbcdFusedRepresentativePointTypesMatchStd (58 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionDefaultFusedAbcdIlpRepresentativePointTypesMatchStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionDefaultFusedAbcdIlpRepresentativePointTypesMatchStd (13 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPublicOverloadMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPublicOverloadMatchesStdWithinBudget (5 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNormalEquationMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNormalEquationMatchesStdWithinBudget (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScaleStressMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScaleStressMatchesStdWithinBudget (8 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPreservesNonFiniteWeightSemantics
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPreservesNonFiniteWeightSemantics (2 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudSmallInputFallsBackToScalar
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudSmallInputFallsBackToScalar (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPredicateGatesAreNarrow
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPredicateGatesAreNarrow (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZSourceMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZSourceMatchesStdWithinBudget (6 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget (6 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudDoubleNormalTargetFallsBackToScalar
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudDoubleNormalTargetFallsBackToScalar (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScalarDoubleFallsBackToScalar
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScalarDoubleFallsBackToScalar (2 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.StdDiagnosticMatchesPublicEstimator
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.StdDiagnosticMatchesPublicEstimator (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.StdCorrespondencesMatchesPublicEstimator
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.StdCorrespondencesMatchesPublicEstimator (1 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.StdSourceIndexedMatchesPublicEstimator
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.StdSourceIndexedMatchesPublicEstimator (1 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.StdDualIndicesMatchesPublicEstimator
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.StdDualIndicesMatchesPublicEstimator (1 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedCandidateMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedCandidateMatchesStd (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.DualIndicesCandidateMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.DualIndicesCandidateMatchesStd (5 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceCandidateMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceCandidateMatchesStd (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.SmallInputFallsBackForIsolatedSizeGate
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.SmallInputFallsBackForIsolatedSizeGate (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.InvalidLaneMaskMatchesStd
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.InvalidLaneMaskMatchesStd (1 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.NonFiniteWeightsAreNotMaskedWhenPointsAreFinite
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.NonFiniteWeightsAreNotMaskedWhenPointsAreFinite (1 ms)
+[----------] 32 tests from TransformationEstimationPointToPlaneLLSWeighted (346 ms total)
+
+[----------] Global test environment tear-down
+[==========] 32 tests from 1 test suite ran. (350 ms total)
+[  PASSED  ] 32 tests.

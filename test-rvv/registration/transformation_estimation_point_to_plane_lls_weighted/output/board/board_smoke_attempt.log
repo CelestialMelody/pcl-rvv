@@ -1,3 +1,0 @@
-ssh: connect to host <redacted-ip> port 22: No route to host
-make: *** [../../mk/rvv-topic.mk:219: check_board_ssh] Error 255
-board_smoke_exit_code=2
