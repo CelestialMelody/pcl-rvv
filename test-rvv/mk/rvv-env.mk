@@ -88,8 +88,10 @@ RUN_CMD = LD_LIBRARY_PATH=$(LIB_PATH_VAL):$$LD_LIBRARY_PATH qemu-riscv64 -L $(RI
 
 # Defaults used by legacy self-contained Makefiles. New topic Makefiles may
 # override these after including rvv-env.mk when they need custom behavior.
+ENABLE_VEC_MISSED ?= 0
+VEC_MISSED_CXXFLAGS ?= $(if $(filter 1 yes true,$(ENABLE_VEC_MISSED)),$(if $(LOG_FILE),-fopt-info-vec-missed=$(LOG_FILE)),)
 CXXFLAGS_ARCH ?= -march=rv64gcv -mabi=lp64d \
-	$(if $(LOG_FILE),-fopt-info-vec-missed=$(LOG_FILE)) \
+	$(VEC_MISSED_CXXFLAGS) \
 	-DPCL_SILENCE_MALLOC_WARNING=1
 CXXFLAGS_ARCH += $(EIGEN_RVV_FLAGS)
 ifeq ($(USE_PCL_RVV10),1)
@@ -121,7 +123,7 @@ REMOTE_USER ?=
 REMOTE_IP   ?=
 REMOTE_DIR  ?= /root/pcl-test/$(MODULE)/$(TOPIC)
 REMOTE_SCRIPT_DIR = $(REMOTE_DIR)/script
-REMOTE_BOARD_OUTPUT_DIR = $(REMOTE_DIR)/output
+REMOTE_BOARD_OUTPUT_DIR ?= $(REMOTE_DIR)/log/board
 BOARD_BENCH_COMPARE_OUTPUT_FILE ?= $(OUTPUT_DIR_BOARD)/analyze_bench_compare.log
 BOARD_TEST_OUTPUT_FILE ?= $(OUTPUT_DIR_BOARD)/run_test.log
 BOARD_LABEL ?= RVV board

@@ -17,8 +17,11 @@ LATEST_VEC_LOG    ?= $(LOG_DIR)/latest_vec_missed.log
 FOCUS_DIR         ?=
 FILTER_REPORT     ?= $(LOG_DIR)/filtered_$(TOPIC).log
 ANALYZE_REPORT    ?= $(LOG_DIR)/analyze_$(TOPIC).log
+ENABLE_VEC_MISSED ?= 0
+VEC_MISSED_CXXFLAGS = $(if $(filter 1 yes true,$(ENABLE_VEC_MISSED)),-fopt-info-vec-missed=$(LOG_FILE),)
+VEC_MISSED_PREREQ = $(if $(filter 1 yes true,$(ENABLE_VEC_MISSED)),$(LOG_VEC_MISS_DIR),)
 
-OUTPUT_DIR        ?= output
+OUTPUT_DIR        ?= $(LOG_DIR)
 OUTPUT_DIR_BOARD  ?= $(OUTPUT_DIR)/board
 OUTPUT_DIR_QEMU   ?= $(OUTPUT_DIR)/qemu
 
@@ -77,7 +80,7 @@ TARGET_UPSTREAM_TEST_BIN = $(BUILD_DIR)/$(ARCH)/$(TARGET_UPSTREAM_TEST)
 USE_PCL_RVV10  ?= 1
 
 CXXFLAGS_ARCH = -march=rv64gcv -mabi=lp64d \
-	-fopt-info-vec-missed=$(LOG_FILE) \
+	$(VEC_MISSED_CXXFLAGS) \
 	-DPCL_SILENCE_MALLOC_WARNING=1
 CXXFLAGS_ARCH += $(EIGEN_RVV_FLAGS)
 ifeq ($(USE_PCL_RVV10),1)
@@ -114,8 +117,6 @@ TEST_ARGS ?=
 
 $(LOG_DIR):
 	mkdir -p $(LOG_DIR)
-$(OUTPUT_DIR):
-	mkdir -p $(OUTPUT_DIR)
 $(VEC_LOGS_DIR): $(LOG_DIR)
 	mkdir -p $(VEC_LOGS_DIR)
 $(LOG_VEC_MISS_DIR): $(LOG_DIR)
@@ -126,20 +127,20 @@ $(ASM_DIR):
 	mkdir -p $(ASM_DIR)
 $(ASM_DIR)/$(ARCH): $(ASM_DIR)
 	mkdir -p $(ASM_DIR)/$(ARCH)
-$(OUTPUT_DIR_QEMU): $(OUTPUT_DIR)
+$(OUTPUT_DIR_QEMU):
 	mkdir -p $(OUTPUT_DIR_QEMU)
-$(OUTPUT_DIR_BOARD): $(OUTPUT_DIR)
+$(OUTPUT_DIR_BOARD):
 	mkdir -p $(OUTPUT_DIR_BOARD)
 
-$(TARGET_BENCH_BIN): $(SRCS_BENCH) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
+$(TARGET_BENCH_BIN): $(SRCS_BENCH) | $(LOG_DIR) $(VEC_MISSED_PREREQ) $(BUILD_DIR)/$(ARCH)
 	@echo "[BUILD] Compiling Benchmark ($(ARCH), USE_PCL_RVV10=$(USE_PCL_RVV10))..."
 	$(CXX) $(CXXFLAGS) $(SRCS_BENCH) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIBS_BENCH) -o $(TARGET_BENCH_BIN)
 
-$(TARGET_TEST_BIN): $(SRCS_TEST) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
+$(TARGET_TEST_BIN): $(SRCS_TEST) | $(LOG_DIR) $(VEC_MISSED_PREREQ) $(BUILD_DIR)/$(ARCH)
 	@echo "[BUILD] Compiling Unit Test ($(ARCH), USE_PCL_RVV10=$(USE_PCL_RVV10))..."
 	$(CXX) $(CXXFLAGS) $(SRCS_TEST) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIBS_TEST) -o $(TARGET_TEST_BIN)
 
-$(TARGET_UPSTREAM_TEST_BIN): $(SRCS_UPSTREAM_TEST) | $(LOG_DIR) $(LOG_VEC_MISS_DIR) $(BUILD_DIR)/$(ARCH)
+$(TARGET_UPSTREAM_TEST_BIN): $(SRCS_UPSTREAM_TEST) | $(LOG_DIR) $(VEC_MISSED_PREREQ) $(BUILD_DIR)/$(ARCH)
 	@echo "[BUILD] Compiling Upstream Unit Test ($(ARCH), USE_PCL_RVV10=$(USE_PCL_RVV10))..."
 	$(CXX) $(CXXFLAGS) $(SRCS_UPSTREAM_TEST) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LIBS_UPSTREAM_TEST) -o $(TARGET_UPSTREAM_TEST_BIN)
 
@@ -173,7 +174,9 @@ analyze_bench_compare: $(BENCH_STD_OUTPUT_FILE) $(BENCH_RVV_OUTPUT_FILE) | $(OUT
 	@$(PYTHON_RUN) $(BENCH_COMPARE_SCRIPT) --std-log $(BENCH_STD_OUTPUT_FILE) --rvv-log $(BENCH_RVV_OUTPUT_FILE) 2>&1 | tee $(BENCH_COMPARE_OUTPUT_FILE)
 run_bench_compare: run_bench_std run_bench_rvv analyze_bench_compare
 
-generate_vec_report: $(TARGET_BENCH_BIN) | $(LOG_DIR) $(LOG_VEC_MISS_DIR)
+generate_vec_report: | $(LOG_DIR) $(LOG_VEC_MISS_DIR)
+	@$(MAKE) -C $(CURDIR) clean_bench
+	@$(MAKE) -C $(CURDIR) ENABLE_VEC_MISSED=1 $(TARGET_BENCH_BIN)
 	@latest_file=""; \
 	if ls "$(LOG_VEC_MISS_DIR)"/vec_missed_*.log >/dev/null 2>&1; then \
 		latest_file=$$(realpath "$$(ls -1t "$(LOG_VEC_MISS_DIR)"/vec_missed_*.log | head -n 1)"); \
@@ -209,7 +212,7 @@ clean_bench_std:
 	rm -f $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_STD)
 clean_bench_rvv:
 	rm -f $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_RVV)
-CLEAN_TARGETS ?= $(BUILD_DIR) $(LOG_DIR) $(OUTPUT_DIR)
+CLEAN_TARGETS ?= $(BUILD_DIR) $(LOG_DIR) $(if $(filter-out $(LOG_DIR),$(OUTPUT_DIR)),$(OUTPUT_DIR),)
 clean:
 	rm -rf $(CLEAN_TARGETS)
 
@@ -254,7 +257,7 @@ deploy_board: $(DEPLOY_BOARD_TARGETS)
 run_board_test: deploy_board | $(OUTPUT_DIR_BOARD)
 	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_test"
 run_board_bench_compare: deploy_board | $(OUTPUT_DIR_BOARD)
-	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_bench_compare BENCH_COMPARE_SAVE=output/analyze_bench_compare.log BOARD_LABEL='$(BOARD_LABEL)' REMOTE_BENCH_ARGS='$(BENCH_ARGS)'"
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_bench_compare REMOTE_OUTPUT_DIR='$(REMOTE_BOARD_OUTPUT_DIR)' BENCH_COMPARE_SAVE='$(REMOTE_BOARD_OUTPUT_DIR)/analyze_bench_compare.log' BOARD_LABEL='$(BOARD_LABEL)' REMOTE_BENCH_ARGS='$(BENCH_ARGS)'"
 fetch_board_logs: | $(OUTPUT_DIR_BOARD)
 	@rsync -e "$(RSYNC_SSH)" -avzP $(REMOTE_USER)@$(REMOTE_IP):$(REMOTE_BOARD_OUTPUT_DIR)/ $(OUTPUT_DIR_BOARD)/
 board_smoke: run_board_test run_board_bench_compare fetch_board_logs

@@ -7,7 +7,7 @@ SHELL := /usr/bin/bash
 .SHELLFLAGS := -o pipefail -c
 
 REMOTE_LIB_DIR    ?= /root/pcl-test/lib
-REMOTE_OUTPUT_DIR ?= $(REMOTE_DIR)/output
+REMOTE_OUTPUT_DIR ?= $(REMOTE_DIR)/log/board
 
 SCRIPT_DIR           ?= $(REMOTE_DIR)/script
 BENCH_COMPARE_SCRIPT ?= $(SCRIPT_DIR)/analyze_bench_compare.py

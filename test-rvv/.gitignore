@@ -1,5 +1,20 @@
 # Common generated dirs (under test-rvv)
-**/log/
 **/.venv/
 **/build/
 **/tmp/
+**/log/**
+!**/log/
+!**/log/qemu/
+!**/log/qemu/**
+!**/log/board/
+!**/log/board/**
+**/log/qemu/*.log
+**/log/board/*.log
+**/log/board/**/run*.log
+**/log/board/**/board_env_*.log
+**/log/board/**/collection_manifest.json
+**/log/vec_missed_log/
+**/log/vec_logs/
+**/log/latest_vec_missed.log
+**/log/filtered_*.log
+**/log/analyze_*.log
