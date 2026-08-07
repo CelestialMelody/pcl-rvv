@@ -323,21 +323,22 @@ loadPointToPlaneLLSWeightedFullReductionVectors(const std::uint8_t* source_base,
   nx = __riscv_vfmul_vv_f32m1(normal_x, weight, vl);
   ny = __riscv_vfmul_vv_f32m1(normal_y, weight, vl);
   nz = __riscv_vfmul_vv_f32m1(normal_z, weight, vl);
-  a = __riscv_vfsub_vv_f32m1(__riscv_vfmul_vv_f32m1(nz, sy, vl),
-                             __riscv_vfmul_vv_f32m1(ny, sz, vl),
-                             vl);
-  b = __riscv_vfsub_vv_f32m1(__riscv_vfmul_vv_f32m1(nx, sz, vl),
-                             __riscv_vfmul_vv_f32m1(nz, sx, vl),
-                             vl);
-  c = __riscv_vfsub_vv_f32m1(__riscv_vfmul_vv_f32m1(ny, sx, vl),
-                             __riscv_vfmul_vv_f32m1(nx, sy, vl),
-                             vl);
-  d = __riscv_vfmul_vv_f32m1(nx, dx, vl);
-  d = __riscv_vfadd_vv_f32m1(d, __riscv_vfmul_vv_f32m1(ny, dy, vl), vl);
-  d = __riscv_vfadd_vv_f32m1(d, __riscv_vfmul_vv_f32m1(nz, dz, vl), vl);
-  d = __riscv_vfsub_vv_f32m1(d, __riscv_vfmul_vv_f32m1(nx, sx, vl), vl);
-  d = __riscv_vfsub_vv_f32m1(d, __riscv_vfmul_vv_f32m1(ny, sy, vl), vl);
-  d = __riscv_vfsub_vv_f32m1(d, __riscv_vfmul_vv_f32m1(nz, sz, vl), vl);
+
+  // Keep this vfmsac form tied to scalar correctness tests; changing operand
+  // order by visual sign inspection flips the solved rotation terms.
+  a = __riscv_vfmul_vv_f32m1(ny, sz, vl);
+  b = __riscv_vfmul_vv_f32m1(nz, sx, vl);
+  c = __riscv_vfmul_vv_f32m1(nx, sy, vl);
+  const vfloat32m1_t dsx = __riscv_vfsub_vv_f32m1(dx, sx, vl);
+  const vfloat32m1_t dsy = __riscv_vfsub_vv_f32m1(dy, sy, vl);
+  const vfloat32m1_t dsz = __riscv_vfsub_vv_f32m1(dz, sz, vl);
+
+  a = __riscv_vfmsac_vv_f32m1(a, nz, sy, vl);
+  b = __riscv_vfmsac_vv_f32m1(b, nx, sz, vl);
+  c = __riscv_vfmsac_vv_f32m1(c, ny, sx, vl);
+  d = __riscv_vfmul_vv_f32m1(nx, dsx, vl);
+  d = __riscv_vfmacc_vv_f32m1(d, ny, dsy, vl);
+  d = __riscv_vfmacc_vv_f32m1(d, nz, dsz, vl);
 
   const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, vl);
   a = __riscv_vmerge_vvm_f32m1(zero, a, keep, vl);
