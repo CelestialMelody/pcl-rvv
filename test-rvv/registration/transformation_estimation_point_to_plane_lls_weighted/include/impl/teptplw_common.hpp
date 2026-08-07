@@ -32,8 +32,9 @@ struct NormalEquation {
   std::size_t accepted_points = 0;
 };
 
+template <typename PointSource, typename PointTarget>
 inline bool
-finite_point_and_normal(const pcl::PointNormal& source, const pcl::PointNormal& target)
+finite_point_and_normal(const PointSource& source, const PointTarget& target)
 {
   return std::isfinite(source.x) && std::isfinite(source.y) &&
          std::isfinite(source.z) && std::isfinite(target.x) &&

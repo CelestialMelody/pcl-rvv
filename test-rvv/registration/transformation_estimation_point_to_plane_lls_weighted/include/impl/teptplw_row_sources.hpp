@@ -15,9 +15,10 @@
 
 namespace pcl::registration::rvv_te_pt2plane_lls_weighted_diag {
 
+template <typename PointSource, typename PointTarget>
 inline NormalEquation
-accumulate_std_full(const pcl::PointCloud<pcl::PointNormal>& source,
-                    const pcl::PointCloud<pcl::PointNormal>& target,
+accumulate_std_full(const pcl::PointCloud<PointSource>& source,
+                    const pcl::PointCloud<PointTarget>& target,
                     const std::vector<float>& weights,
                     AccumulationStats* stats = nullptr)
 {
