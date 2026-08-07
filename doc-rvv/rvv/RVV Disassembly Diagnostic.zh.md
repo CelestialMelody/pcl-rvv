@@ -437,6 +437,8 @@ CEOP closeout 使用的关键证据：
 
 有些主题手写 RVV 后仍保留短标量尾段。编译器可能把尾段自动改成 vector reduction，导致差异同时包含“手写 RVV 近似”和“尾段规约顺序变化”。这类判断不能只凭源码或模型推断，应通过反汇编确认。若后续复核 `filters/bilateral` 或类似邻域权重路径，应把尾段是否出现非预期自动 vector reduction 作为独立检查项，再决定是否需要局部限制 tree vectorizer 或调整诊断归因。
 
+需要解释 GCC missed-vectorization（未自动向量化）报告时，使用 `doc-rvv/rvv/RVV Compiler Auto Vectorization Diagnostics.zh.md` 的开关和证据边界；普通反汇编检查不强制生成该报告。
+
 反汇编检查点：
 
 ```text

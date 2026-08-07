@@ -263,7 +263,7 @@ rg -n "fsrmi|fsrm|frrm|fscsr|frcsr" \
 
 ```bash
 rg -n "未解析|n/a|Total Time 不计算" \
-  test-rvv/<module>/<topic>/output/qemu/analyze_bench_compare.log
+  test-rvv/<module>/<topic>/log/qemu/analyze_bench_compare.log
 ```
 
 ## 检查清单
