@@ -36,6 +36,8 @@ S2 建立函数级评估。评估不是只在对话里口头完成；如果 topi
 - production-candidate（生产候选）、diagnostic（诊断）、bench-only（仅性能诊断）或 no-go（不继续）的初步判断。
 - 需要哪些证据才能改变当前判断。
 
+如果目标循环可能被 compiler auto-vectorization（编译器自动向量化）覆盖，或需要判断手写 RVV 是否有必要，S2 可以把 `generate_vec_report` 列为可选诊断。该诊断默认不开启，报告只作为可向量化潜力和编译器限制的辅助输入。
+
 小 topic 可以把 S2 评估写在主题文档的“函数级评估”章节；复杂 topic 建议单独写 evaluation（评估）文档。
 
 ### S3-S4 设计和证据计划
@@ -54,6 +56,8 @@ S4 形成测试和证据计划，区分：
 - board performance（板卡性能证据）。
 - negative evidence（负向证据，例如证据显示不值得接入生产）。
 
+如果计划中的结论依赖“编译器不会自动向量化”或“自动向量化不足”，S4 应记录 missed-vectorization report（未自动向量化报告）的生成命令、摘要路径或未使用原因。该报告不替代 correctness、反汇编归因或板卡性能证据。
+
 测试类别、row source policy（行来源策略）、production-shaped diagnostic（生产形态诊断）、
 production direct（真实生产路径证据）、component ablation（组件消融）和 evidence logs 策略按
 `rvv-test` 执行。
@@ -69,7 +73,7 @@ S6 根据 S3 决策实现 production RVV、production-shaped diagnostic（生产
 
 S7 运行必要测试和 QEMU 验证。QEMU 只能支持正确性、路径命中和日志形状，不支持真实性能结论。
 
-S8 检查反汇编或等效指令路径，确认关键 RVV 指令是否出现。
+S8 检查反汇编或等效指令路径，确认关键 RVV 指令是否出现，并尽量归属到当前 helper、production 符号、bench harness、库代码或编译器自动向量化区域。若归因存在自动向量化疑点，可以补充 missed-vectorization 摘要；默认 S8 不要求生成该报告。
 
 S9 在板卡或目标硬件上运行必要 smoke（小型验证）、test 和 benchmark（性能测试）。只有板卡或目标硬件性能数据能支撑真实性能结论。
 

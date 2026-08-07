@@ -16,9 +16,9 @@
 | 信息类型 | 主归属 | 允许引用 | 不应复制 |
 | --- | --- | --- | --- |
 | 当前采用的优化方式、覆盖范围、fallback（回退路径）和生产边界 | `doc-rvv/<module>/<topic>-RVV.zh.md` 主题文档 | evaluation 的实现方式审计表、Handoff 摘要、模块状态表 | output summary 的 raw 表、每轮 bench 全量日志、对话过程 |
-| S2 evaluation、候选路线、采用 / 尝试 / 暂缓 / 拒绝理由 | `test-rvv/<module>/<topic>/<topic>-evaluation.zh.md` | 主题文档引用最终采用状态和证据路径；Handoff 引用下一步动作 | 主题文档复制完整候选流水账；Handoff 写成完整实验报告 |
+| S2 evaluation、候选路线、采用 / 尝试 / 暂缓 / 拒绝理由 | `artifact_layout.evaluation_doc_template` 解析出的 evaluation 文档 | 主题文档引用最终采用状态和证据路径；Handoff 引用下一步动作 | 主题文档复制完整候选流水账；Handoff 写成完整实验报告 |
 | test、diagnostic、bench case 的输入构造、计时边界和证明点 | evaluation 文档和对应测试 / bench 源码注释 | 主题文档只引用能支撑结论的 case；Handoff 列命令和路径 | 主题文档复制每个 TEST 的长注释；output summary 承担测试设计说明 |
-| bench 统计、A/B 公式、异常值口径、run label 和复现命令 | `test-rvv/.../output/board/*.md` summary 或 analysis script（分析脚本） | evaluation / 主题文档引用 summary 路径、脚本路径和关键结论 | 主题文档或 Handoff 复制 raw log；把 QEMU timing 写成性能结论 |
+| bench 统计、A/B 公式、异常值口径、run label 和复现命令 | `artifact_layout.board_output_subdir` 解析目录下的 summary 或 analysis script（分析脚本） | evaluation / 主题文档引用 summary 路径、脚本路径和关键结论 | 主题文档或 Handoff 复制 raw log；把 QEMU timing 写成性能结论 |
 | QEMU、反汇编、board（板卡）和 production direct（真实生产路径证据）的证据边界 | 证据 summary、evaluation 证据表和主题文档证据链共同引用同一批路径 | Handoff 列 evidence paths；reviewer 抽查路径 | 多处写互相矛盾的“最新结果”或无路径结论 |
 | 真实 production（生产源码）补丁、dispatch（分流逻辑）、public API（公开接口）和维护解释 | production 源码 + 主题文档 | evaluation 记录 production decision（生产接入判断）；Handoff 列 production diff | evaluation 复述生产实现长文；output summary 解释生产维护边界 |
 | reviewer 恢复动作、dirty isolation（脏工作区隔离）、提交边界和下一轮动作 | Handoff Packet、work log（工作日志）或 CURRENT_STATUS（当前状态入口） | evaluation / 主题文档只保留稳定后续方向 | 主题文档写成当前待办清单；长期文档依赖聊天上下文 |
@@ -99,13 +99,13 @@ role: <该对象在证据链中的角色>
 例如：
 
 ```text
-path: test-rvv/<module>/<topic>/<topic>-evaluation.zh.md
+path: artifact_layout.evaluation_doc_template
 anchor: 实现方式审计
 role: candidate 取舍主归属；主题文档只引用最终采用状态
 ```
 
 ```text
-path: test-rvv/<module>/<topic>/output/board/<summary>.md
+path: {artifact_layout.board_output_subdir}/<summary>.md
 anchor: RVV-vs-RVV B/A summary
 role: 板卡性能摘要；raw log 不进入默认提交边界
 ```

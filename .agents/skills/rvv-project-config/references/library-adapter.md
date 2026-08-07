@@ -28,7 +28,11 @@ paths.doc_root: <repo>/<configured-doc-root>
 artifact_layout.screening_root_template: <configured-doc-root>/<configured-screening-root>
 artifact_layout.topic_test_dir_template: <configured-test-root>/<module>/<topic>
 artifact_layout.topic_doc_template: <configured-doc-root>/<module>/<topic-doc-name>
-artifact_layout.evaluation_doc_template: <configured-test-root>/<module>/<topic>/<evaluation-doc-name>
+artifact_layout.evaluation_doc_subdir: <configured-topic-local-doc-subdir>
+artifact_layout.evaluation_doc_template: <configured-test-root>/<module>/<topic>/<configured-topic-local-doc-subdir>/<evaluation-doc-name>
+artifact_layout.source_subdir: <configured-topic-local-source-subdir>
+artifact_layout.test_source_template: <configured-topic-local-test-source-template>
+artifact_layout.bench_source_template: <configured-topic-local-bench-source-template>
 artifact_layout.qemu_output_subdir: <configured-qemu-output-subdir>
 artifact_layout.board_output_subdir: <configured-board-output-subdir>
 ```
@@ -62,8 +66,8 @@ local override（本机私有覆盖）替换这些默认值。
 ```
 
 快速定位专项证据时，先用 `artifact_layout.topic_test_dir_template` 解析当前 topic 的测试资产目录，再按
-`artifact_layout.makefile_name`、`artifact_layout.board_makefile_name`、`artifact_layout.test_source_prefix`、
-`artifact_layout.bench_source_prefix`、`artifact_layout.qemu_output_subdir` 和
+`artifact_layout.makefile_name`、`artifact_layout.board_makefile_name`、`artifact_layout.test_source_template`、
+`artifact_layout.bench_source_template`、`artifact_layout.evaluation_doc_template`、`artifact_layout.qemu_output_subdir` 和
 `artifact_layout.board_output_subdir` 查找测试、bench、脚本和日志入口。
 
 上述路径、文件名和搜索入口都是配置解析结果，不是 generic RVV agent 的硬编码要求。迁移到其它 C/C++ 库时，由该库 adapter 提供等价的源码、测试、文档、日志和筛选入口。

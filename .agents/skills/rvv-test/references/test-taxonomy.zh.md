@@ -27,6 +27,7 @@
 - numerical consistency（数值一致性）：对比标量参考链路和 RVV 执行链路，记录误差预算、最大误差、checksum（校验和）和失败阈值。
 - component ablation（组件消融）：拆分 gather、staging、reduction、FMA、index 展开等成本。它只提供瓶颈线索，不能单独决定 production。
 - diagnostic/probing（诊断 / 探针测试）：用于定位特定边界、路径命中、计数、分布或日志形状，不作为生产性能结论。
+- compiler auto-vectorization diagnostic（编译器自动向量化诊断）：用编译器报告检查某段标量代码为什么没有自动向量化，或实际是否被编译器生成了向量路径。该诊断默认不开启，适合作为 S2 早期评估或 S4 证据计划中的辅助输入。
 - trade-off analysis（取舍分析）：回答“为什么采用 A 而不是 B”，需要把 correctness、性能、维护成本和证据缺口一起写清。
 
 ### 4. RVV 生产接入证据

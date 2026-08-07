@@ -67,7 +67,7 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `validation` 应用短表或清单列出本轮实际运行和未运行的验证：unit / regression、QEMU correctness、bench compare、反汇编、board / target benchmark、sanitizer 或等价检查。未运行项必须写明原因，不能只省略。
 - `evidence_paths` 只列当前结论真正依赖的证据。大型日志可以列路径和摘要，不要复制长日志。
 - `board_evidence_paths` 只列目标硬件证据，并明确每个路径是 summary artifact（摘要证据）、sanitized log（脱敏日志）还是 raw log（原始日志）。默认 `summary-only` 时，raw log 只能作为本机证据，不进入默认提交边界。
-- `asm_attribution` 必须说明关键 RVV 指令或缺失证据归属到当前 helper、production 符号、bench harness、Eigen/libm、编译器自动向量化或无关代码。归属不清时写“指令存在但热点归属未闭合”。
+- `asm_attribution` 必须说明关键 RVV 指令或缺失证据归属到当前 helper、production 符号、bench harness、Eigen/libm、编译器自动向量化或无关代码。归属不清时写“指令存在但热点归属未闭合”。如果使用 `generate_vec_report` 辅助解释自动向量化疑点，Handoff 只记录命令、摘要路径和它不能替代 objdump 归因的边界。
 - `evidence_decision_summary` 必须对应主题文档的“正确性与高效性证据链”或未接 production 诊断结论的“诊断证据链”。摘要至少写清 public entry 是否真实命中、row semantics、`accepted_points` / 中间态 / matrix / fallback 证据、repeated board 或目标硬件性能来源、EvidenceDecision 边界和未覆盖风险。
 - `evidence_decision` 应是 S10 / PI5 的明确枚举或陈述，例如 `production-ready`、`partial-production-candidate`、`bench-only/no-production`、`rollback/no-production`、`blocked`。它可以和 `current_decision` 内容一致，但不能只隐含在长摘要里。
 - `production_decision` 必须独立于性能结论写清是否修改 production（生产源码）、是否进入 production integration loop（生产接入闭环）、是否只保留 diagnostic，以及哪些入口 / 点类型 / `Scalar` / row source 仍保持标量。诊断板卡收益不能自动写成 production-ready。

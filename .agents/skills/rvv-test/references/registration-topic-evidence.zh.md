@@ -19,6 +19,8 @@ estimation（对应关系估计）。它补充通用 `rvv-test` 规则，不替�
   invalid lane finite mask（无效通道有限值掩码）必须作为测试矩阵条目审计。
 - diagnostic evidence（诊断证据）只说明诊断层证明了什么。未接 production 的诊断结论必须写“诊断证据链”，不能写成 production-ready（生产就绪）。
 
+板卡 repeated run 之前，baseline 和 candidate 应分别通过 topic-local smoke。smoke 必须验证编译、RVV gate 命中、单次运行完成、checksum/accepted-point 输出以及同边界 correctness。这个步骤用于阻止 benchmark helper 的递归、错误模板实例化或 layout 绑定错误进入正式采集。
+
 ## 泛型 Gate 与代表性点型
 
 当 production gate（生产门控）覆盖 layout-gated generic point types（布局门控泛型点类型）集合，
@@ -50,6 +52,8 @@ fused formula（融合公式）在 registration topic 里要把四层证据闭�
 当前这类 topic 的写法还应区分两种“看起来更快”的来源：一种是源码层面的 code-shape preference，另一种是真实不同机器码。像 `AbcdFused` 与 `AbcdFusedIlp` 这种 case，如果 asm 等价，就只能把 `Ilp` 写成源码调度诊断，不要把它当成已证实的独立机器码收益；只有 production-symbol asm attribution 和多轮板卡 B/A 都闭合后，才可以把它写成 production 候选。
 
 board summary 里还要保留 warm-up、run count、绑核、governor、freq 和温度，并且用同一份 RVV binary 内的 RVV-vs-RVV B/A 做判断；不要把不同 std/RVV speedup 互相比较，也不要用 QEMU timing 代替板卡证据。
+
+registration fused formula 的 helper A/B 必须同边界。`block-baseline` 和 `block-fused-*` 应共享 test_support helper 或 production helper 的外壳；真实 public overload 与 test_support helper 的对比只能作为 mixed-boundary cross-check（混合边界交叉检查），不能写成公式消融主表。
 
 ## Correspondence Estimation
 

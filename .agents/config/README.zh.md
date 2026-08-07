@@ -32,9 +32,9 @@ keys，再用当前 topic / function / adapter 提供的运行时变量绑定剩
 - `documentation`：closeout（收尾文档）是否先写当前状态、是否要求数值算例、长期文档是否禁止保留对话流程话术，以及文档语言后缀、主题文档后缀、评估文档后缀和扩展名默认值。
 - `evidence`：证据日志策略。默认 `summary-only`，不提交 raw logs（原始日志）。
 - `agent_assets`：是否报告可沉淀到 skill（技能）或 knowledge map（知识索引）的经验。默认 `report-only`，不自动修改 agent asset。
-- `test_support`：测试支撑代码的拆分阈值、聚合入口、内部目录、文件扩展名、兼容别名和职责拆分偏好。
+- `test_support`：测试支撑代码的拆分阈值、聚合入口目录、聚合入口命名、内部目录、文件扩展名、兼容别名和职责拆分偏好。
 - `paths`：work log（工作日志）、测试目录、文档目录、依赖库和交叉编译工具链的环境变量名。
-- `artifact_layout`：topic（主题）测试目录、主题文档、evaluation（评估）文档、筛选目录、数学专项测试顶层目录和函数目录、QEMU / board 输出目录、Makefile 文件名、测试 / bench 源文件前缀和日志脱敏脚本的模板。
+- `artifact_layout`：topic（主题）测试目录、主题文档、evaluation（评估）文档、测试 / bench 源码位置、筛选目录、数学专项测试顶层目录和函数目录、QEMU / board 输出目录、Makefile 文件名和日志脱敏脚本的模板。
 - `board`：板卡配置的环境变量名。不要在可提交配置里写 IP、用户名或私有路径。
 
 ## 本机覆盖示例

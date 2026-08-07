@@ -51,6 +51,15 @@ CXX = $(CROSS_COMPILE)g++
 endif
 ```
 
+编译器自动向量化诊断默认关闭。公共 Makefile 可以提供窄开关，普通 build 不写 missed-vectorization（未自动向量化）日志；需要报告时由显式 target 或命令行变量开启：
+
+```make
+ENABLE_VEC_MISSED ?= 0
+VEC_MISSED_CXXFLAGS ?= $(if $(filter 1 yes true,$(ENABLE_VEC_MISSED)),$(if $(LOG_FILE),-fopt-info-vec-missed=$(LOG_FILE)),)
+```
+
+`generate_vec_report` 或等价目标应自行用 `ENABLE_VEC_MISSED=1` 重新构建目标二进制，再分析 `log/vec_missed_log/` 下的报告。普通 `run_test_compare`、`run_bench_compare` 和 board 部署不应因为该诊断生成额外日志。
+
 板卡设置：
 
 ```make
@@ -91,6 +100,7 @@ analyze_bench_compare
 - `deploy_*` 只同步脚本、板卡侧 Makefile 和二进制。
 - `run_board_*` 只触发板卡侧测试或 bench。
 - `fetch_board_logs` 只把板卡输出拉回 `artifact_layout.board_output_subdir` 解析出的本地输出目录。
+- QEMU 输出目录按 `artifact_layout.qemu_output_subdir` 解析；board 输出目录按 `artifact_layout.board_output_subdir` 解析。公共默认值应与 `.agents/config/defaults.yaml` 保持一致。
 - 主题 Makefile / board Makefile 只声明 `TOPIC`、`MODULE`、目标名、源码、参数、特殊库和少量覆盖变量；具体文件名由 `artifact_layout.makefile_name` 和 `artifact_layout.board_makefile_name` 决定。
 - 公共规则放在 `paths.test_root` 与 `artifact_layout.shared_make_subdir` 解析出的公共 include 目录；无法使用公共 include 时，在函数级评估或问题记录中说明原因。
 
@@ -148,11 +158,11 @@ endif
 
 ## 迁移检查清单
 
-- 先只搜索源码和配置文件；默认忽略 `output/`、`build/`、`log/` 和生成的 `.log`。
+- 先只搜索源码和配置文件；默认忽略 `build/`、`log/vec_missed_log/`、`log/vec_logs/` 和生成的本机诊断 `.log`。如果 topic 使用 `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 保存可提交 summary，不要把整个 `log/` 当成无效目录。
 - 分别列出已使用公共模板的测试和自包含 legacy Makefile。
 - 确认共享变量能提供同名路径后，再删除 topic Makefile 里的硬编码路径。
 - 用户示例保持通用，只使用占位符、env var 名或文档保留地址，不写个人路径、真实私有地址、用户名或单台设备名。
 - 本机配置用本地 ignore 或项目约定排除，不要提交。
 - 每迁移一批至少跑一个真实 build/test。
 - 同时验证一次错误路径诊断。
-- 不要提交本机 `config.mk`、build 目录或生成日志。
+- 不要提交本机 `config.mk`、build 目录、missed-vectorization raw log 或未脱敏 raw run 日志。

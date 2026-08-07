@@ -54,7 +54,7 @@ local fragment -> full diagnostic -> production case -> production decision
 evaluation 文档会长期保留，不应把证据锚定到“最新一次”“最新日志”“截至目前”这类会随时间漂移的词。推荐写法：
 
 - 写“本轮 board rerun 结果”“当前证据”“历史基线”“rerun 结果 supersedes 历史基线”。
-- 用 `output/board/...`、`output/qemu/...`、summary 文件、manifest 或 run label 说明证据来源。
+- 用 `artifact_layout.board_output_subdir`、`artifact_layout.qemu_output_subdir`、summary 文件、manifest 或 run label 说明证据来源。
 - 若有多轮结果，把旧结果写成“历史基线”或“rerun 前对照”，把新结果写成“rerun 结果”，不要写“最新结果”。
 
 日期允许出现在 work log、manifest、run id、handoff / recovery path 和用户指定目录名中。不要批量改这些位置；它们承担恢复和审计语义。扫描清理时应白名单保留 ICP “最近点”、checksum、常量、指令立即数、数据规模和 run id。

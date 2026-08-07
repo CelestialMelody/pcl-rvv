@@ -38,6 +38,7 @@ production direct case: real public API -> real production RVV gate -> checksum 
 
 - A/B 含义：A 是哪个 baseline，B 是哪个 candidate。
 - A/B 两侧调用路径：test-only helper、public-like wrapper、真实 public overload、production dispatch 等。
+- A/B 是否同边界：同边界时写清共享的 wrapper、gate、mask、reduction、solve 和 checksum 口径；混合边界时必须显式命名为交叉检查，并说明不能作为严格候选收益。
 - `std/RVV speedup` 的定义：同一个 case 内 `std_ms / rvv_ms`，不能直接解释为 candidate 相对 baseline 的收益。
 - candidate-vs-baseline 指标的定义和方向，例如 `B/A = A_rvv_ms / B_rvv_ms`，并说明 `>1` 才表示 B 更快。
 - direct diagnostic、production-shaped diagnostic、production direct 各自能证明什么，是否可作为 production evidence。

@@ -37,7 +37,7 @@ vector reduction（向量规约）会改变累加树。使用或暂缓时都要�
 - 反汇编中 `vfred*` 指令是否属于当前 helper。
 - 板卡 A/B 是否显示收益。
 
-如果编译器对 scalar tail（标量尾段）自动向量化并生成 reduction 指令，文档必须记录该事实。它说明实际执行链路已经不同于源码表面形状。
+如果编译器对 scalar tail（标量尾段）自动向量化并生成 reduction 指令，文档必须记录该事实。它说明实际执行链路已经不同于源码表面形状。missed-vectorization（未自动向量化）报告可辅助解释这类现象；普通构建不默认生成该报告，需要用 `generate_vec_report` 或 `ENABLE_VEC_MISSED=1` 显式开启。
 
 ## 反汇编归属
 
@@ -50,3 +50,4 @@ vector reduction（向量规约）会改变累加树。使用或暂缓时都要�
 - 无关库代码。
 
 归属不清时，结论写成“指令存在但热点归属未闭合”。
+missed-vectorization 报告只能辅助解释编译器是否接管了标量循环。S8 的主证据仍来自 objdump（反汇编导出）和符号级 asm attribution（反汇编归因）。

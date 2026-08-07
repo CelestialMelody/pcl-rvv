@@ -7,6 +7,7 @@
 默认使用 `summary-only`：
 
 - 文档和 Handoff Packet（交接数据包）写摘要、命令和路径。
+- QEMU 和 board（板卡）证据路径按 `.agents/config/defaults.yaml` 的 `artifact_layout.qemu_output_subdir` 和 `artifact_layout.board_output_subdir` 解析。当前默认值是 `log/qemu` 和 `log/board`。
 - output summary（输出摘要）作为 bench / evidence 统计的主归属时，应列出生成脚本、输入日志、被测代码或 bench wrapper、相关文档章节和 Traceability Map 入口。
 - raw run 目录、完整反汇编、build（构建）输出和本机日志不默认提交。
 - 如果日志包含个人路径、板卡 IP、用户名或私有远端路径，只能留在本机工作区或先脱敏。
@@ -61,6 +62,8 @@ Traceability Map（可追踪性地图）、evaluation（函数级评估）或 Ha
 - `build/` 二进制。
 - 完整 asm dump（反汇编导出），除非摘要不足以复核。
 - `log/vec_missed_log/`。
+- `log/vec_logs/`、`log/latest_vec_missed.log`、`log/filtered_*.log` 和 `log/analyze_*.log`。
+- `log/qemu/*.log`、`log/board/*.log`、`log/board/**/run*.log`、`log/board/**/board_env_*.log` 和 `log/board/**/collection_manifest.json`，除非用户明确要求提交脱敏日志或 manifest。
 - 本机 `config.mk`。
 - 临时 deploy（部署）脚本。
 - 聊天记录。
