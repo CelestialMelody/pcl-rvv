@@ -70,7 +70,7 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 - `test-rvv/script/` 只放跨 topic 可复用脚本；与当前优化对象强绑定的脚本放在对应 topic 测试目录的本地 `script/` 下。
 - compiler auto-vectorization（编译器自动向量化）诊断默认不开启；需要评估编译器潜力或解释 missed-vectorization（未自动向量化）原因时，显式运行 topic Makefile 的 `generate_vec_report` 或等价目标。
 - evidence logs 默认 `summary-only`。raw run 目录不默认提交。
-- 生成在 `log/qemu` 或 `log/board` 下的证据文件，只有被 `doc-rvv` 或 `test-rvv` 下的文档明确引用为证据路径、run label 或摘要输入时，才进入提交候选；未被文档引用的日志和摘要留在本机工作区。
+- 生成在 `log/qemu` 或 `log/board` 下的 correctness run log、bench analyze log 和 summary artifact，只有被 `doc-rvv` 或 `test-rvv` 下的文档明确引用为证据路径、run label 或摘要输入时，才进入提交候选；未被文档引用的日志和摘要留在本机工作区。
 - closeout 或 production-candidate 文档必须把 test、bench、QEMU、反汇编和板卡证据汇总到“正确性与高效性证据链”。未接 production 的诊断结论使用“诊断证据链”，并写清 diagnostic evidence 不能替代 production evidence。
 
 ## 与其它 Skill 的边界

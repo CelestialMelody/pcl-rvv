@@ -10,7 +10,7 @@
 - QEMU 和 board（板卡）证据路径按 `.agents/config/defaults.yaml` 的 `artifact_layout.qemu_output_subdir` 和 `artifact_layout.board_output_subdir` 解析。当前默认值是 `log/qemu` 和 `log/board`。
 - output summary（输出摘要）作为 bench / evidence 统计的主归属时，应列出生成脚本、输入日志、被测代码或 bench wrapper、相关文档章节和 Traceability Map 入口。
 - raw run 目录、完整反汇编、build（构建）输出和本机日志不默认提交。
-- `log/qemu` 或 `log/board` 下的生成证据只有在 `doc-rvv` 或 `test-rvv` 下的文档明确引用时才进入提交候选。没有被文档引用的日志、摘要、manifest（清单）或环境探测文件，即使已经生成，也默认留在本机工作区。
+- `log/qemu` 或 `log/board` 下的生成证据只有在 `doc-rvv` 或 `test-rvv` 下的文档明确引用时才进入提交候选。这里的“生成证据”包括 correctness / unit test run log（正确性 / 单元测试运行日志）、bench analyze log（性能分析日志）、summary artifact、checksum、asm attribution 等。没有被文档引用的日志、摘要、manifest（清单）或环境探测文件，即使已经生成，也默认留在本机工作区。
 - 如果日志包含个人路径、板卡 IP、用户名或私有远端路径，只能留在本机工作区或先脱敏。
 - summary artifact（摘要产物）可以临时记录本机 raw archive（原始归档）位置用于当轮溯源，但长期文档和可提交摘要优先使用
   `<local-raw-archive>/...`、`<board-output>/...` 或 env var（环境变量）名等占位符，不把绝对 `/tmp/...`、个人 home（主目录）路径或私有远端路径写成稳定证据入口。
@@ -23,6 +23,8 @@
 
 - 文档只写某个输出目录时，不表示目录内所有文件都可提交；优先按具体文件名或受控 glob（通配模式）建立 allowlist（白名单）。
 - 被文档引用的 summary、checksum、asm attribution（反汇编归因）或 sanitized log（脱敏日志）可以进入提交候选。
+- 被文档引用的 correctness / unit test run log 可以进入提交候选，例如 QEMU `run_test_std.log` / `run_test_rvv.log`、board `run_test.log`，或 topic 明确采用的等价 correctness log。若文档只写 `run_test_compare` 命令而不写具体日志路径，可以改为提交小型 correctness summary，或在文档中补充被保留的具体日志路径。
+- 被文档引用的 bench analyze log 可以进入提交候选，例如 `analyze_bench_compare.log`、repeated benchmark `summary.md`、trace summary 或 topic-local analyzer 生成的性能摘要。原始 `run_bench_*.log` 仍按 raw log 处理，只有文档明确引用且满足脱敏 / 用户授权时才提交。
 - 被文档引用的 raw log（原始日志）仍需满足脱敏检查，或由用户明确要求保留原始文本并确认无私有信息风险。
 - 未被文档引用的 raw run log、board env log（板卡环境日志）、collection manifest（采集清单）、临时 analyzer 输出和空表格摘要不提交；必要时在文档中先补证据角色和路径，再调整 `.gitignore` 或 staging allowlist。
 - `.gitignore` 只应放开文档实际引用的文件或窄模式，不要因为 `log/board` 或 `log/qemu` 目录存在就整体放开。
