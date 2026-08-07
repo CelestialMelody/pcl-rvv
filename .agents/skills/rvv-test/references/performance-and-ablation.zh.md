@@ -62,7 +62,7 @@ direct diagnostic、production-shaped diagnostic 和 production direct 若同时
 
 ## 组件消融
 
-component-only ablation（仅组件消融）只是瓶颈线索，不等于端到端 profile（剖析），也不能单独决定 production。
+component ablation（组件消融）只是瓶颈线索，不等于端到端 profile（剖析），也不能单独决定 production。
 
 适合拆分的组件：
 

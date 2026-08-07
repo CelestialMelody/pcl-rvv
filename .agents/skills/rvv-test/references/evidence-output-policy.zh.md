@@ -10,9 +10,22 @@
 - QEMU 和 board（板卡）证据路径按 `.agents/config/defaults.yaml` 的 `artifact_layout.qemu_output_subdir` 和 `artifact_layout.board_output_subdir` 解析。当前默认值是 `log/qemu` 和 `log/board`。
 - output summary（输出摘要）作为 bench / evidence 统计的主归属时，应列出生成脚本、输入日志、被测代码或 bench wrapper、相关文档章节和 Traceability Map 入口。
 - raw run 目录、完整反汇编、build（构建）输出和本机日志不默认提交。
+- `log/qemu` 或 `log/board` 下的生成证据只有在 `doc-rvv` 或 `test-rvv` 下的文档明确引用时才进入提交候选。没有被文档引用的日志、摘要、manifest（清单）或环境探测文件，即使已经生成，也默认留在本机工作区。
 - 如果日志包含个人路径、板卡 IP、用户名或私有远端路径，只能留在本机工作区或先脱敏。
 - summary artifact（摘要产物）可以临时记录本机 raw archive（原始归档）位置用于当轮溯源，但长期文档和可提交摘要优先使用
   `<local-raw-archive>/...`、`<board-output>/...` 或 env var（环境变量）名等占位符，不把绝对 `/tmp/...`、个人 home（主目录）路径或私有远端路径写成稳定证据入口。
+
+## 文档引用驱动的提交白名单
+
+提交 `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 解析目录下的证据文件前，先检查 `doc-rvv` 和 `test-rvv` 下的 Markdown 文档是否明确引用该证据。引用可以是仓库相对路径、run label（运行标签）、summary artifact（摘要产物）路径，或 Traceability Map 中的 evidence path（证据路径）。
+
+该规则是提交候选的必要条件，不替代脱敏、summary-only 和用户授权规则：
+
+- 文档只写某个输出目录时，不表示目录内所有文件都可提交；优先按具体文件名或受控 glob（通配模式）建立 allowlist（白名单）。
+- 被文档引用的 summary、checksum、asm attribution（反汇编归因）或 sanitized log（脱敏日志）可以进入提交候选。
+- 被文档引用的 raw log（原始日志）仍需满足脱敏检查，或由用户明确要求保留原始文本并确认无私有信息风险。
+- 未被文档引用的 raw run log、board env log（板卡环境日志）、collection manifest（采集清单）、临时 analyzer 输出和空表格摘要不提交；必要时在文档中先补证据角色和路径，再调整 `.gitignore` 或 staging allowlist。
+- `.gitignore` 只应放开文档实际引用的文件或窄模式，不要因为 `log/board` 或 `log/qemu` 目录存在就整体放开。
 
 ## 脚本归属与目录边界
 
@@ -63,7 +76,7 @@ Traceability Map（可追踪性地图）、evaluation（函数级评估）或 Ha
 - 完整 asm dump（反汇编导出），除非摘要不足以复核。
 - `log/vec_missed_log/`。
 - `log/vec_logs/`、`log/latest_vec_missed.log`、`log/filtered_*.log` 和 `log/analyze_*.log`。
-- `log/qemu/*.log`、`log/board/*.log`、`log/board/**/run*.log`、`log/board/**/board_env_*.log` 和 `log/board/**/collection_manifest.json`，除非用户明确要求提交脱敏日志或 manifest。
+- `log/qemu/*.log`、`log/board/*.log`、`log/board/**/run*.log`、`log/board/**/board_env_*.log` 和 `log/board/**/collection_manifest.json`，除非它们已被 `doc-rvv` 或 `test-rvv` 文档明确引用，并且满足脱敏检查或用户对 raw log / manifest 的明确授权。
 - 本机 `config.mk`。
 - 临时 deploy（部署）脚本。
 - 聊天记录。

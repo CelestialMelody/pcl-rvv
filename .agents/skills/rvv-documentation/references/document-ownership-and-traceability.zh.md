@@ -12,6 +12,7 @@
 ## 文档归属矩阵
 
 每类事实只设一个主归属。其它文档可以引用主归属的路径、章节、表格、run label（运行标签）或 evidence path（证据路径），但不要复制长段正文、raw log（原始日志）或完整实验流水。
+`log/qemu` 和 `log/board` 下的生成证据只有被 `doc-rvv` 或 `test-rvv` 文档明确引用时才进入提交候选；因此长期文档和 evaluation 引用证据时要写具体文件、run label 或 summary artifact 路径，而不是只写输出目录。
 
 | 信息类型 | 主归属 | 允许引用 | 不应复制 |
 | --- | --- | --- | --- |
@@ -107,7 +108,7 @@ role: candidate 取舍主归属；主题文档只引用最终采用状态
 ```text
 path: {artifact_layout.board_output_subdir}/<summary>.md
 anchor: RVV-vs-RVV B/A summary
-role: 板卡性能摘要；raw log 不进入默认提交边界
+role: 板卡性能摘要；该路径可进入提交候选，raw log 不进入默认提交边界
 ```
 
 ## Reviewer 检查点

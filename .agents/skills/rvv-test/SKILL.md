@@ -39,7 +39,7 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
   写成“未接 production 的诊断结论”；需要表达筛选或 EvidenceDecision 的诊断阶段时，写成
   `diagnostic`。历史 topic 中的旧标签可在回头完善文档时同步改写。
 - `benchmarking` 只表示性能测量子领域，不单独承载 QEMU、反汇编、日志、数值一致性或生产证据规则。
-- test support（测试支撑代码）的聚合入口目录、聚合入口命名、topic abbreviation（主题缩写）要求、
+- test support（测试支撑代码）的聚合入口目录、聚合入口命名、topic token（主题短标识）与长名缩写策略、
   内部目录、内部头文件前缀、扩展名和 compatibility alias（兼容别名）策略，默认从 `.agents/config/defaults.yaml` 的
   `test_support` 读取；`.agents/local/user-preferences.yaml` 可覆盖本机偏好，当前 prompt 的明确要求优先。
 - topic 内部若有混合用途 helper（reference、diagnostic、ablation、candidate wrapper、bench-facing helper），默认使用
@@ -70,6 +70,7 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 - `test-rvv/script/` 只放跨 topic 可复用脚本；与当前优化对象强绑定的脚本放在对应 topic 测试目录的本地 `script/` 下。
 - compiler auto-vectorization（编译器自动向量化）诊断默认不开启；需要评估编译器潜力或解释 missed-vectorization（未自动向量化）原因时，显式运行 topic Makefile 的 `generate_vec_report` 或等价目标。
 - evidence logs 默认 `summary-only`。raw run 目录不默认提交。
+- 生成在 `log/qemu` 或 `log/board` 下的证据文件，只有被 `doc-rvv` 或 `test-rvv` 下的文档明确引用为证据路径、run label 或摘要输入时，才进入提交候选；未被文档引用的日志和摘要留在本机工作区。
 - closeout 或 production-candidate 文档必须把 test、bench、QEMU、反汇编和板卡证据汇总到“正确性与高效性证据链”。未接 production 的诊断结论使用“诊断证据链”，并写清 diagnostic evidence 不能替代 production evidence。
 
 ## 与其它 Skill 的边界

@@ -5,7 +5,7 @@ RVV 优化 agent 不应把某个项目的目录、测试命令或板卡部署方
 ## Adapter 应声明的内容
 
 - 源码根、构建根、RVV 专项测试根和文档根。
-- 模块、主题和函数级评估文档的命名规则。
+- 模块、主题、topic token（主题短标识）和函数级评估文档的命名规则。
 - 上游原始测试、专项 test、bench、QEMU、反汇编和板卡验证入口。
 - 公共 Makefile include、脚本目录和日志输出目录。
 - 本机配置文件、示例配置文件和不应提交的生成目录。
@@ -30,6 +30,7 @@ artifact_layout.topic_test_dir_template: <configured-test-root>/<module>/<topic>
 artifact_layout.topic_doc_template: <configured-doc-root>/<module>/<topic-doc-name>
 artifact_layout.evaluation_doc_subdir: <configured-topic-local-doc-subdir>
 artifact_layout.evaluation_doc_template: <configured-test-root>/<module>/<topic>/<configured-topic-local-doc-subdir>/<evaluation-doc-name>
+topic_token: <full-topic-for-short-names-or-stable-abbreviation-for-long-names>
 artifact_layout.source_subdir: <configured-topic-local-source-subdir>
 artifact_layout.test_source_template: <configured-topic-local-test-source-template>
 artifact_layout.bench_source_template: <configured-topic-local-bench-source-template>
@@ -65,7 +66,8 @@ local override（本机私有覆盖）替换这些默认值。
 #if defined(__RVV10__)
 ```
 
-快速定位专项证据时，先用 `artifact_layout.topic_test_dir_template` 解析当前 topic 的测试资产目录，再按
+快速定位专项证据时，先用 `artifact_layout.topic_test_dir_template` 解析当前 topic 的测试资产目录，再确定
+`topic_token`：短 topic 通常直接使用完整 topic 名，长 topic 可使用 README / handoff 中记录的稳定缩写。随后按
 `artifact_layout.makefile_name`、`artifact_layout.board_makefile_name`、`artifact_layout.test_source_template`、
 `artifact_layout.bench_source_template`、`artifact_layout.evaluation_doc_template`、`artifact_layout.qemu_output_subdir` 和
 `artifact_layout.board_output_subdir` 查找测试、bench、脚本和日志入口。

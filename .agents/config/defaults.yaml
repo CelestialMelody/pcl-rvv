@@ -29,6 +29,10 @@ evidence:
   keep_raw_logs: false
   submit_raw_logs_by_default: false
   allow_sanitized_logs_when_user_requests_logs: true
+  commit_generated_logs_only_when_referenced_by_docs: true
+  committable_log_reference_roots:
+    - doc-rvv
+    - test-rvv
 
 agent_assets:
   feedback_mode: report-only
@@ -47,21 +51,26 @@ test_support:
   helper_split_hard_line_limit: 1000
   helper_split_responsibility_threshold: 3
   aggregator_directory: include
-  aggregator_prefix: test_support
+  aggregator_prefix: ""
   aggregator_extension: h
-  topic_abbrev_required: true
+  topic_token_required: true
+  topic_abbrev_policy: long_topic_only
+  abbreviated_topic_token_requires_readme_note: true
+  role_aggregator_name_order: role_topic
   internal_directory: include/impl
   internal_header_extension: hpp
-  prefer_topic_prefixed_internal_headers: true
+  prefer_topic_token_prefixed_internal_headers: true
   compatibility_aggregator_alias_allowed: true
   compatibility_aggregator_alias_requires_handoff_reason: true
   internal_header_roles:
-    - common
-    - row_sources
-    - reductions
+    - core_types
+    - fixtures
+    - references
+    - adapters
     - candidates
-    - ablation
-    - bench_support
+    - assertions
+    - bench_harness
+    - bench_cases
 
 paths:
   work_log_root: tmp/rvv-work-logs
@@ -98,8 +107,8 @@ artifact_layout:
   test_source_prefix: test
   bench_source_prefix: bench
   source_extension: cpp
-  test_source_template: "{artifact_layout.source_subdir}/{artifact_layout.test_source_prefix}_{topic}.{artifact_layout.source_extension}"
-  bench_source_template: "{artifact_layout.source_subdir}/{artifact_layout.bench_source_prefix}_{topic}.{artifact_layout.source_extension}"
+  test_source_template: "{artifact_layout.source_subdir}/{artifact_layout.test_source_prefix}_{topic_token}.{artifact_layout.source_extension}"
+  bench_source_template: "{artifact_layout.source_subdir}/{artifact_layout.bench_source_prefix}_{topic_token}.{artifact_layout.source_extension}"
   sanitize_logs_script_template: "{paths.test_root}/script/sanitize_evidence_logs.py"
 
 board:
