@@ -25,9 +25,10 @@ production-adopted/full-cloud-f32-aos-layout-gated-weighted-block-dispatch-fused
 | production-dispatch 代表点型 5-run board summary        | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_dispatch_fused_abcd_ilp/summary.md` | 当前 production default 的 std/RVV 性能主证据。                                                    |
 | production-default trace / asm | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_default_fused_abcd_ilp/` | 当前默认 RVV path 的 trace、checksum 和符号级 asm 归因。 |
 | evaluation 文档 | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/transformation_estimation_point_to_plane_lls_weighted-evaluation.zh.md` | 候选取舍、历史 diagnostic A/B 和接入风险的主归属。 |
-| topic README | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/README.zh.md` | 点型构造、case-filter、采集脚本和 refresh target 的恢复入口。 |
-| QEMU gtest logs                                          | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/qemu/run_test_std.log`；`test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/qemu/run_test_rvv.log` | `run_test_compare` 生成；QEMU std 31 passed + 1 skipped，RVV 32 passed，包含 generic abc 与 D/ABCD fused representative correctness。 |
-| board gtest log                                         | topic-local board test entry | board 32 tests passed，包含 generic abc 与 D/ABCD fused representative correctness。 |
+| optimization evidence 文档 | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/optimization-evidence.zh.md` | 每种 RVV 优化方式到代码路径、target、bench / board 证据和边界的索引。 |
+| topic README | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/README.zh.md` | 文档导航、常用命令和证据白名单入口。 |
+| topic 测试文档 | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/testing-overview.zh.md`；`doc/correctness-tests.zh.md`；`doc/benchmark-and-evidence.zh.md`；`doc/test-support-code-map.zh.md` | 测试类型、gtest 字典、bench/checksum/asm 口径和 test support 调用关系。 |
+| QEMU gtest logs                                          | `test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/qemu/run_test_std.log`；`test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/qemu/run_test_rvv.log` | `run_test_compare` 生成；QEMU std 39 passed + 1 skipped，RVV 40 passed，包含 generic fused representative correctness 和 input semantics tests。 |
 
 QEMU correctness（QEMU 正确性验证）用于构建、路径和日志形状，不作为性能结论。10-case board bench 只保留为 single-run board diagnostic signal（单次板卡诊断信号），不能升级成 repeated board performance conclusion（重复板卡性能结论）。
 
@@ -137,6 +138,47 @@ vsetvl
 
 invalid lane（无效向量通道）被合并为零，因此不贡献 `ATA/ATb`。weight 不参与 finite mask；如果 point/normal 有限但 weight 非有限，RVV 路径会和标量路径一样产生非有限 normal-equation。`vfredosum.vs` 不属于单个 chunk 的内部步骤；它发生在 A/B/C/N 某一组扫完整个 block 之后，用来把该组的 vector partial sums 横向规约成标量。
 
+### 代码路径与标量差异
+
+生产源码中，full-cloud 公开入口先执行原有数量检查。检查通过后，RVV 构建才会尝试生产 RVV helper：
+
+```text
+estimateRigidTransformation(cloud_src, cloud_tgt, matrix)
+  -> detail::estimatePointToPlaneLLSWeightedFullCloudRVV(...)
+  -> detail::buildPointToPlaneLLSWeightedFullCloudBlockRVV(...)
+  -> detail::loadPointToPlaneLLSWeightedFullReductionVectors(...)
+  -> A/B/C/N block group accumulation
+  -> detail::solvePointToPlaneLLSWeightedNormalEquation(...)
+```
+
+任何一步 gate 失败时，公开入口继续使用原标量路径：
+
+```text
+ConstCloudIterator<PointSource> source_it(cloud_src)
+ConstCloudIterator<PointTarget> target_it(cloud_tgt)
+weights_it = weights_.begin()
+estimateRigidTransformation(source_it, target_it, weights_it, matrix)
+```
+
+这意味着当前 RVV 实现没有改变公开入口的对象状态，也没有改变 indexed 或 correspondences overload。它只在 full-cloud、`Scalar=float`、layout gate 和规模 gate 全部成立时，用直接 AoS load 和 block-reduction 替换标量 iterator 内部的逐行 normal-equation 构造。
+
+| 阶段 | 标量实现 | RVV production 实现 | 差异 | 对应测试 / 证据 |
+| --- | --- | --- | --- | --- |
+| 输入数量检查 | public full/source/dual overload 检查 target、indices 和 `weights_` 数量。 | 保留原检查，检查失败时不尝试 RVV。 | RVV 不接管错误输入路径。 | `run_test_input_semantics`。 |
+| 入口选择 | full/source/dual/correspondences 都转成 `ConstCloudIterator`。 | 只在 full-cloud public overload 尝试 `estimatePointToPlaneLLSWeightedFullCloudRVV`。 | source-indexed、dual-indices、correspondences 保持标量。 | `run_test_public_semantics`、`run_test_row_sources`。 |
+| 点型与 `Scalar` gate | 标量模板按字段访问，支持更宽点型和 `Scalar`。 | `canUsePointToPlaneLLSWeightedFullCloudRVV` 检查 source xyz f32 AoS、target xyz+normal f32 AoS、`Scalar=float`、VLEN 和 byte offset。 | RVV 用 traits 和 offset 保证直接跨步 load 安全。 | `run_test_production_direct`、`run_test_candidates`。 |
+| row load | `ConstCloudIterator` 每次读一个 source、target 和 weight。 | 每个 VL chunk 用 `vlse32.v` 读 source/target AoS 字段，用 `vle32.v` 读连续 weights。 | RVV 取消逐点 iterator 开销，改为向量批量加载。 | asm attribution、production-dispatch bench。 |
+| finite mask | 标量 `if` 检查 source xyz、target xyz 和 target normal，失败则 `continue`。 | `loadPointToPlaneLLSWeightedFullReductionVectors` 构造 vector mask，invalid lane merge to zero。 | mask 条件相同；weight 仍不参与 mask。 | 非有限 point/normal 和非有限 weight tests。 |
+| `a/b/c/d` 公式 | 标量逐点计算，按 double 累加到 `ATA/ATb`。 | chunk 内用加权 normal 生成 `a/b/c/d` 向量；当前公式块为 fused-abcd-ilp code shape。 | 公式树变成 RVV intrinsic 形态；数值预算由同链路 tests 保护。 | `run_test_candidates`、`run_bench_generic_fused_formula`。 |
+| normal-equation 累加 | 每个有效点按 row order 更新 21 个 `ATA` 上三角项和 6 个 `ATb` 项。 | `buildPointToPlaneLLSWeightedFullCloudBlockRVV` 按 A/B/C/N 四组维护 vector partial sums，组结束后 `vfredosum` 到 double normal-equation。 | 累加树不同，允许 bitwise 差异；测试检查 `accepted_points`、`ATA/ATb` 和 matrix 预算。 | `run_test_candidates`、production-default trace/checksum。 |
+| solve 和 matrix | Eigen 6x6 solve，构造 4x4 matrix。 | 复用同一 solve 和 matrix 构造。 | 当前 RVV 不优化 solver。 | public matrix tests、production direct tests。 |
+
+采用 block-reduction 的代码差异集中在 normal-equation 构造阶段。早期 staged-row diagnostic 会把有效 lane 写回固定 buffer，再由标量 tail 累加。当前 production helper 去掉 staged row buffer，在 A/B/C/N 组内直接累加向量 partial sums。这个差异对应 `block-reduction` adopted 状态。
+
+采用 generic point type gate 的代码差异集中在 load 地址计算阶段。production helper 通过 PCL RVV layout traits 分别读取 source 和 target 的 offset、stride 和字段类型，不依赖 `PointNormal` 的固定 offset。这个差异对应 `generic point type gate` adopted 状态。
+
+采用 fused formula 的代码差异集中在 `loadPointToPlaneLLSWeightedFullReductionVectors` 的 `a/b/c/d` 公式块。它保留 block group 和 finite mask，只改变 chunk 内公式树。这个差异对应 `fused formula` adopted / accepted-risk 状态。
+
 ### fused formula follow-up A/B 结果
 
 unweighted TEPTPL 已经采用 fused formula（融合公式）生产路径：它保留 A/B/C/N block-reduction 组织，把逐点 `a/b/c` 改成 `vfmsac` 形态，并把 `d` 改成 `nx*(dx-sx) + ny*(dy-sy) + nz*(dz-sz)` 后用 `vfmacc` 累加。weighted 路径需要独立验证。weighted 公式多了 `weight * normal`，并且非有限 weight 语义必须保持可观察；如果把 `d` 的六项和、`d` 的 displacement 形态或 `a/b/c` 改成 FMA contraction（融合乘加收缩），需要重新证明 float 中间舍入、near-cancellation（近似抵消）、`accepted_points`、`ATA/ATb` 和 matrix 预算仍成立。
@@ -155,7 +197,7 @@ unweighted TEPTPL 已经采用 fused formula（融合公式）生产路径：它
 
 | 候选 | 公式树变化 | QEMU correctness / numeric | 板卡 A/B 结论 |
 | --- | --- | --- | --- |
-| `abc-fused` / `abc-fused-ilp` | `a/b/c` 使用 unweighted 同款 `vfmsac` 形态，`d` 保持当前六项展开；ILP 版只重排源码顺序。 | 32 tests 覆盖 same-chain、near-cancellation、scale-stress、非有限 point/normal、非有限 weight、`accepted_points`、`ATA/ATb`、matrix 和三类代表点型。 | 当前二进制中 `abc` 与 `abc-ilp` RVV 指令序列相同；只保留诊断。 |
+| `abc-fused` / `abc-fused-ilp` | `a/b/c` 使用 unweighted 同款 `vfmsac` 形态，`d` 保持当前六项展开；ILP 版只重排源码顺序。 | QEMU 40 tests 覆盖 same-chain、near-cancellation、scale-stress、非有限 point/normal、非有限 weight、输入语义、`accepted_points`、`ATA/ATb`、matrix 和三类代表点型。 | 当前二进制中 `abc` 与 `abc-ilp` RVV 指令序列相同；只保留诊断。 |
 | `d-six-term-fma` / `d-six-term-fma-ilp` | 保留 `nx*dx + ny*dy + nz*dz - nx*sx - ny*sy - nz*sz` 六项形态，但用 FMA 做累加；ILP 版交错 target/source accumulator。 | 同上，并补三类代表点型 correctness。 | generic warm-up 5-run 中 `PointNormal` component no-solve 不稳；ILP 版 asm 与非 ILP 等价。 |
 | `d-displacement-fused` / `d-displacement-fused-ilp` | 使用 unweighted 同款 `dx-sx`、`dy-sy`、`dz-sz` 后 `vfmacc` 累加；ILP 版交错独立差值和 abc 项。 | 同上。 | 两个 `PointXYZ` 代表组合强，但 `PointNormal` component no-solve 不稳；ILP 版 asm 与非 ILP 等价。 |
 | `abcd-fused` / `abcd-fused-ilp` | 同时采用 `abc-fused` 和 `d-displacement-fused`。 | 同上，并补 generic formula warm-up 5-run、production-symbol asm 和默认 production correctness。 | 接入前最稳；按“RVV 优于 std、静态实现质量更高”为主要标准，默认 production 采用 `abcd-fused-ilp`，并接受已记录的运行态风险。 |
@@ -195,18 +237,18 @@ production-adopted/fused-abcd-ilp-default-accepted-risk
 | 方向                                         | 状态               | 证据 / 理由                                                                                                                      |
 | -------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
 | generic point type gate                      | adopted            | source/target 分别用 PCL RVV layout traits、offset 和 stride；三类代表点型有 production direct tests 和 board 5-run。            |
-| block-reduction                              | adopted            | production-default asm attribution（带边界列的反汇编归因）、representative production-dispatch 5-run board summary、QEMU 32 tests 和 board 32 tests 均闭合。 |
+| block-reduction                              | adopted            | production-default asm attribution（带边界列的反汇编归因）、representative production-dispatch 5-run board summary 和 QEMU 40 tests 均闭合。 |
 | representative pointtypes evidence           | adopted            | 板卡覆盖`PointNormal -> PointNormal`、`PointXYZ -> PointNormal`、`PointXYZ -> PointXYZINormal`；文档明确不外推逐类型性能。 |
 | fused formula                                | adopted / accepted-risk | correctness、generic representative pointtypes、production-symbol asm 和接入前多轮板卡数据已闭合静态实现证据；旧 20-run 中 `PointNormal -> PointNormal` avg B/A median 为 `0.976x`、低于 `1.0x` 为 `12/20`，按人工接入标准接受该运行态风险。 |
-| source-indexed production                    | deferred           | 只有 diagnostic correctness 和 single-run 弱正向，缺 production direct/fallback、repeated board 和符号归属。                     |
-| dual-indices production                      | deferred           | 10-case board diagnostic 为负向，且缺 production direct/fallback。                                                               |
-| correspondences production                   | deferred           | 10-case board diagnostic 为负向，且包含 index/weight 展开、gather、压缩和 tail 多个成本源；缺消融。                              |
+| source-indexed production                    | deferred           | 有 public semantics、row-source correctness、`run_bench_row_sources` 和 `collect_board_row_sources_repeated` 入口；缺 production direct/fallback 和符号归属。 |
+| dual-indices production                      | deferred           | 有 public semantics、row-source correctness、`run_bench_row_sources` 和 `collect_board_row_sources_repeated` 入口；缺 production direct/fallback 和符号归属。 |
+| correspondences production                   | deferred           | 有 public semantics、row-source correctness、`run_bench_row_sources` 和 `collect_board_row_sources_repeated` 入口；缺 index/weight 展开消融、production direct/fallback 和符号归属。 |
 | `Scalar=double`                            | deferred           | 当前 RVV 公式和 layout gate 只批准`Scalar=float`，double 已由 fallback test 保护。                                             |
 | 把 diagnostic 10-case 当 production evidence | rejected / not_now | 10-case board 是 single-run diagnostic signal；真实 production 性能只看 production-dispatch representative 5-run。               |
 
 ## RowSourcePolicy 与 WeightPolicy 边界
 
-test-rvv 仍保留四类 row source diagnostic，用于说明每条公开入口的数据流差异。它们不等于 production 批准。
+test-rvv 仍保留四类 row source diagnostic，用于说明每条公开入口的数据流差异。`run_bench_default_diagnostic` 是综合诊断入口，包含 full-cloud、block/fused 和 row-source candidate。复核数据源取舍时使用 `run_bench_row_sources`，必要时再接 `collect_board_row_sources_repeated`。这些入口只跑 full-cloud、source-indexed、dual-indices 和 correspondences candidate。它们不等于 production 批准。
 
 | 入口形态        | RowSourcePolicy 取点                                  | WeightPolicy 取权重                               | Bench 计时边界                                                                                                   | 当前结论                                 |
 | --------------- | ----------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
@@ -271,7 +313,7 @@ generic `abc-fused` representative 5-run B/A 进一步覆盖三类代表点型�
 
 | 链路                        | 证据                                                                                                                                                                       | 结论                                                                                                                                                                                                | 边界                                                                                       |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| correctness（正确性）       | QEMU `run_test_compare`：`run_test_std.log` 为 31 passed + 1 skipped，`run_test_rvv.log` 为 32 passed；board gtest 32 tests passed。                                                                                         | public full-cloud direct、production helper normal-equation、near-cancellation、scale-stress、非有限 point/normal、非有限 weight、`accepted_points`、`ATA/ATb`、matrix、fallback 和 generic fused representative correctness 均在预算内。 | 不覆盖非法 index、所有 correspondence 分布、`Scalar=double` RVV 或未上板点型性能。 |
+| correctness（正确性）       | QEMU `run_test_compare`：`run_test_std.log` 为 39 passed + 1 skipped，`run_test_rvv.log` 为 40 passed。                                                                                         | public full-cloud direct、production helper normal-equation、near-cancellation、scale-stress、非有限 point/normal、非有限 weight、输入数量不匹配、0/负权重、`accepted_points`、`ATA/ATb`、matrix、fallback 和 generic fused representative correctness 均在预算内。 | 不覆盖非法 index、所有 correspondence 分布、`Scalar=double` RVV 或未上板点型性能。 |
 | path / asm（路径 / 反汇编） | `production-default-fused-abcd-ilp` asm attribution 按 `boundary` 记录实际归因边界；`detail` 或 `estimate-rvv-helper` 边界内确认 `vlse32.v`、`vle32.v`、`vfmsac.vv`、`vfmacc.vv` A/B/C/N partial sums、`vcpop/vmerge` 和显式 `vfredosum.vs`。 | production RVV 指令归属于当前默认 helper；`PointNormal -> PointNormal` 行落在 `estimate-rvv-helper`，RVV 指令数为 `357`，另外两类代表点型落在 `detail`，RVV 指令数为 `338`；三行均 `vfadd=0`、`vfmsac=6`，且无 vector spill/reload。 | indexed/correspondences 不在本轮证据范围；不同 `boundary` 的总指令数不能直接横向比较；generic diagnostic helper 只用于候选审计。 |
 | performance（性能）         | `production_dispatch_fused_abcd_ilp/summary.md` 和 `production_default_fused_abcd_ilp/trace_summary.md`。                                                                                                                   | 三类代表点型在 262144 点上 repeated std/RVV speedup 均正向；默认 RVV trace checksum 序列一致。                                                                                                                       | 10-case diagnostic 不替代 production evidence；QEMU timing 不作性能结论。                  |
 | boundary（边界）            | EvidenceDecision、覆盖范围表和 fallback 矩阵共同记录生产边界。                                                                                                           | 结论只覆盖 full-cloud、`Scalar=float`、contiguous `weights_`、source xyz f32 AoS、target xyz/normal f32 AoS。                                                                                   | 未逐类型上板的 gate-allowed 点型没有逐类型性能证明；source/dual/correspondences 保持标量。 |
@@ -293,5 +335,5 @@ generic `abc-fused` representative 5-run B/A 进一步覆盖三类代表点型�
 
 - 更多 gate-allowed 点型：当前 generic gate 允许更多 f32 AoS 点型，但板卡只覆盖三类代表组合。新增点型性能结论需要对应 production direct、asm 和 board 抽样。
 - fused formula：当前 production 保留 block-reduction partial-sum `vfmacc`，逐点 `a/b/c/d` 采用 fused-abcd-ilp 公式块。`abc`、D 项和 `abcd` 已在 generic layout-gated test_support 中完成消融；接入后 production default asm 已确认公式收缩进入默认 helper，且无 vector spill/reload。接入前 20-run 的 `PointNormal` 运行态波动作为 accepted risk 保留。
-- source/dual/correspondences：不应直接接 production。下一步应先做消融，分离 index/weight 展开、`vluxei32.v` gather、`vcompress` 写回、自动 tail reduction 和 block-reduction 成本。
+- source/dual/correspondences：不应直接接 production。下一步先运行 `run_bench_row_sources` 或对应板卡诊断；若某条 row source 稳定正向，再补 production helper、public dispatch、fallback tests、production asm 和 repeated board。
 - 负向归因：dual/correspondences 单次板卡负向说明当前诊断路径不适合直接接生产，但不能证明 gather、buffer 或 weight 展开是唯一主因。
