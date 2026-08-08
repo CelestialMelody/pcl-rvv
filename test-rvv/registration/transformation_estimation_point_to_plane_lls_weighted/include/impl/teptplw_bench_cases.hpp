@@ -196,6 +196,58 @@ collect_bench_results(const BenchOptions& options)
       continue;
     }
 
+    if (options.case_filter == "row-sources") {
+      const pcl::Indices source_indices = diag::make_source_indices(source.size());
+      const pcl::Indices target_indices = diag::make_target_indices(source.size());
+      const pcl::Correspondences correspondences =
+          diag::make_bench_correspondences(source.size());
+
+      results.push_back(run_case(
+          "weighted lls row-sources full-cloud pointnormal " + std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const Eigen::Matrix4f matrix =
+                diag::estimate_candidate_full(source, target, weights, &stats);
+            return diag::matrix_checksum(matrix) +
+                   static_cast<double>(stats.accepted_points) * 1e-6;
+          }));
+
+      results.push_back(run_case(
+          "weighted lls row-sources source-indices pointnormal " + std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const Eigen::Matrix4f matrix = diag::estimate_candidate_source_indices(
+                source, source_indices, target, weights, &stats);
+            return diag::matrix_checksum(matrix) +
+                   static_cast<double>(stats.accepted_points) * 1e-6;
+          }));
+
+      results.push_back(run_case(
+          "weighted lls row-sources dual-indices pointnormal " + std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const Eigen::Matrix4f matrix = diag::estimate_candidate_dual_indices(
+                source, source_indices, target, target_indices, weights, &stats);
+            return diag::matrix_checksum(matrix) +
+                   static_cast<double>(stats.accepted_points) * 1e-6;
+          }));
+
+      results.push_back(run_case(
+          "weighted lls row-sources correspondences pointnormal " + std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const Eigen::Matrix4f matrix = diag::estimate_candidate_correspondences(
+                source, target, correspondences, &stats);
+            return diag::matrix_checksum(matrix) +
+                   static_cast<double>(stats.accepted_points) * 1e-6;
+          }));
+      continue;
+    }
+
     if (options.case_filter == "generic-fused-abc" ||
         options.case_filter == "generic-fused-formula") {
       const bool include_d_candidates = options.case_filter == "generic-fused-formula";

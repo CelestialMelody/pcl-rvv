@@ -19,9 +19,16 @@ TARGET_TEST_STD := test_transformation_estimation_point_to_plane_lls_weighted_st
 TARGET_TEST_RVV := test_transformation_estimation_point_to_plane_lls_weighted_rvv
 SRCS_TEST       := \
 	src/test_teptplw_public_semantics.cpp \
+	src/test_teptplw_input_semantics.cpp \
 	src/test_teptplw_candidates.cpp \
 	src/test_teptplw_row_sources.cpp \
 	src/test_teptplw_production_direct.cpp
+
+TEPTPLW_GTEST_FILTER_PUBLIC_SEMANTICS ?= TransformationEstimationPointToPlaneLLSWeighted.Std*MatchesPublicEstimator
+TEPTPLW_GTEST_FILTER_INPUT_SEMANTICS ?= TransformationEstimationPointToPlaneLLSWeighted.Public*KeepsOutputMatrix:TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudZeroWeightsMatchStdWithinBudget:TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNegativeWeightsMatchStdWithinBudget
+TEPTPLW_GTEST_FILTER_ROW_SOURCES ?= TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedCandidateMatchesStd:TransformationEstimationPointToPlaneLLSWeighted.DualIndicesCandidateMatchesStd:TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceCandidateMatchesStd:TransformationEstimationPointToPlaneLLSWeighted.SmallInputFallsBackForIsolatedSizeGate:TransformationEstimationPointToPlaneLLSWeighted.InvalidLaneMaskMatchesStd:TransformationEstimationPointToPlaneLLSWeighted.NonFiniteWeightsAreNotMaskedWhenPointsAreFinite
+TEPTPLW_GTEST_FILTER_CANDIDATES ?= TransformationEstimationPointToPlaneLLSWeighted.FullCloud*:TransformationEstimationPointToPlaneLLSWeighted.ProductionDefaultFusedAbcdIlpRepresentativePointTypesMatchStd
+TEPTPLW_GTEST_FILTER_PRODUCTION_DIRECT ?= TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloud*
 
 INCLUDES ?= \
 	-I$(CURDIR)/include \
@@ -49,6 +56,7 @@ TEPTPLW_ASM_ATTRIBUTION_SCRIPT := $(TEPTPLW_SCRIPT_DIR)/generate_teptplw_asm_att
 TEPTPLW_COMPARE_SCRIPT := $(TEPTPLW_SCRIPT_DIR)/collect_teptplw_board_compare_repeated.py
 TEPTPLW_BOARD_EVIDENCE_DIR ?= $(OUTPUT_DIR_BOARD)/production_default_fused_abcd_ilp
 TEPTPLW_COMPARE_EVIDENCE_DIR ?= $(OUTPUT_DIR_BOARD)/production_dispatch_fused_abcd_ilp
+TEPTPLW_ROW_SOURCE_EVIDENCE_DIR ?= $(OUTPUT_DIR_BOARD)/row_sources_diagnostic
 TEPTPLW_BOARD_SIZE ?= 262144
 TEPTPLW_BOARD_RUNS ?= 5
 TEPTPLW_BOARD_ITERATIONS ?= 20
@@ -58,10 +66,99 @@ TEPTPLW_COMPARE_SIZE ?= 262144
 TEPTPLW_COMPARE_RUNS ?= 5
 TEPTPLW_COMPARE_ITERATIONS ?= 20
 TEPTPLW_COMPARE_WARMUP_ITERATIONS ?= 5
+TEPTPLW_ROW_SOURCE_CASE_FILTER ?= row-sources
+TEPTPLW_ROW_SOURCE_SIZE ?= 262144
+TEPTPLW_ROW_SOURCE_RUNS ?= 5
+TEPTPLW_ROW_SOURCE_ITERATIONS ?= 20
+TEPTPLW_ROW_SOURCE_WARMUP_ITERATIONS ?= 5
 TEPTPLW_TRACE_LOGS ?= $(wildcard $(TEPTPLW_BOARD_EVIDENCE_DIR)/run*_rvv.log)
 TEPTPLW_ASM_EVIDENCE ?= $(TEPTPLW_BOARD_EVIDENCE_DIR)/asm_production_symbol_attribution.md
+TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_DISPATCH ?= production-dispatch
+TEPTPLW_BENCH_CASE_FILTER_FUSED_FORMULA ?= fused-formula
+TEPTPLW_BENCH_CASE_FILTER_ROW_SOURCES ?= row-sources
+TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_SHAPED_FUSED_FORMULA ?= production-shaped-fused-formula
+TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_ABC ?= generic-fused-abc
+TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_FORMULA ?= generic-fused-formula
+TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_ABC_TRACE ?= generic-fused-abc-trace
+TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_DEFAULT_FUSED_ABCD_ILP ?= production-default-fused-abcd-ilp
 
 include ../../mk/rvv-topic.mk
+
+define TEPTPLW_DEFINE_FILTERED_TEST_TARGETS
+run_test_$(1): run_test_$(1)_compare
+run_test_$(1)_std: clean_test_std | $(OUTPUT_DIR_QEMU)
+	@$(MAKE) -C $(CURDIR) run_test USE_PCL_RVV10=0 TARGET_TEST=$(TARGET_TEST_STD) TEST_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_test_$(1)_std.log TEST_ARGS="--gtest_filter=$(2)"
+run_test_$(1)_rvv: clean_test_rvv | $(OUTPUT_DIR_QEMU)
+	@$(MAKE) -C $(CURDIR) run_test USE_PCL_RVV10=1 TARGET_TEST=$(TARGET_TEST_RVV) TEST_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_test_$(1)_rvv.log TEST_ARGS="--gtest_filter=$(2)"
+run_test_$(1)_compare: run_test_$(1)_std run_test_$(1)_rvv
+endef
+
+$(eval $(call TEPTPLW_DEFINE_FILTERED_TEST_TARGETS,public_semantics,$(TEPTPLW_GTEST_FILTER_PUBLIC_SEMANTICS)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_TEST_TARGETS,input_semantics,$(TEPTPLW_GTEST_FILTER_INPUT_SEMANTICS)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_TEST_TARGETS,row_sources,$(TEPTPLW_GTEST_FILTER_ROW_SOURCES)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_TEST_TARGETS,candidates,$(TEPTPLW_GTEST_FILTER_CANDIDATES)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_TEST_TARGETS,production_direct,$(TEPTPLW_GTEST_FILTER_PRODUCTION_DIRECT)))
+
+run_bench_default_diagnostic: run_bench_default_diagnostic_compare
+run_bench_default_diagnostic_compare: | $(OUTPUT_DIR_QEMU)
+	@$(MAKE) -C $(CURDIR) run_bench_compare BENCH_STD_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_default_diagnostic_std.log BENCH_RVV_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_default_diagnostic_rvv.log BENCH_COMPARE_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/analyze_bench_compare_default_diagnostic.log
+
+define TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS
+run_bench_$(1): run_bench_$(1)_compare
+run_bench_$(1)_compare: | $(OUTPUT_DIR_QEMU)
+	@$(MAKE) -C $(CURDIR) run_bench_compare BENCH_ARGS="--case-filter $(2)" BENCH_STD_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_$(1)_std.log BENCH_RVV_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_$(1)_rvv.log BENCH_COMPARE_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/analyze_bench_compare_$(1).log
+endef
+
+$(eval $(call TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS,production_dispatch,$(TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_DISPATCH)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS,fused_formula,$(TEPTPLW_BENCH_CASE_FILTER_FUSED_FORMULA)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS,row_sources,$(TEPTPLW_BENCH_CASE_FILTER_ROW_SOURCES)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS,production_shaped_fused_formula,$(TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_SHAPED_FUSED_FORMULA)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS,generic_fused_abc,$(TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_ABC)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS,generic_fused_formula,$(TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_FORMULA)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS,generic_fused_abc_trace,$(TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_ABC_TRACE)))
+$(eval $(call TEPTPLW_DEFINE_FILTERED_BENCH_TARGETS,production_default_fused_abcd_ilp,$(TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_DEFAULT_FUSED_ABCD_ILP)))
+
+define TEPTPLW_DEFINE_BOARD_TEST_TARGETS
+run_board_test_$(1): | $(OUTPUT_DIR_BOARD)
+	@$(MAKE) -C $(CURDIR) run_board_test \
+		REMOTE_BOARD_OUTPUT_DIR=$(REMOTE_DIR)/log/board/run_board_test_$(1) \
+		REMOTE_TEST_ARGS="--gtest_filter=$(2)" \
+		OUTPUT_DIR_BOARD=$(OUTPUT_DIR_BOARD)/run_board_test_$(1)
+	@$(MAKE) -C $(CURDIR) fetch_board_logs \
+		REMOTE_BOARD_OUTPUT_DIR=$(REMOTE_DIR)/log/board/run_board_test_$(1) \
+		OUTPUT_DIR_BOARD=$(OUTPUT_DIR_BOARD)/run_board_test_$(1)
+endef
+
+define TEPTPLW_DEFINE_BOARD_BENCH_TARGETS
+run_board_bench_$(1): | $(OUTPUT_DIR_BOARD)
+	@$(MAKE) -C $(CURDIR) run_board_bench_compare \
+		REMOTE_BOARD_OUTPUT_DIR=$(REMOTE_DIR)/log/board/run_board_bench_$(1) \
+		BOARD_LABEL=TEPTPLW-$(1) \
+		BENCH_ARGS="$(2)" \
+		OUTPUT_DIR_BOARD=$(OUTPUT_DIR_BOARD)/run_board_bench_$(1)
+	@$(MAKE) -C $(CURDIR) fetch_board_logs \
+		REMOTE_BOARD_OUTPUT_DIR=$(REMOTE_DIR)/log/board/run_board_bench_$(1) \
+		OUTPUT_DIR_BOARD=$(OUTPUT_DIR_BOARD)/run_board_bench_$(1)
+endef
+
+$(eval $(call TEPTPLW_DEFINE_BOARD_TEST_TARGETS,public_semantics,$(TEPTPLW_GTEST_FILTER_PUBLIC_SEMANTICS)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_TEST_TARGETS,input_semantics,$(TEPTPLW_GTEST_FILTER_INPUT_SEMANTICS)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_TEST_TARGETS,row_sources,$(TEPTPLW_GTEST_FILTER_ROW_SOURCES)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_TEST_TARGETS,candidates,$(TEPTPLW_GTEST_FILTER_CANDIDATES)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_TEST_TARGETS,production_direct,$(TEPTPLW_GTEST_FILTER_PRODUCTION_DIRECT)))
+
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,default_diagnostic,))
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,fused_formula,--case-filter $(TEPTPLW_BENCH_CASE_FILTER_FUSED_FORMULA)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,row_sources,--case-filter $(TEPTPLW_BENCH_CASE_FILTER_ROW_SOURCES)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,production_dispatch,--case-filter $(TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_DISPATCH)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,production_shaped_fused_formula,--case-filter $(TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_SHAPED_FUSED_FORMULA)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,generic_fused_abc,--case-filter $(TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_ABC)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,generic_fused_formula,--case-filter $(TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_FORMULA)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,generic_fused_abc_trace,--case-filter $(TEPTPLW_BENCH_CASE_FILTER_GENERIC_FUSED_ABC_TRACE)))
+$(eval $(call TEPTPLW_DEFINE_BOARD_BENCH_TARGETS,production_default_fused_abcd_ilp,--case-filter $(TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_DEFAULT_FUSED_ABCD_ILP)))
+
+run_bench_production_default_fused_abcd_ilp_rvv: | $(OUTPUT_DIR_QEMU)
+	@$(MAKE) -C $(CURDIR) run_bench_rvv BENCH_ARGS="--case-filter $(TEPTPLW_BENCH_CASE_FILTER_PRODUCTION_DEFAULT_FUSED_ABCD_ILP)" BENCH_RVV_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_production_default_fused_abcd_ilp_rvv.log
 
 collect_board_production_default_fused_abcd_ilp:
 	$(PYTHON_RUN) $(TEPTPLW_BOARD_COLLECT_SCRIPT) \
@@ -105,4 +202,18 @@ clean_board_production_dispatch_repeated:
 
 refresh_board_production_dispatch_repeated: clean_board_production_dispatch_repeated collect_board_production_dispatch_repeated
 
-.PHONY: collect_board_production_default_fused_abcd_ilp clean_board_production_default_fused_abcd_ilp refresh_board_production_default_fused_abcd_ilp summarize_board_production_default_fused_abcd_ilp asm_production_default_fused_abcd_ilp collect_board_production_dispatch_repeated clean_board_production_dispatch_repeated refresh_board_production_dispatch_repeated
+collect_board_row_sources_repeated:
+	$(PYTHON_RUN) $(TEPTPLW_COMPARE_SCRIPT) \
+		--case-filter $(TEPTPLW_ROW_SOURCE_CASE_FILTER) \
+		--size $(TEPTPLW_ROW_SOURCE_SIZE) \
+		--runs $(TEPTPLW_ROW_SOURCE_RUNS) \
+		--iterations $(TEPTPLW_ROW_SOURCE_ITERATIONS) \
+		--warmup-iterations $(TEPTPLW_ROW_SOURCE_WARMUP_ITERATIONS) \
+		--output-dir $(TEPTPLW_ROW_SOURCE_EVIDENCE_DIR)
+
+clean_board_row_sources_repeated:
+	rm -rf $(TEPTPLW_ROW_SOURCE_EVIDENCE_DIR)
+
+refresh_board_row_sources_repeated: clean_board_row_sources_repeated collect_board_row_sources_repeated
+
+.PHONY: run_test_public_semantics run_test_public_semantics_std run_test_public_semantics_rvv run_test_public_semantics_compare run_test_input_semantics run_test_input_semantics_std run_test_input_semantics_rvv run_test_input_semantics_compare run_test_row_sources run_test_row_sources_std run_test_row_sources_rvv run_test_row_sources_compare run_test_candidates run_test_candidates_std run_test_candidates_rvv run_test_candidates_compare run_test_production_direct run_test_production_direct_std run_test_production_direct_rvv run_test_production_direct_compare run_board_test_public_semantics run_board_test_input_semantics run_board_test_row_sources run_board_test_candidates run_board_test_production_direct run_bench_default_diagnostic run_bench_default_diagnostic_compare run_bench_fused_formula run_bench_fused_formula_compare run_bench_row_sources run_bench_row_sources_compare run_bench_production_dispatch run_bench_production_dispatch_compare run_bench_production_shaped_fused_formula run_bench_production_shaped_fused_formula_compare run_bench_generic_fused_abc run_bench_generic_fused_abc_compare run_bench_generic_fused_formula run_bench_generic_fused_formula_compare run_bench_generic_fused_abc_trace run_bench_generic_fused_abc_trace_compare run_bench_production_default_fused_abcd_ilp run_bench_production_default_fused_abcd_ilp_compare run_bench_production_default_fused_abcd_ilp_rvv run_board_bench_default_diagnostic run_board_bench_fused_formula run_board_bench_row_sources run_board_bench_production_dispatch run_board_bench_production_shaped_fused_formula run_board_bench_generic_fused_abc run_board_bench_generic_fused_formula run_board_bench_generic_fused_abc_trace run_board_bench_production_default_fused_abcd_ilp collect_board_production_default_fused_abcd_ilp clean_board_production_default_fused_abcd_ilp refresh_board_production_default_fused_abcd_ilp summarize_board_production_default_fused_abcd_ilp asm_production_default_fused_abcd_ilp collect_board_production_dispatch_repeated clean_board_production_dispatch_repeated refresh_board_production_dispatch_repeated collect_board_row_sources_repeated clean_board_row_sources_repeated refresh_board_row_sources_repeated

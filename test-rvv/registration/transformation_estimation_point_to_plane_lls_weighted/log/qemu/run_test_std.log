@@ -1,9 +1,9 @@
-Running main() from <gtest_main>
-[==========] Running 32 tests from 1 test suite.
+Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gtest_main.cc
+[==========] Running 40 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 32 tests from TransformationEstimationPointToPlaneLLSWeighted
+[----------] 40 tests from TransformationEstimationPointToPlaneLLSWeighted
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd (5 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd (6 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionMatchesStdWithinBudget
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionMatchesStdWithinBudget (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionNearCancellationStressMatchesStd
@@ -13,13 +13,13 @@ Running main() from <gtest_main>
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionPreservesNonFiniteWeightSemantics
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionPreservesNonFiniteWeightSemantics (2 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaCandidatesMatchBlockAndStdWithinBudget
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaCandidatesMatchBlockAndStdWithinBudget (17 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaCandidatesMatchBlockAndStdWithinBudget (19 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaNearCancellationStressMatchesBlockAndStd
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaNearCancellationStressMatchesBlockAndStd (20 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaNearCancellationStressMatchesBlockAndStd (22 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaScaleStressMatchesBlockAndStd
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaScaleStressMatchesBlockAndStd (23 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaScaleStressMatchesBlockAndStd (25 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaPreservesNonFiniteWeightSemantics
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaPreservesNonFiniteWeightSemantics (5 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaPreservesNonFiniteWeightSemantics (6 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudGenericAbcFusedRepresentativePointTypesMatchStd
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudGenericAbcFusedRepresentativePointTypesMatchStd (8 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudGenericDAndAbcdFusedRepresentativePointTypesMatchStd
@@ -29,10 +29,32 @@ src/test_teptplw_candidates.cpp:425: Skipped
 production default fused AbcdFusedIlp path is RVV-only
 
 [  SKIPPED ] TransformationEstimationPointToPlaneLLSWeighted.ProductionDefaultFusedAbcdIlpRepresentativePointTypesMatchStd (1 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.PublicFullCloudTargetSizeMismatchKeepsOutputMatrix
+[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or points in source (81) differs than target (80)!
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.PublicFullCloudTargetSizeMismatchKeepsOutputMatrix (1 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.PublicFullCloudWeightSizeMismatchKeepsOutputMatrix
+[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or weights from the number of correspondences! Use setWeights () to set them.
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.PublicFullCloudWeightSizeMismatchKeepsOutputMatrix (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.PublicSourceIndexedTargetSizeMismatchKeepsOutputMatrix
+[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or points in source (1089) differs than target (1088)!
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.PublicSourceIndexedTargetSizeMismatchKeepsOutputMatrix (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.PublicSourceIndexedWeightSizeMismatchKeepsOutputMatrix
+[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or weights from the number of correspondences! Use setWeights () to set them.
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.PublicSourceIndexedWeightSizeMismatchKeepsOutputMatrix (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.PublicDualIndicesTargetIndexSizeMismatchKeepsOutputMatrix
+[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or points in source (1089) differs than target (1088)!
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.PublicDualIndicesTargetIndexSizeMismatchKeepsOutputMatrix (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.PublicDualIndicesWeightSizeMismatchKeepsOutputMatrix
+[pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or weights from the number of correspondences! Use setWeights () to set them.
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.PublicDualIndicesWeightSizeMismatchKeepsOutputMatrix (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudZeroWeightsMatchStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudZeroWeightsMatchStdWithinBudget (5 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNegativeWeightsMatchStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNegativeWeightsMatchStdWithinBudget (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPublicOverloadMatchesStdWithinBudget
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPublicOverloadMatchesStdWithinBudget (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNormalEquationMatchesStdWithinBudget
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNormalEquationMatchesStdWithinBudget (3 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNormalEquationMatchesStdWithinBudget (2 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScaleStressMatchesStdWithinBudget
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScaleStressMatchesStdWithinBudget (5 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPreservesNonFiniteWeightSemantics
@@ -46,7 +68,7 @@ production default fused AbcdFusedIlp path is RVV-only
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget (4 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudDoubleNormalTargetFallsBackToScalar
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudDoubleNormalTargetFallsBackToScalar (4 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudDoubleNormalTargetFallsBackToScalar (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScalarDoubleFallsBackToScalar
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScalarDoubleFallsBackToScalar (2 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.StdDiagnosticMatchesPublicEstimator
@@ -69,10 +91,10 @@ production default fused AbcdFusedIlp path is RVV-only
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.InvalidLaneMaskMatchesStd (1 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.NonFiniteWeightsAreNotMaskedWhenPointsAreFinite
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.NonFiniteWeightsAreNotMaskedWhenPointsAreFinite (1 ms)
-[----------] 32 tests from TransformationEstimationPointToPlaneLLSWeighted (166 ms total)
+[----------] 40 tests from TransformationEstimationPointToPlaneLLSWeighted (187 ms total)
 
 [----------] Global test environment tear-down
-[==========] 32 tests from 1 test suite ran. (170 ms total)
-[  PASSED  ] 31 tests.
+[==========] 40 tests from 1 test suite ran. (190 ms total)
+[  PASSED  ] 39 tests.
 [  SKIPPED ] 1 test, listed below:
 [  SKIPPED ] TransformationEstimationPointToPlaneLLSWeighted.ProductionDefaultFusedAbcdIlpRepresentativePointTypesMatchStd

@@ -255,7 +255,7 @@ DEPLOY_BOARD_TARGETS += deploy_test
 endif
 deploy_board: $(DEPLOY_BOARD_TARGETS)
 run_board_test: deploy_board | $(OUTPUT_DIR_BOARD)
-	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_test"
+	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_test REMOTE_OUTPUT_DIR='$(REMOTE_BOARD_OUTPUT_DIR)' REMOTE_TEST_ARGS='$(REMOTE_TEST_ARGS)'"
 run_board_bench_compare: deploy_board | $(OUTPUT_DIR_BOARD)
 	@$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_bench_compare REMOTE_OUTPUT_DIR='$(REMOTE_BOARD_OUTPUT_DIR)' BENCH_COMPARE_SAVE='$(REMOTE_BOARD_OUTPUT_DIR)/analyze_bench_compare.log' BOARD_LABEL='$(BOARD_LABEL)' REMOTE_BENCH_ARGS='$(BENCH_ARGS)'"
 fetch_board_logs: | $(OUTPUT_DIR_BOARD)
