@@ -42,7 +42,7 @@ local fragment -> full diagnostic -> production case -> production decision
 
 生产接入判断应按 `rvv-test/references/performance-and-ablation.zh.md` 的 Production Evidence 决策优先级写清：
 先判断 RVV 是否比 std（当前标量 / 标准实现基线）好，再判断静态实现质量是否更高；这两项是主要参考因素。
-静态实现质量至少覆盖公式形态、指令吞吐、RAW dependency（read-after-write，写后读依赖）、寄存器压力、ILP / unroll（指令级并行 / 展开）、LMUL `m1/m2/m4`（向量寄存器分组）取舍和 asm attribution（反汇编归属）。平均情况和异常频率可作为人工判断依据，但不能替代前两项。
+静态实现质量至少覆盖公式形态、指令吞吐、RAW dependency（read-after-write，写后读依赖）、寄存器压力、ILP / unroll（指令级并行 / 展开）、LMUL `m1/m2/m4`（向量寄存器分组）取舍和 asm attribution（反汇编归属）。平均情况和异常频率可作为人工判断依据，但不能替代前两项。若 benchmark、board summary、checksum 或 asm attribution 触发 Evidence Doctor（证据体检）Warning，evaluation 必须引用 doctor 结果并说明处理动作；不能只写“异常可接受”。
 
 如果第 1 和第 2 项闭合，而平均情况或异常频率存在争议但人工决定接入，evaluation 文档必须留痕：
 数据分析口径、异常值情况、可能原因分析、风险边界、为什么仍接受接入。不要只写“人工判断可接受”。

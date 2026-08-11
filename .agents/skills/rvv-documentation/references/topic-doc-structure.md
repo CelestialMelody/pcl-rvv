@@ -19,6 +19,7 @@
 13. 生产接入评估。
 14. 生产接入后的 closeout 更新。
 15. 结论与后续方向。
+16. 阶段探索与测试证据（仅 `test-rvv/.../doc/phases/`，不进入最终 `doc-rvv` 生产行为说明）。
 
 ## 必写要点
 
@@ -181,6 +182,12 @@ RVV helper 片段应覆盖：
 - 该 case 不能证明什么，例如真实 production dispatch、泛型点类型、其它输入形态、规约方案或目标硬件之外的性能。
 
 fallback case 用于证明未覆盖路径保持语义和成本接近，不作为 RVV 主路径性能结论。
+
+如果主题文档已经过长，应把完整 bench label 字典、checksum 公式、trace 输出格式和日志提交白名单移到 topic-local benchmark/evidence 文档。主题文档只保留证据路径、关键结果和边界。拆分后，主题文档必须链接该细分文档。
+
+topic-local benchmark/evidence 文档应把 `run_bench_*`、`run_board_bench_*` 和 repeated board collect target 分开列出。`run_board_bench_*` 是单次板卡 smoke，必须写清默认输出目录和证据等级。性能结论只能引用 repeated board summary 或目标硬件重复采集摘要。
+
+如果一个 topic 同时存在多个 adopted / attempted / deferred 优化方式，或用户需要按优化方式复核“为什么采纳 A、暂缓 B”，应新增或引用 topic-local `optimization-evidence` 文档。该文档按优化方式列出 production / test_support 代码路径、test target、bench target、board evidence、当前结果和不能外推的边界；主题文档只保留当前采用方式和该索引入口。
 
 ## 生产接入后的 Closeout 章节
 

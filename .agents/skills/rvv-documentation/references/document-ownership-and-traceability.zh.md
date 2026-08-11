@@ -14,17 +14,35 @@
 每类事实只设一个主归属。其它文档可以引用主归属的路径、章节、表格、run label（运行标签）或 evidence path（证据路径），但不要复制长段正文、raw log（原始日志）或完整实验流水。
 `log/qemu` 和 `log/board` 下的生成证据只有被 `doc-rvv` 或 `test-rvv` 文档明确引用时才进入提交候选；因此长期文档和 evaluation 引用证据时要写具体文件、run label 或 summary artifact 路径，而不是只写输出目录。
 
+阶段探索归属在 `test-rvv/<module>/<topic>/doc/phases/`：计划、负向尝试、异常解释、optimization matrix 和 unblocked next action 都先放这里。`doc-rvv/<module>/<topic>-RVV.zh.md` 只保存最终 production 行为、当前采用实现、证据链和长期维护边界；它可以引用阶段文档作为审计来源，但不要把阶段流水或临时计划复制进去。
+
 | 信息类型 | 主归属 | 允许引用 | 不应复制 |
 | --- | --- | --- | --- |
 | 当前采用的优化方式、覆盖范围、fallback（回退路径）和生产边界 | `doc-rvv/<module>/<topic>-RVV.zh.md` 主题文档 | evaluation 的实现方式审计表、Handoff 摘要、模块状态表 | output summary 的 raw 表、每轮 bench 全量日志、对话过程 |
 | S2 evaluation、候选路线、采用 / 尝试 / 暂缓 / 拒绝理由 | `artifact_layout.evaluation_doc_template` 解析出的 evaluation 文档 | 主题文档引用最终采用状态和证据路径；Handoff 引用下一步动作 | 主题文档复制完整候选流水账；Handoff 写成完整实验报告 |
+| 阶段计划、阶段结果、优化矩阵、unblocked next action、early-stop 证据 | `artifact_layout.topic_test_dir_template` 下的 `doc/phases/` | Handoff 的 `phase_loop_state`、evaluation 的阶段审计、topic 文档最终结论 | `doc-rvv` 的最终生产行为说明、长期结论和跨阶段通用规则 |
 | test、diagnostic、bench case 的输入构造、计时边界和证明点 | evaluation 文档和对应测试 / bench 源码注释 | 主题文档只引用能支撑结论的 case；Handoff 列命令和路径 | 主题文档复制每个 TEST 的长注释；output summary 承担测试设计说明 |
 | bench 统计、A/B 公式、异常值口径、run label 和复现命令 | `artifact_layout.board_output_subdir` 解析目录下的 summary 或 analysis script（分析脚本） | evaluation / 主题文档引用 summary 路径、脚本路径和关键结论 | 主题文档或 Handoff 复制 raw log；把 QEMU timing 写成性能结论 |
+| 当前数值结论、最新复跑和过期状态 | 最近一次 run-labelled summary、phase result 和 evaluation | Handoff / 主题文档引用 current run label；旧 run 仅作 historical evidence | 把旧 summary 继续写成 current truth，或让 phase result 与最新复跑数值冲突 |
+| Evidence Doctor（证据体检）结果、异常信号、处理动作和结论降级 | `evidence_doctor.md` / `evidence_doctor.json` 或 output summary 内的 Evidence Doctor 小节 | evaluation / 主题文档引用 doctor 路径和关键 finding；Handoff 记录处理动作 | 长期文档复制完整 doctor 报告；把 Warning 隐藏在 raw log 或只写“异常可接受” |
+| Evidence registry（证据登记表）、人工复跑发现和未登记覆盖状态 | `test-rvv/<module>/<topic>/log/evidence_registry.json` 或等价 output summary 状态小节 | Handoff 的 `evidence_registry_status`、phase result 的 freshness 检查、提交前检查输出 | 把 registry 当 raw log 长篇复制；只看 git status 就假设 ignored 日志没变 |
 | QEMU、反汇编、board（板卡）和 production direct（真实生产路径证据）的证据边界 | 证据 summary、evaluation 证据表和主题文档证据链共同引用同一批路径 | Handoff 列 evidence paths；reviewer 抽查路径 | 多处写互相矛盾的“最新结果”或无路径结论 |
 | 真实 production（生产源码）补丁、dispatch（分流逻辑）、public API（公开接口）和维护解释 | production 源码 + 主题文档 | evaluation 记录 production decision（生产接入判断）；Handoff 列 production diff | evaluation 复述生产实现长文；output summary 解释生产维护边界 |
 | reviewer 恢复动作、dirty isolation（脏工作区隔离）、提交边界和下一轮动作 | Handoff Packet、work log（工作日志）或 CURRENT_STATUS（当前状态入口） | evaluation / 主题文档只保留稳定后续方向 | 主题文档写成当前待办清单；长期文档依赖聊天上下文 |
 | screening（筛选）队列、模块级优先级和 topic 状态 | `doc-rvv/library-screening/...` 或配置解析出的状态表 | Handoff 和 closeout 引用状态同步结果 | 主题文档复制模块队列表 |
 | 通用 workflow、reviewer 或文档规则 | `.agents/skills/`、`.agents/knowledge/` 和 `agent_asset_feedback` | Handoff 说明建议更新位置 | topic 文档写成通用 agent 规则 |
+
+复杂 topic 可以把测试和证据说明拆成多份 topic-local 文档。推荐分工：
+
+- `testing-overview`：测试类型定义、运行入口分类、覆盖矩阵和证据白名单。
+- `correctness-tests`：每个 gtest 的中文含义、输入、被测路径、断言、证明范围和代码位置。
+- `benchmark-and-evidence`：bench label 语法、case-filter 字典、QEMU target、board smoke target、repeated board collect target、checksum 来源、trace、asm attribution、复现命令和提交边界。
+- `optimization-evidence`：每种 RVV 优化方式、候选或暂缓路径对应的 production / test_support 代码路径、test target、bench target、board evidence、结论和边界。
+- `test-support-code-map`：`include/impl`、`src`、script 和 production helper 的函数族、调用关系和边界。
+- `phases`：阶段探索、阶段计划、阶段结果、optimization matrix、Evidence Doctor 异常处理、continue / stop decision 和早停检查。
+- evaluation：EvidenceDecision、当前证据、历史候选取舍、accepted risk 和 Traceability Map。
+
+README 只作为导航、常用命令和证据白名单入口。它不承担每个测试、每个 bench case 或每个 helper 的长解释。
 
 ## 写入顺序
 
@@ -33,6 +51,8 @@
 3. 在其它文档只写短引用：仓库相对路径、章节名、符号名、run label 或 output summary 路径。
 4. 如果两个文档都需要同一事实，拆成“长期事实”和“决策审计”。主题文档写当前状态；evaluation 文档写候选取舍和证据如何改变判断。
 5. Handoff 只写 reviewer 恢复需要的定位信息、验证结果和下一步动作，不替代主题文档或 evaluation。
+
+如果一次复跑改变了数值结论、decision bucket 或证据角色，旧 summary 立刻转为 historical evidence，不能继续作为当前 truth。worker 必须同步刷新 phase result、evaluation、主题文档和 Handoff；若还没刷新，文档状态应显式标成 stale / refresh pending，而不是继续沿用旧 run label。若 registry 或扫描发现 `unregistered_change` / `manual_run_detected`，先把当前数值结论降级为待刷新状态，再决定是否重建 summary / Evidence Doctor。
 
 ## Traceability Map 触发条件
 
@@ -117,6 +137,8 @@ reviewer 审查文档和 Handoff 时应确认：
 
 - 是否能用文档归属矩阵指出每类事实的主归属。
 - 主题文档、evaluation、output summary 和 Handoff 是否存在长段重复、互相矛盾或证据错放。
+- 是否存在复跑后数值变化但文档仍引用旧 run label 的情况；如果有，是否已显式标成 historical / stale 并刷新主归属。
+- 是否存在 registry 显示 evidence 文件被覆盖、扫描到未登记文件或 Handoff 写 `evidence_registry_status=not_available` 但没有人工检查路径的情况。
 - 复杂 topic 是否有 Traceability Map；如果没有，Handoff 是否给出 `not_applicable` 理由。
 - Traceability Map 是否能从关键文档跳到代码、测试、脚本和 output，而不是只写自然语言说明。
 - Handoff 是否列出 `document_ownership_check` 和 `traceability_map_status`，并给出 reviewer 可抽查的路径。
