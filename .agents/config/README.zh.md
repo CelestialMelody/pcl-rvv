@@ -19,7 +19,7 @@ env var（环境变量）名或当前 topic（主题）的既有结构；默认�
 ## 模板解析规则
 
 配置模板允许用 `{section.key}` 形式引用 dotted config keys（点分配置键），也允许用 `{module}`、
-`{topic}`、`{function}` 这类运行时变量表示当前 artifact（产物）的上下文。解析时先合并 defaults、
+`{topic}`、`{function}`、`{run_id}`、`{phase_id}`、`{phase_slug}` 这类运行时变量表示当前 artifact（产物）的上下文。解析时先合并 defaults、
 local override（本机私有覆盖）和 prompt override（提示词覆盖）三层配置，递归展开 dotted config
 keys，再用当前 topic / function / adapter 提供的运行时变量绑定剩余占位符。
 如果 dotted config key 或运行时变量无法解析，worker 必须在 S0 报告或 Handoff Packet（交接数据包）
@@ -34,7 +34,8 @@ keys，再用当前 topic / function / adapter 提供的运行时变量绑定剩
 - `agent_assets`：是否报告可沉淀到 skill（技能）或 knowledge map（知识索引）的经验。默认 `report-only`，不自动修改 agent asset。
 - `test_support`：测试支撑代码的拆分阈值、聚合入口目录、聚合入口命名、内部目录、文件扩展名、兼容别名和职责拆分偏好。
 - `paths`：work log（工作日志）、测试目录、文档目录、依赖库和交叉编译工具链的环境变量名。
-- `artifact_layout`：topic（主题）测试目录、主题文档、evaluation（评估）文档、测试 / bench 源码位置、筛选目录、数学专项测试顶层目录和函数目录、QEMU / board 输出目录、Makefile 文件名和日志脱敏脚本的模板。
+- `artifact_layout`：topic（主题）测试目录、主题文档、evaluation（评估）文档、S0 run（S0 运行记录）目录、phase plan/result（阶段计划 / 结果）、optimization matrix（优化矩阵）、current handoff（当前交接摘要）、测试 / bench 源码位置、筛选目录、数学专项测试顶层目录和函数目录、QEMU / board 输出目录、evidence registry（证据登记表）、Makefile 文件名和日志脱敏脚本的模板。
+- `artifact_publication`：产物发布策略。它只表达默认提交边界和审查要求；S0 run record 默认 local-only（仅本地），phase docs 默认 review-required（需要审查），current handoff 默认需要用户显式授权，raw logs 默认不提交，agent asset patch 必须与 topic 产物拆分审查 / 提交。
 - `board`：板卡配置的环境变量名。不要在可提交配置里写 IP、用户名或私有路径。
 
 ## 本机覆盖示例
@@ -61,6 +62,28 @@ agent_assets:
   feedback_mode: report-only
   allow_auto_update: false
 ```
+
+## Artifact layout 与 publication policy
+
+`artifact_layout` 是路径 source of truth（事实来源）。S0 运行记录、phase docs（阶段文档）、optimization matrix（优化矩阵）和 current handoff（当前交接摘要）都应通过模板解析，不要在 skill 或 reference 中重新写死默认路径。新增或修改模板时应遵守两条规则：
+
+1. 模板值只使用仓库相对路径、配置键和运行时变量；不要写私有绝对路径、板卡地址、用户名或 topic-specific（特定主题）硬编码。
+2. 运行时变量缺失时必须 fail closed（保守失败）：在 S0 / Handoff 中报告缺失键和受影响产物，而不是猜一个目录。
+
+`artifact_publication` 是产物发布策略 source of truth。它只记录默认策略和提交边界，不替代 reviewer 的证据判断。常用分类如下：
+
+| class | 默认策略 | 默认提交边界 |
+| --- | --- | --- |
+| `s0_run_record` | local-only（仅本地） | 默认不提交 |
+| `phase_docs` | review-required（需要审查） | 审查后可作为 topic test asset 提交 |
+| `current_handoff` | 需要用户显式授权 | 默认不提交 |
+| `final_topic_docs` | review-required | 证据审查后作为 topic 文档提交 |
+| `evidence_summary` | summary-only + review-required | 被文档引用且脱敏后可提交 |
+| `sanitized_logs` | 需要用户明确要求 | 脱敏后单独提交 |
+| `raw_logs` | local-only | 默认永不提交 |
+| `agent_asset_patch` | separate-review-required（单独审查） | 必须与 topic 产物拆分 |
+
+Handoff Packet（交接数据包）中的 `dirty_isolation`、`artifacts_created_or_updated` 和 `commit_preferences` 应引用这些 class（类别）或说明 prompt override（提示词覆盖），不要把本轮 topic 输出和 agent asset patch 混成一个提交边界。
 
 该文件可以包含真实本机路径、板卡 IP 或用户名，因为 `.agents/local/` 已被 `.gitignore` 忽略。
 不要把本机覆盖内容复制到 `defaults.yaml`。

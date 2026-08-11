@@ -85,6 +85,17 @@ artifact_layout:
   module_doc_dir_template: "{paths.doc_root}/{module}"
   reusable_rvv_knowledge_dir_template: "{paths.doc_root}/rvv"
   topic_doc_template: "{paths.doc_root}/{module}/{topic}-{documentation.topic_doc_suffix}.{documentation.language_suffix}.{documentation.markdown_extension}"
+  topic_worklog_dir_template: "{paths.work_log_root}/{module}/{topic}"
+  current_handoff_dir_template: "{artifact_layout.topic_worklog_dir_template}/current-handoff"
+  s0_run_dir_template: "{artifact_layout.topic_worklog_dir_template}/{run_id}"
+  s0_markdown_template: "{artifact_layout.s0_run_dir_template}/s0.{documentation.language_suffix}.{documentation.markdown_extension}"
+  s0_structured_template: "{artifact_layout.s0_run_dir_template}/s0.yaml"
+  phase_root_template: "{artifact_layout.topic_test_dir_template}/doc/phases"
+  phase_plan_template: "{artifact_layout.phase_root_template}/{phase_id}-{phase_slug}/plan.{documentation.language_suffix}.{documentation.markdown_extension}"
+  phase_result_template: "{artifact_layout.phase_root_template}/{phase_id}-{phase_slug}/result.{documentation.language_suffix}.{documentation.markdown_extension}"
+  optimization_matrix_template: "{artifact_layout.phase_root_template}/optimization-matrix.{documentation.language_suffix}.{documentation.markdown_extension}"
+  current_handoff_template: "{artifact_layout.current_handoff_dir_template}/current-handoff.{documentation.language_suffix}.{documentation.markdown_extension}"
+  current_handoff_structured_template: "{artifact_layout.current_handoff_dir_template}/current-handoff.yaml"
   evaluation_doc_subdir: doc
   evaluation_doc_template: "{paths.test_root}/{module}/{topic}/{artifact_layout.evaluation_doc_subdir}/{topic}-{documentation.evaluation_doc_suffix}.{documentation.language_suffix}.{documentation.markdown_extension}"
   screening_root_template: "{paths.doc_root}/library-screening"
@@ -100,6 +111,8 @@ artifact_layout:
   math_doc_dir_template: "{paths.doc_root}/{artifact_layout.math_doc_subdir}"
   qemu_output_subdir: log/qemu
   board_output_subdir: log/board
+  evidence_registry_template: "{artifact_layout.topic_test_dir_template}/log/evidence_registry.json"
+  evidence_registry_script_template: "{paths.test_root}/script/evidence_registry.py"
   shared_make_subdir: mk
   makefile_name: Makefile
   board_makefile_name: board.mk
@@ -110,6 +123,53 @@ artifact_layout:
   test_source_template: "{artifact_layout.source_subdir}/{artifact_layout.test_source_prefix}_{topic_token}.{artifact_layout.source_extension}"
   bench_source_template: "{artifact_layout.source_subdir}/{artifact_layout.bench_source_prefix}_{topic_token}.{artifact_layout.source_extension}"
   sanitize_logs_script_template: "{paths.test_root}/script/sanitize_evidence_logs.py"
+
+artifact_publication:
+  default_commit_policy: no_commit_without_user_request
+  require_dirty_isolation: true
+  classes:
+    s0_run_record:
+      path_templates:
+        - artifact_layout.s0_markdown_template
+        - artifact_layout.s0_structured_template
+      default_policy: local_only
+      commit_boundary: do_not_commit_by_default
+    phase_docs:
+      path_templates:
+        - artifact_layout.phase_plan_template
+        - artifact_layout.phase_result_template
+        - artifact_layout.optimization_matrix_template
+      default_policy: review_required
+      commit_boundary: topic_test_asset_after_review
+    current_handoff:
+      path_templates:
+        - artifact_layout.current_handoff_template
+        - artifact_layout.current_handoff_structured_template
+      default_policy: explicit_user_authorization_required
+      commit_boundary: do_not_commit_by_default
+    final_topic_docs:
+      path_templates:
+        - artifact_layout.topic_doc_template
+        - artifact_layout.evaluation_doc_template
+      default_policy: review_required
+      commit_boundary: topic_doc_after_evidence_review
+    evidence_summary:
+      default_policy: summary_only_review_required
+      commit_boundary: committable_when_referenced_by_docs
+    sanitized_logs:
+      default_policy: explicit_user_request_required
+      commit_boundary: separate_commit_after_sanitization
+    raw_logs:
+      default_policy: local_only
+      commit_boundary: never_commit_by_default
+    agent_asset_patch:
+      path_roots:
+        - .agents/skills
+        - .agents/knowledge
+        - .agents/config
+        - AGENTS.md
+      default_policy: separate_review_required
+      commit_boundary: separate_from_topic_artifacts
 
 board:
   target_env_var: PCL_RVV_BOARD_TARGET
