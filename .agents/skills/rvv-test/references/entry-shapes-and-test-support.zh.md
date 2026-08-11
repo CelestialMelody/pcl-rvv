@@ -31,6 +31,10 @@ RowSourcePolicy 只负责 row source。shared math pipeline（共享数学流水
 row source -> field load/gather -> finite mask -> formula -> staging/reduction -> accepted_points -> ATA/ATb
 ```
 
+这里的 row source policy（行来源策略）更准确地说是 row-source ingress policy（行来源入口策略）。它只描述每一行从哪里来、如何展开成 source/target/weight 三元组，以及这些展开是否计入 bench；它不等于整条 RVV 优化 family（优化族）或完整的生产策略。full-cloud、source-indexed、dual-indices 和 correspondences 可以共享同一段 math kernel（数学内核）或 reduction/formula family，但每个 policy 都需要单独的 entry adapter（入口适配器）和证据边界。
+
+如果已有某个 policy 采纳了更强的 math family，其他 policy 不能默认继承“同一 family 也一定适用”。必须按 policy 逐一补 candidate、bench、board 和 production direct 证据，或者写出为什么 dataflow / gather / spill / staging 成本让 family 不适用。
+
 ## 长 Test Support 文件拆分
 
 当配置解析出的测试资产中的 helper header（辅助头文件）过长，或同时包含标量 reference、RVV math、row source policy、reduction candidate、component ablation 和 bench/test wrapper 时，应优先拆成稳定聚合头和内部头文件：

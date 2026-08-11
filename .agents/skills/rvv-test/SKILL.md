@@ -51,9 +51,12 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 按任务选择窄 reference：
 
 - [references/test-taxonomy.zh.md](references/test-taxonomy.zh.md)：测试类别和证据层级。
+- [references/optimization-phase-loop.zh.md](references/optimization-phase-loop.zh.md)：多阶段优化循环、阶段 plan/result 布局、optimization matrix（优化矩阵）、Evidence Doctor 异常处理和 continue / stop criteria（继续 / 停止条件）。
 - [references/entry-shapes-and-test-support.zh.md](references/entry-shapes-and-test-support.zh.md)：入口形态、row source policy（行来源策略）和诊断 / 生产分层。
 - [references/numerical-consistency.zh.md](references/numerical-consistency.zh.md)：数值一致性、FMA（融合乘加）、reduction（规约）和反汇编归属。
 - [references/performance-and-ablation.zh.md](references/performance-and-ablation.zh.md)：bench 合同、板卡性能、组件消融和负向归因。
+- [references/evidence-doctor.zh.md](references/evidence-doctor.zh.md)：Evidence Doctor（证据体检 / 证据校验器），用于在 benchmark、board summary、checksum、asm attribution 和 EvidenceDecision 前发现可疑数据模式、输出 Errors / Warnings / Suggestions，并要求 worker 解释、重跑、降级证据边界或保留风险。
+- [references/evidence-manifest-and-naming.zh.md](references/evidence-manifest-and-naming.zh.md)：Evidence manifest（证据清单）与命名合同，定义 topic-local wrapper、manifest 字段、Makefile target、case label 字典和 alias 迁移规则。
 - [references/evidence-output-policy.zh.md](references/evidence-output-policy.zh.md)：证据日志、脚本归属、脱敏、提交边界和 summary-only 默认策略。
 - [references/registration-topic-evidence.zh.md](references/registration-topic-evidence.zh.md)：registration（配准）topic 的
   transformation estimation（变换估计）、correspondence estimation（对应关系估计）和 row source 证据清单。
@@ -62,13 +65,19 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 
 - QEMU（仿真器）只证明 correctness（正确性）、日志形状和路径命中，不证明真实性能。
 - 板卡或目标硬件 benchmark 才能支撑性能结论。
+- bench compare 默认跑板卡或目标硬件；QEMU 默认只编译 bench binary 或跑窄范围 smoke，不运行完整 bench matrix。若保留 QEMU bench 输出，只能写成 `qemu_smoke_only`，不能进入性能排序或 EvidenceDecision；凡是要给用户看的数值 bench，默认只在板卡或目标硬件上运行。
+- 板卡复跑必须有 bounded rerun budget（有界复跑预算）和 decision bucket（决策桶）。数字轻微波动但决策桶不变时不要无限复跑；预算耗尽后仍摇摆时标成 `unstable`、降级结论或交给人工判断。
+- 如果一次复跑改变了已经写入文档的方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，旧 summary 和 phase result 立即降级为 historical evidence；必须刷新相关 topic 文档、evaluation、Handoff Packet 和 phase 文档，不能继续把旧数值当当前 truth。
 - staged candidate（分阶段候选）、production-shaped diagnostic 和 production direct 必须分层，不能互相替代。
 - public-entry-shaped（公开入口形态相似）不等于 production dispatch（生产分流）。
 - diagnostic evidence（诊断证据）不等于 production evidence（生产证据）。
 - component-only ablation（仅组件消融）只能提供瓶颈线索，不能替代端到端 profile（剖析），也不能单独决定 production。
 - full-cloud（全云顺序扫描）、source-indexed（源索引路径）、dual-indices（双索引路径）和 correspondences（对应关系路径）是不同 row source policy。production 必须逐 policy 独立批准。
-- `test-rvv/script/` 只放跨 topic 可复用脚本；与当前优化对象强绑定的脚本放在对应 topic 测试目录的本地 `script/` 下。
+- `test-rvv/script/` 只放跨 topic 可复用脚本；与当前优化对象强绑定的脚本放在对应 topic 测试目录的本地 `script/` 下。通用 Evidence Doctor 脚本放在 `test-rvv/script/evidence_doctor.py`，通用 evidence registry（证据登记表）脚本放在 `test-rvv/script/evidence_registry.py`；若 raw log 解析依赖某个 topic 的 case label、helper 名、字段布局或反汇编符号，应在 topic-local `script/` 下生成 manifest 后再调用全局 doctor / registry。
 - compiler auto-vectorization（编译器自动向量化）诊断默认不开启；需要评估编译器潜力或解释 missed-vectorization（未自动向量化）原因时，显式运行 topic Makefile 的 `generate_vec_report` 或等价目标。
+- benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision 前必须按 `references/evidence-doctor.zh.md` 执行 Evidence Doctor（证据体检）检查；发现 Errors / Warnings / Suggestions 时，summary、evaluation 或 Handoff Packet 必须说明处理动作，不能无解释地把异常数据转成结论。
+- 官方 Make / script target 覆盖证据文件时应更新 topic-local `log/evidence_registry.json` 或等价登记表；S0 恢复、phase loop 恢复和提交前必须检查 registry / manifest / doc refs，发现 `unregistered_change`、`unregistered_file` 或 `stale_doc_pending_refresh` 时先降级当前数值结论。
+- 短 prompt 继续已有 topic、复杂 topic 回访或当前阶段仍有未阻塞优化动作时，必须按 `references/optimization-phase-loop.zh.md` 恢复或创建 phase plan（阶段计划），用 optimization matrix 跟踪 candidate family、row source、点类型 / `Scalar`、test、bench、board、asm 和 doctor 状态；只完成一个 helper、一个 target、一次 bench 或一张表不能作为合法停止理由。
 - evidence logs 默认 `summary-only`。raw run 目录不默认提交。
 - 生成在 `log/qemu` 或 `log/board` 下的 correctness run log、bench analyze log 和 summary artifact，只有被 `doc-rvv` 或 `test-rvv` 下的文档明确引用为证据路径、run label 或摘要输入时，才进入提交候选；未被文档引用的日志和摘要留在本机工作区。
 - closeout 或 production-candidate 文档必须把 test、bench、QEMU、反汇编和板卡证据汇总到“正确性与高效性证据链”。未接 production 的诊断结论使用“诊断证据链”，并写清 diagnostic evidence 不能替代 production evidence。
