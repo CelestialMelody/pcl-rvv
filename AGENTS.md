@@ -1,10 +1,8 @@
-# PCL RVV Agent（代理）指南
+# PCL RVV Agent 指南
 
-本仓库的可复用 RVV agent（代理）资产放在 `.agents/skills/`。开始 PCL RVV
-筛选、诊断、实现、benchmark（性能测试）、文档或项目配置工作前，优先使用匹配的
-skill（技能）。`.codex/` 只用于 Codex 专用配置，不承载通用 RVV 规则。
+本仓库的可复用 RVV agent 资产放在 `.agents/skills/`。开始 PCL RVV 优化工作的筛选、配置、测试、实现或文档前，优先使用匹配的 skill。
 
-S0（恢复和偏好冻结）时，worker（执行者）和 reviewer（审查者）先读取
+S0（恢复和偏好冻结）时，worker 和 reviewer 先读取
 `.agents/config/defaults.yaml`，如果存在再读取 `.agents/local/user-preferences.yaml`。
 S0 输出必须显式记录 `preferences_loaded`，并把注释、文档、证据、agent asset（代理资产）
 反馈和 work log（工作日志）偏好冻结下来。默认偏好只说明规则；本机私有覆盖只放在 `.agents/local/`。
@@ -31,6 +29,7 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
 - `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md` 定义短 prompt worker
   写文件前的轻量质量门禁，避免为了 prompt 变短而丢失文档、注释、bench 和证据质量要求。
 - `.agents/knowledge/pcl-rvv-knowledge-map.md` 是轻量知识索引入口，只说明按配置解析出的文档 / 测试资产读取策略，不复制具体产物内容。
+- 短 prompt 继续已有 topic、恢复阶段状态或目标含有“继续完善 RVV 优化工作”时，必须读取 `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`；它定义 `test-rvv/<topic>/doc/phases/` 的 plan/result、optimization matrix、Evidence Doctor 异常处理和继续 / 停止规则。
 - 未提交的本地迁移材料不作为正式 agent 资产；正常 RVV topic（主题）工作不要读取或依赖这些材料，除非用户明确要求做历史追溯或规则迁移。
 
 ## RVV 工作规则
@@ -38,10 +37,16 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
 - 优先使用匹配的 RVV skill：`rvv-workflow`、`rvv-project-config`、`rvv-screening`、`rvv-test`、`rvv-implementation`、`rvv-documentation`、`rvv-math-vectorization`。
 - `rvv-test` 是统一测试与证据 skill。旧 diagnostics / benchmarking 职责已经迁移到 `rvv-test`，
   不再保留独立 skill 入口。
+- `rvv-test/references/optimization-phase-loop.zh.md` 是多阶段优化循环的细则源。短 prompt 继续已有 topic 时，worker 必须恢复或创建 phase plan，按阶段完成实现、测试、证据解释、矩阵更新和 continue / stop decision；仍有 unblocked next action 时不得因微任务完成而早停。
 - 回复、代码注释、测试说明、文档、汇报必须遵循 `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`：面向中文读者时不要堆英文术语，英文专有术语首次出现必须用括号解释中文含义。
 - 除非用户明确要求，不修改 PCL 生产源码。短 prompt 中“处理 topic”视为授权修改该 topic 对应的、
   由 `artifact_layout` 解析出的测试资产和主题文档产物；不要把该授权扩展到其它 topic。
 - RVV 结论必须有证据链，区分 correctness（正确性）、QEMU 证据、反汇编证据、板卡性能、fallback（回退路径）边界和生产接入判断。
+- bench（性能测试）默认在板卡或目标硬件上跑；QEMU 默认只编译 bench binary 或跑窄范围 smoke，不运行完整 bench matrix，不把 QEMU bench compare 的计时写成性能结论。
+- 板卡复跑必须先有 bounded rerun budget（有界复跑预算）和 decision bucket（决策桶）。数字小幅波动但决策桶不变时不要无限复跑；预算耗尽仍摇摆时标成 `unstable`、降级证据或交给人工判断。
+- 如果一次复跑改变了已写文档中的方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，旧 summary / phase result 立即降级为历史 run；必须刷新对应 topic 文档、evaluation、Handoff Packet 和 phase 文档，不允许继续把旧数值当当前 truth。
+- 官方 Make / script target 覆盖证据文件时应更新 topic-local `log/evidence_registry.json` 或等价登记表；S0 恢复、phase loop 恢复和提交前检查必须发现 `unregistered_change`、`unregistered_file` 或 `stale_doc_pending_refresh`，不能把未登记覆盖当当前 truth。
+- benchmark、board summary、checksum、反汇编归属或 EvidenceDecision 前，必须按 `rvv-test` 的 Evidence Doctor（证据体检）规则暴露 Errors / Warnings / Suggestions；异常信号不是自动判错，但不能无解释地跳过。
 - closeout（收尾）或 production-candidate（生产候选）topic 文档必须包含“正确性与高效性证据链”小节。未接 production（生产源码）的诊断结论使用“诊断证据链”，并写清 diagnostic evidence（诊断证据）不能替代 production evidence（生产证据）。
 - QEMU 只用于正确性、日志格式和路径命中证据；性能结论必须来自目标硬件或板卡。
 - 默认不提交生成日志、本地 build（构建）输出、个人绝对路径、私有板卡地址、本机 `config.mk` 或聊天记录。用户明确要求提交 evidence logs（证据日志）时，优先提交已脱敏日志，必须按 `rvv-workflow` 和 `rvv-test` 冻结日志策略、运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本或对应 Make target 检查、拆分 commit，并说明保留或排除哪些日志。

@@ -14,12 +14,12 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码状
 | Class（稳定标签）                               | Location（位置）                                                                  | Role（作用）                                                                     | Default loading rule（默认读取规则）                                             |
 | ----------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `repo_rules`（仓库规则）                      | `AGENTS.md`、`.agents/skills/`                                                | 持久仓库约定和可复用 agent workflow（代理工作流）。                              | 先读适用的`AGENTS.md`，再读匹配的 skill（技能）。                              |
-| `role_entry_defaults`（角色入口默认值）       | `.agents/config/defaults.yaml`、`.agents/local/user-preferences.yaml`、`.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md`、`worker-quality-gates.zh.md` | 短 prompt（提示词）启动时的 worker（执行者）、reviewer（审查者）和 workflow improvement（工作流改进）默认读取链；worker 写文件前的轻量质量门禁。 | 用户只给角色、工作目录和目标时读取；worker 选中 topic 后按质量门禁决定是否继续读取 documentation / testing / implementation 细则。 |
+| `role_entry_defaults`（角色入口默认值）       | `.agents/config/defaults.yaml`、`.agents/local/user-preferences.yaml`、`.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md`、`worker-quality-gates.zh.md` | 短 prompt（提示词）启动时的 worker（执行者）、reviewer（审查者）和 workflow improvement（工作流改进）默认读取链；S0 / phase / current handoff 路径模板；worker 写文件前的轻量质量门禁。 | 用户只给角色、工作目录和目标时读取；worker 选中 topic 后按配置解析产物位置，并按质量门禁决定是否继续读取 documentation / testing / implementation 细则。 |
 | `agent_preferences`（代理偏好）               | `.agents/config/defaults.yaml`、`.agents/local/user-preferences.yaml`                  | 可提交默认偏好、本机私有覆盖和 env var 名。                                      | S0 读取后冻结注释、文档、证据和工作日志偏好。                                      |
 | `normative_rvv_knowledge`（通用 RVV 知识）    | `artifact_layout.reusable_rvv_knowledge_dir_template`                           | 跨 topic（主题）的 RVV 知识、数学函数向量化说明和可复用 RVV 约定。               | 需要通用 RVV 规则时，优先从配置解析出的目录选择窄文件读取。                      |
 | `historical_topic_reports`（历史 topic 报告） | `artifact_layout.module_doc_dir_template`                                       | topic 文档、closeout（收尾记录）记录、实现说明和历史决策。                       | 只读当前模块或 topic 相关文档，并用当前源码复核。                                |
 | `screening_and_queue_docs`（筛选和队列文档）  | `artifact_layout.screening_root_template`                                       | 模块筛选、候选队列、状态表和下一主题建议。                                       | 选择、恢复或复筛 topic 时读取。                                                  |
-| `executable_evidence`（可执行证据）           | `artifact_layout.topic_test_dir_template`                                       | test（测试）、bench（性能测试）、QEMU、反汇编检查、board（板卡）脚本和日志入口。 | 只读取当前结论需要的具体测试、脚本或日志。                                       |
+| `executable_evidence`（可执行证据）           | `artifact_layout.topic_test_dir_template`                                       | test（测试）、bench（性能测试）、QEMU、反汇编检查、board（板卡）脚本、日志、manifest、Evidence Doctor 和 evidence registry 入口。 | 只读取当前结论需要的具体测试、脚本、summary、registry 或日志。                  |
 | `current_source_state`（当前源码状态）        | 当前 PCL 源码、当前 git diff、`__RVV10__` 路径                                  | 用于复核当前实现行为。                                                           | 下结论前必须用当前源码和当前 diff 复核文档与测试。                               |
 | `migration_only`（仅迁移材料）                | local migration sources（本地迁移来源，可能不存在；例如已移入`tmp` 的历史材料） | 历史 prompt（提示词）材料和旧 skill（技能）草稿。                                | 正常 topic runtime（主题运行过程）不读取；只有用户要求迁移、追溯或审计时才读取。 |
 
@@ -29,6 +29,11 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码状
 2. 读取 `.agents/config/defaults.yaml`；如果存在，读取 `.agents/local/user-preferences.yaml`。
 3. 如果用户使用短 prompt，读取 `rvv-workflow/references/short-prompt-entry.zh.md`；worker 选中 topic 后再读取 `rvv-workflow/references/worker-quality-gates.zh.md`。
 4. 选择匹配的 `.agents/skills/<skill-name>/SKILL.md`。测试、诊断、benchmark、消融和证据日志优先读取 `rvv-test`；
+   短 prompt 继续已有 topic、恢复 phase plan/result 或存在未阻塞下一步时，先从
+   `artifact_layout.phase_root_template`、`artifact_layout.phase_plan_template`、
+   `artifact_layout.phase_result_template` 和 `artifact_layout.optimization_matrix_template`
+   解析阶段文档位置，再读取
+   `rvv-test/references/optimization-phase-loop.zh.md`；
    registration topic 涉及变换估计、对应关系估计、row source 或法方程时，读取
    `rvv-test/references/registration-topic-evidence.zh.md`。
 5. 读取本知识索引，决定下一步需要打开哪类证据。
@@ -43,12 +48,15 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码状
 
 ## Source Priority（来源优先级）
 
+- `artifact_layout` 解析出的路径是 S0 run record（S0 运行记录）、phase docs（阶段文档）、optimization matrix（优化矩阵）、current handoff（当前交接摘要）、topic 测试资产和 topic 文档位置的默认来源；若 local override 或 prompt override 改变路径，Handoff 必须记录覆盖范围。
+- `artifact_publication` 是默认提交边界来源；raw logs、S0 run record 和 current handoff 不应仅因存在于工作区而进入提交，agent asset patch 必须与 topic 产物分开审查。
 - 下结论前，用当前源码和当前 git diff 复核实现行为。
 - `artifact_layout.reusable_rvv_knowledge_dir_template` 解析出的目录可以作为可复用 RVV 约定入口；如果它描述的代码已经变化，以当前源码为准。
 - `artifact_layout.module_doc_dir_template` 解析出的目录记录历史案例和 closeout 结论，可用于定位旧结论，但不自动代表当前源码。
 - `artifact_layout.topic_test_dir_template` 解析出的目录是可执行证据入口；结论取决于具体测试、构建参数、日志、目标硬件和时间。
 - QEMU evidence（QEMU 证据）只支持 correctness（正确性）、log shape（日志形状）和 path/instruction coverage（路径或指令覆盖）判断，不能支撑真实性能结论。
 - Board/target-hardware benchmark（板卡或目标硬件 benchmark）日志才能支撑性能结论。
+- 如果 topic 有 `log/evidence_registry.json` 或等价状态文件，恢复或提交前优先用它判断是否存在人工复跑、未登记覆盖或 stale 文档；没有 registry 时按 `rvv-test` 规则人工列出检查路径。
 - evidence logs（证据日志）默认 `summary-only`；raw logs（原始日志）只在明确授权时进入提交边界。
 
 ## What Not To Load By Default（默认不要读取什么）
