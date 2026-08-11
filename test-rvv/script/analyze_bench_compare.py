@@ -143,6 +143,21 @@ def extract_iterations(text: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
+def extract_warmup_iterations(text: str) -> int | None:
+    """
+    从日志中提取 warm-up 次数。
+
+    bench 程序通常打印 `Warmup Iterations: N`。compare summary 要保留这个字段，
+    否则 Evidence Doctor 无法区分带 warm-up 的 board 数据和 no-warmup smoke。
+    """
+    m = re.search(
+        r"(?m)^\s*(?:warm[- ]?up\s+iterations|warmup_iterations|warmup)\s*:\s*(\d+)\b",
+        text,
+        re.IGNORECASE,
+    )
+    return int(m.group(1)) if m else None
+
+
 def extract_dataset_line(text: str) -> str | None:
     m = DATASET_LINE_RE.search(text)
     return m.group(1).strip() if m else None
@@ -322,6 +337,8 @@ def parse_one_log(text: str, fmt: str, iterations_override: int | None) -> dict:
     if iterations_override is not None:
         d = dict(d)
         d["base_iterations"] = iterations_override
+    d = dict(d)
+    d["warmup_iterations"] = extract_warmup_iterations(text)
     return d
 
 
@@ -400,6 +417,15 @@ def main() -> int:
             f"[WARN] Std Iterations={std_d['base_iterations']} 与 RVV Iterations={rvv_d['base_iterations']} 不一致，仍按名称对齐",
             file=sys.stderr,
         )
+    if (
+        std_d.get("warmup_iterations") is not None
+        and rvv_d.get("warmup_iterations") is not None
+        and std_d["warmup_iterations"] != rvv_d["warmup_iterations"]
+    ):
+        print(
+            f"[WARN] Std Warmup Iterations={std_d['warmup_iterations']} 与 RVV Warmup Iterations={rvv_d['warmup_iterations']} 不一致，仍按名称对齐",
+            file=sys.stderr,
+        )
     iw, ih = std_d.get("image_w"), std_d.get("image_h")
     if (iw, ih) != (rvv_d.get("image_w"), rvv_d.get("image_h")) and iw is not None and ih is not None:
         print(
@@ -462,6 +488,11 @@ def main() -> int:
         )
     else:
         print_context_kv("Iterations", f"{base_iters} （每行 Total = Avg × {base_iters}）")
+    warmup_iters = std_d.get("warmup_iterations")
+    if warmup_iters is None:
+        warmup_iters = rvv_d.get("warmup_iterations")
+    if warmup_iters is not None:
+        print_context_kv("Warmup", str(warmup_iters))
     print_context_kv("Std log", str(args.std_log))
     print_context_kv(variant_log_label, str(args.rvv_log))
     print()
