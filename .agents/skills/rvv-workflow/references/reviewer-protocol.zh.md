@@ -39,6 +39,8 @@ reviewer 至少应读取：
 - `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
 - `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`
 - `.agents/skills/rvv-test/SKILL.md`
+- `.agents/skills/rvv-test/references/evidence-doctor.zh.md`，当 worker 输出 benchmark、board summary、checksum、asm attribution 或 EvidenceDecision 时读取并检查 doctor result。
+- `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`，当 worker 用短 prompt 继续 topic、输出 phase plan/result、仍有 unblocked next action，或 reviewer 需要判断是否过早停止时读取。
 - registration（配准）topic 若涉及变换估计、对应关系估计、row source 或法方程，读取
   `.agents/skills/rvv-test/references/registration-topic-evidence.zh.md`
 - 与当前 topic 相关的 worker Handoff Packet（交接数据包）
@@ -73,6 +75,7 @@ Findings 之后按顺序输出：
 ```text
 Open questions / assumptions（未解决疑问 / 默认假设）
 Evidence reviewed（本轮复核过的证据）
+Phase-loop / early-stop review（阶段循环 / 早停检查）
 Suggested next worker actions（建议 worker 下一步动作）
 Worker prompt patch（可转发给 worker 的提示词补丁）
 Suggested skill / knowledge-map updates（建议更新的 skill 或知识索引）
@@ -82,7 +85,7 @@ Workflow improvement decision（工作流改进决策）
 Files changed in workflow improvement mode（若启用工作流改进模式，本轮改动文件）
 ```
 
-可以省略空章节，但不能省略 `Evidence reviewed`、`Suggested next worker actions` 和 `Worker prompt patch`。`Agent asset feedback` 只在发现可沉淀规则、资产缺口或冗余规则时输出。
+可以省略空章节，但不能省略 `Evidence reviewed`、`Phase-loop / early-stop review`、`Suggested next worker actions` 和 `Worker prompt patch`。`Agent asset feedback` 只在发现可沉淀规则、资产缺口或冗余规则时输出。
 
 ## Worker Prompt Patch（给 worker 的提示词补丁）要求
 
@@ -112,6 +115,7 @@ reviewer 应至少检查：
 - QEMU、反汇编和板卡证据是否分层正确。
 - closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”小节；未接 production 的诊断结论是否包含“诊断证据链”小节。
 - 证据链是否写清 correctness（正确性）、performance（性能）、boundary（证据边界）和 risk（风险）：public entry 是否真实命中；row semantics 是否清楚；`accepted_points`、中间态、matrix 和 fallback 是否有证据；性能结论是否只来自 repeated board 或目标硬件。
+- benchmark、board summary、checksum、asm attribution 或 EvidenceDecision 是否运行或人工填写 Evidence Doctor（证据体检）结果；Error 是否阻塞严格结论，Warning 是否进入 summary / evaluation / Handoff 的风险说明和处理动作。
 - 证据链是否把 QEMU timing、diagnostic evidence、representative pointtypes、indexed / correspondences 边界写清。QEMU timing 不能写成性能结论，diagnostic evidence 不能写成 production evidence。
 - registration 主题是否按 `registration-topic-evidence.zh.md` 审计 `accepted_points`、`ATA/ATb`、
   matrix、weights、symmetric normals、query/match 输出语义和 production direct 边界。
@@ -132,6 +136,7 @@ reviewer 应至少检查：
 - Handoff Packet 是否包含 `document_ownership_check` 和 `traceability_map_status`，并给出 reviewer 可抽查的文档、代码、测试、脚本和 output 路径；缺失时应视为恢复和审查定位缺口。
 - Handoff Packet 是否包含 `ilp_lmul_decision`。对 RVV kernel、reduction、staging 或性能候选，reviewer 应检查 LMUL、VLEN gate、accumulator 数、ILP / unroll、寄存器压力和 spill 风险是否有说明；不适用时理由是否成立。
 - Handoff Packet 是否包含 `numerical_budget_result`。对 FMA、reduction、浮点阈值、near-cancellation、`ATA/ATb`、matrix 或 checksum 风险，reviewer 应检查参考链路、误差阈值、关键结果和失败样本状态是否闭合。
+- Handoff Packet 是否包含 `evidence_doctor_result`。对 benchmark、board summary、checksum、asm attribution 或 EvidenceDecision，reviewer 应检查 Errors / Warnings / Suggestions、未解决 warning、处理动作，以及是否重跑、降级证据边界或修改结论；缺失时应视为证据复核缺口。
 - Handoff Packet 是否包含 `asm_attribution`，并说明关键 RVV 指令归属当前 helper、production 符号、bench harness、Eigen/libm、编译器自动向量化或无关代码；仅说“二进制中出现指令”不够。
 - Handoff Packet 是否包含 `board_evidence_paths`，并区分 summary artifact、sanitized log 和 raw log；默认 summary-only 策略下 raw logs 不应进入默认提交边界。
 - Handoff Packet 是否显式包含 `evidence_decision` 与 `production_decision`。Reviewer 应检查二者是否一致但不混淆：性能或诊断收益成立不自动等于生产接入成立。
@@ -144,10 +149,13 @@ reviewer 应至少检查：
   bench-only/no-production 或保留重要未覆盖范围，reviewer 应检查 `followup_options_for_user` 是否列出默认动作、
   继续当前 topic 的扩展动作、应另开 topic 的消融 / 扩展动作和当前不建议做的方向。
 - 如果 worker 使用短 prompt 启动，Handoff Packet 是否包含 `worker_quality_gate_check`，且该字段真实覆盖标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、证据模型和 stop condition。缺失或虚写时，应视为 workflow/worker 执行缺口。
+- 如果 worker 继续已有 topic 或声明处于 phase loop，Handoff Packet 是否包含 `phase_loop_state`，并列出当前 phase、phase plan/result 路径、completion matrix、optimization matrix、unblocked next actions、stop condition、continue/stop decision 和 next phase default。
+- reviewer 必须检查 worker 是否过早停止：当前 phase plan 是否在修改前存在；plan 的每个动作是否在 result 和矩阵中回填；若仍有 `unblocked_next_actions`，worker 是否错误地停在一个 helper、隔离层、target、bench、summary 或表格之后；Evidence Doctor Warning / Error 是否被解释、重跑、降级或阻塞。发现早停时，至少列为 `High` finding，并在 `Worker prompt patch` 要求回到第一个 unblocked next action。
 - `worker_quality_gate_check` 是否是证据化表格，而不是只有 `true` / `false`。reviewer 应抽查每项 `evidence` 是否能在当前 topic 产物中定位；若找不到对应文件、章节、日志或代码注释，应把该项判为未闭合。
 - `worker_quality_gate_check` 是否在适用时覆盖 `experience_migration_audit_ready` 和 `test_support_split_decision_ready`。若 worker 声称不适用，reviewer 应抽查当前 topic 是否确实没有 sibling topic 经验、长 helper 或多职责 helper 信号。
 - `worker_quality_gate_check` 是否覆盖 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`。
 - `worker_quality_gate_check` 是否覆盖 `correctness_efficiency_evidence_chain_ready`。
+- `worker_quality_gate_check` 是否覆盖 `evidence_doctor_result_ready`，并指向 doctor report 或人工 Errors / Warnings / Suggestions 摘要。若本轮涉及性能、checksum 或 asm 证据但该项缺失，应把 EvidenceDecision 判为未闭合。
 - `worker_quality_gate_check` 是否覆盖 `dirty_isolation_ready`、`implementation_review_ready`、`candidates_added_or_deferred_ready`、`document_ownership_matrix_ready`、`traceability_map_ready`、`ilp_lmul_decision_ready`、`numerical_budget_result_ready`、`asm_attribution_ready`、`board_evidence_paths_ready`、`evidence_decision_ready`、`production_decision_ready` 和 `validation_summary_ready`。不适用项必须有理由，不能直接省略。
 - `language_check` 是否同样有证据支撑。若 worker 声称通过，但诊断 helper、测试、bench 或主题文档仍有非平凡段落缺少中文说明，应指出具体文件和行号。
 - 当前结论若为 `partial-production-candidate`、`production-ready` 或其它强于 no-production 的状态，reviewer 必须检查 worker 是否列出 production direct 缺口。诊断路径上的板卡收益不能自动升级成 production-ready。

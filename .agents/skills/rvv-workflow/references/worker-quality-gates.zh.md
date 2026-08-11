@@ -19,6 +19,9 @@
 - 如果 worker 声明采用 sibling topic（同模块相邻主题）经验，或当前 topic 的设计明显来自
   相邻成功 / 负向案例，S0 后、写文件前必须做 experience-migration audit（经验迁移审计）。
   该审计不要求照搬相邻 topic 的具体算法，只要求列清哪些经验被采用、尝试、暂缓或拒绝。
+- 如果短 prompt 是“继续完善 <topic> 的 RVV 优化工作”、当前 topic 已有 phase plan/result，
+  或当前计划仍有 `unblocked_next_actions`，必须读取 `rvv-test/references/optimization-phase-loop.zh.md`，
+  并把 phase loop 状态纳入写文件前自查和 Handoff Packet。
 
 ## 最小门禁
 
@@ -35,6 +38,8 @@ worker 必须在 S0 报告和最终 Handoff Packet（交接数据包）中写清
 - `documentation_policy_frozen`：closeout（收尾文档）是否 current-state-first（当前状态优先）、是否必须有数值算例、长期文档是否禁止保留对话流程话术。
 
 如果 local override 中配置了板卡、依赖库、交叉编译工具链或私有路径，Handoff 只报告“已读取对应覆盖项”和使用的 env var（环境变量）名。不要复制 IP、用户名或个人绝对路径。
+
+S0 字段级合同、artifact layout（产物布局）解析和 artifact publication（产物发布）判断见 `rvv-workflow/references/s0-preferences-and-recovery.zh.md`；S0 输出要把 `preferences_loaded`、`frozen_policies`、`resolved_artifacts`、`artifact_publication_decision`、`dirty_isolation`、`validation` 和 `next_action` 回填到 Handoff Packet（交接数据包），而不是散落在不同段落里。
 
 ### 2. 标量路径重建
 
@@ -144,6 +149,22 @@ worker 必须分开写：
 QEMU 不能作为性能结论。板卡退化只能支持 no-production，不能自动证明 gather、buffer、
 FMA 或 tail 是单一主因；没有消融 bench 或 profile 时必须写成假设。
 
+bench 类性能结论默认只来自 board / target hardware。QEMU 默认可以编译 bench binary，但不运行完整
+bench matrix；若确实需要 QEMU bench，只能跑小规模、少 case、少 iteration 的 build / correctness /
+log-shape smoke。若本轮只跑了 QEMU bench smoke，worker 必须把性能证据写成 missing / blocked，
+不能把 `analyze_bench_compare.log` 的 QEMU 计时用于排序或 EvidenceDecision。
+
+每次复跑都要做 evidence freshness check（证据新鲜度检查）。若新 run 改变了文档中的 speedup、
+方向、decision bucket、run count、Evidence Doctor 数量或证据角色，旧 run 只能保留为 historical evidence；
+phase result、optimization matrix、evaluation、topic 文档和 Handoff 必须同步刷新，或明确写
+`stale_doc_pending_refresh`。若 topic 有 `log/evidence_registry.json` 或等价登记表，恢复和提交前
+必须检查 `unregistered_change`、`unregistered_file` 和 `manual_run_detected`；若没有 registry，
+Handoff 必须写 `evidence_registry_status=not_available` 并列出人工检查路径。
+
+板卡复跑必须有 bounded rerun budget（有界复跑预算）和 decision bucket（决策桶）。worker 不追求
+每个精确数字完全稳定；预算用完后，如果 bucket 稳定即可关闭该证据动作，如果仍摇摆则标成
+`unstable`、降级 EvidenceDecision 或交给 reviewer / 用户判断。
+
 closeout 或 production-candidate topic 文档必须包含“正确性与高效性证据链”小节。该小节至少检查：
 
 - correctness：public entry 是否真实命中；row semantics 是否清楚；`accepted_points`、中间态、matrix 和 fallback 是否有证据。
@@ -172,6 +193,9 @@ full-cloud（全云顺序扫描）、source-indexed（源索引路径）、dual-
 correspondences（对应关系路径）是不同 row source policy（行来源策略）。production 必须逐 policy
 独立批准。RowSourcePolicy 只负责 row source；shared math pipeline（共享数学流水线）负责
 finite mask（有限值掩码）、formula（公式）、staging/reduction、accepted_points、ATA/ATb。
+如果当前 topic 已有 adopted math family，worker 写实现前必须检查该 family 是否已经按 row source
+policy 做过 carry-over audit。未尝试的 policy 先在 test-rvv 中补 candidate / bench / board 证据，
+或写出不适用原因；不能只因为某个旧 helper 在一个 policy 上正向，就直接扩大 production。
 
 mixed fields（混合字段）、point traits（点类型字段特征）、AoS stride（数组结构跨步）、
 gather、valid-index-only（仅有效索引）、production predicate（生产谓词）和 invalid lane finite mask
@@ -185,6 +209,27 @@ correspondences 或 indexed 路径退化时，归因必须列出 query/match 展
 详细规则见 `rvv-test/references/test-taxonomy.zh.md`、`rvv-test/references/entry-shapes-and-test-support.zh.md`、
 `rvv-test/references/registration-topic-evidence.zh.md`、`rvv-test/references/numerical-consistency.zh.md`
 和 `rvv-test/references/performance-and-ablation.zh.md`。
+
+### 8a. Phase loop 防早停门禁
+
+复杂 topic、短 prompt 继续已有 topic 或任何含多阶段优化计划的 topic，必须把 `rvv-test/references/optimization-phase-loop.zh.md`
+作为 phase loop 的 source of truth。worker 写 test-rvv、bench、production 或长期文档前至少闭合下列门禁：
+
+```text
+phase_plan_written_before_edits:
+phase_completion_matrix_ready:
+optimization_matrix_ready:
+micro_stop_guard:
+continue_stop_decision:
+```
+
+- `phase_plan_written_before_edits`：当前 phase 的 `plan.zh.md` 必须先于该 phase 的实现、测试、bench 或 production 修改存在。若历史 topic 没有阶段目录，先创建 `doc/phases/000-current-state-and-gaps/plan.zh.md`。
+- `phase_completion_matrix_ready`：分两个时间点检查。写文件前，`plan.zh.md` 必须已有可回填的 action / completion scaffold（计划动作表、依赖和完成判据），让后续 `result.zh.md` 能逐项回填；阶段结束或 Handoff 前，`result.zh.md` 或 Handoff 必须逐项列出计划动作的 `done / partial / deferred / blocked` 状态、证据路径和缺口，不能只写“完成本阶段”。
+- `optimization_matrix_ready`：复杂 topic 必须维护 candidate family × row source policy × point type / `Scalar` / layout × test × bench × board × asm × doctor × decision 矩阵；`planned` 或 `deferred` 不能伪装成 adopted。
+- `micro_stop_guard`：如果只完成一个小 helper、一个隔离层、一个 target、一次 bench、一个 summary 或一张表，但当前计划仍有授权且未阻塞 next action，worker 不允许停；必须继续推进下一个动作，或写出真实停止条件。
+- `continue_stop_decision`：最终输出和 Handoff 必须解释为什么继续或为什么停。停止必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权或当前 phase 矩阵已闭合且没有 unblocked next action。
+
+`micro_stop_guard` 是强规则：worker 不能把一个局部 positive / negative、row-source audit 表、Evidence Doctor warning 解释或 isolated bench 当作 topic 完成。若继续推进会扩大范围，则停止理由必须写清扩大到哪里、需要谁授权、恢复入口是什么。
 
 ### 9. PI1 生产接入计划门禁
 
@@ -275,13 +320,24 @@ production_to_diagnostic_mapping_ready:
 document_ownership_matrix_ready:
 traceability_map_ready:
 experience_migration_audit_ready:
+phase_plan_written_before_edits:
+phase_completion_matrix_ready:
+optimization_matrix_ready:
+micro_stop_guard:
+continue_stop_decision:
 doc_quality_refs_loaded:
 current_optimization_section_ready:
 test_comment_strategy_frozen:
 test_support_split_decision_ready:
 bench_timing_boundary_defined:
+bench_backend_choice_ready:
+qemu_bench_smoke_scope_ready:
+rerun_budget_decision_ready:
 alternative_designs_listed:
 evidence_model_defined:
+evidence_doctor_result_ready:
+evidence_registry_status_ready:
+evidence_freshness_check_ready:
 correctness_efficiency_evidence_chain_ready:
 stop_condition_defined:
 pi1_production_scope_ready:
@@ -327,9 +383,18 @@ followup_options_ready:
 - `missing_items` 必须写成陈述句；没有缺口时写 `none`。
 - 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
   和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
+- 表格必须包含 `evidence_doctor_result_ready`。凡本轮涉及 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision，证据必须指向 `test-rvv/script/evidence_doctor.py` 生成的 report，或按 `rvv-test/references/evidence-doctor.zh.md` 人工填写的 Errors / Warnings / Suggestions 摘要；未运行脚本时说明原因和当前 doctor 边界。
+- 表格必须包含 `bench_backend_choice_ready`。凡本轮涉及 bench，证据必须说明性能结论是否来自 board / target hardware；若只跑 QEMU bench smoke，状态应为 `partial` 或 `not_applicable`，并写清它只用于 build / correctness / log-shape smoke；若没有运行 QEMU bench，应写明默认策略是只编译或只跑 gtest / correctness。
+- 表格必须包含 `qemu_bench_smoke_scope_ready`。如果运行了 QEMU bench，证据必须列出 case-filter、规模、iteration 和为什么它不是完整 bench；如果没有运行，写 `not_applicable` 并说明性能验证只走 board / target hardware。
+- 表格必须包含 `rerun_budget_decision_ready`。凡本轮涉及 board performance 或 repeated summary，证据必须指向 phase plan / summary 中的 run budget、decision bucket、是否用完预算和是否需要降级 / 人工判断。
+- 表格必须包含 `evidence_registry_status_ready`。证据指向 `log/evidence_registry.json`、`make evidence_status` / `make check_evidence_freshness` 输出或等价人工检查；若 topic 尚未接入 registry，写 `partial` 并列出应补的 target / script。
+- 表格必须包含 `evidence_freshness_check_ready`。证据指向 Handoff Packet 的 `evidence_freshness_status`、phase result、evaluation 或 topic 文档；若复跑改变了旧数值、decision bucket 或证据角色，必须列出已刷新和待刷新的路径。
 - 表格必须包含 `correctness_efficiency_evidence_chain_ready`。证据指向主题文档中的“正确性与高效性证据链”或“诊断证据链”小节。
 - 表格必须包含 `document_ownership_matrix_ready`。证据指向文档归属矩阵章节、evaluation 中的决策审计或 Handoff Packet 的定位字段。
 - 表格必须包含 `traceability_map_ready`。证据指向 Traceability Map 章节或独立 traceability 文档，说明文档、测试、输出和代码位置可以互相定位。
+- 表格必须包含 `phase_plan_written_before_edits`、`phase_completion_matrix_ready`、`optimization_matrix_ready`、
+  `micro_stop_guard` 和 `continue_stop_decision`。证据指向当前 phase plan/result、optimization matrix、
+  `unblocked_next_actions`、`stop_condition_hit` 和 Handoff 的 `phase_loop_state`；若当前任务不是多阶段优化，写 `not_applicable` 并说明为什么没有 phase loop。
 - 表格必须包含 `dirty_isolation_ready`。证据指向 Handoff Packet 的 `dirty_isolation`，说明当前 worktree 的无关 diff、raw logs、build 输出和本轮可审查 / 可提交路径边界。
 - 表格必须包含 `implementation_review_ready`。若本轮改了 production、diagnostic helper、bench-facing helper 或 RVV kernel，证据指向 Handoff Packet 的 `implementation_review` 或主题文档“当前采用的优化方式”；若纯文档 cleanup，写 `not_applicable` 并说明原因。
 - 表格必须包含 `candidates_added_or_deferred_ready`。证据指向本轮候选路线表、experience-migration audit 或 Handoff Packet 的 `candidates_added_or_deferred`，说明新增、尝试、暂缓或拒绝的候选。

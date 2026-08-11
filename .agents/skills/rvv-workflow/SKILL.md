@@ -22,11 +22,18 @@ description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适
 必须按 [references/worker-quality-gates.zh.md](references/worker-quality-gates.zh.md)
 检查标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、
 证据模型和 stop condition（停止条件）；命中复杂 RVV 模式时再读取对应细则。测试、
-诊断、benchmark、消融和证据日志规则集中在 `rvv-test`。
+诊断、benchmark、消融和证据日志规则集中在 `rvv-test`。短 prompt 继续已有 topic 或目标是
+“继续完善 RVV 优化工作”时，还必须读取 `rvv-test/references/optimization-phase-loop.zh.md`，
+恢复或创建 phase plan（阶段计划）和 optimization matrix（优化矩阵）。
+
+S0 恢复和偏好冻结的合同见 [references/s0-preferences-and-recovery.zh.md](references/s0-preferences-and-recovery.zh.md)。
+当工作需要从默认偏好、local override 和 prompt override 里恢复当前轮的有效策略、解析已配置的
+artifact layout（产物布局）或判断产物发布边界时，先按该 reference 的字段合同恢复，再进入 topic
+的后续阶段。
 
 所有 RVV 工作的回复、文档、测试输出、配置解析出的测试资产和 prototype 注释应遵循 [references/reviewability-and-language.zh.md](references/reviewability-and-language.zh.md)：英文术语首次出现时必须解释；中文主导时给中文解释，英文主导时也要给 plain-English explanation（白话解释），必要时再补中文解释。中文说明要自然，避免翻译腔、名词堆叠和模板填空；长测试/诊断文件提供“本文件做什么”这类阅读提示，非平凡函数用自然句说明作用、调用者和证据角色。
 
-单个 RVV topic（主题）的状态机见 [references/topic-lifecycle.zh.md](references/topic-lifecycle.zh.md)。S0-S12 是主干状态，不是线性流水账；S10 `EvidenceDecision`（证据决策）之后必须按证据进入 no-production closeout（不接入生产收尾）、production integration loop（生产接入闭环）或 blocked handoff（阻塞交接）。不要把生产接入简单追加成固定 S13；如果进入生产接入，必须完成生产补丁、生产直连测试、生产证据重跑和再次证据决策后，才进入最终文档 closeout。
+单个 RVV topic（主题）的状态机见 [references/topic-lifecycle.zh.md](references/topic-lifecycle.zh.md)。S0-S12 是主干状态，不是线性流水账；S3-S10 可按 phase loop 反复执行设计、实现、测试、证据解释、矩阵更新和 EvidenceDecision。S10 `EvidenceDecision`（证据决策）之后必须按证据进入 no-production closeout（不接入生产收尾）、production integration loop（生产接入闭环）、下一 phase 或 blocked handoff（阻塞交接）。不要把生产接入简单追加成固定 S13；如果进入生产接入，必须完成生产补丁、生产直连测试、生产证据重跑和再次证据决策后，才进入最终文档 closeout。
 
 worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（阻塞）时，应按 [references/handoff-packet.zh.md](references/handoff-packet.zh.md) 输出 Handoff Packet（交接数据包）。涉及文档 closeout、evaluation、output summary 或复杂 topic 定位时，Handoff 还要包含 document ownership（文档归属）和 Traceability Map（可追踪性地图）状态。reviewer 审查 worker 产物时，应按 [references/reviewer-protocol.zh.md](references/reviewer-protocol.zh.md) 输出 findings（问题清单）、worker prompt patch（给 worker 的提示词补丁）和 agent asset（代理资产）更新建议。
 
@@ -71,10 +78,10 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 
 1. S0 恢复上下文和冻结偏好。
 2. S1-S2 确认目标并建立函数级评估；需要继续的 topic 应创建或更新 evaluation（评估）文档。
-3. S3-S4 形成 RVV / 诊断设计和证据计划。
-4. S5-S9 创建 scaffold（脚手架）、实现诊断或生产候选、执行 QEMU、反汇编和板卡验证。
-5. S10 做 EvidenceDecision。
-6. S10 后按证据分支：不接入生产则进入 S11 closeout；接入生产则进入 production integration loop，重跑生产证据后再进入 S11；阻塞则进入 S12。
+3. S3-S4 形成 RVV / 诊断设计和证据计划；多阶段 topic 每个 phase 都要先有 plan。
+4. S5-S9 创建 scaffold（脚手架）、实现诊断或生产候选、执行 QEMU、反汇编和板卡验证；这些步骤可随 phase loop 重复。
+5. S10 做 EvidenceDecision，并更新 phase result、optimization matrix 和继续 / 停止决定。
+6. S10 后按证据分支：不接入生产则进入 S11 closeout；接入生产则进入 production integration loop；仍有 unblocked next action 则回到下一 phase；阻塞则进入 S12。
 7. S11 同步评估文档、主题文档、模块工作日志和状态表。
 8. S12 输出 done_or_blocked。
 

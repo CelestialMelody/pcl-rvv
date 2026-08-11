@@ -16,6 +16,14 @@
 second-pass（第二轮筛选）或 follow-up（复筛）状态表自动选择模块；若模块仍然
 不唯一，才先询问模块名。模块一旦确定，worker 默认选择该模块下第一条未完成 topic（主题）。
 
+如果短 prompt 只是“继续完善 <topic> 的 RVV 优化工作”或类似粗目标，worker 默认先恢复 phase loop：
+读取最近 Handoff Packet、最近 phase plan/result、`doc/phases/README.zh.md` 和 optimization matrix。
+若当前没有 phase plan，先创建 current-state phase plan，再按当前 phase 继续推进实现、测试、证据解释和计划更新。
+如果选中的 topic 属于 registration（配准）类，row-source family carry-over audit 只是常见的第一阶段，不是整轮默认终点；
+它应作为 phase loop 中的一个候选 phase，被放进矩阵后继续判断下一个未阻塞 phase。
+不要把一个 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
+如果短 prompt 的目标是恢复 S0、冻结偏好或复核产物发布边界，先读 `.agents/skills/rvv-workflow/references/s0-preferences-and-recovery.zh.md`，再决定是否继续 phase loop。
+
 worker（执行者）和 reviewer（审查者）启动时先读取：
 
 1. `AGENTS.md`
@@ -25,6 +33,7 @@ worker（执行者）和 reviewer（审查者）启动时先读取：
 5. `.agents/skills/rvv-workflow/SKILL.md`
 6. `.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md`
 7. `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`
+8. `.agents/skills/rvv-workflow/references/s0-preferences-and-recovery.zh.md`
 
 S0 必须在输出中写明 `preferences_loaded`，并冻结注释、文档、证据、日志和 agent asset（代理资产）反馈偏好。若 local override
 存在，worker 还要报告读取到的本机覆盖范围；若不存在，写明只使用 defaults。
@@ -62,8 +71,10 @@ worker 可用：
 ```
 
 用户不需要知道 `next_worker_action_if_review_passes` 字段名。只要短 prompt 表达“继续当前 topic”
-或“进入下一阶段”，worker 默认就要从最近 Handoff Packet 读取该字段；若字段存在且与用户新指令不冲突，
-它就是本轮下一步动作的主来源。若字段缺失、路径不存在或与用户新指令冲突，worker 先说明恢复风险，
+或“进入下一阶段”，worker 默认就要从最近 Handoff Packet 里的 `phase_loop_state` 恢复：
+先读 `current_phase`、`phase_plan_paths`、`phase_result_paths`、`unblocked_next_actions`
+和 `next_phase_default`。`next_worker_action_if_review_passes` 仍可作为兼容字段，但不再是唯一主来源。
+若 phase loop 状态缺失、路径不存在或与用户新指令冲突，worker 先说明恢复风险，
 再按 `phase_reached`、`current_decision`、reviewer prompt patch（审查者提示词补丁）和当前源码证据推导下一步。
 
 如果最近 Handoff Packet（交接数据包）的 `current_decision` 是 `partial-production-candidate`
@@ -157,18 +168,19 @@ worker 再读：
 1. `.agents/skills/rvv-workflow/references/topic-lifecycle.zh.md`
 2. `.agents/skills/rvv-workflow/references/handoff-packet.zh.md`
 3. `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md`
-4. `.agents/skills/rvv-workflow/references/topic-entry-template.md`
-5. `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
-6. `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`，当本轮要写 closeout、evaluation、主题文档、Handoff Packet，或 topic 涉及多处代码 / 测试 / 输出定位时读取。
-7. 当前模块的筛选状态表。
-7. 命中的 topic 源码、文档和测试证据。
+4. `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`，当短 prompt 继续已有 topic、恢复 phase plan/result 或当前 phase 仍有 unblocked next action 时读取。
+5. `.agents/skills/rvv-workflow/references/topic-entry-template.md`
+6. `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
+7. `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`，当本轮要写 closeout、evaluation、主题文档、Handoff Packet，或 topic 涉及多处代码 / 测试 / 输出定位时读取。
+8. 当前模块的筛选状态表。
+9. 命中的 topic 源码、文档和测试证据。
 
 worker 选中 topic 后、开始写配置解析出的 topic 测试资产、topic 文档或 production 前，必须按
 `worker-quality-gates.zh.md` 做一次轻量自查。若 topic 涉及 staging（分阶段暂存）、
 gather（离散加载）、`vcompress`、scalar tail（标量尾段）、vector reduction（向量规约）、
-FMA（融合乘加）、板卡性能或 no-production closeout（不接入生产收尾），继续读取该文件指向的
-`rvv-documentation`、`rvv-test` 和 `rvv-implementation` 详细 reference。短 prompt
-只负责启动变短，不降低 worker 产物质量门槛。
+FMA（融合乘加）、板卡性能、benchmark summary、checksum summary、asm attribution 或 no-production closeout（不接入生产收尾），继续读取该文件指向的
+`rvv-documentation`、`rvv-test` 和 `rvv-implementation` 详细 reference；其中 benchmark、board summary、checksum、asm attribution 或 EvidenceDecision 必须读取 `rvv-test/references/evidence-doctor.zh.md`。
+短 prompt 只负责启动变短，不降低 worker 产物质量门槛。
 
 registration（配准）topic 如果涉及 transformation estimation（变换估计）、correspondence
 estimation（对应关系估计）、row source policy（行来源策略）、`accepted_points`、`ATA/ATb`
@@ -183,9 +195,11 @@ common pipeline 或类似数据流分发信号，应按 `.agents/knowledge/pcl-r
 production 决策，就跳过当前源码复核、QEMU correctness、反汇编和板卡证据。
 
 如果短 prompt 是“继续当前 topic”或“进入下一阶段”，worker 应先读取最近 work log（工作日志）
-或 Handoff Packet，恢复 `phase_reached`、`current_decision`、`next_worker_action_if_review_passes`
-和 evidence paths（证据路径）。`next_worker_action_if_review_passes` 是默认续作入口；除非用户新指令覆盖，
-不要绕过它自行选择下一个 topic 或重跑旧阶段。当恢复到 `partial-production-candidate` 并进入 PI1 时，还必须读取：
+或 Handoff Packet，恢复 `phase_loop_state`、`phase_reached`、`current_decision`、
+`phase_plan_paths`、`phase_result_paths` 和 evidence paths（证据路径）。
+`phase_loop_state.next_phase_default` 是默认续作入口；`next_worker_action_if_review_passes` 只作为兼容别名。
+除非用户新指令覆盖，不要绕过 phase loop 自行选择下一个 topic 或重跑旧阶段。
+当恢复到 `partial-production-candidate` 并进入 PI1 时，还必须读取：
 
 1. `.agents/skills/rvv-implementation/SKILL.md`
 2. `.agents/skills/rvv-implementation/references/point-load-store.md`
@@ -198,10 +212,11 @@ reviewer 再读：
 2. `.agents/skills/rvv-workflow/references/handoff-packet.zh.md`
 3. `.agents/skills/rvv-workflow/references/topic-lifecycle.zh.md`
 4. `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md`
-5. `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
-6. `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`
-7. `.agents/skills/rvv-test/SKILL.md`，以及当前证据类型需要的窄 reference。
-7. worker 输出、Handoff Packet（交接数据包）、当前 diff（差异）和 topic 证据；如果用户没有给 worker 输出路径，就读当前对话中最近一轮 worker 回复或用户贴入的交接内容。
+5. `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`，尤其是检查 phase plan/result、optimization matrix 和 early-stop 条件时读取。
+6. `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
+7. `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`
+8. `.agents/skills/rvv-test/SKILL.md`，以及当前证据类型需要的窄 reference。
+9. worker 输出、Handoff Packet（交接数据包）、当前 diff（差异）和 topic 证据；如果用户没有给 worker 输出路径，就读当前对话中最近一轮 worker 回复或用户贴入的交接内容。
 
 workflow improvement 再读：
 
@@ -245,6 +260,7 @@ worker 最终输出必须包含：
 - 执行命令。
 - 证据路径。
 - EvidenceDecision。
+- Evidence Doctor result（证据体检结果），包含 Errors / Warnings / Suggestions、未解决 warning、处理动作和是否降级证据边界；没有运行脚本时说明人工检查边界。
 - `language_check`。
 - `worker_quality_gate_check`，使用 `gate | status | evidence | missing_items` 证据化表格，并覆盖 `document_ownership_matrix_ready` 与 `traceability_map_ready`。
 - `preferences_loaded`。
@@ -271,7 +287,7 @@ workflow improvement 最终输出必须包含：
 - Changes made in Workflow improvement mode（工作流改进模式的实际改动）。
 - `backup_path`，如果本轮创建了备份。
 - Validation（验证命令和结果）。
-- Handoff Packet（交接数据包），至少包含 files_changed、implementation_review、candidates_added_or_deferred、document_ownership_check、traceability_map_status、dirty_isolation、validation、remaining_risks 和 next_worker_action。
+- Handoff Packet（交接数据包），至少包含 files_changed、implementation_review、candidates_added_or_deferred、document_ownership_check、traceability_map_status、evidence_doctor_result、dirty_isolation、validation、remaining_risks 和 next_worker_action。
 - New short prompt example（新的短 prompt 示例）。
 
 ## 缺省工作偏好

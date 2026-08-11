@@ -9,6 +9,7 @@
 - 如果证据不支持生产接入，进入诊断 / bench closeout（收尾）并在 S12 结束。
 - 如果证据支持生产接入，进入 production integration loop（生产接入闭环），完成生产实现后重新跑必要的测试、反汇编、板卡和证据决策，再做最终文档 closeout。
 - Commit phase（提交阶段）是可选独立阶段，不属于 S0-S12 的固定后缀。
+- S3-S10 不是一次性瀑布。它们是可重复的优化循环：设计、实现、测试、证据解释、矩阵更新和决策可以在同一 topic 内重复多轮，只要还有授权且未阻塞的下一步动作。
 
 ## Phase Groups（阶段分组）
 
@@ -23,6 +24,8 @@
 - 冻结提交偏好：默认不提交；如果用户授权提交，再确认 topic、日志和 agent asset（代理资产）是否拆分。
 - 冻结 evidence logs（证据日志）策略：默认 `summary-only`，raw logs（原始日志）不默认提交。
 - 检查同 topic 是否残留上一轮 worker 产物；若存在且用户未确认复用，先停止。
+
+S0 的字段级合同、artifact layout（产物布局）恢复和 artifact publication（产物发布）判断，见 `rvv-workflow/references/s0-preferences-and-recovery.zh.md`；S0 记录与 Handoff Packet（交接数据包）应使用同一组恢复术语，而不是重新发明另一套状态名。
 
 ### S1-S2 目标确认和函数级评估
 
@@ -58,6 +61,8 @@ S4 形成测试和证据计划，区分：
 
 如果计划中的结论依赖“编译器不会自动向量化”或“自动向量化不足”，S4 应记录 missed-vectorization report（未自动向量化报告）的生成命令、摘要路径或未使用原因。该报告不替代 correctness、反汇编归因或板卡性能证据。
 
+S3-S4 的输出不是一次性草稿，而是后续每一轮 phase loop 的输入。worker 可以在新的 candidate family、row source policy、点类型、`Scalar`、布局或 Evidence Doctor 结果出现时回到 S3-S4，修订计划和证据矩阵，再继续 S5-S9。
+
 测试类别、row source policy（行来源策略）、production-shaped diagnostic（生产形态诊断）、
 production direct（真实生产路径证据）、component ablation（组件消融）和 evidence logs 策略按
 `rvv-test` 执行。
@@ -65,7 +70,7 @@ production direct（真实生产路径证据）、component ablation（组件消
 S4 如果暴露出可跨 topic 复用的测试矩阵、证据缺口或冗余规则，应在 Handoff Packet（交接数据包）的
 `agent_asset_feedback` 中按 `report-only`（只报告建议）记录；没有发现时省略，避免短 prompt（短提示词）输出膨胀。
 
-### S5-S9 产物和验证
+### S5-S9 产物和验证（可重复执行）
 
 S5 创建或复查 topic scaffold（脚手架），包括配置解析出的测试资产、Makefile、board 配置、评估文档或诊断原型。
 
@@ -76,6 +81,8 @@ S7 运行必要测试和 QEMU 验证。QEMU 只能支持正确性、路径命中
 S8 检查反汇编或等效指令路径，确认关键 RVV 指令是否出现，并尽量归属到当前 helper、production 符号、bench harness、库代码或编译器自动向量化区域。若归因存在自动向量化疑点，可以补充 missed-vectorization 摘要；默认 S8 不要求生成该报告。
 
 S9 在板卡或目标硬件上运行必要 smoke（小型验证）、test 和 benchmark（性能测试）。只有板卡或目标硬件性能数据能支撑真实性能结论。
+
+S5-S9 可以随着 phase loop 重复多轮：新增 candidate、补 test、扩 bench、更新板卡证据或重跑反汇编都不意味着 topic 已结束。worker 不应把一个 isolated helper、一个 target、一次 bench 或一张 summary 当作整轮完成。
 
 ### S10 EvidenceDecision
 
@@ -93,6 +100,8 @@ S10 必须写清“证据证明了什么”和“不能证明什么”。QEMU �
 production evidence（生产证据）。
 S10 如果发现 EvidenceDecision（证据决策）依赖了尚未写入 `rvv-test`、`rvv-implementation`
 或 `rvv-documentation` 的通用规则，应输出 `agent_asset_feedback`，但默认不修改 agent asset（代理资产）。
+
+S10 是当前 phase 的决策点，不是 topic 的天然终点。若 `current_decision` 之外仍存在授权且未阻塞的下一动作，worker 应把 S10 结果回填到 Handoff Packet，再回到 S3-S9 继续下一 phase，而不是把一次局部 positive / negative 当作最终完成。
 
 ## S10 后分支
 

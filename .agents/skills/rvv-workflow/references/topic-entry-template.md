@@ -30,6 +30,7 @@
 - `rvv-test/references/entry-shapes-and-test-support.zh.md`：local fragment、row source policy、production-shaped diagnostic 和 production direct 分层。
 - `rvv-test/references/numerical-consistency.zh.md`：浮点、FRM/FCSR、FMA、reduction、finite mask 和反汇编归属。
 - `rvv-test/references/performance-and-ablation.zh.md`：QEMU、板卡、bench 输出、component ablation 和负向归因。
+- `rvv-test/references/evidence-doctor.zh.md`：Evidence Doctor（证据体检 / 证据校验器），用于在 benchmark、board summary、checksum、asm attribution 和 EvidenceDecision 前暴露 Errors / Warnings / Suggestions。
 - `rvv-test/references/evidence-output-policy.zh.md`：summary-only、sanitized-logs、raw-logs 和提交边界。
 - `rvv-test/references/registration-topic-evidence.zh.md`：registration 主题的变换估计、对应关系估计、row source 和法方程证据清单。
 - `rvv-implementation/SKILL.md`：Std/RVV 分发、fallback、注释粒度和 PCL 代码风格。
@@ -66,9 +67,11 @@
 - 函数级评估是 production gate：只有 full diagnostic 或 production case 能证明入口主成本、fallback、维护边界和板卡收益成立，才进入生产实现。
 - `1.05x ~ 1.2x` 弱收益不能机械接入；只适合入口常用、实现小、fallback 简单、语义风险低且证据完整的路径。
 - bench 诊断主题默认授权范围限于专项 test/bench、诊断文档和状态表；升级生产路径必须先有 full diagnostic 或 production case 的稳定目标硬件收益。
+- 对 registration（配准）类 topic，如果已有 adopted math family 只在某个 row source policy 上闭合，而其它 policy 仍未尝试同 family，默认先做 family carry-over audit：在 test-rvv 中补对应 policy 的 candidate、bench 和 board 证据，再决定是否进入 production integration loop。不要把单一 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
 - QEMU 不写成性能结论。
 - 板卡或目标硬件结果才是性能结论。
 - bench 输出必须能解析 `Dataset:`、`Iterations:`、case avg、`Total Time` 和 checksum；格式异常先修 bench 或脚本。
+- benchmark、board summary、checksum、asm attribution 或 EvidenceDecision 前必须执行 Evidence Doctor（证据体检）检查；Error 阻塞严格结论，Warning 必须进入 summary / evaluation / Handoff 的风险说明。
 - full-cloud、source-indexed、dual-indices 和 correspondences 是不同 row source policy；production 必须逐 policy 独立批准。
 - production-shaped diagnostic 和 production direct 分层记录；diagnostic evidence 不能替代 production evidence。
 - 若手工展开浮点表达式，检查源码公式、标量反汇编和 RVV intrinsic 求值顺序。
