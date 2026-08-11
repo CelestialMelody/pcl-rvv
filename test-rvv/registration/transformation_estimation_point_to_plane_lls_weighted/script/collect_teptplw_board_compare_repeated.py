@@ -31,6 +31,55 @@ def extract_table(analyzer_output: str) -> str:
     return analyzer_output[start:].strip() + "\n"
 
 
+def rerun_command_lines(case_filter: str) -> list[str]:
+    if case_filter == "dual-correspondence-family":
+        return [
+            "make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \\",
+            "  collect_board_production_dispatch_repeated \\",
+            "  TEPTPLW_COMPARE_CASE_FILTER=dual-correspondence-family \\",
+            "  TEPTPLW_COMPARE_SIZE=<size> \\",
+            "  TEPTPLW_COMPARE_RUNS=<runs> \\",
+            "  TEPTPLW_COMPARE_ITERATIONS=<iterations> \\",
+            "  TEPTPLW_COMPARE_WARMUP_ITERATIONS=<warmup-iterations>",
+        ]
+    if case_filter == "source-indexed-family":
+        return [
+            "make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \\",
+            "  collect_board_source_indexed_family_repeated \\",
+            "  TEPTPLW_SOURCE_INDEXED_FAMILY_SIZE=<size> \\",
+            "  TEPTPLW_SOURCE_INDEXED_FAMILY_RUNS=<runs> \\",
+            "  TEPTPLW_SOURCE_INDEXED_FAMILY_ITERATIONS=<iterations> \\",
+            "  TEPTPLW_SOURCE_INDEXED_FAMILY_WARMUP_ITERATIONS=<warmup-iterations>",
+        ]
+    if case_filter == "production-source-indices":
+        return [
+            "make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \\",
+            "  collect_board_production_source_indices_repeated \\",
+            "  TEPTPLW_SOURCE_INDICES_SIZE=<size> \\",
+            "  TEPTPLW_SOURCE_INDICES_RUNS=<runs> \\",
+            "  TEPTPLW_SOURCE_INDICES_ITERATIONS=<iterations> \\",
+            "  TEPTPLW_SOURCE_INDICES_WARMUP_ITERATIONS=<warmup-iterations>",
+        ]
+    if case_filter == "row-sources":
+        return [
+            "make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \\",
+            "  collect_board_row_sources_repeated \\",
+            "  TEPTPLW_ROW_SOURCE_SIZE=<size> \\",
+            "  TEPTPLW_ROW_SOURCE_RUNS=<runs> \\",
+            "  TEPTPLW_ROW_SOURCE_ITERATIONS=<iterations> \\",
+            "  TEPTPLW_ROW_SOURCE_WARMUP_ITERATIONS=<warmup-iterations>",
+        ]
+    return [
+        "make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \\",
+        "  collect_board_production_dispatch_repeated \\",
+        "  TEPTPLW_COMPARE_CASE_FILTER=<case-filter> \\",
+        "  TEPTPLW_COMPARE_SIZE=<size> \\",
+        "  TEPTPLW_COMPARE_RUNS=<runs> \\",
+        "  TEPTPLW_COMPARE_ITERATIONS=<iterations> \\",
+        "  TEPTPLW_COMPARE_WARMUP_ITERATIONS=<warmup-iterations>",
+    ]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Collect repeated Std/RVV board comparisons for TEPTPLW."
@@ -110,6 +159,11 @@ def main() -> int:
             stdout=subprocess.PIPE,
         ).stdout
         table = extract_table(analyzed)
+        raw_log_boundary = (
+            f"- raw compare logs：`{raw_dir}`；local-only diagnostic inputs，默认不进入提交边界。"
+            if args.raw_dir is not None
+            else "- raw compare logs：默认使用临时目录，脚本结束后清理，不进入提交边界。"
+        )
         summary = "\n".join(
             [
                 "# 重复 Benchmark Speedup 摘要",
@@ -121,18 +175,12 @@ def main() -> int:
                 f"- runs：`{args.runs}`",
                 f"- iterations：`{args.iterations}`",
                 f"- warm-up iterations：`{args.warmup_iterations}`",
-                "- raw compare logs 默认使用临时目录，不进入提交边界。",
+                raw_log_boundary,
                 "",
                 "使用 topic-local target 重新生成：",
                 "",
                 "```bash",
-                "make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \\",
-                "  collect_board_production_dispatch_repeated \\",
-                "  TEPTPLW_COMPARE_CASE_FILTER=<case-filter> \\",
-                "  TEPTPLW_COMPARE_SIZE=<size> \\",
-                "  TEPTPLW_COMPARE_RUNS=<runs> \\",
-                "  TEPTPLW_COMPARE_ITERATIONS=<iterations> \\",
-                "  TEPTPLW_COMPARE_WARMUP_ITERATIONS=<warmup-iterations>",
+                *rerun_command_lines(args.case_filter),
                 "```",
                 "",
                 table.rstrip(),
