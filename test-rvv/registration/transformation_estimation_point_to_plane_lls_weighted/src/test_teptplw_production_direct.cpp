@@ -333,6 +333,14 @@ TEST(TransformationEstimationPointToPlaneLLSWeighted,
   negative_index[0] = -1;
   prod_detail::PointToPlaneLLSWeightedNormalEquation eq;
   prod_detail::PointToPlaneLLSWeightedFullCloudStats stats;
+  EXPECT_FALSE(
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV(
+          source, negative_index, target, weights, eq, &stats));
+  EXPECT_EQ(stats.input_points, negative_index.size());
+  EXPECT_EQ(stats.accepted_points, 0u);
+  EXPECT_FALSE(stats.used_rvv);
+
+  stats = prod_detail::PointToPlaneLLSWeightedFullCloudStats{};
   EXPECT_FALSE(prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
       source, negative_index, target, weights, eq, &stats));
   EXPECT_EQ(stats.input_points, negative_index.size());
@@ -341,6 +349,14 @@ TEST(TransformationEstimationPointToPlaneLLSWeighted,
 
   auto out_of_range_index = makeSourceIndices(source.size());
   out_of_range_index[1] = static_cast<int>(source.size());
+  stats = prod_detail::PointToPlaneLLSWeightedFullCloudStats{};
+  EXPECT_FALSE(
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV(
+          source, out_of_range_index, target, weights, eq, &stats));
+  EXPECT_EQ(stats.input_points, out_of_range_index.size());
+  EXPECT_EQ(stats.accepted_points, 0u);
+  EXPECT_FALSE(stats.used_rvv);
+
   stats = prod_detail::PointToPlaneLLSWeightedFullCloudStats{};
   EXPECT_FALSE(prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
       source, out_of_range_index, target, weights, eq, &stats));

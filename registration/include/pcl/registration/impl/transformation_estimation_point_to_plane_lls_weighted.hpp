@@ -481,6 +481,96 @@ template <typename PointSource,
           typename SrcLayout,
           typename TgtLayout>
 inline void
+loadPointToPlaneLLSWeightedSourceIndexedBlockVectors(
+    const std::uint8_t* source_base,
+    const std::uint32_t* source_indices,
+    const std::uint8_t* target_base,
+    const float* weights,
+    const std::size_t i,
+    const std::size_t vl,
+    vfloat32m1_t& a,
+    vfloat32m1_t& b,
+    vfloat32m1_t& c,
+    vfloat32m1_t& d,
+    vfloat32m1_t& nx,
+    vfloat32m1_t& ny,
+    vfloat32m1_t& nz,
+    vbool32_t& keep)
+{
+  constexpr std::ptrdiff_t kTargetStride = sizeof(PointTarget);
+  const vuint32m1_t source_index_vector =
+      __riscv_vle32_v_u32m1(source_indices + i, vl);
+  const vuint32m1_t source_offsets =
+      __riscv_vmul_vx_u32m1(source_index_vector, sizeof(PointSource), vl);
+
+  const auto gather_source = [&](const std::size_t offset) -> vfloat32m1_t {
+    return __riscv_vluxei32_v_f32m1(
+        reinterpret_cast<const float*>(source_base + offset), source_offsets, vl);
+  };
+  const auto load_target = [&](const std::size_t offset) -> vfloat32m1_t {
+    return __riscv_vlse32_v_f32m1(
+        reinterpret_cast<const float*>(target_base + i * sizeof(PointTarget) + offset),
+        kTargetStride,
+        vl);
+  };
+
+  const vfloat32m1_t sx = gather_source(SrcLayout::kX);
+  const vfloat32m1_t sy = gather_source(SrcLayout::kY);
+  const vfloat32m1_t sz = gather_source(SrcLayout::kZ);
+  const vfloat32m1_t dx = load_target(TgtLayout::kX);
+  const vfloat32m1_t dy = load_target(TgtLayout::kY);
+  const vfloat32m1_t dz = load_target(TgtLayout::kZ);
+  const vfloat32m1_t normal_x = load_target(TgtLayout::kNX);
+  const vfloat32m1_t normal_y = load_target(TgtLayout::kNY);
+  const vfloat32m1_t normal_z = load_target(TgtLayout::kNZ);
+  const vfloat32m1_t weight = __riscv_vle32_v_f32m1(weights + i, vl);
+
+  keep = finitePointToPlaneLLSWeightedF32M1(sx, vl);
+  keep = __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSWeightedF32M1(sy, vl), vl);
+  keep = __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSWeightedF32M1(sz, vl), vl);
+  keep = __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSWeightedF32M1(dx, vl), vl);
+  keep = __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSWeightedF32M1(dy, vl), vl);
+  keep = __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSWeightedF32M1(dz, vl), vl);
+  keep =
+      __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSWeightedF32M1(normal_x, vl), vl);
+  keep =
+      __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSWeightedF32M1(normal_y, vl), vl);
+  keep =
+      __riscv_vmand_mm_b32(keep, finitePointToPlaneLLSWeightedF32M1(normal_z, vl), vl);
+
+  nx = __riscv_vfmul_vv_f32m1(normal_x, weight, vl);
+  ny = __riscv_vfmul_vv_f32m1(normal_y, weight, vl);
+  nz = __riscv_vfmul_vv_f32m1(normal_z, weight, vl);
+
+  a = __riscv_vfmul_vv_f32m1(ny, sz, vl);
+  b = __riscv_vfmul_vv_f32m1(nz, sx, vl);
+  c = __riscv_vfmul_vv_f32m1(nx, sy, vl);
+  const vfloat32m1_t dsx = __riscv_vfsub_vv_f32m1(dx, sx, vl);
+  const vfloat32m1_t dsy = __riscv_vfsub_vv_f32m1(dy, sy, vl);
+  const vfloat32m1_t dsz = __riscv_vfsub_vv_f32m1(dz, sz, vl);
+
+  a = __riscv_vfmsac_vv_f32m1(a, nz, sy, vl);
+  b = __riscv_vfmsac_vv_f32m1(b, nx, sz, vl);
+  c = __riscv_vfmsac_vv_f32m1(c, ny, sx, vl);
+  d = __riscv_vfmul_vv_f32m1(nx, dsx, vl);
+  d = __riscv_vfmacc_vv_f32m1(d, ny, dsy, vl);
+  d = __riscv_vfmacc_vv_f32m1(d, nz, dsz, vl);
+
+  const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, vl);
+  a = __riscv_vmerge_vvm_f32m1(zero, a, keep, vl);
+  b = __riscv_vmerge_vvm_f32m1(zero, b, keep, vl);
+  c = __riscv_vmerge_vvm_f32m1(zero, c, keep, vl);
+  d = __riscv_vmerge_vvm_f32m1(zero, d, keep, vl);
+  nx = __riscv_vmerge_vvm_f32m1(zero, nx, keep, vl);
+  ny = __riscv_vmerge_vvm_f32m1(zero, ny, keep, vl);
+  nz = __riscv_vmerge_vvm_f32m1(zero, nz, keep, vl);
+}
+
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
+inline void
 loadPointToPlaneLLSWeightedFullReductionVectors(const std::uint8_t* source_base,
                                                 const std::uint8_t* target_base,
                                                 const float* weights,
@@ -743,6 +833,188 @@ accumulatePointToPlaneLLSWeightedBlockGroupN(const std::uint8_t* source_base,
   eq.atb.coeffRef(5) += reducePointToPlaneLLSWeightedSumF32M1(nzd, vlmax);
 }
 
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
+inline void
+accumulatePointToPlaneLLSWeightedSourceIndexedBlockGroupA(
+    const std::uint8_t* source_base,
+    const std::uint32_t* source_indices,
+    const std::uint8_t* target_base,
+    const float* weights,
+    const std::size_t begin,
+    const std::size_t end,
+    PointToPlaneLLSWeightedNormalEquation& eq)
+{
+  const std::size_t vlmax = __riscv_vsetvlmax_e32m1();
+  const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, vlmax);
+  vfloat32m1_t aa = zero, ab = zero, ac = zero, anx = zero, any = zero, anz = zero;
+  vfloat32m1_t ad = zero;
+  for (std::size_t i = begin; i < end;) {
+    const std::size_t vl = __riscv_vsetvl_e32m1(end - i);
+    vfloat32m1_t a, b, c, d, nx, ny, nz;
+    vbool32_t keep;
+    loadPointToPlaneLLSWeightedSourceIndexedBlockVectors<
+        PointSource,
+        PointTarget,
+        SrcLayout,
+        TgtLayout>(
+        source_base, source_indices, target_base, weights, i, vl, a, b, c, d, nx, ny, nz, keep);
+    eq.accepted_points += __riscv_vcpop_m_b32(keep, vl);
+    aa = __riscv_vfmacc_vv_f32m1_tu(aa, a, a, vl);
+    ab = __riscv_vfmacc_vv_f32m1_tu(ab, a, b, vl);
+    ac = __riscv_vfmacc_vv_f32m1_tu(ac, a, c, vl);
+    anx = __riscv_vfmacc_vv_f32m1_tu(anx, a, nx, vl);
+    any = __riscv_vfmacc_vv_f32m1_tu(any, a, ny, vl);
+    anz = __riscv_vfmacc_vv_f32m1_tu(anz, a, nz, vl);
+    ad = __riscv_vfmacc_vv_f32m1_tu(ad, a, d, vl);
+    i += vl;
+  }
+  eq.ata.coeffRef(0) += reducePointToPlaneLLSWeightedSumF32M1(aa, vlmax);
+  eq.ata.coeffRef(1) += reducePointToPlaneLLSWeightedSumF32M1(ab, vlmax);
+  eq.ata.coeffRef(2) += reducePointToPlaneLLSWeightedSumF32M1(ac, vlmax);
+  eq.ata.coeffRef(3) += reducePointToPlaneLLSWeightedSumF32M1(anx, vlmax);
+  eq.ata.coeffRef(4) += reducePointToPlaneLLSWeightedSumF32M1(any, vlmax);
+  eq.ata.coeffRef(5) += reducePointToPlaneLLSWeightedSumF32M1(anz, vlmax);
+  eq.atb.coeffRef(0) += reducePointToPlaneLLSWeightedSumF32M1(ad, vlmax);
+}
+
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
+inline void
+accumulatePointToPlaneLLSWeightedSourceIndexedBlockGroupB(
+    const std::uint8_t* source_base,
+    const std::uint32_t* source_indices,
+    const std::uint8_t* target_base,
+    const float* weights,
+    const std::size_t begin,
+    const std::size_t end,
+    PointToPlaneLLSWeightedNormalEquation& eq)
+{
+  const std::size_t vlmax = __riscv_vsetvlmax_e32m1();
+  const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, vlmax);
+  vfloat32m1_t bb = zero, bc = zero, bnx = zero, bny = zero, bnz = zero, bd = zero;
+  for (std::size_t i = begin; i < end;) {
+    const std::size_t vl = __riscv_vsetvl_e32m1(end - i);
+    vfloat32m1_t a, b, c, d, nx, ny, nz;
+    vbool32_t keep;
+    loadPointToPlaneLLSWeightedSourceIndexedBlockVectors<
+        PointSource,
+        PointTarget,
+        SrcLayout,
+        TgtLayout>(
+        source_base, source_indices, target_base, weights, i, vl, a, b, c, d, nx, ny, nz, keep);
+    bb = __riscv_vfmacc_vv_f32m1_tu(bb, b, b, vl);
+    bc = __riscv_vfmacc_vv_f32m1_tu(bc, b, c, vl);
+    bnx = __riscv_vfmacc_vv_f32m1_tu(bnx, b, nx, vl);
+    bny = __riscv_vfmacc_vv_f32m1_tu(bny, b, ny, vl);
+    bnz = __riscv_vfmacc_vv_f32m1_tu(bnz, b, nz, vl);
+    bd = __riscv_vfmacc_vv_f32m1_tu(bd, b, d, vl);
+    i += vl;
+  }
+  eq.ata.coeffRef(7) += reducePointToPlaneLLSWeightedSumF32M1(bb, vlmax);
+  eq.ata.coeffRef(8) += reducePointToPlaneLLSWeightedSumF32M1(bc, vlmax);
+  eq.ata.coeffRef(9) += reducePointToPlaneLLSWeightedSumF32M1(bnx, vlmax);
+  eq.ata.coeffRef(10) += reducePointToPlaneLLSWeightedSumF32M1(bny, vlmax);
+  eq.ata.coeffRef(11) += reducePointToPlaneLLSWeightedSumF32M1(bnz, vlmax);
+  eq.atb.coeffRef(1) += reducePointToPlaneLLSWeightedSumF32M1(bd, vlmax);
+}
+
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
+inline void
+accumulatePointToPlaneLLSWeightedSourceIndexedBlockGroupC(
+    const std::uint8_t* source_base,
+    const std::uint32_t* source_indices,
+    const std::uint8_t* target_base,
+    const float* weights,
+    const std::size_t begin,
+    const std::size_t end,
+    PointToPlaneLLSWeightedNormalEquation& eq)
+{
+  const std::size_t vlmax = __riscv_vsetvlmax_e32m1();
+  const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, vlmax);
+  vfloat32m1_t cc = zero, cnx = zero, cny = zero, cnz = zero, cd = zero;
+  for (std::size_t i = begin; i < end;) {
+    const std::size_t vl = __riscv_vsetvl_e32m1(end - i);
+    vfloat32m1_t a, b, c, d, nx, ny, nz;
+    vbool32_t keep;
+    loadPointToPlaneLLSWeightedSourceIndexedBlockVectors<
+        PointSource,
+        PointTarget,
+        SrcLayout,
+        TgtLayout>(
+        source_base, source_indices, target_base, weights, i, vl, a, b, c, d, nx, ny, nz, keep);
+    cc = __riscv_vfmacc_vv_f32m1_tu(cc, c, c, vl);
+    cnx = __riscv_vfmacc_vv_f32m1_tu(cnx, c, nx, vl);
+    cny = __riscv_vfmacc_vv_f32m1_tu(cny, c, ny, vl);
+    cnz = __riscv_vfmacc_vv_f32m1_tu(cnz, c, nz, vl);
+    cd = __riscv_vfmacc_vv_f32m1_tu(cd, c, d, vl);
+    i += vl;
+  }
+  eq.ata.coeffRef(14) += reducePointToPlaneLLSWeightedSumF32M1(cc, vlmax);
+  eq.ata.coeffRef(15) += reducePointToPlaneLLSWeightedSumF32M1(cnx, vlmax);
+  eq.ata.coeffRef(16) += reducePointToPlaneLLSWeightedSumF32M1(cny, vlmax);
+  eq.ata.coeffRef(17) += reducePointToPlaneLLSWeightedSumF32M1(cnz, vlmax);
+  eq.atb.coeffRef(2) += reducePointToPlaneLLSWeightedSumF32M1(cd, vlmax);
+}
+
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
+inline void
+accumulatePointToPlaneLLSWeightedSourceIndexedBlockGroupN(
+    const std::uint8_t* source_base,
+    const std::uint32_t* source_indices,
+    const std::uint8_t* target_base,
+    const float* weights,
+    const std::size_t begin,
+    const std::size_t end,
+    PointToPlaneLLSWeightedNormalEquation& eq)
+{
+  const std::size_t vlmax = __riscv_vsetvlmax_e32m1();
+  const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, vlmax);
+  vfloat32m1_t nxnx = zero, nxny = zero, nxnz = zero;
+  vfloat32m1_t nyny = zero, nynz = zero, nznz = zero;
+  vfloat32m1_t nxd = zero, nyd = zero, nzd = zero;
+  for (std::size_t i = begin; i < end;) {
+    const std::size_t vl = __riscv_vsetvl_e32m1(end - i);
+    vfloat32m1_t a, b, c, d, nx, ny, nz;
+    vbool32_t keep;
+    loadPointToPlaneLLSWeightedSourceIndexedBlockVectors<
+        PointSource,
+        PointTarget,
+        SrcLayout,
+        TgtLayout>(
+        source_base, source_indices, target_base, weights, i, vl, a, b, c, d, nx, ny, nz, keep);
+    nxnx = __riscv_vfmacc_vv_f32m1_tu(nxnx, nx, nx, vl);
+    nxny = __riscv_vfmacc_vv_f32m1_tu(nxny, nx, ny, vl);
+    nxnz = __riscv_vfmacc_vv_f32m1_tu(nxnz, nx, nz, vl);
+    nyny = __riscv_vfmacc_vv_f32m1_tu(nyny, ny, ny, vl);
+    nynz = __riscv_vfmacc_vv_f32m1_tu(nynz, ny, nz, vl);
+    nznz = __riscv_vfmacc_vv_f32m1_tu(nznz, nz, nz, vl);
+    nxd = __riscv_vfmacc_vv_f32m1_tu(nxd, nx, d, vl);
+    nyd = __riscv_vfmacc_vv_f32m1_tu(nyd, ny, d, vl);
+    nzd = __riscv_vfmacc_vv_f32m1_tu(nzd, nz, d, vl);
+    i += vl;
+  }
+  eq.ata.coeffRef(21) += reducePointToPlaneLLSWeightedSumF32M1(nxnx, vlmax);
+  eq.ata.coeffRef(22) += reducePointToPlaneLLSWeightedSumF32M1(nxny, vlmax);
+  eq.ata.coeffRef(23) += reducePointToPlaneLLSWeightedSumF32M1(nxnz, vlmax);
+  eq.ata.coeffRef(28) += reducePointToPlaneLLSWeightedSumF32M1(nyny, vlmax);
+  eq.ata.coeffRef(29) += reducePointToPlaneLLSWeightedSumF32M1(nynz, vlmax);
+  eq.ata.coeffRef(35) += reducePointToPlaneLLSWeightedSumF32M1(nznz, vlmax);
+  eq.atb.coeffRef(3) += reducePointToPlaneLLSWeightedSumF32M1(nxd, vlmax);
+  eq.atb.coeffRef(4) += reducePointToPlaneLLSWeightedSumF32M1(nyd, vlmax);
+  eq.atb.coeffRef(5) += reducePointToPlaneLLSWeightedSumF32M1(nzd, vlmax);
+}
+
 template <typename PointSource, typename PointTarget>
 inline bool
 buildPointToPlaneLLSWeightedFullCloudBlockRVV(
@@ -808,6 +1080,91 @@ buildPointToPlaneLLSWeightedFullCloudBlockRVV(
       stats->accepted_points = eq.accepted_points;
       stats->used_rvv = true;
     }
+    return true;
+  }
+}
+
+template <typename PointSource, typename PointTarget>
+inline bool
+buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::Indices& indices_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    const std::vector<float>& weights,
+    PointToPlaneLLSWeightedNormalEquation& eq,
+    PointToPlaneLLSWeightedFullCloudStats* stats = nullptr)
+{
+  using SrcLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointSource>;
+  using TgtLayout = pcl::rvv::RVVXYZNormalFloatLayout<PointTarget>;
+
+  const std::size_t nr_points = indices_src.size();
+  if constexpr (!SrcLayout::value || !TgtLayout::value) {
+    setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
+    return false;
+  }
+  else {
+    if (!canUsePointToPlaneLLSWeightedSourceIndicesRVV<PointSource, PointTarget>(
+            cloud_src.size(),
+            nr_points,
+            cloud_tgt.size(),
+            weights.size(),
+            __riscv_vsetvlmax_e32m1())) {
+      setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
+      return false;
+    }
+
+    std::vector<std::uint32_t> source_indices;
+    source_indices.reserve(nr_points);
+    for (std::size_t row = 0; row < nr_points; ++row) {
+      if (indices_src[row] < 0) {
+        setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
+        return false;
+      }
+      const auto source_index = static_cast<std::size_t>(indices_src[row]);
+      if (source_index >= cloud_src.size()) {
+        setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
+        return false;
+      }
+      source_indices.push_back(static_cast<std::uint32_t>(source_index));
+    }
+
+    constexpr std::size_t kBlockChunks = 8;
+    const std::size_t vlmax = __riscv_vsetvlmax_e32m1();
+    const std::size_t block_rows =
+        std::max<std::size_t>(vlmax, vlmax * kBlockChunks);
+    eq = PointToPlaneLLSWeightedNormalEquation{};
+    const auto* source_base =
+        reinterpret_cast<const std::uint8_t*>(cloud_src.points.data());
+    const auto* target_base =
+        reinterpret_cast<const std::uint8_t*>(cloud_tgt.points.data());
+    for (std::size_t begin = 0; begin < nr_points; begin += block_rows) {
+      const std::size_t end = std::min(nr_points, begin + block_rows);
+      accumulatePointToPlaneLLSWeightedSourceIndexedBlockGroupA<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(
+          source_base, source_indices.data(), target_base, weights.data(), begin, end, eq);
+      accumulatePointToPlaneLLSWeightedSourceIndexedBlockGroupB<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(
+          source_base, source_indices.data(), target_base, weights.data(), begin, end, eq);
+      accumulatePointToPlaneLLSWeightedSourceIndexedBlockGroupC<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(
+          source_base, source_indices.data(), target_base, weights.data(), begin, end, eq);
+      accumulatePointToPlaneLLSWeightedSourceIndexedBlockGroupN<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(
+          source_base, source_indices.data(), target_base, weights.data(), begin, end, eq);
+    }
+    setPointToPlaneLLSWeightedStats(stats, nr_points, eq.accepted_points, true);
     return true;
   }
 }
@@ -920,6 +1277,9 @@ buildPointToPlaneLLSWeightedSourceIndicesDefault(
 {
 #if defined(__RVV10__)
   PointToPlaneLLSWeightedNormalEquation eq;
+  if (buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV(
+          cloud_src, indices_src, cloud_tgt, weights, eq, stats))
+    return eq;
   if (buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
           cloud_src, indices_src, cloud_tgt, weights, eq, stats))
     return eq;
@@ -966,7 +1326,9 @@ estimatePointToPlaneLLSWeightedSourceIndicesRVV(
 #if defined(__RVV10__)
   if constexpr (std::is_same_v<Scalar, float>) {
     PointToPlaneLLSWeightedNormalEquation eq;
-    if (!buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+    if (!buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV(
+            cloud_src, indices_src, cloud_tgt, weights, eq) &&
+        !buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
             cloud_src, indices_src, cloud_tgt, weights, eq))
       return false;
     solvePointToPlaneLLSWeightedNormalEquation(eq, transformation_matrix);
