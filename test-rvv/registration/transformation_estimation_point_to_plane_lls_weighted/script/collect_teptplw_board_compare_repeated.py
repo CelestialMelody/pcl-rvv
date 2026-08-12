@@ -31,7 +31,16 @@ def extract_table(analyzer_output: str) -> str:
     return analyzer_output[start:].strip() + "\n"
 
 
-def rerun_command_lines(case_filter: str) -> list[str]:
+def rerun_command_lines(case_filter: str, rerun_target: str | None) -> list[str]:
+    if rerun_target == "production-source-indices-block-fused-probe":
+        return [
+            "make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \\",
+            "  collect_board_production_source_indices_probe_repeated \\",
+            "  TEPTPLW_SOURCE_INDICES_SIZE=<size> \\",
+            "  TEPTPLW_SOURCE_INDICES_RUNS=<runs> \\",
+            "  TEPTPLW_SOURCE_INDICES_ITERATIONS=<iterations> \\",
+            "  TEPTPLW_SOURCE_INDICES_WARMUP_ITERATIONS=<warmup-iterations>",
+        ]
     if case_filter == "dual-correspondence-family":
         return [
             "make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \\",
@@ -99,6 +108,17 @@ def main() -> int:
         type=Path,
         default=None,
         help="Keep per-run compare logs here; default is a temporary directory.",
+    )
+    parser.add_argument(
+        "--rerun-target",
+        choices=("production-source-indices-block-fused-probe",),
+        default=None,
+        help="Use a named topic-local target in the summary reproduction command.",
+    )
+    parser.add_argument(
+        "--collection-profile",
+        default=None,
+        help="Optional stable collection label recorded in the summary metadata.",
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
@@ -175,12 +195,17 @@ def main() -> int:
                 f"- runs：`{args.runs}`",
                 f"- iterations：`{args.iterations}`",
                 f"- warm-up iterations：`{args.warmup_iterations}`",
+                *(
+                    [f"- collection profile：`{args.collection_profile}`"]
+                    if args.collection_profile
+                    else []
+                ),
                 raw_log_boundary,
                 "",
                 "使用 topic-local target 重新生成：",
                 "",
                 "```bash",
-                *rerun_command_lines(args.case_filter),
+                *rerun_command_lines(args.case_filter, args.rerun_target),
                 "```",
                 "",
                 table.rstrip(),

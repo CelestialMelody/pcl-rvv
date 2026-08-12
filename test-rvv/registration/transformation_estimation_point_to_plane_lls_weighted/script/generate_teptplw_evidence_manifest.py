@@ -27,6 +27,9 @@ TOPIC_DIR = SCRIPT_PATH.parents[1]
 REPO_ROOT = SCRIPT_PATH.parents[4]
 DEFAULT_DISPATCH_DIR = TOPIC_DIR / "log/board/production_dispatch_fused_abcd_ilp"
 DEFAULT_SOURCE_INDEXED_DIR = TOPIC_DIR / "log/board/production_source_indices_staged_gather"
+DEFAULT_SOURCE_INDEXED_PROBE_DIR = (
+    TOPIC_DIR / "log/board/production_source_indices_block_fused_abcd_ilp_probe"
+)
 DEFAULT_ROW_SOURCES_DIR = TOPIC_DIR / "log/board/run_board_bench_row_sources"
 DEFAULT_SOURCE_INDEXED_FAMILY_DIR = TOPIC_DIR / "log/board/run_board_bench_source_indexed_family"
 DEFAULT_SOURCE_INDEXED_FAMILY_REPEATED_DIR = TOPIC_DIR / "log/board/source_indexed_family_repeated"
@@ -450,12 +453,20 @@ def comparison_from_row(
     size = int(match.group("size"))
     row_source = ROW_SOURCE_POLICY_MAP.get(match.group("row_source"), match.group("row_source").replace("-", "_"))
     asm_info = asm.get(point_type, {})
-    if profile == "production-source-indices":
+    if profile in {
+        "production-source-indices",
+        "production-source-indices-block-fused-probe",
+    }:
         boundary = "production_dispatch_public_source_indexed"
         wrapper = "public_source_indexed_overload"
         gate = "production_source_indexed_dispatch"
         group = "production_dispatch_source_indexed"
-        title_tag = "production-source-indices"
+        if profile == "production-source-indices-block-fused-probe":
+            title_tag = "production-source-indices-block-fused-abcd-ilp-probe"
+            implementation_family = "block_fused_abcd_ilp"
+        else:
+            title_tag = "production-source-indices"
+            implementation_family = "staged_gather_compressed_tail"
         checksum_policy = "source_indexed_board_speedup_summary"
     else:
         boundary = "production_dispatch_public_full_cloud"
@@ -463,6 +474,7 @@ def comparison_from_row(
         gate = "production_full_cloud_dispatch"
         group = "production_dispatch_full_cloud"
         title_tag = "production-dispatch"
+        implementation_family = "block_fused_abcd_ilp"
         checksum_policy = "rvv_trace_final_checksum_supplemental"
     candidate_asm_boundary = asm_info.get("asm_boundary")
     candidate_rvv_instr_count = asm_info.get("rvv_instr_count")
@@ -471,7 +483,10 @@ def comparison_from_row(
         "ba_values are Std/RVV repeated board speedups from the topic-local summary.",
         "checksum and asm attribution are supplemental production-default RVV evidence from separate summary artifacts.",
     ]
-    if profile == "production-source-indices":
+    if profile in {
+        "production-source-indices",
+        "production-source-indices-block-fused-probe",
+    }:
         candidate_asm_boundary = None
         candidate_rvv_instr_count = None
         candidate_checksum = None
@@ -479,6 +494,11 @@ def comparison_from_row(
             "ba_values are Std/RVV repeated board speedups from the source-indexed summary.",
             "source-indexed-specific asm attribution is not recorded in this manifest; production-default checksum / asm paths remain supplemental source paths only.",
         ]
+        if profile == "production-source-indices-block-fused-probe":
+            notes.insert(
+                1,
+                "The RVV candidate is the Phase 031 source-indexed block-fused-abcd-ilp production probe.",
+            )
     common = {
         "boundary": boundary,
         "wrapper": wrapper,
@@ -495,6 +515,7 @@ def comparison_from_row(
         "label": f"std {title_tag}",
         "build": "std",
         **common,
+        "implementation_family": "scalar_std",
         "asm_boundary": "std_non_rvv_path_not_attributed",
         "rvv_instr_count": 0,
     }
@@ -502,6 +523,7 @@ def comparison_from_row(
         "label": f"rvv {title_tag}",
         "build": "rvv",
         **common,
+        "implementation_family": implementation_family,
         "asm_boundary": candidate_asm_boundary,
         "rvv_instr_count": candidate_rvv_instr_count,
         "checksum": candidate_checksum,
@@ -808,7 +830,11 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
         asm = parse_asm_attribution(args.asm_attribution)
         checksum = parse_checksum_validation(args.checksum_validation)
         board_env = parse_board_env(args.board_env)
-        collection = parse_collection_manifest(args.collection_manifest)
+        collection = (
+            {}
+            if args.kind == "production-source-indices-block-fused-probe"
+            else parse_collection_manifest(args.collection_manifest)
+        )
 
         if args.kind == "production-source-indices":
             title = "TEPTPLW source-indexed repeated board evidence manifest"
@@ -818,6 +844,15 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
                 "keeps the supplemental production-default RVV checksum / asm source paths "
                 "for traceability only and is a wrapper smoke for Evidence Doctor, not a "
                 "replacement for raw logs."
+            )
+        elif args.kind == "production-source-indices-block-fused-probe":
+            title = "TEPTPLW source-indexed block-fused-abcd-ilp production probe manifest"
+            summary_boundary = (
+                "Phase 031 records repeated Std/RVV timing from the real source-indexed "
+                "public dispatch after routing the RVV path to the block-fused-abcd-ilp "
+                "probe. This is production direct evidence for the bounded probe, not a "
+                "generic source-indexed adoption claim. Source-indexed-specific asm "
+                "attribution and binary identity remain incomplete."
             )
         else:
             title = "TEPTPLW production-dispatch repeated board evidence manifest"
@@ -861,8 +896,28 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
             "evidence_role": "diagnostic" if args.kind in DIAGNOSTIC_KINDS else "production_direct",
             "summary_path": repo_path(args.summary),
             "metadata": metadata,
+            **(
+                {
+                    "probe": {
+                        "name": "source_indexed_block_fused_abcd_ilp",
+                        "phase": "031-source-indexed-fused-production-probe",
+                        "collection_profile": summary_context.get("collection profile"),
+                    }
+                }
+                if args.kind == "production-source-indices-block-fused-probe"
+                else {}
+            ),
             "source_paths": {
                 "summary": repo_path(args.summary),
+                **(
+                    {
+                        "checksum_validation": repo_path(args.checksum_validation),
+                        "asm_attribution": repo_path(args.asm_attribution),
+                        "board_env": repo_path(args.board_env),
+                    }
+                    if args.kind == "production-source-indices-block-fused-probe"
+                    else {}
+                ),
                 **(
                     {
                         "checksum_validation": repo_path(args.checksum_validation),
@@ -871,9 +926,15 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
                         "collection_manifest": repo_path(args.collection_manifest),
                     }
                     if args.kind not in DIAGNOSTIC_KINDS
-                    else {
+                    and args.kind != "production-source-indices-block-fused-probe"
+                    else {}
+                ),
+                **(
+                    {
                         "raw_board_compare_log": repo_path(args.summary),
                     }
+                    if args.kind in DIAGNOSTIC_KINDS
+                    else {}
                 ),
             },
             "source_boundary_note": summary_boundary,
@@ -922,6 +983,7 @@ def main() -> int:
         choices=(
             "production-dispatch",
             "production-source-indices",
+            "production-source-indices-block-fused-probe",
             "row-sources-diagnostic",
             "source-indexed-family-diagnostic",
             "source-indexed-family-repeated",
@@ -950,6 +1012,8 @@ def main() -> int:
     if args.summary is None:
         if args.kind == "production-source-indices":
             args.summary = DEFAULT_SOURCE_INDEXED_DIR / "summary.md"
+        elif args.kind == "production-source-indices-block-fused-probe":
+            args.summary = DEFAULT_SOURCE_INDEXED_PROBE_DIR / "summary.md"
         elif args.kind == "row-sources-diagnostic":
             args.summary = DEFAULT_ROW_SOURCES_DIR / "analyze_bench_compare.log"
         elif args.kind == "source-indexed-family-diagnostic":
@@ -972,6 +1036,8 @@ def main() -> int:
     if args.output is None:
         if args.kind == "production-source-indices":
             args.output = DEFAULT_SOURCE_INDEXED_DIR / "evidence_manifest.json"
+        elif args.kind == "production-source-indices-block-fused-probe":
+            args.output = DEFAULT_SOURCE_INDEXED_PROBE_DIR / "evidence_manifest.json"
         elif args.kind == "row-sources-diagnostic":
             args.output = DEFAULT_ROW_SOURCES_DIR / "evidence_manifest.json"
         elif args.kind == "source-indexed-family-diagnostic":

@@ -1,0 +1,388 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "TEPTPLW source-indexed block-fused-abcd-ilp production probe manifest",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "governor": "performance",
+      "freq": "1600000,1600000",
+      "temperature": "thermal_zone0=40000, thermal_zone1=40000, thermal_zone2=41000, thermal_zone3=41000",
+      "vlen": "see SoC / ELF (board)"
+    },
+    "probe": {
+      "name": "source_indexed_block_fused_abcd_ilp",
+      "phase": "031-source-indexed-fused-production-probe",
+      "collection_profile": "source-indexed-block-fused-abcd-ilp-production-probe"
+    },
+    "source_paths": {
+      "summary": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md",
+      "checksum_validation": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_default_fused_abcd_ilp/checksum_validation.md",
+      "asm_attribution": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_default_fused_abcd_ilp/asm_production_symbol_attribution.md",
+      "board_env": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_default_fused_abcd_ilp/board_env_before.log"
+    },
+    "source_boundary_note": "Phase 031 records repeated Std/RVV timing from the real source-indexed public dispatch after routing the RVV path to the block-fused-abcd-ilp probe. This is production direct evidence for the bounded probe, not a generic source-indexed adoption claim. Source-indexed-specific asm attribution and binary identity remain incomplete."
+  },
+  "checks": {
+    "strict_ab": true,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "weighted lls production-dispatch source-indices pointnormal 262144",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointnormal",
+      "size": 262144,
+      "group": "production_dispatch_source_indexed",
+      "run_count": 5,
+      "ba_values": [
+        1.64,
+        1.65,
+        1.67,
+        1.37,
+        1.17
+      ],
+      "baseline": {
+        "label": "std production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "std",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "scalar_std",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "block_fused_abcd_ilp",
+        "asm_boundary": null,
+        "rvv_instr_count": null,
+        "checksum": null
+      },
+      "notes": [
+        "ba_values are Std/RVV repeated board speedups from the source-indexed summary.",
+        "The RVV candidate is the Phase 031 source-indexed block-fused-abcd-ilp production probe.",
+        "source-indexed-specific asm attribution is not recorded in this manifest; production-default checksum / asm paths remain supplemental source paths only."
+      ]
+    },
+    {
+      "name": "weighted lls production-dispatch source-indices pointnormal 65536",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointnormal",
+      "size": 65536,
+      "group": "production_dispatch_source_indexed",
+      "run_count": 5,
+      "ba_values": [
+        1.66,
+        1.74,
+        1.74,
+        1.71,
+        1.7
+      ],
+      "baseline": {
+        "label": "std production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "std",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "scalar_std",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "block_fused_abcd_ilp",
+        "asm_boundary": null,
+        "rvv_instr_count": null,
+        "checksum": null
+      },
+      "notes": [
+        "ba_values are Std/RVV repeated board speedups from the source-indexed summary.",
+        "The RVV candidate is the Phase 031 source-indexed block-fused-abcd-ilp production probe.",
+        "source-indexed-specific asm attribution is not recorded in this manifest; production-default checksum / asm paths remain supplemental source paths only."
+      ]
+    },
+    {
+      "name": "weighted lls production-dispatch source-indices pointxyz-to-pointnormal 262144",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointxyz-to-pointnormal",
+      "size": 262144,
+      "group": "production_dispatch_source_indexed",
+      "run_count": 5,
+      "ba_values": [
+        1.65,
+        1.06,
+        1.71,
+        1.54,
+        1.29
+      ],
+      "baseline": {
+        "label": "std production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "std",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "scalar_std",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "block_fused_abcd_ilp",
+        "asm_boundary": null,
+        "rvv_instr_count": null,
+        "checksum": null
+      },
+      "notes": [
+        "ba_values are Std/RVV repeated board speedups from the source-indexed summary.",
+        "The RVV candidate is the Phase 031 source-indexed block-fused-abcd-ilp production probe.",
+        "source-indexed-specific asm attribution is not recorded in this manifest; production-default checksum / asm paths remain supplemental source paths only."
+      ]
+    },
+    {
+      "name": "weighted lls production-dispatch source-indices pointxyz-to-pointnormal 65536",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointxyz-to-pointnormal",
+      "size": 65536,
+      "group": "production_dispatch_source_indexed",
+      "run_count": 5,
+      "ba_values": [
+        1.62,
+        1.64,
+        1.68,
+        1.64,
+        1.59
+      ],
+      "baseline": {
+        "label": "std production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "std",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "scalar_std",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "block_fused_abcd_ilp",
+        "asm_boundary": null,
+        "rvv_instr_count": null,
+        "checksum": null
+      },
+      "notes": [
+        "ba_values are Std/RVV repeated board speedups from the source-indexed summary.",
+        "The RVV candidate is the Phase 031 source-indexed block-fused-abcd-ilp production probe.",
+        "source-indexed-specific asm attribution is not recorded in this manifest; production-default checksum / asm paths remain supplemental source paths only."
+      ]
+    },
+    {
+      "name": "weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal 262144",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointxyz-to-pointxyzinormal",
+      "size": 262144,
+      "group": "production_dispatch_source_indexed",
+      "run_count": 5,
+      "ba_values": [
+        1.49,
+        1.77,
+        1.79,
+        1.69,
+        1.41
+      ],
+      "baseline": {
+        "label": "std production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "std",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "scalar_std",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "block_fused_abcd_ilp",
+        "asm_boundary": null,
+        "rvv_instr_count": null,
+        "checksum": null
+      },
+      "notes": [
+        "ba_values are Std/RVV repeated board speedups from the source-indexed summary.",
+        "The RVV candidate is the Phase 031 source-indexed block-fused-abcd-ilp production probe.",
+        "source-indexed-specific asm attribution is not recorded in this manifest; production-default checksum / asm paths remain supplemental source paths only."
+      ]
+    },
+    {
+      "name": "weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal 65536",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointxyz-to-pointxyzinormal",
+      "size": 65536,
+      "group": "production_dispatch_source_indexed",
+      "run_count": 5,
+      "ba_values": [
+        1.69,
+        1.69,
+        1.75,
+        1.7,
+        1.68
+      ],
+      "baseline": {
+        "label": "std production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "std",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "scalar_std",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production-source-indices-block-fused-abcd-ilp-probe",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_source_indexed",
+        "wrapper": "public_source_indexed_overload",
+        "row_source": "source_indexed",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "source_indexed_board_speedup_summary",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_source_indexed_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "implementation_family": "block_fused_abcd_ilp",
+        "asm_boundary": null,
+        "rvv_instr_count": null,
+        "checksum": null
+      },
+      "notes": [
+        "ba_values are Std/RVV repeated board speedups from the source-indexed summary.",
+        "The RVV candidate is the Phase 031 source-indexed block-fused-abcd-ilp production probe.",
+        "source-indexed-specific asm attribution is not recorded in this manifest; production-default checksum / asm paths remain supplemental source paths only."
+      ]
+    }
+  ]
+}
