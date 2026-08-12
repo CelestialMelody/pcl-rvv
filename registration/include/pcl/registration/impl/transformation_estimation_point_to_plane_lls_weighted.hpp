@@ -43,6 +43,7 @@
 #include <pcl/cloud_iterator.h>
 #include <pcl/point_types.h>
 #include <pcl/rvv_point_traits.h>
+#include <pcl/types.h>
 
 #include <algorithm>
 #include <cmath>
@@ -63,6 +64,19 @@ struct PointToPlaneLLSWeightedFullCloudStats {
   std::size_t accepted_points = 0;
   bool used_rvv = false;
 };
+
+inline void
+setPointToPlaneLLSWeightedStats(PointToPlaneLLSWeightedFullCloudStats* stats,
+                                const std::size_t input_points,
+                                const std::size_t accepted_points,
+                                const bool used_rvv)
+{
+  if (!stats)
+    return;
+  stats->input_points = input_points;
+  stats->accepted_points = accepted_points;
+  stats->used_rvv = used_rvv;
+}
 
 struct PointToPlaneLLSWeightedNormalEquation {
   Eigen::Matrix<double, 6, 6> ata = Eigen::Matrix<double, 6, 6>::Zero();
@@ -179,6 +193,33 @@ buildPointToPlaneLLSWeightedFullCloudStd(
   return eq;
 }
 
+template <typename PointSource, typename PointTarget>
+inline PointToPlaneLLSWeightedNormalEquation
+buildPointToPlaneLLSWeightedSourceIndicesStd(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::Indices& indices_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    const std::vector<float>& weights,
+    PointToPlaneLLSWeightedFullCloudStats* stats = nullptr)
+{
+  PointToPlaneLLSWeightedNormalEquation eq;
+  const std::size_t nr_points =
+      std::min(std::min(indices_src.size(), cloud_tgt.size()), weights.size());
+  for (std::size_t row = 0; row < nr_points; ++row) {
+    if (indices_src[row] < 0)
+      continue;
+    const auto source_index = static_cast<std::size_t>(indices_src[row]);
+    if (source_index >= cloud_src.size())
+      continue;
+    if (!isFinitePointToPlaneLLSWeightedRow(cloud_src[source_index], cloud_tgt[row]))
+      continue;
+    accumulatePointToPlaneLLSWeightedRow(
+        cloud_src[source_index], cloud_tgt[row], weights[row], eq);
+  }
+  setPointToPlaneLLSWeightedStats(stats, nr_points, eq.accepted_points, false);
+  return eq;
+}
+
 template <typename Scalar>
 inline void
 constructPointToPlaneLLSWeightedTransformationMatrix(
@@ -241,6 +282,20 @@ canUsePointToPlaneLLSWeightedFullCloudRVV(const std::size_t nr_points,
          nr_points <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointTarget>();
 }
 
+template <typename PointSource, typename PointTarget>
+inline bool
+canUsePointToPlaneLLSWeightedSourceIndicesRVV(const std::size_t source_points,
+                                             const std::size_t index_points,
+                                             const std::size_t target_points,
+                                             const std::size_t weights_size,
+                                             const std::size_t vlmax)
+{
+  return target_points == index_points && weights_size == index_points &&
+         index_points >= 64 && vlmax <= 64 &&
+         source_points <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointSource>() &&
+         target_points <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointTarget>();
+}
+
 #if defined(__RVV10__)
 inline vbool32_t
 finitePointToPlaneLLSWeightedF32M1(vfloat32m1_t value, const std::size_t vl)
@@ -255,6 +310,170 @@ reducePointToPlaneLLSWeightedSumF32M1(vfloat32m1_t value, const std::size_t vl)
   const vfloat32m1_t zero = __riscv_vfmv_v_f_f32m1(0.0f, vl);
   const vfloat32m1_t reduced = __riscv_vfredosum_vs_f32m1_f32m1(value, zero, vl);
   return __riscv_vfmv_f_s_f32m1_f32(reduced);
+}
+
+inline vbool16_t
+finitePointToPlaneLLSWeightedF32M2(vfloat32m2_t value, const std::size_t vl)
+{
+  const vfloat32m2_t abs_value = __riscv_vfabs_v_f32m2(value, vl);
+  return __riscv_vmfle_vf_f32m2_b16(abs_value, std::numeric_limits<float>::max(), vl);
+}
+
+inline void
+accumulatePointToPlaneLLSWeightedCompressedRowsF32M2(
+    vfloat32m2_t a,
+    vfloat32m2_t b,
+    vfloat32m2_t c,
+    vfloat32m2_t d,
+    vfloat32m2_t nx,
+    vfloat32m2_t ny,
+    vfloat32m2_t nz,
+    vbool16_t keep,
+    const std::size_t vl,
+    PointToPlaneLLSWeightedNormalEquation& eq)
+{
+  alignas(16) float a_buf[64];
+  alignas(16) float b_buf[64];
+  alignas(16) float c_buf[64];
+  alignas(16) float d_buf[64];
+  alignas(16) float nx_buf[64];
+  alignas(16) float ny_buf[64];
+  alignas(16) float nz_buf[64];
+  const std::size_t kept = __riscv_vcpop_m_b16(keep, vl);
+  if (kept == 0)
+    return;
+
+  __riscv_vse32_v_f32m2(a_buf, __riscv_vcompress_vm_f32m2(a, keep, vl), kept);
+  __riscv_vse32_v_f32m2(b_buf, __riscv_vcompress_vm_f32m2(b, keep, vl), kept);
+  __riscv_vse32_v_f32m2(c_buf, __riscv_vcompress_vm_f32m2(c, keep, vl), kept);
+  __riscv_vse32_v_f32m2(d_buf, __riscv_vcompress_vm_f32m2(d, keep, vl), kept);
+  __riscv_vse32_v_f32m2(nx_buf, __riscv_vcompress_vm_f32m2(nx, keep, vl), kept);
+  __riscv_vse32_v_f32m2(ny_buf, __riscv_vcompress_vm_f32m2(ny, keep, vl), kept);
+  __riscv_vse32_v_f32m2(nz_buf, __riscv_vcompress_vm_f32m2(nz, keep, vl), kept);
+
+  for (std::size_t lane = 0; lane < kept; ++lane) {
+    const double a_d = a_buf[lane];
+    const double b_d = b_buf[lane];
+    const double c_d = c_buf[lane];
+    const double nx_d = nx_buf[lane];
+    const double ny_d = ny_buf[lane];
+    const double nz_d = nz_buf[lane];
+    const double d_d = d_buf[lane];
+
+    eq.ata.coeffRef(0) += a_d * a_d;
+    eq.ata.coeffRef(1) += a_d * b_d;
+    eq.ata.coeffRef(2) += a_d * c_d;
+    eq.ata.coeffRef(3) += a_d * nx_d;
+    eq.ata.coeffRef(4) += a_d * ny_d;
+    eq.ata.coeffRef(5) += a_d * nz_d;
+    eq.ata.coeffRef(7) += b_d * b_d;
+    eq.ata.coeffRef(8) += b_d * c_d;
+    eq.ata.coeffRef(9) += b_d * nx_d;
+    eq.ata.coeffRef(10) += b_d * ny_d;
+    eq.ata.coeffRef(11) += b_d * nz_d;
+    eq.ata.coeffRef(14) += c_d * c_d;
+    eq.ata.coeffRef(15) += c_d * nx_d;
+    eq.ata.coeffRef(16) += c_d * ny_d;
+    eq.ata.coeffRef(17) += c_d * nz_d;
+    eq.ata.coeffRef(21) += nx_d * nx_d;
+    eq.ata.coeffRef(22) += nx_d * ny_d;
+    eq.ata.coeffRef(23) += nx_d * nz_d;
+    eq.ata.coeffRef(28) += ny_d * ny_d;
+    eq.ata.coeffRef(29) += ny_d * nz_d;
+    eq.ata.coeffRef(35) += nz_d * nz_d;
+
+    eq.atb.coeffRef(0) += a_d * d_d;
+    eq.atb.coeffRef(1) += b_d * d_d;
+    eq.atb.coeffRef(2) += c_d * d_d;
+    eq.atb.coeffRef(3) += nx_d * d_d;
+    eq.atb.coeffRef(4) += ny_d * d_d;
+    eq.atb.coeffRef(5) += nz_d * d_d;
+    ++eq.accepted_points;
+  }
+}
+
+template <typename PointSource,
+          typename PointTarget,
+          typename SrcLayout,
+          typename TgtLayout>
+inline void
+loadPointToPlaneLLSWeightedSourceIndexedVectors(
+    const std::uint8_t* source_base,
+    const std::uint32_t* source_indices,
+    const std::uint8_t* target_base,
+    const float* weights,
+    const std::size_t i,
+    const std::size_t vl,
+    vfloat32m2_t& a,
+    vfloat32m2_t& b,
+    vfloat32m2_t& c,
+    vfloat32m2_t& d,
+    vfloat32m2_t& nx,
+    vfloat32m2_t& ny,
+    vfloat32m2_t& nz,
+    vbool16_t& keep)
+{
+  constexpr std::ptrdiff_t kTargetStride = sizeof(PointTarget);
+  const vuint32m2_t source_index_vector =
+      __riscv_vle32_v_u32m2(source_indices + i, vl);
+  const vuint32m2_t source_offsets =
+      __riscv_vmul_vx_u32m2(source_index_vector, sizeof(PointSource), vl);
+
+  const auto gather_source = [&](const std::size_t offset) -> vfloat32m2_t {
+    return __riscv_vluxei32_v_f32m2(
+        reinterpret_cast<const float*>(source_base + offset), source_offsets, vl);
+  };
+  const auto load_target = [&](const std::size_t offset) -> vfloat32m2_t {
+    return __riscv_vlse32_v_f32m2(
+        reinterpret_cast<const float*>(target_base + i * sizeof(PointTarget) + offset),
+        kTargetStride,
+        vl);
+  };
+
+  const vfloat32m2_t sx = gather_source(SrcLayout::kX);
+  const vfloat32m2_t sy = gather_source(SrcLayout::kY);
+  const vfloat32m2_t sz = gather_source(SrcLayout::kZ);
+  const vfloat32m2_t dx = load_target(TgtLayout::kX);
+  const vfloat32m2_t dy = load_target(TgtLayout::kY);
+  const vfloat32m2_t dz = load_target(TgtLayout::kZ);
+  const vfloat32m2_t normal_x = load_target(TgtLayout::kNX);
+  const vfloat32m2_t normal_y = load_target(TgtLayout::kNY);
+  const vfloat32m2_t normal_z = load_target(TgtLayout::kNZ);
+  const vfloat32m2_t weight = __riscv_vle32_v_f32m2(weights + i, vl);
+
+  keep = finitePointToPlaneLLSWeightedF32M2(sx, vl);
+  keep = __riscv_vmand_mm_b16(keep, finitePointToPlaneLLSWeightedF32M2(sy, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finitePointToPlaneLLSWeightedF32M2(sz, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finitePointToPlaneLLSWeightedF32M2(dx, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finitePointToPlaneLLSWeightedF32M2(dy, vl), vl);
+  keep = __riscv_vmand_mm_b16(keep, finitePointToPlaneLLSWeightedF32M2(dz, vl), vl);
+  keep =
+      __riscv_vmand_mm_b16(keep, finitePointToPlaneLLSWeightedF32M2(normal_x, vl), vl);
+  keep =
+      __riscv_vmand_mm_b16(keep, finitePointToPlaneLLSWeightedF32M2(normal_y, vl), vl);
+  keep =
+      __riscv_vmand_mm_b16(keep, finitePointToPlaneLLSWeightedF32M2(normal_z, vl), vl);
+
+  nx = __riscv_vfmul_vv_f32m2(normal_x, weight, vl);
+  ny = __riscv_vfmul_vv_f32m2(normal_y, weight, vl);
+  nz = __riscv_vfmul_vv_f32m2(normal_z, weight, vl);
+
+  a = __riscv_vfsub_vv_f32m2(__riscv_vfmul_vv_f32m2(nz, sy, vl),
+                             __riscv_vfmul_vv_f32m2(ny, sz, vl),
+                             vl);
+  b = __riscv_vfsub_vv_f32m2(__riscv_vfmul_vv_f32m2(nx, sz, vl),
+                             __riscv_vfmul_vv_f32m2(nz, sx, vl),
+                             vl);
+  c = __riscv_vfsub_vv_f32m2(__riscv_vfmul_vv_f32m2(ny, sx, vl),
+                             __riscv_vfmul_vv_f32m2(nx, sy, vl),
+                             vl);
+
+  d = __riscv_vfmul_vv_f32m2(nx, dx, vl);
+  d = __riscv_vfadd_vv_f32m2(d, __riscv_vfmul_vv_f32m2(ny, dy, vl), vl);
+  d = __riscv_vfadd_vv_f32m2(d, __riscv_vfmul_vv_f32m2(nz, dz, vl), vl);
+  d = __riscv_vfsub_vv_f32m2(d, __riscv_vfmul_vv_f32m2(nx, sx, vl), vl);
+  d = __riscv_vfsub_vv_f32m2(d, __riscv_vfmul_vv_f32m2(ny, sy, vl), vl);
+  d = __riscv_vfsub_vv_f32m2(d, __riscv_vfmul_vv_f32m2(nz, sz, vl), vl);
 }
 
 template <typename PointSource,
@@ -538,21 +757,13 @@ buildPointToPlaneLLSWeightedFullCloudBlockRVV(
 
   const std::size_t nr_points = cloud_src.size();
   if constexpr (!SrcLayout::value || !TgtLayout::value) {
-    if (stats) {
-      stats->input_points = nr_points;
-      stats->accepted_points = 0;
-      stats->used_rvv = false;
-    }
+    setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
     return false;
   }
   else {
     if (!canUsePointToPlaneLLSWeightedFullCloudRVV<PointSource, PointTarget>(
             nr_points, cloud_tgt.size(), weights.size(), __riscv_vsetvlmax_e32m1())) {
-      if (stats) {
-        stats->input_points = nr_points;
-        stats->accepted_points = 0;
-        stats->used_rvv = false;
-      }
+      setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
       return false;
     }
 
@@ -600,6 +811,86 @@ buildPointToPlaneLLSWeightedFullCloudBlockRVV(
     return true;
   }
 }
+
+template <typename PointSource, typename PointTarget>
+inline bool
+buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::Indices& indices_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    const std::vector<float>& weights,
+    PointToPlaneLLSWeightedNormalEquation& eq,
+    PointToPlaneLLSWeightedFullCloudStats* stats = nullptr)
+{
+  using SrcLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointSource>;
+  using TgtLayout = pcl::rvv::RVVXYZNormalFloatLayout<PointTarget>;
+
+  const std::size_t nr_points = indices_src.size();
+  if constexpr (!SrcLayout::value || !TgtLayout::value) {
+    setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
+    return false;
+  }
+  else {
+    if (!canUsePointToPlaneLLSWeightedSourceIndicesRVV<PointSource, PointTarget>(
+            cloud_src.size(),
+            nr_points,
+            cloud_tgt.size(),
+            weights.size(),
+            __riscv_vsetvlmax_e32m2())) {
+      setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
+      return false;
+    }
+
+    std::vector<std::uint32_t> source_indices;
+    source_indices.reserve(nr_points);
+    for (std::size_t row = 0; row < nr_points; ++row) {
+      if (indices_src[row] < 0) {
+        setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
+        return false;
+      }
+      const auto source_index = static_cast<std::size_t>(indices_src[row]);
+      if (source_index >= cloud_src.size()) {
+        setPointToPlaneLLSWeightedStats(stats, nr_points, 0, false);
+        return false;
+      }
+      source_indices.push_back(static_cast<std::uint32_t>(source_index));
+    }
+
+    eq = PointToPlaneLLSWeightedNormalEquation{};
+    const auto* source_base =
+        reinterpret_cast<const std::uint8_t*>(cloud_src.points.data());
+    const auto* target_base =
+        reinterpret_cast<const std::uint8_t*>(cloud_tgt.points.data());
+    for (std::size_t i = 0; i < nr_points;) {
+      const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
+      vfloat32m2_t a, b, c, d, nx, ny, nz;
+      vbool16_t keep;
+      loadPointToPlaneLLSWeightedSourceIndexedVectors<
+          PointSource,
+          PointTarget,
+          SrcLayout,
+          TgtLayout>(source_base,
+                     source_indices.data(),
+                     target_base,
+                     weights.data(),
+                     i,
+                     vl,
+                     a,
+                     b,
+                     c,
+                     d,
+                     nx,
+                     ny,
+                     nz,
+                     keep);
+      accumulatePointToPlaneLLSWeightedCompressedRowsF32M2(
+          a, b, c, d, nx, ny, nz, keep, vl, eq);
+      i += vl;
+    }
+    setPointToPlaneLLSWeightedStats(stats, nr_points, eq.accepted_points, true);
+    return true;
+  }
+}
 #endif // __RVV10__
 
 template <typename PointSource, typename PointTarget>
@@ -616,6 +907,25 @@ buildPointToPlaneLLSWeightedFullCloudDefault(
     return eq;
 #endif
   return buildPointToPlaneLLSWeightedFullCloudStd(cloud_src, cloud_tgt, weights, stats);
+}
+
+template <typename PointSource, typename PointTarget>
+inline PointToPlaneLLSWeightedNormalEquation
+buildPointToPlaneLLSWeightedSourceIndicesDefault(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::Indices& indices_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    const std::vector<float>& weights,
+    PointToPlaneLLSWeightedFullCloudStats* stats = nullptr)
+{
+#if defined(__RVV10__)
+  PointToPlaneLLSWeightedNormalEquation eq;
+  if (buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+          cloud_src, indices_src, cloud_tgt, weights, eq, stats))
+    return eq;
+#endif
+  return buildPointToPlaneLLSWeightedSourceIndicesStd(
+      cloud_src, indices_src, cloud_tgt, weights, stats);
 }
 
 template <typename PointSource, typename PointTarget, typename Scalar>
@@ -637,6 +947,35 @@ estimatePointToPlaneLLSWeightedFullCloudRVV(
   return false;
 #else
   (void)cloud_src;
+  (void)cloud_tgt;
+  (void)weights;
+  (void)transformation_matrix;
+  return false;
+#endif
+}
+
+template <typename PointSource, typename PointTarget, typename Scalar>
+inline bool
+estimatePointToPlaneLLSWeightedSourceIndicesRVV(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::Indices& indices_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    const std::vector<float>& weights,
+    Eigen::Matrix<Scalar, 4, 4>& transformation_matrix)
+{
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<Scalar, float>) {
+    PointToPlaneLLSWeightedNormalEquation eq;
+    if (!buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+            cloud_src, indices_src, cloud_tgt, weights, eq))
+      return false;
+    solvePointToPlaneLLSWeightedNormalEquation(eq, transformation_matrix);
+    return true;
+  }
+  return false;
+#else
+  (void)cloud_src;
+  (void)indices_src;
   (void)cloud_tgt;
   (void)weights;
   (void)transformation_matrix;
@@ -712,6 +1051,19 @@ TransformationEstimationPointToPlaneLLSWeighted<PointSource, PointTarget, Scalar
               "correspondences! Use setWeights () to set them.\n");
     return;
   }
+
+#if defined(__RVV10__)
+  // The indexed fast path is limited to valid source-index rows with contiguous
+  // weights. It keeps target rows sequential and falls back to the original
+  // iterator path on layout, size, VLEN, Scalar, or index-gate misses.
+  if constexpr (std::is_same_v<Scalar, float>) {
+    if (detail::estimatePointToPlaneLLSWeightedSourceIndicesRVV<
+            PointSource,
+            PointTarget,
+            Scalar>(cloud_src, indices_src, cloud_tgt, weights_, transformation_matrix))
+      return;
+  }
+#endif // defined(__RVV10__)
 
   ConstCloudIterator<PointSource> source_it(cloud_src, indices_src);
   ConstCloudIterator<PointTarget> target_it(cloud_tgt);

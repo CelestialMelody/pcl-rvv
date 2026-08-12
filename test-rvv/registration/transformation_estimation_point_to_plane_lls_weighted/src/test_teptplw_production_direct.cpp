@@ -207,6 +207,227 @@ TEST(TransformationEstimationPointToPlaneLLSWeighted,
                 pcl::PointNormal>(kMaxRows + 1, kMaxRows + 1, kMaxRows + 1, 64)));
 }
 
+// production direct：真实 source-indexed public overload 使用 source_indices[k]、
+// target[k] 和 weights_[k]。RVV build 应命中 source gather + target stride helper。
+TEST(TransformationEstimationPointToPlaneLLSWeighted,
+     ProductionSourceIndexedPublicOverloadMatchesStdWithinBudget)
+{
+  const auto source = makeSurfaceCloud(32, 0.10f);
+  const auto target = makeTargetCloud(source);
+  const pcl::Indices source_indices = makeSourceIndices(source.size());
+  const std::vector<float> weights = makeWeights(source_indices.size());
+
+  pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+      pcl::PointNormal,
+      pcl::PointNormal>
+      estimator;
+  estimator.setCorrespondenceWeights(weights);
+  Eigen::Matrix4f public_matrix = Eigen::Matrix4f::Identity();
+  estimator.estimateRigidTransformation(
+      source, source_indices, target, public_matrix);
+
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats std_stats;
+  const auto std_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStd(
+          source, source_indices, target, weights, &std_stats);
+  expectMatrixNear(public_matrix, solveProductionEquation(std_eq), 3e-3f);
+}
+
+// production direct normal-equation：比 public matrix 更早捕获 source index
+// staging、gather、finite mask 或 weight 语义回归。
+TEST(TransformationEstimationPointToPlaneLLSWeighted,
+     ProductionSourceIndexedNormalEquationMatchesStdWithinBudget)
+{
+  const auto source = makeSurfaceCloud(32, 0.10f);
+  const auto target = makeTargetCloud(source);
+  const pcl::Indices source_indices = makeSourceIndices(source.size());
+  const std::vector<float> weights = makeWeights(source_indices.size());
+
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats std_stats;
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats candidate_stats;
+  const auto std_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStd(
+          source, source_indices, target, weights, &std_stats);
+  const auto candidate_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesDefault(
+          source, source_indices, target, weights, &candidate_stats);
+
+  EXPECT_EQ(candidate_stats.input_points, std_stats.input_points);
+  EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(candidate_stats.used_rvv);
+#else
+  EXPECT_FALSE(candidate_stats.used_rvv);
+#endif
+  expectProductionEquationWithinBudget(candidate_eq, std_eq, 4e-1, 3e-5, 4e-1, 3e-5);
+  expectMatrixNear(solveProductionEquation(candidate_eq),
+                   solveProductionEquation(std_eq),
+                   3e-3f);
+}
+
+// production source-indexed fallback：小规模输入不进入 indexed RVV helper，保持原
+// iterator 标量路径。
+TEST(TransformationEstimationPointToPlaneLLSWeighted,
+     ProductionSourceIndexedSmallInputFallsBackToScalar)
+{
+  const auto source = makeSurfaceCloud(3, 0.30f);
+  const auto target = makeTargetCloud(source);
+  const pcl::Indices source_indices = makeSourceIndices(source.size());
+  const std::vector<float> weights = makeWeights(source_indices.size());
+
+  pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+      pcl::PointNormal,
+      pcl::PointNormal>
+      estimator;
+  estimator.setCorrespondenceWeights(weights);
+  Eigen::Matrix4f public_matrix = Eigen::Matrix4f::Identity();
+  estimator.estimateRigidTransformation(
+      source, source_indices, target, public_matrix);
+
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats stats;
+  const auto default_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesDefault(
+          source, source_indices, target, weights, &stats);
+  EXPECT_FALSE(stats.used_rvv);
+  expectMatrixNear(public_matrix, solveProductionEquation(default_eq), 1e-3f);
+}
+
+// production source-indexed gate：source cloud size、index count、target count、
+// weights、VLEN 和 byte-offset predicate 必须全部满足。
+TEST(TransformationEstimationPointToPlaneLLSWeighted,
+     ProductionSourceIndexedPredicateGatesAreNarrow)
+{
+  constexpr std::size_t kMaxRows =
+      std::numeric_limits<std::uint32_t>::max() / sizeof(pcl::PointNormal);
+  EXPECT_TRUE((prod_detail::canUsePointToPlaneLLSWeightedSourceIndicesRVV<
+               pcl::PointXYZ,
+               pcl::PointXYZINormal>(64, 64, 64, 64, 64)));
+  EXPECT_FALSE((prod_detail::canUsePointToPlaneLLSWeightedSourceIndicesRVV<
+                pcl::PointNormal,
+                pcl::PointNormal>(64, 63, 63, 63, 64)));
+  EXPECT_FALSE((prod_detail::canUsePointToPlaneLLSWeightedSourceIndicesRVV<
+                pcl::PointNormal,
+                pcl::PointNormal>(64, 64, 63, 64, 64)));
+  EXPECT_FALSE((prod_detail::canUsePointToPlaneLLSWeightedSourceIndicesRVV<
+                pcl::PointNormal,
+                pcl::PointNormal>(64, 64, 64, 63, 64)));
+  EXPECT_FALSE((prod_detail::canUsePointToPlaneLLSWeightedSourceIndicesRVV<
+                pcl::PointNormal,
+                pcl::PointNormal>(64, 64, 64, 64, 65)));
+  EXPECT_FALSE((prod_detail::canUsePointToPlaneLLSWeightedSourceIndicesRVV<
+                pcl::PointNormal,
+                pcl::PointNormal>(kMaxRows + 1, 64, 64, 64, 64)));
+}
+
+#ifdef __RVV10__
+// production source-indexed gate：非法 source index 不能进入 gather。这里不声明
+// public API 的非法 index 合同，只保护 RVV helper 的 pre-gather gate。
+TEST(TransformationEstimationPointToPlaneLLSWeighted,
+     ProductionSourceIndexedInvalidIndexRejectsRVVBeforeGather)
+{
+  const auto source = makeSurfaceCloud(32, 0.10f);
+  const auto target = makeTargetCloud(source);
+  const std::vector<float> weights = makeWeights(source.size());
+
+  auto negative_index = makeSourceIndices(source.size());
+  negative_index[0] = -1;
+  prod_detail::PointToPlaneLLSWeightedNormalEquation eq;
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats stats;
+  EXPECT_FALSE(prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+      source, negative_index, target, weights, eq, &stats));
+  EXPECT_EQ(stats.input_points, negative_index.size());
+  EXPECT_EQ(stats.accepted_points, 0u);
+  EXPECT_FALSE(stats.used_rvv);
+
+  auto out_of_range_index = makeSourceIndices(source.size());
+  out_of_range_index[1] = static_cast<int>(source.size());
+  stats = prod_detail::PointToPlaneLLSWeightedFullCloudStats{};
+  EXPECT_FALSE(prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+      source, out_of_range_index, target, weights, eq, &stats));
+  EXPECT_EQ(stats.input_points, out_of_range_index.size());
+  EXPECT_EQ(stats.accepted_points, 0u);
+  EXPECT_FALSE(stats.used_rvv);
+}
+#endif
+
+// production source-indexed generic source：PointXYZ source 只提供 xyz 字段，
+// target normal 仍来自 PointNormal，indices 仍按 source cloud 下标解释。
+TEST(TransformationEstimationPointToPlaneLLSWeighted,
+     ProductionSourceIndexedPointXYZSourceMatchesStdWithinBudget)
+{
+  const auto source_normal = makeSurfaceCloud(32, 0.10f);
+  const auto source = copySourceAsXYZ(source_normal);
+  const auto target = makeTargetCloud(source_normal);
+  const pcl::Indices source_indices = makeSourceIndices(source.size());
+  const std::vector<float> weights = makeWeights(source_indices.size());
+
+  pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+      pcl::PointXYZ,
+      pcl::PointNormal>
+      estimator;
+  estimator.setCorrespondenceWeights(weights);
+  Eigen::Matrix4f public_matrix = Eigen::Matrix4f::Identity();
+  estimator.estimateRigidTransformation(
+      source, source_indices, target, public_matrix);
+
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats std_stats;
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats candidate_stats;
+  const auto std_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStd(
+          source, source_indices, target, weights, &std_stats);
+  const auto candidate_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesDefault(
+          source, source_indices, target, weights, &candidate_stats);
+
+  EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(candidate_stats.used_rvv);
+#else
+  EXPECT_FALSE(candidate_stats.used_rvv);
+#endif
+  expectProductionEquationWithinBudget(candidate_eq, std_eq, 4e-1, 3e-5, 4e-1, 3e-5);
+  expectMatrixNear(public_matrix, solveProductionEquation(std_eq), 3e-3f);
+}
+
+// production source-indexed generic target：target 使用 PointXYZINormal 时，
+// source index stream 仍只选择 source 行，额外 intensity 字段不参与公式。
+TEST(TransformationEstimationPointToPlaneLLSWeighted,
+     ProductionSourceIndexedPointXYZToPointXYZINormalMatchesStdWithinBudget)
+{
+  const auto source_normal = makeSurfaceCloud(32, 0.10f);
+  const auto source = copySourceAsXYZ(source_normal);
+  const auto target = copyTargetAsXYZINormal(makeTargetCloud(source_normal));
+  const pcl::Indices source_indices = makeSourceIndices(source.size());
+  const std::vector<float> weights = makeWeights(source_indices.size());
+
+  pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+      pcl::PointXYZ,
+      pcl::PointXYZINormal>
+      estimator;
+  estimator.setCorrespondenceWeights(weights);
+  Eigen::Matrix4f public_matrix = Eigen::Matrix4f::Identity();
+  estimator.estimateRigidTransformation(
+      source, source_indices, target, public_matrix);
+
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats std_stats;
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats candidate_stats;
+  const auto std_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStd(
+          source, source_indices, target, weights, &std_stats);
+  const auto candidate_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesDefault(
+          source, source_indices, target, weights, &candidate_stats);
+
+  EXPECT_EQ(candidate_stats.accepted_points, std_stats.accepted_points);
+#ifdef __RVV10__
+  EXPECT_TRUE(candidate_stats.used_rvv);
+#else
+  EXPECT_FALSE(candidate_stats.used_rvv);
+#endif
+  expectProductionEquationWithinBudget(candidate_eq, std_eq, 4e-1, 3e-5, 4e-1, 3e-5);
+  expectMatrixNear(public_matrix, solveProductionEquation(std_eq), 3e-3f);
+}
+
 // production generic source：PointXYZ source 只提供 xyz 字段，target normal 仍来自
 // PointNormal。这个 public overload 应命中泛型 source layout gate。
 TEST(TransformationEstimationPointToPlaneLLSWeighted,

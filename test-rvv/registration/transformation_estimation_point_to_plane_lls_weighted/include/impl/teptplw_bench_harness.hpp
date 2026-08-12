@@ -148,6 +148,15 @@ normal_equation_checksum(const NormalEquationLike& eq)
   return checksum;
 }
 
+inline double
+solved_normal_equation_checksum(const diag::NormalEquation& eq)
+{
+  // full-estimate 与 component no-solve 对照时，full 路径也保留 normal-equation
+  // sink，再额外 sink solve 后的 matrix，减少 checksum 口径差异带来的误读。
+  const Eigen::Matrix4f matrix = diag::solve_normal_equation(eq);
+  return normal_equation_checksum(eq) + diag::matrix_checksum(matrix);
+}
+
 template <typename Fn>
 BenchResult
 run_case(const std::string& name, const int iterations, Fn&& fn)
@@ -211,6 +220,23 @@ run_public_full_cloud_weighted(
   estimator.setCorrespondenceWeights(weights);
   Eigen::Matrix4f matrix = Eigen::Matrix4f::Identity();
   estimator.estimateRigidTransformation(source, target, matrix);
+  return diag::matrix_checksum(matrix);
+}
+
+template <typename PointSource, typename PointTarget>
+double
+run_public_source_indices_weighted(
+    pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<PointSource,
+                                                                        PointTarget>&
+        estimator,
+    const pcl::PointCloud<PointSource>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<PointTarget>& target,
+    const std::vector<float>& weights)
+{
+  estimator.setCorrespondenceWeights(weights);
+  Eigen::Matrix4f matrix = Eigen::Matrix4f::Identity();
+  estimator.estimateRigidTransformation(source, source_indices, target, matrix);
   return diag::matrix_checksum(matrix);
 }
 

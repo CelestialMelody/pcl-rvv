@@ -7,6 +7,7 @@
 #pragma once
 
 #include "teptplw_candidate_full_cloud.hpp"
+#include "teptplw_candidate_index_pair_family.hpp"
 #include "teptplw_candidate_row_sources.hpp"
 
 namespace pcl::registration::rvv_te_pt2plane_lls_weighted_diag {
@@ -265,6 +266,30 @@ estimate_candidate_source_indices(const pcl::PointCloud<pcl::PointNormal>& sourc
 }
 
 inline Matrix4f
+estimate_candidate_source_indices_block_reduction(
+    const pcl::PointCloud<pcl::PointNormal>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<pcl::PointNormal>& target,
+    const std::vector<float>& weights,
+    AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(accumulate_candidate_source_indices_block_reduction(
+      source, source_indices, target, weights, stats));
+}
+
+inline Matrix4f
+estimate_candidate_source_indices_block_fused_abcd_ilp(
+    const pcl::PointCloud<pcl::PointNormal>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<pcl::PointNormal>& target,
+    const std::vector<float>& weights,
+    AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(accumulate_candidate_source_indices_block_fused_abcd_ilp(
+      source, source_indices, target, weights, stats));
+}
+
+inline Matrix4f
 estimate_std_dual_indices(const pcl::PointCloud<pcl::PointNormal>& source,
                           const pcl::Indices& source_indices,
                           const pcl::PointCloud<pcl::PointNormal>& target,
@@ -289,6 +314,33 @@ estimate_candidate_dual_indices(const pcl::PointCloud<pcl::PointNormal>& source,
 }
 
 inline Matrix4f
+estimate_candidate_dual_indices_block_reduction(
+    const pcl::PointCloud<pcl::PointNormal>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<pcl::PointNormal>& target,
+    const pcl::Indices& target_indices,
+    const std::vector<float>& weights,
+    AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(accumulate_candidate_dual_indices_block_reduction(
+      source, source_indices, target, target_indices, weights, stats));
+}
+
+inline Matrix4f
+estimate_candidate_dual_indices_block_fused_abcd_ilp(
+    const pcl::PointCloud<pcl::PointNormal>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<pcl::PointNormal>& target,
+    const pcl::Indices& target_indices,
+    const std::vector<float>& weights,
+    AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(
+      accumulate_candidate_dual_indices_block_fused_abcd_ilp(
+          source, source_indices, target, target_indices, weights, stats));
+}
+
+inline Matrix4f
 estimate_std_correspondences(const pcl::PointCloud<pcl::PointNormal>& source,
                              const pcl::PointCloud<pcl::PointNormal>& target,
                              const pcl::Correspondences& correspondences,
@@ -306,6 +358,29 @@ estimate_candidate_correspondences(const pcl::PointCloud<pcl::PointNormal>& sour
 {
   return solve_normal_equation(
       accumulate_candidate_correspondences(source, target, correspondences, stats));
+}
+
+inline Matrix4f
+estimate_candidate_correspondences_block_reduction(
+    const pcl::PointCloud<pcl::PointNormal>& source,
+    const pcl::PointCloud<pcl::PointNormal>& target,
+    const pcl::Correspondences& correspondences,
+    AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(accumulate_candidate_correspondences_block_reduction(
+      source, target, correspondences, stats));
+}
+
+inline Matrix4f
+estimate_candidate_correspondences_block_fused_abcd_ilp(
+    const pcl::PointCloud<pcl::PointNormal>& source,
+    const pcl::PointCloud<pcl::PointNormal>& target,
+    const pcl::Correspondences& correspondences,
+    AccumulationStats* stats = nullptr)
+{
+  return solve_normal_equation(
+      accumulate_candidate_correspondences_block_fused_abcd_ilp(
+          source, target, correspondences, stats));
 }
 
 } // namespace pcl::registration::rvv_te_pt2plane_lls_weighted_diag

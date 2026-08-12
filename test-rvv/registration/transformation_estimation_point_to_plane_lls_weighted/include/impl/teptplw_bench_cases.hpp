@@ -100,6 +100,56 @@ collect_bench_results(const BenchOptions& options)
       continue;
     }
 
+    if (options.case_filter == "production-source-indices") {
+      const pcl::Indices source_indices = diag::make_source_indices(source.size());
+
+      pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+          pcl::PointNormal,
+          pcl::PointNormal>
+          pointnormal_estimator;
+      results.push_back(run_case(
+          "weighted lls production-dispatch source-indices pointnormal " +
+              std::to_string(n),
+          options.iterations,
+          [&]() {
+            return run_public_source_indices_weighted(
+                pointnormal_estimator, source, source_indices, target, weights);
+          }));
+
+      const auto source_xyz = diag::copy_source_as_xyz(source);
+      pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+          pcl::PointXYZ,
+          pcl::PointNormal>
+          pointxyz_pointnormal_estimator;
+      results.push_back(run_case(
+          "weighted lls production-dispatch source-indices pointxyz-to-pointnormal " +
+              std::to_string(n),
+          options.iterations,
+          [&]() {
+            return run_public_source_indices_weighted(
+                pointxyz_pointnormal_estimator, source_xyz, source_indices, target, weights);
+          }));
+
+      const auto target_xyzinormal = diag::copy_target_as_xyzinormal(target);
+      pcl::registration::TransformationEstimationPointToPlaneLLSWeighted<
+          pcl::PointXYZ,
+          pcl::PointXYZINormal>
+          pointxyz_xyzinormal_estimator;
+      results.push_back(run_case(
+          "weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal " +
+              std::to_string(n),
+          options.iterations,
+          [&]() {
+            return run_public_source_indices_weighted(pointxyz_xyzinormal_estimator,
+                                                     source_xyz,
+                                                     source_indices,
+                                                     target_xyzinormal,
+                                                     weights);
+          }));
+
+      continue;
+    }
+
     if (options.case_filter == "production-shaped-fused-formula") {
       results.push_back(run_case(
           "weighted lls production-shaped full-cloud block-baseline pointnormal " +
@@ -245,6 +295,181 @@ collect_bench_results(const BenchOptions& options)
             return diag::matrix_checksum(matrix) +
                    static_cast<double>(stats.accepted_points) * 1e-6;
           }));
+      continue;
+    }
+
+    if (options.case_filter == "source-indexed-family") {
+      const pcl::Indices source_indices = diag::make_source_indices(source.size());
+
+      results.push_back(run_case(
+          "weighted lls source-indexed-family staged-gather pointnormal " +
+              std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const diag::NormalEquation eq = diag::accumulate_candidate_source_indices(
+                source, source_indices, target, weights, &stats);
+            return solved_normal_equation_checksum(eq);
+          }));
+
+      results.push_back(run_case(
+          "weighted lls source-indexed-family block-baseline pointnormal " +
+              std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const diag::NormalEquation eq =
+                diag::accumulate_candidate_source_indices_block_reduction(
+                    source, source_indices, target, weights, &stats);
+            return solved_normal_equation_checksum(eq);
+          }));
+
+      results.push_back(run_case(
+          "weighted lls source-indexed-family block-fused-abcd-ilp pointnormal " +
+              std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const diag::NormalEquation eq =
+                diag::accumulate_candidate_source_indices_block_fused_abcd_ilp(
+                    source, source_indices, target, weights, &stats);
+            return solved_normal_equation_checksum(eq);
+          }));
+
+      results.push_back(run_case(
+          "weighted lls component source-indexed-family block-baseline pointnormal no-solve " +
+              std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const diag::NormalEquation eq =
+                diag::accumulate_candidate_source_indices_block_reduction(
+                    source, source_indices, target, weights, &stats);
+            return normal_equation_checksum(eq) +
+                   static_cast<double>(stats.used_rvv ? 1 : 0) * 1e-3;
+          }));
+
+      results.push_back(run_case(
+          "weighted lls component source-indexed-family block-fused-abcd-ilp pointnormal no-solve " +
+              std::to_string(n),
+          options.iterations,
+          [&]() {
+            diag::AccumulationStats stats;
+            const diag::NormalEquation eq =
+                diag::accumulate_candidate_source_indices_block_fused_abcd_ilp(
+                    source, source_indices, target, weights, &stats);
+            return normal_equation_checksum(eq) +
+                   static_cast<double>(stats.used_rvv ? 1 : 0) * 1e-3;
+          }));
+      continue;
+    }
+
+    if (options.case_filter == "dual-correspondence-family") {
+      const pcl::Indices source_indices = diag::make_source_indices(source.size());
+      const pcl::Indices target_indices = diag::make_target_indices(source.size());
+      const pcl::Correspondences correspondences =
+          diag::make_bench_correspondences(source.size());
+
+      auto add_full_estimate_case = [&](const std::string& row_source,
+                                        const std::string& variant,
+                                        auto estimate) {
+        results.push_back(run_case(
+            "weighted lls dual-correspondence-family " + row_source + " " +
+                variant + " pointnormal " + std::to_string(n),
+            options.iterations,
+            [&]() {
+              diag::AccumulationStats stats;
+              const Eigen::Matrix4f matrix = estimate(&stats);
+              return diag::matrix_checksum(matrix) +
+                     static_cast<double>(stats.accepted_points) * 1e-6;
+            }));
+      };
+      auto add_component_case = [&](const std::string& row_source,
+                                    const std::string& variant,
+                                    auto accumulate) {
+        results.push_back(run_case(
+            "weighted lls component dual-correspondence-family " + row_source +
+                " " + variant + " pointnormal no-solve " + std::to_string(n),
+            options.iterations,
+            [&]() {
+              diag::AccumulationStats stats;
+              const diag::NormalEquation eq = accumulate(&stats);
+              return normal_equation_checksum(eq) +
+                     static_cast<double>(stats.used_rvv ? 1 : 0) * 1e-3;
+            }));
+      };
+
+      add_full_estimate_case(
+          "dual-indices",
+          "staged-gather",
+          [&](diag::AccumulationStats* stats) {
+            return diag::estimate_candidate_dual_indices(
+                source, source_indices, target, target_indices, weights, stats);
+          });
+      add_full_estimate_case(
+          "dual-indices",
+          "block-baseline",
+          [&](diag::AccumulationStats* stats) {
+            return diag::estimate_candidate_dual_indices_block_reduction(
+                source, source_indices, target, target_indices, weights, stats);
+          });
+      add_full_estimate_case(
+          "dual-indices",
+          "block-fused-abcd-ilp",
+          [&](diag::AccumulationStats* stats) {
+            return diag::estimate_candidate_dual_indices_block_fused_abcd_ilp(
+                source, source_indices, target, target_indices, weights, stats);
+          });
+      add_component_case(
+          "dual-indices",
+          "block-baseline",
+          [&](diag::AccumulationStats* stats) {
+            return diag::accumulate_candidate_dual_indices_block_reduction(
+                source, source_indices, target, target_indices, weights, stats);
+          });
+      add_component_case(
+          "dual-indices",
+          "block-fused-abcd-ilp",
+          [&](diag::AccumulationStats* stats) {
+            return diag::accumulate_candidate_dual_indices_block_fused_abcd_ilp(
+                source, source_indices, target, target_indices, weights, stats);
+          });
+
+      add_full_estimate_case(
+          "correspondences",
+          "staged-gather",
+          [&](diag::AccumulationStats* stats) {
+            return diag::estimate_candidate_correspondences(
+                source, target, correspondences, stats);
+          });
+      add_full_estimate_case(
+          "correspondences",
+          "block-baseline",
+          [&](diag::AccumulationStats* stats) {
+            return diag::estimate_candidate_correspondences_block_reduction(
+                source, target, correspondences, stats);
+          });
+      add_full_estimate_case(
+          "correspondences",
+          "block-fused-abcd-ilp",
+          [&](diag::AccumulationStats* stats) {
+            return diag::estimate_candidate_correspondences_block_fused_abcd_ilp(
+                source, target, correspondences, stats);
+          });
+      add_component_case(
+          "correspondences",
+          "block-baseline",
+          [&](diag::AccumulationStats* stats) {
+            return diag::accumulate_candidate_correspondences_block_reduction(
+                source, target, correspondences, stats);
+          });
+      add_component_case(
+          "correspondences",
+          "block-fused-abcd-ilp",
+          [&](diag::AccumulationStats* stats) {
+            return diag::accumulate_candidate_correspondences_block_fused_abcd_ilp(
+                source, target, correspondences, stats);
+          });
       continue;
     }
 
