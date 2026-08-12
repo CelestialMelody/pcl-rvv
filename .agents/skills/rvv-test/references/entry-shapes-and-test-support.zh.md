@@ -39,6 +39,9 @@ row source -> field load/gather -> finite mask -> formula -> staging/reduction -
 
 当配置解析出的测试资产中的 helper header（辅助头文件）过长，或同时包含标量 reference、RVV math、row source policy、reduction candidate、component ablation 和 bench/test wrapper 时，应优先拆成稳定聚合头和内部头文件：
 
+- 短 prompt 恢复 phase loop 时，即使用户没有显式要求“重构测试框架”，也要把 RVV test support architecture（RVV 测试支撑架构）作为完成度审计项。若当前 topic 的测试入口、helper、bench case、文档或 evidence boundary 已经难以区分 reference / diagnostic / production direct 职责，应把拆分或重构列为当前 phase 的候选未完成项。
+- 不要把某个 sibling topic（同类主题）的文件清单、缩写、目录结构或实现族机械复制过来；只继承通用职责划分和质量 bar。具体拆分应从当前 topic 的源码、测试、bench、证据和 dirty isolation 推导。
+
 - 默认偏好来自 `.agents/config/defaults.yaml` 的 `test_support` 配置：helper header 超过
   `helper_split_soft_line_limit`（默认约 800 行）时应评估拆分；超过
   `helper_split_hard_line_limit`（默认约 1000 行），或同时包含不少于

@@ -19,6 +19,8 @@
 
 用户明确限定“只写计划”“只做一个指定 target”“只修一个文件”时，限定范围覆盖默认继续规则；worker 仍要记录未完成的 phase loop 状态。
 
+短 prompt 中的“自行判断未完成项 / 下一步”必须按 topic maturity audit（主题成熟度审计）执行，而不是只寻找一个局部代码问题。若同时存在局部修补点和结构性测试 / 证据问题，先判断结构性问题是否影响后续审计清晰度；不能因为局部修复容易完成就提前 closeout。
+
 ## 阶段文档布局
 
 阶段文档属于配置解析出的 topic 测试目录，不属于通用 `.agents/knowledge/`，也不属于最终 `doc-rvv` 主题文档。默认布局为：
@@ -53,6 +55,17 @@
 10. **文档更新清单**：phase result、topic test 文档、evaluation、Handoff；production 行为只有在真实接入后才同步到 `doc-rvv`。
 
 计划不是愿望清单。每个动作都必须能在 `result.zh.md` 中回填为事实、证据路径、结论和下一步。
+
+## Topic Maturity Audit
+
+恢复已有 topic 或创建 `000-current-state-and-gaps` 阶段时，worker 必须审计四类完成度。这个审计不依赖任何特定历史 topic；历史 sibling（同类主题）只能提供候选风险和质量 bar，不能被机械照搬成实现方案。
+
+1. **production boundary**：公开入口、RVV dispatch、fallback、layout / point type / `Scalar` gate 是否清晰；未覆盖入口是否显式保持标量；test-only reference 是否没有混入 production detail；production detail helper 是否真实服务 runtime path 或明确服务生产可维护性。
+2. **RVV test support architecture**：测试支撑是否有稳定聚合入口；reference、fixtures、row source adapter、RVV math、reduction / formula candidate、assertions、bench harness / bench cases 是否按职责可审查；大型单文件、重复 helper、混合 production-direct 与 diagnostic 职责、bench/test wrapper 相互缠绕，都是可列入本阶段的工程债。
+3. **evidence and docs**：correctness、fallback、asm、bench、board summary、Evidence Doctor、evaluation、topic docs 和 remaining risks 是否一致；QEMU correctness、diagnostic bench、production-shaped bench 和 production-dispatch board evidence 是否分层；stale helper、旧风险、旧结论或未登记覆盖日志是否需要刷新。
+4. **closeout hygiene**：dirty isolation 是否只允许当前 topic 或当前 agent asset；`git diff --check`、std/RVV correctness、必要 asm / bench / board 边界是否运行或有明确不运行理由；phase result / evaluation / Handoff 是否能让下一轮短 prompt 恢复。
+
+若 test support 架构已经影响审计定位、证据边界或后续 candidate 扩展，框架化整理本身就是 unblocked next action。worker 不需要等用户显式说“重构测试框架”才把它纳入计划；但必须在 phase plan 中写清范围、保持 case 名 / bench 输出合同的策略和验证命令。
 
 ## Optimization Matrix
 

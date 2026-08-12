@@ -22,6 +22,10 @@ second-pass（第二轮筛选）或 follow-up（复筛）状态表自动选择�
 如果选中的 topic 属于 registration（配准）类，row-source family carry-over audit 只是常见的第一阶段，不是整轮默认终点；
 它应作为 phase loop 中的一个候选 phase，被放进矩阵后继续判断下一个未阻塞 phase。
 不要把一个 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
+恢复阶段时还必须做 topic maturity audit：除 production hot path 和数值 / 性能证据外，
+同时检查 RVV test support architecture、测试与 bench 文件职责、reference / diagnostic /
+production-direct 分层、文档与 evidence registry 一致性以及 closeout hygiene。发现这些结构性
+问题影响审计清晰度时，应把它们作为当前 phase 的未完成项纳入计划；用户不需要额外写“重构测试框架”。
 如果短 prompt 的目标是恢复 S0、冻结偏好或复核产物发布边界，先读 `.agents/skills/rvv-workflow/references/s0-preferences-and-recovery.zh.md`，再决定是否继续 phase loop。
 
 worker（执行者）和 reviewer（审查者）启动时先读取：
