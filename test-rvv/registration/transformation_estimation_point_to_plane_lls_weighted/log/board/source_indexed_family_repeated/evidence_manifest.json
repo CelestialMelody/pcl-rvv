@@ -1,0 +1,306 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "TEPTPLW source-indexed implementation-family repeated board diagnostic manifest",
+    "evidence_role": "diagnostic",
+    "summary_path": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/source_indexed_family_repeated/summary.md",
+    "metadata": {
+      "device": "记录在每轮 raw compare log 中",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "vlen": "see SoC / ELF (board)"
+    },
+    "source_paths": {
+      "summary": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/source_indexed_family_repeated/summary.md",
+      "raw_board_compare_log": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/source_indexed_family_repeated/summary.md"
+    },
+    "source_boundary_note": "Repeated source-indexed-family summary is converted into a diagnostic manifest. It compares staged-gather, block-baseline and block-fused-abcd-ilp test-rvv candidates under the source-indexed row source. It is pre-production diagnostic evidence and cannot be used as production direct evidence."
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "weighted lls component source-indexed-family block-baseline pointnormal no-solve 262144",
+      "case_kind": "component_ablation",
+      "evidence_role": "diagnostic",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointnormal",
+      "size": 262144,
+      "group": "source_indexed_family_repeated_block_baseline",
+      "run_count": 5,
+      "ba_values": [
+        1.0,
+        1.16,
+        1.29,
+        1.16,
+        1.27
+      ],
+      "baseline": {
+        "label": "std source-indexed-family repeated diagnostic",
+        "build": "std",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "block_baseline",
+        "solve": false,
+        "checksum_policy": "normal_equation_checksum",
+        "timer_boundary": "repeated_component_no_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "block_reduction_abcn",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv source-indexed-family repeated diagnostic",
+        "build": "rvv",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "block_baseline",
+        "solve": false,
+        "checksum_policy": "normal_equation_checksum",
+        "timer_boundary": "repeated_component_no_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "block_reduction_abcn",
+        "asm_boundary": null,
+        "rvv_instr_count": null
+      },
+      "notes": [
+        "Repeated board summary for source-indexed implementation-family carry-over.",
+        "This is still pre-production diagnostic evidence; it does not prove production dispatch.",
+        "Summary ba_values preserve run-to-run direction, but per-run Std/RVV ms and component/full delta checks require retained raw compare logs."
+      ]
+    },
+    {
+      "name": "weighted lls component source-indexed-family block-fused-abcd-ilp pointnormal no-solve 262144",
+      "case_kind": "component_ablation",
+      "evidence_role": "diagnostic",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointnormal",
+      "size": 262144,
+      "group": "source_indexed_family_repeated_block_fused_abcd_ilp",
+      "run_count": 5,
+      "ba_values": [
+        1.18,
+        0.98,
+        0.93,
+        1.03,
+        0.85
+      ],
+      "baseline": {
+        "label": "std source-indexed-family repeated diagnostic",
+        "build": "std",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "block_fused_abcd_ilp",
+        "solve": false,
+        "checksum_policy": "normal_equation_checksum",
+        "timer_boundary": "repeated_component_no_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "block_reduction_abcn_fused_abcd_ilp",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv source-indexed-family repeated diagnostic",
+        "build": "rvv",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "block_fused_abcd_ilp",
+        "solve": false,
+        "checksum_policy": "normal_equation_checksum",
+        "timer_boundary": "repeated_component_no_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "block_reduction_abcn_fused_abcd_ilp",
+        "asm_boundary": null,
+        "rvv_instr_count": null
+      },
+      "notes": [
+        "Repeated board summary for source-indexed implementation-family carry-over.",
+        "This is still pre-production diagnostic evidence; it does not prove production dispatch.",
+        "Summary ba_values preserve run-to-run direction, but per-run Std/RVV ms and component/full delta checks require retained raw compare logs."
+      ]
+    },
+    {
+      "name": "weighted lls source-indexed-family block-baseline pointnormal 262144",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "diagnostic",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointnormal",
+      "size": 262144,
+      "group": "source_indexed_family_repeated_block_baseline",
+      "run_count": 5,
+      "ba_values": [
+        1.05,
+        1.26,
+        0.92,
+        1.0,
+        1.38
+      ],
+      "baseline": {
+        "label": "std source-indexed-family repeated diagnostic",
+        "build": "std",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "block_baseline",
+        "solve": true,
+        "checksum_policy": "normal_equation_plus_matrix_checksum",
+        "timer_boundary": "repeated_diagnostic_estimate_includes_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "block_reduction_abcn",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv source-indexed-family repeated diagnostic",
+        "build": "rvv",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "block_baseline",
+        "solve": true,
+        "checksum_policy": "normal_equation_plus_matrix_checksum",
+        "timer_boundary": "repeated_diagnostic_estimate_includes_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "block_reduction_abcn",
+        "asm_boundary": null,
+        "rvv_instr_count": null
+      },
+      "notes": [
+        "Repeated board summary for source-indexed implementation-family carry-over.",
+        "This is still pre-production diagnostic evidence; it does not prove production dispatch.",
+        "Summary ba_values preserve run-to-run direction, but per-run Std/RVV ms and component/full delta checks require retained raw compare logs."
+      ]
+    },
+    {
+      "name": "weighted lls source-indexed-family block-fused-abcd-ilp pointnormal 262144",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "diagnostic",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointnormal",
+      "size": 262144,
+      "group": "source_indexed_family_repeated_block_fused_abcd_ilp",
+      "run_count": 5,
+      "ba_values": [
+        0.83,
+        0.93,
+        0.9,
+        1.2,
+        0.76
+      ],
+      "baseline": {
+        "label": "std source-indexed-family repeated diagnostic",
+        "build": "std",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "block_fused_abcd_ilp",
+        "solve": true,
+        "checksum_policy": "normal_equation_plus_matrix_checksum",
+        "timer_boundary": "repeated_diagnostic_estimate_includes_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "block_reduction_abcn_fused_abcd_ilp",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv source-indexed-family repeated diagnostic",
+        "build": "rvv",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "block_fused_abcd_ilp",
+        "solve": true,
+        "checksum_policy": "normal_equation_plus_matrix_checksum",
+        "timer_boundary": "repeated_diagnostic_estimate_includes_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "block_reduction_abcn_fused_abcd_ilp",
+        "asm_boundary": null,
+        "rvv_instr_count": null
+      },
+      "notes": [
+        "Repeated board summary for source-indexed implementation-family carry-over.",
+        "This is still pre-production diagnostic evidence; it does not prove production dispatch.",
+        "Summary ba_values preserve run-to-run direction, but per-run Std/RVV ms and component/full delta checks require retained raw compare logs."
+      ]
+    },
+    {
+      "name": "weighted lls source-indexed-family staged-gather pointnormal 262144",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "diagnostic",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointnormal",
+      "size": 262144,
+      "group": "source_indexed_family_repeated_staged_gather",
+      "run_count": 5,
+      "ba_values": [
+        1.04,
+        1.25,
+        1.32,
+        0.95,
+        0.99
+      ],
+      "baseline": {
+        "label": "std source-indexed-family repeated diagnostic",
+        "build": "std",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "staged_gather",
+        "solve": true,
+        "checksum_policy": "normal_equation_plus_matrix_checksum",
+        "timer_boundary": "repeated_diagnostic_estimate_includes_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "staged_gather_compressed_tail",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv source-indexed-family repeated diagnostic",
+        "build": "rvv",
+        "boundary": "source_indexed_family_repeated_board_diagnostic",
+        "wrapper": "collect_board_source_indexed_family_repeated",
+        "row_source": "source_indexed",
+        "formula_mode": "staged_gather",
+        "solve": true,
+        "checksum_policy": "normal_equation_plus_matrix_checksum",
+        "timer_boundary": "repeated_diagnostic_estimate_includes_solve",
+        "gate": "test_rvv_source_indexed_family_candidate",
+        "mask": "production_finite_mask_weight_not_masked",
+        "reduction": "staged_gather_compressed_tail",
+        "asm_boundary": null,
+        "rvv_instr_count": null
+      },
+      "notes": [
+        "Repeated board summary for source-indexed implementation-family carry-over.",
+        "This is still pre-production diagnostic evidence; it does not prove production dispatch.",
+        "Summary ba_values preserve run-to-run direction, but per-run Std/RVV ms and component/full delta checks require retained raw compare logs."
+      ]
+    }
+  ]
+}

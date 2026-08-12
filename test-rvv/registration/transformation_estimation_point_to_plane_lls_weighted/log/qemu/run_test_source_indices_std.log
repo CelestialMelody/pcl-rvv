@@ -1,0 +1,22 @@
+Running main() from <riscv-build>/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexed*
+[==========] Running 6 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 6 tests from TransformationEstimationPointToPlaneLLSWeighted
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPublicOverloadMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPublicOverloadMatchesStdWithinBudget (7 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedNormalEquationMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedNormalEquationMatchesStdWithinBudget (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedSmallInputFallsBackToScalar
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedSmallInputFallsBackToScalar (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPredicateGatesAreNarrow
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPredicateGatesAreNarrow (0 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPointXYZSourceMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPointXYZSourceMatchesStdWithinBudget (5 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPointXYZToPointXYZINormalMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPointXYZToPointXYZINormalMatchesStdWithinBudget (5 ms)
+[----------] 6 tests from TransformationEstimationPointToPlaneLLSWeighted (25 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test suite ran. (29 ms total)
+[  PASSED  ] 6 tests.

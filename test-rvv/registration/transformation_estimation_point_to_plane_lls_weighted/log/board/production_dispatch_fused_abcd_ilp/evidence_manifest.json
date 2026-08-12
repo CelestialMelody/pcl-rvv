@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "TEPTPLW production-dispatch repeated board evidence manifest",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_dispatch_fused_abcd_ilp/summary.md",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "taskset -c 0",
+      "governor": "performance",
+      "freq": "1600000,1600000",
+      "temperature": "thermal_zone0=40000, thermal_zone1=40000, thermal_zone2=41000, thermal_zone3=41000",
+      "vlen": "see SoC / ELF (board)",
+      "git_commit": "0866c773596934658aadfdb6f062da501d73c92d",
+      "git_dirty": true
+    },
+    "source_paths": {
+      "summary": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_dispatch_fused_abcd_ilp/summary.md",
+      "checksum_validation": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_default_fused_abcd_ilp/checksum_validation.md",
+      "asm_attribution": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_default_fused_abcd_ilp/asm_production_symbol_attribution.md",
+      "board_env": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_default_fused_abcd_ilp/board_env_before.log",
+      "collection_manifest": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_default_fused_abcd_ilp/collection_manifest.json"
+    },
+    "source_boundary_note": "Repeated production-dispatch speedup summary is combined with supplemental production-default RVV checksum and asm summaries; this manifest is a wrapper smoke for Evidence Doctor, not a replacement for raw logs."
+  },
+  "checks": {
+    "strict_ab": true,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "weighted lls production-dispatch full-cloud pointnormal 262144",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointnormal",
+      "size": 262144,
+      "group": "production_dispatch_full_cloud",
+      "run_count": 5,
+      "ba_values": [
+        2.73,
+        2.76,
+        2.77,
+        2.73,
+        2.76
+      ],
+      "baseline": {
+        "label": "std production dispatch",
+        "build": "std",
+        "boundary": "production_dispatch_public_full_cloud",
+        "wrapper": "public_full_cloud_overload",
+        "row_source": "full_cloud",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "rvv_trace_final_checksum_supplemental",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_full_cloud_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production dispatch",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_full_cloud",
+        "wrapper": "public_full_cloud_overload",
+        "row_source": "full_cloud",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "rvv_trace_final_checksum_supplemental",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_full_cloud_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "asm_boundary": "estimate-rvv-helper",
+        "rvv_instr_count": 357,
+        "checksum": "2184.271025"
+      },
+      "notes": [
+        "ba_values are Std/RVV production-dispatch speedups from repeated board summary.",
+        "checksum and asm attribution are supplemental production-default RVV evidence from separate summary artifacts."
+      ]
+    },
+    {
+      "name": "weighted lls production-dispatch full-cloud pointxyz-to-pointnormal 262144",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointxyz-to-pointnormal",
+      "size": 262144,
+      "group": "production_dispatch_full_cloud",
+      "run_count": 5,
+      "ba_values": [
+        2.95,
+        2.98,
+        3.01,
+        2.96,
+        3.03
+      ],
+      "baseline": {
+        "label": "std production dispatch",
+        "build": "std",
+        "boundary": "production_dispatch_public_full_cloud",
+        "wrapper": "public_full_cloud_overload",
+        "row_source": "full_cloud",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "rvv_trace_final_checksum_supplemental",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_full_cloud_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production dispatch",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_full_cloud",
+        "wrapper": "public_full_cloud_overload",
+        "row_source": "full_cloud",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "rvv_trace_final_checksum_supplemental",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_full_cloud_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "asm_boundary": "detail",
+        "rvv_instr_count": 338,
+        "checksum": "2184.271025"
+      },
+      "notes": [
+        "ba_values are Std/RVV production-dispatch speedups from repeated board summary.",
+        "checksum and asm attribution are supplemental production-default RVV evidence from separate summary artifacts."
+      ]
+    },
+    {
+      "name": "weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal 262144",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv",
+      "point_type": "pointxyz-to-pointxyzinormal",
+      "size": 262144,
+      "group": "production_dispatch_full_cloud",
+      "run_count": 5,
+      "ba_values": [
+        2.97,
+        3.0,
+        3.02,
+        2.96,
+        3.01
+      ],
+      "baseline": {
+        "label": "std production dispatch",
+        "build": "std",
+        "boundary": "production_dispatch_public_full_cloud",
+        "wrapper": "public_full_cloud_overload",
+        "row_source": "full_cloud",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "rvv_trace_final_checksum_supplemental",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_full_cloud_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "rvv_instr_count": 0
+      },
+      "candidate": {
+        "label": "rvv production dispatch",
+        "build": "rvv",
+        "boundary": "production_dispatch_public_full_cloud",
+        "wrapper": "public_full_cloud_overload",
+        "row_source": "full_cloud",
+        "formula_mode": "production_weighted_lls",
+        "solve": true,
+        "checksum_policy": "rvv_trace_final_checksum_supplemental",
+        "timer_boundary": "estimate_call_includes_solve",
+        "gate": "production_full_cloud_dispatch",
+        "mask": "production_finite_mask",
+        "reduction": "production_weighted_lls_semantics",
+        "asm_boundary": "detail",
+        "rvv_instr_count": 338,
+        "checksum": "2184.271025"
+      },
+      "notes": [
+        "ba_values are Std/RVV production-dispatch speedups from repeated board summary.",
+        "checksum and asm attribution are supplemental production-default RVV evidence from separate summary artifacts."
+      ]
+    }
+  ]
+}
