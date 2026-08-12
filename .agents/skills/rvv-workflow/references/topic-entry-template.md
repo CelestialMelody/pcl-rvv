@@ -67,7 +67,7 @@
 - 函数级评估是 production gate：只有 full diagnostic 或 production case 能证明入口主成本、fallback、维护边界和板卡收益成立，才进入生产实现。
 - `1.05x ~ 1.2x` 弱收益不能机械接入；只适合入口常用、实现小、fallback 简单、语义风险低且证据完整的路径。
 - bench 诊断主题默认授权范围限于专项 test/bench、诊断文档和状态表；升级生产路径必须先有 full diagnostic 或 production case 的稳定目标硬件收益。
-- 对 registration（配准）类 topic，如果已有 adopted math family 只在某个 row source policy 上闭合，而其它 policy 仍未尝试同 family，默认先做 family carry-over audit：在 test-rvv 中补对应 policy 的 candidate、bench 和 board 证据，再决定是否进入 production integration loop。不要把单一 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
+- 对 registration（配准）类 topic，如果已有 adopted math family 只在某个 row source policy 上闭合，而其它 policy 仍未尝试同 family，默认先做 family carry-over audit：在配置解析出的 RVV test 资产中补对应 policy 的 candidate、bench 和 board 证据，再决定是否进入 production integration loop。不要把单一 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
 - QEMU 不写成性能结论。
 - 板卡或目标硬件结果才是性能结论。
 - bench 输出必须能解析 `Dataset:`、`Iterations:`、case avg、`Total Time` 和 checksum；格式异常先修 bench 或脚本。

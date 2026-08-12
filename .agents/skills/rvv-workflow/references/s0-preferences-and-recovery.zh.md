@@ -61,7 +61,7 @@ resolved_artifacts:
     publication_class: current_handoff
   - artifact_key: evidence_registry
     template_key: artifact_layout.evidence_registry_template
-    resolved_path: test-rvv/<module>/<topic>/log/evidence_registry.json
+    resolved_path: <resolved-path-from-artifact_layout.evidence_registry_template>
     publication_class: evidence_summary
 
 artifact_publication_decision:

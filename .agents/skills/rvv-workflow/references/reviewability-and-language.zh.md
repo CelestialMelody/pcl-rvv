@@ -209,7 +209,7 @@ production 代码注释应克制，只解释维护边界、fallback、语义风�
 
 这些说明不需要逐行解释 intrinsic（内建函数），但要让 reviewer 能在不回看对话的情况下回答：“这段 helper 为什么存在，和 production 哪段语义对齐，失败会破坏哪条证据？”
 
-需要长期保留性能、checksum 或 asm 证据的 topic-local 脚本，应优先生成 Evidence Doctor（证据体检）可读取的 JSON manifest，而不是只打印无法复核的 Markdown 表格。生成 manifest 的脚本如果依赖当前 topic 的 case label、helper 名、字段布局或反汇编符号，应放在该 topic 的 `script/` 下；通用检查逻辑复用 `test-rvv/script/evidence_doctor.py`。
+需要长期保留性能、checksum 或 asm 证据的 topic-local 脚本，应优先生成 Evidence Doctor（证据体检）可读取的 JSON manifest，而不是只打印无法复核的 Markdown 表格。生成 manifest 的脚本如果依赖当前 topic 的 case label、helper 名、字段布局或反汇编符号，应放在该 topic 的 `script/` 下；通用检查逻辑复用 `artifact_layout.evidence_doctor_script_template` 解析出的脚本。
 
 如果 diagnostic 或 test support 头文件已经长到难以审查，聚合入口、内部目录、兼容别名和狭义诊断位置都按 `.agents/config/defaults.yaml` 的 `test_support` 配置、可选本机覆盖和当前 topic 既有结构决定。拆出的每个内部头文件仍要有文件级中文说明，说明职责、RVV 测试证据边界，以及不能证明 production dispatch。
 

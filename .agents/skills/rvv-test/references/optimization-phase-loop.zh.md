@@ -23,7 +23,7 @@
 
 ## 阶段文档布局
 
-阶段文档属于配置解析出的 topic 测试目录，不属于通用 `.agents/knowledge/`，也不属于最终 `doc-rvv` 主题文档。默认布局为：
+阶段文档属于配置解析出的 topic 测试目录，不属于通用 `.agents/knowledge/`，也不属于 `artifact_layout.topic_doc_template` 解析出的最终主题文档。默认布局为：
 
 ```text
 <topic-test-dir>/doc/phases/
@@ -52,7 +52,7 @@
 7. **阶段完成条件**：矩阵条目如何进入 `adopted`、`attempted`、`rejected`、`deferred`、`blocked` 或 `not_applicable`，哪些条目必须有同边界证据才能关闭。
 8. **板卡复跑预算和决策桶**：run count、warm-up、最大复跑次数、统计口径、positive / weak-positive / neutral / negative / unstable 的判断口径，以及复跑预算耗尽后的降级或人工判断规则。
 9. **继续 / 停止条件**：下一阶段默认入口、unblocked next actions、扩大权限或需要人工判断的边界。
-10. **文档更新清单**：phase result、topic test 文档、evaluation、Handoff；production 行为只有在真实接入后才同步到 `doc-rvv`。
+10. **文档更新清单**：phase result、topic test 文档、evaluation、Handoff；production 行为只有在真实接入后才同步到 `artifact_layout.topic_doc_template` 解析出的主题文档。
 
 计划不是愿望清单。每个动作都必须能在 `result.zh.md` 中回填为事实、证据路径、结论和下一步。
 
@@ -105,7 +105,7 @@ worker 应优先完成能改变决策的证据链，而不是堆积无关 case�
 
 ## Evidence Doctor 异常处理
 
-benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision 前，必须运行 `test-rvv/script/evidence_doctor.py`，或按 `evidence-doctor.zh.md` 人工记录结果。阶段 result 至少记录输入、严重级别数量、每项异常、处理动作和对结论的影响。
+benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision 前，必须运行 `artifact_layout.evidence_doctor_script_template` 解析出的 Evidence Doctor 脚本，或按 `evidence-doctor.zh.md` 人工记录结果。阶段 result 至少记录输入、严重级别数量、每项异常、处理动作和对结论的影响。
 
 - **Error**：例如 checksum 不一致、strict A/B 缺一侧、boundary / wrapper / row source / solve / timer boundary 不一致且未降级、关键 metadata 缺失。先修复并重跑，或把证据降级 / 标为 blocked；不能用未处理 Error 关闭阶段。
 - **Warning**：例如 B/A 方向异常、长尾、点型偏离、环境字段缺失、asm 归属不闭合、名称与 metadata 角色冲突。必须写可能解释、最小验证动作和结论边界；未解释 Warning 时不能写成 clean pass。

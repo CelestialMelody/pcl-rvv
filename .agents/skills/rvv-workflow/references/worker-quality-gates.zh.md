@@ -194,7 +194,7 @@ correspondences（对应关系路径）是不同 row source policy（行来源�
 独立批准。RowSourcePolicy 只负责 row source；shared math pipeline（共享数学流水线）负责
 finite mask（有限值掩码）、formula（公式）、staging/reduction、accepted_points、ATA/ATb。
 如果当前 topic 已有 adopted math family，worker 写实现前必须检查该 family 是否已经按 row source
-policy 做过 carry-over audit。未尝试的 policy 先在 test-rvv 中补 candidate / bench / board 证据，
+policy 做过 carry-over audit。未尝试的 policy 先在配置解析出的 RVV test 资产中补 candidate / bench / board 证据，
 或写出不适用原因；不能只因为某个旧 helper 在一个 policy 上正向，就直接扩大 production。
 
 mixed fields（混合字段）、point traits（点类型字段特征）、AoS stride（数组结构跨步）、
@@ -213,7 +213,7 @@ correspondences 或 indexed 路径退化时，归因必须列出 query/match 展
 ### 8a. Phase loop 防早停门禁
 
 复杂 topic、短 prompt 继续已有 topic 或任何含多阶段优化计划的 topic，必须把 `rvv-test/references/optimization-phase-loop.zh.md`
-作为 phase loop 的 source of truth。worker 写 test-rvv、bench、production 或长期文档前至少闭合下列门禁：
+作为 phase loop 的 source of truth。worker 写配置解析出的 RVV test 资产、bench、production 或长期文档前至少闭合下列门禁：
 
 ```text
 phase_plan_written_before_edits:
@@ -383,7 +383,7 @@ followup_options_ready:
 - `missing_items` 必须写成陈述句；没有缺口时写 `none`。
 - 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
   和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
-- 表格必须包含 `evidence_doctor_result_ready`。凡本轮涉及 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision，证据必须指向 `test-rvv/script/evidence_doctor.py` 生成的 report，或按 `rvv-test/references/evidence-doctor.zh.md` 人工填写的 Errors / Warnings / Suggestions 摘要；未运行脚本时说明原因和当前 doctor 边界。
+- 表格必须包含 `evidence_doctor_result_ready`。凡本轮涉及 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision，证据必须指向 `artifact_layout.evidence_doctor_script_template` 解析出的脚本生成的 report，或按 `rvv-test/references/evidence-doctor.zh.md` 人工填写的 Errors / Warnings / Suggestions 摘要；未运行脚本时说明原因和当前 doctor 边界。
 - 表格必须包含 `bench_backend_choice_ready`。凡本轮涉及 bench，证据必须说明性能结论是否来自 board / target hardware；若只跑 QEMU bench smoke，状态应为 `partial` 或 `not_applicable`，并写清它只用于 build / correctness / log-shape smoke；若没有运行 QEMU bench，应写明默认策略是只编译或只跑 gtest / correctness。
 - 表格必须包含 `qemu_bench_smoke_scope_ready`。如果运行了 QEMU bench，证据必须列出 case-filter、规模、iteration 和为什么它不是完整 bench；如果没有运行，写 `not_applicable` 并说明性能验证只走 board / target hardware。
 - 表格必须包含 `rerun_budget_decision_ready`。凡本轮涉及 board performance 或 repeated summary，证据必须指向 phase plan / summary 中的 run budget、decision bucket、是否用完预算和是否需要降级 / 人工判断。

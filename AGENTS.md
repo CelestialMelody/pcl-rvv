@@ -29,7 +29,7 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
 - `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md` 定义短 prompt worker
   写文件前的轻量质量门禁，避免为了 prompt 变短而丢失文档、注释、bench 和证据质量要求。
 - `.agents/knowledge/pcl-rvv-knowledge-map.md` 是轻量知识索引入口，只说明按配置解析出的文档 / 测试资产读取策略，不复制具体产物内容。
-- 短 prompt 继续已有 topic、恢复阶段状态或目标含有“继续完善 RVV 优化工作”时，必须读取 `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`；它定义 `test-rvv/<topic>/doc/phases/` 的 plan/result、optimization matrix、Evidence Doctor 异常处理和继续 / 停止规则。
+- 短 prompt 继续已有 topic、恢复阶段状态或目标含有“继续完善 RVV 优化工作”时，必须读取 `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`；它定义 `artifact_layout.phase_root_template` 解析目录下的 plan/result、optimization matrix、Evidence Doctor 异常处理和继续 / 停止规则。
 - 未提交的本地迁移材料不作为正式 agent 资产；正常 RVV topic（主题）工作不要读取或依赖这些材料，除非用户明确要求做历史追溯或规则迁移。
 
 ## RVV 工作规则

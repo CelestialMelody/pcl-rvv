@@ -133,21 +133,22 @@ Evidence Doctor finding 不能只写“异常”。它必须把异常转成下�
 跨 topic 可复用脚本放在：
 
 ```text
-test-rvv/script/evidence_doctor.py
+{artifact_layout.evidence_doctor_script_template}
 ```
 
 该脚本适合检查通用 JSON manifest 和 Markdown summary 表中的数值分布、A/B metadata、checksum、asm boundary、环境字段和异常模式。
+下面命令中的 `<evidence-doctor-script>` 应由 `artifact_layout.evidence_doctor_script_template` 解析得到。
 
 生成模板：
 
 ```bash
-python3 test-rvv/script/evidence_doctor.py --write-template /tmp/evidence_manifest.example.json
+python3 <evidence-doctor-script> --write-template /tmp/evidence_manifest.example.json
 ```
 
 检查 JSON manifest：
 
 ```bash
-python3 test-rvv/script/evidence_doctor.py \
+python3 <evidence-doctor-script> \
   --manifest <topic-output>/evidence_manifest.json \
   --output <topic-output>/evidence_doctor.md
 ```
@@ -155,7 +156,7 @@ python3 test-rvv/script/evidence_doctor.py \
 对旧 Markdown summary 做轻量检查：
 
 ```bash
-python3 test-rvv/script/evidence_doctor.py \
+python3 <evidence-doctor-script> \
   --summary-md <topic-output>/summary.md \
   --output <topic-output>/evidence_doctor.md \
   --fail-on never
@@ -166,10 +167,10 @@ Markdown summary 模式会输出 `summary_only_metadata_missing` warning。它�
 如果检查逻辑依赖某个 topic 的 case label、函数名、helper 名、字段布局、反汇编符号或目录结构，应写 topic-local wrapper（主题本地包装脚本），例如：
 
 ```text
-test-rvv/<module>/<topic>/script/generate_<topic>_evidence_manifest.py
+{artifact_layout.topic_test_dir_template}/script/generate_<topic_token>_evidence_manifest.py
 ```
 
-该 wrapper 负责把 topic-specific raw log（当前主题特定原始日志）转成通用 manifest，再调用全局 `test-rvv/script/evidence_doctor.py`。
+该 wrapper 负责把 topic-specific raw log（当前主题特定原始日志）转成通用 manifest，再调用 `artifact_layout.evidence_doctor_script_template` 解析出的全局 doctor。
 
 ## 字段名稳定性与兼容层
 

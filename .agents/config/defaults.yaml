@@ -31,8 +31,8 @@ evidence:
   allow_sanitized_logs_when_user_requests_logs: true
   commit_generated_logs_only_when_referenced_by_docs: true
   committable_log_reference_roots:
-    - doc-rvv
-    - test-rvv
+    - "{paths.doc_root}"
+    - "{paths.test_root}"
 
 agent_assets:
   feedback_mode: report-only
@@ -113,6 +113,7 @@ artifact_layout:
   board_output_subdir: log/board
   evidence_registry_template: "{artifact_layout.topic_test_dir_template}/log/evidence_registry.json"
   evidence_registry_script_template: "{paths.test_root}/script/evidence_registry.py"
+  evidence_doctor_script_template: "{paths.test_root}/script/evidence_doctor.py"
   shared_make_subdir: mk
   makefile_name: Makefile
   board_makefile_name: board.mk

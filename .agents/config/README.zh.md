@@ -22,6 +22,7 @@ env var（环境变量）名或当前 topic（主题）的既有结构；默认�
 `{topic}`、`{function}`、`{run_id}`、`{phase_id}`、`{phase_slug}` 这类运行时变量表示当前 artifact（产物）的上下文。解析时先合并 defaults、
 local override（本机私有覆盖）和 prompt override（提示词覆盖）三层配置，递归展开 dotted config
 keys，再用当前 topic / function / adapter 提供的运行时变量绑定剩余占位符。
+列表型路径配置也可以使用同样的 `{section.key}` 引用；worker 应逐项展开，而不是把当前默认目录名写进规则正文。
 如果 dotted config key 或运行时变量无法解析，worker 必须在 S0 报告或 Handoff Packet（交接数据包）
 中写清缺失键和受影响产物；不要猜一个固定路径或文件名代替配置结果。
 

@@ -9,9 +9,9 @@
 - 文档和 Handoff Packet（交接数据包）写摘要、命令和路径。
 - QEMU 和 board（板卡）证据路径按 `.agents/config/defaults.yaml` 的 `artifact_layout.qemu_output_subdir` 和 `artifact_layout.board_output_subdir` 解析。当前默认值是 `log/qemu` 和 `log/board`。
 - output summary（输出摘要）作为 bench / evidence 统计的主归属时，应列出生成脚本、输入日志、被测代码或 bench wrapper、相关文档章节和 Traceability Map 入口。
-- `evidence_doctor.md`、`evidence_doctor.json` 或 summary 内的 Evidence Doctor（证据体检）小节属于 summary artifact（摘要证据产物），不是 raw log。它可以进入提交候选，但必须被 doc-rvv 或 test-rvv 文档明确引用，并且不能包含个人路径、私有板卡地址或未脱敏 raw log 片段。
+- `evidence_doctor.md`、`evidence_doctor.json` 或 summary 内的 Evidence Doctor（证据体检）小节属于 summary artifact（摘要证据产物），不是 raw log。它可以进入提交候选，但必须被 `evidence.committable_log_reference_roots` 解析出的文档根明确引用，并且不能包含个人路径、私有板卡地址或未脱敏 raw log 片段。
 - raw run 目录、完整反汇编、build（构建）输出和本机日志不默认提交。
-- `log/qemu` 或 `log/board` 下的生成证据只有在 `doc-rvv` 或 `test-rvv` 下的文档明确引用时才进入提交候选。这里的“生成证据”包括 correctness / unit test run log（正确性 / 单元测试运行日志）、bench analyze log（性能分析日志）、summary artifact、checksum、asm attribution、Evidence Doctor report（证据体检报告）等。没有被文档引用的日志、摘要、manifest（清单）或环境探测文件，即使已经生成，也默认留在本机工作区。
+- `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 解析目录下的生成证据只有在 `evidence.committable_log_reference_roots` 解析出的文档根中被明确引用时才进入提交候选。这里的“生成证据”包括 correctness / unit test run log（正确性 / 单元测试运行日志）、bench analyze log（性能分析日志）、summary artifact、checksum、asm attribution、Evidence Doctor report（证据体检报告）等。没有被文档引用的日志、摘要、manifest（清单）或环境探测文件，即使已经生成，也默认留在本机工作区。
 - 如果日志包含个人路径、板卡 IP、用户名或私有远端路径，只能留在本机工作区或先脱敏。
 - summary artifact（摘要产物）可以临时记录本机 raw archive（原始归档）位置用于当轮溯源，但长期文档和可提交摘要优先使用
   `<local-raw-archive>/...`、`<board-output>/...` 或 env var（环境变量）名等占位符，不把绝对 `/tmp/...`、个人 home（主目录）路径或私有远端路径写成稳定证据入口。
@@ -28,13 +28,13 @@ bench、board summary、Evidence Doctor 或 checksum summary 一旦被重新运�
 
 ## Evidence Registry（证据登记表）
 
-为了处理人工或 agent 复跑覆盖旧日志但忘记同步文档的问题，复杂 topic 和所有会覆盖证据文件的 board / bench target 应维护 topic-local evidence registry（证据登记表）。默认路径由 `artifact_layout.evidence_registry_template` 解析，当前为：
+为了处理人工或 agent 复跑覆盖旧日志但忘记同步文档的问题，复杂 topic 和所有会覆盖证据文件的 board / bench target 应维护 topic-local evidence registry（证据登记表）。默认路径由 `artifact_layout.evidence_registry_template` 解析：
 
 ```text
-test-rvv/<module>/<topic>/log/evidence_registry.json
+{artifact_layout.evidence_registry_template}
 ```
 
-通用脚本入口为 `test-rvv/script/evidence_registry.py`。它不是长期文档，也不替代 manifest / Evidence Doctor；它只记录“哪些证据文件由哪个动作生成，以及当前文件状态是否和上次登记一致”。registry 至少记录：
+通用脚本入口由 `artifact_layout.evidence_registry_script_template` 解析。它不是长期文档，也不替代 manifest / Evidence Doctor；它只记录“哪些证据文件由哪个动作生成，以及当前文件状态是否和上次登记一致”。registry 至少记录：
 
 - evidence path（证据路径）、size、`mtime_ns`、`sha256` 或等价 summary digest；`mtime` 只能作为快速变化信号，不能单独作为最终判断。
 - producer target / script（生产动作）、backend（`qemu` / `board` / `target`）、run label、case-filter、evidence role。
@@ -48,7 +48,7 @@ test-rvv/<module>/<topic>/log/evidence_registry.json
 - 如果 registry / summary 指向的 current run 未被 phase result、evaluation、topic 文档或 Handoff 引用，写成 `stale_doc_pending_refresh`。
 - 如果 hook（例如 pre-commit）未安装，不得假设 registry 已经自动更新；恢复和提交前仍要显式运行检查。
 
-registry 可以进入提交候选，但只有被 `doc-rvv` 或 `test-rvv` 文档明确引用并确认不含私有路径时才提交。raw logs 仍按 raw log 策略处理。
+registry 可以进入提交候选，但只有被 `evidence.committable_log_reference_roots` 解析出的文档根明确引用并确认不含私有路径时才提交。raw logs 仍按 raw log 策略处理。
 
 ## Bench Backend（bench 后端）
 
@@ -61,7 +61,7 @@ bench 类 target 的性能结论默认只来自 board（板卡）或 target hard
 
 ## 文档引用驱动的提交白名单
 
-提交 `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 解析目录下的证据文件前，先检查 `doc-rvv` 和 `test-rvv` 下的 Markdown 文档是否明确引用该证据。引用可以是仓库相对路径、run label（运行标签）、summary artifact（摘要产物）路径，或 Traceability Map 中的 evidence path（证据路径）。
+提交 `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 解析目录下的证据文件前，先检查 `evidence.committable_log_reference_roots` 解析出的 Markdown 文档是否明确引用该证据。引用可以是仓库相对路径、run label（运行标签）、summary artifact（摘要产物）路径，或 Traceability Map 中的 evidence path（证据路径）。
 
 该规则是提交候选的必要条件，不替代脱敏、summary-only 和用户授权规则：
 
@@ -124,7 +124,7 @@ Traceability Map（可追踪性地图）、evaluation（函数级评估）或 Ha
 提交 evidence logs 前必须：
 
 - 运行 topic 目录提供的 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本并传入 `--check <logs>`。
-- 运行 topic 提供的 `make evidence_status` / `make check_evidence_freshness`，或直接调用 `test-rvv/script/evidence_registry.py check` 的等价入口；若 topic 尚未接入 registry，Handoff 必须说明 `evidence_registry_status=not_available` 并人工列出可能被覆盖的证据路径。
+- 运行 topic 提供的 `make evidence_status` / `make check_evidence_freshness`，或直接调用 `artifact_layout.evidence_registry_script_template` 解析出的脚本执行 `check` 的等价入口；若 topic 尚未接入 registry，Handoff 必须说明 `evidence_registry_status=not_available` 并人工列出可能被覆盖的证据路径。
 - 列出将加入的文件和排除的文件。
 - 说明是否仍包含本机路径、远端路径、用户名、私有地址或设备标签。
 - 说明脱敏是否改变 benchmark（性能测试）数值、checksum（校验和）或命令参数。
@@ -138,7 +138,7 @@ Traceability Map（可追踪性地图）、evaluation（函数级评估）或 Ha
 - 完整 asm dump（反汇编导出），除非摘要不足以复核。
 - `log/vec_missed_log/`。
 - `log/vec_logs/`、`log/latest_vec_missed.log`、`log/filtered_*.log` 和 `log/analyze_*.log`。
-- `log/qemu/*.log`、`log/board/*.log`、`log/board/**/run*.log`、`log/board/**/board_env_*.log` 和 `log/board/**/collection_manifest.json`，除非它们已被 `doc-rvv` 或 `test-rvv` 文档明确引用，并且满足脱敏检查或用户对 raw log / manifest 的明确授权。
+- `artifact_layout.qemu_output_subdir` 与 `artifact_layout.board_output_subdir` 解析目录下的 raw `*.log`、`run*.log`、`board_env_*.log` 和 `collection_manifest.json`，除非它们已被 `evidence.committable_log_reference_roots` 解析出的文档明确引用，并且满足脱敏检查或用户对 raw log / manifest 的明确授权。
 - 本机 `config.mk`。
 - 临时 deploy（部署）脚本。
 - 聊天记录。

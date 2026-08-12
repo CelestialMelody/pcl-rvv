@@ -68,7 +68,7 @@ implementation-family comparison 可以复用同一 math kernel 或 reduction/fo
 
 ## Evidence Doctor 证据体检
 
-benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision 前，必须按 `evidence-doctor.zh.md` 执行 Evidence Doctor（证据体检 / 证据校验器）检查。检查可以由 `test-rvv/script/evidence_doctor.py` 读取 JSON manifest 自动完成，也可以在尚未接入脚本的 topic 中按规则人工填写；无论哪种方式，都必须把 Errors、Warnings 和 Suggestions 写入 summary、evaluation 或 Handoff Packet。
+benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision 前，必须按 `evidence-doctor.zh.md` 执行 Evidence Doctor（证据体检 / 证据校验器）检查。检查可以由 `artifact_layout.evidence_doctor_script_template` 解析出的脚本读取 JSON manifest 自动完成，也可以在尚未接入脚本的 topic 中按规则人工填写；无论哪种方式，都必须把 Errors、Warnings 和 Suggestions 写入 summary、evaluation 或 Handoff Packet。
 
 Evidence Doctor 用于阻止 worker 无解释地跳过可疑数据。典型输入应包含 case name、case kind、build、point type、size、iterations、warm-up、run count、baseline / candidate 的 boundary、wrapper、row source、formula mode、solve、checksum policy、checksum、asm boundary、RVV 指令计数、B/A values 和板卡环境字段。
 
@@ -76,7 +76,7 @@ Evidence Doctor 用于阻止 worker 无解释地跳过可疑数据。典型输�
 - Warning：例如某点型明显偏离、`B/A < 1` 频率偏高、median 正向但长尾明显、std/RVV speedup 与 RVV-vs-RVV B/A 冲突、asm 归属不闭合、环境字段缺失或名称暗示的证据角色与 metadata 不一致。Warning 可以继续分析，但结论必须说明风险、可能原因和处理动作。
 - Suggestion：例如建议扩大 runs、补 binary hash、补 per-iteration trace、补温度 / governor / freq 或把 topic-local analyzer 迁成 manifest 生成器。Suggestion 不阻塞当前结论，但应进入下一轮检查建议。
 
-若 summary 只含 Markdown 表格而没有机器可读 metadata，Evidence Doctor 必须输出 metadata 不完整的 warning；这类轻量检查只能作为 reviewer aid，不能写成完整 doctor 通过。复杂 topic 应优先由 topic-local wrapper 生成 JSON manifest，再调用全局 `test-rvv/script/evidence_doctor.py`。
+若 summary 只含 Markdown 表格而没有机器可读 metadata，Evidence Doctor 必须输出 metadata 不完整的 warning；这类轻量检查只能作为 reviewer aid，不能写成完整 doctor 通过。复杂 topic 应优先由 topic-local wrapper 生成 JSON manifest，再调用 `artifact_layout.evidence_doctor_script_template` 解析出的全局 doctor。
 
 ## 对比口径
 

@@ -54,12 +54,12 @@ row source -> field load/gather -> finite mask -> formula -> staging/reduction -
 - 新 topic 默认放在 `test_support.aggregator_directory` 解析出的目录下，并按
   `test_support.aggregator_prefix`、topic token 和 `test_support.aggregator_extension`
   生成宽口径 aggregator header（聚合头文件）。当前默认 `test_support.aggregator_prefix` 可为空，
-  此时宽口径入口形如 `<topic-token>.h`；长名 topic 可以是 `teptplw.h`，短 topic 可直接是
+  此时宽口径入口形如 `<topic-token>.h`；长名 topic 可以使用稳定缩写，短 topic 可直接是
   `<topic>.h`。本文不固定任何 topic token、目录字面量或完整文件名。
 - role-specific aggregator（按入口角色拆出的聚合头）优先和 `src` 入口同向命名。默认
   `test_support.role_aggregator_name_order: role_topic` 表示使用 `<role>_<topic-token>.h`，
-  例如 `test_teptplw.h` 和 `bench_teptplw.h`，分别对应 `src/test_teptplw_*.cpp` 和
-  `src/bench_teptplw.cpp`。若 topic 使用旧命名或本机 override，应在 README / handoff 中说明。
+  例如 `test_<topic-token>.h` 和 `bench_<topic-token>.h`，分别对应按
+  `artifact_layout.test_source_template` 和 `artifact_layout.bench_source_template` 解析出的源码。若 topic 使用旧命名或本机 override，应在 README / handoff 中说明。
 - `.agents/local/user-preferences.yaml` 可覆盖本机命名偏好，例如聚合入口目录、聚合入口前缀、
   role-specific aggregator 命名顺序、topic token / abbreviation 策略、内部目录、扩展名和内部头文件是否带
   topic token 前缀。不要默认创建或提交本机 override（覆盖）文件；若使用本机覆盖，Handoff Packet

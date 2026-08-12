@@ -73,13 +73,13 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 - diagnostic evidence（诊断证据）不等于 production evidence（生产证据）。
 - component-only ablation（仅组件消融）只能提供瓶颈线索，不能替代端到端 profile（剖析），也不能单独决定 production。
 - full-cloud（全云顺序扫描）、source-indexed（源索引路径）、dual-indices（双索引路径）和 correspondences（对应关系路径）是不同 row source policy。production 必须逐 policy 独立批准。
-- `test-rvv/script/` 只放跨 topic 可复用脚本；与当前优化对象强绑定的脚本放在对应 topic 测试目录的本地 `script/` 下。通用 Evidence Doctor 脚本放在 `test-rvv/script/evidence_doctor.py`，通用 evidence registry（证据登记表）脚本放在 `test-rvv/script/evidence_registry.py`；若 raw log 解析依赖某个 topic 的 case label、helper 名、字段布局或反汇编符号，应在 topic-local `script/` 下生成 manifest 后再调用全局 doctor / registry。
+- `paths.test_root` 解析目录下的全局 `script/` 只放跨 topic 可复用脚本；与当前优化对象强绑定的脚本放在 `artifact_layout.topic_test_dir_template` 解析目录的本地 `script/` 下。通用 Evidence Doctor 脚本路径由 `artifact_layout.evidence_doctor_script_template` 解析，通用 evidence registry（证据登记表）脚本路径由 `artifact_layout.evidence_registry_script_template` 解析；若 raw log 解析依赖某个 topic 的 case label、helper 名、字段布局或反汇编符号，应在 topic-local `script/` 下生成 manifest 后再调用全局 doctor / registry。
 - compiler auto-vectorization（编译器自动向量化）诊断默认不开启；需要评估编译器潜力或解释 missed-vectorization（未自动向量化）原因时，显式运行 topic Makefile 的 `generate_vec_report` 或等价目标。
 - benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision 前必须按 `references/evidence-doctor.zh.md` 执行 Evidence Doctor（证据体检）检查；发现 Errors / Warnings / Suggestions 时，summary、evaluation 或 Handoff Packet 必须说明处理动作，不能无解释地把异常数据转成结论。
 - 官方 Make / script target 覆盖证据文件时应更新 topic-local `log/evidence_registry.json` 或等价登记表；S0 恢复、phase loop 恢复和提交前必须检查 registry / manifest / doc refs，发现 `unregistered_change`、`unregistered_file` 或 `stale_doc_pending_refresh` 时先降级当前数值结论。
 - 短 prompt 继续已有 topic、复杂 topic 回访或当前阶段仍有未阻塞优化动作时，必须按 `references/optimization-phase-loop.zh.md` 恢复或创建 phase plan（阶段计划），用 optimization matrix 跟踪 candidate family、row source、点类型 / `Scalar`、test、bench、board、asm 和 doctor 状态；只完成一个 helper、一个 target、一次 bench 或一张表不能作为合法停止理由。
 - evidence logs 默认 `summary-only`。raw run 目录不默认提交。
-- 生成在 `log/qemu` 或 `log/board` 下的 correctness run log、bench analyze log 和 summary artifact，只有被 `doc-rvv` 或 `test-rvv` 下的文档明确引用为证据路径、run label 或摘要输入时，才进入提交候选；未被文档引用的日志和摘要留在本机工作区。
+- 生成在 `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 解析目录下的 correctness run log、bench analyze log 和 summary artifact，只有被 `paths.doc_root` 或 `paths.test_root` 解析目录下的文档明确引用为证据路径、run label 或摘要输入时，才进入提交候选；未被文档引用的日志和摘要留在本机工作区。
 - closeout 或 production-candidate 文档必须把 test、bench、QEMU、反汇编和板卡证据汇总到“正确性与高效性证据链”。未接 production 的诊断结论使用“诊断证据链”，并写清 diagnostic evidence 不能替代 production evidence。
 
 ## 与其它 Skill 的边界

@@ -96,7 +96,7 @@ reviewer 检查文档时应确认：
 
 - 是否有 S2 评估，而不是只在最终 closeout 才解释函数。
 - 文档归属矩阵是否清楚区分主题文档、evaluation、output summary 和 Handoff Packet 的职责，是否避免把长期事实、实验结果和恢复动作混写。
-- 复杂 topic 是否有 Traceability Map，且表格能把 production、test-rvv、analysis script、output summary 和文档章节互相定位。
+- 复杂 topic 是否有 Traceability Map，且表格能把 production、RVV test 资产、analysis script、output summary 和文档章节互相定位。
 - S2 评估是否足以让人判断为什么继续或停止。
 - S11 closeout 是否覆盖最终证据，而不是重复早期计划。
 - closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”；未接 production 的诊断结论是否包含“诊断证据链”。

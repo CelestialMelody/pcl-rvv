@@ -10,7 +10,7 @@
 4. 覆盖范围与 fallback：点类型、dense/indexed、小规模、NaN/Inf、FRM/FCSR、非 RVV 行为。
 5. 详细设计：helper、traits、staging、mask helper、数值 helper、对象状态展开。
 6. 当前采用的优化方式：当前真实使用的 RVV 组织方式、采用理由、内部流程和暂缓方案。
-7. Traceability Map（可追踪性地图）：复杂 topic 列出 production、test-rvv、script、output 和文档章节之间的定位关系；详细规则见 [document-ownership-and-traceability.zh.md](document-ownership-and-traceability.zh.md)。
+7. Traceability Map（可追踪性地图）：复杂 topic 列出 production、RVV test 资产、script、output 和文档章节之间的定位关系；详细规则见 [document-ownership-and-traceability.zh.md](document-ownership-and-traceability.zh.md)。
 8. 关键实现片段：展示完整阶段边界，不能只贴公式。
 9. 数值算例与 VL chunk 图示。
 10. Bench case 说明。
@@ -19,7 +19,7 @@
 13. 生产接入评估。
 14. 生产接入后的 closeout 更新。
 15. 结论与后续方向。
-16. 阶段探索与测试证据（仅 `test-rvv/.../doc/phases/`，不进入最终 `doc-rvv` 生产行为说明）。
+16. 阶段探索与测试证据（仅 `artifact_layout.phase_root_template` 解析目录，不进入 `artifact_layout.topic_doc_template` 解析出的最终生产行为说明）。
 
 ## 必写要点
 
@@ -35,7 +35,7 @@
 - 每个 bench case 的入口、规模、参数、是否命中 RVV、speedup 计算方式和证明点。
 - 板卡收益是否足以覆盖 staging、buffer 和维护成本。
 - closeout 或 production-candidate 阶段必须包含“当前采用的优化方式”小节。该小节面向维护者解释当前代码实际采用的优化组织方式，不能只列历史尝试、bench 数字或最终 EvidenceDecision。
-- 复杂 topic 必须包含或引用 Traceability Map。该表只覆盖 reviewer 需要定位的关键 production、test-rvv、script、output 和文档章节，不要求枚举每个小函数，也不要求默认新建巨型函数文档。
+- 复杂 topic 必须包含或引用 Traceability Map。该表只覆盖 reviewer 需要定位的关键 production、RVV test 资产、script、output 和文档章节，不要求枚举每个小函数，也不要求默认新建巨型函数文档。
 - closeout 或 production-candidate 阶段必须包含“正确性与高效性证据链”小节。该小节是 reviewer 判断依据，不能只写说明文字。
 - 若当前结论是 partial-production-candidate（局部生产候选），必须写清“候选范围”和“尚不能生产接入的原因”。候选范围要窄到入口形态、点类型、数据布局、规模、fallback 条件和目标硬件；不能把局部诊断收益写成整个函数族可接入。
 - 若已经接入 production（生产源码），主题文档必须从“诊断原型说明”升级为“生产实现说明”：写清真实 production patch（生产补丁）、真实 dispatch / fallback、production direct（真实生产入口直连）测试、反汇编符号归属、板卡 production bench 和 PI5 EvidenceDecision（生产证据决策）。不要把早期诊断 speedup 当作最终生产结论。
@@ -76,7 +76,7 @@ closeout（收尾）或 production-candidate（生产候选）文档必须新增
 覆盖范围按当前结论裁剪，至少包括：
 
 - production public entry、dispatch / fallback gate、Std helper、RVV helper 或保持标量的入口。
-- test-rvv 中的 reference、row source、candidate、reduction / staging、production-shaped diagnostic、production direct test 和 bench wrapper。
+- RVV test 侧的 reference、row source、candidate、reduction / staging、production-shaped diagnostic、production direct test 和 bench wrapper。
 - analysis script、output summary、QEMU / board output、反汇编或 profile 证据入口。
 - evaluation 的实现方式审计、主题文档证据链和 Handoff Packet 中恢复字段。
 

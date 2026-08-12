@@ -5,8 +5,8 @@
 1. topic-local wrapper（主题本地包装脚本）应该是什么、如何命名、输出到哪里。
 2. Makefile、测试代码、分析脚本和 output summary（输出摘要）在命名 evidence 字段前，应使用哪些规范字段，避免字段名漂移导致检查不稳定。
 
-`test-rvv/script/evidence_doctor.py` 是执行检查的通用脚本。若二者冲突，以本文和 `evidence-doctor.zh.md` 的字段语义为长期合同，并同步修正脚本。
-`test-rvv/script/evidence_registry.py` 是可选但推荐的通用登记脚本，用于记录 evidence output（证据输出）文件的 size / mtime / hash 和 producer target（生成动作），帮助恢复和提交前发现人工复跑或日志覆盖导致的 stale 文档。
+`artifact_layout.evidence_doctor_script_template` 解析出的脚本是执行检查的通用脚本。若二者冲突，以本文和 `evidence-doctor.zh.md` 的字段语义为长期合同，并同步修正脚本。
+`artifact_layout.evidence_registry_script_template` 解析出的脚本是可选但推荐的通用登记脚本，用于记录 evidence output（证据输出）文件的 size / mtime / hash 和 producer target（生成动作），帮助恢复和提交前发现人工复跑或日志覆盖导致的 stale 文档。
 
 ## topic-local wrapper 是什么
 
@@ -15,10 +15,10 @@ topic-local wrapper（主题本地包装脚本）不是一个已经自动存在�
 例如下面只是推荐命名，不表示当前仓库已经有这个文件：
 
 ```text
-test-rvv/<module>/<topic>/script/generate_<topic_token>_evidence_manifest.py
+{artifact_layout.topic_test_dir_template}/script/generate_<topic_token>_evidence_manifest.py
 ```
 
-以 `transformation_estimation_point_to_plane_lls_weighted` 为例，`generate_teptplw_evidence_manifest.py` 是一个合理的未来文件名，因为该 topic 已经有 `teptplw` 短 token。但只有在实际为该 topic 做 wrapper 试点时，才创建它。
+如果当前 topic 已经有稳定短 token，可以在 `generate_..._evidence_manifest.py` 中使用该 token；只有在实际为该 topic 做 wrapper 试点时，才创建文件。
 
 全局 doctor 不应该理解每个 topic 的私有命名。分工应是：
 
@@ -26,7 +26,7 @@ test-rvv/<module>/<topic>/script/generate_<topic_token>_evidence_manifest.py
 | -------------------------------------- | ---------------------------------------------------------------------------------- |
 | topic-local wrapper                    | 理解当前 topic 的 case label、helper 名、raw log 格式、checksum 字段和反汇编符号。 |
 | `evidence_manifest.json`             | 用规范字段表达可比较证据；它是全局 doctor 的主要输入。                             |
-| `test-rvv/script/evidence_doctor.py` | 对规范 manifest 做通用数据契约检查、异常信号检测和诊断建议。                       |
+| `artifact_layout.evidence_doctor_script_template` 解析出的脚本 | 对规范 manifest 做通用数据契约检查、异常信号检测和诊断建议。                       |
 | `evidence_doctor.md`                 | 输出 Errors / Warnings / Suggestions，供 summary、evaluation 和 Handoff 引用。     |
 
 ## 推荐文件命名
@@ -37,14 +37,14 @@ test-rvv/<module>/<topic>/script/generate_<topic_token>_evidence_manifest.py
 <topic-output>/evidence_manifest.json
 <topic-output>/evidence_doctor.md
 <topic-output>/evidence_doctor.json        # 可选，供机器读取
-test-rvv/<module>/<topic>/log/evidence_registry.json
+{artifact_layout.evidence_registry_template}
 ```
 
 如果同一 topic 有多个 run label（运行标签），放在对应 run 目录下：
 
 ```text
-test-rvv/<module>/<topic>/log/board/<run-label>/evidence_manifest.json
-test-rvv/<module>/<topic>/log/board/<run-label>/evidence_doctor.md
+{artifact_layout.topic_test_dir_template}/{artifact_layout.board_output_subdir}/<run-label>/evidence_manifest.json
+{artifact_layout.topic_test_dir_template}/{artifact_layout.board_output_subdir}/<run-label>/evidence_doctor.md
 ```
 
 如果是 QEMU correctness（QEMU 正确性）或 checksum-only（仅校验和）证据，也可以放在 `log/qemu/<run-label>/` 下；但 QEMU timing（QEMU 计时）仍不能写成性能结论。
@@ -67,7 +67,7 @@ script/generate_<topic_token>_rvv_ba_evidence_manifest.py
 script/generate_<topic_token>_asm_evidence_manifest.py
 ```
 
-不要把 topic-specific parser（当前主题特定解析器）放进全局 `test-rvv/script/`，除非它已经不依赖 topic 名、case label、helper 名、字段布局或反汇编符号。
+不要把 topic-specific parser（当前主题特定解析器）放进 `paths.test_root` 解析出的全局 `script/`，除非它已经不依赖 topic 名、case label、helper 名、字段布局或反汇编符号。
 
 ## 推荐 Makefile target 命名
 
@@ -93,7 +93,7 @@ make run_rvv_ba_evidence_doctor
 如果 target 位于共享 Make include 或跨 topic 脚本入口中，才使用 topic token 前缀，例如：
 
 ```make
-make generate_teptplw_evidence_manifest
+make generate_<topic_token>_evidence_manifest
 ```
 
 Makefile 变量命名建议：
@@ -107,20 +107,20 @@ EVIDENCE_DOCTOR_JSON := <output>/evidence_doctor.json
 在共享上下文中再加 topic token 前缀：
 
 ```make
-TEPTPLW_EVIDENCE_MANIFEST := ...
-TEPTPLW_EVIDENCE_DOCTOR_MD := ...
+<TOPIC_TOKEN>_EVIDENCE_MANIFEST := ...
+<TOPIC_TOKEN>_EVIDENCE_DOCTOR_MD := ...
 ```
 
 ## Evidence Registry 字段
 
-`evidence_registry.json` 使用 JSON object（对象）顶层结构。它可以由 `test-rvv/script/evidence_registry.py record` 生成，也可以由 topic-local wrapper 写出等价字段：
+`evidence_registry.json` 使用 JSON object（对象）顶层结构。它可以由 `artifact_layout.evidence_registry_script_template` 解析出的脚本执行 `record` 生成，也可以由 topic-local wrapper 写出等价字段：
 
 ```json
 {
   "schema_version": 1,
   "updated_at_epoch": 0,
   "files": {
-    "test-rvv/<module>/<topic>/log/board/<run-label>/summary.md": {
+    "{artifact_layout.topic_test_dir_template}/{artifact_layout.board_output_subdir}/<run-label>/summary.md": {
       "state": {
         "path": "...",
         "exists": true,
@@ -246,7 +246,7 @@ strict A/B 或 production direct 默认要求 baseline 和 candidate 共享以�
 
 ## Alias 只用于迁移
 
-`test-rvv/script/evidence_doctor.py` 可以识别少量旧字段 alias（别名），例如：
+`artifact_layout.evidence_doctor_script_template` 解析出的脚本可以识别少量旧字段 alias（别名），例如：
 
 | 规范字段              | 可兼容旧名示例                       |
 | --------------------- | ------------------------------------ |
@@ -266,7 +266,7 @@ strict A/B 或 production direct 默认要求 baseline 和 candidate 共享以�
 
 ```python
 CASE_LABELS = {
-    "weighted lls production-dispatch full-cloud pointnormal 262144": {
+    "<case-label>": {
         "case_kind": "production_direct",
         "point_type": "pointnormal",
         "row_source": "full_cloud",
@@ -294,7 +294,7 @@ CASE_LABELS = {
 如果某个 topic 还没有 `generate_<topic_token>_evidence_manifest.py`，可以先用：
 
 ```bash
-python3 test-rvv/script/evidence_doctor.py \
+python3 <evidence-doctor-script> \
   --summary-md <topic-output>/summary.md \
   --output <topic-output>/evidence_doctor.md \
   --fail-on never
