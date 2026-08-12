@@ -16,7 +16,9 @@ production 文件：
 registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls_weighted.hpp
 ```
 
-当前 production 结论只覆盖 full-cloud public overload、`Scalar=float`、连续 `weights_`、source xyz f32 AoS layout、target xyz+normal f32 AoS layout、规模/VLEN/byte-offset gate 均满足的路径。source-indexed、dual-indices、correspondences、`Scalar=double` 和 layout miss 路径保持标量。
+当前 production 结论覆盖 full-cloud public overload 和 source-indexed public overload。两条 RVV 分流都要求 `Scalar=float`、连续 `weights_`、source xyz f32 AoS layout、target xyz+normal f32 AoS layout、规模/VLEN/byte-offset gate 均满足。dual-indices、correspondences、`Scalar=double`、layout miss 和 invalid source index gate miss 路径保持标量。dual-indices / correspondences 现在已经补了同 family candidate / bench / board compare，但结果仍是 pre-production diagnostic negative，不会把它们推进 production。
+
+这里还要再分一层：full-cloud / source-indexed 的 production direct tests（接入生产后真实路径测试）和 row-source / fused-formula / generic candidate tests（接入生产前诊断）不能混写。full-cloud 已采纳的 family 若要迁移到 source-indexed、dual-indices 或 correspondences，必须先作为 pre-production diagnostic 补 candidate / bench / board，再决定是否进入 production direct。
 
 ## 文档阅读路径
 
@@ -39,9 +41,10 @@ registration/include/pcl/registration/impl/transformation_estimation_point_to_pl
 | 公开入口语义测试（public semantics） | 公开入口有效输入语义。 | `Std*MatchesPublicEstimator` | test-only 标量 reference 是否复刻公开入口有效输入语义。 | production RVV dispatch 是否命中。 |
 | 公开入口输入语义测试（public input semantics） | 公开入口数量、权重和输入状态语义。 | `Public*MismatchKeepsOutputMatrix`、0/负权重 tests | 公开入口对数量不匹配和特殊权重的行为。 | 非法 index/correspondence 的未定义边界。 |
 | 局部正确性测试（unit/correctness） | helper 或候选链路对拍。 | `FullCloudCandidateMatchesStd` | helper 或候选链路在固定输入上与标量 reference 对齐。 | 板卡性能和真实 production 入口。 |
+| 实现族比较测试（implementation-family comparison） | 同 row source 下的 family carry-over 审计。 | `SourceIndexedBlockReductionMatchesStdWithinBudget`、`DualIndicesBlockReductionMatchesStdWithinBudget` | staged-gather / block-baseline / block-fused-abcd-ilp 在同边界下的数值和形状。 | 真实 production 接入和 repeated production 性能。 |
 | 数值一致性测试（numerical consistency） | 误差预算和稳定性检查。 | near-cancellation、scale-stress、非有限语义 tests | `accepted_points`、`ATA/ATb`、matrix 在误差预算内。 | bitwise 完全一致。 |
 | 回退路径测试（fallback tests） | gate miss 后的标量语义。 | small input、layout gate、`Scalar=double` | gate miss 后不进入 RVV，仍使用标量语义。 | 未覆盖入口也有性能收益。 |
-| 真实生产路径测试（production direct） | 真实 public full-cloud overload 命中情况。 | `ProductionFullCloud*` | public full-cloud overload 命中 production helper 或按 gate 回退。 | source-indexed、dual-indices、correspondences 的 production 接入。 |
+| 真实生产路径测试（production direct） | 真实 public overload 命中情况。 | `ProductionFullCloud*`、`ProductionSourceIndexed*` | public full-cloud / source-indexed overload 命中 production helper 或按 gate 回退。 | dual-indices、correspondences 的 production 接入。 |
 | 生产形态诊断（production-shaped diagnostic） | 接近生产调用形态的诊断。 | `production-shaped` bench cases | test_support helper 用接近 production 的输入和 wrapper 做候选筛选。 | 真实 production dispatch。 |
 | 组件消融（component ablation） | 拆分 normal-equation 组件成本。 | `component ... no-solve` bench cases | 只测 normal-equation 构造，分离公式和 reduction 成本。 | 端到端 estimate 性能。 |
 | 性能测试（bench/performance） | 板卡或目标硬件耗时测试。 | board repeated summary | 目标硬件上的耗时和 speedup。 | QEMU timing 不能作为性能结论。 |
@@ -84,8 +87,11 @@ registration/include/pcl/registration/impl/transformation_estimation_point_to_pl
 | `run_test_public_semantics` | 公开入口语义测试。 | 行来源公开语义。 | `log/qemu/run_test_public_semantics_std.log`、`run_test_public_semantics_rvv.log`。 |
 | `run_test_input_semantics` | 公开入口输入语义测试。 | 边界 / 对抗输入。 | `log/qemu/run_test_input_semantics_std.log`、`run_test_input_semantics_rvv.log`。 |
 | `run_test_row_sources` | 局部正确性测试。 | 行来源诊断、回退路径、边界输入。 | `log/qemu/run_test_row_sources_std.log`、`run_test_row_sources_rvv.log`。 |
+| `run_test_source_indexed_family` | 实现族比较正确性。 | source-indexed block-reduction / fused-abcd-ilp candidate；pre-production diagnostic。 | `log/qemu/run_test_source_indexed_family_std.log`、`run_test_source_indexed_family_rvv.log`。 |
+| `run_test_dual_correspondence_family` | 实现族比较正确性。 | dual-indices / correspondences staged-gather / block-baseline / block-fused-abcd-ilp candidate；pre-production diagnostic。 | `log/qemu/run_test_dual_correspondence_family_std.log`、`run_test_dual_correspondence_family_rvv.log`。 |
 | `run_test_candidates` | 局部正确性测试。 | 数值一致性、组件消融正确性、边界输入。 | `log/qemu/run_test_candidates_std.log`、`run_test_candidates_rvv.log`。 |
 | `run_test_production_direct` | 真实生产路径测试。 | 回退路径、布局门控正确性、数值一致性。 | `log/qemu/run_test_production_direct_std.log`、`run_test_production_direct_rvv.log`。 |
+| `run_test_source_indices` | source-indexed 真实生产路径测试。 | 有效 source index、source/target generic layout gate 和小规模回退。 | `log/qemu/run_test_source_indices_std.log`、`run_test_source_indices_rvv.log`。 |
 | `run_test_compare` | 正确性汇总入口。 | 覆盖上述全部 gtest 类型。 | `log/qemu/run_test_std.log`、`log/qemu/run_test_rvv.log`。 |
 
 ### bench alias
@@ -96,8 +102,11 @@ registration/include/pcl/registration/impl/transformation_estimation_point_to_pl
 | --- | --- | --- | --- |
 | `run_bench_default_diagnostic` | 综合诊断入口。 | 空；默认大汇总，覆盖 full-cloud、block/fused 和 row-source candidate。 | `log/qemu/run_bench_default_diagnostic_std.log`、`run_bench_default_diagnostic_rvv.log`、`analyze_bench_compare_default_diagnostic.log`。 |
 | `run_bench_row_sources` | 行来源诊断。 | `row-sources`；隔离 full-cloud/source-indexed/dual-indices/correspondences candidate。 | `log/qemu/run_bench_row_sources_std.log`、`run_bench_row_sources_rvv.log`、`analyze_bench_compare_row_sources.log`。 |
+| `run_bench_source_indexed_family` | 实现族比较。 | `source-indexed-family`；同一 source-indexed row source 下比较 staged-gather、block-baseline 和 block-fused-abcd-ilp。 | `log/qemu/run_bench_source_indexed_family_std.log`、`run_bench_source_indexed_family_rvv.log`、`analyze_bench_compare_source_indexed_family.log`；当前阶段默认带 warmup，旧 `Warmup Iterations: 0` 日志只算历史 smoke。 |
+| `run_bench_dual_correspondence_family` | 实现族比较。 | `dual-correspondence-family`；同一 dual/correspondence row source 下比较 staged-gather、block-baseline 和 block-fused-abcd-ilp。 | `log/qemu/run_bench_dual_correspondence_family_std.log`、`run_bench_dual_correspondence_family_rvv.log`、`analyze_bench_compare_dual_correspondence_family.log`。 |
 | `run_bench_fused_formula` | 组件消融。 | `fused-formula`。 | `log/qemu/run_bench_fused_formula_std.log`、`run_bench_fused_formula_rvv.log`、`analyze_bench_compare_fused_formula.log`。 |
 | `run_bench_production_dispatch` | 真实生产路径性能测试。 | `production-dispatch`。 | `log/qemu/run_bench_production_dispatch_std.log`、`run_bench_production_dispatch_rvv.log`、`analyze_bench_compare_production_dispatch.log`。 |
+| `run_bench_production_source_indices` | source-indexed 真实生产路径性能测试。 | `production-source-indices`。 | `log/qemu/run_bench_production_source_indices_std.log`、`run_bench_production_source_indices_rvv.log`、`analyze_bench_compare_production_source_indices.log`。 |
 | `run_bench_production_shaped_fused_formula` | 生产形态诊断。 | `production-shaped-fused-formula`。 | `log/qemu/run_bench_production_shaped_fused_formula_std.log`、`run_bench_production_shaped_fused_formula_rvv.log`、`analyze_bench_compare_production_shaped_fused_formula.log`。 |
 | `run_bench_generic_fused_abc` | 组件消融。 | `generic-fused-abc`；三类代表点型的 `abc` 候选。 | `log/qemu/run_bench_generic_fused_abc_std.log`、`run_bench_generic_fused_abc_rvv.log`、`analyze_bench_compare_generic_fused_abc.log`。 |
 | `run_bench_generic_fused_formula` | 组件消融。 | `generic-fused-formula`；三类代表点型的 `abc`、D 项和 `abcd` 候选。 | `log/qemu/run_bench_generic_fused_formula_std.log`、`run_bench_generic_fused_formula_rvv.log`、`analyze_bench_compare_generic_fused_formula.log`。 |
@@ -114,12 +123,18 @@ registration/include/pcl/registration/impl/transformation_estimation_point_to_pl
 | `run_board_test_public_semantics` | 公开入口语义测试。 | `run_test_public_semantics`。 | `log/board/run_board_test_public_semantics/`。 |
 | `run_board_test_input_semantics` | 公开入口输入语义测试。 | `run_test_input_semantics`。 | `log/board/run_board_test_input_semantics/`。 |
 | `run_board_test_row_sources` | 行来源与回退测试。 | `run_test_row_sources`。 | `log/board/run_board_test_row_sources/`。 |
+| `run_board_test_source_indexed_family` | 实现族比较正确性。 | `run_test_source_indexed_family`。 | `log/board/run_board_test_source_indexed_family/`。 |
+| `run_board_test_dual_correspondence_family` | 实现族比较正确性。 | `run_test_dual_correspondence_family`。 | `log/board/run_board_test_dual_correspondence_family/`。 |
 | `run_board_test_candidates` | 候选正确性测试。 | `run_test_candidates`。 | `log/board/run_board_test_candidates/`。 |
 | `run_board_test_production_direct` | 真实生产路径测试。 | `run_test_production_direct`。 | `log/board/run_board_test_production_direct/`。 |
+| `run_board_test_source_indices` | source-indexed 真实生产路径测试。 | `run_test_source_indices`。 | `log/board/run_board_test_source_indices/`。 |
 | `run_board_bench_default_diagnostic` | 综合诊断入口。 | `run_bench_default_diagnostic`。 | `log/board/run_board_bench_default_diagnostic/`。 |
-| `run_board_bench_row_sources` | 行来源诊断。 | `run_bench_row_sources`。 | `log/board/run_board_bench_row_sources/`。 |
+| `run_board_bench_row_sources` | 行来源诊断。 | `run_bench_row_sources`。 | `log/board/run_board_bench_row_sources/`；当前有 diagnostic `evidence_manifest.json` / `evidence_doctor.md`。 |
+| `run_board_bench_source_indexed_family` | source-indexed 实现族比较。 | `run_bench_source_indexed_family`。 | `log/board/run_board_bench_source_indexed_family/`；当前有 diagnostic `evidence_manifest.json` / `evidence_doctor.md`，默认板卡 smoke 也带 warmup。 |
+| `run_board_bench_dual_correspondence_family` | dual-indices / correspondences 实现族比较。 | `run_bench_dual_correspondence_family`。 | `log/board/run_board_bench_dual_correspondence_family/`；当前有 diagnostic `evidence_manifest.json` / `evidence_doctor.md`。 |
 | `run_board_bench_fused_formula` | 组件消融。 | `run_bench_fused_formula`。 | `log/board/run_board_bench_fused_formula/`。 |
 | `run_board_bench_production_dispatch` | 真实生产路径性能测试。 | `run_bench_production_dispatch`。 | `log/board/run_board_bench_production_dispatch/`。 |
+| `run_board_bench_production_source_indices` | source-indexed 真实生产路径性能测试。 | `run_bench_production_source_indices`。 | `log/board/run_board_bench_production_source_indices/`。 |
 | `run_board_bench_production_shaped_fused_formula` | 生产形态诊断。 | `run_bench_production_shaped_fused_formula`。 | `log/board/run_board_bench_production_shaped_fused_formula/`。 |
 | `run_board_bench_generic_fused_abc` | 组件消融。 | `run_bench_generic_fused_abc`。 | `log/board/run_board_bench_generic_fused_abc/`。 |
 | `run_board_bench_generic_fused_formula` | 组件消融。 | `run_bench_generic_fused_formula`。 | `log/board/run_board_bench_generic_fused_formula/`。 |
@@ -131,10 +146,15 @@ registration/include/pcl/registration/impl/transformation_estimation_point_to_pl
 | target | 主测试类型 | 作用 | 默认输出 |
 | --- | --- | --- | --- |
 | `collect_board_row_sources_repeated` | 行来源重复采集。 | 多轮采集 `row-sources` case-filter，判断是否值得进入下一轮 production integration。 | `log/board/row_sources_diagnostic/summary.md`。 |
+| `collect_board_source_indexed_family_repeated` | source-indexed 实现族重复采集。 | 多轮采集 `source-indexed-family` case-filter，重新校准 staged-gather、block-baseline、block-fused-abcd-ilp 和 component no-solve 的 repeated board speedup。 | `log/board/source_indexed_family_repeated/summary.md`。 |
+| `doctor_board_source_indexed_family_repeated` | source-indexed 实现族重复采集后的 Evidence Doctor wrapper。 | summary 生成后把 repeated board summary 转成 `evidence_manifest.json`、`evidence_doctor.md` 和 `evidence_doctor.json`。 | `log/board/source_indexed_family_repeated/evidence_manifest.json`、`evidence_doctor.md`、`evidence_doctor.json`。 |
 | `collect_board_production_dispatch_repeated` | 生产路径重复采集。 | 多轮采集真实 public full-cloud overload 的 std/RVV speedup。 | `log/board/production_dispatch_fused_abcd_ilp/summary.md`。 |
+| `collect_board_production_source_indices_repeated` | source-indexed 生产路径重复采集。 | 多轮采集真实 public source-indexed overload 的 std/RVV speedup。 | `log/board/production_source_indices_staged_gather/summary.md`；当前有 `evidence_manifest.json` / `evidence_doctor.md` 边界。 |
 | `collect_board_production_default_fused_abcd_ilp` | 默认生产路径重复采集。 | 多轮采集默认 RVV path trace 和 checksum。 | `log/board/production_default_fused_abcd_ilp/`。 |
 | `summarize_board_production_default_fused_abcd_ilp` | 追踪汇总。 | 从默认 RVV path raw logs 生成 trace summary。 | `log/board/production_default_fused_abcd_ilp/trace_summary.md`。 |
 | `asm_production_default_fused_abcd_ilp` | 反汇编归因。 | 生成默认 production helper 的反汇编归因摘要。 | `log/board/production_default_fused_abcd_ilp/asm_production_symbol_attribution.md`。 |
+
+source-indexed-family 现在已经有 dedicated 的重复板卡 target `collect_board_source_indexed_family_repeated`；它只产出 repeated summary，不自动替代 `production-source-indices` 的 production evidence。当前 5-run summary 和 `doctor_board_source_indexed_family_repeated` 已生成 `3E / 6W / 13S`：`block-fused-abcd-ilp` full estimate median `0.90x`、`4/5` 低于 `1.0x`，所以停在 diagnostic no-production。dual-indices / correspondences 仍没有自己的 dedicated repeated production target，相关比较还应留在 diagnostic / next-phase audit。
 
 ## 测试流程
 
@@ -181,7 +201,7 @@ flowchart TD
 | 维度                       | 已覆盖                                                                  | 证据位置                                                                                                                                 | 当前边界                                                             |
 | -------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | full-cloud public overload | 已覆盖公开入口语义测试、真实生产路径测试和 bench。 | `src/test_teptplw_public_semantics.cpp`、`src/test_teptplw_production_direct.cpp`、`production_dispatch_fused_abcd_ilp/summary.md` | 只批准`Scalar=float`、连续 weights、layout gate 成立。             |
-| source-indexed             | 已覆盖公开入口语义测试、test-only candidate、行来源诊断 target 和 board target。 | `src/test_teptplw_public_semantics.cpp`、`src/test_teptplw_row_sources.cpp`、`run_bench_row_sources`、`run_board_bench_row_sources`、`collect_board_row_sources_repeated` | production 保持标量。 |
+| source-indexed             | 已覆盖公开入口语义测试、公开入口输入语义测试、test-only candidate、真实生产路径测试、行来源诊断 target 和 repeated board summary。 | `src/test_teptplw_public_semantics.cpp`、`src/test_teptplw_input_semantics.cpp`、`src/test_teptplw_row_sources.cpp`、`src/test_teptplw_production_direct.cpp`、`run_test_source_indices`、`run_bench_production_source_indices`、`collect_board_production_source_indices_repeated` | 只批准有效 source index、连续 weights、`Scalar=float` 和 layout/size/VLEN/byte-offset gate。 |
 | dual-indices               | 已覆盖公开入口语义测试、test-only candidate、行来源诊断 target 和 board target。 | 同上。 | production 保持标量。 |
 | correspondences            | 已覆盖公开入口语义测试、test-only candidate、行来源诊断 target 和 board target。 | 同上。 | production 保持标量；非法 index 行为需谨慎。 |
 | finite point/normal mask   | 已覆盖。                                                                | `InvalidLaneMaskMatchesStd`、非有限语义 tests。                                                                                        | weight 不参与 finite mask。                                          |
@@ -200,9 +220,23 @@ flowchart TD
 
 | 文件                                                                                 | 证据角色                                               |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| `log/qemu/run_test_std.log`                                                        | QEMU std gtest correctness；39 passed + 1 skipped。    |
-| `log/qemu/run_test_rvv.log`                                                        | QEMU RVV gtest correctness；40 passed。                |
+| `log/qemu/run_test_std.log`                                                        | QEMU std gtest correctness；45 passed + 1 skipped。    |
+| `log/qemu/run_test_rvv.log`                                                        | QEMU RVV gtest correctness；47 passed。                |
+| `log/qemu/run_test_source_indices_std.log`                                         | source-indexed production direct 细粒度 std correctness；6 passed。 |
+| `log/qemu/run_test_source_indices_rvv.log`                                         | source-indexed production direct 细粒度 RVV correctness；7 passed。 |
+| `log/board/run_board_bench_row_sources/analyze_bench_compare.log`                  | row-source 诊断触发原始日志；说明 source-indexed 值得进入 production integration loop。 |
+| `log/board/run_board_bench_row_sources/evidence_manifest.json`                     | row-source diagnostic manifest；记录 observed speedup 和 pre-production 边界。 |
+| `log/board/run_board_bench_row_sources/evidence_doctor.md`                         | row-source diagnostic doctor；0 Errors / 0 Warnings / 0 Suggestions。 |
 | `log/board/production_dispatch_fused_abcd_ilp/summary.md`                          | production-dispatch repeated std/RVV speedup summary。 |
+| `log/board/production_source_indices_staged_gather/summary.md`                     | source-indexed production repeated std/RVV speedup summary。 |
+| `log/board/production_source_indices_staged_gather/evidence_manifest.json`          | source-indexed production repeated board manifest。 |
+| `log/board/production_source_indices_staged_gather/evidence_doctor.md`              | source-indexed Evidence Doctor；0 Errors / 7 Warnings / 6 Suggestions。 |
+| `log/board/run_board_bench_source_indexed_family/evidence_manifest.json`            | source-indexed implementation-family diagnostic manifest；single-run board smoke。 |
+| `log/board/run_board_bench_source_indexed_family/evidence_doctor.md`                | source-indexed family doctor；Phase 030 当前为 2 Errors / 30 Warnings / 26 Suggestions，阻止把旧 no-warmup smoke 写成生产替换结论。 |
+| `log/board/source_indexed_family_repeated/summary.md`                               | source-indexed implementation-family repeated diagnostic summary；`block-fused-abcd-ilp` full estimate median `0.90x`。 |
+| `log/board/source_indexed_family_repeated/evidence_manifest.json`                   | source-indexed implementation-family repeated diagnostic manifest。 |
+| `log/board/source_indexed_family_repeated/evidence_doctor.md`                       | source-indexed implementation-family repeated doctor；3 Errors / 6 Warnings / 13 Suggestions。 |
+| `log/board/source_indexed_family_repeated/evidence_doctor.json`                     | source-indexed implementation-family repeated doctor 机器可读输出。 |
 | `log/board/production_default_fused_abcd_ilp/trace_summary.md`                     | 默认 RVV path 多轮 trace summary。                     |
 | `log/board/production_default_fused_abcd_ilp/checksum_validation.md`               | 默认 RVV path checksum 序列一致性。                    |
 | `log/board/production_default_fused_abcd_ilp/asm_production_symbol_attribution.md` | 默认 production helper 反汇编归因。                    |
@@ -213,8 +247,8 @@ flowchart TD
 
 | 文件或模式                                                                            | 原因                                                                              |
 | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `log/qemu/run_bench_std.log`、`run_bench_rvv.log`、`analyze_bench_compare.log`  | QEMU timing 不作为性能结论；当前文档只保留 correctness logs。                     |
-| `log/board/run_bench_std.log`、`run_bench_rvv.log`、`analyze_bench_compare.log` | single-run board diagnostic，不属于当前 repeated summary 主证据。                   |
+| `log/qemu/run_bench_std.log`、`run_bench_rvv.log`、`analyze_bench_compare.log`  | QEMU timing 不作为性能结论；若保留，只能作为 `qemu_smoke_only`。                     |
+| `log/board/run_bench_std.log`、`run_bench_rvv.log`、`analyze_bench_compare.log` | single-run board diagnostic，不属于当前 repeated summary 主证据；`run_board_bench_row_sources/analyze_bench_compare.log` 是文档引用的诊断触发例外。 |
 | `log/board/**/run*.log`                                                             | raw board logs；默认 summary-only。                                               |
 | `log/board/**/board_env_*.log`                                                      | 板卡环境 raw log；默认不提交。                                                    |
 | `log/board/**/collection_manifest.json`                                             | 采集 manifest 可能包含本机或远端信息；默认不提交。                                |
@@ -223,4 +257,6 @@ flowchart TD
 
 ## 当前结论边界
 
-当前 correctness 证据覆盖 public full-cloud direct、production helper normal-equation、near-cancellation、scale-stress、非有限 point/normal、非有限 weight、fallback、输入数量不匹配、0/负权重和三类代表点型。当前 performance 证据只覆盖三类代表点型在 262144 点上的 repeated board std/RVV speedup。未逐类型上板的 gate-allowed 点型只能继承 correctness 和 representative performance 判断。
+当前 correctness 证据覆盖 public full-cloud direct、public source-indexed direct、production helper normal-equation、near-cancellation、scale-stress、非有限 point/normal、非有限 weight、fallback、输入数量不匹配、0/负权重和三类代表点型。当前 performance 证据覆盖 full-cloud 三类代表点型在 262144 点上的 repeated board std/RVV speedup，也覆盖 source-indexed 三类代表点型在 65536 和 262144 点上的 repeated board std/RVV speedup。未逐类型上板的 gate-allowed 点型只能继承 correctness 和 representative performance 判断。
+
+`source-indexed-family` 是接入生产前实现族比较入口。它的 correctness 已通过；Phase 030 的 5-run repeated board summary 显示 `block-fused-abcd-ilp` full estimate median `0.90x`、`4/5` 低于 `1.0x`，Evidence Doctor 为 3 Errors / 6 Warnings / 13 Suggestions。当前只支持 `attempted / no-production for current evidence` 结论，不替代 `run_test_source_indices` 和 `collect_board_production_source_indices_repeated` 的生产证据，也不触发 production replacement。

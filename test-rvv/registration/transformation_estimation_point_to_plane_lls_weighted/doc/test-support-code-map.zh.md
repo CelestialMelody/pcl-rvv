@@ -129,7 +129,7 @@ include/impl/teptplw_candidate_row_sources.hpp
 | `accumulate_candidate_dual_indices` | source/target 双侧 gather；weight contiguous load。 | 非 RVV 构建、小规模、VLEN miss、byte-offset miss、任一索引无效。 | dual-indices candidate correctness 和 bench。 |
 | `accumulate_candidate_correspondences` | 先展开 query/match/weight，再双侧 gather。 | 非 RVV 构建、小规模、VLEN miss、byte-offset miss、有效 correspondence 少于 64。 | correspondences candidate correctness 和 bench。 |
 
-这些函数是 diagnostic candidates。production 当前不调用它们。
+这些函数是 diagnostic candidates。production 当前不调用它们。source-indexed production 采用同一 row source policy，但使用单独的 production helper：它先 staging 有效索引，再做 gather / stride load 和压缩尾段，不复用这些 test-only helper。
 
 ## Full-Cloud Candidate 与 Estimate Wrapper
 
@@ -253,6 +253,7 @@ src/bench_teptplw.cpp
 | `run_case` | 普通计时。 |
 | `run_case_trace` | 逐 iteration 计时。 |
 | `run_public_full_cloud_weighted` | 调用真实 public full-cloud overload。 |
+| `run_public_source_indices_weighted` | 调用真实 public source-indexed overload。 |
 | `print_results` | 输出 case 耗时、checksum 和 trace。 |
 
 `teptplw_bench_cases.hpp` 负责 case-filter 到具体 case 的映射。它是 bench label 的 source of truth。
@@ -261,10 +262,14 @@ src/bench_teptplw.cpp
 | --- | --- |
 | 空 | 默认综合诊断，混合 full-cloud、block/fused 和 row-source candidate。 |
 | `row-sources` | 数据源取舍诊断，只跑 full-cloud、source-indexed、dual-indices 和 correspondences candidate。 |
+| `dual-correspondence-family` | dual-indices / correspondences 实现族比较诊断，只跑 staged-gather、block-baseline 和 block-fused-abcd-ilp candidate。 |
 | `production-dispatch` | 真实 public full-cloud overload 的 std/RVV bench。 |
+| `production-source-indices` | 真实 public source-indexed overload 的 std/RVV bench。 |
 | `production-default-fused-abcd-ilp` | 当前默认 production RVV path 的 trace bench。 |
 
 完整 case-filter 字典见 `benchmark-and-evidence.zh.md`。
+
+`dual-correspondence-family` 仍只服务 test-rvv candidate 和 board diagnostic，不会改动 production public overload。
 
 ## Production 代码对照
 
@@ -287,9 +292,16 @@ production 主要符号：
 | `buildPointToPlaneLLSWeightedFullCloudBlockRVV` | production RVV helper | full-cloud block-reduction RVV path。 | production default gtest、production-default trace。 |
 | `buildPointToPlaneLLSWeightedFullCloudDefault` | production default selector | RVV 可用时用 RVV，否则 std。 | production direct tests。 |
 | `estimatePointToPlaneLLSWeightedFullCloudRVV` | production wrapper | RVV 成功后 solve 并返回 true。 | public overload dispatch。 |
-| `estimateRigidTransformation(cloud_src, cloud_tgt, matrix)` | production public entry | full-cloud public overload，当前唯一 RVV dispatch 入口。 | production-dispatch bench。 |
+| `canUsePointToPlaneLLSWeightedSourceIndicesRVV` | production dispatch gate | 检查 source size、index count、target size、weights size、VLEN、byte-offset。 | `ProductionSourceIndexedPredicateGatesAreNarrow`。 |
+| `loadPointToPlaneLLSWeightedSourceIndexedVectors` | production RVV formula helper | source gather、target stride load、weight load、mask 和 row vectors。 | source-indexed production correctness。 |
+| `accumulatePointToPlaneLLSWeightedCompressedRowsF32M2` | production RVV reduction | `vcompress` 和 scalar tail accumulation。 | source-indexed production correctness。 |
+| `buildPointToPlaneLLSWeightedSourceIndicesStagedRVV` | production RVV helper | source-indexed staged-gather RVV path。 | source-indexed production gtest、board summary。 |
+| `buildPointToPlaneLLSWeightedSourceIndicesDefault` | production default selector | RVV 可用时用 staged-gather RVV，否则 std。 | source-indexed production tests。 |
+| `estimatePointToPlaneLLSWeightedSourceIndicesRVV` | production wrapper | source-indexed RVV 成功后 solve 并返回 true。 | source-indexed public overload dispatch。 |
+| `estimateRigidTransformation(cloud_src, cloud_tgt, matrix)` | production public entry | full-cloud public overload，当前一个 RVV dispatch 入口。 | production-dispatch bench。 |
+| `estimateRigidTransformation(cloud_src, indices_src, cloud_tgt, matrix)` | production public entry | source-indexed public overload，当前另一个 RVV dispatch 入口。 | source-indexed production bench。 |
 | public overload size/weight checks | production public entry | full/source/dual 输入数量不匹配时打印 `PCL_ERROR` 并返回。 | input semantics tests。 |
-| indexed/correspondences overloads | production public entry | 保持 `ConstCloudIterator` 标量路径。 | public semantics tests。 |
+| dual-indices / correspondences overloads | production public entry | 保持 `ConstCloudIterator` 标量路径。 | public semantics tests 和 row source tests。 |
 
 ## Src 测试文件到 Helper 的调用关系
 
@@ -299,7 +311,7 @@ production 主要符号：
 | `test_teptplw_input_semantics.cpp` | public estimator -> production public size/weight checks；0/负权重 tests 继续对 `buildPointToPlaneLLSWeightedFullCloudDefault` 和 std helper。 |
 | `test_teptplw_row_sources.cpp` | `diag::estimate_candidate_*` -> candidate row source -> reduction/staged rows -> solver。 |
 | `test_teptplw_candidates.cpp` | candidate full-cloud/reduction/fused helpers -> assertions -> std/block reference。 |
-| `test_teptplw_production_direct.cpp` | public estimator 或 production detail helpers -> production std/default/RVV helpers。 |
+| `test_teptplw_production_direct.cpp` | public full-cloud / source-indexed estimator 或 production detail helpers -> production std/default/RVV helpers。 |
 
 ## Production 与 Test Support 边界
 

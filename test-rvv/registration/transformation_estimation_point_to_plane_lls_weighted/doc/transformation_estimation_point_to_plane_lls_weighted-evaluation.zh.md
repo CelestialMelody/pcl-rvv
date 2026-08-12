@@ -10,12 +10,12 @@
 EvidenceDecision：
 
 ```text
-production-adopted/full-cloud-f32-aos-layout-gated-weighted-block-dispatch-fused-abcd-ilp-accepted-risk
+production-adopted/full-cloud-and-source-indexed-f32-aos-layout-gated-weighted-rvv-accepted-risk
 ```
 
-生产接入范围是 full-cloud public overload、`Scalar=float`、连续 `weights_`、source `RVVXYZAoSFloatLayout`、target `RVVXYZNormalFloatLayout`、size/VLEN/byte-offset gate 均满足的路径。该路径保留 weighted block-reduction，并在逐点 `a/b/c/d` 公式块中采用 `fused-abcd-ilp` code shape。
+生产接入范围是 full-cloud public overload 和 source-indexed public overload。两条路径都要求 `Scalar=float`、连续 `weights_`、source `RVVXYZAoSFloatLayout`、target `RVVXYZNormalFloatLayout`、size/VLEN/byte-offset gate 均满足。full-cloud 路径保留 weighted block-reduction，并在逐点 `a/b/c/d` 公式块中采用 `fused-abcd-ilp` code shape。source-indexed 路径采用 valid-index scan + staging gather。
 
-source-indexed、dual-indices、correspondences、`Scalar=double`、非连续权重和 layout miss 路径保持标量。
+dual-indices、correspondences、`Scalar=double`、非连续权重和 layout miss 路径保持标量。
 
 ## 文档分工
 
@@ -35,19 +35,28 @@ source-indexed、dual-indices、correspondences、`Scalar=double`、非连续权
 | 项 | 当前状态 | 证据 |
 | --- | --- | --- |
 | dispatch | full-cloud overload 先检查 source/target 点数和 `weights_.size()`，再尝试 RVV。命中后提前返回，失败后进入原 iterator 标量 helper。 | 真实生产路径测试、公开入口输入语义测试、源码审查。 |
+| source-indexed dispatch | source-indexed overload 先检查 index count、target 点数和 `weights_.size()`，再尝试 source-indexed RVV。命中后提前返回，失败后进入原 iterator 标量 helper。 | `run_test_source_indices_compare`、source-indexed board summary、源码审查。 |
 | generic gate | source 用 `RVVXYZAoSFloatLayout`，target 用 `RVVXYZNormalFloatLayout`。两侧分别取 offset 和 stride。 | 三类代表点型 correctness、production-dispatch board summary。 |
 | weights | 只读取成员 `weights_` 的连续 vector。 | public overload tests 和 production-dispatch bench 都调用 `setCorrespondenceWeights(weights)`。 |
 | finite mask | 检查 source xyz、target xyz 和 target normal。weight 不参与 finite mask。 | 非有限 point/normal tests、非有限 weight tests。 |
 | reduction | 使用 A/B/C/N block groups。每组在向量 partial sums 中累加，再显式 `vfredosum` 到 double normal-equation。 | 法方程测试、反汇编归因、板卡追踪。 |
 | formula | `a/b/c` 使用 seed multiply + `vfmsac`；`d` 使用 displacement 后 `vfmul + vfmacc + vfmacc`。 | production source、反汇编归因、checksum trace。 |
-| fallback | 非 RVV、非 float、小规模、layout miss、VL miss、byte-offset miss、indexed/correspondences 均标量。 | 回退路径测试和源码审查。 |
+| fallback | 非 RVV、非 float、小规模、layout miss、VL miss、byte-offset miss、source-index invalid、dual-indices 和 correspondences 均回到标量边界。 | 回退路径测试和源码审查。 |
+| source-indexed family | 当前采用 staged-gather / compressed-tail；source-indexed block-reduction / fused-formula family comparison 已在当前 diagnostic 边界下闭合为 no-production。 | 当前 production repeated board 证明现有 source-indexed family；新 family repeated summary 说明 `block-fused-abcd-ilp` 不进入 production-candidate。 |
+| family carry-over audit | full-cloud adopted 的 block-reduction / A/B/C/N / fused-abcd-ilp family 已按 source-indexed、dual-indices、correspondences 启动 test-rvv 审计；source-indexed-family 的旧 no-warmup smoke 降级为 historical diagnostic，新 repeated board 成为当前 truth。 | source-indexed `block-fused-abcd-ilp` full estimate median `0.90x` 且 `4/5` 低于 `1.0x`；当前不谈 production replacement。 |
 
 ## Evidence Index
 
 | 证据 | 路径 / 命令 | 结果 | 边界 |
 | --- | --- | --- | --- |
-| QEMU 正确性 | `log/qemu/run_test_std.log`、`log/qemu/run_test_rvv.log` | std 为 `39 passed + 1 skipped`；RVV 为 `40 passed`。 | 正确性、路径和日志形状；不作为性能结论。 |
-| production-dispatch 重复板卡采集 | `log/board/production_dispatch_fused_abcd_ilp/summary.md` | 三类代表点型 262144 点 repeated std/RVV speedup 均正向。 | 真实 public full-cloud overload；不覆盖 indexed/correspondences。 |
+| QEMU 正确性 | `log/qemu/run_test_std.log`、`log/qemu/run_test_rvv.log` | std 为 `45 passed + 1 skipped`；RVV 为 `47 passed`。 | 正确性、路径和日志形状；不作为性能结论。 |
+| source-indexed 细粒度正确性 | `log/qemu/run_test_source_indices_std.log`、`log/qemu/run_test_source_indices_rvv.log` | std 6 passed；RVV 7 passed。 | 真实 public source-indexed overload、default helper、fallback 和代表点型。 |
+| row-source 诊断触发 | `log/board/run_board_bench_row_sources/analyze_bench_compare.log`、`log/board/run_board_bench_row_sources/evidence_manifest.json`、`log/board/run_board_bench_row_sources/evidence_doctor.md` | source-indexed 65536 / 262144 正向；dual-indices 和 correspondences 负向；doctor 为 0 Errors / 0 Warnings / 0 Suggestions。 | 只说明 pre-production diagnostic 边界成立；不作为最终 production 性能结论。 |
+| production-dispatch 重复板卡采集 | `log/board/production_dispatch_fused_abcd_ilp/summary.md` | 三类代表点型 262144 点 repeated std/RVV speedup 均正向。 | 真实 public full-cloud overload；不覆盖 source-indexed / dual / correspondences。 |
+| production-dispatch Evidence Doctor | `log/board/production_dispatch_fused_abcd_ilp/evidence_manifest.json`、`log/board/production_dispatch_fused_abcd_ilp/evidence_doctor.md` | 0 Errors / 0 Warnings / 3 Suggestions；binary identity suggestion 不阻塞当前结论。 | 只覆盖 production-dispatch full-cloud summary 和补充的默认 path checksum / asm。 |
+| source-indexed production 重复板卡采集 | `log/board/production_source_indices_staged_gather/summary.md` | 三类代表点型在 65536 和 262144 点 repeated std/RVV speedup 均正向。 | 真实 public source-indexed overload；不覆盖 dual-indices、correspondences 或 invalid index public 行为。 |
+| source-indexed Evidence Doctor 边界 | `log/board/production_source_indices_staged_gather/evidence_manifest.json`、`log/board/production_source_indices_staged_gather/evidence_doctor.md` | 0 Errors / 7 Warnings / 6 Suggestions。 | production repeated board 边界已机读化，但 source-indexed-specific asm 和 binary identity 仍未闭合，不能写成 clean pass。 |
+| source-indexed family diagnostic | `log/board/run_board_bench_source_indexed_family/evidence_manifest.json`、`log/board/run_board_bench_source_indexed_family/evidence_doctor.md`、`log/board/source_indexed_family_repeated/summary.md`、`log/board/source_indexed_family_repeated/evidence_doctor.md` | Phase 030 新 repeated summary：staged median `1.04x`、block-baseline median `1.05x`、block-fused median `0.90x`；doctor 为 `3E / 6W / 13S`。 | 只作为 pre-production diagnostic；当前足以阻止 `block-fused-abcd-ilp` production-candidate，不替代 production direct / asm。 |
 | production-default 追踪 | `log/board/production_default_fused_abcd_ilp/trace_summary.md` | 5 runs、20 iterations、5 warm-up；三类点型 checksum 序列一致。 | 默认 RVV path 稳定性；不产出旧 block/fused B/A。 |
 | 校验和稳定性 | `log/board/production_default_fused_abcd_ilp/checksum_validation.md` | 5 轮 checksum 行齐全，序列一致。 | 日志指纹一致性；不替代 gtest 数值正确性。 |
 | 生产反汇编归因 | `log/board/production_default_fused_abcd_ilp/asm_production_symbol_attribution.md` | 默认 production helper 的 RVV 指令归属已记录 `boundary`。 | 不同 `boundary` 的总指令数不能直接横向比较。 |
@@ -68,7 +77,26 @@ std/RVV speedup = std_ms / rvv_ms
 | `weighted lls production-dispatch full-cloud pointxyz-to-pointnormal 262144` | source generic gate representative。 | `2.98x / 2.95x` | 代表 source 只提供 xyz。 |
 | `weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal 262144` | source + target generic gate representative。 | `3.00x / 2.96x` | 代表 target 有 xyz+normal 和额外字段。 |
 
-这些结果证明当前 production default 在三类代表点型上相对 std 正向。它们不证明 indexed/correspondences、`Scalar=double`、非连续权重或所有 gate-allowed 点型逐类型性能。
+这些结果证明 full-cloud production default 在三类代表点型上相对 std 正向。它们不证明 source-indexed、dual-indices、correspondences、`Scalar=double`、非连续权重或所有 gate-allowed 点型逐类型性能。source-indexed 结论见下一节。
+
+## Source-Indexed Production Result
+
+source-indexed production repeated board 使用 `production-source-indices` case-filter、65536/262144 点、5 runs、20 iterations 和 5 warm-up iterations。speedup 公式同样是：
+
+```text
+std/RVV speedup = std_ms / rvv_ms
+```
+
+| case | 中文含义 | median/min | 结论边界 |
+| --- | --- | ---: | --- |
+| `weighted lls production-dispatch source-indices pointnormal 262144` | `PointNormal -> PointNormal` 真实 source-indexed public overload。 | `2.33x / 1.99x` | 代表 `PointNormal` source gather。 |
+| `weighted lls production-dispatch source-indices pointnormal 65536` | 同上，较小规模。 | `2.59x / 2.47x` | 代表 64K index stream。 |
+| `weighted lls production-dispatch source-indices pointxyz-to-pointnormal 262144` | source 是 `PointXYZ`，target 是 `PointNormal`。 | `2.22x / 2.18x` | 代表 source generic xyz layout。 |
+| `weighted lls production-dispatch source-indices pointxyz-to-pointnormal 65536` | 同上，较小规模。 | `2.57x / 2.49x` | 代表 64K generic source。 |
+| `weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal 262144` | source 是 `PointXYZ`，target 是 `PointXYZINormal`。 | `2.37x / 2.28x` | 代表 source 和 target generic layout。 |
+| `weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal 65536` | 同上，较小规模。 | `2.78x / 2.70x` | 代表 64K generic source + target。 |
+
+这些结果证明 valid source-indexed production path 在三类代表点型和两个规模上相对 std 正向。它们不证明 dual-indices、correspondences、invalid index public API 行为、`Scalar=double` 或非连续权重。
 
 ## Correctness Boundary
 
@@ -78,7 +106,7 @@ QEMU `run_test_compare` 覆盖下列 correctness 维度：
 | --- | --- |
 | 公开入口语义测试 | full-cloud、source-indexed、dual-indices 和 correspondences 的有效输入语义。 |
 | 公开入口输入语义测试 | full/source/dual 的 target、index stream 和 weights 数量不匹配；0 权重；负权重。 |
-| 真实生产路径测试 | 真实 full-cloud public overload、default helper、std helper 和 production normal-equation。 |
+| 真实生产路径测试 | 真实 full-cloud public overload、source-indexed public overload、default helper、std helper 和 production normal-equation。 |
 | 回退路径测试 | small input、predicate gate、double-normal target、`Scalar=double`。 |
 | 数值一致性测试 | near-cancellation、scale-stress、非有限 point/normal、非有限 weight。 |
 | 代表点型覆盖 | `PointNormal -> PointNormal`、`PointXYZ -> PointNormal`、`PointXYZ -> PointXYZINormal`。 |
@@ -97,14 +125,18 @@ QEMU `run_test_compare` 覆盖下列 correctness 维度：
 
 当前新增 `run_bench_row_sources` 作为第一层的专门入口。对应的单次板卡入口是 `run_board_bench_row_sources`，重复板卡采集入口是 `collect_board_row_sources_repeated`。`run_bench_default_diagnostic` 仍是综合诊断入口，它包含 row source case，但同时混入 full-cloud、block-reduction 和 fused formula case。
 
+`run_board_bench_row_sources/analyze_bench_compare.log` 记录了 source-indexed 65536 / 262144 正向、dual-indices 和 correspondences 负向的单次板卡信号。对应的 `run_board_bench_row_sources/evidence_manifest.json` 把这些值保留为 `observed_speedup`，doctor 结果为 0 Errors / 0 Warnings / 0 Suggestions。它是 production integration 的触发 / 拒绝诊断证据，不是最终 production 性能结论；source-indexed 的最终结论由 `collect_board_production_source_indices_repeated` 收口。
+
+source-indexed 走完的是 staged-gather / compressed-tail adoption 链路，不是 full-cloud adopted family 的自动外推。若后续继续优化 source-indexed，默认动作是在 test-rvv 先补同 family candidate、correctness、bench、board 和 asm / doctor 边界，再决定是否替换当前 production helper。dual-indices 和 correspondences 则还停在 diagnostic candidate 阶段，必须先补自己的 candidate / test / bench / board，再谈 production。
+
 | 入口形态 | correctness target | bench target | board target | 当前状态 | 生产接入前还缺什么 |
 | --- | --- | --- | --- | --- | --- |
 | full-cloud | `run_test_public_semantics`、`run_test_production_direct` | `run_bench_production_dispatch` | `collect_board_production_dispatch_repeated` | 已采纳 | 已有当前真实生产路径证据。 |
-| source-indexed | `run_test_public_semantics`、`run_test_row_sources` | `run_bench_row_sources` | `collect_board_row_sources_repeated` | 仅诊断 | production helper、public dispatch、回退路径测试、production asm、repeated board。 |
+| source-indexed | `run_test_public_semantics`、`run_test_source_indices`、`run_test_production_direct` | `run_bench_production_source_indices` | `collect_board_production_source_indices_repeated` | 已采纳 | 已有 source-indexed production direct、fallback、bench 和 repeated board 证据；clean doctor pass 仍缺 source-indexed-specific asm / binary identity，family comparison 另开审计。 |
 | dual-indices | `run_test_public_semantics`、`run_test_row_sources` | `run_bench_row_sources` | `collect_board_row_sources_repeated` | 仅诊断 | production helper、public dispatch、回退路径测试、production asm、repeated board。 |
 | correspondences | `run_test_public_semantics`、`run_test_row_sources` | `run_bench_row_sources` | `collect_board_row_sources_repeated` | 仅诊断 | production helper、public dispatch、回退路径测试、production asm、repeated board；还要拆 index/weight 展开成本。 |
 
-如果 `run_bench_row_sources` 或对应 board 诊断显示某个 row source 稳定正向，只能把该方向升级为下一轮 production integration candidate。接入 production 之前，不能把该诊断结果写入当前 EvidenceDecision。
+如果 `run_bench_row_sources` 或对应 board 诊断显示某个 row source 稳定正向，只能把该方向升级为下一轮 production integration candidate。接入 production 之前，不能把该诊断结果写入当前 EvidenceDecision。source-indexed 已经走完这条升级链路，因此不再停留在 candidate。
 
 ## Historical Decision Audit
 
@@ -123,6 +155,8 @@ B/A = block-baseline_rvv_ms / fused-candidate_rvv_ms
 | direct diagnostic PointNormal 5-run | 256K direct B/A 多数不稳定或负向。`abc-fused` 为 `0.96x / 0.88x`，`abcd-fused` 为 `0.92x / 0.60x`。 | 说明 direct helper 单独不足以支持接入。 |
 | production-shaped PointNormal 5-run | `abc-fused` 256K 为 `1.11x / 1.09x`，`abcd-fused` 256K 为 `1.13x / 1.09x`。 | 支持继续补 generic representative 和 production-symbol 证据。 |
 | generic fused-formula warm-up 5-run | `abcd` 与 `abcd-ilp` 在三类代表点型的 production-shaped full estimate 上整体更稳。 | 支持把 `abcd` 组合推进到 production-loop。 |
+| row-source diagnostic to production loop | `row-sources` 诊断里 source-indexed 行稳定正向，后续补 source-indexed production direct、source-indexed bench 和 repeated board summary。 | 支持把 source-indexed 从 diagnostic candidate 升级成 production adopted。 |
+| source-indexed implementation-family comparison | repeated diagnostic negative-with-variance | 当前 source-indexed production 路径已是 staged-gather / compressed-tail；单独的 source-indexed block-reduction / fused-formula family comparison 已有 5-run summary。`block-fused-abcd-ilp` full estimate median `0.90x`、`4/5` 低于 `1.0x`，doctor 为 `3E / 6W / 13S`。 | 阻止 `block-fused-abcd-ilp` production-candidate；不推翻当前 source-indexed staged-gather production adopted 结论。 |
 | production-symbol 20-run | `PointNormal -> PointNormal` avg B/A median 为 `0.976x`，avg 低于 `1.0x` 为 `12/20`。两个 `PointXYZ` 代表组合平均正向。 | 记录 accepted risk。 |
 | production-default repeated summary | 三类代表点型 std/RVV speedup 均正向。 | 支撑当前 production adopted 结论。 |
 
@@ -134,8 +168,11 @@ B/A = block-baseline_rvv_ms / fused-candidate_rvv_ms
 | --- | --- | --- | --- |
 | `loadPointToPlaneLLSWeightedFullReductionVectors` | production RVV helper | 当前默认 production 的 `a/b/c/d` 公式和 lane 数据准备。 | production patch、公式实现和 asm 归属。 |
 | `buildPointToPlaneLLSWeightedFullCloudBlockRVV` | production RVV helper | full-cloud block-reduction RVV path。 | 默认 production 正确性、追踪、反汇编归因。 |
+| `buildPointToPlaneLLSWeightedSourceIndicesStagedRVV` | production RVV helper | source-indexed staged-gather RVV path。 | source-indexed correctness、bench 和 repeated board。 |
 | `buildPointToPlaneLLSWeightedFullCloudDefault` | production selector | RVV 可用时用 RVV，否则 std。 | 真实生产路径测试和回退路径测试。 |
-| `estimateRigidTransformation(cloud_src, cloud_tgt, matrix)` | public entry | 当前唯一尝试 RVV dispatch 的公开入口。 | production-dispatch bench。 |
+| `buildPointToPlaneLLSWeightedSourceIndicesDefault` | production selector | source-indexed RVV 可用时用 staged-gather RVV，否则 std。 | source-indexed production tests。 |
+| `estimateRigidTransformation(cloud_src, cloud_tgt, matrix)` | public entry | full-cloud public overload，会尝试 RVV dispatch。 | production-dispatch bench。 |
+| `estimateRigidTransformation(cloud_src, indices_src, cloud_tgt, matrix)` | public entry | source-indexed public overload；当前同样尝试 RVV dispatch。 | source-indexed production bench。 |
 | `src/test_teptplw_input_semantics.cpp` | gtest | 数量不匹配、0 权重和负权重 public semantics。 | 输入语义正确性。 |
 | `src/test_teptplw_production_direct.cpp` | gtest | production direct、layout gate 和 fallback。 | 生产路径正确性。 |
 | `include/impl/teptplw_bench_cases.hpp` | bench registry | case-filter 到 bench case 的映射。 | bench label source of truth。 |
@@ -152,28 +189,31 @@ B/A = block-baseline_rvv_ms / fused-candidate_rvv_ms
 
 - full-cloud public overload 已有真实 direct tests。
 - size、weights、VL、layout、byte-offset、`Scalar` 和 small-input fallback 均有测试或源码审查。
-- QEMU correctness 已覆盖 40 个 gtest。std 构建跳过 RVV-only production default test，RVV 构建全部通过。
+- QEMU correctness 已覆盖 47 个 gtest。std 构建为 `45 passed + 1 skipped`，RVV 构建全部通过。
 - production-default asm attribution 已记录实际 `boundary`，覆盖默认 RVV path 的归因边界。
 - production-dispatch repeated board summary 在三类代表点型、262144 点上正向。
+- production-source-indices repeated board summary 在三类代表点型、65536 和 262144 点上正向；对应 Evidence Doctor 为 0 Errors / 7 Warnings / 6 Suggestions，warnings 主要记录 source-indexed-specific asm boundary 和 binary identity 未闭合。
 - production-default trace 经过 5 runs，每轮 20 次测量和 5 次 warm-up，三类点型 checksum 序列一致。
 
 证据不支持的扩展：
 
-- source-indexed production：当前只有 public semantics、row-source correctness 和 diagnostic bench 入口；缺 production direct/fallback、符号级生产归属和 repeated board。
 - dual-indices production：当前只有 public semantics、row-source correctness 和 diagnostic bench 入口；缺 production direct/fallback、符号级生产归属和 repeated board。
 - correspondences production：当前只有 public semantics、row-source correctness 和 diagnostic bench 入口；还缺 index/weight 展开消融、production direct/fallback、符号级生产归属和 repeated board。
+- row-source diagnostic manifest：只保留 pre-production observed speedup 和诊断边界；不能替代 dual-indices / correspondences 的同 family candidate、test、bench、board 和 asm 证据。
+- source-indexed `block-fused-abcd-ilp` production-candidate：当前 repeated diagnostic 为 negative-with-variance，不能接 production。
 - `Scalar=double` RVV：当前 production helper 只批准 `Scalar=float`。
 - 未逐类型上板的 gate-allowed 点型性能。
 
 因此当前 EvidenceDecision 保持为：
 
 ```text
-production-adopted/full-cloud-f32-aos-layout-gated-weighted-block-dispatch-fused-abcd-ilp-accepted-risk
+production-adopted/full-cloud-and-source-indexed-f32-aos-layout-gated-weighted-rvv-accepted-risk
 ```
 
 ## 遗留风险
 
 - 代表点型只证明三类组合。新增 gate-allowed 点型的性能结论需要对应 board evidence。
 - 接入前 `PointNormal -> PointNormal` 的 production-symbol fused-vs-block 20-run 存在 `B/A < 1` 高频风险。当前 production-dispatch 5-run std/RVV summary 均正向，但不证明长期无波动。
-- source/dual/correspondences 的负向归因尚未消融，不能写成单一主因。
+- dual-indices / correspondences 的负向归因尚未消融，不能写成单一主因。
+- source-indexed 当前路径仍是 staged-gather / compressed-tail；source-indexed block-reduction / fused-formula family 已在当前 diagnostic 下比较完成，但缺 raw per-run trace、环境字段、binary hash 和 source-indexed-specific asm，因此不能写成细粒度根因。
 - empty input、invalid indices 和 invalid correspondences 没有 public semantics 测试。后续应先审计 upstream API 语义。

@@ -24,7 +24,7 @@ test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/incl
 | `src/test_teptplw_input_semantics.cpp` | `run_test_input_semantics` | 公开入口输入语义。 | 数量不匹配、0 权重和负权重如何处理。 |
 | `src/test_teptplw_row_sources.cpp` | `run_test_row_sources` | 行来源 candidate、fallback gate、finite/weight 语义。 | full/source/dual/correspondences 数据来源如何区分。 |
 | `src/test_teptplw_candidates.cpp` | `run_test_candidates` | staged-row、block-reduction、fused formula、代表点型、production default 对拍。 | RVV 候选与标量 reference 的数值预算。 |
-| `src/test_teptplw_production_direct.cpp` | `run_test_production_direct` | 真实 production full-cloud public overload、layout gate 和 fallback。 | production dispatch 是否命中，gate miss 是否回标量。 |
+| `src/test_teptplw_production_direct.cpp` | `run_test_production_direct` | 真实 production full-cloud public overload、source-indexed public overload、layout gate 和 fallback。 | production dispatch 是否命中，gate miss 是否回标量。 |
 
 ## 共同输入和断言
 
@@ -47,7 +47,7 @@ test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/incl
 
 | TEST 名称 | 中文含义 | 输入 | 被测路径 | 断言 | 能证明 | 不能证明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `StdDiagnosticMatchesPublicEstimator` | 全云公开入口与 test-only 标量 full-cloud reference 一致。 | `PointNormal -> PointNormal`；小规模 `grid_radius=3`；连续 weights。 | public full-cloud overload 和 `diag::estimate_std_full`。 | matrix 逐元素接近；stats 输入点和 accepted 点一致。 | `diag::accumulate_std_full` 可作为 full-cloud 标量 reference。 | 大规模 RVV dispatch；indexed/correspondences。 |
+| `StdDiagnosticMatchesPublicEstimator` | 全云公开入口与 test-only 标量 full-cloud reference 一致。 | `PointNormal -> PointNormal`；小规模 `grid_radius=3`；连续 weights。 | public full-cloud overload 和 `diag::estimate_std_full`。 | matrix 逐元素接近；stats 输入点和 accepted 点一致。 | `diag::accumulate_std_full` 可作为 full-cloud 标量 reference。 | 大规模 RVV dispatch；source-indexed、dual-indices、correspondences。 |
 | `StdCorrespondencesMatchesPublicEstimator` | correspondences 公开入口使用 `correspondence.weight`。 | `grid_radius=16`；有效、乱序、重复 correspondences。 | public correspondences overload 和 `diag::estimate_std_correspondences`。 | matrix 接近；输入行数等于 correspondences 数。 | correspondence weight 来源不同于 `weights_`。 | 非法 correspondence index 的 public API 行为。 |
 | `StdSourceIndexedMatchesPublicEstimator` | source-indexed 公开入口按 `source[indices[k]] + target[k] + weights[k]` 取行。 | `grid_radius=16`；有效 source indices；连续 weights。 | public source-indexed overload 和 `diag::estimate_std_source_indices`。 | matrix 接近；input/accepted 行数一致。 | source-indexed row source 语义。 | production RVV 接入。 |
 | `StdDualIndicesMatchesPublicEstimator` | dual-indices 公开入口使用两条 index stream。 | `grid_radius=16`；有效 source/target indices；连续 weights。 | public dual-indices overload 和 `diag::estimate_std_dual_indices`。 | matrix 接近；input/accepted 行数一致。 | dual-indices row source 和 weight 读取语义。 | correspondences 的 query/match 展开成本。 |
@@ -69,16 +69,27 @@ test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/incl
 
 ## Row Source 与 Finite 语义测试
 
-这些测试验证 test-only RVV candidate 的 row source、finite mask 和 fallback。它们不批准 production indexed/correspondences RVV。
+这些测试验证 test-only RVV candidate 的 row source、finite mask 和 fallback。source-indexed 的 production direct 证据放在后面的真实生产路径测试；dual-indices 和 correspondences 仍只有诊断证据。
 
 | TEST 名称 | 中文含义 | 输入 | 被测路径 | 断言 | 能证明 | 不能证明 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `SourceIndexedCandidateMatchesStd` | source-indexed candidate 与标量 reference 一致。 | `grid_radius=32`；有效 source indices；连续 weights。 | `diag::estimate_candidate_source_indices` 对 `diag::estimate_std_source_indices`。 | input/accepted 一致；RVV 构建命中 candidate；matrix 接近。 | 单侧 source gather、target stride load、continuous weight 的 candidate correctness。 | production dispatch。 |
+| `SourceIndexedCandidateMatchesStd` | source-indexed candidate 与标量 reference 一致。 | `grid_radius=32`；有效 source indices；连续 weights。 | `diag::estimate_candidate_source_indices` 对 `diag::estimate_std_source_indices`。 | input/accepted 一致；RVV 构建命中 candidate；matrix 接近。 | 单侧 source gather、target stride load、continuous weight 的 candidate correctness。 | 真实 public production dispatch。 |
 | `DualIndicesCandidateMatchesStd` | dual-indices candidate 与标量 reference 一致。 | `grid_radius=34`；有效 source/target indices；连续 weights。 | `diag::estimate_candidate_dual_indices` 对 `diag::estimate_std_dual_indices`。 | input/accepted 一致；RVV 构建命中 candidate；matrix 接近。 | 双侧 gather candidate correctness。 | correspondences weight 展开。 |
 | `CorrespondenceCandidateMatchesStd` | correspondences candidate 与标量 reference 一致。 | `grid_radius=32`；有效、乱序、重复 correspondences。 | `diag::estimate_candidate_correspondences` 对 `diag::estimate_std_correspondences`。 | input/accepted 一致；RVV 构建命中 candidate；matrix 接近。 | query/match/weight 展开后 gather path correctness。 | production correspondences RVV。 |
 | `SmallInputFallsBackForIsolatedSizeGate` | 小规模 candidate 不进入 RVV。 | `grid_radius=3`；连续 weights。 | `diag::accumulate_candidate_full`。 | `used_rvv=false`；normal-equation 与标量完全接近。 | size gate fallback。 | public full-cloud overload 的所有 fallback。 |
 | `InvalidLaneMaskMatchesStd` | 非有限 point/normal lane 被剔除。 | `grid_radius=20`；source x NaN、target normal Inf、target y NaN；权重有限。 | `diag::accumulate_candidate_full` 对 `diag::accumulate_std_full`。 | accepted points 一致；`ATA/ATb` 预算内。 | finite mask 覆盖 source xyz、target xyz、target normal。 | 非有限 weight 语义。 |
 | `NonFiniteWeightsAreNotMaskedWhenPointsAreFinite` | 非有限 weight 不参与 finite mask。 | `grid_radius=18`；point/normal 有限；weight NaN/Inf。 | `diag::accumulate_candidate_full` 对 `diag::accumulate_std_full`。 | accepted points 一致；两侧法方程变为非有限。 | weighted 标量合同：weight 非有限仍传播。 | 业务层是否接受非有限输出。 |
+
+## Dual / Correspondence Family Carry-over
+
+Phase 020 额外补了 `run_test_dual_correspondence_family` 对应的四个实现族比较测试。它们都属于 pre-production diagnostic：把 full-cloud adopted family 迁移到 dual-indices 和 correspondences row source，先看同边界 correctness，再看 bench / board 是否仍然负向。
+
+| TEST 名称 | 中文含义 | 输入 | 被测路径 | 断言 | 能证明 | 不能证明 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `DualIndicesBlockReductionMatchesStdWithinBudget` | dual-indices 的 block-baseline carry-over。 | `PointNormal`；有效 source/target indices；连续 weights。 | `diag::accumulate_candidate_dual_indices_block_reduction` 对 `diag::accumulate_std_dual_indices`。 | input/accepted 一致；`ATA/ATb` 预算内；matrix 接近。 | 同边界下的 dual-indices block-reduction 正确性。 | production dual-indices RVV。 |
+| `DualIndicesBlockFusedAbcdIlpMatchesBlockAndStdWithinBudget` | dual-indices 的 fused-abcd-ilp carry-over。 | `PointNormal`；有效 source/target indices；连续 weights。 | `diag::accumulate_candidate_dual_indices_block_fused_abcd_ilp` 对 block / std。 | input/accepted 一致；`ATA/ATb` 预算内；matrix 接近。 | dual-indices fused formula / ILP 在同边界下可对拍。 | production dual-indices RVV。 |
+| `CorrespondenceBlockReductionMatchesStdWithinBudget` | correspondences 的 block-baseline carry-over。 | `PointNormal`；有效、乱序、重复 correspondences。 | `diag::accumulate_candidate_correspondences_block_reduction` 对 `diag::accumulate_std_correspondences`。 | input/accepted 一致；`ATA/ATb` 预算内；matrix 接近。 | correspondences 的 query/match/weight 展开后仍可对拍 block-baseline。 | production correspondences RVV。 |
+| `CorrespondenceBlockFusedAbcdIlpMatchesBlockAndStdWithinBudget` | correspondences 的 fused-abcd-ilp carry-over。 | `PointNormal`；有效、乱序、重复 correspondences。 | `diag::accumulate_candidate_correspondences_block_fused_abcd_ilp` 对 block / std。 | input/accepted 一致；`ATA/ATb` 预算内；matrix 接近。 | correspondences 的 fused formula / ILP 在同边界下可对拍。 | production correspondences RVV。 |
 
 ## Candidate 与 Reduction 测试
 
@@ -101,7 +112,7 @@ test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/incl
 
 ## 真实生产路径测试
 
-这些测试直接触达 production 文件中的 public full-cloud overload 或 production detail helper。它们是 production 接入判断的 correctness 主证据。
+这些测试直接触达 production 文件中的 public full-cloud overload、source-indexed overload 或 production detail helper。它们是 production 接入判断的 correctness 主证据。
 
 | TEST 名称 | 中文含义 | 输入 | 被测路径 | 断言 | 能证明 | 不能证明 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -111,6 +122,13 @@ test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/incl
 | `ProductionFullCloudPreservesNonFiniteWeightSemantics` | production default 保留非有限 weight 语义。 | `grid_radius=20`；point/normal 非有限和 weight 非有限。 | default helper 对 std helper。 | input/accepted 一致；两侧法方程非有限。 | production path 的 finite mask 与 weight 语义。 | 业务层输出是否可用。 |
 | `ProductionFullCloudSmallInputFallsBackToScalar` | 小规模 full-cloud public overload 回标量。 | `grid_radius=3`；连续 weights。 | public overload 和 default helper。 | `used_rvv=false`；accepted 等于输入点；matrix 接近。 | `nr_points < 64` fallback。 | layout miss fallback。 |
 | `ProductionFullCloudPredicateGatesAreNarrow` | production RVV predicate 是窄门。 | 直接调用 predicate helper。 | `canUsePointToPlaneLLSWeightedFullCloudRVV`。 | size、target size、weights size、VLEN、byte-offset miss 均 false。 | predicate 条件本身。 | public overload early-return 行为。 |
+| `ProductionSourceIndexedPublicOverloadMatchesStdWithinBudget` | 真实 public source-indexed overload 与 production std helper 对齐。 | `grid_radius=32`；`PointNormal -> PointNormal`；有效 source indices；连续 weights。 | public source-indexed overload 对 `prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStd`。 | matrix 接近。 | source-indexed public dispatch 后输出符合 production std reference。 | normal-equation 中间态。 |
+| `ProductionSourceIndexedNormalEquationMatchesStdWithinBudget` | production source-indexed default normal-equation 与 std helper 对齐。 | 同上。 | `buildPointToPlaneLLSWeightedSourceIndicesDefault` 对 std helper。 | input/accepted 一致；RVV 构建命中；normal-equation 和 matrix 预算内。 | source-indexed production helper 的中间态 correctness。 | board 性能。 |
+| `ProductionSourceIndexedSmallInputFallsBackToScalar` | 小规模 source-indexed public overload 回标量。 | `grid_radius=3`；连续 weights。 | public overload 和 default helper。 | `used_rvv=false`；matrix 接近。 | `nr_points < 64` fallback。 | layout miss fallback。 |
+| `ProductionSourceIndexedPredicateGatesAreNarrow` | source-indexed production RVV predicate 是窄门。 | 直接调用 predicate helper。 | `canUsePointToPlaneLLSWeightedSourceIndicesRVV`。 | size、target size、weights size、VLEN、byte-offset miss 均 false。 | predicate 条件本身。 | public overload early-return 行为。 |
+| `ProductionSourceIndexedInvalidIndexRejectsRVVBeforeGather` | source-indexed RVV helper 在 gather 前拒绝非法 source index。 | `grid_radius=32`；一个负索引和一个越界索引；RVV-only。 | `buildPointToPlaneLLSWeightedSourceIndicesStagedRVV`。 | 返回 false；`used_rvv=false`；accepted 为 0。 | 非法 index 不会进入 RVV gather。 | public API 对非法 index 的业务合同。 |
+| `ProductionSourceIndexedPointXYZSourceMatchesStdWithinBudget` | `PointXYZ -> PointNormal` source generic gate。 | source 从 `PointNormal` 复制为 `PointXYZ`。 | public overload、default helper、std helper。 | accepted 一致；RVV 构建命中；normal-equation 和 matrix 预算内。 | source 只需要 xyz f32 AoS layout。 | 所有 source 点型。 |
+| `ProductionSourceIndexedPointXYZToPointXYZINormalMatchesStdWithinBudget` | `PointXYZ -> PointXYZINormal` target generic gate。 | source `PointXYZ`，target `PointXYZINormal`。 | public overload、default helper、std helper。 | accepted 一致；RVV 构建命中；normal-equation 和 matrix 预算内。 | target 需要 xyz+normal f32 AoS layout，额外 intensity 不参与公式。 | 所有 target normal 点型。 |
 | `ProductionFullCloudPointXYZSourceMatchesStdWithinBudget` | `PointXYZ -> PointNormal` source generic gate。 | source 从 `PointNormal` 复制为 `PointXYZ`。 | public overload、default helper、std helper。 | accepted 一致；RVV 构建命中；normal-equation 和 matrix 预算内。 | source 只需要 xyz f32 AoS layout。 | 所有 source 点型。 |
 | `ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget` | `PointXYZ -> PointXYZINormal` target generic gate。 | source `PointXYZ`，target `PointXYZINormal`。 | public overload、default helper、std helper。 | input/accepted 一致；RVV 构建命中；normal-equation 和 matrix 预算内。 | target 需要 xyz+normal f32 AoS layout，额外 intensity 不参与公式。 | 所有 target normal 点型。 |
 | `ProductionFullCloudDoubleNormalTargetFallsBackToScalar` | target normal 是 double 时回标量。 | target 使用 `TEPTPLWDoubleNormalTarget`。 | public overload 和 default helper。 | static_assert layout gate false；`used_rvv=false`；matrix 接近。 | target normal f32 gate。 | source layout miss。 |
@@ -131,7 +149,7 @@ test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/incl
 | zero weights | 已覆盖。 | `ProductionFullCloudZeroWeightsMatchStdWithinBudget`。 |
 | negative weights | 已覆盖。 | `ProductionFullCloudNegativeWeightsMatchStdWithinBudget`。 |
 | empty input | 未专项覆盖。 | 先确认 upstream 期望和 solver 行为。 |
-| invalid indices / invalid correspondences | test-only reference 有 defensive skip；public iterator 未做边界检查。 | 先文档记录，暂不把 skip 写成 public API 合同。 |
+| invalid indices / invalid correspondences | public iterator 未做边界检查；source-indexed RVV helper 已有 pre-gather gate 测试。 | 不把 test-only reference 的 defensive skip 写成 public API 合同。 |
 | `Scalar=double` 严格 reference 对拍 | 当前有 fallback smoke。 | 可补 double reference 或更窄的 matrix 对拍，前提是先确认误差预算。 |
 
 ## 验证命令
@@ -147,6 +165,8 @@ make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weigh
 ```text
 log/qemu/run_test_std.log
 log/qemu/run_test_rvv.log
+log/qemu/run_test_source_indices_std.log
+log/qemu/run_test_source_indices_rvv.log
 ```
 
-本轮重跑结果：std 为 `39 passed + 1 skipped`，RVV 为 `40 passed`。如果继续新增 gtest，应重跑该命令并更新这两个日志。
+本轮重跑结果：std 为 `45 passed + 1 skipped`，RVV 为 `47 passed`。`run_test_source_indices_compare` 的细粒度结果为 std 6 passed、RVV 7 passed。如果继续新增 gtest，应重跑该命令并更新这些日志。
