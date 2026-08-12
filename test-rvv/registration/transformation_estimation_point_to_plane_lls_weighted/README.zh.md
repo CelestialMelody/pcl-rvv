@@ -8,7 +8,7 @@ production 文件：
 registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls_weighted.hpp
 ```
 
-当前 production 结论覆盖 full-cloud public overload 和 source-indexed public overload。full-cloud 采用 block-reduction + A/B/C/N block groups + fused-abcd-ilp code shape。source-indexed 当前采用 staged-gather / compressed-tail family。两条 RVV 分流都要求 `Scalar=float`、连续 `weights_`、source xyz f32 AoS layout、target xyz+normal f32 AoS layout、规模/VLEN/byte-offset gate 均满足。dual-indices、correspondences、`Scalar=double`、layout miss 和 invalid source index gate miss 路径保持标量；它们在当前 topic 里先作为 pre-production diagnostic（接入生产前诊断）和 family carry-over audit（实现族迁移审计）对象，而不是直接 production。
+当前 production 结论覆盖 full-cloud public overload 和 source-indexed public overload。full-cloud 采用 block-reduction + A/B/C/N block groups + fused-abcd-ilp code shape。source-indexed 在 Phase 031 后先尝试 `block-fused-abcd-ilp` bounded production candidate（有边界的生产候选），失败时回到 staged-gather / compressed-tail helper，再失败时回到标量路径。两条 RVV 分流都要求 `Scalar=float`、连续 `weights_`、source xyz f32 AoS layout、target xyz+normal f32 AoS layout、规模/VLEN/byte-offset gate 均满足；source-indexed 还要求 source index stream 全部有效。dual-indices、correspondences、`Scalar=double`、layout miss 和 invalid source index gate miss 路径保持标量；它们在当前 topic 里先作为 pre-production diagnostic（接入生产前诊断）和 family carry-over audit（实现族迁移审计）对象，而不是直接 production。
 
 ## 先读哪份文档
 
@@ -145,6 +145,20 @@ make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weigh
   collect_board_production_source_indices_repeated
 ```
 
+source-indexed block-fused production probe repeated board：
+
+```bash
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \
+  collect_board_production_source_indices_probe_repeated
+```
+
+summary 生成后再跑 probe Evidence Doctor wrapper：
+
+```bash
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \
+  doctor_board_production_source_indices_probe_repeated
+```
+
 production-dispatch repeated board：
 
 ```bash
@@ -198,7 +212,11 @@ make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weigh
 | `log/board/production_dispatch_fused_abcd_ilp/summary.md` | production-dispatch repeated std/RVV speedup summary。 |
 | `log/board/production_source_indices_staged_gather/evidence_manifest.json` | source-indexed repeated board evidence manifest；当前 Evidence Doctor 边界。 |
 | `log/board/production_source_indices_staged_gather/evidence_doctor.md` | source-indexed Evidence Doctor 摘要；0 Errors / 7 Warnings / 6 Suggestions。 |
-| `log/board/production_source_indices_staged_gather/summary.md` | source-indexed production repeated std/RVV speedup summary。 |
+| `log/board/production_source_indices_staged_gather/summary.md` | source-indexed staged-gather prior production repeated std/RVV speedup summary；Phase 031 后作为 rollback / historical production baseline。 |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md` | source-indexed block-fused production probe repeated std/RVV speedup summary；6 个代表 case median 均正向。 |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_manifest.json` | source-indexed block-fused production probe manifest；`implementation_family=block_fused_abcd_ilp`。 |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_doctor.md` | source-indexed block-fused production probe Evidence Doctor；0 Errors / 9 Warnings / 12 Suggestions。 |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_doctor.json` | source-indexed block-fused production probe Doctor 机器可读输出。 |
 | `log/board/run_board_bench_source_indexed_family/evidence_manifest.json` | source-indexed implementation-family diagnostic manifest；记录 single-run board smoke，不能替代 production evidence。 |
 | `log/board/run_board_bench_source_indexed_family/evidence_doctor.md` | source-indexed family Evidence Doctor；Phase 030 起会额外检查 zero-warmup、component/full sink 和 solve-delta 异常，结论保持 diagnostic / reopened。 |
 | `log/board/source_indexed_family_repeated/summary.md` | source-indexed implementation-family repeated board summary；当前 5-run 结果显示 `block-fused-abcd-ilp` full estimate median `0.90x`。 |
@@ -234,8 +252,8 @@ board production-dispatch repeated summary 使用 262144 点、5 runs、20 itera
 | `weighted lls production-dispatch full-cloud pointxyz-to-pointnormal 262144` | `2.98x / 2.95x` |
 | `weighted lls production-dispatch full-cloud pointxyz-to-pointxyzinormal 262144` | `3.00x / 2.96x` |
 
-board source-indexed production repeated summary 使用 65536/262144 点、5 runs、20 iterations 和 5 warm-up iterations。三类代表点型在两个规模上均为正向，summary 路径为 `log/board/production_source_indices_staged_gather/summary.md`。对应的 machine-readable 边界已经补成 `log/board/production_source_indices_staged_gather/evidence_manifest.json` 和 `evidence_doctor.md`；doctor 目前给出 0 Errors / 7 Warnings / 6 Suggestions，主要在于 source-indexed-specific asm boundary 仍缺、binary identity 仍缺，但并不推翻 repeated board 的正向结果。
+board source-indexed production repeated summary 分两层保留。`log/board/production_source_indices_staged_gather/summary.md` 是 Phase 031 前 staged-gather / compressed-tail 的 prior production baseline（旧生产基线），三类代表点型在两个规模上均为正向；对应 Doctor 为 0 Errors / 7 Warnings / 6 Suggestions。Phase 031 的当前 production probe 证据是 `log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md`，同样使用 65536/262144 点、5 runs、20 iterations 和 5 warm-up iterations，6 个代表 case 的 median 为 `1.54x` 到 `1.71x`，Doctor 为 0 Errors / 9 Warnings / 12 Suggestions。它说明真实 public source-indexed dispatch 接入 block-fused 后没有复现 Phase 030 的负向，但仍缺 source-indexed-specific asm boundary、binary identity 和 262144 长尾解释，因此当前写成 bounded production candidate，不写成 clean adopted。
 
 `log/board/run_board_bench_row_sources/analyze_bench_compare.log` 是 source-indexed 接入的诊断触发原始日志，不是最终 production 性能结论。它现在也有配套的 diagnostic manifest / doctor：`log/board/run_board_bench_row_sources/evidence_manifest.json`、`evidence_doctor.md`，用于记录 pre-production diagnostic 边界，不会把 row-source 负向信号误写成 production direct。
 
-Phase 010 的 source-indexed implementation-family audit 已补 `source-indexed-family` case-filter。该阶段的旧单次板卡 smoke 没有 warmup，且 component no-solve 与 full estimate 的 sink 口径不够隔离。Phase 030 已把它降级为 historical diagnostic，并完成带 warmup 的 source-indexed-family repeated board：`staged-gather` median `1.04x`、`block-baseline` median `1.05x`、`block-fused-abcd-ilp` full estimate median `0.90x` 且 `4/5` 低于 `1.0x`。新 Evidence Doctor 为 3 Errors / 6 Warnings / 13 Suggestions。因此当前不替换 production，也不把 `block-fused-abcd-ilp` 推进 production-candidate；若继续，只应另开 root-cause / extended-run phase，补 raw logs、环境字段、binary hash 和 source-indexed-specific asm。
+Phase 010 的 source-indexed implementation-family audit 已补 `source-indexed-family` case-filter。该阶段的旧单次板卡 smoke 没有 warmup，且 component no-solve 与 full estimate 的 sink 口径不够隔离。Phase 030 已把它降级为 historical diagnostic，并完成带 warmup 的 source-indexed-family repeated board：`staged-gather` median `1.04x`、`block-baseline` median `1.05x`、`block-fused-abcd-ilp` full estimate median `0.90x` 且 `4/5` 低于 `1.0x`。新 Evidence Doctor 为 3 Errors / 6 Warnings / 13 Suggestions。Phase 031 的生产直连 probe 没有复现这组负向，因此 Phase 030 现在保留为 harness-risk signal（测试框架风险信号）和 historical diagnostic；若继续升级为 clean adopted，应先补 source-indexed-specific asm、binary hash / taskset metadata 和可选 20-run / 50-run extended board。

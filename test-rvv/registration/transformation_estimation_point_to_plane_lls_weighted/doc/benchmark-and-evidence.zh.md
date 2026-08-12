@@ -69,6 +69,7 @@ weighted lls <layer> <row-source> <variant> <point-type-label> [no-solve] <size>
 | --- | --- |
 | `weighted lls` | 带权 point-to-plane LLS。 |
 | `production-dispatch` | std/RVV 都调用真实 public overload。row-source 字段决定 full-cloud 或 source-indexed。 |
+| `production-source-indices-block-fused-probe` | Phase 031 的 source-indexed block-fused production probe 采集配置；bench case-filter 仍是 `production-source-indices`。 |
 | `production-default` | 当前默认 production RVV path，用 trace 输出逐 iteration。 |
 | `production-shaped` | test_support layout-gated helper，形态接近 production。 |
 | `component` | 只测 normal-equation 构造，不包含 Eigen solve 和 matrix 构造。 |
@@ -322,9 +323,13 @@ log/board/production_default_fused_abcd_ilp/checksum_validation.md
 | `log/board/production_dispatch_fused_abcd_ilp/summary.md` | `collect_board_production_dispatch_repeated` | 三类代表点型 262144 点 repeated std/RVV speedup 均正向。 | tracked |
 | `log/board/production_dispatch_fused_abcd_ilp/evidence_manifest.json` | `generate_teptplw_evidence_manifest.py` | production-dispatch summary、checksum 和 asm 归因的 Evidence Doctor manifest。 | tracked |
 | `log/board/production_dispatch_fused_abcd_ilp/evidence_doctor.md` | `test-rvv/script/evidence_doctor.py --manifest ...` | 0 Errors / 0 Warnings / 3 Suggestions；建议补 binary identity，不阻塞当前结论。 | tracked |
-| `log/board/production_source_indices_staged_gather/summary.md` | `collect_board_production_source_indices_repeated` | source-indexed 三类代表点型在 65536 和 262144 点 repeated std/RVV speedup 均正向。 | tracked |
+| `log/board/production_source_indices_staged_gather/summary.md` | `collect_board_production_source_indices_repeated` | Phase 031 前 source-indexed staged-gather / compressed-tail 三类代表点型在 65536 和 262144 点 repeated std/RVV speedup 均正向；现在作为 rollback baseline。 | tracked |
 | `log/board/production_source_indices_staged_gather/evidence_manifest.json` | `generate_teptplw_evidence_manifest.py --kind production-source-indices` | source-indexed repeated board manifest；source-indexed-specific asm boundary 仍缺。 | tracked |
 | `log/board/production_source_indices_staged_gather/evidence_doctor.md` | `test-rvv/script/evidence_doctor.py --manifest ...` | 0 Errors / 7 Warnings / 6 Suggestions；repeated board 正向，但 asm / binary identity 边界仍未闭合。 | tracked |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md` | `collect_board_production_source_indices_probe_repeated` | Phase 031 source-indexed block-fused production probe；6 个代表 case median 均正向。 | tracked |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_manifest.json` | `generate_teptplw_evidence_manifest.py --kind production-source-indices-block-fused-probe` | source-indexed block-fused probe manifest；记录 `implementation_family=block_fused_abcd_ilp`。 | tracked |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_doctor.md` | `test-rvv/script/evidence_doctor.py --manifest ...` | 0 Errors / 9 Warnings / 12 Suggestions；probe 正向但 asm / binary identity / taskset / 长尾仍未闭合。 | tracked |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_doctor.json` | `test-rvv/script/evidence_doctor.py --manifest ...` | source-indexed block-fused probe Doctor 机器可读输出。 | tracked |
 | `log/board/run_board_bench_row_sources/analyze_bench_compare.log` | `run_board_bench_row_sources` | row-source diagnostic 原始 compare log；source-indexed 正向，dual-indices / correspondences 负向。 | tracked |
 | `log/board/run_board_bench_row_sources/evidence_manifest.json` | `generate_teptplw_evidence_manifest.py --kind row-sources-diagnostic` | row-source diagnostic manifest；evidence_role=diagnostic，记录 observed speedup。 | tracked |
 | `log/board/run_board_bench_row_sources/evidence_doctor.md` | `test-rvv/script/evidence_doctor.py --manifest ... --fail-on never` | 0 Errors / 0 Warnings / 0 Suggestions；只做诊断边界，不升级成 production direct。 | tracked |
@@ -351,11 +356,11 @@ log/board/run_board_bench_row_sources/analyze_bench_compare.log
 run_board_bench_row_sources
 ```
 
-该日志是 source-indexed 接入的诊断触发原始日志，不是最终 production 性能结论。它记录了 row-sources case-filter 下 source-indexed 65536 / 262144 正向、dual-indices 和 correspondences 负向的单次板卡信号。对应的 diagnostic manifest / doctor 现在已经补成 `log/board/run_board_bench_row_sources/evidence_manifest.json` 和 `evidence_doctor.md`，用于保留 pre-production 边界；source-indexed 的最终性能结论仍以 `production_source_indices_staged_gather/summary.md` 为准。
+该日志是 source-indexed 接入的诊断触发原始日志，不是最终 production 性能结论。它记录了 row-sources case-filter 下 source-indexed 65536 / 262144 正向、dual-indices 和 correspondences 负向的单次板卡信号。对应的 diagnostic manifest / doctor 现在已经补成 `log/board/run_board_bench_row_sources/evidence_manifest.json` 和 `evidence_doctor.md`，用于保留 pre-production 边界；Phase 031 后 source-indexed 的当前生产探针性能结论以 `production_source_indices_block_fused_abcd_ilp_probe/summary.md` 为准，旧 `production_source_indices_staged_gather/summary.md` 保留为 rollback baseline。
 
 `run_board_bench_dual_correspondence_family/analyze_bench_compare.log` 则是 dual-indices / correspondences 的实现族迁移诊断原始日志。它把 staged-gather、block-baseline、block-fused-abcd-ilp 和 component no-solve 逐项跑在同一个 board compare 里，QEMU 两侧都能通过，但 RVV 在所有列出的 compare case 上都慢于 std。对应的 `evidence_manifest.json` 与 `evidence_doctor.md` 记录了 `20 comparisons`、`Errors=20`、`Warnings=21`、`Suggestions=0` 的边界，其中所有 Errors 都来自 `ba_degradation_frequency`。这说明 dual-indices / correspondences 只能停在 diagnostic attempted，不应继续外推到 production evidence。
 
-`run_board_bench_source_indexed_family/analyze_bench_compare.log` 是 source-indexed 实现族迁移诊断原始日志。Phase 030 之前的该目录日志没有 warm-up，且 full estimate 与 component no-solve sink 口径不够隔离；它只能作为 historical diagnostic。Phase 030 之后，`run_board_bench_source_indexed_family` 默认带 5 次 warm-up，source-indexed-family full estimate 也改为 normal-equation + matrix sink。当前 5-run repeated summary 已由 `collect_board_source_indexed_family_repeated` 生成，对应 wrapper target `doctor_board_source_indexed_family_repeated` 已生成 manifest / doctor；结论是不支持 `block-fused-abcd-ilp` 进入 production-candidate investigation。
+`run_board_bench_source_indexed_family/analyze_bench_compare.log` 是 source-indexed 实现族迁移诊断原始日志。Phase 030 之前的该目录日志没有 warm-up，且 full estimate 与 component no-solve sink 口径不够隔离；它只能作为 historical diagnostic。Phase 030 之后，`run_board_bench_source_indexed_family` 默认带 5 次 warm-up，source-indexed-family full estimate 也改为 normal-equation + matrix sink。当前 5-run repeated summary 已由 `collect_board_source_indexed_family_repeated` 生成，对应 wrapper target `doctor_board_source_indexed_family_repeated` 已生成 manifest / doctor；结论是 diagnostic wrapper 下不支持 `block-fused-abcd-ilp`。Phase 031 的真实 production direct probe 没有复现这组负向，所以 Phase 030 不能再写成直接阻止 production probe。
 
 ## Source-Indexed Family Repeated Target
 
@@ -363,6 +368,8 @@ run_board_bench_row_sources
 | --- | --- | --- | --- |
 | `collect_board_source_indexed_family_repeated` | `source-indexed-family`；多轮采集 staged-gather、block-baseline、block-fused-abcd-ilp 和 component no-solve 的 repeated board speedup。 | `log/board/source_indexed_family_repeated/summary.md`。 | 只负责上板采集 summary；raw logs 默认临时清理，显式 `--raw-dir` 时才作为 local-only 诊断材料保留。 |
 | `doctor_board_source_indexed_family_repeated` | `source-indexed-family-repeated` manifest / Evidence Doctor wrapper。 | `log/board/source_indexed_family_repeated/evidence_manifest.json`、`evidence_doctor.md`、`evidence_doctor.json`。 | 只在 repeated summary 已存在后运行；该 manifest 仍是 pre-production diagnostic，不是 production direct。 |
+| `collect_board_production_source_indices_probe_repeated` | `production-source-indices`；多轮采集真实 public source-indexed overload 在 block-fused probe 代码上的 std/RVV speedup。 | `log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md`。 | 这是 production direct probe，不替代 clean adopted 所需的 asm、binary identity 和 extended-run。 |
+| `doctor_board_production_source_indices_probe_repeated` | `production-source-indices-block-fused-probe` manifest / Evidence Doctor wrapper。 | `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_manifest.json`、`evidence_doctor.md`、`evidence_doctor.json`。 | 只在 probe summary 已存在后运行；Doctor finding 必须写入 bounded candidate 风险边界。 |
 
 默认参数与命令：
 
@@ -390,7 +397,8 @@ Evidence Doctor（证据体检）不是性能结论本身。它把 summary、che
 | evidence | 当前 manifest / doctor 状态 | 结论边界 |
 | --- | --- | --- |
 | production-dispatch full-cloud repeated summary | 已有 `log/board/production_dispatch_fused_abcd_ilp/evidence_manifest.json` 和 `evidence_doctor.md`。 | 可支撑当前 full-cloud production direct performance；doctor Suggestions 只提示后续补 binary identity。 |
-| source-indexed production repeated summary | 已有 `log/board/production_source_indices_staged_gather/evidence_manifest.json` 和 `evidence_doctor.md`。 | 可作为 source-indexed production repeated board summary 使用，但 doctor 仍给出 asm boundary missing、long-tail 和 binary identity 缺口；不能写成 clean pass。 |
+| source-indexed prior production repeated summary / rollback baseline | 已有 `log/board/production_source_indices_staged_gather/evidence_manifest.json` 和 `evidence_doctor.md`。 | 可作为 Phase 031 前 source-indexed staged-gather / compressed-tail repeated board summary 使用；当前保留为 rollback baseline，不能替代 block-fused probe，也不能写成 clean pass。 |
+| source-indexed block-fused production probe | 已有 `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_manifest.json`、`evidence_doctor.md` 和 `evidence_doctor.json`；doctor 为 `0E / 9W / 12S`。 | 当前 production direct probe summary。它证明真实 public dispatch positive-with-warnings，但仍不是 clean adopted。 |
 | row-source diagnostic trigger | 已有 `log/board/run_board_bench_row_sources/evidence_manifest.json` 和 `evidence_doctor.md`。 | 只证明 pre-production diagnostic 边界；manifest 记录 observed speedup，doctor 维持 diagnostic-only，不会升级成 production direct。 |
 | source-indexed implementation-family diagnostic | 已有 `log/board/run_board_bench_source_indexed_family/evidence_manifest.json` 和 `evidence_doctor.md`。 | Phase 030 起新增 zero-warmup、component/full sink 和 solve-delta 异常检查；旧 no-warmup 结果降级为 historical diagnostic。 |
 | source-indexed implementation-family repeated summary | 已有 `log/board/source_indexed_family_repeated/summary.md`、`evidence_manifest.json`、`evidence_doctor.md` 和 `evidence_doctor.json`；doctor 为 `3E / 6W / 13S`。 | 当前结果不支持 `block-fused-abcd-ilp` production-candidate；仍不能替代 production direct、fallback、asm 和 production bench。 |
@@ -431,12 +439,12 @@ std/RVV speedup = std_ms / rvv_ms
 
 该 summary 证明当前 full-cloud production default 在三类代表点型上相对 std 正向。它不证明 source-indexed、dual-indices、correspondences、`Scalar=double`、非连续权重或所有 gate-allowed 点型逐类型性能。source-indexed 结论使用下一节的 dedicated summary。
 
-## Production-Source-Indices Summary 口径
+## Production-Source-Indices Probe Summary 口径
 
 文件：
 
 ```text
-log/board/production_source_indices_staged_gather/summary.md
+log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md
 ```
 
 采集参数：
@@ -455,14 +463,14 @@ log/board/production_source_indices_staged_gather/summary.md
 
 | case | 中文含义 | median/min | 边界 |
 | --- | --- | ---: | --- |
-| `weighted lls production-dispatch source-indices pointnormal 262144` | `PointNormal -> PointNormal` 真实 source-indexed public overload。 | `2.33x / 1.99x` | 代表 `PointNormal` source gather。 |
-| `weighted lls production-dispatch source-indices pointnormal 65536` | 同上，较小规模。 | `2.59x / 2.47x` | 代表 64K index stream。 |
-| `weighted lls production-dispatch source-indices pointxyz-to-pointnormal 262144` | source 是 `PointXYZ`，target 是 `PointNormal`。 | `2.22x / 2.18x` | 代表 source generic xyz layout。 |
-| `weighted lls production-dispatch source-indices pointxyz-to-pointnormal 65536` | 同上，较小规模。 | `2.57x / 2.49x` | 代表 64K generic source。 |
-| `weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal 262144` | source 是 `PointXYZ`，target 是 `PointXYZINormal`。 | `2.37x / 2.28x` | 代表 source 和 target generic layout。 |
-| `weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal 65536` | 同上，较小规模。 | `2.78x / 2.70x` | 代表 64K generic source + target。 |
+| `weighted lls production-dispatch source-indices pointnormal 262144` | `PointNormal -> PointNormal` 真实 source-indexed public overload。 | `1.64x / 1.17x` | 代表 `PointNormal` source gather；有 262144 长尾 warning。 |
+| `weighted lls production-dispatch source-indices pointnormal 65536` | 同上，较小规模。 | `1.71x / 1.66x` | 代表 64K index stream。 |
+| `weighted lls production-dispatch source-indices pointxyz-to-pointnormal 262144` | source 是 `PointXYZ`，target 是 `PointNormal`。 | `1.54x / 1.06x` | 代表 source generic xyz layout；有 262144 长尾 warning。 |
+| `weighted lls production-dispatch source-indices pointxyz-to-pointnormal 65536` | 同上，较小规模。 | `1.64x / 1.59x` | 代表 64K generic source。 |
+| `weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal 262144` | source 是 `PointXYZ`，target 是 `PointXYZINormal`。 | `1.69x / 1.41x` | 代表 source 和 target generic layout；有 262144 长尾 warning。 |
+| `weighted lls production-dispatch source-indices pointxyz-to-pointxyzinormal 65536` | 同上，较小规模。 | `1.69x / 1.68x` | 代表 64K generic source + target。 |
 
-该 summary 证明 valid source-indexed production path 在三类代表点型和两个规模上相对 std 正向。它不证明 dual-indices、correspondences、invalid index public API 行为、`Scalar=double` 或非连续权重。
+该 summary 证明 valid source-indexed production probe path 在三类代表点型和两个规模上相对 std 正向。它不证明 dual-indices、correspondences、invalid index public API 行为、`Scalar=double` 或非连续权重。旧 staged-gather summary 路径为 `log/board/production_source_indices_staged_gather/summary.md`，现在作为 rollback baseline 和 Phase 031 前历史生产证据保留。
 
 ## Production-Default Trace 口径
 
@@ -590,6 +598,17 @@ source-indexed production repeated board：
 make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \
   collect_board_production_source_indices_repeated \
   TEPTPLW_SOURCE_INDICES_CASE_FILTER=production-source-indices \
+  TEPTPLW_SOURCE_INDICES_SIZE=65536,262144 \
+  TEPTPLW_SOURCE_INDICES_RUNS=5 \
+  TEPTPLW_SOURCE_INDICES_ITERATIONS=20 \
+  TEPTPLW_SOURCE_INDICES_WARMUP_ITERATIONS=5
+```
+
+source-indexed block-fused production probe repeated board：
+
+```bash
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted \
+  collect_board_production_source_indices_probe_repeated \
   TEPTPLW_SOURCE_INDICES_SIZE=65536,262144 \
   TEPTPLW_SOURCE_INDICES_RUNS=5 \
   TEPTPLW_SOURCE_INDICES_ITERATIONS=20 \

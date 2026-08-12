@@ -16,9 +16,9 @@ production 文件：
 registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls_weighted.hpp
 ```
 
-当前 production 结论覆盖 full-cloud public overload 和 source-indexed public overload。两条 RVV 分流都要求 `Scalar=float`、连续 `weights_`、source xyz f32 AoS layout、target xyz+normal f32 AoS layout、规模/VLEN/byte-offset gate 均满足。dual-indices、correspondences、`Scalar=double`、layout miss 和 invalid source index gate miss 路径保持标量。dual-indices / correspondences 现在已经补了同 family candidate / bench / board compare，但结果仍是 pre-production diagnostic negative，不会把它们推进 production。
+当前 production 结论覆盖 full-cloud public overload 和 source-indexed public overload。两条 RVV 分流都要求 `Scalar=float`、连续 `weights_`、source xyz f32 AoS layout、target xyz+normal f32 AoS layout、规模/VLEN/byte-offset gate 均满足。source-indexed 在 Phase 031 后先尝试 `block-fused-abcd-ilp` production probe helper，失败后回 staged-gather / compressed-tail helper，再失败时回标量。dual-indices、correspondences、`Scalar=double`、layout miss 和 invalid source index gate miss 路径保持标量。dual-indices / correspondences 现在已经补了同 family candidate / bench / board compare，但结果仍是 pre-production diagnostic negative，不会把它们推进 production。
 
-这里还要再分一层：full-cloud / source-indexed 的 production direct tests（接入生产后真实路径测试）和 row-source / fused-formula / generic candidate tests（接入生产前诊断）不能混写。full-cloud 已采纳的 family 若要迁移到 source-indexed、dual-indices 或 correspondences，必须先作为 pre-production diagnostic 补 candidate / bench / board，再决定是否进入 production direct。
+这里还要再分一层：full-cloud / source-indexed 的 production direct tests（接入生产后真实路径测试）和 row-source / fused-formula / generic candidate tests（接入生产前诊断）不能混写。Phase 030 的 source-indexed-family diagnostic negative 已被 Phase 031 生产直连 probe 校准为 historical diagnostic / harness-risk signal；当前 source-indexed block-fused 只能写成 bounded production candidate，不写成 clean adopted。
 
 ## 文档阅读路径
 
@@ -73,6 +73,7 @@ registration/include/pcl/registration/impl/transformation_estimation_point_to_pl
 | `make ... collect_board_row_sources_repeated`              | 多轮采集行来源诊断。                                   | `log/board/row_sources_diagnostic/summary.md` 等                                  | 行来源重复板卡采集。                           | 只能作为诊断信号；不能证明 production dispatch。       |
 | `make ... collect_board_production_dispatch_repeated`      | 多轮采集真实 public overload std/RVV speedup。          | `log/board/production_dispatch_fused_abcd_ilp/summary.md`                          | 生产路径重复板卡性能。                         | 可以支撑当前 production 性能结论。                     |
 | `make ... collect_board_production_default_fused_abcd_ilp` | 多轮采集默认 RVV path trace、checksum、asm。            | `production_default_fused_abcd_ilp/*summary*.md` 等                                | 追踪、校验和、反汇编归因。                     | 可支撑默认 RVV path 稳定性；不产出旧 block/fused B/A。 |
+| `make ... collect_board_production_source_indices_probe_repeated` | 多轮采集真实 public source-indexed overload 在 block-fused probe 代码上的 std/RVV speedup。 | `log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md` | source-indexed production direct probe。 | 可以支撑 bounded production candidate；不能写成 clean adopted。 |
 
 ## 细粒度 Target
 
@@ -149,12 +150,14 @@ registration/include/pcl/registration/impl/transformation_estimation_point_to_pl
 | `collect_board_source_indexed_family_repeated` | source-indexed 实现族重复采集。 | 多轮采集 `source-indexed-family` case-filter，重新校准 staged-gather、block-baseline、block-fused-abcd-ilp 和 component no-solve 的 repeated board speedup。 | `log/board/source_indexed_family_repeated/summary.md`。 |
 | `doctor_board_source_indexed_family_repeated` | source-indexed 实现族重复采集后的 Evidence Doctor wrapper。 | summary 生成后把 repeated board summary 转成 `evidence_manifest.json`、`evidence_doctor.md` 和 `evidence_doctor.json`。 | `log/board/source_indexed_family_repeated/evidence_manifest.json`、`evidence_doctor.md`、`evidence_doctor.json`。 |
 | `collect_board_production_dispatch_repeated` | 生产路径重复采集。 | 多轮采集真实 public full-cloud overload 的 std/RVV speedup。 | `log/board/production_dispatch_fused_abcd_ilp/summary.md`。 |
-| `collect_board_production_source_indices_repeated` | source-indexed 生产路径重复采集。 | 多轮采集真实 public source-indexed overload 的 std/RVV speedup。 | `log/board/production_source_indices_staged_gather/summary.md`；当前有 `evidence_manifest.json` / `evidence_doctor.md` 边界。 |
+| `collect_board_production_source_indices_repeated` | source-indexed prior 生产路径重复采集。 | 多轮采集 Phase 031 前真实 public source-indexed staged-gather / compressed-tail overload 的 std/RVV speedup。 | `log/board/production_source_indices_staged_gather/summary.md`；当前作为 rollback baseline。 |
+| `collect_board_production_source_indices_probe_repeated` | source-indexed block-fused production probe 重复采集。 | 多轮采集真实 public source-indexed overload 在 block-fused probe 代码上的 std/RVV speedup。 | `log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md`；当前有 `evidence_manifest.json` / `evidence_doctor.md` / `evidence_doctor.json` 边界。 |
+| `doctor_board_production_source_indices_probe_repeated` | source-indexed block-fused production probe 的 Evidence Doctor wrapper。 | summary 生成后把 probe summary 转成 manifest 和 Doctor 报告。 | `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_manifest.json`、`evidence_doctor.md`、`evidence_doctor.json`。 |
 | `collect_board_production_default_fused_abcd_ilp` | 默认生产路径重复采集。 | 多轮采集默认 RVV path trace 和 checksum。 | `log/board/production_default_fused_abcd_ilp/`。 |
 | `summarize_board_production_default_fused_abcd_ilp` | 追踪汇总。 | 从默认 RVV path raw logs 生成 trace summary。 | `log/board/production_default_fused_abcd_ilp/trace_summary.md`。 |
 | `asm_production_default_fused_abcd_ilp` | 反汇编归因。 | 生成默认 production helper 的反汇编归因摘要。 | `log/board/production_default_fused_abcd_ilp/asm_production_symbol_attribution.md`。 |
 
-source-indexed-family 现在已经有 dedicated 的重复板卡 target `collect_board_source_indexed_family_repeated`；它只产出 repeated summary，不自动替代 `production-source-indices` 的 production evidence。当前 5-run summary 和 `doctor_board_source_indexed_family_repeated` 已生成 `3E / 6W / 13S`：`block-fused-abcd-ilp` full estimate median `0.90x`、`4/5` 低于 `1.0x`，所以停在 diagnostic no-production。dual-indices / correspondences 仍没有自己的 dedicated repeated production target，相关比较还应留在 diagnostic / next-phase audit。
+source-indexed-family 现在已经有 dedicated 的重复板卡 target `collect_board_source_indexed_family_repeated`；它只产出 repeated summary，不自动替代 `production-source-indices` 的 production evidence。Phase 030 的 5-run summary 和 `doctor_board_source_indexed_family_repeated` 已生成 `3E / 6W / 13S`：`block-fused-abcd-ilp` full estimate median `0.90x`、`4/5` 低于 `1.0x`。Phase 031 的真实 production direct probe 未复现该负向，`production_source_indices_block_fused_abcd_ilp_probe` 为 `0E / 9W / 12S` 且 6 个代表 case median 均正向。dual-indices / correspondences 仍没有自己的 dedicated repeated production target，相关比较还应留在 diagnostic / next-phase audit。
 
 ## 测试流程
 
@@ -228,9 +231,13 @@ flowchart TD
 | `log/board/run_board_bench_row_sources/evidence_manifest.json`                     | row-source diagnostic manifest；记录 observed speedup 和 pre-production 边界。 |
 | `log/board/run_board_bench_row_sources/evidence_doctor.md`                         | row-source diagnostic doctor；0 Errors / 0 Warnings / 0 Suggestions。 |
 | `log/board/production_dispatch_fused_abcd_ilp/summary.md`                          | production-dispatch repeated std/RVV speedup summary。 |
-| `log/board/production_source_indices_staged_gather/summary.md`                     | source-indexed production repeated std/RVV speedup summary。 |
-| `log/board/production_source_indices_staged_gather/evidence_manifest.json`          | source-indexed production repeated board manifest。 |
-| `log/board/production_source_indices_staged_gather/evidence_doctor.md`              | source-indexed Evidence Doctor；0 Errors / 7 Warnings / 6 Suggestions。 |
+| `log/board/production_source_indices_staged_gather/summary.md`                     | source-indexed prior staged-gather repeated std/RVV speedup summary；Phase 031 后作为 rollback baseline。 |
+| `log/board/production_source_indices_staged_gather/evidence_manifest.json`          | source-indexed prior production repeated board manifest。 |
+| `log/board/production_source_indices_staged_gather/evidence_doctor.md`              | source-indexed prior Evidence Doctor；0 Errors / 7 Warnings / 6 Suggestions。 |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/summary.md`         | source-indexed block-fused production probe repeated std/RVV speedup summary。 |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_manifest.json` | source-indexed block-fused production probe manifest。 |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_doctor.md` | source-indexed block-fused production probe Doctor；0 Errors / 9 Warnings / 12 Suggestions。 |
+| `log/board/production_source_indices_block_fused_abcd_ilp_probe/evidence_doctor.json` | source-indexed block-fused production probe Doctor 机器可读输出。 |
 | `log/board/run_board_bench_source_indexed_family/evidence_manifest.json`            | source-indexed implementation-family diagnostic manifest；single-run board smoke。 |
 | `log/board/run_board_bench_source_indexed_family/evidence_doctor.md`                | source-indexed family doctor；Phase 030 当前为 2 Errors / 30 Warnings / 26 Suggestions，阻止把旧 no-warmup smoke 写成生产替换结论。 |
 | `log/board/source_indexed_family_repeated/summary.md`                               | source-indexed implementation-family repeated diagnostic summary；`block-fused-abcd-ilp` full estimate median `0.90x`。 |
@@ -257,6 +264,6 @@ flowchart TD
 
 ## 当前结论边界
 
-当前 correctness 证据覆盖 public full-cloud direct、public source-indexed direct、production helper normal-equation、near-cancellation、scale-stress、非有限 point/normal、非有限 weight、fallback、输入数量不匹配、0/负权重和三类代表点型。当前 performance 证据覆盖 full-cloud 三类代表点型在 262144 点上的 repeated board std/RVV speedup，也覆盖 source-indexed 三类代表点型在 65536 和 262144 点上的 repeated board std/RVV speedup。未逐类型上板的 gate-allowed 点型只能继承 correctness 和 representative performance 判断。
+当前 correctness 证据覆盖 public full-cloud direct、public source-indexed direct、production helper normal-equation、near-cancellation、scale-stress、非有限 point/normal、非有限 weight、fallback、输入数量不匹配、0/负权重和三类代表点型。当前 performance 证据覆盖 full-cloud 三类代表点型在 262144 点上的 repeated board std/RVV speedup，也覆盖 source-indexed block-fused probe 三类代表点型在 65536 和 262144 点上的 repeated board std/RVV speedup。未逐类型上板的 gate-allowed 点型只能继承 correctness 和 representative performance 判断。
 
-`source-indexed-family` 是接入生产前实现族比较入口。它的 correctness 已通过；Phase 030 的 5-run repeated board summary 显示 `block-fused-abcd-ilp` full estimate median `0.90x`、`4/5` 低于 `1.0x`，Evidence Doctor 为 3 Errors / 6 Warnings / 13 Suggestions。当前只支持 `attempted / no-production for current evidence` 结论，不替代 `run_test_source_indices` 和 `collect_board_production_source_indices_repeated` 的生产证据，也不触发 production replacement。
+`source-indexed-family` 是接入生产前实现族比较入口。它的 correctness 已通过；Phase 030 的 5-run repeated board summary 显示 `block-fused-abcd-ilp` full estimate median `0.90x`、`4/5` 低于 `1.0x`，Evidence Doctor 为 3 Errors / 6 Warnings / 13 Suggestions。Phase 031 的真实 production direct probe 没有复现该负向，因此 Phase 030 现在只支持 `historical diagnostic / harness-risk signal` 结论，不替代 `run_test_source_indices` 和 `collect_board_production_source_indices_probe_repeated` 的生产证据。
