@@ -71,6 +71,16 @@ agent_assets:
 1. 模板值只使用仓库相对路径、配置键和运行时变量；不要写私有绝对路径、板卡地址、用户名或 topic-specific（特定主题）硬编码。
 2. 运行时变量缺失时必须 fail closed（保守失败）：在 S0 / Handoff 中报告缺失键和受影响产物，而不是猜一个目录。
 
+## Agent Asset 防写死检查
+
+修改 `.agents/skills/`、`.agents/knowledge/`、`.agents/config/` 或 `AGENTS.md` 前后，worker 应检查新增规则是否把当前仓库默认值、某个 topic 名、topic token、sibling 结构或脚本路径写成长期规则。分类处理：
+
+- `defaults.yaml` 里的当前默认值可以保留；其它 agent asset 正文应优先写 `paths.*`、`artifact_layout.*`、`test_support.*`、`evidence.*` 或 env var 名。
+- 描述当前 topic 既有结构时，应写“当前 topic 既有结构”或“配置解析出的等价结构”，不要把默认目录名、源码子目录、聚合入口目录或内部头目录当作通用要求。
+- 历史 sibling 只能作为 quality bar（质量门槛）、候选风险或结构经验来源；不要在通用规则里写具体 topic 名、缩写 token、文件名或某个 sibling 的目录布局，除非明确标成历史事实并说明不能机械复制。
+- 需要给命名示例时使用 `<topic>`、`<topic-token>`、`<role>`、`<run-label>`、`{artifact_layout.topic_test_dir_template}` 这类占位符；不要使用真实 topic 或本机路径。
+- 提交 agent asset 前运行一次硬编码扫描，并把命中分成 `config default keep`、`historical fact keep with boundary`、`rewrite to config key` 三类；无法分类的命中先不要提交。
+
 `artifact_publication` 是产物发布策略 source of truth。它只记录默认策略和提交边界，不替代 reviewer 的证据判断。常用分类如下：
 
 | class | 默认策略 | 默认提交边界 |

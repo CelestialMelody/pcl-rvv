@@ -38,7 +38,7 @@
 - `correctness-tests`：每个 gtest 的中文含义、输入、被测路径、断言、证明范围和代码位置。
 - `benchmark-and-evidence`：bench label 语法、case-filter 字典、QEMU target、board smoke target、repeated board collect target、checksum 来源、trace、asm attribution、复现命令和提交边界。
 - `optimization-evidence`：每种 RVV 优化方式、候选或暂缓路径对应的 production / test_support 代码路径、test target、bench target、board evidence、结论和边界。
-- `test-support-code-map`：`include/impl`、`src`、script 和 production helper 的函数族、调用关系和边界。
+- `test-support-code-map`：`artifact_layout` 与 `test_support` 解析出的源码、聚合入口、内部头文件、script 和 production helper 的函数族、调用关系和边界。
 - `phases`：阶段探索、阶段计划、阶段结果、optimization matrix、Evidence Doctor 异常处理、continue / stop decision 和早停检查。
 - evaluation：EvidenceDecision、当前证据、历史候选取舍、accepted risk 和 Traceability Map。
 
