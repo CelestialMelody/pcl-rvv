@@ -58,14 +58,19 @@
 
 ## Topic Maturity Audit
 
-恢复已有 topic 或创建 `000-current-state-and-gaps` 阶段时，worker 必须审计四类完成度。这个审计不依赖任何特定历史 topic；历史 sibling（同类主题）只能提供候选风险和质量 bar，不能被机械照搬成实现方案。
+恢复已有 topic 或创建 `000-current-state-and-gaps` 阶段时，worker 必须审计五类完成度。这个审计不依赖任何特定历史 topic；历史 sibling（同类主题）只能提供候选风险、结构 quality bar 和验证方向，不能被机械照搬成实现方案。
 
 1. **production boundary**：公开入口、RVV dispatch、fallback、layout / point type / `Scalar` gate 是否清晰；未覆盖入口是否显式保持标量；test-only reference 是否没有混入 production detail；production detail helper 是否真实服务 runtime path 或明确服务生产可维护性。
 2. **RVV test support architecture**：测试支撑是否有稳定聚合入口；reference、fixtures、row source adapter、RVV math、reduction / formula candidate、assertions、bench harness / bench cases 是否按职责可审查；大型单文件、重复 helper、混合 production-direct 与 diagnostic 职责、bench/test wrapper 相互缠绕，都是可列入本阶段的工程债。
-3. **evidence and docs**：correctness、fallback、asm、bench、board summary、Evidence Doctor、evaluation、topic docs 和 remaining risks 是否一致；QEMU correctness、diagnostic bench、production-shaped bench 和 production-dispatch board evidence 是否分层；stale helper、旧风险、旧结论或未登记覆盖日志是否需要刷新。
-4. **closeout hygiene**：dirty isolation 是否只允许当前 topic 或当前 agent asset；`git diff --check`、std/RVV correctness、必要 asm / bench / board 边界是否运行或有明确不运行理由；phase result / evaluation / Handoff 是否能让下一轮短 prompt 恢复。
+3. **test harness layout and naming**：测试 / bench 源码、聚合头文件和内部职责拆分是否仍停在当前 topic 既有布局，是否应迁移到 `artifact_layout.source_subdir`、`artifact_layout.test_source_template`、`artifact_layout.bench_source_template`、`test_support.aggregator_directory` 和 `test_support.internal_directory` 解析出的结构；长 topic 是否应按 `test_support.topic_abbrev_policy` 使用缩写 topic token 作为文件名；Makefile、board target、日志路径、文档引用和现有 case 名在迁移后是否保持兼容。此项必须给出 `adopt / defer / reject` 决策，不能被包含在泛泛的“测试支撑可读性”里。
+4. **evidence and docs**：correctness、fallback、asm、bench、board summary、Evidence Doctor、evaluation、topic docs 和 remaining risks 是否一致；QEMU correctness、diagnostic bench、production-shaped bench 和 production-dispatch board evidence 是否分层；stale helper、旧风险、旧结论或未登记覆盖日志是否需要刷新。
+5. **closeout hygiene**：dirty isolation 是否只允许当前 topic 或当前 agent asset；`git diff --check`、std/RVV correctness、必要 asm / bench / board 边界是否运行或有明确不运行理由；phase result / evaluation / Handoff 是否能让下一轮短 prompt 恢复。
 
 若 test support 架构已经影响审计定位、证据边界或后续 candidate 扩展，框架化整理本身就是 unblocked next action。worker 不需要等用户显式说“重构测试框架”才把它纳入计划；但必须在 phase plan 中写清范围、保持 case 名 / bench 输出合同的策略和验证命令。
+如果 topic 与相邻成熟 topic 有相同模块、相似数据流或相似 test_support 复杂度，worker 必须把相邻 topic 的测试支撑源码布局、聚合入口、内部职责拆分和 topic token 命名作为结构经验审计对象；具体目录和文件名仍按当前 topic 既有结构、`artifact_layout` 与 `test_support` 配置解析。`不要机械复制`
+只禁止照搬算法、候选收益或 production 决策；它不允许跳过结构经验迁移审计。若不采用相邻结构经验，
+`result.zh.md` 和 Handoff 必须写明为什么当前 topic 不适用、当前暂缓是否影响 reviewer 可读性、
+以及下一轮恢复条件。
 
 ## Optimization Matrix
 

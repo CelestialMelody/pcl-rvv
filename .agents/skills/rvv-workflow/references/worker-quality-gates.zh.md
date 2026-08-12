@@ -135,6 +135,20 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 `test_support` 配置拆分，或在 Handoff Packet 中写清 `deferred reason`。拆分本身不应扩大算法范围；
 若暂缓拆分，必须说明暂缓是否影响 reviewer 可读性、后续测试维护和当前证据复核。
 
+恢复旧 topic 或长 topic 时，还必须做 test harness layout audit（测试框架布局审计）。该审计
+不只看 helper header 行数，还要检查：
+
+- 测试和 bench 源码是否仍放在 topic 根目录，而不是 `artifact_layout.source_subdir`、`artifact_layout.test_source_template` 和 `artifact_layout.bench_source_template` 解析出的结构；
+- 是否缺少 `test_support.aggregator_directory` 解析出的聚合入口，以及 `test_support.internal_directory` 解析出的内部职责拆分；
+- 长 topic 是否仍使用超长文件名，是否应按 `test_support.topic_abbrev_policy` 采用缩写 topic token；
+- Makefile、board target、日志路径和现有文档引用是否能在迁移后保持兼容；
+- 相邻成熟 topic 的测试支撑源码布局、聚合入口、内部职责拆分和 topic token 命名经验是否适用，哪些只作为 quality bar，不迁移实现细节；具体目录和文件名仍按当前 topic 既有结构、`artifact_layout` 与 `test_support` 配置解析。
+
+worker 必须把结果写成 `adopted / deferred / rejected` 中的一种：`adopted` 表示本 phase
+执行布局迁移；`deferred` 表示它是未阻塞但本 phase 因范围或风险暂缓的下一动作；`rejected`
+表示当前源码或证据说明不该迁移。不能省略该决策，也不能只因一个局部 reference cleanup、
+单个 target 或一次 correctness 通过，就把测试框架成熟度审计视为完成。
+
 ### 7. 证据和归因
 
 worker 必须分开写：
@@ -409,6 +423,10 @@ followup_options_ready:
   证据指向 adopted / attempted / deferred / rejected 对照表。若未声明且无相邻经验可迁移，可写 `not_applicable` 并说明原因。
 - 如果当前 topic 的测试支撑 helper header 命中行数或职责阈值，表格必须包含
   `test_support_split_decision_ready`；证据指向按 `test_support` 配置拆分后的结构，或 Handoff 中的 deferred reason。
+- 恢复旧 topic、长 topic 或测试 / bench 仍在 topic 根目录的 topic 时，表格必须包含
+  `test_harness_layout_audit_ready`；证据必须说明是否采用 `artifact_layout` 与 `test_support`
+  解析出的 source、aggregator、internal header 和长 topic 缩写文件名策略，以及 sibling 结构经验是 adopted、deferred 还是 rejected。
+  若暂缓迁移，必须把它写入 `unblocked_next_actions` 或说明阻塞条件。
 - 若 `language_check` 声称通过，必须能在同一张表或相邻段落中指出诊断代码、测试、bench 和文档的术语 / 中文注释证据。
 - 表格必须包含 `writing_style_trigger_check`。检查范围至少覆盖主题文档、evaluation / closeout 文档、workflow 文档、Handoff Packet、worker / reviewer 最终回复和 `agent_asset_feedback`；触发词清单来自 `rvv-documentation/references/writing-style.md`。若某个命中词是必要技术术语，必须写清保留理由。
 - 若当前结论强于 no-production，例如 `partial-production-candidate`，表格必须额外列出 production direct 尚未闭合的证据项，避免把诊断收益误写成 production-ready。
