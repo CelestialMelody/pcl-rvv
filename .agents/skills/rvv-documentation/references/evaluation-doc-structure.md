@@ -111,7 +111,7 @@ PI5 后，evaluation 文档必须更新 production decision（生产接入判断
 
 ## Traceability Map
 
-复杂 topic 的 evaluation 文档应包含或引用 Traceability Map（可追踪性地图）。它用于定位候选设计、测试资产、bench wrapper、analysis script、output summary、主题文档章节和 production 代码位置。
+复杂 topic 的 evaluation 文档应包含或引用 Traceability Map（可追踪性地图）。它用于定位候选设计、测试资产、bench wrapper、analysis script、output summary、适用的 production 长期主题文档章节和 production 代码位置；no-production 时应明确 `doc-rvv` 为 `not_applicable`。
 
 推荐表格：
 
@@ -119,13 +119,13 @@ PI5 后，evaluation 文档必须更新 production decision（生产接入判断
 | 符号 / 文件 | 层级 | 作用 | 调用者 / 上游入口 | 被调用者 / 下游消费者 | 证据角色 | 位置 |
 ```
 
-本表不替代主题文档的长期实现说明，也不替代 output summary 的统计结果。evaluation 中的 map 主要服务决策审计：为什么这些候选被采用、尝试、暂缓或拒绝，以及 reviewer 应从哪些代码和输出复核。
+本表不替代 production 长期主题文档的长期实现说明，也不替代 output summary 的统计结果。evaluation 中的 map 主要服务决策审计：为什么这些候选被采用、尝试、暂缓或拒绝，以及 reviewer 应从哪些代码和输出复核。
 
-如果主题文档已经有完整 map，evaluation 可以只引用路径和 anchor（章节 / 符号 / run label），再补 candidate 或 bench 决策需要的少量行。
+如果 production 长期主题文档已经有完整 map，evaluation 可以只引用路径和 anchor（章节 / 符号 / run label），再补 candidate 或 bench 决策需要的少量行。no-production topic 没有 production 长期主题文档时，evaluation 或 topic-local doc suite 承担 map 主归属。
 
 ## 实现方式审计
 
-evaluation（函数级评估）文档应保留轻量“实现方式审计”表，用来帮助 reviewer 复核当前实现选择和证据边界。主题 RVV 文档负责长文解释“当前采用的优化方式”；evaluation 文档只记录决策矩阵，避免复制大段实现说明。
+evaluation（函数级评估）文档应保留轻量“实现方式审计”表，用来帮助 reviewer 复核当前实现选择和证据边界。production 长期主题文档在适用时负责长文解释“当前采用的优化方式”；evaluation 文档记录决策矩阵，避免复制大段实现说明。no-production 时，evaluation 是诊断证据链和候选拒绝理由的主归属。
 
 推荐表格：
 
@@ -142,7 +142,7 @@ evaluation（函数级评估）文档应保留轻量“实现方式审计”表�
 - row source policy：full-cloud、source-indexed、dual-indices、correspondences 或其它入口形态是否逐 policy 独立批准。
 - production scope：production direct、production-shaped diagnostic、bench 诊断主题或 no-production 的最终边界。
 
-如果主题文档已经有完整“当前采用的优化方式”小节，evaluation 文档可以只保留表格和证据路径；不要把聊天过程或历史流水账搬进长期评估文档。候选路线、bench 统计和 output summary 应按 `document-ownership-and-traceability.zh.md` 的归属矩阵引用，避免同一段结论在主题文档、evaluation、summary 和 Handoff 中重复。
+如果 production 长期主题文档已经有完整“当前采用的优化方式”小节，evaluation 文档可以只保留表格和证据路径；不要把聊天过程或历史流水账搬进长期评估文档。候选路线、bench 统计和 output summary 应按 `document-ownership-and-traceability.zh.md` 的归属矩阵引用，避免同一段结论在 production 长期主题文档、evaluation、summary 和 Handoff 中重复。
 
 ## Bench 说明要求
 

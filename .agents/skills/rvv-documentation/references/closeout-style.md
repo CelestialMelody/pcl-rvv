@@ -6,9 +6,9 @@
 
 历史过程只保留能解释当前设计的内容，例如 FMA contraction、阈值谓词、`vcompress` 保序、fallback tail 或 traits gate。
 
-closeout 后的主题文档应单独说明“当前采用的优化方式”。这段说明解释当前实际使用的 RVV 组织方式、采用原因、VL chunk 内部流程、分组职责、fallback 边界和暂缓方案。它不是历史实验清单，也不替代后面的“正确性与高效性证据链”。
+production closeout 后的 `doc-rvv` 主题文档应单独说明“当前采用的优化方式”。这段说明解释当前实际使用的 RVV 组织方式、采用原因、VL chunk 内部流程、分组职责、fallback 边界和暂缓方案。它不是历史实验清单，也不替代后面的“正确性与高效性证据链”。no-production closeout 没有 adopted production behavior 时，不创建 `doc-rvv`；候选尝试、拒绝理由和“诊断证据链”写入 topic-local evaluation / phase closeout。
 
-closeout 后的主题文档应回答：
+production closeout 后的主题文档应回答：
 
 - 原标量循环中哪几段已经由 production RVV 或 diagnostic RVV 接管。
 - 哪些阶段仍是标量，为什么不继续 RVV 化。
@@ -26,7 +26,7 @@ production 升级后先做测试 inventory，不要因为已有真实生产入�
 - `production-shaped diagnostic` 可继续作为阶段归因、边界复现或 fallback 验证工具保留；名称和注释要说明用途，不再写成未来接入的单独证据。
 - 只有测试的入口形态、输入构造、参数、断言和覆盖边界都被其它测试完全包含时，才适合删除或合并。
 
-如果测试被删除、合并或改名，评估文档和主题文档必须记录：
+如果测试被删除、合并或改名，评估文档和适用的 production 长期主题文档必须记录：
 
 - 旧测试名。
 - 删除或合并原因。
@@ -64,7 +64,7 @@ closeout 文档还应遵循：
 
 closeout 时至少检查：
 
-- 函数级评估与主题文档的生产接入结论是否一致。
+- 函数级评估与适用的 production 长期主题文档的生产接入结论是否一致；no-production 时是否明确 `doc-rvv` 为 `not_applicable`。
 - 模块状态表是否反映当前主题完成、暂缓、bench 诊断或生产回退状态。
 - 工作日志是否记录测试、bench、QEMU、反汇编、目标硬件和文档同步状态。
 - 如果改动暴露通用规则，是否同步到 `.agents/skills/` 或项目知识文档。

@@ -113,15 +113,15 @@ reviewer 应至少检查：
 - S10 EvidenceDecision（证据决策）后是否按 `topic-lifecycle.zh.md` 进入正确分支。
 - production integration loop（生产接入闭环）是否包含生产补丁、生产直连测试、生产证据重跑和再次证据决策。
 - QEMU、反汇编和板卡证据是否分层正确。
-- closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”小节；未接 production 的诊断结论是否包含“诊断证据链”小节。
+- production closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”小节；未接 production 的诊断结论是否在 topic-local evaluation / phase closeout 中包含“诊断证据链”小节，且没有默认新增 `doc-rvv`。
 - 证据链是否写清 correctness（正确性）、performance（性能）、boundary（证据边界）和 risk（风险）：public entry 是否真实命中；row semantics 是否清楚；`accepted_points`、中间态、matrix 和 fallback 是否有证据；性能结论是否只来自 repeated board 或目标硬件。
 - benchmark、board summary、checksum、asm attribution 或 EvidenceDecision 是否运行或人工填写 Evidence Doctor（证据体检）结果；Error 是否阻塞严格结论，Warning 是否进入 summary / evaluation / Handoff 的风险说明和处理动作。
 - 证据链是否把 QEMU timing、diagnostic evidence、representative pointtypes、indexed / correspondences 边界写清。QEMU timing 不能写成性能结论，diagnostic evidence 不能写成 production evidence。
 - registration 主题是否按 `registration-topic-evidence.zh.md` 审计 `accepted_points`、`ATA/ATb`、
   matrix、weights、symmetric normals、query/match 输出语义和 production direct 边界。
 - 配置解析出的测试资产、diagnostic（诊断代码）、prototype（原型代码）是否有足够中文注释和文件级阅读提示。
-- 主题文档是否区分 S2 evaluation 和 S11 closeout（收尾）。
-- 文档归属是否符合 `document-ownership-and-traceability.zh.md`：主题文档负责长期事实，evaluation 负责候选取舍，output summary / analysis script 负责 bench 统计，Handoff Packet 负责恢复动作；长段重复、互相矛盾或证据错放应视为可审查性缺口。
+- production 长期主题文档是否只在 adopted production behavior、production patch 或 PI5 通过后适用，并区分 S2 evaluation 和 S11 closeout（收尾）。
+- 文档归属是否符合 `document-ownership-and-traceability.zh.md`：production 长期主题文档负责 adopted production 事实，evaluation 负责候选取舍和 no-production 诊断证据链，output summary / analysis script 负责 bench 统计，Handoff Packet 负责恢复动作；长段重复、互相矛盾、证据错放，或 no-production 默认发布 `doc-rvv` 应视为可审查性缺口。
 - 复杂 topic 是否有 Traceability Map，且能从文档定位到 production 入口、diagnostic / candidate helper、bench wrapper、analysis script、output summary 和 Handoff 恢复字段。
 - 文档是否能让读者理解标量实现做了什么、RVV 方案如何实现、bench case 如何构造和证明什么；如果只列公式、helper 名、指令名或 speedup，视为可审查性缺口。
 - 对 buffer/staging、scalar tail（标量尾段）、fused multiply-add（融合乘加）、vector reduction（向量规约）、数学函数是否向量化等实现取舍，worker 是否给出理由、替代方案和需要补的证据。
@@ -150,7 +150,7 @@ reviewer 应至少检查：
 - Handoff Packet 是否显式包含 `evidence_decision` 与 `production_decision`。Reviewer 应检查二者是否一致但不混淆：性能或诊断收益成立不自动等于生产接入成立。
 - Handoff Packet 是否包含 `validation` 摘要，列出已运行和未运行的 test、bench、反汇编、板卡或 sanitizer；未运行项是否说明原因。
 - 如果 worker 发现可沉淀规则、资产缺口或冗余规则，Handoff Packet 是否包含 `agent_asset_feedback`；默认配置下该字段只能报告建议，不能代表已修改 agent asset。
-- Handoff Packet 是否包含 `evidence_decision_summary`，并与主题文档的“正确性与高效性证据链”或“诊断证据链”一致。
+- Handoff Packet 是否包含 `evidence_decision_summary`，并与 production 长期主题文档的“正确性与高效性证据链”或 topic-local “诊断证据链”一致。
 - Handoff Packet 是否包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`，并与 S0 报告、defaults、local override 和当前 prompt 一致。
 - 可提交配置是否只包含默认值、占位符和 env var 名；私有 IP、用户名、个人绝对路径和 raw logs 是否仍留在被忽略的 local override、工作区日志或本机环境中。
 - Handoff Packet 是否把重要后续选择暴露给用户。若当前结论是窄范围 production-ready、partial-production-candidate、

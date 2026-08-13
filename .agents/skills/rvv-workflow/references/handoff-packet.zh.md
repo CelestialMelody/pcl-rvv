@@ -54,7 +54,7 @@ agent_asset_feedback (可选；本轮发现的可沉淀规则、资产缺口或�
 preferences_loaded (S0 读取的偏好层级，例如 defaults、local override、prompt override，以及是否只报告 env var 名):
 work_preferences (S0 冻结的工作偏好，例如注释详细度、注释语言、production（生产源码）注释上限、测试资产 / diagnostic 注释下限、是否处于单 topic 校准重跑):
 commit_preferences (S0 冻结的提交偏好，例如是否允许 commit（提交）、topic / log / agent asset 是否拆分、evidence log policy（证据日志策略）是 summary-only / sanitized-logs / raw-logs):
-artifact_publication_decision (S0 解析出的产物发布判断；列出 `s0_run_record`、`phase_docs`、`current_handoff`、`final_topic_docs`、`evidence_summary`、`sanitized_logs`、`raw_logs` 和 `agent_asset_patch` 的默认策略与提交边界):
+artifact_publication_decision (S0 解析出的产物发布判断；列出 `s0_run_record`、`phase_docs`、`current_handoff`、`production_topic_docs`、`topic_local_evaluation`、`evidence_summary`、`sanitized_logs`、`raw_logs` 和 `agent_asset_patch` 的默认策略与提交边界；no-production 时 `production_topic_docs` 必须写 `not_applicable`):
 experience_migration_audit (可选；声明采用 sibling topic 经验时，列出 adopted / attempted / deferred / rejected 对照表):
 test_support_shape_scan (测试支撑形态扫描；列出当前 topic 的根目录源文件、聚合头、内部 helper、旧 test_support 目录、script 或等价支撑代码):
 test_support_split_decision (可选；长 helper 或多职责 helper 是否已按 test_support 配置拆分，或暂缓理由):
@@ -79,7 +79,7 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `evidence_paths` 只列当前结论真正依赖的证据。大型日志可以列路径和摘要，不要复制长日志。
 - `board_evidence_paths` 只列目标硬件证据，并明确每个路径是 summary artifact（摘要证据）、sanitized log（脱敏日志）还是 raw log（原始日志）。默认 `summary-only` 时，raw log 只能作为本机证据，不进入默认提交边界。
 - `asm_attribution` 必须说明关键 RVV 指令或缺失证据归属到当前 helper、production 符号、bench harness、Eigen/libm、编译器自动向量化或无关代码。归属不清时写“指令存在但热点归属未闭合”。如果使用 `generate_vec_report` 辅助解释自动向量化疑点，Handoff 只记录命令、摘要路径和它不能替代 objdump 归因的边界。
-- `evidence_decision_summary` 必须对应主题文档的“正确性与高效性证据链”或未接 production 诊断结论的“诊断证据链”。摘要至少写清 public entry 是否真实命中、row semantics、`accepted_points` / 中间态 / matrix / fallback 证据、repeated board 或目标硬件性能来源、EvidenceDecision 边界和未覆盖风险。
+- `evidence_decision_summary` 必须对应 production 长期主题文档的“正确性与高效性证据链”，或 topic-local evaluation / phase closeout 中未接 production 诊断结论的“诊断证据链”。摘要至少写清 public entry 是否真实命中、row semantics、`accepted_points` / 中间态 / matrix / fallback 证据、repeated board 或目标硬件性能来源、EvidenceDecision 边界和未覆盖风险。
 - `evidence_decision` 应是 S10 / PI5 的明确枚举或陈述，例如 `production-ready`、`partial-production-candidate`、`bench-only/no-production`、`rollback/no-production`、`blocked`。它可以和 `current_decision` 内容一致，但不能只隐含在长摘要里。
 - `production_decision` 必须独立于性能结论写清是否修改 production（生产源码）、是否进入 production integration loop（生产接入闭环）、是否只保留 diagnostic，以及哪些入口 / 点类型 / `Scalar` / row source 仍保持标量。诊断板卡收益不能自动写成 production-ready。
 - `implementation_review` 适用于任何实现或诊断 helper 改动。它至少说明 public entry / `*_Std` / `*_RVV` 或 diagnostic helper 分层、fallback 与 gate、是否新增 public API、是否复用公共 load/store / traits / policy、维护风险，以及 reviewer 应重点看哪些实现边界。
@@ -88,7 +88,7 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `traceability_map_status` 应说明复杂 topic 的 Traceability Map 是 `required`、`updated`、`not_required` 还是 `deferred`。`updated` 时列出章节或独立文档；`not_required` 时说明 topic 为什么简单；`deferred` 时说明缺少哪些代码、测试、脚本或 output 路径。
 - `mature_sibling_parity_status` 在相邻成熟 topic 已经提供更完整结构时必须输出。它不要求复制 sibling
   的算法、文件清单或性能结论；它要求当前 topic 对 source / aggregator / internal helper 布局、
-  topic-local doc suite、evaluation 主路径、`doc-rvv` 长期文档分工和 legacy 清理逐项给出
+  topic-local doc suite、evaluation 主路径、`doc-rvv` production-only 适用性和 legacy 清理逐项给出
   `adopted / deferred / rejected`。若存在当前 topic 授权范围内、未阻塞、低风险的 deferred 项，
   `next_phase_default` 不能是 `ready_for_review`，必须指向 structure-parity 或对应清理 phase。
 - `ready_for_review_validity_check` 在 worker 声称 `ready_for_review`、`done`、`stop_for_review`
@@ -126,7 +126,7 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `preferences_loaded` 必须写清 `.agents/config/defaults.yaml` 是否读取、`.agents/local/user-preferences.yaml` 是否存在、当前 prompt 是否覆盖配置。涉及板卡、用户名、私有路径时，只写 env var（环境变量）名或 local override 覆盖范围，不写实际值。
 - `resolved_artifacts` 必须列出本轮通过 `artifact_layout` 解析出的关键 worklog、phase、handoff 或 topic 文档路径，并标明 template key、resolved path 和 publication class；若解析失败，写缺失键而不是猜路径。
 - `work_preferences` 和 `commit_preferences` 应与 S0 报告一致；若中途改变，写明用户授权或改变原因。`work_preferences` 至少覆盖 `comment_policy_frozen` 和 `documentation_policy_frozen`；`commit_preferences` 至少覆盖 `evidence_policy_frozen`。
-- `artifact_publication_decision` 应与 `.agents/config/defaults.yaml` 中的 `artifact_publication` 默认分类保持一致；若本轮改写了发布边界，说明原因和授权来源。
+- `artifact_publication_decision` 应与 `.agents/config/defaults.yaml` 中的 `artifact_publication` 默认分类保持一致；若本轮改写了发布边界，说明原因和授权来源。当前结论为 `diagnostic`、`bench-only`、`rollback/no-production` 或未接 production 的 `partial-production-candidate` 时，`production_topic_docs` 必须写 `not_applicable`，不能把 `artifact_layout.topic_doc_template` 当作默认 closeout 产物。
 - `experience_migration_audit` 在 worker 声明采用 sibling topic（同模块相邻主题）经验时必须输出。它至少覆盖 row source、source / weight policy、shared math pipeline、staging / reduction、formula / FMA、evidence model 和 production boundary，并用 `adopted`、`attempted`、`deferred` 或 `rejected` 说明每个历史经验维度的处理结果。该字段不要求当前 topic 实现 sibling 的具体算法，但要求未采用的成功或负向方案有理由或下一轮验证计划。
 - `test_support_shape_scan` 在恢复旧 topic、长 topic、或声明对齐成熟 sibling 结构时必须输出。它应列出当前
   topic 实际存在的测试支撑形态：根目录 test / bench 源码、聚合头、内部 helper、旧 `test_support/`

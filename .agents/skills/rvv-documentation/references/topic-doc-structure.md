@@ -1,6 +1,10 @@
 # 主题 RVV 文档结构
 
-主题文档面向长期维护，强调算法、实现设计、staging 边界、数值语义和生产接入理由。
+主题文档面向 production 长期维护，强调算法、实现设计、staging 边界、数值语义和生产接入理由。
+`artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 主题文档只在存在 adopted production behavior
+（已采用生产行为）、production patch（生产补丁）或 PI5 生产证据闭环通过后适用。`diagnostic`、
+`bench-only`、`rollback/no-production` 或未接 production 的 `partial-production-candidate` 的诊断证据链
+应写在 topic-local evaluation / phase closeout；不得为了 no-production closeout 新建 `doc-rvv`。
 
 推荐结构：
 
@@ -32,19 +36,19 @@
 - RVV 覆盖原标量代码的哪一段，哪些阶段仍是标量，原因是什么。
 - 实现选择审计：如果使用 buffer/staging、`vcompress`、scatter、标量 tail、显式/非显式 fused multiply-add（融合乘加）、vector reduction（向量规约）或数学函数 helper，必须说明为什么这样做、替代方案是什么、当前证据是否足以排除或暂缓替代方案。
 - 哪些 gate 触发 fallback，fallback 后语义如何保持。
-- 当前主题属于 production direct、production-shaped diagnostic、bench 诊断主题，还是生产回退说明。
+- 当前主题属于 production direct、production-shaped diagnostic、bench 诊断主题，还是生产回退说明；若不是 adopted production behavior，说明 `doc-rvv` 是否 `not_applicable`。
 - 每个 bench case 的入口、规模、参数、是否命中 RVV、speedup 计算方式和证明点。
 - 板卡收益是否足以覆盖 staging、buffer 和维护成本。
-- closeout 或 production-candidate 阶段必须包含“当前采用的优化方式”小节。该小节面向维护者解释当前代码实际采用的优化组织方式，不能只列历史尝试、bench 数字或最终 EvidenceDecision。
+- production closeout 或 production-candidate 阶段必须包含“当前采用的优化方式”小节。该小节面向维护者解释当前代码实际采用的优化组织方式，不能只列历史尝试、bench 数字或最终 EvidenceDecision。no-production closeout 没有当前采用的 production 优化方式时，该内容应写成 evaluation / phase result 中的候选审计，不新建 `doc-rvv`。
 - 复杂 topic 必须包含或引用 Traceability Map。该表只覆盖 reviewer 需要定位的关键 production、RVV test 资产、script、output 和文档章节，不要求枚举每个小函数，也不要求默认新建巨型函数文档。
 - 多阶段优化 topic 必须包含或引用 topic-level optimization roadmap。roadmap 记录 candidate family、idea source、阶段反思新增路线、优先级和恢复条件；主题文档只引用最终采用和仍暂缓的路线，不复制搜索过程。
-- closeout 或 production-candidate 阶段必须包含“正确性与高效性证据链”小节。该小节是 reviewer 判断依据，不能只写说明文字。
+- production closeout 或 production-candidate 阶段必须包含“正确性与高效性证据链”小节。该小节是 reviewer 判断依据，不能只写说明文字。未接 production 的 no-production 结论使用 topic-local “诊断证据链”。
 - 若当前结论是 partial-production-candidate（局部生产候选），必须写清“候选范围”和“尚不能生产接入的原因”。候选范围要窄到入口形态、点类型、数据布局、规模、fallback 条件和目标硬件；不能把局部诊断收益写成整个函数族可接入。
 - 若已经接入 production（生产源码），主题文档必须从“诊断原型说明”升级为“生产实现说明”：写清真实 production patch（生产补丁）、真实 dispatch / fallback、production direct（真实生产入口直连）测试、反汇编符号归属、板卡 production bench 和 PI5 EvidenceDecision（生产证据决策）。不要把早期诊断 speedup 当作最终生产结论。
 
 ## 当前采用的优化方式
 
-closeout（收尾）或 production-candidate（生产候选）文档必须新增或更新本小节。该小节回答“当前到底采用了什么优化方式、为什么采用、如何工作、证据支持到哪里”。它放在详细设计之后、证据链之前，作为维护者理解代码形态的入口。
+production closeout（收尾）或 production-candidate（生产候选）文档必须新增或更新本小节。该小节回答“当前到底采用了什么优化方式、为什么采用、如何工作、证据支持到哪里”。它放在详细设计之后、证据链之前，作为维护者理解代码形态的入口。no-production closeout 不应伪造“当前采用的优化方式”；候选尝试和拒绝理由写入 evaluation / phase docs。
 
 本小节至少覆盖：
 
@@ -67,7 +71,7 @@ closeout（收尾）或 production-candidate（生产候选）文档必须新增
 
 ## Traceability Map
 
-复杂 topic 的主题文档应包含或引用 Traceability Map（可追踪性地图）。本小节回答“读者从长期文档如何跳到代码、测试、脚本和 output 复核”。
+复杂 topic 的 production 长期主题文档应包含或引用 Traceability Map（可追踪性地图）。no-production topic 的 Traceability Map 主归属是 evaluation 或 topic-local doc suite。本小节回答“读者从长期文档如何跳到代码、测试、脚本和 output 复核”。
 
 推荐表格：
 
@@ -80,25 +84,26 @@ closeout（收尾）或 production-candidate（生产候选）文档必须新增
 - production public entry、dispatch / fallback gate、Std helper、RVV helper 或保持标量的入口。
 - RVV test 侧的 reference、row source、candidate、reduction / staging、production-shaped diagnostic、production direct test 和 bench wrapper。
 - analysis script、output summary、QEMU / board output、反汇编或 profile 证据入口。
-- evaluation 的实现方式审计、主题文档证据链和 Handoff Packet 中恢复字段。
+- evaluation 的实现方式审计、适用的 production 长期主题文档证据链或 topic-local 诊断证据链，以及 Handoff Packet 中恢复字段。
 
 每一行都要写清证据角色，例如 correctness gate、RVV-vs-RVV B/A summary、fallback coverage、asm attribution、production boundary 或 recovery pointer。不要只写自然语言说明。
 
-如果表格过长，可以拆到独立 `*-traceability.zh.md`，主题文档只保留路径、anchor（章节 / 符号 / run label）和 role（证据角色）。
+如果表格过长，可以拆到独立 `*-traceability.zh.md`，production 长期主题文档只保留路径、anchor（章节 / 符号 / run label）和 role（证据角色）；no-production topic 则由 evaluation 或 topic-local doc suite 引用。
 
 ## 正确性与高效性证据链
 
-closeout（收尾）或 production-candidate 文档必须新增或更新本小节。小节至少回答：
+production closeout（收尾）或 production-candidate 文档必须新增或更新本小节。小节至少回答：
 
 - correctness（正确性）：public entry（公开入口）是否真实命中目标路径；row semantics（行语义）是否清楚；`accepted_points`、中间态、matrix（矩阵）和 fallback 是否有测试、日志或源码证据。
 - performance（性能）：性能结论是否来自 repeated board（重复板卡测试）或目标硬件结果；QEMU timing（QEMU 计时）不能作为性能结论。
 - boundary（证据边界）：EvidenceDecision 是否只覆盖证据已经证明的入口、点类型、row source policy（行来源策略）、indices、correspondences、`Scalar`、数据布局和规模。
 - risk（风险）：未覆盖范围、保留标量路径、后续扩展条件和需要补的 test、bench、asm（反汇编）或板卡证据。
 
-未接 production 的诊断结论应写对应“诊断证据链”。该小节必须说明 diagnostic evidence（诊断证据）
+未接 production 的诊断结论应在 topic-local evaluation / phase closeout 写对应“诊断证据链”。该小节必须说明 diagnostic evidence（诊断证据）
 能证明什么，不能写成 production evidence（生产证据）。如果只有 representative pointtypes
 （代表性点类型）、public-entry-shaped wrapper（公开入口形态包装）或 production-shaped diagnostic，
-必须写清真实 production dispatch、indexed / correspondences、泛型点类型或 fallback 仍未闭合。
+必须写清真实 production dispatch、indexed / correspondences、泛型点类型或 fallback 仍未闭合；`doc-rvv`
+应标为 `not_applicable`，除非已有 adopted production behavior 需要维护。
 
 ## Staging 与特殊实体
 
@@ -185,15 +190,15 @@ RVV helper 片段应覆盖：
 
 fallback case 用于证明未覆盖路径保持语义和成本接近，不作为 RVV 主路径性能结论。
 
-如果主题文档已经过长，应把完整 bench label 字典、checksum 公式、trace 输出格式和日志提交白名单移到 topic-local benchmark/evidence 文档。主题文档只保留证据路径、关键结果和边界。拆分后，主题文档必须链接该细分文档。
+如果 production 长期主题文档已经过长，应把完整 bench label 字典、checksum 公式、trace 输出格式和日志提交白名单移到 topic-local benchmark/evidence 文档。production 长期主题文档只保留证据路径、关键结果和边界。拆分后，主题文档必须链接该细分文档。
 
 topic-local benchmark/evidence 文档应把 `run_bench_*`、`run_board_bench_*` 和 repeated board collect target 分开列出。`run_board_bench_*` 是单次板卡 smoke，必须写清默认输出目录和证据等级。性能结论只能引用 repeated board summary 或目标硬件重复采集摘要。
 
-如果一个 topic 同时存在多个 adopted / attempted / deferred 优化方式，或用户需要按优化方式复核“为什么采纳 A、暂缓 B”，应新增或引用 topic-local `optimization-evidence` 文档。该文档按优化方式列出 production / test_support 代码路径、test target、bench target、board evidence、当前结果和不能外推的边界；主题文档只保留当前采用方式和该索引入口。
+如果一个 topic 同时存在多个 adopted / attempted / deferred 优化方式，或用户需要按优化方式复核“为什么采纳 A、暂缓 B”，应新增或引用 topic-local `optimization-evidence` 文档。该文档按优化方式列出 production / test_support 代码路径、test target、bench target、board evidence、当前结果和不能外推的边界；production 长期主题文档只保留当前 adopted production 方式和该索引入口。
 
 ## Topic-Local Doc Suite
 
-复杂 topic 命中下列任一条件时，应把测试和证据说明拆成 topic-local doc suite（主题本地文档套件），而不是把所有内容塞进 evaluation 或 `doc-rvv` 主题文档：
+复杂 topic 命中下列任一条件时，应把测试和证据说明拆成 topic-local doc suite（主题本地文档套件），而不是把所有内容塞进 evaluation 或适用的 `doc-rvv` production 长期主题文档：
 
 - evaluation 已经同时承担测试说明、bench label、代码地图、候选取舍和 EvidenceDecision。
 - test_support / `include/impl` / `src` 中存在三类以上角色，例如 reference、fixtures、row source、candidate、reduction、assertion、bench harness、bench cases、script。
@@ -236,7 +241,7 @@ README 只负责导航、常用命令和可提交证据入口。`testing-overvie
 
 ## 生产接入后的 Closeout 章节
 
-topic 完成 PI2-PI5 后，主题文档应新增或更新生产 closeout 章节。该章节不需要复述完整代码，
+topic 完成 PI2-PI5 后，production 长期主题文档应新增或更新生产 closeout 章节。该章节不需要复述完整代码，
 但必须让 reviewer 能从文档直接看出“实际接入了什么、如何回退、证据是否仍成立”：
 
 ```text
@@ -273,7 +278,7 @@ topic 完成 PI2-PI5 后，主题文档应新增或更新生产 closeout 章节�
 
 ## 负向性能归因
 
-如果 board（板卡）或目标硬件结果不支持生产接入，主题文档不能只写“不加速”。必须补一段受证据约束的归因：
+如果 board（板卡）或目标硬件结果不支持生产接入，topic-local evaluation / phase closeout 不能只写“不加速”。必须补一段受证据约束的归因；已有 production 长期主题文档只有在需要记录生产回退历史时才更新：
 
 - 哪些源码结构或 RVV 实现选择可能造成退化，例如 gather、不规则访存、压缩到 buffer、额外 store/load、标量 tail、solver/状态机主成本、数据重排或分流开销。
 - 哪些证据支持这个判断，例如 asm 中的指令归属、bench case 对比、规模放大趋势、QEMU 只作为路径证据、消融 bench 或 profile。

@@ -40,14 +40,18 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
 - `rvv-test/references/optimization-phase-loop.zh.md` 是多阶段优化循环的细则源。短 prompt 继续已有 topic 时，worker 必须恢复或创建 phase plan，按阶段完成实现、测试、证据解释、矩阵更新和 continue / stop decision；仍有 unblocked next action 时不得因微任务完成而早停。若历史 phase 或 Handoff 写着 `ready_for_review`，仍要重新执行 `ready_for_review_validity_check`，确认 roadmap、matrix、structure parity、doc suite、legacy 清理和 shape scan 没有未阻塞缺口。
 - 回复、代码注释、测试说明、文档、汇报必须遵循 `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`：面向中文读者时不要堆英文术语，英文专有术语首次出现必须用括号解释中文含义。
 - 除非用户明确要求，不修改 PCL 生产源码。短 prompt 中“处理 topic”视为授权修改该 topic 对应的、
-  由 `artifact_layout` 解析出的测试资产和主题文档产物；不要把该授权扩展到其它 topic。
+  由 `artifact_layout` 解析出的测试资产、topic-local evaluation / phase 文档和适用的文档产物；不要把该授权扩展到其它 topic。
+  `artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 长期主题文档只适用于已有 adopted production behavior（已采用生产行为）、
+  production patch（生产补丁）或 PI5 生产证据闭环通过后的主题。`diagnostic`、`bench-only`、`rollback/no-production`
+  或未进入生产接入闭环的 `partial-production-candidate` 不默认创建 `doc-rvv`；其诊断证据链写入 topic-local
+  evaluation、phase result、roadmap / matrix 和 Handoff。
 - RVV 结论必须有证据链，区分 correctness（正确性）、QEMU 证据、反汇编证据、板卡性能、fallback（回退路径）边界和生产接入判断。
 - bench（性能测试）默认在板卡或目标硬件上跑；QEMU 默认只编译 bench binary 或跑窄范围 smoke，不运行完整 bench matrix，不把 QEMU bench compare 的计时写成性能结论。
 - 板卡复跑必须先有 bounded rerun budget（有界复跑预算）和 decision bucket（决策桶）。数字小幅波动但决策桶不变时不要无限复跑；预算耗尽仍摇摆时标成 `unstable`、降级证据或交给人工判断。
-- 如果一次复跑改变了已写文档中的方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，旧 summary / phase result 立即降级为历史 run；必须刷新对应 topic 文档、evaluation、Handoff Packet 和 phase 文档，不允许继续把旧数值当当前 truth。
+- 如果一次复跑改变了已写文档中的方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，旧 summary / phase result 立即降级为历史 run；必须刷新对应 evaluation、phase 文档、Handoff Packet 和适用的 production 长期主题文档，不允许继续把旧数值当当前 truth。若当前结论为 no-production 且没有 adopted production behavior，不得为了刷新而新建 `doc-rvv`。
 - 官方 Make / script target 覆盖证据文件时应更新 topic-local `log/evidence_registry.json` 或等价登记表；S0 恢复、phase loop 恢复和提交前检查必须发现 `unregistered_change`、`unregistered_file` 或 `stale_doc_pending_refresh`，不能把未登记覆盖当当前 truth。
 - benchmark、board summary、checksum、反汇编归属或 EvidenceDecision 前，必须按 `rvv-test` 的 Evidence Doctor（证据体检）规则暴露 Errors / Warnings / Suggestions；异常信号不是自动判错，但不能无解释地跳过。
-- closeout（收尾）或 production-candidate（生产候选）topic 文档必须包含“正确性与高效性证据链”小节。未接 production（生产源码）的诊断结论使用“诊断证据链”，并写清 diagnostic evidence（诊断证据）不能替代 production evidence（生产证据）。
+- closeout（收尾）或 production-candidate（生产候选）文档必须包含证据链。production 长期主题文档使用“正确性与高效性证据链”；未接 production（生产源码）的诊断结论在 topic-local evaluation / phase closeout 中使用“诊断证据链”，并写清 diagnostic evidence（诊断证据）不能替代 production evidence（生产证据）。
 - QEMU 只用于正确性、日志格式和路径命中证据；性能结论必须来自目标硬件或板卡。
 - 默认不提交生成日志、本地 build（构建）输出、个人绝对路径、私有板卡地址、本机 `config.mk` 或聊天记录。用户明确要求提交 evidence logs（证据日志）时，优先提交已脱敏日志，必须按 `rvv-workflow` 和 `rvv-test` 冻结日志策略、运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本或对应 Make target 检查、拆分 commit，并说明保留或排除哪些日志。
 

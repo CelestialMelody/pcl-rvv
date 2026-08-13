@@ -218,11 +218,11 @@ worker 再读：
 4. `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`，当短 prompt 继续已有 topic、恢复 phase plan/result 或当前 phase 仍有 unblocked next action 时读取。
 5. `.agents/skills/rvv-workflow/references/topic-entry-template.md`
 6. `.agents/skills/rvv-documentation/references/function-evaluation-and-closeout.zh.md`
-7. `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`，当本轮要写 closeout、evaluation、主题文档、Handoff Packet，或 topic 涉及多处代码 / 测试 / 输出定位时读取。
+7. `.agents/skills/rvv-documentation/references/document-ownership-and-traceability.zh.md`，当本轮要写 closeout、evaluation、topic-local 文档、适用的 `doc-rvv` 长期主题文档、Handoff Packet，或 topic 涉及多处代码 / 测试 / 输出定位时读取。
 8. 当前模块的筛选状态表。
 9. 命中的 topic 源码、文档和测试证据。
 
-worker 选中 topic 后、开始写配置解析出的 topic 测试资产、topic 文档或 production 前，必须按
+worker 选中 topic 后、开始写配置解析出的 topic 测试资产、topic-local 文档、适用的 production 长期主题文档或 production 前，必须按
 `worker-quality-gates.zh.md` 做一次轻量自查。若 topic 涉及 staging（分阶段暂存）、
 gather（离散加载）、`vcompress`、scalar tail（标量尾段）、vector reduction（向量规约）、
 FMA（融合乘加）、板卡性能、benchmark summary、checksum summary、asm attribution 或 no-production closeout（不接入生产收尾），继续读取该文件指向的
@@ -281,9 +281,9 @@ workflow improvement 再读：
 
 worker 默认权限：
 
-- 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产和主题文档产物。
+- 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产、topic-local evaluation / phase 文档和适用的文档产物。`artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 长期主题文档只有在存在 adopted production behavior、production patch 或 PI5 生产证据闭环通过时才适用；no-production / bench-only / 未接 production 的 partial-production-candidate 只写 topic-local evaluation、phase result、roadmap / matrix 和 Handoff。
 - 对测试优化和 topic-local 文档成熟度工作，短 prompt 默认授权 worker 在当前 topic 内连续推进多个低风险 phase，例如测试支撑结构迁移、legacy 聚合头 / pointer 清理、evaluation 迁入 `doc/`、README / doc suite 补齐、source-indexed 或其它 row source 的 candidate / correctness / bench / asm / Evidence Doctor 阶段。除非继续会扩大到 production、public API、其它 topic、板卡不可用、证据矛盾或 dirty isolation 不安全，否则不应因为一个小 phase 完成就停止。
-- 不把该授权扩展到其它 topic 的测试资产、主题文档或生产源码。
+- 不把该授权扩展到其它 topic 的测试资产、topic-local 文档、production 长期主题文档或生产源码。
 - S10 `EvidenceDecision`（证据决策）前不修改 production（生产源码）。
 - 如果证据支持 production-ready（可接入生产），先输出 Handoff Packet，等待用户确认后进入 production integration loop（生产接入闭环）。
 - 默认不创建 commit（提交）。

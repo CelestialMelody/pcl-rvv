@@ -8,9 +8,9 @@
 
 Closeout 用于回答“本轮最终证明了什么”。它应该在测试、QEMU、反汇编、板卡或生产接入证据完成后出现，作为长期维护和提交审查依据。
 
-二者可以写在同一个物理文档中，但章节职责必须分开。复杂 topic 建议拆成 evaluation 文档和主题 RVV 文档。
+二者可以写在同一个物理文档中，但章节职责必须分开。复杂 topic 建议拆成 evaluation 文档和适用的 production 长期主题文档；no-production topic 不默认创建 `doc-rvv`。
 
-如果一个 topic 同时存在主题文档、evaluation、output summary 和 Handoff Packet，先用文档归属矩阵分清长期事实、候选取舍、bench 统计和恢复动作的主归属，再写具体章节。这样 reviewer 才能从主归属一路追到代码、测试和输出。
+如果一个 topic 同时存在 production 长期主题文档、evaluation、output summary 和 Handoff Packet，先用文档归属矩阵分清长期事实、候选取舍、bench 统计和恢复动作的主归属，再写具体章节。这样 reviewer 才能从主归属一路追到代码、测试和输出。
 
 ## S2 Evaluation（函数级评估）应回答什么
 
@@ -28,13 +28,13 @@ S2 文档可以包含计划和假设，但必须标清哪些内容尚未由证�
 
 ## S11 Closeout（收尾文档）应回答什么
 
-S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必要工作日志，至少覆盖：
+S11 阶段更新 evaluation 文档、topic-local closeout 文档、模块状态表和必要工作日志；只有存在 adopted production behavior、production patch 或 PI5 生产证据闭环通过时，才更新 `artifact_layout.topic_doc_template` 解析出的 production 长期主题文档。S11 至少覆盖：
 
 - 本轮最终 EvidenceDecision（证据决策）。
 - 复杂 topic 的 Traceability Map 是否仍然可用，能否从最终文档跳到 production 入口、diagnostic / candidate helper、bench wrapper、analysis script 和 output summary。
 - 实际创建或修改了哪些 production（生产源码）、diagnostic（诊断代码）、test、bench 或文档。
 - correctness（正确性）、QEMU path evidence（QEMU 路径证据）、disassembly evidence（反汇编证据）和 board performance（板卡性能证据）分别证明什么。
-- 主题文档是否包含“正确性与高效性证据链”小节；未接 production 的诊断结论是否包含对应“诊断证据链”。
+- production 长期主题文档是否包含“正确性与高效性证据链”小节；未接 production 的诊断结论是否在 evaluation / phase closeout 中包含对应“诊断证据链”。
 - 如果不接入生产，说明原因是收益不足、语义风险、证据不足、维护成本过高，还是工具 / 板卡阻塞。
 - 如果接入生产，说明真实生产入口、fallback（回退路径）、dispatch（分流逻辑）、`__RVV10__` 关闭行为、生产直连测试和板卡性能结果。
 - 未闭合项必须说明是什么、为什么没闭合、完成后能证明什么、当前是否必须完成。
@@ -52,7 +52,7 @@ S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必�
 4. 生产证据重跑。
 5. 再次 EvidenceDecision。
 
-之后再做 S11 closeout。最终主题文档必须按 `artifact_layout.topic_doc_template` 解析位置，并反映真实生产源码，而不是只反映 diagnostic prototype（诊断原型）或 bench-only 原型。
+之后再做 S11 closeout。最终 production 长期主题文档必须按 `artifact_layout.topic_doc_template` 解析位置，并反映真实生产源码，而不是只反映 diagnostic prototype（诊断原型）或 bench-only 原型。若 S10 没有进入生产接入闭环，则该模板为 `not_applicable`，closeout 写入 evaluation / phase 文档。
 
 如果用户授权进入生产接入闭环，且没有明确要求“只做 PI1 计划”，worker 默认应在同一轮完成 PI1-PI5
 和 S11 closeout。PI1 是继续生产补丁前的范围 gate，不是默认交付终点；只有命中生命周期中的暂停条件，
@@ -60,7 +60,7 @@ S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必�
 
 ## 生产接入后文档必须新增什么
 
-生产接入后的 S11 文档不是在原诊断结论后追加一句“已接入 production”。主题文档和 evaluation 文档
+生产接入后的 S11 文档不是在原诊断结论后追加一句“已接入 production”。production 长期主题文档和 evaluation 文档
 至少要同步以下内容：
 
 - 真实生产补丁范围：改了哪些生产文件、helper、dispatch、编译宏和 `__RVV10__` gate，哪些路径没有改。
@@ -75,7 +75,8 @@ S11 阶段更新 evaluation 文档、主题 RVV 文档、模块状态表和必�
 - 正确性与高效性证据链：public entry 是否真实命中；row semantics、`accepted_points`、中间态、matrix 和 fallback 的证据；性能结论是否只来自 repeated board 或目标硬件；EvidenceDecision 是否没有超过证据范围；未覆盖范围和扩展条件。
 
 若生产补丁最终回退，文档也要写成 rollback/no-production closeout：说明回退了哪些生产改动、保留了哪些
-diagnostic / bench 资产、为什么生产证据不成立。
+diagnostic / bench 资产、为什么生产证据不成立。若回退后没有 adopted production behavior，`doc-rvv`
+production 长期主题文档应删除、标为历史归档或判为 `not_applicable`；当前结论主归属回到 evaluation / phase closeout。
 
 ## 小 Topic 的合并写法
 
@@ -95,13 +96,13 @@ diagnostic / bench 资产、为什么生产证据不成立。
 reviewer 检查文档时应确认：
 
 - 是否有 S2 评估，而不是只在最终 closeout 才解释函数。
-- 文档归属矩阵是否清楚区分主题文档、evaluation、output summary 和 Handoff Packet 的职责，是否避免把长期事实、实验结果和恢复动作混写。
+- 文档归属矩阵是否清楚区分 production 长期主题文档、evaluation、topic-local phase / diagnostic docs、output summary 和 Handoff Packet 的职责，是否避免把长期事实、实验结果和恢复动作混写。
 - 复杂 topic 是否有 Traceability Map，且表格能把 production、RVV test 资产、analysis script、output summary 和文档章节互相定位。
 - S2 评估是否足以让人判断为什么继续或停止。
 - S11 closeout 是否覆盖最终证据，而不是重复早期计划。
-- closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”；未接 production 的诊断结论是否包含“诊断证据链”。
+- production closeout 或 production-candidate 文档是否包含“正确性与高效性证据链”；未接 production 的诊断结论是否在 evaluation / phase closeout 中包含“诊断证据链”，且没有默认发布 `doc-rvv`。
 - 生产接入 topic 是否在生产证据重跑后才写最终文档。
-- 生产接入后的主题文档是否以真实生产补丁和 production direct 证据为中心，而不是继续复述诊断原型。
+- 生产接入后的 production 长期主题文档是否以真实生产补丁和 production direct 证据为中心，而不是继续复述诊断原型。
 - fallback、未覆盖入口和未闭合项是否能让下一轮 worker 用短 prompt 恢复。
 - closeout 是否给出用户可决策的后续路径，而不是只把重要扩展可能性藏在“风险”里。
 - 不接入生产 topic 是否明确记录了恢复条件或下一轮证据需求。

@@ -36,7 +36,7 @@ keys，再用当前 topic / function / adapter 提供的运行时变量绑定剩
 - `test_support`：测试支撑代码的拆分阈值、聚合入口目录、聚合入口命名、内部目录、文件扩展名、兼容别名默认是否允许和职责拆分偏好；兼容别名默认关闭，除非有明确外部依赖或 dirty isolation 风险。
 - `paths`：work log（工作日志）、测试目录、文档目录、依赖库和交叉编译工具链的环境变量名。
 - `artifact_layout`：topic（主题）测试目录、主题文档、evaluation（评估）文档、S0 run（S0 运行记录）目录、phase plan/result（阶段计划 / 结果）、optimization matrix（优化矩阵）、current handoff（当前交接摘要）、测试 / bench 源码位置、筛选目录、数学专项测试顶层目录和函数目录、QEMU / board 输出目录、evidence registry（证据登记表）、Makefile 文件名和日志脱敏脚本的模板。
-- `artifact_publication`：产物发布策略。它只表达默认提交边界和审查要求；S0 run record 默认 local-only（仅本地），phase docs 默认 review-required（需要审查），current handoff 默认需要用户显式授权，raw logs 默认不提交，agent asset patch 必须与 topic 产物拆分审查 / 提交。
+- `artifact_publication`：产物发布策略。它只表达默认提交边界和审查要求；S0 run record 默认 local-only（仅本地），phase docs 默认 review-required（需要审查），current handoff 默认需要用户显式授权，`production_topic_docs` 仅在真实 production 行为已采用或 PI5 通过后适用，raw logs 默认不提交，agent asset patch 必须与 topic 产物拆分审查 / 提交。
 - `board`：板卡配置的环境变量名。不要在可提交配置里写 IP、用户名或私有路径。
 
 ## 本机覆盖示例
@@ -88,7 +88,8 @@ agent_assets:
 | `s0_run_record` | local-only（仅本地） | 默认不提交 |
 | `phase_docs` | review-required（需要审查） | 审查后可作为 topic test asset 提交 |
 | `current_handoff` | 需要用户显式授权 | 默认不提交 |
-| `final_topic_docs` | review-required | 证据审查后作为 topic 文档提交 |
+| `production_topic_docs` | review-required；no-production 时 not-applicable | PI5 或已采用 production 行为的证据审查后作为 `doc-rvv` 长期主题文档提交 |
+| `topic_local_evaluation` | review-required | 证据审查后作为 topic-local evaluation / closeout 决策审计提交 |
 | `evidence_summary` | summary-only + review-required | 被文档引用且脱敏后可提交 |
 | `sanitized_logs` | 需要用户明确要求 | 脱敏后单独提交 |
 | `raw_logs` | local-only | 默认永不提交 |

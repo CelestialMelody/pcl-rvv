@@ -95,8 +95,10 @@ S10 汇总 evidence bundle（证据包）并给出明确决策：
 - `blocked`：缺少工具、板卡、用户判断或必要源码条件。
 
 S10 必须写清“证据证明了什么”和“不能证明什么”。QEMU 或反汇编不能被写成生产性能结论。
-进入 closeout 或 production-candidate 后，主题文档必须包含“正确性与高效性证据链”小节。
-未接 production 的诊断结论写“诊断证据链”，并说明 diagnostic evidence（诊断证据）不能替代
+进入 closeout 或 production-candidate 后，文档必须包含证据链。`artifact_layout.topic_doc_template`
+解析出的 `doc-rvv` 长期主题文档只适用于 adopted production behavior（已采用生产行为）、production patch
+（生产补丁）或 PI5 生产证据闭环通过后的主题，并使用“正确性与高效性证据链”。未接 production 的诊断结论
+写入 topic-local evaluation / phase closeout 的“诊断证据链”，并说明 diagnostic evidence（诊断证据）不能替代
 production evidence（生产证据）。
 S10 如果发现 EvidenceDecision（证据决策）依赖了尚未写入 `rvv-test`、`rvv-implementation`
 或 `rvv-documentation` 的通用规则，应输出 `agent_asset_feedback`，但默认不修改 agent asset（代理资产）。
@@ -112,8 +114,9 @@ S10 是当前 phase 的决策点，不是 topic 的天然终点。若 `current_d
 进入 S11 文档 closeout：
 
 - 更新函数级评估文档，记录为什么不接入生产。
-- 更新主题文档或诊断文档，解释测试、bench、QEMU、反汇编、板卡证据和遗留风险。
-- 在主题文档中新增或更新“正确性与高效性证据链”；未接 production 的诊断结论写“诊断证据链”。
+- 更新 topic-local phase result、diagnostic 文档或 roadmap / matrix，解释测试、bench、QEMU、反汇编、板卡证据和遗留风险。
+- 在 evaluation 或 phase closeout 中新增或更新“诊断证据链”，说明未接 production 的诊断证据边界。
+- 不新建 `artifact_layout.topic_doc_template` / `doc-rvv` 长期主题文档；若已有 `doc-rvv` 只是诊断或 no-production 遗留产物，应删除或标为不适用，除非用户明确要求保留历史归档。
 - 更新模块队列表和状态表。
 - 写清下一轮如果要重新评估，需要补什么证据。
 
@@ -193,7 +196,7 @@ S11 是最终文档收口，不是所有文档的首次出现。
 
 - S2 文档回答“为什么值得或不值得继续”。
 - S11 文档回答“本轮实际证明了什么、接入了什么、没有接入什么、下一步该做什么”。
-- closeout 或 production-candidate 文档必须包含“正确性与高效性证据链”；未接 production 的诊断结论使用“诊断证据链”并标清 production direct 缺口。
+- closeout 或 production-candidate 文档必须包含证据链：production 长期主题文档使用“正确性与高效性证据链”；未接 production 的诊断结论在 evaluation / phase closeout 中使用“诊断证据链”并标清 production direct 缺口。`doc-rvv` 不适用于无 adopted production behavior 的 no-production closeout。
 - S11 closeout 如果沉淀出新的跨 topic 规则、发现旧规则冗余，或发现后续回访文档需要统一整改，按 `agent_asset_feedback` 报告建议；只有用户授权 workflow improvement（工作流改进）时才修改 `.agents`。
 
 如果 topic 进入生产接入闭环，S11 必须发生在 PI5 之后。若 topic 不接入生产，S11 可以直接发生在第一次 S10 之后。

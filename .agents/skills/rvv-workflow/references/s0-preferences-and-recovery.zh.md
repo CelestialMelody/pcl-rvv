@@ -63,12 +63,22 @@ resolved_artifacts:
     template_key: artifact_layout.evidence_registry_template
     resolved_path: <resolved-path-from-artifact_layout.evidence_registry_template>
     publication_class: evidence_summary
+  - artifact_key: evaluation
+    template_key: artifact_layout.evaluation_doc_template
+    resolved_path: <resolved-path-from-artifact_layout.evaluation_doc_template>
+    publication_class: topic_local_evaluation
+  - artifact_key: topic_doc
+    template_key: artifact_layout.topic_doc_template
+    resolved_path: <resolved-path-from-artifact_layout.topic_doc_template>
+    publication_class: production_topic_docs
+    applicability: adopted_production_behavior_or_pi5_passed_only
 
 artifact_publication_decision:
   s0_run_record: local_only
   phase_docs: review_required
   current_handoff: explicit_user_authorization_required
-  final_topic_docs: review_required
+  production_topic_docs: not_applicable_until_adopted_production_behavior_or_pi5_passed
+  topic_local_evaluation: review_required
   evidence_summary: summary_only_review_required
   sanitized_logs: explicit_user_request_required
   raw_logs: local_only
@@ -137,7 +147,8 @@ next_action: "写 Handoff Packet，并按当前 topic 进入下一步或停在�
 - `s0_run_record`：默认 local-only。
 - `phase_docs`：默认 review-required，审查后才可进入 topic 产物边界。
 - `current_handoff`：默认需要用户显式授权。
-- `final_topic_docs`：默认 review-required，证据确认后可提交。
+- `production_topic_docs`：默认 review-required，但只有 adopted production behavior、production patch 或 PI5 生产证据闭环通过后适用；no-production / bench-only / 未接 production 的 partial-production-candidate 写 `not_applicable`。
+- `topic_local_evaluation`：默认 review-required，负责 S2/S11 决策审计、no-production 诊断证据链和恢复条件。
 - `evidence_summary`：默认 summary-only + review-required。
 - `sanitized_logs`：默认需要用户明确要求。
 - `raw_logs`：默认 local-only。

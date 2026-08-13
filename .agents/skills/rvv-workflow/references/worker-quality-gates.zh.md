@@ -98,19 +98,31 @@ worker 必须写清映射关系：
 component ablation 或负向历史方案，worker 必须在表中审计它们。可以合理拒绝或暂缓，但不能只写
 “已参考相邻经验”而不列出未采用的主线。
 
-### 5. 主题文档质量
+### 5. 文档发布边界和主题文档质量
 
-主题 RVV 文档至少要包含：
+`doc-rvv` 主题 RVV 文档是 production 长期主题文档，不是 no-production closeout 的默认载体。worker 必须先判断 `artifact_layout.topic_doc_template` 是否适用：
+
+- `production_topic_doc_applicable`：存在 adopted production behavior（已采用生产行为）、production patch（生产补丁）或 PI5 生产证据闭环通过。
+- `production_topic_doc_not_applicable`：当前结论是 `diagnostic`、`bench-only`、`rollback/no-production`，或未接 production 的 `partial-production-candidate`。此时不创建 `doc-rvv`；诊断证据链写入 topic-local evaluation / phase closeout / roadmap / matrix / Handoff。
+
+适用时，production 长期主题文档至少要包含：
 
 - 函数入口作用和标量路径；
 - RVV 数据流、VL chunk（可变向量长度分块）、mask（掩码）、staging、tail 和 fallback（回退路径）；
 - 实现选择审计，例如 buffer、`vcompress`、scalar tail、FMA、vector reduction 或数学函数向量化；
-- closeout 或 production-candidate 阶段的“当前采用的优化方式”小节，写清当前真实采用的 RVV 组织方式、采用理由、chunk 内部流程、分组职责、暂缓方案和证据边界；
+- production closeout 或 production-candidate 阶段的“当前采用的优化方式”小节，写清当前真实采用的 RVV 组织方式、采用理由、chunk 内部流程、分组职责、暂缓方案和证据边界；
 - bench case 的输入构造、计时边界、证明点和不能证明的边界；
 - QEMU、反汇编、板卡证据分别支持什么；
-- closeout 或 production-candidate 阶段的“正确性与高效性证据链”小节；未接 production 的诊断结论的“诊断证据链”；
-- no-production 时的受证据约束归因和后续消融条件；
+- production closeout 或 production-candidate 阶段的“正确性与高效性证据链”小节；
 - partial-production-candidate（局部生产候选）时的生产直连缺口，例如真实公开入口 direct test、fallback、点类型 traits、`Scalar=double`、indices / correspondences 策略、生产 bench 重跑和人工确认点。
+
+no-production closeout 至少要在 topic-local 文档中包含：
+
+- evaluation 中的生产接入判断和候选拒绝理由；
+- phase result 中的 EvidenceDecision、证据分层、Evidence Doctor 解释和继续 / 停止条件；
+- “诊断证据链”，说明 diagnostic evidence 能证明什么，不能证明什么；
+- 受证据约束的负向归因和后续 profiling / ablation 恢复条件；
+- `doc-rvv` / `artifact_layout.topic_doc_template` 判为 `not_applicable` 的说明。
 
 如果当前模块已有最近通过 reviewer 的 sibling topic（同模块相邻主题）文档，worker 应读取或抽样对照其结构、解释粒度和证据边界，不复制 topic 特有结论、参数或性能数字。
 
@@ -172,7 +184,7 @@ worker 必须把结果写成 `adopted / deferred / rejected` 中的一种：`ado
 - `src/`、`include/`、`include/impl/`、聚合入口和 legacy alias 是否与当前配置和 topic 复杂度匹配；
 - evaluation 是否位于 `artifact_layout.evaluation_doc_template` 解析出的 `doc/` 路径；
 - 是否需要 `README.zh.md`、`testing-overview`、`correctness-tests`、`benchmark-and-evidence`、`optimization-evidence` 和 `test-support-code-map`；
-- `doc-rvv` 主题文档是否只保留长期 production 行为、当前采用方式和证据链，避免承载测试工程全量解释；
+- `doc-rvv` production 长期主题文档是否只在适用时出现，并只保留长期 production 行为、当前采用方式和证据链，避免承载测试工程全量解释；no-production topic 是否明确判为 `not_applicable`；
 - 暂缓项是否仍是 `phase_deferred + unblocked`，是否应继续到下一 phase。
 
 成熟相邻主题对齐审计的默认结果不应是“记录后等待 reviewer”。若缺口只涉及当前 topic 的测试资产、
@@ -223,8 +235,8 @@ closeout 或 production-candidate topic 文档必须包含“正确性与高效�
 - traceability map：复杂 topic 是否提供 Traceability Map（可追踪性地图），能从文档跳到 production 入口、test helper、bench wrapper、analysis script 和 output summary。
 - risk：未覆盖范围、保留标量路径和后续扩展条件。
 
-未接 production 的诊断结论必须写“诊断证据链”。该小节必须说明 diagnostic evidence 不能写成 production evidence；
-public-entry-shaped、production-shaped diagnostic 或代表性点类型证据不能替代真实 production dispatch。
+未接 production 的诊断结论必须在 topic-local evaluation / phase closeout 写“诊断证据链”。该小节必须说明 diagnostic evidence 不能写成 production evidence；
+public-entry-shaped、production-shaped diagnostic 或代表性点类型证据不能替代真实 production dispatch。没有 adopted production behavior 时，`doc-rvv` 必须写成 `not_applicable` 或删除遗留诊断文档。
 
 详细规则见 `rvv-test/SKILL.md`、`rvv-test/references/performance-and-ablation.zh.md`、
 `rvv-test/references/evidence-output-policy.zh.md` 和 `rvv-documentation/references/document-ownership-and-traceability.zh.md`。
@@ -445,7 +457,7 @@ followup_options_ready:
 要求：
 
 - `status` 可写 `pass`、`partial`、`fail` 或 `not_applicable`；不要用没有证据的 `true`。
-- `evidence` 至少指向当前 topic 的 evaluation、主题文档、测试资产注释、bench 说明、证据日志或 Handoff 段落。
+- `evidence` 至少指向当前 topic 的 evaluation、topic-local phase / diagnostic 文档、适用的 production 长期主题文档、测试资产注释、bench 说明、证据日志或 Handoff 段落。
 - `missing_items` 必须写成陈述句；没有缺口时写 `none`。
 - 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
   和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
@@ -455,7 +467,8 @@ followup_options_ready:
 - 表格必须包含 `rerun_budget_decision_ready`。凡本轮涉及 board performance 或 repeated summary，证据必须指向 phase plan / summary 中的 run budget、decision bucket、是否用完预算和是否需要降级 / 人工判断。
 - 表格必须包含 `evidence_registry_status_ready`。证据指向 `log/evidence_registry.json`、`make evidence_status` / `make check_evidence_freshness` 输出或等价人工检查；若 topic 尚未接入 registry，写 `partial` 并列出应补的 target / script。
 - 表格必须包含 `evidence_freshness_check_ready`。证据指向 Handoff Packet 的 `evidence_freshness_status`、phase result、evaluation 或 topic 文档；若复跑改变了旧数值、decision bucket 或证据角色，必须列出已刷新和待刷新的路径。
-- 表格必须包含 `correctness_efficiency_evidence_chain_ready`。证据指向主题文档中的“正确性与高效性证据链”或“诊断证据链”小节。
+- 表格必须包含 `production_topic_doc_applicability_ready`。证据说明 `artifact_layout.topic_doc_template` 是 applicable 还是 not_applicable；no-production 时必须说明没有新建 `doc-rvv`，或已有遗留 `doc-rvv` 已删除 / 标为历史归档。
+- 表格必须包含 `correctness_efficiency_evidence_chain_ready`。production 结论的证据指向 production 长期主题文档中的“正确性与高效性证据链”；no-production 结论的证据指向 evaluation / phase closeout 中的“诊断证据链”。
 - 表格必须包含 `document_ownership_matrix_ready`。证据指向文档归属矩阵章节、evaluation 中的决策审计或 Handoff Packet 的定位字段。
 - 表格必须包含 `traceability_map_ready`。证据指向 Traceability Map 章节或独立 traceability 文档，说明文档、测试、输出和代码位置可以互相定位。
 - 表格必须包含 `phase_plan_written_before_edits`、`phase_completion_matrix_ready`、`optimization_matrix_ready`、
@@ -467,7 +480,7 @@ followup_options_ready:
   若这些位置仍有 `phase_deferred + unblocked`，该项必须写 `fail`，且 `next_phase_default` 不能是
   `ready_for_review`。
 - 表格必须包含 `dirty_isolation_ready`。证据指向 Handoff Packet 的 `dirty_isolation`，说明当前 worktree 的无关 diff、raw logs、build 输出和本轮可审查 / 可提交路径边界。
-- 表格必须包含 `implementation_review_ready`。若本轮改了 production、diagnostic helper、bench-facing helper 或 RVV kernel，证据指向 Handoff Packet 的 `implementation_review` 或主题文档“当前采用的优化方式”；若纯文档 cleanup，写 `not_applicable` 并说明原因。
+- 表格必须包含 `implementation_review_ready`。若本轮改了 production、diagnostic helper、bench-facing helper 或 RVV kernel，证据指向 Handoff Packet 的 `implementation_review` 或适用的 production 长期主题文档“当前采用的优化方式”；若纯文档 cleanup，写 `not_applicable` 并说明原因。
 - 表格必须包含 `candidates_added_or_deferred_ready`。证据指向本轮候选路线表、experience-migration audit 或 Handoff Packet 的 `candidates_added_or_deferred`，说明新增、尝试、暂缓或拒绝的候选。
 - 表格必须包含 `ilp_lmul_decision_ready`。含 RVV kernel、reduction、staging 或性能候选时，证据必须说明 LMUL、VLEN gate、accumulator 数、ILP / unroll、寄存器压力或 spill 风险；不适用时说明原因。
 - 表格必须包含 `numerical_budget_result_ready`。含 FMA、reduction、浮点阈值、`ATA/ATb`、matrix 或 checksum 风险时，证据必须指向误差预算和结果；不适用时说明原因。
@@ -475,7 +488,7 @@ followup_options_ready:
 - 表格必须包含 `board_evidence_paths_ready`。证据指向 summary / sanitized / raw 的板卡证据边界；未跑板卡时说明阻塞原因和当前 EvidenceDecision 限制。
 - 表格必须包含 `evidence_decision_ready` 和 `production_decision_ready`。前者写 S10 / PI5 证据决策，后者独立说明是否进入 production integration loop、是否修改 production、哪些路径保持标量。
 - 表格必须包含 `validation_summary_ready`。证据指向 Handoff Packet 的 `validation`，列出已运行和未运行的 test、bench、asm、board 或 sanitizer。
-- closeout 或 production-candidate 文档必须列出 `current_optimization_section_ready`、`document_ownership_matrix_ready` 和 `traceability_map_ready`。证据指向主题文档中的“当前采用的优化方式”小节、文档归属矩阵章节和 Traceability Map 章节，并说明它们是否覆盖 dispatch / fallback、layout gate、当前优化机制、chunk 内部流程、分组职责、暂缓方案和证据边界。
+- production closeout 或 production-candidate 文档必须列出 `current_optimization_section_ready`、`document_ownership_matrix_ready` 和 `traceability_map_ready`。证据指向 production 长期主题文档中的“当前采用的优化方式”小节、文档归属矩阵章节和 Traceability Map 章节，并说明它们是否覆盖 dispatch / fallback、layout gate、当前优化机制、chunk 内部流程、分组职责、暂缓方案和证据边界。no-production closeout 中 `current_optimization_section_ready` 可写 `not_applicable`，但必须用 evaluation / phase closeout 指向候选拒绝理由和诊断证据链。
 - 如果 worker 声明采用 sibling topic 经验，表格必须包含 `experience_migration_audit_ready`；
   证据指向 adopted / attempted / deferred / rejected 对照表。若未声明且无相邻经验可迁移，可写 `not_applicable` 并说明原因。
 - 表格必须包含 `test_support_shape_scan_ready`。证据必须列出当前 topic 的测试支撑形态：根目录

@@ -76,10 +76,10 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码状
 1. 从用户请求或筛选队列中确认 module（模块）和 topic（主题）名称。
 2. 读取匹配的 RVV skill，并且只读取当前任务需要的 skill references（参考文件）。
 3. 如果任务涉及选题、恢复或复筛，打开 `artifact_layout.screening_root_template` 解析出的目录。
-4. 如果存在对应 topic 文档，打开 `artifact_layout.module_doc_dir_template` 或 `artifact_layout.topic_doc_template` 解析出的窄文档。
+4. 如果存在对应 production 长期主题文档，打开 `artifact_layout.module_doc_dir_template` 或 `artifact_layout.topic_doc_template` 解析出的窄文档；no-production topic 优先打开 topic-local evaluation / phase docs。
 5. 检查当前源码里的公开入口、helper、fallback 和 `__RVV10__` 分支。
 6. 只为验证当前问题，读取 `artifact_layout.topic_test_dir_template` 解析出的必要测试、bench、脚本或日志。
-7. closeout 或 production-candidate topic 要读取主题文档的“正确性与高效性证据链”；未接 production 的诊断结论要读取“诊断证据链”。
+7. production closeout 或 production-candidate topic 要读取 production 长期主题文档的“正确性与高效性证据链”；未接 production 的诊断结论要读取 topic-local evaluation / phase closeout 的“诊断证据链”。
 8. 结论中分开说明 correctness（正确性）、QEMU path evidence（QEMU 路径证据）、disassembly evidence（反汇编证据）、board performance（板卡性能）和 production decision（生产接入判断）。
 
 ## Historical Analogy Retrieval Pattern（历史类比检索模式）

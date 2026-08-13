@@ -300,18 +300,30 @@ artifact_publication:
       default_policy: explicit_user_authorization_required
       # commit_boundary：默认不提交。
       commit_boundary: do_not_commit_by_default
-    # final_topic_docs：长期主题文档和 evaluation。
-    final_topic_docs:
-      # path_templates：长期文档类别包含的路径模板 key。
+    # production_topic_docs：doc-rvv 生产长期主题文档。
+    production_topic_docs:
+      # path_templates：生产长期主题文档类别包含的路径模板 key。
       path_templates:
-        # artifact_layout.topic_doc_template：doc-rvv 主题文档。
+        # artifact_layout.topic_doc_template：doc-rvv 生产长期主题文档。
         - artifact_layout.topic_doc_template
+      # applicability：只有真实采用或接入 production 后才适用。
+      applicability: adopted_production_behavior_or_pi5_passed_only
+      # not_applicable_when：这些状态不默认创建 doc-rvv。
+      not_applicable_when: diagnostic_bench_only_no_production_or_partial_candidate_without_production_direct
+      # default_policy：默认需要 review。
+      default_policy: review_required
+      # commit_boundary：生产证据审查后作为 production topic doc 提交。
+      commit_boundary: production_topic_doc_after_pi5_evidence_review
+    # topic_local_evaluation：topic-local evaluation / closeout 决策审计。
+    topic_local_evaluation:
+      # path_templates：topic-local evaluation 类别包含的路径模板 key。
+      path_templates:
         # artifact_layout.evaluation_doc_template：topic-local evaluation。
         - artifact_layout.evaluation_doc_template
       # default_policy：默认需要 review。
       default_policy: review_required
-      # commit_boundary：证据审查后作为 topic doc 提交。
-      commit_boundary: topic_doc_after_evidence_review
+      # commit_boundary：证据审查后作为 topic test asset 文档提交。
+      commit_boundary: topic_local_doc_after_evidence_review
     # evidence_summary：证据摘要/summary artifact。
     evidence_summary:
       # default_policy：只提交摘要且需要 review。

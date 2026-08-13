@@ -26,13 +26,14 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - 文档使用仓库相对路径和占位符，不写个人路径、私有地址或设备内部绝对路径。
 - QEMU 只写成正确性、日志格式和路径证据；性能结论来自板卡或目标硬件。
 - 生产接入判断必须连接 local fragment、full diagnostic、production case、fallback 和维护成本。
-- 评估文档负责决策审计；主题文档负责长期维护。
+- 评估文档负责决策审计；`doc-rvv` 主题文档负责 production 长期维护，只有存在 adopted production behavior（已采用生产行为）、production patch（生产补丁）或 PI5 生产证据闭环通过后才适用。
 - 文档归属矩阵负责分清长期事实、候选取舍、bench 统计、output summary（输出摘要）和 Handoff Packet（交接数据包）的主归属；其它位置只引用路径、章节、run label（运行标签）或证据角色，不复制长段正文或 raw log（原始日志）。
 - 如果文档引用 `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 解析目录下的可提交证据，应写明确文件路径、run label 或 summary artifact 路径；这些引用是后续提交日志 / 摘要文件的白名单来源。
-- 复杂 topic 必须在 evaluation 或主题文档中维护 Traceability Map，列出关键 production、RVV test 资产、script、output 和文档位置；默认不新建巨型函数文档，除非 map 已经大到影响主文档可读性。
+- 复杂 topic 必须在 evaluation、topic-local 文档或适用的 production 长期主题文档中维护 Traceability Map，列出关键 production、RVV test 资产、script、output 和文档位置；默认不新建巨型函数文档，除非 map 已经大到影响主文档可读性。
 - 多阶段优化 topic 应在配置解析出的 topic test `doc/optimization-roadmap.zh.md` 或等价位置维护主题级优化路线图。路线图只记录候选家族、搜索空间、阶段反思、新增想法、优先级和恢复条件；不要把它写成阶段流水，也不要替代 evaluation 的取舍审计。
 - S2 函数级评估阶段就应创建或更新 evaluation（评估）文档，用来记录函数功能、可向量化点、RVV 优先级、初步接入判断和需要补齐的证据。不要把这些判断只留到 S11 closeout（收尾）阶段。
 - S11 closeout 文档负责记录实验后的最终状态、证据边界、生产接入或不接入理由、遗留风险和队列表同步。如果 topic 进入 production integration loop（生产接入闭环），S11 必须发生在生产补丁、生产直连测试、生产证据重跑和再次 EvidenceDecision（证据决策）之后。
+- `diagnostic`、`bench-only`、`rollback/no-production` 或未接 production 的 `partial-production-candidate` 不默认创建 `artifact_layout.topic_doc_template` / `doc-rvv`。这些结论的“诊断证据链”主归属是 topic-local evaluation、phase result、roadmap / matrix 和 Handoff；若已有 `doc-rvv` 仅承载诊断或 no-production 结论，应删除或标为 not_applicable，除非用户明确要求保留历史归档。
 - 生产接入后的主题文档必须按 `artifact_layout.topic_doc_template` 解析位置，并以真实 production patch（生产补丁）和 production direct（真实生产入口直连）证据为中心，不能只复述 diagnostic prototype（诊断原型）或早期 bench 结果。必须同步覆盖范围、fallback 矩阵、生产直连测试、反汇编归属、板卡 production bench、最终 EvidenceDecision 和未覆盖路径。
 - 筛选文档负责队列和状态，不承担实现事实的长期解释。
 - 诊断文档必须区分授权边界：局部实验、production-shaped diagnostic、production direct 或生产回退。
@@ -56,7 +57,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 
 ## 同步边界
 
-主题文档修改后，如果影响生产接入结论、bench case 含义、新增诊断失败、workflow 规则或筛选状态，应同步函数级评估、模块工作日志和相关筛选状态表。
+production 长期主题文档修改后，如果影响生产接入结论、bench case 含义、新增诊断失败、workflow 规则或筛选状态，应同步函数级评估、模块工作日志和相关筛选状态表。no-production closeout 修改只同步 topic-local evaluation / phase 文档和状态表，不因此新建 `doc-rvv`。
 
 如果一次主题工作暴露出可复用文档规则，应沉淀到本 skill 或 reference，避免规则只停留在一次主题文档中。
 

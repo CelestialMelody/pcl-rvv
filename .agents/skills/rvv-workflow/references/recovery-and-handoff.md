@@ -26,7 +26,7 @@
 新对话交接 prompt 应包含：
 
 - 仓库占位路径和目标源码。
-- 配置解析出的目标测试资产和主题文档位置。
+- 配置解析出的目标测试资产、topic-local 文档和适用的 production 长期主题文档位置；no-production 时 `doc-rvv` 应恢复为 `not_applicable`。
 - 应继续参考的项目内 skill。
 - 当前 RVV 覆盖范围、fallback 边界和标量 tail。
 - 已解决的数值 / 反汇编问题。
