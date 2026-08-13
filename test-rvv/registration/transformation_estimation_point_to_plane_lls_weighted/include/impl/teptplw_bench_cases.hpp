@@ -150,6 +150,55 @@ collect_bench_results(const BenchOptions& options)
       continue;
     }
 
+    if (options.case_filter == "production-source-indices-detail-ba") {
+      const pcl::Indices source_indices = diag::make_source_indices(source.size());
+      const auto source_xyz = diag::copy_source_as_xyz(source);
+      const auto target_xyzinormal = diag::copy_target_as_xyzinormal(target);
+
+      auto add_detail_pair = [&](const std::string& case_label,
+                                 const auto& source_cloud,
+                                 const auto& target_cloud) {
+        results.push_back(run_case_trace(
+            "weighted lls production-source-indices-detail component staged-gather " +
+                case_label + " no-solve " + std::to_string(n),
+            options.iterations,
+            [&]() {
+              return run_production_source_indices_staged_no_solve(
+                  source_cloud, source_indices, target_cloud, weights);
+            }));
+        results.push_back(run_case_trace(
+            "weighted lls production-source-indices-detail component block-fused-abcd-ilp " +
+                case_label + " no-solve " + std::to_string(n),
+            options.iterations,
+            [&]() {
+              return run_production_source_indices_block_fused_no_solve(
+                  source_cloud, source_indices, target_cloud, weights);
+            }));
+
+        results.push_back(run_case_trace(
+            "weighted lls production-source-indices-detail staged-gather " +
+                case_label + " " + std::to_string(n),
+            options.iterations,
+            [&]() {
+              return run_production_source_indices_staged_full(
+                  source_cloud, source_indices, target_cloud, weights);
+            }));
+        results.push_back(run_case_trace(
+            "weighted lls production-source-indices-detail block-fused-abcd-ilp " +
+                case_label + " " + std::to_string(n),
+            options.iterations,
+            [&]() {
+              return run_production_source_indices_block_fused_full(
+                  source_cloud, source_indices, target_cloud, weights);
+            }));
+      };
+
+      add_detail_pair("pointnormal", source, target);
+      add_detail_pair("pointxyz-to-pointnormal", source_xyz, target);
+      add_detail_pair("pointxyz-to-pointxyzinormal", source_xyz, target_xyzinormal);
+      continue;
+    }
+
     if (options.case_filter == "production-shaped-fused-formula") {
       results.push_back(run_case(
           "weighted lls production-shaped full-cloud block-baseline pointnormal " +

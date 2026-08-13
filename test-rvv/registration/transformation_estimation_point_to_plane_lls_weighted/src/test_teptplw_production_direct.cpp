@@ -265,6 +265,36 @@ TEST(TransformationEstimationPointToPlaneLLSWeighted,
                    3e-3f);
 }
 
+#ifdef __RVV10__
+// production default policy：Phase 032 的同边界 A/B 后，source-indexed
+// 默认 RVV path 固定回 staged-gather。block-fused helper 仍保留给显式 probe /
+// detail A/B，但不能再无意间回到 public 默认优先路径。
+TEST(TransformationEstimationPointToPlaneLLSWeighted,
+     ProductionSourceIndexedDefaultUsesStagedGatherRVV)
+{
+  const auto source = makeSurfaceCloud(32, 0.10f);
+  const auto target = makeTargetCloud(source);
+  const pcl::Indices source_indices = makeSourceIndices(source.size());
+  const std::vector<float> weights = makeWeights(source_indices.size());
+
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats default_stats;
+  prod_detail::PointToPlaneLLSWeightedFullCloudStats staged_stats;
+  const auto default_eq =
+      prod_detail::buildPointToPlaneLLSWeightedSourceIndicesDefault(
+          source, source_indices, target, weights, &default_stats);
+  prod_detail::PointToPlaneLLSWeightedNormalEquation staged_eq;
+  ASSERT_TRUE(prod_detail::buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+      source, source_indices, target, weights, staged_eq, &staged_stats));
+
+  EXPECT_TRUE(default_stats.used_rvv);
+  EXPECT_TRUE(staged_stats.used_rvv);
+  EXPECT_EQ(default_stats.input_points, staged_stats.input_points);
+  EXPECT_EQ(default_stats.accepted_points, staged_stats.accepted_points);
+  expectProductionEquationWithinBudget(
+      default_eq, staged_eq, 0.0, 0.0, 0.0, 0.0);
+}
+#endif
+
 // production source-indexed fallback：小规模输入不进入 indexed RVV helper，保持原
 // iterator 标量路径。
 TEST(TransformationEstimationPointToPlaneLLSWeighted,

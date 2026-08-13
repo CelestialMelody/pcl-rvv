@@ -1277,9 +1277,8 @@ buildPointToPlaneLLSWeightedSourceIndicesDefault(
 {
 #if defined(__RVV10__)
   PointToPlaneLLSWeightedNormalEquation eq;
-  if (buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV(
-          cloud_src, indices_src, cloud_tgt, weights, eq, stats))
-    return eq;
+  // Same-boundary production A/B kept the block-fused helper as an explicit
+  // probe, but the public indexed default stays with staged-gather.
   if (buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
           cloud_src, indices_src, cloud_tgt, weights, eq, stats))
     return eq;
@@ -1326,9 +1325,7 @@ estimatePointToPlaneLLSWeightedSourceIndicesRVV(
 #if defined(__RVV10__)
   if constexpr (std::is_same_v<Scalar, float>) {
     PointToPlaneLLSWeightedNormalEquation eq;
-    if (!buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV(
-            cloud_src, indices_src, cloud_tgt, weights, eq) &&
-        !buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+    if (!buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
             cloud_src, indices_src, cloud_tgt, weights, eq))
       return false;
     solvePointToPlaneLLSWeightedNormalEquation(eq, transformation_matrix);

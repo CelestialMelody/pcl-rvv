@@ -149,6 +149,27 @@ def pair_for_candidate(name: str) -> tuple[PairKey, str] | None:
     baseline = f"{prefix}block-baseline {point_type} no-solve {size}"
     return PairKey("component no-solve", point_type, size, candidate), baseline
 
+  prefix = "weighted lls production-source-indices-detail component "
+  suffix_token = " no-solve "
+  if name.startswith(prefix) and suffix_token in unfused_name:
+    rest = unfused_name[len(prefix) :]
+    point_type, size = rest.rsplit(suffix_token, 1)
+    baseline = f"{prefix}staged-gather {point_type} no-solve {size}"
+    return (
+        PairKey("production-source-indices-detail component", point_type, size, candidate),
+        baseline,
+    )
+
+  prefix = "weighted lls production-source-indices-detail "
+  if name.startswith(prefix):
+    rest = unfused_name[len(prefix) :]
+    point_type, size = rest.rsplit(" ", 1)
+    baseline = f"{prefix}staged-gather {point_type} {size}"
+    return (
+        PairKey("production-source-indices-detail full", point_type, size, candidate),
+        baseline,
+    )
+
   prefix = "weighted lls production-shaped full-cloud "
   if name.startswith(prefix):
     rest = unfused_name[len(prefix) :]

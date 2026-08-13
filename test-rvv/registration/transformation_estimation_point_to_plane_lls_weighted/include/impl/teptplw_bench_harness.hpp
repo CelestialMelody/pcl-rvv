@@ -240,6 +240,114 @@ run_public_source_indices_weighted(
   return diag::matrix_checksum(matrix);
 }
 
+inline double
+solved_production_normal_equation_checksum(
+    const pcl::registration::detail::PointToPlaneLLSWeightedNormalEquation& eq)
+{
+  Eigen::Matrix4f matrix = Eigen::Matrix4f::Identity();
+  pcl::registration::detail::solvePointToPlaneLLSWeightedNormalEquation(eq, matrix);
+  return normal_equation_checksum(eq) + diag::matrix_checksum(matrix);
+}
+
+template <typename PointSource, typename PointTarget>
+pcl::registration::detail::PointToPlaneLLSWeightedNormalEquation
+build_production_source_indices_staged_or_std(
+    const pcl::PointCloud<PointSource>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<PointTarget>& target,
+    const std::vector<float>& weights,
+    pcl::registration::detail::PointToPlaneLLSWeightedFullCloudStats* stats)
+{
+#if defined(__RVV10__)
+  pcl::registration::detail::PointToPlaneLLSWeightedNormalEquation eq;
+  if (pcl::registration::detail::buildPointToPlaneLLSWeightedSourceIndicesStagedRVV(
+          source, source_indices, target, weights, eq, stats))
+    return eq;
+#endif
+  return pcl::registration::detail::buildPointToPlaneLLSWeightedSourceIndicesStd(
+      source, source_indices, target, weights, stats);
+}
+
+template <typename PointSource, typename PointTarget>
+pcl::registration::detail::PointToPlaneLLSWeightedNormalEquation
+build_production_source_indices_block_fused_or_std(
+    const pcl::PointCloud<PointSource>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<PointTarget>& target,
+    const std::vector<float>& weights,
+    pcl::registration::detail::PointToPlaneLLSWeightedFullCloudStats* stats)
+{
+#if defined(__RVV10__)
+  pcl::registration::detail::PointToPlaneLLSWeightedNormalEquation eq;
+  if (pcl::registration::detail::
+          buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV(
+              source, source_indices, target, weights, eq, stats))
+    return eq;
+#endif
+  return pcl::registration::detail::buildPointToPlaneLLSWeightedSourceIndicesStd(
+      source, source_indices, target, weights, stats);
+}
+
+template <typename PointSource, typename PointTarget>
+double
+run_production_source_indices_staged_no_solve(
+    const pcl::PointCloud<PointSource>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<PointTarget>& target,
+    const std::vector<float>& weights)
+{
+  pcl::registration::detail::PointToPlaneLLSWeightedFullCloudStats stats;
+  const auto eq = build_production_source_indices_staged_or_std(
+      source, source_indices, target, weights, &stats);
+  return normal_equation_checksum(eq) +
+         static_cast<double>(stats.used_rvv ? 1 : 0) * 1e-3;
+}
+
+template <typename PointSource, typename PointTarget>
+double
+run_production_source_indices_block_fused_no_solve(
+    const pcl::PointCloud<PointSource>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<PointTarget>& target,
+    const std::vector<float>& weights)
+{
+  pcl::registration::detail::PointToPlaneLLSWeightedFullCloudStats stats;
+  const auto eq = build_production_source_indices_block_fused_or_std(
+      source, source_indices, target, weights, &stats);
+  return normal_equation_checksum(eq) +
+         static_cast<double>(stats.used_rvv ? 1 : 0) * 1e-3;
+}
+
+template <typename PointSource, typename PointTarget>
+double
+run_production_source_indices_staged_full(
+    const pcl::PointCloud<PointSource>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<PointTarget>& target,
+    const std::vector<float>& weights)
+{
+  pcl::registration::detail::PointToPlaneLLSWeightedFullCloudStats stats;
+  const auto eq = build_production_source_indices_staged_or_std(
+      source, source_indices, target, weights, &stats);
+  return solved_production_normal_equation_checksum(eq) +
+         static_cast<double>(stats.used_rvv ? 1 : 0) * 1e-3;
+}
+
+template <typename PointSource, typename PointTarget>
+double
+run_production_source_indices_block_fused_full(
+    const pcl::PointCloud<PointSource>& source,
+    const pcl::Indices& source_indices,
+    const pcl::PointCloud<PointTarget>& target,
+    const std::vector<float>& weights)
+{
+  pcl::registration::detail::PointToPlaneLLSWeightedFullCloudStats stats;
+  const auto eq = build_production_source_indices_block_fused_or_std(
+      source, source_indices, target, weights, &stats);
+  return solved_production_normal_equation_checksum(eq) +
+         static_cast<double>(stats.used_rvv ? 1 : 0) * 1e-3;
+}
+
 inline void
 print_results(const std::vector<BenchResult>& results)
 {
