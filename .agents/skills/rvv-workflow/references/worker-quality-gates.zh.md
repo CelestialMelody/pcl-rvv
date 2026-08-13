@@ -21,7 +21,7 @@
   该审计不要求照搬相邻 topic 的具体算法，只要求列清哪些经验被采用、尝试、暂缓或拒绝。
 - 如果短 prompt 是“继续完善 <topic> 的 RVV 优化工作”、当前 topic 已有 phase plan/result，
   或当前计划仍有 `unblocked_next_actions`，必须读取 `rvv-test/references/optimization-phase-loop.zh.md`，
-  并把 phase loop 状态纳入写文件前自查和 Handoff Packet。
+  并把 phase loop 状态、optimization roadmap 状态和 `phase_deferred` / `turn_stop_deferred` 判断纳入写文件前自查和 Handoff Packet。
 
 ## 最小门禁
 
@@ -149,6 +149,14 @@ worker 必须把结果写成 `adopted / deferred / rejected` 中的一种：`ado
 表示当前源码或证据说明不该迁移。不能省略该决策，也不能只因一个局部 reference cleanup、
 单个 target 或一次 correctness 通过，就把测试框架成熟度审计视为完成。
 
+若相邻成熟 topic 已经形成更完整的测试工程结构，worker 还必须做 mature sibling parity audit（成熟相邻主题对齐审计）。该审计只迁移结构成熟度，不复制算法结论。至少检查：
+
+- `src/`、`include/`、`include/impl/`、聚合入口和 legacy alias 是否与当前配置和 topic 复杂度匹配；
+- evaluation 是否位于 `artifact_layout.evaluation_doc_template` 解析出的 `doc/` 路径；
+- 是否需要 `README.zh.md`、`testing-overview`、`correctness-tests`、`benchmark-and-evidence`、`optimization-evidence` 和 `test-support-code-map`；
+- `doc-rvv` 主题文档是否只保留长期 production 行为、当前采用方式和证据链，避免承载测试工程全量解释；
+- 暂缓项是否仍是 `phase_deferred + unblocked`，是否应继续到下一 phase。
+
 ### 7. 证据和归因
 
 worker 必须分开写：
@@ -231,6 +239,7 @@ correspondences 或 indexed 路径退化时，归因必须列出 query/match 展
 
 ```text
 phase_plan_written_before_edits:
+optimization_roadmap_ready:
 phase_completion_matrix_ready:
 optimization_matrix_ready:
 micro_stop_guard:
@@ -238,12 +247,15 @@ continue_stop_decision:
 ```
 
 - `phase_plan_written_before_edits`：当前 phase 的 `plan.zh.md` 必须先于该 phase 的实现、测试、bench 或 production 修改存在。若历史 topic 没有阶段目录，先创建 `doc/phases/000-current-state-and-gaps/plan.zh.md`。
+- `optimization_roadmap_ready`：复杂 topic 必须读取或创建 `artifact_layout.optimization_roadmap_template` 解析出的 roadmap。roadmap 必须列出候选 family、idea source、适用 row source / 点类型 / `Scalar`、预期收益、风险、证据需求、状态和 next phase；phase 结束后必须回填新增想法或调整优先级。
 - `phase_completion_matrix_ready`：分两个时间点检查。写文件前，`plan.zh.md` 必须已有可回填的 action / completion scaffold（计划动作表、依赖和完成判据），让后续 `result.zh.md` 能逐项回填；阶段结束或 Handoff 前，`result.zh.md` 或 Handoff 必须逐项列出计划动作的 `done / partial / deferred / blocked` 状态、证据路径和缺口，不能只写“完成本阶段”。
 - `optimization_matrix_ready`：复杂 topic 必须维护 candidate family × row source policy × point type / `Scalar` / layout × test × bench × board × asm × doctor × decision 矩阵；`planned` 或 `deferred` 不能伪装成 adopted。
 - `micro_stop_guard`：如果只完成一个小 helper、一个隔离层、一个 target、一次 bench、一个 summary 或一张表，但当前计划仍有授权且未阻塞 next action，worker 不允许停；必须继续推进下一个动作，或写出真实停止条件。
-- `continue_stop_decision`：最终输出和 Handoff 必须解释为什么继续或为什么停。停止必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权或当前 phase 矩阵已闭合且没有 unblocked next action。
+- `continue_stop_decision`：最终输出和 Handoff 必须解释为什么继续或为什么停。停止必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权，或当前 phase 矩阵、optimization matrix 和 roadmap 都已闭合且没有 unblocked next action。
 
 `micro_stop_guard` 是强规则：worker 不能把一个局部 positive / negative、row-source audit 表、Evidence Doctor warning 解释或 isolated bench 当作 topic 完成。若继续推进会扩大范围，则停止理由必须写清扩大到哪里、需要谁授权、恢复入口是什么。
+
+`phase_deferred` 和 `turn_stop_deferred` 必须分开写。测试优化阶段、topic-local 文档重构、test_support 拆分、evaluation 路径迁移、doc suite 对齐、candidate / bench / asm / Evidence Doctor 补齐，通常都属于可继续推进的 `phase_deferred + unblocked`。只有高风险、真实 blocker 或明确授权边界才允许转成 `turn_stop_deferred`。
 
 ### 9. PI1 生产接入计划门禁
 
@@ -335,6 +347,7 @@ document_ownership_matrix_ready:
 traceability_map_ready:
 experience_migration_audit_ready:
 phase_plan_written_before_edits:
+optimization_roadmap_ready:
 phase_completion_matrix_ready:
 optimization_matrix_ready:
 micro_stop_guard:

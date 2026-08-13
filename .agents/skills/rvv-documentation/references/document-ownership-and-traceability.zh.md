@@ -14,13 +14,14 @@
 每类事实只设一个主归属。其它文档可以引用主归属的路径、章节、表格、run label（运行标签）或 evidence path（证据路径），但不要复制长段正文、raw log（原始日志）或完整实验流水。
 `artifact_layout.qemu_output_subdir` 和 `artifact_layout.board_output_subdir` 解析目录下的生成证据，只有被 `paths.doc_root` 或 `paths.test_root` 解析目录下的文档明确引用时才进入提交候选；因此长期文档和 evaluation 引用证据时要写具体文件、run label 或 summary artifact 路径，而不是只写输出目录。
 
-阶段探索归属在 `artifact_layout.phase_root_template` 解析目录：计划、负向尝试、异常解释、optimization matrix 和 unblocked next action 都先放这里。`artifact_layout.topic_doc_template` 解析出的主题文档只保存最终 production 行为、当前采用实现、证据链和长期维护边界；它可以引用阶段文档作为审计来源，但不要把阶段流水或临时计划复制进去。
+阶段探索归属在 `artifact_layout.phase_root_template` 解析目录：计划、负向尝试、异常解释、optimization matrix 和 unblocked next action 都先放这里。`artifact_layout.topic_doc_template` 解析出的主题文档只保存最终 production 行为、当前采用实现、证据链和长期维护边界；它可以引用阶段文档作为审计来源，但不要把阶段流水或临时计划复制进去。跨阶段的 candidate 搜索空间、阶段反思新增路线和恢复条件归到 `artifact_layout.optimization_roadmap_template` 解析出的 roadmap，不要塞进 phase result 或 evaluation。
 
 | 信息类型 | 主归属 | 允许引用 | 不应复制 |
 | --- | --- | --- | --- |
 | 当前采用的优化方式、覆盖范围、fallback（回退路径）和生产边界 | `artifact_layout.topic_doc_template` 解析出的主题文档 | evaluation 的实现方式审计表、Handoff 摘要、模块状态表 | output summary 的 raw 表、每轮 bench 全量日志、对话过程 |
 | S2 evaluation、候选路线、采用 / 尝试 / 暂缓 / 拒绝理由 | `artifact_layout.evaluation_doc_template` 解析出的 evaluation 文档 | 主题文档引用最终采用状态和证据路径；Handoff 引用下一步动作 | 主题文档复制完整候选流水账；Handoff 写成完整实验报告 |
 | 阶段计划、阶段结果、优化矩阵、unblocked next action、early-stop 证据 | `artifact_layout.phase_root_template` 解析目录 | Handoff 的 `phase_loop_state`、evaluation 的阶段审计、topic 文档最终结论 | 主题文档的最终生产行为说明、长期结论和跨阶段通用规则 |
+| 跨阶段候选搜索空间、阶段反思新增路线、恢复条件和优先级 | `artifact_layout.optimization_roadmap_template` 解析出的 roadmap | phase result 的反思摘要、Handoff 的 `optimization_roadmap_status`、evaluation 的候选取舍索引 | 单阶段流水、board 统计明细和 production 最终结论 |
 | test、diagnostic、bench case 的输入构造、计时边界和证明点 | evaluation 文档和对应测试 / bench 源码注释 | 主题文档只引用能支撑结论的 case；Handoff 列命令和路径 | 主题文档复制每个 TEST 的长注释；output summary 承担测试设计说明 |
 | bench 统计、A/B 公式、异常值口径、run label 和复现命令 | `artifact_layout.board_output_subdir` 解析目录下的 summary 或 analysis script（分析脚本） | evaluation / 主题文档引用 summary 路径、脚本路径和关键结论 | 主题文档或 Handoff 复制 raw log；把 QEMU timing 写成性能结论 |
 | 当前数值结论、最新复跑和过期状态 | 最近一次 run-labelled summary、phase result 和 evaluation | Handoff / 主题文档引用 current run label；旧 run 仅作 historical evidence | 把旧 summary 继续写成 current truth，或让 phase result 与最新复跑数值冲突 |
@@ -40,6 +41,7 @@
 - `optimization-evidence`：每种 RVV 优化方式、候选或暂缓路径对应的 production / test_support 代码路径、test target、bench target、board evidence、结论和边界。
 - `test-support-code-map`：`artifact_layout` 与 `test_support` 解析出的源码、聚合入口、内部头文件、script 和 production helper 的函数族、调用关系和边界。
 - `phases`：阶段探索、阶段计划、阶段结果、optimization matrix、Evidence Doctor 异常处理、continue / stop decision 和早停检查。
+- `optimization-roadmap`：跨阶段 candidate family、idea source、阶段反思新增路线、优先级、恢复条件和搜索空间变化。
 - evaluation：EvidenceDecision、当前证据、历史候选取舍、accepted risk 和 Traceability Map。
 
 README 只作为导航、常用命令和证据白名单入口。它不承担每个测试、每个 bench case 或每个 helper 的长解释。
@@ -52,7 +54,7 @@ README 只作为导航、常用命令和证据白名单入口。它不承担每�
 4. 如果两个文档都需要同一事实，拆成“长期事实”和“决策审计”。主题文档写当前状态；evaluation 文档写候选取舍和证据如何改变判断。
 5. Handoff 只写 reviewer 恢复需要的定位信息、验证结果和下一步动作，不替代主题文档或 evaluation。
 
-如果一次复跑改变了数值结论、decision bucket 或证据角色，旧 summary 立刻转为 historical evidence，不能继续作为当前 truth。worker 必须同步刷新 phase result、evaluation、主题文档和 Handoff；若还没刷新，文档状态应显式标成 stale / refresh pending，而不是继续沿用旧 run label。若 registry 或扫描发现 `unregistered_change` / `manual_run_detected`，先把当前数值结论降级为待刷新状态，再决定是否重建 summary / Evidence Doctor。
+如果一次复跑改变了数值结论、decision bucket 或证据角色，旧 summary 立刻转为 historical evidence，不能继续作为当前 truth。worker 必须同步刷新 phase result、optimization roadmap、evaluation、主题文档和 Handoff；若还没刷新，文档状态应显式标成 stale / refresh pending，而不是继续沿用旧 run label。若 registry 或扫描发现 `unregistered_change` / `manual_run_detected`，先把当前数值结论降级为待刷新状态，再决定是否重建 summary / Evidence Doctor。
 
 ## Traceability Map 触发条件
 
@@ -140,6 +142,7 @@ reviewer 审查文档和 Handoff 时应确认：
 - 是否存在复跑后数值变化但文档仍引用旧 run label 的情况；如果有，是否已显式标成 historical / stale 并刷新主归属。
 - 是否存在 registry 显示 evidence 文件被覆盖、扫描到未登记文件或 Handoff 写 `evidence_registry_status=not_available` 但没有人工检查路径的情况。
 - 复杂 topic 是否有 Traceability Map；如果没有，Handoff 是否给出 `not_applicable` 理由。
+- 复杂 topic 是否有 topic-level optimization roadmap；如果没有，Handoff 是否给出 `not_applicable` 或 `deferred` 理由，并说明下一轮为什么需要创建。
 - Traceability Map 是否能从关键文档跳到代码、测试、脚本和 output，而不是只写自然语言说明。
 - Handoff 是否列出 `document_ownership_check` 和 `traceability_map_status`，并给出 reviewer 可抽查的路径。
 
@@ -150,6 +153,7 @@ worker 的 Handoff Packet 应补充：
 ```text
 document_ownership_check: 本轮长期事实、候选取舍、bench 统计、output summary、恢复动作分别写到哪里；是否存在重复或错放。
 traceability_map_status: required / updated / not_required / deferred；列出 map 所在文档章节，或说明暂缓原因和下一轮补齐条件。
+optimization_roadmap_status: required / updated / not_required / deferred；列出 roadmap 路径、当前候选搜索空间、阶段反思新增路线和恢复条件，或说明暂缓原因。
 ```
 
-这两个字段不要求复制 map 内容。它们只给 reviewer 一个入口，用来抽查文档、测试、输出和代码位置是否能互相定位。
+这些字段不要求复制 map 或 roadmap 全文。它们只给 reviewer 一个入口，用来抽查文档、测试、输出、代码位置和候选搜索空间是否能互相定位。

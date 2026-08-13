@@ -31,7 +31,8 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码状
 4. 选择匹配的 `.agents/skills/<skill-name>/SKILL.md`。测试、诊断、benchmark、消融和证据日志优先读取 `rvv-test`；
    短 prompt 继续已有 topic、恢复 phase plan/result 或存在未阻塞下一步时，先从
    `artifact_layout.phase_root_template`、`artifact_layout.phase_plan_template`、
-   `artifact_layout.phase_result_template` 和 `artifact_layout.optimization_matrix_template`
+   `artifact_layout.phase_result_template`、`artifact_layout.optimization_roadmap_template`
+   和 `artifact_layout.optimization_matrix_template`
    解析阶段文档位置，再读取
    `rvv-test/references/optimization-phase-loop.zh.md`；
    registration topic 涉及变换估计、对应关系估计、row source 或法方程时，读取
@@ -48,7 +49,7 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码状
 
 ## Source Priority（来源优先级）
 
-- `artifact_layout` 解析出的路径是 S0 run record（S0 运行记录）、phase docs（阶段文档）、optimization matrix（优化矩阵）、current handoff（当前交接摘要）、topic 测试资产和 topic 文档位置的默认来源；若 local override 或 prompt override 改变路径，Handoff 必须记录覆盖范围。
+- `artifact_layout` 解析出的路径是 S0 run record（S0 运行记录）、phase docs（阶段文档）、optimization roadmap（优化路线图）、optimization matrix（优化矩阵）、current handoff（当前交接摘要）、topic 测试资产和 topic 文档位置的默认来源；若 local override 或 prompt override 改变路径，Handoff 必须记录覆盖范围。
 - `artifact_publication` 是默认提交边界来源；raw logs、S0 run record 和 current handoff 不应仅因存在于工作区而进入提交，agent asset patch 必须与 topic 产物分开审查。
 - 下结论前，用当前源码和当前 git diff 复核实现行为。
 - `artifact_layout.reusable_rvv_knowledge_dir_template` 解析出的目录可以作为可复用 RVV 约定入口；如果它描述的代码已经变化，以当前源码为准。

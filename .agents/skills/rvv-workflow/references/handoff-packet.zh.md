@@ -38,13 +38,14 @@ implementation_review (实现自审；说明入口分层、fallback、helper 边
 candidates_added_or_deferred (候选实现或诊断路线；列出新增、尝试、暂缓、拒绝的候选及理由):
 document_ownership_check (文档归属检查；说明长期事实、候选取舍、bench 统计、output summary 和恢复动作分别写到哪里):
 traceability_map_status (可追踪性地图状态；required / updated / not_required / deferred，并列出 map 位置或暂缓理由):
+optimization_roadmap_status (优化路线图状态；required / updated / not_required / deferred，并列出 roadmap 路径、候选搜索空间和下一阶段恢复条件):
 ilp_lmul_decision (ILP / LMUL 取舍；说明寄存器压力、accumulator 数、VL/LMUL、unroll 或暂不适用原因):
 numerical_budget_result (数值预算结果；说明 FMA、reduction tree、误差阈值、near-cancellation 和矩阵 / checksum 结果):
 evidence_doctor_result (证据体检结果；Errors / Warnings / Suggestions、未解决 warning、处理动作、是否重跑 / 降级 / 修改结论):
 evidence_freshness_status (当前 run 是否覆盖旧数值；fresh / stale / refreshed，并列出被刷新文档路径):
 evidence_registry_status (证据登记表状态；fresh / not_available / unregistered_change / unregistered_file / manual_run_detected / stale_doc_pending_refresh，并列出 registry、扫描命令和待刷新路径):
 rerun_budget_decision (板卡复跑预算与决策桶；run budget、实际复跑次数、decision bucket、是否用完预算、是否降级或需要人工判断):
-phase_loop_state (多阶段优化循环状态；current_phase、phase_plan_paths、phase_result_paths、phase_completion_matrix、optimization_matrix_status、unblocked_next_actions、stop_condition_hit、continue_stop_decision、next_phase_default):
+phase_loop_state (多阶段优化循环状态；current_phase、phase_plan_paths、phase_result_paths、phase_completion_matrix、optimization_roadmap_status、optimization_matrix_status、phase_deferred_unblocked_items、unblocked_next_actions、stop_condition_hit、continue_stop_decision、next_phase_default):
 agent_assets_used (本次读取或调用的 agent 资产，例如 skills（技能）、knowledge map（知识索引）、PCL adapter（PCL 适配器）、规则集):
 agent_asset_trace (资产使用追踪，关键工作行为分别来自哪些实际读取并使用过的资产 / 规则):
 agent_asset_feedback (可选；本轮发现的可沉淀规则、资产缺口或冗余规则，默认 report-only):
@@ -92,14 +93,16 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
   - `phase_plan_paths`：当前和下一阶段 `plan.zh.md` 路径；没有计划时写明必须先创建的路径。
   - `phase_result_paths`：当前和最近完成阶段 `result.zh.md` 路径。
   - `phase_completion_matrix`：计划动作的 `done / partial / deferred / blocked` 状态摘要。
+  - `optimization_roadmap_status`：topic-level roadmap 路径、是否 fresh、当前 high-priority candidate family、阶段反思新增项和下一阶段默认候选；没有 roadmap 时写明必须创建的配置解析路径。
   - `optimization_matrix_status`：candidate family、row source、点类型 / `Scalar`、test、bench、board、asm 和 Evidence Doctor 的矩阵状态。
+  - `phase_deferred_unblocked_items`：当前 phase 未做但仍可继续做的事项；必须区分 `phase_deferred` 和 `turn_stop_deferred`。测试优化、topic-local 文档重构、test_support 拆分、evaluation 迁移、doc suite 对齐和低风险 candidate / bench 补齐通常属于 `phase_deferred + unblocked`。
   - `unblocked_next_actions`：仍被本轮或下一轮授权、且没有工具 / 权限 / 证据阻塞的具体动作；没有时写 `none` 并说明为什么。
-  - `stop_condition_hit`：停止原因，必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权或矩阵已闭合且无 unblocked next action。
+  - `stop_condition_hit`：停止原因，必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权，或 phase 矩阵、optimization matrix 和 roadmap 都已闭合且无 unblocked next action。
   - `continue_stop_decision`：为什么继续或为什么停；不能只写 `done`。
   - `next_phase_default`：下一轮短 prompt 默认恢复的一个动作；替代路径放入 `followup_options_for_user`。
 - `agent_assets_used` 只列实际读取或调用过的资产，不要机械列全量 skill。
 - `agent_asset_trace` 必须把行为映射到资产，例如 `reviewability-and-language.zh.md -> TEST 注释和术语解释`。如果某资产只读过但没有影响决策，不要放入 trace。
-- `agent_asset_feedback` 只在发现可复用规则、资产缺口或冗余规则时输出。默认模式是 `report-only`：只写建议，不修改 `.agents`、prompt 或 knowledge map。该字段至少说明发现项、建议更新的 skill/reference、适用范围是 topic-specific 还是 cross-topic（跨主题），以及是否建议进入 workflow improvement（工作流改进）。
+- `agent_asset_feedback` 只在发现可复用规则、资产缺口或冗余规则时输出。默认模式是 `report-only`：只写建议，不修改 `.agents`、prompt 或 knowledge map。该字段至少说明发现项、建议更新的 skill/reference、适用范围是 topic-specific 还是 cross-topic（跨主题），以及是否建议进入 workflow improvement（工作流改进）。用户对工作流程、停止条件、测试体系、文档结构、恢复方式或 reviewer 可读性的反馈，默认要审计是否属于 agent asset 缺口；若属于，不能只写入 topic 文档。
 - `preferences_loaded` 必须写清 `.agents/config/defaults.yaml` 是否读取、`.agents/local/user-preferences.yaml` 是否存在、当前 prompt 是否覆盖配置。涉及板卡、用户名、私有路径时，只写 env var（环境变量）名或 local override 覆盖范围，不写实际值。
 - `resolved_artifacts` 必须列出本轮通过 `artifact_layout` 解析出的关键 worklog、phase、handoff 或 topic 文档路径，并标明 template key、resolved path 和 publication class；若解析失败，写缺失键而不是猜路径。
 - `work_preferences` 和 `commit_preferences` 应与 S0 报告一致；若中途改变，写明用户授权或改变原因。`work_preferences` 至少覆盖 `comment_policy_frozen` 和 `documentation_policy_frozen`；`commit_preferences` 至少覆盖 `evidence_policy_frozen`。
@@ -107,12 +110,12 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `experience_migration_audit` 在 worker 声明采用 sibling topic（同模块相邻主题）经验时必须输出。它至少覆盖 row source、source / weight policy、shared math pipeline、staging / reduction、formula / FMA、evidence model 和 production boundary，并用 `adopted`、`attempted`、`deferred` 或 `rejected` 说明每个历史经验维度的处理结果。该字段不要求当前 topic 实现 sibling 的具体算法，但要求未采用的成功或负向方案有理由或下一轮验证计划。
 - `test_support_split_decision` 在单个测试支撑 helper header 超过配置阈值，或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation 中三类以上职责时必须输出。若已拆分，说明 aggregator（聚合头文件）和按 `test_support` 配置解析出的内部结构职责；若暂缓，说明 deferred reason 以及对 reviewer 可读性和后续维护的影响。
 - `language_check` 不允许虚写。若配置解析出的测试资产、diagnostic（诊断代码）或 prototype（原型代码）没有详细中文注释，必须写成未达标。通过时应列出覆盖面，例如“诊断 helper 注释、TEST 注释、bench 文件头、主题文档术语解释”，并给出文件或章节证据。该字段还必须说明是否执行 `writing_style_trigger_check`，以及它覆盖了文档、Handoff Packet、最终回复、reviewer 报告或 `agent_asset_feedback` 中的哪些文本。
-- `worker_quality_gate_check` 不允许虚写。必须使用证据化表格，至少覆盖 `worker-quality-gates.zh.md` 中的 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen`、标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、证据模型、Evidence Doctor（证据体检）和 stop condition（停止条件）。表格列建议为 `gate | status | evidence | missing_items`；未完成项要列入 `risks_or_open_questions`。
+- `worker_quality_gate_check` 不允许虚写。必须使用证据化表格，至少覆盖 `worker-quality-gates.zh.md` 中的 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen`、标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、optimization roadmap、证据模型、Evidence Doctor（证据体检）和 stop condition（停止条件）。表格列建议为 `gate | status | evidence | missing_items`；未完成项要列入 `risks_or_open_questions`。
 - `worker_quality_gate_check` 中的 `status` 不应只有 `true` / `false`。使用 `pass`、`partial`、`fail` 或 `not_applicable`，并为每项提供文件 / 章节 / 日志路径证据。
 - 如果 `current_decision` 是 `partial-production-candidate` 或任何强于 no-production 的结论，`worker_quality_gate_check` 必须额外列出 production direct 尚未闭合项，例如真实公开入口 direct test、fallback、点类型 traits、`Scalar=double`、indices / correspondences 策略、生产 bench 重跑和人工确认点。
 - `recommended_reviewer_focus` 应指向具体风险，例如“检查 fallback gate 是否被单独覆盖”，不要写成“请全面审查”。
 - `followup_options_for_user` 用于把 reviewer 和用户需要做的人工选择显式暴露出来。当前结论是窄范围 production-ready、partial-production-candidate、bench-only/no-production 但仍存在可复用扩展方向时，必须列出 2-4 个选项：推荐默认动作、继续当前 topic 的扩展动作、应另开 topic 的动作、明确不建议做的动作。每个选项都要写清收益、风险、需要补的证据和是否会扩大 production 范围。
-- `next_worker_action_if_review_passes` 是下一轮短 prompt 继续工作的默认恢复入口，应是可执行动作，例如“进入 PI1 生产接入计划”“按已冻结范围连续推进 PI2-PI5”或“只做 S11 文档收尾”，不要写成泛泛的“继续优化”。如果下一步要限制范围，例如只做 full-cloud、保持 indices / correspondences 标量、只修文档不改 production，必须写在该字段中。
+- `next_worker_action_if_review_passes` 是下一轮短 prompt 继续工作的默认恢复入口，应是可执行动作，例如“进入 PI1 生产接入计划”“按已冻结范围连续推进 PI2-PI5”“继续 roadmap 中的 source-indexed family audit”或“只做 S11 文档收尾”，不要写成泛泛的“继续优化”。如果下一步要限制范围，例如只做 full-cloud、保持 indices / correspondences 标量、只修文档不改 production，必须写在该字段中。
 - `next_worker_action_if_review_passes` 只能有一个默认动作；如果存在重要替代路径，不要把它们藏在 `risks_or_open_questions` 里，应放进 `followup_options_for_user`。例如窄范围 `PointNormal` 接入完成后，应主动提示是否继续做泛型 normal traits（法线字段特征）扩展、`Scalar=double` 评估、indexed / correspondences 消融，或进入下一个 topic。
 - 如果建议下一轮连续推进 PI2-PI5，`next_worker_action_if_review_passes` 必须同时写清候选范围、不可扩大范围和暂停条件摘要；完整细则可指向主题文档 PI1 计划和 `topic-lifecycle.zh.md`。
 - 如果本轮已经完成 PI2-PI5，Handoff Packet 必须写清 S11 文档 closeout 是否已同步 production patch、fallback 矩阵、production direct 测试、反汇编归属、板卡 production bench、PI5 EvidenceDecision 和未覆盖路径；不能只说“文档已更新”。
@@ -147,7 +150,7 @@ worker 输出 Handoff Packet 前应检查：
 - 如果长 helper 或多职责 helper 命中拆分阈值，是否输出 `test_support_split_decision`，并说明拆分或暂缓理由。
 - `language_check` 是否覆盖文档、代码注释、测试输出、Handoff Packet 和最终回复；是否按 `writing-style.md` 执行触发词检查，并说明命中项、改写结果或保留理由。
 - `worker_quality_gate_check` 是否真实反映写文件前质量门禁，且每项带 reviewer 可定位的证据；如果短 prompt 启动后产物质量下降，应在这里暴露，而不是只写 agent asset trace。
-- `phase_loop_state` 是否能让下一轮 worker 用一句短 prompt 恢复当前 phase；如果仍有 `unblocked_next_actions` 却选择停止，是否写清合法 `stop_condition_hit` 和 `continue_stop_decision`。
+- `phase_loop_state` 是否能让下一轮 worker 用一句短 prompt 恢复当前 phase 和 roadmap；如果仍有 `phase_deferred_unblocked_items` 或 `unblocked_next_actions` 却选择停止，是否写清合法 `stop_condition_hit` 和 `continue_stop_decision`。
 - 是否明确哪些日志、build（构建）产物和本机配置只作为工作区证据，不进入提交。
 - 如果 topic 进入 production integration loop，是否写明生产接入计划和需要人工确认的风险。
 - 如果 topic 完成 production integration loop，是否写明最终主题文档已经按生产证据重写，而不是沿用诊断阶段结论。

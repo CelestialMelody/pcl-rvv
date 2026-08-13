@@ -17,8 +17,12 @@ second-pass（第二轮筛选）或 follow-up（复筛）状态表自动选择�
 不唯一，才先询问模块名。模块一旦确定，worker 默认选择该模块下第一条未完成 topic（主题）。
 
 如果短 prompt 只是“继续完善 <topic> 的 RVV 优化工作”或类似粗目标，worker 默认先恢复 phase loop：
-读取最近 Handoff Packet、最近 phase plan/result、`doc/phases/README.zh.md` 和 optimization matrix。
-若当前没有 phase plan，先创建 current-state phase plan，再按当前 phase 继续推进实现、测试、证据解释和计划更新。
+读取最近 Handoff Packet、最近 phase plan/result、`doc/phases/README.zh.md`、topic-level optimization roadmap
+和 optimization matrix。若当前没有 phase plan，先创建 current-state phase plan；若没有 roadmap，先按
+`artifact_layout.optimization_roadmap_template` 创建 `doc/optimization-roadmap.zh.md` 或配置解析出的等价路径。
+随后按当前 phase 继续推进实现、测试、证据解释、阶段反思和计划更新。
+`phase_deferred` 只表示当前 phase 暂缓，不表示本轮可以停止；只要 roadmap 或矩阵里仍有当前 topic 授权范围内、
+未阻塞且风险可控的下一动作，worker 默认继续创建或修订下一 phase 并推进。
 如果选中的 topic 属于 registration（配准）类，row-source family carry-over audit 只是常见的第一阶段，不是整轮默认终点；
 它应作为 phase loop 中的一个候选 phase，被放进矩阵后继续判断下一个未阻塞 phase。
 不要把一个 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
@@ -209,7 +213,7 @@ production 决策，就跳过当前源码复核、QEMU correctness、反汇编�
 
 如果短 prompt 是“继续当前 topic”或“进入下一阶段”，worker 应先读取最近 work log（工作日志）
 或 Handoff Packet，恢复 `phase_loop_state`、`phase_reached`、`current_decision`、
-`phase_plan_paths`、`phase_result_paths` 和 evidence paths（证据路径）。
+`phase_plan_paths`、`phase_result_paths`、optimization roadmap、optimization matrix 和 evidence paths（证据路径）。
 `phase_loop_state.next_phase_default` 是默认续作入口；`next_worker_action_if_review_passes` 只作为兼容别名。
 除非用户新指令覆盖，不要绕过 phase loop 自行选择下一个 topic 或重跑旧阶段。
 当恢复到 `partial-production-candidate` 并进入 PI1 时，还必须读取：
@@ -244,6 +248,7 @@ workflow improvement 再读：
 worker 默认权限：
 
 - 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产和主题文档产物。
+- 对测试优化和 topic-local 文档成熟度工作，短 prompt 默认授权 worker 在当前 topic 内连续推进多个低风险 phase，例如 test_support 拆分、legacy 聚合头清理、evaluation 迁入 `doc/`、README / doc suite 补齐、source-indexed 或其它 row source 的 candidate / correctness / bench / asm / Evidence Doctor 阶段。除非继续会扩大到 production、public API、其它 topic、板卡不可用、证据矛盾或 dirty isolation 不安全，否则不应因为一个小 phase 完成就停止。
 - 不把该授权扩展到其它 topic 的测试资产、主题文档或生产源码。
 - S10 `EvidenceDecision`（证据决策）前不修改 production（生产源码）。
 - 如果证据支持 production-ready（可接入生产），先输出 Handoff Packet，等待用户确认后进入 production integration loop（生产接入闭环）。
@@ -279,9 +284,11 @@ worker 最终输出必须包含：
 - `preferences_loaded`。
 - `agent_asset_trace`。
 - `agent_asset_feedback`，仅在本轮发现可沉淀规则、资产缺口或冗余规则时输出；默认只报告建议，不自动改 agent asset。
+- 用户或 reviewer 对工作流程、测试体系、文档结构、恢复方式、停止方式和可读性的反馈，必须先判断是否属于 agent asset 缺口；若是，写入 `agent_asset_feedback`，并在获得 workflow improvement 授权时优先修订对应 skill/reference，避免同类问题重复出现。
 - Handoff Packet。
 - 若当前结论是窄范围、局部候选、不接入生产但仍有可复用后续方向，输出给用户的后续路径选项：
   默认建议、继续当前 topic、另开 follow-up topic、当前不建议做的方向。
+- 如果本轮停止时仍有 `phase_deferred + unblocked` 项，明确列出“本轮没有做但可继续做”的事项、默认下一 phase、停止条件和需要用户 / reviewer 判断的边界；不能只写成泛泛 remaining risks。
 
 reviewer 最终输出必须符合 reviewer protocol（审查协议）：
 
@@ -325,5 +332,6 @@ workflow improvement 最终输出必须包含：
 - 模块、topic、worker 输出或 reviewer 输出是否能从当前上下文、状态表、对话内容或用户贴入内容中推导。
 - 是否需要用户授权写 production、进入 workflow improvement 或创建 commit。
 - 默认读取链是否足以启动本轮任务。
+- 若目标是继续 RVV 优化工作，是否已经恢复或创建 phase plan、optimization roadmap 和 optimization matrix，并判断 `phase_deferred` 是否仍可在本轮继续。
 
 如果无法推导模块、topic 或 worker 输出，先提出一个具体问题。其余默认条件从本文读取。

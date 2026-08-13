@@ -20,6 +20,7 @@
 14. 生产接入后的 closeout 更新。
 15. 结论与后续方向。
 16. 阶段探索与测试证据（仅 `artifact_layout.phase_root_template` 解析目录，不进入 `artifact_layout.topic_doc_template` 解析出的最终生产行为说明）。
+17. 优化路线图（仅 `artifact_layout.optimization_roadmap_template` 解析出的 topic-local roadmap；主题文档只引用当前采用或暂缓状态）。
 
 ## 必写要点
 
@@ -36,6 +37,7 @@
 - 板卡收益是否足以覆盖 staging、buffer 和维护成本。
 - closeout 或 production-candidate 阶段必须包含“当前采用的优化方式”小节。该小节面向维护者解释当前代码实际采用的优化组织方式，不能只列历史尝试、bench 数字或最终 EvidenceDecision。
 - 复杂 topic 必须包含或引用 Traceability Map。该表只覆盖 reviewer 需要定位的关键 production、RVV test 资产、script、output 和文档章节，不要求枚举每个小函数，也不要求默认新建巨型函数文档。
+- 多阶段优化 topic 必须包含或引用 topic-level optimization roadmap。roadmap 记录 candidate family、idea source、阶段反思新增路线、优先级和恢复条件；主题文档只引用最终采用和仍暂缓的路线，不复制搜索过程。
 - closeout 或 production-candidate 阶段必须包含“正确性与高效性证据链”小节。该小节是 reviewer 判断依据，不能只写说明文字。
 - 若当前结论是 partial-production-candidate（局部生产候选），必须写清“候选范围”和“尚不能生产接入的原因”。候选范围要窄到入口形态、点类型、数据布局、规模、fallback 条件和目标硬件；不能把局部诊断收益写成整个函数族可接入。
 - 若已经接入 production（生产源码），主题文档必须从“诊断原型说明”升级为“生产实现说明”：写清真实 production patch（生产补丁）、真实 dispatch / fallback、production direct（真实生产入口直连）测试、反汇编符号归属、板卡 production bench 和 PI5 EvidenceDecision（生产证据决策）。不要把早期诊断 speedup 当作最终生产结论。
@@ -188,6 +190,36 @@ fallback case 用于证明未覆盖路径保持语义和成本接近，不作为
 topic-local benchmark/evidence 文档应把 `run_bench_*`、`run_board_bench_*` 和 repeated board collect target 分开列出。`run_board_bench_*` 是单次板卡 smoke，必须写清默认输出目录和证据等级。性能结论只能引用 repeated board summary 或目标硬件重复采集摘要。
 
 如果一个 topic 同时存在多个 adopted / attempted / deferred 优化方式，或用户需要按优化方式复核“为什么采纳 A、暂缓 B”，应新增或引用 topic-local `optimization-evidence` 文档。该文档按优化方式列出 production / test_support 代码路径、test target、bench target、board evidence、当前结果和不能外推的边界；主题文档只保留当前采用方式和该索引入口。
+
+## Topic-Local Doc Suite
+
+复杂 topic 命中下列任一条件时，应把测试和证据说明拆成 topic-local doc suite（主题本地文档套件），而不是把所有内容塞进 evaluation 或 `doc-rvv` 主题文档：
+
+- evaluation 已经同时承担测试说明、bench label、代码地图、候选取舍和 EvidenceDecision。
+- test_support / `include/impl` / `src` 中存在三类以上角色，例如 reference、fixtures、row source、candidate、reduction、assertion、bench harness、bench cases、script。
+- 存在多个 public entry、row source policy、点类型 / `Scalar` / layout、candidate family 或 repeated board evidence。
+- 用户、reviewer 或 worker 从文档难以回答“这个测试名是什么意思、bench label 对应哪条代码路径、checksum 怎么来、日志为什么提交”。
+- 相邻成熟 topic 已经通过 reviewer，且提供了清晰的 README、测试总览、正确性测试说明、benchmark/evidence 说明、optimization evidence 和 test-support code map。
+
+推荐 doc suite：
+
+```text
+README.zh.md
+doc/testing-overview.zh.md
+doc/correctness-tests.zh.md
+doc/benchmark-and-evidence.zh.md
+doc/optimization-evidence.zh.md
+doc/test-support-code-map.zh.md
+doc/optimization-roadmap.zh.md
+doc/<topic>-evaluation.zh.md
+doc/phases/
+```
+
+evaluation 必须放在 `artifact_layout.evaluation_doc_template` 解析路径。旧 topic 如果仍把 `<topic>-evaluation.zh.md`
+放在 topic 根目录，worker 应把 legacy evaluation migration（旧评估文档迁移）列入成熟度审计，并做
+`adopt / defer / reject` 决策。若暂缓且仍无风险阻塞，通常属于 `phase_deferred + unblocked`，不应让本轮早停。
+
+README 只负责导航、常用命令和可提交证据入口。`testing-overview` 解释测试类型、运行入口、覆盖矩阵和证据边界；`correctness-tests` 解释每个 gtest 名称、输入、断言和代码位置；`benchmark-and-evidence` 解释 case-filter、bench label、checksum、trace、asm、QEMU/board 边界和日志提交白名单；`test-support-code-map` 解释聚合入口、内部头文件、`src`、script 和 production helper 的调用关系；`optimization-evidence` 按优化方式索引代码、target 和证据；`optimization-roadmap` 保留还可以尝试的搜索空间和下一阶段候选。
 
 ## 生产接入后的 Closeout 章节
 

@@ -94,6 +94,7 @@ artifact_layout:
   phase_plan_template: "{artifact_layout.phase_root_template}/{phase_id}-{phase_slug}/plan.{documentation.language_suffix}.{documentation.markdown_extension}"
   phase_result_template: "{artifact_layout.phase_root_template}/{phase_id}-{phase_slug}/result.{documentation.language_suffix}.{documentation.markdown_extension}"
   optimization_matrix_template: "{artifact_layout.phase_root_template}/optimization-matrix.{documentation.language_suffix}.{documentation.markdown_extension}"
+  optimization_roadmap_template: "{artifact_layout.topic_test_dir_template}/doc/optimization-roadmap.{documentation.language_suffix}.{documentation.markdown_extension}"
   current_handoff_template: "{artifact_layout.current_handoff_dir_template}/current-handoff.{documentation.language_suffix}.{documentation.markdown_extension}"
   current_handoff_structured_template: "{artifact_layout.current_handoff_dir_template}/current-handoff.yaml"
   evaluation_doc_subdir: doc
@@ -140,6 +141,7 @@ artifact_publication:
         - artifact_layout.phase_plan_template
         - artifact_layout.phase_result_template
         - artifact_layout.optimization_matrix_template
+        - artifact_layout.optimization_roadmap_template
       default_policy: review_required
       commit_boundary: topic_test_asset_after_review
     current_handoff:

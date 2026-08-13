@@ -30,6 +30,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - 文档归属矩阵负责分清长期事实、候选取舍、bench 统计、output summary（输出摘要）和 Handoff Packet（交接数据包）的主归属；其它位置只引用路径、章节、run label（运行标签）或证据角色，不复制长段正文或 raw log（原始日志）。
 - 如果文档引用 `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 解析目录下的可提交证据，应写明确文件路径、run label 或 summary artifact 路径；这些引用是后续提交日志 / 摘要文件的白名单来源。
 - 复杂 topic 必须在 evaluation 或主题文档中维护 Traceability Map，列出关键 production、RVV test 资产、script、output 和文档位置；默认不新建巨型函数文档，除非 map 已经大到影响主文档可读性。
+- 多阶段优化 topic 应在配置解析出的 topic test `doc/optimization-roadmap.zh.md` 或等价位置维护主题级优化路线图。路线图只记录候选家族、搜索空间、阶段反思、新增想法、优先级和恢复条件；不要把它写成阶段流水，也不要替代 evaluation 的取舍审计。
 - S2 函数级评估阶段就应创建或更新 evaluation（评估）文档，用来记录函数功能、可向量化点、RVV 优先级、初步接入判断和需要补齐的证据。不要把这些判断只留到 S11 closeout（收尾）阶段。
 - S11 closeout 文档负责记录实验后的最终状态、证据边界、生产接入或不接入理由、遗留风险和队列表同步。如果 topic 进入 production integration loop（生产接入闭环），S11 必须发生在生产补丁、生产直连测试、生产证据重跑和再次 EvidenceDecision（证据决策）之后。
 - 生产接入后的主题文档必须按 `artifact_layout.topic_doc_template` 解析位置，并以真实 production patch（生产补丁）和 production direct（真实生产入口直连）证据为中心，不能只复述 diagnostic prototype（诊断原型）或早期 bench 结果。必须同步覆盖范围、fallback 矩阵、生产直连测试、反汇编归属、板卡 production bench、最终 EvidenceDecision 和未覆盖路径。

@@ -24,7 +24,9 @@ description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适
 证据模型和 stop condition（停止条件）；命中复杂 RVV 模式时再读取对应细则。测试、
 诊断、benchmark、消融和证据日志规则集中在 `rvv-test`。短 prompt 继续已有 topic 或目标是
 “继续完善 RVV 优化工作”时，还必须读取 `rvv-test/references/optimization-phase-loop.zh.md`，
-恢复或创建 phase plan（阶段计划）和 optimization matrix（优化矩阵）。
+恢复或创建 phase plan（阶段计划）、topic-level optimization roadmap（主题级优化路线图）
+和 optimization matrix（优化矩阵）。roadmap 负责持续保留搜索空间和下一阶段候选；phase
+plan/result 负责本阶段闭环；matrix 负责证据状态。
 
 S0 恢复和偏好冻结的合同见 [references/s0-preferences-and-recovery.zh.md](references/s0-preferences-and-recovery.zh.md)。
 当工作需要从默认偏好、local override 和 prompt override 里恢复当前轮的有效策略、解析已配置的
@@ -80,7 +82,7 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 2. S1-S2 确认目标并建立函数级评估；需要继续的 topic 应创建或更新 evaluation（评估）文档。
 3. S3-S4 形成 RVV / 诊断设计和证据计划；多阶段 topic 每个 phase 都要先有 plan。
 4. S5-S9 创建 scaffold（脚手架）、实现诊断或生产候选、执行 QEMU、反汇编和板卡验证；这些步骤可随 phase loop 重复。
-5. S10 做 EvidenceDecision，并更新 phase result、optimization matrix 和继续 / 停止决定。
+5. S10 做 EvidenceDecision，并更新 phase result、optimization roadmap、optimization matrix 和继续 / 停止决定。
 6. S10 后按证据分支：不接入生产则进入 S11 closeout；接入生产则进入 production integration loop；仍有 unblocked next action 则回到下一 phase；阻塞则进入 S12。
 7. S11 同步评估文档、主题文档、模块工作日志和状态表。
 8. S12 输出 done_or_blocked。
