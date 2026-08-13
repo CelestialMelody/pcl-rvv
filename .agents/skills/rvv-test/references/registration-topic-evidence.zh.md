@@ -23,6 +23,11 @@ estimation（对应关系估计）。它补充通用 `rvv-test` 规则，不替�
 - row source 诊断若稳定正向，worker 必须把触发日志单独写入证据索引，例如单次板卡 `analyze_bench_compare.log` 或等价摘要，再进入 production integration loop（生产接入闭环）。不能只凭默认综合 bench 口头升级，也不能把触发日志混写成最终 production summary。
 - row source diagnostic 出现稳定正向时，worker 必须进入 production integration loop（生产接入闭环）：补 production helper、public dispatch、fallback / gate tests、dedicated bench target、board smoke、repeated board summary，以及 asm attribution 或等价路径证据。若仍不接 production，文档必须写出阻塞条件、负向证据或维护成本。
 - row source 升级为 production 前，必须检查当前 topic 是否已有 adopted implementation family。若 full-cloud 已采用 block-reduction、A/B/C/N block groups、fused formula 或 ILP code shape，新 row source 不能默认沿用早期 staged-row / compressed-tail helper。worker 必须新增同边界 implementation-family comparison，或在 evaluation 中写出不适用原因，例如重复 gather 成本、寄存器压力、spill、VLEN / LMUL 限制、index staging 成本或 correctness 风险。
+- row source production probe 若和 pre-production diagnostic 方向相反，必须分清两个问题：
+  public Std/RVV speedup（公开入口标量 / RVV 加速比）只能证明真实公开入口接入 RVV 是否快于标量；
+  同一 row source 内的新 family 是否优于既有 adopted family，必须用同边界 production detail RVV-vs-RVV
+  A/B 回答。没有这层 A/B 时，默认只能写 bounded probe（有边界探针）或 provisional adoption（暂定采纳）；
+  若同边界 A/B 为 mixed / negative，默认生产路径应回到既有 adopted family，新 family 只保留为显式 probe / 实验路径。
 - 如果某个 policy 已有 adopted family，而另一个 policy 还没有尝试过该 family，worker 的默认顺序是先做 family carry-over audit：先在配置解析出的 RVV test 资产中补同 family 的 policy-specific candidate、bench 和 board 证据，再决定 production integration。不要把一个 policy 的 positive summary 直接外推到其它 policy。
 - family carry-over audit 是 optimization roadmap 的 candidate generation（候选生成）动作，不是收尾备注。
   当 full-cloud 已采用 block-reduction、A/B/C/N block groups、fused formula、ILP code shape、staged-gather

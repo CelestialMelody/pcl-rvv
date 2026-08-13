@@ -64,6 +64,14 @@ QEMU timing（QEMU 计时）不作为性能结论。QEMU 只用于 correctness�
 
 implementation-family comparison 可以复用同一 math kernel 或 reduction/formula helper，但 row-source ingress 必须按 full-cloud、source-indexed、dual-indices 和 correspondences 分别适配。统一 family 不等于统一证据；每个 policy 的 gather、index staging、weight source、mask 和计时边界都要单独记录。
 
+当 diagnostic repeated summary（重复诊断摘要）为 negative（负向）但 production public
+Std/RVV repeated summary（真实公开入口标量 / RVV 重复摘要）为 positive（正向）时，不要直接拒绝
+production probe（生产探针），也不要直接 clean-adopt（干净采纳）新 family。worker 必须先标记
+comparison-boundary / baseline mismatch（比较边界 / 基线不一致）：public Std/RVV 只回答
+“当前 public RVV path 是否快于 public scalar path”，不能证明某个新 RVV family 快于已有 adopted
+RVV family。若决策问题是 family selection（实现族选择），必须补同一 production boundary（生产边界）
+内的 RVV-vs-RVV detail A/B，或把新 family 保留为 explicit probe（显式探针）/ experiment path（实验路径），默认路径继续使用已有 adopted family。
+
 候选升级为 adopted 后，文档中的 case-filter 字典、细粒度 target 表、EvidenceDecision 和提交证据白名单必须同步更新。
 
 ## Evidence Doctor 证据体检
