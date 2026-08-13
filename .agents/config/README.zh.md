@@ -30,10 +30,10 @@ keys，再用当前 topic / function / adapter 提供的运行时变量绑定剩
 
 - `language`：中文主导、英文术语首次出现是否解释。
 - `comments`：配置解析出的测试资产、diagnostic（诊断代码）、prototype（原型代码）和 production（生产源码）的注释策略。
-- `documentation`：closeout（收尾文档）是否先写当前状态、是否要求数值算例、长期文档是否禁止保留对话流程话术，以及文档语言后缀、主题文档后缀、评估文档后缀和扩展名默认值。
+- `documentation`：closeout（收尾文档）是否先写当前状态、是否要求数值算例、长期文档是否禁止保留对话流程话术、legacy pointer（旧路径指针）默认删除策略，以及文档语言后缀、主题文档后缀、评估文档后缀和扩展名默认值。
 - `evidence`：证据日志策略。默认 `summary-only`，不提交 raw logs（原始日志）。
 - `agent_assets`：是否报告可沉淀到 skill（技能）或 knowledge map（知识索引）的经验。默认 `report-only`，不自动修改 agent asset。
-- `test_support`：测试支撑代码的拆分阈值、聚合入口目录、聚合入口命名、内部目录、文件扩展名、兼容别名和职责拆分偏好。
+- `test_support`：测试支撑代码的拆分阈值、聚合入口目录、聚合入口命名、内部目录、文件扩展名、兼容别名默认是否允许和职责拆分偏好；兼容别名默认关闭，除非有明确外部依赖或 dirty isolation 风险。
 - `paths`：work log（工作日志）、测试目录、文档目录、依赖库和交叉编译工具链的环境变量名。
 - `artifact_layout`：topic（主题）测试目录、主题文档、evaluation（评估）文档、S0 run（S0 运行记录）目录、phase plan/result（阶段计划 / 结果）、optimization matrix（优化矩阵）、current handoff（当前交接摘要）、测试 / bench 源码位置、筛选目录、数学专项测试顶层目录和函数目录、QEMU / board 输出目录、evidence registry（证据登记表）、Makefile 文件名和日志脱敏脚本的模板。
 - `artifact_publication`：产物发布策略。它只表达默认提交边界和审查要求；S0 run record 默认 local-only（仅本地），phase docs 默认 review-required（需要审查），current handoff 默认需要用户显式授权，raw logs 默认不提交，agent asset patch 必须与 topic 产物拆分审查 / 提交。

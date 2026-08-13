@@ -134,6 +134,11 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 中不少于 `test_support.helper_split_responsibility_threshold` 类职责，worker 必须优先按
 `test_support` 配置拆分，或在 Handoff Packet 中写清 `deferred reason`。拆分本身不应扩大算法范围；
 若暂缓拆分，必须说明暂缓是否影响 reviewer 可读性、后续测试维护和当前证据复核。
+这里的“测试支撑 helper”是职责概念，不是固定目录名。worker 应先扫描当前 topic 的真实文件形态：
+根目录长 `test_*.cpp` / `bench_*.cpp`、单个大聚合头、旧 `test_support/` 目录、已有 `include/` /
+`include/impl/`、script、bench case registry 或其它等价支撑代码都可能命中拆分条件。只有当前确实存在
+旧 `test_support/` 目录时，才把“移出 `test_support/`”作为具体动作；其它历史 topic 应按当前文件形态
+迁移到配置解析出的 source / aggregator / internal helper 布局。
 
 恢复旧 topic 或长 topic 时，还必须做 test harness layout audit（测试框架布局审计）。该审计
 不只看 helper header 行数，还要检查：
@@ -141,7 +146,7 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 - 测试和 bench 源码是否仍放在 topic 根目录，而不是 `artifact_layout.source_subdir`、`artifact_layout.test_source_template` 和 `artifact_layout.bench_source_template` 解析出的结构；
 - 是否缺少 `test_support.aggregator_directory` 解析出的聚合入口，以及 `test_support.internal_directory` 解析出的内部职责拆分；
 - 长 topic 是否仍使用超长文件名，是否应按 `test_support.topic_abbrev_policy` 采用缩写 topic token；
-- Makefile、board target、日志路径和现有文档引用是否能在迁移后保持兼容；
+- Makefile、board target、日志路径和现有文档引用是否能在迁移后保持正确；
 - 相邻成熟 topic 的测试支撑源码布局、聚合入口、内部职责拆分和 topic token 命名经验是否适用，哪些只作为 quality bar，不迁移实现细节；具体目录和文件名仍按当前 topic 既有结构、`artifact_layout` 与 `test_support` 配置解析。
 
 worker 必须把结果写成 `adopted / deferred / rejected` 中的一种：`adopted` 表示本 phase
@@ -156,6 +161,15 @@ worker 必须把结果写成 `adopted / deferred / rejected` 中的一种：`ado
 - 是否需要 `README.zh.md`、`testing-overview`、`correctness-tests`、`benchmark-and-evidence`、`optimization-evidence` 和 `test-support-code-map`；
 - `doc-rvv` 主题文档是否只保留长期 production 行为、当前采用方式和证据链，避免承载测试工程全量解释；
 - 暂缓项是否仍是 `phase_deferred + unblocked`，是否应继续到下一 phase。
+
+成熟相邻主题对齐审计的默认结果不应是“记录后等待 reviewer”。若缺口只涉及当前 topic 的测试资产、
+topic-local 文档、evaluation 路径或无依赖 legacy 清理，worker 应创建或修订下一阶段 plan 并继续推进。
+只有用户限定范围、dirty isolation 不安全、存在明确外部依赖、需要板卡 / 工具或会扩大到 production /
+public API / 其它 topic 时，才能停止并把该项写成 `turn_stop_deferred`。
+
+compatibility alias（兼容别名）和 legacy pointer（旧路径指针）默认不保留。保留它们需要具体证据：
+仍有脚本、文档、Make target、reviewer 工作流或用户指令依赖旧路径；同时必须写删除条件和下一阶段清理动作。
+没有证据的“为避免旧引用断开”应改为更新引用并删除旧入口。
 
 ### 7. 证据和归因
 
@@ -255,7 +269,7 @@ continue_stop_decision:
 
 `micro_stop_guard` 是强规则：worker 不能把一个局部 positive / negative、row-source audit 表、Evidence Doctor warning 解释或 isolated bench 当作 topic 完成。若继续推进会扩大范围，则停止理由必须写清扩大到哪里、需要谁授权、恢复入口是什么。
 
-`phase_deferred` 和 `turn_stop_deferred` 必须分开写。测试优化阶段、topic-local 文档重构、test_support 拆分、evaluation 路径迁移、doc suite 对齐、candidate / bench / asm / Evidence Doctor 补齐，通常都属于可继续推进的 `phase_deferred + unblocked`。只有高风险、真实 blocker 或明确授权边界才允许转成 `turn_stop_deferred`。
+`phase_deferred` 和 `turn_stop_deferred` 必须分开写。测试优化阶段、topic-local 文档重构、测试支撑结构迁移、evaluation 路径迁移、doc suite 对齐、无依赖 legacy 清理、candidate / bench / asm / Evidence Doctor 补齐，通常都属于可继续推进的 `phase_deferred + unblocked`。只有高风险、真实 blocker 或明确授权边界才允许转成 `turn_stop_deferred`。
 
 ### 9. PI1 生产接入计划门禁
 
@@ -356,6 +370,9 @@ doc_quality_refs_loaded:
 current_optimization_section_ready:
 test_comment_strategy_frozen:
 test_support_split_decision_ready:
+test_support_shape_scan_ready:
+legacy_compatibility_decision_ready:
+mature_sibling_parity_action_ready:
 bench_timing_boundary_defined:
 bench_backend_choice_ready:
 qemu_bench_smoke_scope_ready:
@@ -434,12 +451,20 @@ followup_options_ready:
 - closeout 或 production-candidate 文档必须列出 `current_optimization_section_ready`、`document_ownership_matrix_ready` 和 `traceability_map_ready`。证据指向主题文档中的“当前采用的优化方式”小节、文档归属矩阵章节和 Traceability Map 章节，并说明它们是否覆盖 dispatch / fallback、layout gate、当前优化机制、chunk 内部流程、分组职责、暂缓方案和证据边界。
 - 如果 worker 声明采用 sibling topic 经验，表格必须包含 `experience_migration_audit_ready`；
   证据指向 adopted / attempted / deferred / rejected 对照表。若未声明且无相邻经验可迁移，可写 `not_applicable` 并说明原因。
-- 如果当前 topic 的测试支撑 helper header 命中行数或职责阈值，表格必须包含
+- 表格必须包含 `test_support_shape_scan_ready`。证据必须列出当前 topic 的测试支撑形态：根目录
+  test / bench 源码、聚合头、内部 helper、旧 `test_support/` 目录、script、bench case registry
+  或等价文件；没有某种形态时写 `not_present`，不能把“不存在 `test_support/` 目录”当成未审计理由。
+- 如果当前 topic 的测试支撑 helper、源文件或等价支撑代码命中行数或职责阈值，表格必须包含
   `test_support_split_decision_ready`；证据指向按 `test_support` 配置拆分后的结构，或 Handoff 中的 deferred reason。
 - 恢复旧 topic、长 topic 或测试 / bench 仍在 topic 根目录的 topic 时，表格必须包含
   `test_harness_layout_audit_ready`；证据必须说明是否采用 `artifact_layout` 与 `test_support`
   解析出的 source、aggregator、internal header 和长 topic 缩写文件名策略，以及 sibling 结构经验是 adopted、deferred 还是 rejected。
   若暂缓迁移，必须把它写入 `unblocked_next_actions` 或说明阻塞条件。
+- 若相邻成熟 topic 已经形成更完整的测试工程或 topic-local doc suite，表格必须包含
+  `mature_sibling_parity_action_ready`；证据必须说明结构差距是否已经采用、拒绝，或作为高优先级
+  `phase_deferred + unblocked` 继续推进。若停止，必须指向真实 stop condition。
+- 表格必须包含 `legacy_compatibility_decision_ready`。证据必须说明是否存在 legacy pointer / alias /
+  旧路径 wrapper；默认处理是删除并更新引用。若保留，必须列出具体外部依赖、删除条件和下一阶段。
 - 若 `language_check` 声称通过，必须能在同一张表或相邻段落中指出诊断代码、测试、bench 和文档的术语 / 中文注释证据。
 - 表格必须包含 `writing_style_trigger_check`。检查范围至少覆盖主题文档、evaluation / closeout 文档、workflow 文档、Handoff Packet、worker / reviewer 最终回复和 `agent_asset_feedback`；触发词清单来自 `rvv-documentation/references/writing-style.md`。若某个命中词是必要技术术语，必须写清保留理由。
 - 若当前结论强于 no-production，例如 `partial-production-candidate`，表格必须额外列出 production direct 尚未闭合的证据项，避免把诊断收益误写成 production-ready。

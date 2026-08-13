@@ -74,6 +74,7 @@
 1. **production boundary**：公开入口、RVV dispatch、fallback、layout / point type / `Scalar` gate 是否清晰；未覆盖入口是否显式保持标量；test-only reference 是否没有混入 production detail；production detail helper 是否真实服务 runtime path 或明确服务生产可维护性。
 2. **RVV test support architecture**：测试支撑是否有稳定聚合入口；reference、fixtures、row source adapter、RVV math、reduction / formula candidate、assertions、bench harness / bench cases 是否按职责可审查；大型单文件、重复 helper、混合 production-direct 与 diagnostic 职责、bench/test wrapper 相互缠绕，都是可列入本阶段的工程债。
 3. **test harness layout and naming**：测试 / bench 源码、聚合头文件和内部职责拆分是否仍停在当前 topic 既有布局，是否应迁移到 `artifact_layout.source_subdir`、`artifact_layout.test_source_template`、`artifact_layout.bench_source_template`、`test_support.aggregator_directory` 和 `test_support.internal_directory` 解析出的结构；长 topic 是否应按 `test_support.topic_abbrev_policy` 使用缩写 topic token 作为文件名；Makefile、board target、日志路径、文档引用和现有 case 名在迁移后是否保持兼容。此项必须给出 `adopt / defer / reject` 决策，不能被包含在泛泛的“测试支撑可读性”里。
+   审计对象按当前 topic 真实形态枚举：根目录长 `test_*.cpp` / `bench_*.cpp`、单个聚合头、多职责 helper header、旧 `test_support/` 目录、已有 `include/` / `include/impl/`、script 或其它等价测试支撑文件都要纳入；不要假设每个 topic 都有字面量 `test_support/` 目录，也不要因为没有该目录就跳过布局迁移审计。
 4. **evidence and docs**：correctness、fallback、asm、bench、board summary、Evidence Doctor、evaluation、topic docs 和 remaining risks 是否一致；QEMU correctness、diagnostic bench、production-shaped bench 和 production-dispatch board evidence 是否分层；stale helper、旧风险、旧结论或未登记覆盖日志是否需要刷新。
 5. **closeout hygiene**：dirty isolation 是否只允许当前 topic 或当前 agent asset；`git diff --check`、std/RVV correctness、必要 asm / bench / board 边界是否运行或有明确不运行理由；phase result / evaluation / Handoff 是否能让下一轮短 prompt 恢复。
 
@@ -84,6 +85,7 @@
 以及下一轮恢复条件。
 
 成熟度审计还必须检查 topic-local doc suite（主题本地文档套件）是否达到当前 topic 复杂度需要。若相邻成熟 topic 已经提供 `README.zh.md`、`doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` 和 `doc/<topic>-evaluation.zh.md` 这类结构，worker 应把它作为文档成熟度 quality bar。具体内容不能复制，但结构、读者路径、证据白名单和代码地图必须做 `adopt / defer / reject` 决策。evaluation 仍在 topic 根目录、缺少 README、缺少测试/bench/代码地图或长期 `doc-rvv` 与 topic-local docs 互相挤压时，都是可继续推进的 unblocked doc-suite action。
+文档迁移默认不保留 legacy pointer（旧路径指针）、compatibility alias（兼容别名）或重复正文。只有存在明确外部依赖、用户限定必须兼容、跨 topic 脚本暂时无法同轮更新，或 dirty isolation 会误删用户改动时，才可以临时保留；保留时必须在 phase result / Handoff 写出依赖证据、删除条件和下一阶段删除动作。缺少证据的“避免旧引用断开”不是充分理由。
 
 ## Optimization Roadmap
 
@@ -108,6 +110,7 @@ roadmap candidate family 可以来自模型自行分析、当前源码证据、�
 roadmap 更新规则：
 
 - 新 phase 开始前，先读取 roadmap，选择当前最值得闭合的 unblocked candidate 或结构 maturity action。
+- 若 mature sibling parity audit 发现当前 topic 缺少 source / aggregator / internal helper 布局、完整 topic-local doc suite、evaluation 主路径迁移或 legacy 清理，且这些动作仍在当前 topic 测试 / 文档边界内，roadmap 必须把它们合并成高优先级 structure-parity phase，默认排在 evidence registry、helper shape 微调和可选性能探索之前，除非写出真实阻塞或更高风险证据动作。
 - phase 结束后，必须把实际发现的新候选、负向解释、异常模式和可继续动作回填 roadmap。
 - `deferred` candidate 必须写 resume condition（恢复条件），例如需要板卡、asm、production direct、输入语义审计或先完成 test_support 拆分。
 - roadmap 不写成“以后有空可以做”的松散清单。每个 unblocked 高优先级 candidate 应能导出下一阶段 plan，或明确说明为什么暂时不做。
@@ -134,7 +137,7 @@ roadmap 更新规则：
 `deferred` 只表示当前 phase 未闭合，不自动表示本轮可以停止。建议区分：
 
 - `phase_deferred`：当前 phase 不做或没做完，但仍在当前 topic 授权范围内，且没有高风险阻塞。worker 默认创建或修订下一 phase plan 并继续。
-- `turn_stop_deferred`：本轮可以合法停止。必须命中明确 stop condition，例如用户限定范围、继续会扩大到未授权 production / public API / 其它 topic、板卡或工具不可用、证据矛盾、dirty isolation 不安全，或当前矩阵和 roadmap 已无授权未阻塞动作。
+- `turn_stop_deferred`：本轮可以合法停止。必须命中明确 stop condition，例如用户限定范围、继续会扩大到未授权 production / public API / 其它 topic、板卡或工具不可用、证据矛盾、dirty isolation 不安全，或当前矩阵和 roadmap 已无授权未阻塞动作。低风险测试优化、测试支撑结构迁移、topic-local 文档拆分、evaluation 主路径迁移和无外部依赖的 legacy 清理，默认不能转成 `turn_stop_deferred`。
 
 如果一个条目是 `phase_deferred + unblocked`，`result.zh.md`、optimization matrix、roadmap 和 Handoff 都必须写出下一阶段动作。最终回复也要明确“这些没有做，但仍可继续”，不能只写“已完成”。
 
@@ -154,7 +157,7 @@ worker 按下列步骤循环，直到命中停止条件：
 6. **解释证据**：把实际结果、输入口径、A/B 边界、checksum、长尾、异常频率、decision bucket、rerun budget、asm attribution、目标硬件和不能证明的范围写入 `result.zh.md`，并更新矩阵状态。
 7. **阶段反思**：用本阶段证据反推是否出现新的 candidate family、消融需求、ILP / LMUL 取舍、文档结构缺口或测试输入缺口；把它们更新到 roadmap，并标注优先级、证据需求和恢复条件。
 8. **更新计划**：将剩余动作按 `blocked` / `unblocked` 标记；为下一阶段写默认目标或创建下一阶段 plan。计划变更必须保留原因，不得把未执行动作直接勾成完成。
-9. **继续 / 停止决策**：如果 roadmap 或矩阵中存在授权且未阻塞的下一动作，默认继续同轮推进；只有命中明确 stop condition 才输出 Handoff 并停止。
+9. **继续 / 停止决策**：如果 roadmap 或矩阵中存在授权且未阻塞的下一动作，默认继续同轮推进；只有命中明确 stop condition 才输出 Handoff 并停止。若本阶段只是建立 roadmap、迁移单份 evaluation、补一个指针或完成一个局部 layout 子任务，而结构 parity / doc suite / legacy 清理仍未闭合，不能把 `next_phase_default` 写成 `ready_for_review`。
 
 worker 应优先完成能改变决策的证据链，而不是堆积无关 case。阶段大小由“是否形成可审查的决策闭环”决定，不由文件数量决定。
 
@@ -186,7 +189,7 @@ benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecis
 
 ## Continue / Stop Criteria
 
-默认继续，尤其测试优化、test_support 结构整理、topic-local 文档拆分、evaluation 迁移、README / doc suite 对齐、诊断 candidate / bench / asm / Evidence Doctor 补齐等仍在当前 topic 测试资产或文档边界内的动作，通常应继续推进。以下任一条件成立才允许停止当前 worker 轮次：
+默认继续，尤其测试优化、测试支撑结构整理、topic-local 文档拆分、evaluation 迁移、README / doc suite 对齐、无依赖 legacy pointer / alias 删除、诊断 candidate / bench / asm / Evidence Doctor 补齐等仍在当前 topic 测试资产或文档边界内的动作，通常应继续推进。以下任一条件成立才允许停止当前 worker 轮次：
 
 1. 当前 phase plan 的完成矩阵已闭合，roadmap 和 optimization matrix 均没有授权、未阻塞的 high-priority next action；下一阶段已经明确标为 `not_yet_started`，并有可恢复的 plan 入口。
 2. 用户明确限制本轮范围，且 worker 已完成该范围并记录剩余 loop 状态。

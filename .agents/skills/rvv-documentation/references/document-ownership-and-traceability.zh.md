@@ -56,6 +56,11 @@ README 只作为导航、常用命令和证据白名单入口。它不承担每�
 
 如果一次复跑改变了数值结论、decision bucket 或证据角色，旧 summary 立刻转为 historical evidence，不能继续作为当前 truth。worker 必须同步刷新 phase result、optimization roadmap、evaluation、主题文档和 Handoff；若还没刷新，文档状态应显式标成 stale / refresh pending，而不是继续沿用旧 run label。若 registry 或扫描发现 `unregistered_change` / `manual_run_detected`，先把当前数值结论降级为待刷新状态，再决定是否重建 summary / Evidence Doctor。
 
+legacy pointer（旧路径指针）和 compatibility alias（兼容别名）不是默认的文档归属策略。若长期文档、
+evaluation 或 topic-local doc suite 已迁移到新主路径，worker 应优先更新引用并删除旧入口；只有存在
+明确外部依赖、同轮无法同步更新的脚本、dirty isolation 风险或用户明确要求保留时，才临时保留，并在
+Handoff / phase result 写出删除条件和下一阶段清理动作。
+
 ## Traceability Map 触发条件
 
 复杂 topic 必须在 evaluation 或主题文档中加入 `Traceability Map（可追踪性地图）` 章节。确实需要时可以拆成独立 `*-traceability.zh.md`，但默认不新建大型长期函数文档。

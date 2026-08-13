@@ -34,11 +34,18 @@ production-direct 分层、文档与 evidence registry 一致性以及 closeout 
 根目录超长测试 / bench 源码文件、是否缺少配置解析出的 source subdir（源码子目录）、
 aggregator header（聚合头文件）入口和 internal header（内部头文件）职责拆分、是否需要按
 `test_support.topic_abbrev_policy` 为长 topic 采用缩写 topic token（主题短标识）、以及是否应把
-reference、fixtures、row source、candidate、assertion 和 bench harness 分职责拆分。具体目录和文件名按
+reference、fixtures、row source、candidate、assertion 和 bench harness 分职责拆分。审计对象从当前 topic
+实际文件形态推导：可能是根目录长 `.cpp`、单个大 header、旧 `test_support/` 目录、已有 `include/` /
+`include/impl/`、script 或其它等价测试支撑文件；不要假设字面量 `test_support/` 一定存在，也不要因为
+没有该目录就跳过结构迁移。具体目录和文件名按
 `artifact_layout`、`test_support` 和当前 topic 既有等价结构解析。历史 sibling topic（同类主题）只能作为结构质量 bar
 和风险来源，不能机械复制其实现；但 worker 必须给出 `adopt / defer / reject` 决策。若不重构，
 phase plan / result / Handoff 必须说明暂缓原因、对 reviewer 可读性和后续候选扩展的影响，
 并把仍未阻塞的重构列入 `unblocked_next_actions`，不能因为局部代码清理已通过测试就提前 closeout。
+若相邻成熟 topic 的 README、topic-local doc suite、evaluation 主路径、`doc-rvv` 长期文档分工或
+legacy 清理明显更成熟，worker 必须把这些结构差距合并成当前 topic 的 structure-parity 候选 phase。
+除非存在真实外部依赖、dirty isolation 风险或用户限定范围，否则该 phase 是默认下一步，不能把
+roadmap-only、evaluation-only 或 pointer-only 小阶段收口成 `ready_for_review`。
 如果短 prompt 的目标是恢复 S0、冻结偏好或复核产物发布边界，先读 `.agents/skills/rvv-workflow/references/s0-preferences-and-recovery.zh.md`，再决定是否继续 phase loop。
 
 worker（执行者）和 reviewer（审查者）启动时先读取：
@@ -248,7 +255,7 @@ workflow improvement 再读：
 worker 默认权限：
 
 - 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产和主题文档产物。
-- 对测试优化和 topic-local 文档成熟度工作，短 prompt 默认授权 worker 在当前 topic 内连续推进多个低风险 phase，例如 test_support 拆分、legacy 聚合头清理、evaluation 迁入 `doc/`、README / doc suite 补齐、source-indexed 或其它 row source 的 candidate / correctness / bench / asm / Evidence Doctor 阶段。除非继续会扩大到 production、public API、其它 topic、板卡不可用、证据矛盾或 dirty isolation 不安全，否则不应因为一个小 phase 完成就停止。
+- 对测试优化和 topic-local 文档成熟度工作，短 prompt 默认授权 worker 在当前 topic 内连续推进多个低风险 phase，例如测试支撑结构迁移、legacy 聚合头 / pointer 清理、evaluation 迁入 `doc/`、README / doc suite 补齐、source-indexed 或其它 row source 的 candidate / correctness / bench / asm / Evidence Doctor 阶段。除非继续会扩大到 production、public API、其它 topic、板卡不可用、证据矛盾或 dirty isolation 不安全，否则不应因为一个小 phase 完成就停止。
 - 不把该授权扩展到其它 topic 的测试资产、主题文档或生产源码。
 - S10 `EvidenceDecision`（证据决策）前不修改 production（生产源码）。
 - 如果证据支持 production-ready（可接入生产），先输出 Handoff Packet，等待用户确认后进入 production integration loop（生产接入闭环）。

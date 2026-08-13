@@ -201,6 +201,11 @@ topic-local benchmark/evidence 文档应把 `run_bench_*`、`run_board_bench_*` 
 - 用户、reviewer 或 worker 从文档难以回答“这个测试名是什么意思、bench label 对应哪条代码路径、checksum 怎么来、日志为什么提交”。
 - 相邻成熟 topic 已经通过 reviewer，且提供了清晰的 README、测试总览、正确性测试说明、benchmark/evidence 说明、optimization evidence 和 test-support code map。
 
+若当前 topic 已具备多阶段优化、多个测试支撑角色、多个 public entry / row source / 点型组合，或评审者
+需要从文档回答测试语义、bench label、checksum、证据白名单和代码地图，topic-local doc suite 应视为
+结构成熟度的一部分，而不是可选装饰。只做 evaluation 迁移、只新增 roadmap 或只保留一个指针文件，
+不足以关闭 doc-suite 缺口。
+
 推荐 doc suite：
 
 ```text
@@ -218,6 +223,9 @@ doc/phases/
 evaluation 必须放在 `artifact_layout.evaluation_doc_template` 解析路径。旧 topic 如果仍把 `<topic>-evaluation.zh.md`
 放在 topic 根目录，worker 应把 legacy evaluation migration（旧评估文档迁移）列入成熟度审计，并做
 `adopt / defer / reject` 决策。若暂缓且仍无风险阻塞，通常属于 `phase_deferred + unblocked`，不应让本轮早停。
+迁移后默认更新引用并删除根目录旧文件；不要为了泛泛的“避免旧引用断开”保留 legacy pointer。只有明确
+外部依赖、用户要求兼容、同轮无法安全更新引用或 dirty isolation 风险时才可临时保留，并必须写出删除条件
+和下一阶段清理动作。
 
 README 只负责导航、常用命令和可提交证据入口。`testing-overview` 解释测试类型、运行入口、覆盖矩阵和证据边界；`correctness-tests` 解释每个 gtest 名称、输入、断言和代码位置；`benchmark-and-evidence` 解释 case-filter、bench label、checksum、trace、asm、QEMU/board 边界和日志提交白名单；`test-support-code-map` 解释聚合入口、内部头文件、`src`、script 和 production helper 的调用关系；`optimization-evidence` 按优化方式索引代码、target 和证据；`optimization-roadmap` 保留还可以尝试的搜索空间和下一阶段候选。
 

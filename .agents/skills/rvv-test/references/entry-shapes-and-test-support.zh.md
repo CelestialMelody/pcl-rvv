@@ -41,6 +41,11 @@ row source -> field load/gather -> finite mask -> formula -> staging/reduction -
 
 - 短 prompt 恢复 phase loop 时，即使用户没有显式要求“重构测试框架”，也要把 RVV test support architecture（RVV 测试支撑架构）作为完成度审计项。若当前 topic 的测试入口、helper、bench case、文档或 evidence boundary 已经难以区分 reference / diagnostic / production direct 职责，应把拆分或重构列为当前 phase 的候选未完成项。
 - 不要把某个 sibling topic（同类主题）的文件清单、缩写、目录结构或实现族机械复制过来；只继承通用职责划分和质量 bar。具体拆分应从当前 topic 的源码、测试、bench、证据和 dirty isolation 推导。
+- 先做 test support shape scan（测试支撑形态扫描），再决定具体迁移动作。可迁移对象包括根目录长
+  `test_*.cpp` / `bench_*.cpp`、单个大聚合头、多职责 helper header、旧 `test_support/` 目录、
+  已有 `include/` / `include/impl/`、script、bench case registry 或其它等价支撑代码。不要把
+  `test_support/` 当作必然存在的目录；只有当前 topic 真的有旧 `test_support/` 目录时，才把
+  “移出 `test_support/`”写成具体动作。
 
 - 默认偏好来自 `.agents/config/defaults.yaml` 的 `test_support` 配置：helper header 超过
   `helper_split_soft_line_limit`（默认约 800 行）时应评估拆分；超过
@@ -64,9 +69,9 @@ row source -> field load/gather -> finite mask -> formula -> staging/reduction -
   role-specific aggregator 命名顺序、topic token / abbreviation 策略、内部目录、扩展名和内部头文件是否带
   topic token 前缀。不要默认创建或提交本机 override（覆盖）文件；若使用本机覆盖，Handoff Packet
   只说明读取了哪些覆盖项和最终生效行为。
-- 历史 topic 若已有兼容聚合入口，在 `test_support.compatibility_aggregator_alias_allowed` 为 true 时可暂作
-  compatibility alias（兼容别名）保留；它不是新 topic 的默认命名。若继续保留兼容别名，且
-  `test_support.compatibility_aggregator_alias_requires_handoff_reason` 为 true，Handoff Packet 必须说明保留原因。
+- 历史 topic 若已有旧聚合入口或旧路径 wrapper，默认应更新引用并删除旧入口。只有存在明确外部依赖、
+  用户限定必须兼容、或同轮修改会误伤 dirty isolation 时，才可临时保留 compatibility alias（兼容别名）。
+  若继续保留兼容别名，Handoff Packet 必须说明具体依赖、为什么不能同轮删除、删除条件和默认下一阶段。
 - 只有内容确实是狭义 diagnostic/probing（诊断 / 探针）时，才使用配置或当前 topic 既有结构指定的狭义诊断位置。
 - 内部实现优先放到 `test_support.internal_directory` 解析出的目录。`test_support.internal_header_roles`
   是通用职责词表，不是每个 topic 必须照抄的文件清单。默认角色应保持跨模块通用，例如

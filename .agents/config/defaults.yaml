@@ -1,183 +1,363 @@
+# 默认语言策略：控制 worker/reviewer 输出和文档的主语言。
 language:
+  # primary：默认主语言；`zh` 表示中文优先。
   primary: zh
+  # explain_english_terms：英文专业术语首次出现时是否补中文解释。
   explain_english_terms: true
 
+# 注释策略：按代码/资产类型限制注释详细度，避免 production 注释过重。
 comments:
+  # test_rvv：配置解析出的 test-rvv 测试资产注释风格；`detailed_zh` 表示详细中文说明。
   test_rvv: detailed_zh
+  # diagnostic：诊断/候选代码注释风格；默认详细中文说明证据角色和边界。
   diagnostic: detailed_zh
+  # prototype：原型代码注释风格；默认详细中文说明，便于 reviewer 理解试验意图。
   prototype: detailed_zh
+  # production：生产源码注释风格；默认只写边界和维护必要信息。
   production: concise_boundary_only
+  # production_comment_scope：production 注释允许覆盖的主题白名单。
   production_comment_scope:
+    # maintenance_boundary：维护边界，例如哪些 helper 是内部实现、哪些路径不可扩大。
     - maintenance_boundary
+    # fallback：fallback/回退条件和语义保持说明。
     - fallback
+    # dispatch：RVV/标量 dispatch 条件和入口说明。
     - dispatch
+    # numeric_risk：数值风险、误差预算、FMA/reduction 语义边界。
     - numeric_risk
+    # data_layout：字段布局、stride、AoS/SoA、traits gate 等数据布局边界。
     - data_layout
 
+# 文档策略：控制长期文档、evaluation 和迁移旧文档入口的默认行为。
 documentation:
+  # closeout_current_state_first：closeout 文档先写当前状态，再写历史/阶段过程。
   closeout_current_state_first: true
+  # require_numeric_example：复杂数值/几何函数文档是否要求给数值算例。
   require_numeric_example: true
+  # forbid_conversation_process_phrasing：长期文档禁止保留“本轮/我做了”等对话流程话术。
   forbid_conversation_process_phrasing: true
+  # long_term_docs_use_source_evidence：长期文档结论必须来自源码、测试、summary 等证据路径。
   long_term_docs_use_source_evidence: true
+  # legacy_pointer_default：旧路径指针默认处理；`remove` 表示更新引用后删除旧入口。
+  legacy_pointer_default: remove
+  # legacy_pointer_allowed_only_with_external_dependency：只有存在明确外部依赖时才允许保留旧路径指针。
+  legacy_pointer_allowed_only_with_external_dependency: true
+  # legacy_pointer_requires_deletion_phase：临时保留旧路径指针时必须记录删除条件/后续阶段。
+  legacy_pointer_requires_deletion_phase: true
+  # markdown_extension：Markdown 文档默认扩展名。
   markdown_extension: md
+  # language_suffix：中文文档文件名默认语言后缀。
   language_suffix: zh
+  # topic_doc_suffix：doc-rvv 主题文档文件名后缀。
   topic_doc_suffix: RVV
+  # evaluation_doc_suffix：topic-local evaluation 文档文件名后缀。
   evaluation_doc_suffix: evaluation
 
+# 证据/日志策略：控制 raw log、summary、sanitized log 是否进入提交候选。
 evidence:
+  # default_policy：默认证据提交策略；`summary-only` 表示只提交摘要证据。
   default_policy: summary-only
+  # keep_raw_logs：默认是否保留 raw logs；false 表示不要求保留。
   keep_raw_logs: false
+  # submit_raw_logs_by_default：默认是否提交 raw logs；false 表示绝不默认提交。
   submit_raw_logs_by_default: false
+  # allow_sanitized_logs_when_user_requests_logs：用户要求日志时是否允许提交脱敏日志。
   allow_sanitized_logs_when_user_requests_logs: true
+  # commit_generated_logs_only_when_referenced_by_docs：生成日志只有被文档引用时才进入提交候选。
   commit_generated_logs_only_when_referenced_by_docs: true
+  # committable_log_reference_roots：允许引用并提交 summary/sanitized 日志的文档根路径。
   committable_log_reference_roots:
+    # {paths.doc_root}：doc-rvv 等长期文档根目录。
     - "{paths.doc_root}"
+    # {paths.test_root}：test-rvv 主题本地文档/证据根目录。
     - "{paths.test_root}"
 
+# agent asset 策略：控制 worker 发现流程问题时如何反馈/更新 .agents 资产。
 agent_assets:
+  # feedback_mode：默认只报告 agent asset 建议，不自动修改。
   feedback_mode: report-only
+  # allow_auto_update：是否允许 worker 自动更新 agent asset；默认关闭，需要用户授权。
   allow_auto_update: false
+  # report_at_phase_boundaries：是否在 phase 边界报告可沉淀的 asset 反馈。
   report_at_phase_boundaries: true
+  # experience_migration_audit：相邻/历史 topic 经验迁移审计配置。
   experience_migration_audit:
+    # required_when_sibling_experience_claimed：声明参考 sibling 经验时必须输出审计表。
     required_when_sibling_experience_claimed: true
+    # statuses：经验迁移审计允许的状态枚举。
     statuses:
+      # adopted：已采用，并有当前 topic 落点/证据。
       - adopted
+      # attempted：已尝试，但证据或收益不足。
       - attempted
+      # deferred：暂缓，必须写恢复条件。
       - deferred
+      # rejected：拒绝，必须写当前 topic 不适用理由。
       - rejected
 
+# 测试支撑结构策略：控制 test/bench/helper 如何拆分到稳定聚合入口和内部实现。
 test_support:
+  # helper_split_soft_line_limit：超过该行数时应评估拆分。
   helper_split_soft_line_limit: 800
+  # helper_split_hard_line_limit：超过该行数时必须优先拆分或写 deferred reason。
   helper_split_hard_line_limit: 1000
+  # helper_split_responsibility_threshold：混合多少类职责时触发拆分审计。
   helper_split_responsibility_threshold: 3
+  # aggregator_directory：测试支撑聚合头默认目录，位于 topic 测试目录内。
   aggregator_directory: include
+  # aggregator_prefix：聚合头文件名前缀；空字符串表示无前缀。
   aggregator_prefix: ""
+  # aggregator_extension：聚合头默认扩展名。
   aggregator_extension: h
+  # topic_token_required：长 topic 是否必须解析稳定 topic token/缩写。
   topic_token_required: true
+  # topic_abbrev_policy：何时使用缩写 topic token；`long_topic_only` 表示仅长 topic 缩写。
   topic_abbrev_policy: long_topic_only
+  # abbreviated_topic_token_requires_readme_note：使用缩写时 README/Handoff 必须说明映射。
   abbreviated_topic_token_requires_readme_note: true
+  # role_aggregator_name_order：角色聚合头命名顺序；`role_topic` 表示 `<role>_<topic-token>`。
   role_aggregator_name_order: role_topic
+  # internal_directory：测试支撑内部头默认目录，位于 topic 测试目录内。
   internal_directory: include/impl
+  # internal_header_extension：内部头默认扩展名。
   internal_header_extension: hpp
+  # prefer_topic_token_prefixed_internal_headers：内部头文件名是否优先带 topic token 前缀。
   prefer_topic_token_prefixed_internal_headers: true
-  compatibility_aggregator_alias_allowed: true
+  # compatibility_aggregator_alias_allowed：是否默认允许旧聚合头/兼容别名；false 表示默认删除旧入口。
+  compatibility_aggregator_alias_allowed: false
+  # compatibility_aggregator_alias_requires_handoff_reason：临时保留兼容别名时必须在 Handoff 写原因。
   compatibility_aggregator_alias_requires_handoff_reason: true
+  # internal_header_roles：内部头职责词表；不是每个 topic 必须照抄的文件清单。
   internal_header_roles:
+    # core_types：共享类型、traits、轻量结构定义。
     - core_types
+    # fixtures：测试夹具、输入数据构造、点云/矩阵样本。
     - fixtures
+    # references：标量 reference 或独立正确性参考实现。
     - references
+    # adapters：entry/row-source/point-type 适配器。
     - adapters
+    # candidates：候选 RVV/math/formula/reduction 实现。
     - candidates
+    # assertions：断言、误差比较、结果校验 helper。
     - assertions
+    # bench_harness：bench 驱动、CLI、计时边界、输出合同。
     - bench_harness
+    # bench_cases：bench case 组装、case-filter、数据规模矩阵。
     - bench_cases
 
+# 顶层路径策略：所有路径模板应通过这些根路径和 env var 名解析。
 paths:
+  # work_log_root：默认 work log 根目录；位于 tmp 下，默认不提交。
   work_log_root: tmp/rvv-work-logs
+  # board_archive_root：板卡 raw evidence 本地归档根目录；默认不提交。
   board_archive_root: work/rvv-evidence-raw-archive
+  # test_root：RVV 测试资产根目录。
   test_root: test-rvv
+  # doc_root：RVV 长期文档根目录。
   doc_root: doc-rvv
+  # dependency_root_env_var：依赖库根目录对应的环境变量名，只记录变量名不记录私有路径。
   dependency_root_env_var: PCL_RVV_DEP_ROOT
+  # cross_toolchain_env_var：交叉工具链根目录对应的环境变量名，只记录变量名。
   cross_toolchain_env_var: PCL_RVV_TOOLCHAIN_ROOT
 
+# 产物布局模板：所有 topic 文档、phase、证据、源码路径都从这里解析。
 artifact_layout:
+  # topic_test_dir_template：某个 module/topic 的 test-rvv 主题目录。
   topic_test_dir_template: "{paths.test_root}/{module}/{topic}"
+  # module_doc_dir_template：某个 module 的 doc-rvv 目录。
   module_doc_dir_template: "{paths.doc_root}/{module}"
+  # reusable_rvv_knowledge_dir_template：可复用 RVV 知识文档目录。
   reusable_rvv_knowledge_dir_template: "{paths.doc_root}/rvv"
+  # topic_doc_template：doc-rvv 长期主题文档路径。
   topic_doc_template: "{paths.doc_root}/{module}/{topic}-{documentation.topic_doc_suffix}.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # topic_worklog_dir_template：某个 topic 的 work log 目录。
   topic_worklog_dir_template: "{paths.work_log_root}/{module}/{topic}"
+  # current_handoff_dir_template：当前 Handoff Packet 目录。
   current_handoff_dir_template: "{artifact_layout.topic_worklog_dir_template}/current-handoff"
+  # s0_run_dir_template：S0 run record 目录，按 run_id 区分。
   s0_run_dir_template: "{artifact_layout.topic_worklog_dir_template}/{run_id}"
+  # s0_markdown_template：S0 Markdown 记录路径。
   s0_markdown_template: "{artifact_layout.s0_run_dir_template}/s0.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # s0_structured_template：S0 结构化 YAML 记录路径。
   s0_structured_template: "{artifact_layout.s0_run_dir_template}/s0.yaml"
+  # phase_root_template：topic-local phase 文档根目录。
   phase_root_template: "{artifact_layout.topic_test_dir_template}/doc/phases"
+  # phase_plan_template：单个 phase 的 plan 文档路径。
   phase_plan_template: "{artifact_layout.phase_root_template}/{phase_id}-{phase_slug}/plan.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # phase_result_template：单个 phase 的 result 文档路径。
   phase_result_template: "{artifact_layout.phase_root_template}/{phase_id}-{phase_slug}/result.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # optimization_matrix_template：跨 phase 优化矩阵路径。
   optimization_matrix_template: "{artifact_layout.phase_root_template}/optimization-matrix.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # optimization_roadmap_template：topic-level 优化路线图路径。
   optimization_roadmap_template: "{artifact_layout.topic_test_dir_template}/doc/optimization-roadmap.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # current_handoff_template：当前 Handoff Markdown 路径。
   current_handoff_template: "{artifact_layout.current_handoff_dir_template}/current-handoff.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # current_handoff_structured_template：当前 Handoff 结构化 YAML 路径。
   current_handoff_structured_template: "{artifact_layout.current_handoff_dir_template}/current-handoff.yaml"
+  # evaluation_doc_subdir：topic-local evaluation 文档子目录。
   evaluation_doc_subdir: doc
+  # evaluation_doc_template：topic-local evaluation 主文档路径。
   evaluation_doc_template: "{paths.test_root}/{module}/{topic}/{artifact_layout.evaluation_doc_subdir}/{topic}-{documentation.evaluation_doc_suffix}.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # screening_root_template：模块筛选/队列文档根目录。
   screening_root_template: "{paths.doc_root}/library-screening"
+  # screening_modules_subdir：模块级 triage 文档子目录。
   screening_modules_subdir: modules
+  # module_triage_doc_template：模块函数 triage 文档路径。
   module_triage_doc_template: "{artifact_layout.screening_root_template}/{artifact_layout.screening_modules_subdir}/{module}-function-triage.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # module_second_pass_doc_template：模块 second-pass 文档路径。
   module_second_pass_doc_template: "{artifact_layout.screening_root_template}/{module}/{module}-module-second-pass.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # module_followup_rescreen_doc_template：模块 follow-up/rescreen 文档路径。
   module_followup_rescreen_doc_template: "{artifact_layout.screening_root_template}/{module}/{module}-module-followup-rescreen.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # generic_point_type_strategy_doc_template：泛型点类型策略文档路径。
   generic_point_type_strategy_doc_template: "{artifact_layout.reusable_rvv_knowledge_dir_template}/RVV Generic Point Type Strategy.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # math_test_subdir：数学专项 test-rvv 子目录。
   math_test_subdir: rvv/math
+  # math_doc_subdir：数学专项 doc-rvv 子目录。
   math_doc_subdir: rvv/math
+  # math_test_root_template：数学专项测试根目录。
   math_test_root_template: "{paths.test_root}/{artifact_layout.math_test_subdir}"
+  # math_test_dir_template：单个数学函数测试目录。
   math_test_dir_template: "{artifact_layout.math_test_root_template}/{function}"
+  # math_doc_dir_template：数学专项文档目录。
   math_doc_dir_template: "{paths.doc_root}/{artifact_layout.math_doc_subdir}"
+  # qemu_output_subdir：topic 内 QEMU 输出/日志子目录。
   qemu_output_subdir: log/qemu
+  # board_output_subdir：topic 内 board/目标硬件输出子目录。
   board_output_subdir: log/board
+  # evidence_registry_template：topic-local evidence registry 路径。
   evidence_registry_template: "{artifact_layout.topic_test_dir_template}/log/evidence_registry.json"
+  # evidence_registry_script_template：evidence registry 脚本路径。
   evidence_registry_script_template: "{paths.test_root}/script/evidence_registry.py"
+  # evidence_doctor_script_template：Evidence Doctor 脚本路径。
   evidence_doctor_script_template: "{paths.test_root}/script/evidence_doctor.py"
+  # shared_make_subdir：共享 Make 片段目录。
   shared_make_subdir: mk
+  # makefile_name：topic 默认 Makefile 文件名。
   makefile_name: Makefile
+  # board_makefile_name：板卡相关 Makefile 文件名。
   board_makefile_name: board.mk
+  # source_subdir：topic-local test/bench 源码子目录。
   source_subdir: src
+  # test_source_prefix：测试源码文件名前缀。
   test_source_prefix: test
+  # bench_source_prefix：bench 源码文件名前缀。
   bench_source_prefix: bench
+  # source_extension：test/bench 源码扩展名。
   source_extension: cpp
+  # test_source_template：topic-local 测试源码相对路径模板。
   test_source_template: "{artifact_layout.source_subdir}/{artifact_layout.test_source_prefix}_{topic_token}.{artifact_layout.source_extension}"
+  # bench_source_template：topic-local bench 源码相对路径模板。
   bench_source_template: "{artifact_layout.source_subdir}/{artifact_layout.bench_source_prefix}_{topic_token}.{artifact_layout.source_extension}"
+  # sanitize_logs_script_template：日志脱敏脚本路径。
   sanitize_logs_script_template: "{paths.test_root}/script/sanitize_evidence_logs.py"
 
+# 产物发布策略：说明每类产物默认是否提交、是否需要审查、是否必须拆分提交。
 artifact_publication:
+  # default_commit_policy：默认不由 worker 自动提交，除非用户明确要求。
   default_commit_policy: no_commit_without_user_request
+  # require_dirty_isolation：提交/审查前必须说明 dirty worktree 隔离边界。
   require_dirty_isolation: true
+  # classes：按产物类别定义默认策略和提交边界。
   classes:
+    # s0_run_record：S0 偏好冻结/恢复记录。
     s0_run_record:
+      # path_templates：该类别包含的路径模板 key。
       path_templates:
+        # artifact_layout.s0_markdown_template：S0 Markdown 记录。
         - artifact_layout.s0_markdown_template
+        # artifact_layout.s0_structured_template：S0 结构化记录。
         - artifact_layout.s0_structured_template
+      # default_policy：默认 local-only，不提交。
       default_policy: local_only
+      # commit_boundary：默认提交边界。
       commit_boundary: do_not_commit_by_default
+    # phase_docs：phase plan/result/matrix/roadmap。
     phase_docs:
+      # path_templates：phase 文档类别包含的路径模板 key。
       path_templates:
+        # artifact_layout.phase_plan_template：phase plan。
         - artifact_layout.phase_plan_template
+        # artifact_layout.phase_result_template：phase result。
         - artifact_layout.phase_result_template
+        # artifact_layout.optimization_matrix_template：optimization matrix。
         - artifact_layout.optimization_matrix_template
+        # artifact_layout.optimization_roadmap_template：optimization roadmap。
         - artifact_layout.optimization_roadmap_template
+      # default_policy：默认需要 review。
       default_policy: review_required
+      # commit_boundary：review 后可作为 topic test asset 提交。
       commit_boundary: topic_test_asset_after_review
+    # current_handoff：当前交接摘要。
     current_handoff:
+      # path_templates：current handoff 类别包含的路径模板 key。
       path_templates:
+        # artifact_layout.current_handoff_template：Handoff Markdown。
         - artifact_layout.current_handoff_template
+        # artifact_layout.current_handoff_structured_template：Handoff YAML。
         - artifact_layout.current_handoff_structured_template
+      # default_policy：默认需要用户显式授权。
       default_policy: explicit_user_authorization_required
+      # commit_boundary：默认不提交。
       commit_boundary: do_not_commit_by_default
+    # final_topic_docs：长期主题文档和 evaluation。
     final_topic_docs:
+      # path_templates：长期文档类别包含的路径模板 key。
       path_templates:
+        # artifact_layout.topic_doc_template：doc-rvv 主题文档。
         - artifact_layout.topic_doc_template
+        # artifact_layout.evaluation_doc_template：topic-local evaluation。
         - artifact_layout.evaluation_doc_template
+      # default_policy：默认需要 review。
       default_policy: review_required
+      # commit_boundary：证据审查后作为 topic doc 提交。
       commit_boundary: topic_doc_after_evidence_review
+    # evidence_summary：证据摘要/summary artifact。
     evidence_summary:
+      # default_policy：只提交摘要且需要 review。
       default_policy: summary_only_review_required
+      # commit_boundary：被文档引用时可提交。
       commit_boundary: committable_when_referenced_by_docs
+    # sanitized_logs：脱敏日志。
     sanitized_logs:
+      # default_policy：只有用户明确要求时才进入提交候选。
       default_policy: explicit_user_request_required
+      # commit_boundary：脱敏日志应单独提交/审查。
       commit_boundary: separate_commit_after_sanitization
+    # raw_logs：原始日志。
     raw_logs:
+      # default_policy：默认只保留本地。
       default_policy: local_only
+      # commit_boundary：默认永不提交。
       commit_boundary: never_commit_by_default
+    # agent_asset_patch：.agents/AGENTS.md 等 agent 资产改动。
     agent_asset_patch:
+      # path_roots：agent asset patch 允许覆盖的根路径。
       path_roots:
+        # .agents/skills：技能和 reference。
         - .agents/skills
+        # .agents/knowledge：知识索引/经验库。
         - .agents/knowledge
+        # .agents/config：配置默认值和说明。
         - .agents/config
+        # AGENTS.md：仓库 agent 入口说明。
         - AGENTS.md
+      # default_policy：默认需要单独 review。
       default_policy: separate_review_required
+      # commit_boundary：必须与 topic 产物拆分。
       commit_boundary: separate_from_topic_artifacts
 
+# 板卡/目标硬件策略：只记录环境变量名，私有值放本机 override 或环境中。
 board:
+  # target_env_var：板卡 target 标识的环境变量名。
   target_env_var: PCL_RVV_BOARD_TARGET
+  # user_env_var：板卡 SSH 用户名的环境变量名。
   user_env_var: PCL_RVV_BOARD_USER
+  # host_env_var：板卡主机/IP 的环境变量名。
   host_env_var: PCL_RVV_BOARD_HOST
+  # remote_root_env_var：板卡远端工作目录根路径的环境变量名。
   remote_root_env_var: PCL_RVV_BOARD_REMOTE_ROOT
+  # label_env_var：板卡标签/环境标识的环境变量名。
   label_env_var: PCL_RVV_BOARD_LABEL
+  # store_private_values_in_local_override：私有板卡值是否只允许放 local override。
   store_private_values_in_local_override: true
