@@ -12,8 +12,8 @@
 
 #pragma once
 
-#include "transformation_estimation_point_to_plane_lls_reductions.hpp"
-#include "transformation_estimation_point_to_plane_lls_row_sources.hpp"
+#include "teptpl_reductions.hpp"
+#include "teptpl_row_sources.hpp"
 
 #include <pcl/correspondence.h>
 #include <pcl/point_cloud.h>

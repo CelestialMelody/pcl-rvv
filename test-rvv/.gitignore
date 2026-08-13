@@ -19,6 +19,9 @@
 **/log/filtered_*.log
 **/log/analyze_*.log
 
+# TEPTPL evidence registry; documented digest state only.
+!registration/transformation_estimation_point_to_plane_lls/log/evidence_registry.json
+
 # TEPTPLW evidence allowlist; documented files only.
 !registration/transformation_estimation_point_to_plane_lls_weighted/log/qemu/run_test_source_indices_std.log
 !registration/transformation_estimation_point_to_plane_lls_weighted/log/qemu/run_test_source_indices_rvv.log

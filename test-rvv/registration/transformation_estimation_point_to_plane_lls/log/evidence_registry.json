@@ -1,0 +1,154 @@
+{
+  "files": {
+    "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_rvv.log": {
+      "backend": "qemu",
+      "case_filter": "all",
+      "doc_refs": [
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/phases/README.zh.md",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/transformation_estimation_point_to_plane_lls-evaluation.zh.md",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/phases/030-legacy-cleanup-and-evidence-registry/result.zh.md"
+      ],
+      "evidence_role": "correctness_log",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786600917,
+      "related": {},
+      "run_label": "qemu-correctness-std-rvv-phase-030",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786600865332366517,
+        "path": "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_rvv.log",
+        "sha256": "sha256:f72862c0926b2d851a38eb48586e02e08094f929138bd22284796bec2fdc82c4",
+        "size": 9061
+      },
+      "target": "run_test"
+    },
+    "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_std.log": {
+      "backend": "qemu",
+      "case_filter": "all",
+      "doc_refs": [
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/phases/README.zh.md",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/transformation_estimation_point_to_plane_lls-evaluation.zh.md",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/phases/030-legacy-cleanup-and-evidence-registry/result.zh.md"
+      ],
+      "evidence_role": "correctness_log",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786600917,
+      "related": {},
+      "run_label": "qemu-correctness-std-rvv-phase-030",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786600863019383727,
+        "path": "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_std.log",
+        "sha256": "sha256:a595a39ef273d18271f0bceb48803909fd2157e0ff180c722e1a289811b6d94d",
+        "size": 9061
+      },
+      "target": "run_test"
+    },
+    "test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md": {
+      "backend": "board",
+      "case_filter": "block-fused-formula",
+      "doc_refs": [
+        "doc-rvv/registration/transformation_estimation_point_to_plane_lls-RVV.zh.md",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/transformation_estimation_point_to_plane_lls-evaluation.zh.md",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/phases/README.zh.md"
+      ],
+      "evidence_role": "diagnostic_performance_summary",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786600746,
+      "related": {},
+      "run_label": "block-fused-formula-5run",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1785324204566443739,
+        "path": "test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md",
+        "sha256": "sha256:0bf3e1569b217baa0269caff120f7eb7024a3dd6c62d21e0d0303abbe3bbe96d",
+        "size": 4055
+      },
+      "target": "analyze_bench_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md": {
+      "backend": "board",
+      "case_filter": "production-dispatch",
+      "doc_refs": [
+        "doc-rvv/registration/transformation_estimation_point_to_plane_lls-RVV.zh.md",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/transformation_estimation_point_to_plane_lls-evaluation.zh.md",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/phases/README.zh.md"
+      ],
+      "evidence_role": "post_production_performance_summary",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786600738,
+      "related": {},
+      "run_label": "production-dispatch-generic-representative-5run",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1785324204566443739,
+        "path": "test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md",
+        "sha256": "sha256:9737a1428948b20bd7a493ea1e8fb1b0c6bd2ee30e4f2688eb65908c120efb04",
+        "size": 5522
+      },
+      "target": "analyze_bench_repeated"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "production-dispatch",
+      "evidence_role": "post_production_performance_summary",
+      "files": [
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md"
+      ],
+      "recorded_at_epoch": 1786600738,
+      "run_label": "production-dispatch-generic-representative-5run",
+      "target": "analyze_bench_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "block-fused-formula",
+      "evidence_role": "diagnostic_performance_summary",
+      "files": [
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md"
+      ],
+      "recorded_at_epoch": 1786600746,
+      "run_label": "block-fused-formula-5run",
+      "target": "analyze_bench_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "all",
+      "evidence_role": "correctness_log",
+      "files": [
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786600764,
+      "run_label": "qemu-correctness-std-rvv",
+      "target": "run_test"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "all",
+      "evidence_role": "correctness_log",
+      "files": [
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786600892,
+      "run_label": "qemu-correctness-std-rvv-phase-030",
+      "target": "run_test"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "all",
+      "evidence_role": "correctness_log",
+      "files": [
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_point_to_plane_lls/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786600917,
+      "run_label": "qemu-correctness-std-rvv-phase-030",
+      "target": "run_test"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1786600917
+}

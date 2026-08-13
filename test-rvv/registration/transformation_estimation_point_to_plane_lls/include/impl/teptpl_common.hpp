@@ -45,8 +45,9 @@ struct NormalEquation {
 };
 
 // 这个函数复刻 production 的有效点判断，供标量参考链路和测试断言共用。
+template <typename PointSource, typename PointTarget>
 inline bool
-finite_point_and_normal(const pcl::PointNormal& source, const pcl::PointNormal& target)
+finite_point_and_normal(const PointSource& source, const PointTarget& target)
 {
   return std::isfinite(source.x) && std::isfinite(source.y) &&
          std::isfinite(source.z) && std::isfinite(target.x) &&
@@ -187,9 +188,10 @@ solve_normal_equation(NormalEquation eq)
 }
 
 // 全云标量参考链路，用来验证 test-rvv 诊断是否复刻当前 production 公式。
+template <typename PointSource, typename PointTarget>
 inline NormalEquation
-accumulate_std_full(const pcl::PointCloud<pcl::PointNormal>& source,
-                    const pcl::PointCloud<pcl::PointNormal>& target,
+accumulate_std_full(const pcl::PointCloud<PointSource>& source,
+                    const pcl::PointCloud<PointTarget>& target,
                     AccumulationStats* stats = nullptr)
 {
   NormalEquation eq;

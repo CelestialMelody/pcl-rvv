@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "transformation_estimation_point_to_plane_lls_common.hpp"
+#include "teptpl_common.hpp"
 
 #include <pcl/rvv_point_load.h>
 

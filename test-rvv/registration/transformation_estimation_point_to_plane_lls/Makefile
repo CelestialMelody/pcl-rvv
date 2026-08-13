@@ -12,14 +12,19 @@ ANALYZE_REPORT := log/analyze_transformation_estimation_point_to_plane_lls.log
 TARGET_BENCH     := bench_transformation_estimation_point_to_plane_lls
 TARGET_BENCH_STD := bench_transformation_estimation_point_to_plane_lls_std
 TARGET_BENCH_RVV := bench_transformation_estimation_point_to_plane_lls_rvv
-SRCS_BENCH       := bench_transformation_estimation_point_to_plane_lls.cpp
+SRCS_BENCH       := src/bench_teptpl.cpp
 
 TARGET_TEST     := test_transformation_estimation_point_to_plane_lls
 TARGET_TEST_STD := test_transformation_estimation_point_to_plane_lls_std
 TARGET_TEST_RVV := test_transformation_estimation_point_to_plane_lls_rvv
-SRCS_TEST       := test_transformation_estimation_point_to_plane_lls.cpp
+SRCS_TEST       := \
+	src/test_teptpl_public_semantics.cpp \
+	src/test_teptpl_candidates.cpp \
+	src/test_teptpl_production_direct.cpp \
+	src/test_teptpl_row_sources.cpp
 
 INCLUDES ?= \
+	-I$(CURDIR)/include \
 	-I$(PCL_SOURCE_ROOT)/common/include \
 	-I$(PCL_SOURCE_ROOT)/registration/include \
 	-I$(PCL_SOURCE_ROOT)/test/include \

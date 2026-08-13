@@ -6,6 +6,8 @@
 
 专项目录：`test-rvv/registration/transformation_estimation_point_to_plane_lls/`。
 
+主归属路径：`test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/transformation_estimation_point_to_plane_lls-evaluation.zh.md`。topic 根目录下的旧同名文件已经删除；当前不保留 legacy pointer（旧路径指针）。
+
 当前 EvidenceDecision：
 
 ```text
@@ -13,6 +15,18 @@ production-candidate/full-cloud-f32-aos-layout-gated-source-xyz-target-xyznormal
 ```
 
 本评估文档只负责决策审计。长期实现说明、算法解释和证据边界见 `doc-rvv/registration/transformation_estimation_point_to_plane_lls-RVV.zh.md`。
+跨阶段候选搜索空间和下一 phase 恢复条件见 `test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/optimization-roadmap.zh.md`。
+
+Topic-local doc suite（主题本地文档套件）已在 Phase 040 补齐，用于承接测试、bench、证据白名单和代码地图：
+
+| 读者问题 | 主归属 |
+| --- | --- |
+| 目录导航、常用命令、可提交证据 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/README.zh.md` |
+| 测试类型、运行入口和覆盖矩阵 | `doc/testing-overview.zh.md` |
+| 每个 gtest 的输入、断言和证明边界 | `doc/correctness-tests.zh.md` |
+| bench label、case-filter、checksum、QEMU/board/asm/registry 边界 | `doc/benchmark-and-evidence.zh.md` |
+| 优化方式到代码、target 和证据的索引 | `doc/optimization-evidence.zh.md` |
+| 聚合入口、内部头、test/bench 源和 production helper 代码地图 | `doc/test-support-code-map.zh.md` |
 
 ## 函数级结论
 
@@ -75,22 +89,36 @@ QEMU timing 不作为性能结论。QEMU 只用于 correctness、checksum、case
 | fallback | 不适用。 | gate 失败回标量 helper。 |
 | debug loss | 标量 helper 在 debug verbosity 下会复算并打印 loss。 | RVV fast path 成功后提前返回，当前不打印该 debug loss。 |
 
-默认 production hot path 现在只有 fused-formula block。它保留 current block 的 A/B/C/N reduction 组织，但把 `a/b/c` 改为 `vfmsac` 形态，把 `d` 改为 `nx*(dx-sx) + ny*(dy-sy) + nz*(dz-sz)` 后用 `vfmacc` 累加，因此改变逐点计算树。current multiply/add/subtract block 只保留在 `test_support/` 作为 diagnostic A/B、benchmark 和历史证据 baseline，不作为 production selector 或长期 production 可配置行为。
+默认 production hot path 现在只有 fused-formula block。它保留 current block 的 A/B/C/N reduction 组织，但把 `a/b/c` 改为 `vfmsac` 形态，把 `d` 改为 `nx*(dx-sx) + ny*(dy-sy) + nz*(dz-sz)` 后用 `vfmacc` 累加，因此改变逐点计算树。current multiply/add/subtract block 只保留在 `include/impl/teptpl_reductions.hpp` 作为 test-rvv diagnostic A/B、benchmark 和历史证据 baseline，不作为 production selector 或长期 production 可配置行为。
 
 `FullCloudBlockFusedFormulaNearCancellationMatchesStdWithinBudget` 已加入 test-rvv。它把 source/target 推到大绝对坐标、保留小相对位移，并叠加 invalid lane 和 scale-stress 条件，以约束 d 公式里的近似抵消区间。production-facing fused tests 还覆盖 `PointNormal -> PointNormal`、`PointXYZ -> PointNormal`、`PointXYZ -> PointXYZINormal`、小规模 fallback、layout gate 失败 fallback 和 `Scalar=double` fallback。
 
-板卡 diagnostic direct 5-run 摘要索引为 `output/board/block_fused_formula_5run_summary.md`。最终 production-dispatch current vs fused 5-run 摘要索引为 `output/board/production_dispatch_generic_representative_5run_summary.md`。fused production-dispatch 三类代表点型 64K/256K median 分别为 `2.80x/2.82x`、`3.13x/3.15x`、`3.11x/3.14x`，min 均稳定正向；current baseline 在 256K generic rows 中出现 `1.33x` 和 `1.23x` 低谷。fused-formula 因此替换 current baseline 成为默认 production hot path。
+板卡 diagnostic direct 5-run 摘要索引为 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md`。最终 production-dispatch current vs fused 5-run 摘要索引为 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md`。fused production-dispatch 三类代表点型 64K/256K median 分别为 `2.80x/2.82x`、`3.13x/3.15x`、`3.11x/3.14x`，min 均稳定正向；current baseline 在 256K generic rows 中出现 `1.33x` 和 `1.23x` 低谷。fused-formula 因此替换 current baseline 成为默认 production hot path。
 
 ## 测试 Inventory
 
 | 测试组 | 测试 | 保留理由 |
 | --- | --- | --- |
-| production direct | `ProductionFullCloudPublicOverloadMatrixMatchesStdWithinBudget`、`ProductionFullCloudNormalEquationMatchesStdWithinBudget`、`ProductionFullCloudInvalidLanesMatchStdWithinBudget`、`ProductionFullCloudScaleStressMatchesStdWithinBudget`、generic `PointXYZ -> PointNormal` 和 `PointXYZ -> PointXYZINormal` case | 默认 fused production correctness 证据，覆盖 public overload、`accepted_points`、`ATA/ATb`、matrix、invalid lane、数值压力和 generic source/target layout gate。 |
+| production direct | `ProductionFullCloudPublicOverloadMatrixMatchesStdWithinBudget`、`ProductionFullCloudNormalEquationMatchesStdWithinBudget`、`ProductionFullCloudInvalidLanesMatchStdWithinBudget`、`ProductionFullCloudScaleStressMatchesStdWithinBudget`、generic `PointXYZ -> PointNormal` 和 `PointXYZ -> PointXYZINormal` case | 默认 fused production correctness 证据，覆盖 public overload、`accepted_points`、`ATA/ATb`、matrix、invalid lane、数值压力和 generic source/target layout gate；expected normal-equation 来自 test-only scalar reference，不再依赖 production detail 标量 helper。 |
 | fallback | `ProductionFullCloudSmallInputFallsBackToScalar`、`ProductionFullCloudScalarDoubleFallbackSmoke`、`SmallInputFallsBackForIsolatedSizeGate` | 保护小规模和 `Scalar=double` 不误命中 RVV。 |
 | RVV-only diagnostic | `FullCloudBlockReduction*`、`InvalidLaneMaskMatchesStd` | 保护当前 block-reduction math、invalid lane 和 reduction-tree 预算。 |
 | fused-formula production-facing | `FullCloudBlockFusedFormulaReductionMatchesStdWithinBudget`、`FullCloudBlockFusedFormulaNearCancellationMatchesStdWithinBudget`、`ProductionFusedFullCloud*` tests | 保护 fused-formula direct helper 与默认 production path 的普通样本、near-cancellation、三类代表点型和 fallback。 |
 | historical diagnostic | std/public 对拍、source-indexed、dual-indices、correspondences、trusted-dense、fused、grouped tests | 解释历史方案和未扩展范围，防止未来误把旧诊断收益当 production 证据。 |
-| bench-only | `bench_transformation_estimation_point_to_plane_lls.cpp` 中 component-only、public-entry-shaped 和 historical rows | 用于归因或形态复核，不单独决定 production。 |
+| bench-only | `include/impl/teptpl_bench_*.hpp` 中 component-only、public-entry-shaped 和 historical rows；`src/bench_teptpl.cpp` 只是薄入口。 | 用于归因或形态复核，不单独决定 production。 |
+
+## 测试框架布局审计
+
+当前 topic 采用 `src/` 和 `include/` 的测试框架布局，并在 Phase 040 补齐 topic-local doc suite。
+它采用 weighted sibling 的结构质量 bar，但不机械复制 weighted 的算法 helper、证据数字或 production 结论：
+
+| 审计项 | 当前决策 | 理由 |
+| --- | --- | --- |
+| test / bench 源码位置 | adopted：四个 `src/test_teptpl_*.cpp` 与薄 `src/bench_teptpl.cpp`。 | Phase 050 已把单个长 gtest 源拆成 public semantics、candidates、production direct 和 row sources；bench CLI/registry 迁到 `include/impl`，薄入口保留 target 名。 |
+| 长 topic 缩写 token | adopted：`teptpl`。 | 该 token 只用于 test-rvv 文件名和聚合入口，避免继续使用超长源码文件名；production 符号和 topic 名不变。 |
+| 聚合入口 | adopted：`include/teptpl.h`、`include/test_teptpl.h`、`include/bench_teptpl.h`；旧 `test_support_transformation_estimation_point_to_plane_lls.hpp` 已删除。 | 共用入口、gtest-only 入口和 bench-only 入口分层后，bench 不再引入 gtest helper；恢复检查未发现源码、Make target 或脚本依赖旧头，因此不再保留 compatibility alias（兼容别名）。 |
+| topic-local doc suite | adopted：README、testing overview、correctness tests、benchmark/evidence、optimization evidence、test-support code map。 | 当前 topic 有 production dispatch、fallback、多个 row source diagnostic、多个 candidate family、board summary 和 registry；只靠 evaluation 大文档会影响恢复和审查。 |
+| `include/impl` 内部布局 | adopted。 | Phase 050 已把常规测试支撑内部头迁到 `include/impl/teptpl_*.hpp`，并新增 gtest-only 与 bench-only 内部 helper；旧 `test_support/` 不再作为当前 include 路径。 |
+| sibling 结构经验 | adopted as structure quality bar（作为结构质量 bar 采用）。 | weighted sibling 的 `src/include` 结构证明该模块适合短 token 和聚合入口；source-indexed production 方案、证据数字和算法 helper 不迁移到当前 topic。 |
 
 本轮没有删除、合并或重命名测试。原因是现有测试分别保护 reduction-tree、invalid lane、`accepted_points`、`ATA/ATb`、matrix、fallback 和 public overload；没有发现入口形态、输入构造、断言和 adversarial 条件完全重复的 case。
 
@@ -140,6 +168,40 @@ test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/
 
 若未来选择提交日志，必须先使用 topic Makefile 的 `sanitize_output_logs` / `check_output_logs_sanitized`，或 `test-rvv/script/sanitize_evidence_logs.py --check <logs>`。
 
+Phase 030 已接入 topic-local evidence registry（证据登记表）：
+
+```text
+test-rvv/registration/transformation_estimation_point_to_plane_lls/log/evidence_registry.json
+```
+
+registry 当前登记两类证据：被长期文档引用的 board summary-only artifact（板卡摘要证据）和本机
+QEMU correctness log。恢复或提交前可用 `test-rvv/script/evidence_registry.py check` 检查 hash、
+文档引用和是否有未登记覆盖。registry 不改变性能结论，也不把 QEMU timing 写成性能证据。
+bench label、日志提交边界和 registry check 命令的主归属现在是
+`test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/benchmark-and-evidence.zh.md`。
+
+## Traceability Map
+
+Traceability Map（可追踪性地图）用于让 reviewer 从决策文档跳到关键源码、测试、bench 和证据摘要。它只列当前 EvidenceDecision 依赖的关键对象，不枚举每个小 helper。
+
+| 符号 / 文件 | 层级 | 作用 | 调用者 / 上游入口 | 被调用者 / 下游消费者 | 证据角色 | 位置 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `TransformationEstimationPointToPlaneLLS::estimateRigidTransformation(cloud_src, cloud_tgt, matrix)` | production public entry | full-cloud public overload，先尝试 RVV gate，失败后回标量。 | registration 上游调用方。 | `estimatePointToPlaneLLSFullCloudRVV` 或 `estimateRigidTransformationFullCloudStd`。 | production boundary（生产边界）和 fallback coverage（回退路径覆盖）。 | `registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls.hpp` |
+| `estimatePointToPlaneLLSFullCloudRVV` | production dispatch / fallback | `__RVV10__` 下的窄 RVV 尝试层；只覆盖 `Scalar=float` 和 f32 AoS layout gate。 | full-cloud public overload。 | fused-formula RVV estimate helper。 | dispatch gate（分流验收）和 unsupported-scope boundary（未覆盖范围边界）。 | `registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls.hpp` |
+| `buildPointToPlaneLLSFullCloudBlockRVVFusedFormula` | production RVV helper | 以 A/B/C/N block groups 构造 point-to-plane normal-equation（法方程）。 | fused-formula estimate helper。 | Eigen solve 和 matrix construct。 | RVV hot path、asm attribution（反汇编归属）和 numerical budget（数值预算）。 | `registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls.hpp` |
+| `estimateRigidTransformationFullCloudStd` | production Std helper | full-cloud fallback wrapper，继续使用原 `ConstCloudIterator` 标量 helper。 | full-cloud public overload。 | 原 scalar transformation estimate helper。 | fallback semantic preservation（回退语义保持）。 | `registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls.hpp` |
+| `include/teptpl.h` | test support aggregator | test-rvv 共用聚合入口，汇总 reference、RVV math、row source、reduction 和 candidate helper。 | `include/test_teptpl.h`、`include/bench_teptpl.h`。 | `include/impl/teptpl_candidates.hpp` 等内部头。 | reviewer navigation（审查导航）和 test asset boundary（测试资产边界）。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/include/teptpl.h` |
+| `include/test_teptpl.h` | gtest aggregator | gtest-only 聚合入口，加入 fixtures、assertions 和 production helper bridge。 | 四个 `src/test_teptpl_*.cpp`。 | `include/impl/teptpl_test_helpers.hpp`。 | correctness gate（正确性验收）入口分层。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/include/test_teptpl.h` |
+| `include/bench_teptpl.h` | bench aggregator | bench-only 聚合入口，加入 fixture、component helper 和 case registry。 | `src/bench_teptpl.cpp`。 | `include/impl/teptpl_bench_cases.hpp`。 | bench wrapper boundary（性能测试包装边界）。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/include/bench_teptpl.h` |
+| `support::accumulate_std_full` | diagnostic reference | 测试专用 full-cloud scalar reference，复刻当前 production 公式用于 expected normal-equation。 | production direct tests 和 RVV helper 对拍。 | `support::NormalEquation` assertions。 | correctness reference（正确性参考链路），不属于 production fallback。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/include/impl/teptpl_common.hpp` |
+| `ProductionFullCloud*` tests | production direct tests | 覆盖 public overload、`accepted_points`、`ATA/ATb`、matrix、invalid lane、scale stress 和 fallback。 | `make ... run_test_std` / `run_test_rvv`。 | gtest assertions 和 QEMU logs。 | correctness gate（正确性验收）和 fallback coverage。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/src/test_teptpl_production_direct.cpp` |
+| `production-dispatch full-cloud ...` bench rows | bench wrapper | std/RVV 两侧都调用真实 public full-cloud overload 的 production-dispatch A/B。 | `run_bench_compare --case-filter production-dispatch` 和板卡 target。 | analyze scripts / board summaries。 | board performance（板卡性能）和 checksum/log-shape evidence（校验和 / 日志形状证据）。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/include/impl/teptpl_bench_cases.hpp` |
+| `production_dispatch_generic_representative_5run_summary.md` | evidence output summary | 三类代表点型 repeated board summary，记录命令、case filter、values 和 analyzer hash。 | fetched board analyze logs。 | topic docs、evaluation 和 phase docs。 | current performance truth（当前性能事实）和 summary-only evidence（摘要证据）。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md` |
+| `log/evidence_registry.json` | evidence registry | 记录 summary-only evidence 和 QEMU correctness log 的 size/hash/doc refs，用于恢复和提交前检查 freshness（新鲜度）。 | `test-rvv/script/evidence_registry.py record`。 | `test-rvv/script/evidence_registry.py check`、phase result 和 reviewer。 | freshness guard（新鲜度门禁）；不替代 Evidence Doctor 或性能结论。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/log/evidence_registry.json` |
+| `doc/phases/optimization-matrix.zh.md` | phase optimization matrix | 记录 candidate family、row source、test、bench、board、asm 和 Evidence Doctor 状态。 | phase plan/result。 | Handoff Packet 和 roadmap。 | phase recovery（阶段恢复）和 decision audit（决策审计）。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/phases/optimization-matrix.zh.md` |
+| `doc/optimization-roadmap.zh.md` | optimization roadmap | 记录 helper shape review、registry adoption、test split、row-source follow-up 等恢复条件。 | phase loop 恢复。 | 下一 phase plan。 | unblocked next action index（未阻塞下一步索引）。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/optimization-roadmap.zh.md` |
+| topic-local doc suite | documentation index | README、测试体系、gtest 语义、bench/evidence、optimization evidence 和 code map。 | Phase 040 doc-suite parity。 | reviewer 和下一轮 worker。 | reviewer navigation（审查导航）和 evidence whitelist（证据白名单）。 | `test-rvv/registration/transformation_estimation_point_to_plane_lls/README.zh.md`、`doc/*.zh.md` |
+
 ## 验证约定
 
 本轮审计使用以下本地验证命令：
@@ -154,7 +216,30 @@ make -C test-rvv/registration/transformation_estimation_point_to_plane_lls fetch
 python3 test-rvv/script/analyze_bench_repeated.py <five fetched analyze_bench_compare.log files>
 ```
 
-板卡 5-run 使用 summary-only 策略：每轮 fetch 后只把脱敏摘要数字写入文档和 summary artifact，不提交 raw run 目录。当前 production stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md`，其中记录的 `<local-raw-archive>/production-dispatch-current` 和 `<local-raw-archive>/production-dispatch-fused` 是当轮本机临时归档，不是长期依赖；长期审计以 summary artifact 的 values、命令和 analyzer hash 为准。fused-formula direct diagnostic A/B 的 stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md`。文档、输出清理、注释整理或不改变 RVV hot path/bench 逻辑的入口 wrapper 重构不要求重跑板卡。若后续修改 RVV hot path 指令逻辑、bench case 或 production dispatch gate，则需要补反汇编/QEMU bench，并按变更风险判断是否复跑板卡。
+本轮 reference/production-detail 边界清理后已重跑：
+
+```text
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls run_test_std
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls run_test_rvv
+```
+
+两侧 QEMU correctness 都是 40/40 通过。该改动未改变 RVV hot path 指令逻辑、bench case 或 production dispatch gate，因此不要求重跑板卡。
+
+Phase 010 测试框架布局迁移后已重跑：
+
+```text
+git diff --check
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls run_test_std
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls run_test_rvv
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls USE_PCL_RVV10=0 TARGET_BENCH=bench_transformation_estimation_point_to_plane_lls_std build/riscv/bench_transformation_estimation_point_to_plane_lls_std
+make -C test-rvv/registration/transformation_estimation_point_to_plane_lls dump_bench_rvv
+```
+
+std/RVV QEMU correctness 仍为 40/40 通过；std bench compile smoke 和 `dump_bench_rvv`
+只作为 bench compile smoke（编译冒烟）与路径形状检查，证明新 bench 聚合入口和薄
+`src/bench_teptpl.cpp` 可以在 std/RVV 两侧编译，RVV 侧还能生成反汇编。它们没有运行 bench，也不刷新性能结论。
+
+板卡 5-run 使用 summary-only 策略：每轮 fetch 后只把脱敏摘要数字写入文档和 summary artifact，不提交 raw run 目录。当前 production stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md`，其中记录的 `<local-raw-archive>/production-dispatch-current` 和 `<local-raw-archive>/production-dispatch-fused` 是当轮本机临时归档，不是长期依赖；长期审计以 summary artifact 的 values、命令和 analyzer hash 为准。fused-formula direct diagnostic A/B 的 stable index 是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/block_fused_formula_5run_summary.md`。文档、输出清理、注释整理、不改变 RVV hot path/bench 逻辑的入口 wrapper 重构，或本轮这种 reference/test-support 边界清理不要求重跑板卡。若后续修改 RVV hot path 指令逻辑、bench case 或 production dispatch gate，则需要补反汇编/QEMU bench，并按变更风险判断是否复跑板卡。
 
 ## Production 接入判断
 
@@ -174,8 +259,8 @@ python3 test-rvv/script/analyze_bench_repeated.py <five fetched analyze_bench_co
 | 风险 | 当前为什么未闭合 | 后续闭合条件 |
 | --- | --- | --- |
 | debug loss 日志差异 | RVV fast path 成功后提前 `return`，绕过原 scalar helper 的 `PCL_DEBUG` loss 复算。默认矩阵输出不变，但 debug verbosity 下日志行为不同。 | 若要求日志等价，需要抽出 debug loss helper 或在 RVV fast path 后复刻调试计算，并重跑专项测试。 |
-| production helper size / duplication | 公开入口已收束为 `*_RVV` 尝试和 `*_Std` fallback，但 block A/B/C/N 组仍重复 load/formula；helper 规模和重复度仍是 reviewer 审查项。 | 合入前若审查要求，可压缩 helper 或拆清 Std/RVV/reference 边界，并重跑 correctness。 |
-| `buildPointToPlaneLLSFullCloudStd` / solve / matrix helper 职责 | 这些 helper 当前服务 production-facing tests 和 RVV 对拍，也与 production 源码同文件共存。 | 审查时需要确认它们作为 reference/test 支撑是否可接受；若不接受，应移动或收窄职责后重跑测试。 |
+| production helper size / duplication | full-cloud scalar normal-equation reference 位于 `test-rvv/registration/transformation_estimation_point_to_plane_lls/include/impl/teptpl_common.hpp`，production fallback 仍走 `ConstCloudIterator`。但 block A/B/C/N 组仍重复 load/formula；helper 规模和重复度仍是 reviewer 审查项。 | 合入前若审查要求，可压缩 RVV block helper，并重跑 correctness。 |
+| test reference / production detail 边界 | production-facing normal-equation tests 现在用 test-only scalar reference 作为 expected，仅在 RVV build 下把 production RVV helper 输出转换为 test-support equation 对拍。 | 若后续新增 production detail helper 给测试使用，应先确认它是否参与 runtime fallback；不参与时优先放在 test-support。 |
 | generic board variability | fused-formula 三类 production-dispatch 板卡 5-run 都稳定正向；current block 的 256K 低谷已作为替换依据之一记录在 summary artifact。 | 若 reviewer 要求更多泛型目标证据，可追加 repeated runs 或拆分板卡负载/调度波动；当前不外推到未上板点型。 |
 | gate-allowed point-type coverage | 当前 production gate 允许更多 source xyz / target xyz+normal f32 AoS 组合，但板卡只覆盖三类代表组合。 | 若新增点型实例进入 release 风险面，需要补该点型的 production direct、asm 和板卡抽样，或临时收窄 production gate。 |
 | fused-formula 数值树 | 默认 hot path 改为 fused-formula 后，逐点 `a/b/c/d` 的舍入树和标量/current block 不同；当前 tests 和板卡 A/B 在预算内通过，但不承诺 bitwise 等价。 | 若扩大点型、规模、Scalar 或公式结构，需要重新做 near-cancellation、scale-stress、production-dispatch A/B 和 asm attribution。 |

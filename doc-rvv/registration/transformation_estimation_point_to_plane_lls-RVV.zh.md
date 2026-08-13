@@ -8,7 +8,7 @@
 production-candidate/full-cloud-f32-aos-layout-gated-source-xyz-target-xyznormal-float-rvv-fused-formula-block-dispatch-representative-pointtypes
 ```
 
-当前 production path（生产路径）覆盖全云顺序扫描（full-cloud，source 和 target 按相同下标一一对应）公开 overload，并把原 exact `PointNormal -> PointNormal, float` gate 扩成 f32 AoS layout-gated（字段为 float32、结构数组字节偏移可安全读取的布局 gate）：source 侧只要求 `x/y/z` 单个 `float` 字段，target 侧要求 `x/y/z/normal_x/normal_y/normal_z` 单个 `float` 字段，输出 `Scalar` 仍只覆盖 `float`。点字段 float32 和输出 `Scalar=float` 是两条不同边界。该候选默认只走 fused-formula production block；current block 只保留在 `test_support/` 作为 diagnostic baseline，fallback 仍回原 `ConstCloudIterator` 标量路径。
+当前 production path（生产路径）覆盖全云顺序扫描（full-cloud，source 和 target 按相同下标一一对应）公开 overload，并把原 exact `PointNormal -> PointNormal, float` gate 扩成 f32 AoS layout-gated（字段为 float32、结构数组字节偏移可安全读取的布局 gate）：source 侧只要求 `x/y/z` 单个 `float` 字段，target 侧要求 `x/y/z/normal_x/normal_y/normal_z` 单个 `float` 字段，输出 `Scalar` 仍只覆盖 `float`。点字段 float32 和输出 `Scalar=float` 是两条不同边界。该候选默认只走 fused-formula production block；current block 只保留在 test-rvv 的 `include/impl/teptpl_reductions.hpp` 作为 diagnostic baseline，fallback 仍回原 `ConstCloudIterator` 标量路径。
 
 `representative-pointtypes` 表示板卡证据覆盖了 gate 允许空间中的代表点型组合，不表示每一种满足 layout gate 的点型都已经逐类型上板。旧 exact `PointNormal -> PointNormal` 是当前 generic candidate 的子集。新增板卡 5-run 覆盖 `PointNormal -> PointNormal`、`PointXYZ -> PointNormal` 和 `PointXYZ -> PointXYZINormal` 三类 production-dispatch case；其它 gate-allowed f32 AoS 点型组合依靠 traits/layout gate、QEMU correctness 和 fallback 审查，不具备逐类型板卡结论。source 单侧索引（source-indexed）、双侧索引（dual-indices）、对应关系索引（correspondences）、weighted LLS 和 `Scalar=double` 仍不在本轮范围。
 
@@ -24,6 +24,19 @@ production patch 位于 `registration/include/pcl/registration/impl/transformati
 | 板卡 production dispatch | fused-formula 三类 full-cloud production-dispatch case 都有 5-run 正向 speedup；见第 9 节摘要和`test-rvv/registration/transformation_estimation_point_to_plane_lls/output/board/production_dispatch_generic_representative_5run_summary.md`。 | 只覆盖三类代表点型组合；不外推到所有 gate-allowed 点型、indexed/correspondences/weighted/`Scalar=double`。 |
 
 Evidence policy 是 `summary-only`：长期文档保留命令、摘要数字、证据边界和清理策略，不提交大批 raw run 目录。顶层 tracked output 日志会被工具覆盖，不作为稳定证据来源；稳定证据索引使用 `output/board/production_dispatch_generic_representative_5run_summary.md`。
+当前 topic-local evidence registry（证据登记表）位于
+`test-rvv/registration/transformation_estimation_point_to_plane_lls/log/evidence_registry.json`；
+它记录 summary-only 证据和 QEMU correctness log 的 digest（摘要指纹），用于恢复时检查是否有未登记覆盖或 stale 文档。
+
+函数级决策审计、测试 inventory、bench 审计和 Traceability Map（可追踪性地图）以
+`test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/transformation_estimation_point_to_plane_lls-evaluation.zh.md`
+为主归属。跨阶段候选搜索空间和恢复条件以
+`test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/optimization-roadmap.zh.md`
+为主归属。
+测试类型、gtest 名称、bench label、evidence registry check 和测试支撑代码地图已拆到 topic-local doc suite：
+`test-rvv/registration/transformation_estimation_point_to_plane_lls/README.zh.md`、
+`doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、
+`doc/optimization-evidence.zh.md` 和 `doc/test-support-code-map.zh.md`。
 
 ## 正确性与高效性证据链
 
@@ -76,7 +89,6 @@ production patch 拆出了几个窄 helper，用来让公开入口保持短 disp
 
 | helper                                       | 作用                                                                                                  |
 | -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `buildPointToPlaneLLSFullCloudStd`         | full-cloud 模板标量 normal-equation reference，供 production-facing tests 对拍。                      |
 | `buildPointToPlaneLLSFullCloudBlockRVVFusedFormula` | 默认 f32 AoS layout-gated fused-formula RVV block-reduction normal-equation 构造。            |
 | `estimatePointToPlaneLLSFullCloudBlockRVVFusedFormula` | fused block 构造法方程后复用求解和矩阵构造。                                              |
 | `estimatePointToPlaneLLSFullCloudRVV`      | 仅在`__RVV10__` 下定义的 RVV 尝试层；`Scalar=float` 且 layout gate 命中时只尝试 fused-formula。 |
@@ -136,7 +148,7 @@ block-reduction 的目标是避免早期 fused-reduction 同时持有 27 个 vec
 
 1. 它重复 load/formula，以换取较少的同时活跃 accumulator 和更稳定的寄存器压力。
 2. 它改变 reduction tree。标量路径按 row 顺序用 double 累加；RVV 路径先在 float vector partial sums 中规约，再写入 double normal-equation。因此测试使用 `ATA/ATb` 范数预算和 matrix 预算，不承诺 bitwise 等价。
-3. 默认 production 已采用 fused-formula 逐点树；current block 只保留在 `test_support/` 作为 diagnostic baseline。`ATA/ATb` 乘积累加阶段仍使用 `vfmacc`。fused 与 current 的差异集中在逐点 `a/b/c/d` 计算树，不是 API 或 layout gate 的扩大。
+3. 默认 production 已采用 fused-formula 逐点树；current block 只保留在 test-rvv 的 `include/impl/teptpl_reductions.hpp` 作为 diagnostic baseline。`ATA/ATb` 乘积累加阶段仍使用 `vfmacc`。fused 与 current 的差异集中在逐点 `a/b/c/d` 计算树，不是 API 或 layout gate 的扩大。
 
 fused-formula 在 `test-rvv` 中仍保留 `block-fused-formula` direct helper，作为 current vs fused 归因入口。production 默认路径使用同一条 fused 逐点计算树：`a/b/c` 使用 `vfmsac` 形态，`d` 使用 `nx*(dx-sx) + ny*(dy-sy) + nz*(dz-sz)` 后用 `vfmacc` 累加。它明确改变逐点计算树，因此测试和文档只承诺预算内对齐，不承诺 bitwise 等价。
 
@@ -308,7 +320,7 @@ QEMU timing 不作为性能结论。性能结论只来自板卡或目标硬件�
 - 更复杂对象生命周期或上游完整 registration 场景。
 - debug verbosity 下的 loss 日志等价性。
 
-实现结构还留有审查者需要确认的可维护性风险：`buildPointToPlaneLLSFullCloudStd`、求解和矩阵 helper 同时服务 production-facing tests 和 production RVV helper 对拍；RVV block helper 内部也有 A/B/C/N 四组重复 load/formula。它们让边界清晰，但 helper size 和重复逻辑是审查项。若合入前要求更紧凑的源码形态，可考虑压缩 helper 或进一步拆清 Std/RVV/reference 边界；当前 production phase 不做大规模重构。
+实现结构已经把 full-cloud 标量 normal-equation reference 放在 `test-rvv/registration/transformation_estimation_point_to_plane_lls/include/impl/teptpl_common.hpp`，production fallback 继续走原 `ConstCloudIterator` 标量 helper。production header 仍保留 RVV normal-equation、求解和矩阵构造 helper；RVV block helper 内部也有 A/B/C/N 四组重复 load/formula。它们让边界清晰，但 helper size 和重复逻辑仍是审查项。若合入前要求更紧凑的源码形态，可考虑压缩 helper，并重跑 correctness。
 
 ## 12. Evidence / Output 策略
 
@@ -322,6 +334,9 @@ QEMU timing 不作为性能结论。性能结论只来自板卡或目标硬件�
 当前验证记录包含 QEMU correctness、dump bench、production-dispatch QEMU bench，以及三类 representative pointtypes production-dispatch 板卡 5-run。generic EvidenceDecision 已基于这些摘要升级为 fused-formula 默认 production candidate，但结论名保留 `representative-pointtypes` 边界。
 
 fused-formula variant 另有 `block_fused_formula_5run_summary.md` 作为 diagnostic direct board A/B 摘要。near-cancellation 数值测试已经加入 `run_test_compare`，并且 production-facing fused correctness、asm attribution 和 5-run production-dispatch A/B 已闭合。
+
+bench label 字典、checksum 口径、Evidence Doctor 边界和 registry check 命令不在长期主题文档重复维护；
+主归属是 `test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/benchmark-and-evidence.zh.md`。
 
 ## 13. 后续方向
 

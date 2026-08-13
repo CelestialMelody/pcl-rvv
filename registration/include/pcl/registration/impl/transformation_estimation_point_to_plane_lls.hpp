@@ -70,81 +70,6 @@ struct PointToPlaneLLSNormalEquation {
   std::size_t accepted_points = 0;
 };
 
-template <typename PointSource, typename PointTarget>
-inline bool
-isFinitePointToPlaneLLSRow(const PointSource& source, const PointTarget& target)
-{
-  return std::isfinite(source.x) && std::isfinite(source.y) &&
-         std::isfinite(source.z) && std::isfinite(target.x) &&
-         std::isfinite(target.y) && std::isfinite(target.z) &&
-         std::isfinite(target.normal_x) && std::isfinite(target.normal_y) &&
-         std::isfinite(target.normal_z);
-}
-
-inline void
-accumulatePointToPlaneLLSFormula(const double a,
-                                 const double b,
-                                 const double c,
-                                 const double d,
-                                 const double nx,
-                                 const double ny,
-                                 const double nz,
-                                 PointToPlaneLLSNormalEquation& eq)
-{
-  eq.ata.coeffRef(0) += a * a;
-  eq.ata.coeffRef(1) += a * b;
-  eq.ata.coeffRef(2) += a * c;
-  eq.ata.coeffRef(3) += a * nx;
-  eq.ata.coeffRef(4) += a * ny;
-  eq.ata.coeffRef(5) += a * nz;
-  eq.ata.coeffRef(7) += b * b;
-  eq.ata.coeffRef(8) += b * c;
-  eq.ata.coeffRef(9) += b * nx;
-  eq.ata.coeffRef(10) += b * ny;
-  eq.ata.coeffRef(11) += b * nz;
-  eq.ata.coeffRef(14) += c * c;
-  eq.ata.coeffRef(15) += c * nx;
-  eq.ata.coeffRef(16) += c * ny;
-  eq.ata.coeffRef(17) += c * nz;
-  eq.ata.coeffRef(21) += nx * nx;
-  eq.ata.coeffRef(22) += nx * ny;
-  eq.ata.coeffRef(23) += nx * nz;
-  eq.ata.coeffRef(28) += ny * ny;
-  eq.ata.coeffRef(29) += ny * nz;
-  eq.ata.coeffRef(35) += nz * nz;
-
-  eq.atb.coeffRef(0) += a * d;
-  eq.atb.coeffRef(1) += b * d;
-  eq.atb.coeffRef(2) += c * d;
-  eq.atb.coeffRef(3) += nx * d;
-  eq.atb.coeffRef(4) += ny * d;
-  eq.atb.coeffRef(5) += nz * d;
-  ++eq.accepted_points;
-}
-
-template <typename PointSource, typename PointTarget>
-inline void
-accumulatePointToPlaneLLSRow(const PointSource& source,
-                             const PointTarget& target,
-                             PointToPlaneLLSNormalEquation& eq)
-{
-  const float& sx = source.x;
-  const float& sy = source.y;
-  const float& sz = source.z;
-  const float& dx = target.x;
-  const float& dy = target.y;
-  const float& dz = target.z;
-  const float& nx = target.normal[0];
-  const float& ny = target.normal[1];
-  const float& nz = target.normal[2];
-
-  const double a = nz * sy - ny * sz;
-  const double b = nx * sz - nz * sx;
-  const double c = ny * sx - nx * sy;
-  const double d = nx * dx + ny * dy + nz * dz - nx * sx - ny * sy - nz * sz;
-  accumulatePointToPlaneLLSFormula(a, b, c, d, nx, ny, nz, eq);
-}
-
 inline void
 completePointToPlaneLLSNormalEquation(PointToPlaneLLSNormalEquation& eq)
 {
@@ -163,27 +88,6 @@ completePointToPlaneLLSNormalEquation(PointToPlaneLLSNormalEquation& eq)
   eq.ata.coeffRef(32) = eq.ata.coeff(17);
   eq.ata.coeffRef(33) = eq.ata.coeff(23);
   eq.ata.coeffRef(34) = eq.ata.coeff(29);
-}
-
-template <typename PointSource, typename PointTarget>
-inline PointToPlaneLLSNormalEquation
-buildPointToPlaneLLSFullCloudStd(const pcl::PointCloud<PointSource>& cloud_src,
-                                 const pcl::PointCloud<PointTarget>& cloud_tgt,
-                                 PointToPlaneLLSFullCloudStats* stats = nullptr)
-{
-  PointToPlaneLLSNormalEquation eq;
-  const std::size_t nr_points = std::min(cloud_src.size(), cloud_tgt.size());
-  for (std::size_t i = 0; i < nr_points; ++i) {
-    if (!isFinitePointToPlaneLLSRow(cloud_src[i], cloud_tgt[i]))
-      continue;
-    accumulatePointToPlaneLLSRow(cloud_src[i], cloud_tgt[i], eq);
-  }
-  if (stats) {
-    stats->input_points = nr_points;
-    stats->accepted_points = eq.accepted_points;
-    stats->used_rvv = false;
-  }
-  return eq;
 }
 
 template <typename Scalar>
