@@ -1,4 +1,4 @@
-Running main() from <riscv-build>/googletest/googletest/src/gtest_main.cc
+Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gtest_main.cc
 Note: Google Test filter = TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexed*
 [==========] Running 6 tests from 1 test suite.
 [----------] Global test environment set-up.

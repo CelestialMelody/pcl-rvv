@@ -1,0 +1,38 @@
+{
+  "created_at": "2026-08-13T13:23:15.864791+08:00",
+  "topic": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted",
+  "output_dir": "test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/log/board/production_source_indices_detail_ba",
+  "runs": 5,
+  "case_filter": "production-source-indices-detail-ba",
+  "size": "65536,262144",
+  "iterations": 20,
+  "warmup_iterations": 5,
+  "cpu": 0,
+  "board": {
+    "remote": "root@192.168.55.2",
+    "remote_dir": "/root/pcl-test/registration/transformation_estimation_point_to_plane_lls_weighted",
+    "bench": "bench_transformation_estimation_point_to_plane_lls_weighted_rvv"
+  },
+  "git": {
+    "commit": "494c247465863039dfcc1a10644d26774cb35786",
+    "dirty": true,
+    "status": [
+      " M doc-rvv/library-screening/registration/registration-module-second-pass.zh.md",
+      " M doc-rvv/registration/transformation_estimation_point_to_plane_lls-RVV.zh.md",
+      " M registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls.hpp",
+      " M test-rvv/registration/transformation_estimation_point_to_plane_lls/Makefile",
+      " D test-rvv/registration/transformation_estimation_point_to_plane_lls/bench_transformation_estimation_point_to_plane_lls.cpp",
+      " M test-rvv/registration/transformation_estimation_point_to_plane_lls/test_support/transformation_estimation_point_to_plane_lls_common.hpp",
+      " M test-rvv/registration/transformation_estimation_point_to_plane_lls/test_support_transformation_estimation_point_to_plane_lls.hpp",
+      " D test-rvv/registration/transformation_estimation_point_to_plane_lls/test_transformation_estimation_point_to_plane_lls.cpp",
+      " M test-rvv/registration/transformation_estimation_point_to_plane_lls/transformation_estimation_point_to_plane_lls-evaluation.zh.md",
+      " M test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/Makefile",
+      " M test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/include/impl/teptplw_bench_cases.hpp",
+      " M test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/include/impl/teptplw_bench_harness.hpp",
+      " M test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/script/analyze_teptplw_rvv_ba.py",
+      "?? test-rvv/registration/transformation_estimation_point_to_plane_lls/doc/",
+      "?? test-rvv/registration/transformation_estimation_point_to_plane_lls/include/",
+      "?? test-rvv/registration/transformation_estimation_point_to_plane_lls/src/"
+    ]
+  }
+}

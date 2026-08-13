@@ -1,0 +1,66 @@
+pointnormal: avg_below_1.0=5/5 median_below_1.0=5/5
+avg_values=run01_rvv.log:0.959x, run02_rvv.log:0.957x, run03_rvv.log:0.960x, run04_rvv.log:0.952x, run05_rvv.log:0.956x
+median_values=run01_rvv.log:0.950x, run02_rvv.log:0.974x, run03_rvv.log:0.959x, run04_rvv.log:0.950x, run05_rvv.log:0.949x
+avg_below_runs=run01_rvv.log:0.959x baseline=7.966877 fused=8.304008, run02_rvv.log:0.957x baseline=7.676404 fused=8.020313, run03_rvv.log:0.960x baseline=7.680881 fused=8.002777, run04_rvv.log:0.952x baseline=7.670837 fused=8.055207, run05_rvv.log:0.956x baseline=7.636756 fused=7.985129
+median_below_runs=run01_rvv.log:0.950x baseline_med=7.548430 fused_med=7.946789, run02_rvv.log:0.974x baseline_med=7.688265 fused_med=7.892788, run03_rvv.log:0.959x baseline_med=7.589993 fused_med=7.917830, run04_rvv.log:0.950x baseline_med=7.512846 fused_med=7.912018, run05_rvv.log:0.949x baseline_med=7.543722 fused_med=7.945268
+
+pointnormal: avg_below_1.0=5/5 median_below_1.0=2/5
+avg_values=run01_rvv.log:0.996x, run02_rvv.log:0.991x, run03_rvv.log:0.848x, run04_rvv.log:0.881x, run05_rvv.log:0.620x
+median_values=run01_rvv.log:1.018x, run02_rvv.log:1.005x, run03_rvv.log:1.010x, run04_rvv.log:0.976x, run05_rvv.log:0.533x
+avg_below_runs=run01_rvv.log:0.996x baseline=35.349349 fused=35.492034, run02_rvv.log:0.991x baseline=34.419124 fused=34.733462, run03_rvv.log:0.848x baseline=35.026215 fused=41.308685, run04_rvv.log:0.881x baseline=33.834319 fused=38.389802, run05_rvv.log:0.620x baseline=34.554384 fused=55.762509
+median_below_runs=run04_rvv.log:0.976x baseline_med=33.601241 fused_med=34.425584, run05_rvv.log:0.533x baseline_med=34.258458 fused_med=64.285173
+
+pointxyz-to-pointnormal: avg_below_1.0=2/5 median_below_1.0=2/5
+avg_values=run01_rvv.log:0.995x, run02_rvv.log:0.995x, run03_rvv.log:1.037x, run04_rvv.log:1.029x, run05_rvv.log:1.003x
+median_values=run01_rvv.log:0.999x, run02_rvv.log:0.987x, run03_rvv.log:1.033x, run04_rvv.log:1.045x, run05_rvv.log:1.027x
+avg_below_runs=run01_rvv.log:0.995x baseline=8.127741 fused=8.168083, run02_rvv.log:0.995x baseline=8.026671 fused=8.067390
+median_below_runs=run01_rvv.log:0.999x baseline_med=7.935185 fused_med=7.945080, run02_rvv.log:0.987x baseline_med=7.986018 fused_med=8.088936
+
+pointxyz-to-pointnormal: avg_below_1.0=2/5 median_below_1.0=2/5
+avg_values=run01_rvv.log:1.115x, run02_rvv.log:1.593x, run03_rvv.log:1.141x, run04_rvv.log:0.960x, run05_rvv.log:0.817x
+median_values=run01_rvv.log:1.121x, run02_rvv.log:1.116x, run03_rvv.log:1.153x, run04_rvv.log:0.955x, run05_rvv.log:0.861x
+avg_below_runs=run04_rvv.log:0.960x baseline=36.536760 fused=38.050321, run05_rvv.log:0.817x baseline=37.264900 fused=45.607198
+median_below_runs=run04_rvv.log:0.955x baseline_med=36.782906 fused_med=38.514971, run05_rvv.log:0.861x baseline_med=36.517528 fused_med=42.416478
+
+pointxyz-to-pointxyzinormal: avg_below_1.0=5/5 median_below_1.0=5/5
+avg_values=run01_rvv.log:0.963x, run02_rvv.log:0.989x, run03_rvv.log:0.960x, run04_rvv.log:0.992x, run05_rvv.log:0.997x
+median_values=run01_rvv.log:0.961x, run02_rvv.log:0.978x, run03_rvv.log:0.970x, run04_rvv.log:0.994x, run05_rvv.log:0.995x
+avg_below_runs=run01_rvv.log:0.963x baseline=8.208009 fused=8.519273, run02_rvv.log:0.989x baseline=8.059534 fused=8.146521, run03_rvv.log:0.960x baseline=7.814166 fused=8.138200, run04_rvv.log:0.992x baseline=8.026194 fused=8.091997, run05_rvv.log:0.997x baseline=8.095014 fused=8.116585
+median_below_runs=run01_rvv.log:0.961x baseline_med=7.954122 fused_med=8.278626, run02_rvv.log:0.978x baseline_med=7.973394 fused_med=8.152500, run03_rvv.log:0.970x baseline_med=7.844225 fused_med=8.089811, run04_rvv.log:0.994x baseline_med=8.037290 fused_med=8.087770, run05_rvv.log:0.995x baseline_med=8.038894 fused_med=8.081686
+
+pointxyz-to-pointxyzinormal: avg_below_1.0=2/5 median_below_1.0=2/5
+avg_values=run01_rvv.log:1.009x, run02_rvv.log:0.782x, run03_rvv.log:1.035x, run04_rvv.log:1.058x, run05_rvv.log:0.831x
+median_values=run01_rvv.log:0.837x, run02_rvv.log:1.031x, run03_rvv.log:1.151x, run04_rvv.log:1.053x, run05_rvv.log:0.789x
+avg_below_runs=run02_rvv.log:0.782x baseline=36.476486 fused=46.649816, run05_rvv.log:0.831x baseline=34.843724 fused=41.934602
+median_below_runs=run01_rvv.log:0.837x baseline_med=36.805407 fused_med=43.967748, run05_rvv.log:0.789x baseline_med=34.239624 fused_med=43.418117
+
+pointnormal: avg_below_1.0=5/5 median_below_1.0=5/5
+avg_values=run01_rvv.log:0.957x, run02_rvv.log:0.984x, run03_rvv.log:0.957x, run04_rvv.log:0.996x, run05_rvv.log:0.968x
+median_values=run01_rvv.log:0.956x, run02_rvv.log:0.980x, run03_rvv.log:0.950x, run04_rvv.log:0.992x, run05_rvv.log:0.968x
+avg_below_runs=run01_rvv.log:0.957x baseline=7.735042 fused=8.085834, run02_rvv.log:0.984x baseline=7.880748 fused=8.008686, run03_rvv.log:0.957x baseline=7.726476 fused=8.077580, run04_rvv.log:0.996x baseline=7.981825 fused=8.011583, run05_rvv.log:0.968x baseline=7.821604 fused=8.077128
+median_below_runs=run01_rvv.log:0.956x baseline_med=7.646389 fused_med=7.997727, run02_rvv.log:0.980x baseline_med=7.737536 fused_med=7.895580, run03_rvv.log:0.950x baseline_med=7.568388 fused_med=7.970581, run04_rvv.log:0.992x baseline_med=7.881934 fused_med=7.944643, run05_rvv.log:0.968x baseline_med=7.711911 fused_med=7.969622
+
+pointnormal: avg_below_1.0=0/5 median_below_1.0=0/5
+avg_values=run01_rvv.log:1.008x, run02_rvv.log:1.663x, run03_rvv.log:1.382x, run04_rvv.log:1.677x, run05_rvv.log:1.069x
+median_values=run01_rvv.log:1.017x, run02_rvv.log:1.890x, run03_rvv.log:1.037x, run04_rvv.log:1.870x, run05_rvv.log:1.012x
+
+pointxyz-to-pointnormal: avg_below_1.0=0/5 median_below_1.0=0/5
+avg_values=run01_rvv.log:1.036x, run02_rvv.log:1.040x, run03_rvv.log:1.013x, run04_rvv.log:1.029x, run05_rvv.log:1.031x
+median_values=run01_rvv.log:1.018x, run02_rvv.log:1.056x, run03_rvv.log:1.011x, run04_rvv.log:1.030x, run05_rvv.log:1.033x
+
+pointxyz-to-pointnormal: avg_below_1.0=3/5 median_below_1.0=2/5
+avg_values=run01_rvv.log:1.075x, run02_rvv.log:0.826x, run03_rvv.log:1.192x, run04_rvv.log:0.851x, run05_rvv.log:0.617x
+median_values=run01_rvv.log:1.132x, run02_rvv.log:0.849x, run03_rvv.log:1.199x, run04_rvv.log:1.008x, run05_rvv.log:0.470x
+avg_below_runs=run02_rvv.log:0.826x baseline=43.765302 fused=52.995678, run04_rvv.log:0.851x baseline=39.300614 fused=46.192100, run05_rvv.log:0.617x baseline=36.006024 fused=58.393524
+median_below_runs=run02_rvv.log:0.849x baseline_med=37.260246 fused_med=43.895372, run05_rvv.log:0.470x baseline_med=35.491932 fused_med=75.503254
+
+pointxyz-to-pointxyzinormal: avg_below_1.0=0/5 median_below_1.0=1/5
+avg_values=run01_rvv.log:1.006x, run02_rvv.log:1.018x, run03_rvv.log:1.188x, run04_rvv.log:1.033x, run05_rvv.log:1.013x
+median_values=run01_rvv.log:0.990x, run02_rvv.log:1.013x, run03_rvv.log:1.229x, run04_rvv.log:1.029x, run05_rvv.log:1.019x
+median_below_runs=run01_rvv.log:0.990x baseline_med=7.930643 fused_med=8.014394
+
+pointxyz-to-pointxyzinormal: avg_below_1.0=5/5 median_below_1.0=4/5
+avg_values=run01_rvv.log:0.883x, run02_rvv.log:0.721x, run03_rvv.log:0.705x, run04_rvv.log:0.694x, run05_rvv.log:0.949x
+median_values=run01_rvv.log:1.087x, run02_rvv.log:0.640x, run03_rvv.log:0.905x, run04_rvv.log:0.791x, run05_rvv.log:0.953x
+avg_below_runs=run01_rvv.log:0.883x baseline=36.133425 fused=40.920501, run02_rvv.log:0.721x baseline=36.492782 fused=50.587933, run03_rvv.log:0.705x baseline=37.741173 fused=53.569698, run04_rvv.log:0.694x baseline=36.002395 fused=51.903958, run05_rvv.log:0.949x baseline=36.917558 fused=38.907111
+median_below_runs=run02_rvv.log:0.640x baseline_med=36.252609 fused_med=56.666077, run03_rvv.log:0.905x baseline_med=37.062139 fused_med=40.946293, run04_rvv.log:0.791x baseline_med=36.230525 fused_med=45.780876, run05_rvv.log:0.953x baseline_med=36.923616 fused_med=38.754807

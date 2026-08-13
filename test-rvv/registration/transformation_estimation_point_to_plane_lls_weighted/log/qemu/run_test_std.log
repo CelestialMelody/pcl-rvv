@@ -1,9 +1,9 @@
-Running main() from <riscv-build>/googletest/googletest/src/gtest_main.cc
-[==========] Running 46 tests from 1 test suite.
+Running main() from /home/zoomin/codes/riscv-build/googletest/googletest/src/gtest_main.cc
+[==========] Running 53 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 46 tests from TransformationEstimationPointToPlaneLLSWeighted
+[----------] 53 tests from TransformationEstimationPointToPlaneLLSWeighted
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd (5 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudCandidateMatchesStd (6 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionMatchesStdWithinBudget
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionMatchesStdWithinBudget (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionNearCancellationStressMatchesStd
@@ -13,11 +13,11 @@ Running main() from <riscv-build>/googletest/googletest/src/gtest_main.cc
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionPreservesNonFiniteWeightSemantics
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockReductionPreservesNonFiniteWeightSemantics (2 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaCandidatesMatchBlockAndStdWithinBudget
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaCandidatesMatchBlockAndStdWithinBudget (17 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaCandidatesMatchBlockAndStdWithinBudget (18 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaNearCancellationStressMatchesBlockAndStd
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaNearCancellationStressMatchesBlockAndStd (24 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaNearCancellationStressMatchesBlockAndStd (20 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaScaleStressMatchesBlockAndStd
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaScaleStressMatchesBlockAndStd (23 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaScaleStressMatchesBlockAndStd (24 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaPreservesNonFiniteWeightSemantics
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudBlockFusedFormulaPreservesNonFiniteWeightSemantics (5 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.FullCloudGenericAbcFusedRepresentativePointTypesMatchStd
@@ -48,7 +48,7 @@ production default fused AbcdFusedIlp path is RVV-only
 [pcl::TransformationEstimationPointToPlaneLLSWeighted::estimateRigidTransformation] Number or weights from the number of correspondences! Use setWeights () to set them.
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.PublicDualIndicesWeightSizeMismatchKeepsOutputMatrix (0 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudZeroWeightsMatchStdWithinBudget
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudZeroWeightsMatchStdWithinBudget (4 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudZeroWeightsMatchStdWithinBudget (5 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNegativeWeightsMatchStdWithinBudget
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudNegativeWeightsMatchStdWithinBudget (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPublicOverloadMatchesStdWithinBudget
@@ -66,7 +66,7 @@ production default fused AbcdFusedIlp path is RVV-only
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPublicOverloadMatchesStdWithinBudget
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPublicOverloadMatchesStdWithinBudget (4 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedNormalEquationMatchesStdWithinBudget
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedNormalEquationMatchesStdWithinBudget (3 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedNormalEquationMatchesStdWithinBudget (4 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedSmallInputFallsBackToScalar
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedSmallInputFallsBackToScalar (0 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionSourceIndexedPredicateGatesAreNarrow
@@ -78,9 +78,9 @@ production default fused AbcdFusedIlp path is RVV-only
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZSourceMatchesStdWithinBudget
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZSourceMatchesStdWithinBudget (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget (4 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudPointXYZToPointXYZINormalMatchesStdWithinBudget (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudDoubleNormalTargetFallsBackToScalar
-[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudDoubleNormalTargetFallsBackToScalar (3 ms)
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudDoubleNormalTargetFallsBackToScalar (4 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScalarDoubleFallsBackToScalar
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.ProductionFullCloudScalarDoubleFallsBackToScalar (2 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.StdDiagnosticMatchesPublicEstimator
@@ -93,20 +93,34 @@ production default fused AbcdFusedIlp path is RVV-only
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.StdDualIndicesMatchesPublicEstimator (1 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedCandidateMatchesStd
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedCandidateMatchesStd (3 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedBlockReductionMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedBlockReductionMatchesStdWithinBudget (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedBlockFusedAbcdIlpMatchesBlockAndStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedBlockFusedAbcdIlpMatchesBlockAndStdWithinBudget (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedBlockFamilyPreservesNonFiniteWeightSemantics
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.SourceIndexedBlockFamilyPreservesNonFiniteWeightSemantics (2 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.DualIndicesCandidateMatchesStd
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.DualIndicesCandidateMatchesStd (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.DualIndicesBlockReductionMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.DualIndicesBlockReductionMatchesStdWithinBudget (4 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.DualIndicesBlockFusedAbcdIlpMatchesBlockAndStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.DualIndicesBlockFusedAbcdIlpMatchesBlockAndStdWithinBudget (4 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceCandidateMatchesStd
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceCandidateMatchesStd (3 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceBlockReductionMatchesStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceBlockReductionMatchesStdWithinBudget (3 ms)
+[ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceBlockFusedAbcdIlpMatchesBlockAndStdWithinBudget
+[       OK ] TransformationEstimationPointToPlaneLLSWeighted.CorrespondenceBlockFusedAbcdIlpMatchesBlockAndStdWithinBudget (3 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.SmallInputFallsBackForIsolatedSizeGate
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.SmallInputFallsBackForIsolatedSizeGate (0 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.InvalidLaneMaskMatchesStd
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.InvalidLaneMaskMatchesStd (1 ms)
 [ RUN      ] TransformationEstimationPointToPlaneLLSWeighted.NonFiniteWeightsAreNotMaskedWhenPointsAreFinite
 [       OK ] TransformationEstimationPointToPlaneLLSWeighted.NonFiniteWeightsAreNotMaskedWhenPointsAreFinite (1 ms)
-[----------] 46 tests from TransformationEstimationPointToPlaneLLSWeighted (200 ms total)
+[----------] 53 tests from TransformationEstimationPointToPlaneLLSWeighted (226 ms total)
 
 [----------] Global test environment tear-down
-[==========] 46 tests from 1 test suite ran. (203 ms total)
-[  PASSED  ] 45 tests.
+[==========] 53 tests from 1 test suite ran. (230 ms total)
+[  PASSED  ] 52 tests.
 [  SKIPPED ] 1 test, listed below:
 [  SKIPPED ] TransformationEstimationPointToPlaneLLSWeighted.ProductionDefaultFusedAbcdIlpRepresentativePointTypesMatchStd

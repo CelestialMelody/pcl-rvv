@@ -8,6 +8,10 @@
 
 ```text
 test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/phases/README.zh.md
+test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/phases/033-source-indexed-default-staged-and-workflow-guard/plan.zh.md
+test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/phases/033-source-indexed-default-staged-and-workflow-guard/result.zh.md
+test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/phases/032-source-indexed-production-diagnostic-boundary-root-cause/plan.zh.md
+test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/phases/032-source-indexed-production-diagnostic-boundary-root-cause/result.zh.md
 test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/phases/031-source-indexed-fused-production-probe/plan.zh.md
 test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/phases/031-source-indexed-fused-production-probe/result.zh.md
 test-rvv/registration/transformation_estimation_point_to_plane_lls_weighted/doc/phases/030-source-indexed-bench-evidence-calibration/plan.zh.md
@@ -22,7 +26,11 @@ full estimate median `0.90x`，Doctor 为 `3E / 6W / 13S`。Phase 031 按用户�
 probe（生产探针），结果与 Phase 030 分叉：source-indexed public overload 接入 block-fused 后，
 6 个代表 case 的 5-run median 均正向，Doctor 为 `0E / 9W / 12S`。因此 Phase 030 现在保留为
 historical diagnostic 和 harness-risk signal（测试框架风险信号），不能再写成直接阻止 production probe。
-Phase 031 当前结论是 bounded production candidate（有边界的生产候选），还不是 clean adopted。
+Phase 032 进一步补了 production detail RVV-vs-RVV A/B：同一 production RVV binary 内比较
+staged-gather 与 block-fused。结果显示 block-fused 相对 staged 是 mixed / negative，尤其 262144
+规模有多项明显负向。因此 Phase 031 的 public Std/RVV 正向可信，但不能证明 block-fused 优于 staged；
+当前结论仍不能升级为 clean adopted。Phase 033 已把 source-indexed production 默认路径退回
+staged-gather / compressed-tail，并把 block-fused 保留为显式 probe / detail A/B helper。
 
 ## 阶段表
 
@@ -33,6 +41,8 @@ Phase 031 当前结论是 bounded production candidate（有边界的生产候�
 | `020-dual-indices-correspondences-family-carry-over` | done | 为 dual-indices 和 correspondences 先补同 family candidate / test / bench / board smoke，再把结论收成 diagnostic negative，而不是直接 production。 | `020-dual-indices-correspondences-family-carry-over/plan.zh.md` | `020-dual-indices-correspondences-family-carry-over/result.zh.md` |
 | `030-source-indexed-bench-evidence-calibration` | done | 校准 source-indexed-family bench 证据口径，补 warm-up / sink / Evidence Doctor 边界，并完成重复板卡 target / summary / doctor 审计。 | `030-source-indexed-bench-evidence-calibration/plan.zh.md` | `030-source-indexed-bench-evidence-calibration/result.zh.md` |
 | `031-source-indexed-fused-production-probe` | done | 按用户授权把 source-indexed public overload 临时接到 `block-fused-abcd-ilp`，用 production direct correctness、repeated board 和 Evidence Doctor 验证 Phase 030 诊断负向是否复现。 | `031-source-indexed-fused-production-probe/plan.zh.md` | `031-source-indexed-fused-production-probe/result.zh.md` |
+| `032-source-indexed-production-diagnostic-boundary-root-cause` | done | 解释 Phase 030 diagnostic negative 与 Phase 031 production public positive 的分歧，补 production detail RVV-vs-RVV A/B，并回答 full-cloud 对照。 | `032-source-indexed-production-diagnostic-boundary-root-cause/plan.zh.md` | `032-source-indexed-production-diagnostic-boundary-root-cause/result.zh.md` |
+| `033-source-indexed-default-staged-and-workflow-guard` | done | 将 Phase 032 的 rejected-for-default 结论落实到 production 默认路径、gtest 护栏、agent 资产和 topic/doc-rvv 文档。 | `033-source-indexed-default-staged-and-workflow-guard/plan.zh.md` | `033-source-indexed-default-staged-and-workflow-guard/result.zh.md` |
 
 ## 文档归属
 
@@ -48,4 +58,4 @@ Phase 031 当前结论是 bounded production candidate（有边界的生产候�
 
 ## 当前早停规则
 
-Phase 010 已完成 PointNormal-first source-indexed family 审计：correctness 通过，但旧 board smoke 和 Evidence Doctor 显示不能替换 production。Phase 020 已完成 dual-indices / correspondences 的同族 candidate、correctness、bench、board smoke 和 doctor 审计：结果仍是 diagnostic negative，不能替换 production。Phase 030 已把旧 no-warmup smoke 降级为 historical diagnostic，并用 `collect_board_source_indexed_family_repeated` 生成 5-run summary；该 diagnostic wrapper 里 `block-fused-abcd-ilp` full estimate median `0.90x` 且 `4/5` 低于 `1.0x`。Phase 031 继续做真实 production probe，`production_source_indices_block_fused_abcd_ilp_probe` summary 显示 6 个代表 case median `1.54x` 到 `1.71x`，Doctor 为 `0E / 9W / 12S`。默认早停规则：停在 bounded production candidate 评审边界；若继续升级为 clean adopted，先补 source-indexed-specific asm attribution、binary identity 和可选 extended-run。
+Phase 010 已完成 PointNormal-first source-indexed family 审计：correctness 通过，但旧 board smoke 和 Evidence Doctor 显示不能替换 production。Phase 020 已完成 dual-indices / correspondences 的同族 candidate、correctness、bench、board smoke 和 doctor 审计：结果仍是 diagnostic negative，不能替换 production。Phase 030 已把旧 no-warmup smoke 降级为 historical diagnostic，并用 `collect_board_source_indexed_family_repeated` 生成 5-run summary；该 diagnostic wrapper 里 `block-fused-abcd-ilp` full estimate median `0.90x` 且 `4/5` 低于 `1.0x`。Phase 031 继续做真实 production probe，`production_source_indices_block_fused_abcd_ilp_probe` summary 显示 6 个代表 case median `1.54x` 到 `1.71x`，Doctor 为 `0E / 9W / 12S`。Phase 032 补 `production_source_indices_detail_ba`，确认同一 production RVV binary 内 block-fused 对 staged 仍是 mixed / negative。Phase 033 已把 source-indexed 默认路径改为 staged-gather / compressed-tail，并补 gtest 防止默认 selector 回到 block-fused。默认早停规则：不能把 Phase 031 写成 clean adopted；若重新挑战 block-fused 默认优先 dispatch，必须先补 source-indexed-specific asm attribution、binary identity 和 extended-run detail A/B。

@@ -129,7 +129,7 @@ include/impl/teptplw_candidate_row_sources.hpp
 | `accumulate_candidate_dual_indices` | source/target 双侧 gather；weight contiguous load。 | 非 RVV 构建、小规模、VLEN miss、byte-offset miss、任一索引无效。 | dual-indices candidate correctness 和 bench。 |
 | `accumulate_candidate_correspondences` | 先展开 query/match/weight，再双侧 gather。 | 非 RVV 构建、小规模、VLEN miss、byte-offset miss、有效 correspondence 少于 64。 | correspondences candidate correctness 和 bench。 |
 
-这些函数是 diagnostic candidates。production 当前不调用它们。source-indexed production 采用同一 row source policy，但使用单独的 production helper：Phase 031 后它先尝试 block-fused probe helper，再把 staged-gather / compressed-tail helper 作为 rollback；不复用这些 test-only helper。
+这些函数是 diagnostic candidates。production 当前不调用它们。source-indexed production 采用同一 row source policy，但使用单独的 production helper：Phase 033 后默认尝试 staged-gather / compressed-tail helper；block-fused helper 只保留为显式 probe / detail A/B，不复用这些 test-only helper。
 
 ## Full-Cloud Candidate 与 Estimate Wrapper
 
@@ -295,10 +295,10 @@ production 主要符号：
 | `canUsePointToPlaneLLSWeightedSourceIndicesRVV` | production dispatch gate | 检查 source size、index count、target size、weights size、VLEN、byte-offset。 | `ProductionSourceIndexedPredicateGatesAreNarrow`。 |
 | `loadPointToPlaneLLSWeightedSourceIndexedVectors` | production RVV formula helper | source gather、target stride load、weight load、mask 和 row vectors。 | source-indexed production correctness。 |
 | `accumulatePointToPlaneLLSWeightedCompressedRowsF32M2` | production RVV reduction | `vcompress` 和 scalar tail accumulation。 | source-indexed production correctness。 |
-| `loadPointToPlaneLLSWeightedSourceIndexedBlockVectors` | production RVV formula helper | source-indexed block-fused probe 的 source gather、target stride load、weight load、mask 和 row vectors。 | Phase 031 source-indexed production probe correctness 和 board summary。 |
-| `buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV` | production RVV helper | source-indexed block-fused probe path，valid-index scan 后用 A/B/C/N groups 构造 normal-equation。 | source-indexed production probe gtest、board summary。 |
-| `buildPointToPlaneLLSWeightedSourceIndicesStagedRVV` | production RVV helper | source-indexed staged-gather RVV rollback path。 | source-indexed prior production gtest、board summary。 |
-| `buildPointToPlaneLLSWeightedSourceIndicesDefault` | production default selector | RVV 可用时先用 block-fused probe，失败后用 staged-gather，仍失败时用 std。 | source-indexed production tests。 |
+| `loadPointToPlaneLLSWeightedSourceIndexedBlockVectors` | production RVV formula helper | source-indexed block-fused explicit probe 的 source gather、target stride load、weight load、mask 和 row vectors。 | Phase 031 source-indexed production probe correctness、board summary 和 Phase 032 detail A/B。 |
+| `buildPointToPlaneLLSWeightedSourceIndicesBlockFusedAbcdIlpRVV` | production RVV helper | source-indexed block-fused explicit probe path，valid-index scan 后用 A/B/C/N groups 构造 normal-equation。 | source-indexed production probe gtest、board summary 和 detail A/B。 |
+| `buildPointToPlaneLLSWeightedSourceIndicesStagedRVV` | production RVV helper | source-indexed staged-gather RVV default path。 | source-indexed production gtest、board summary 和 Phase 033 default guard。 |
+| `buildPointToPlaneLLSWeightedSourceIndicesDefault` | production default selector | RVV 可用时用 staged-gather；失败时用 std。block-fused 不再作为默认优先路径。 | source-indexed production tests。 |
 | `estimatePointToPlaneLLSWeightedSourceIndicesRVV` | production wrapper | source-indexed RVV 成功后 solve 并返回 true。 | source-indexed public overload dispatch。 |
 | `estimateRigidTransformation(cloud_src, cloud_tgt, matrix)` | production public entry | full-cloud public overload，当前一个 RVV dispatch 入口。 | production-dispatch bench。 |
 | `estimateRigidTransformation(cloud_src, indices_src, cloud_tgt, matrix)` | production public entry | source-indexed public overload，当前另一个 RVV dispatch 入口。 | source-indexed production bench。 |
