@@ -140,6 +140,19 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 旧 `test_support/` 目录时，才把“移出 `test_support/`”作为具体动作；其它历史 topic 应按当前文件形态
 迁移到配置解析出的 source / aggregator / internal helper 布局。
 
+当 `.agents/config/defaults.yaml` 的 `test_support.internal_directory` 解析为 `include/impl`，且当前 topic
+仍有旧 `test_support/` 目录承载 reference、fixture、row source、candidate、assertion 或 bench harness
+等常规测试支撑职责时，`test_support/` 到 `include/impl` 的迁移属于 internal-helper-layout
+（内部测试支撑布局）动作，不是可随意忽略的命名偏好。相邻成熟 topic 已采用 `src/`、`include/`
+和 `include/impl` 结构时，可作为结构成熟度 quality bar；worker 不能复制其算法、候选结论或具体文件集，
+但必须把同等级目录职责作为默认结构目标候选。单独写“只是路径重命名 churn”“code map 已经足够”
+或“reviewer 如果需要再做”不足以把该缺口判为 `rejected` 或 `turn_stop_deferred`。若本轮不迁移，
+且该动作只触碰当前 topic 的测试资产、Makefile include 路径和 topic-local 文档，它默认是
+`phase_deferred + unblocked`，`next_phase_default` 必须指向 `internal-helper-layout`、`test-source-split`
+或二者合并的窄 phase，而不是 `ready_for_review`。只有用户明确限定范围、dirty isolation 不安全、
+存在外部旧路径依赖、同轮无法安全更新引用，或迁移会越过当前 topic / production / public API 边界时，
+才能写成 `turn_stop_deferred`，并列出证据。
+
 恢复旧 topic 或长 topic 时，还必须做 test harness layout audit（测试框架布局审计）。该审计
 不只看 helper header 行数，还要检查：
 
@@ -254,6 +267,7 @@ correspondences 或 indexed 路径退化时，归因必须列出 query/match 展
 ```text
 phase_plan_written_before_edits:
 optimization_roadmap_ready:
+roadmap_default_recovery_queue_ready:
 phase_completion_matrix_ready:
 optimization_matrix_ready:
 micro_stop_guard:
@@ -263,6 +277,11 @@ ready_for_review_validity_check:
 
 - `phase_plan_written_before_edits`：当前 phase 的 `plan.zh.md` 必须先于该 phase 的实现、测试、bench 或 production 修改存在。若历史 topic 没有阶段目录，先创建 `doc/phases/000-current-state-and-gaps/plan.zh.md`。
 - `optimization_roadmap_ready`：复杂 topic 必须读取或创建 `artifact_layout.optimization_roadmap_template` 解析出的 roadmap。roadmap 必须列出候选 family、idea source、适用 row source / 点类型 / `Scalar`、预期收益、风险、证据需求、状态和 next phase；phase 结束后必须回填新增想法或调整优先级。
+- `roadmap_default_recovery_queue_ready`：恢复旧 topic 时，worker 必须从 roadmap、phase README、最近 result
+  和 Handoff 中解析“默认恢复动作”、`next_phase_default`、`resume condition` 或等价字段，形成有序恢复队列。
+  队列项必须区分当前授权内的 `phase_deferred + unblocked`、命中真实停止条件的 `turn_stop_deferred`、
+  `blocked`、`rejected with evidence` 和 `not_applicable with evidence`。若队列中仍有测试资产结构迁移、
+  test source split、internal helper layout、doc suite、registry 或 legacy 清理，`ready_for_review` 无效。
 - `phase_completion_matrix_ready`：分两个时间点检查。写文件前，`plan.zh.md` 必须已有可回填的 action / completion scaffold（计划动作表、依赖和完成判据），让后续 `result.zh.md` 能逐项回填；阶段结束或 Handoff 前，`result.zh.md` 或 Handoff 必须逐项列出计划动作的 `done / partial / deferred / blocked` 状态、证据路径和缺口，不能只写“完成本阶段”。
 - `optimization_matrix_ready`：复杂 topic 必须维护 candidate family × row source policy × point type / `Scalar` / layout × test × bench × board × asm × doctor × decision 矩阵；`planned` 或 `deferred` 不能伪装成 adopted。
 - `micro_stop_guard`：如果只完成一个小 helper、一个隔离层、一个 target、一次 bench、一个 summary 或一张表，但当前计划仍有授权且未阻塞 next action，worker 不允许停；必须继续推进下一个动作，或写出真实停止条件。
@@ -440,7 +459,7 @@ followup_options_ready:
 - 表格必须包含 `document_ownership_matrix_ready`。证据指向文档归属矩阵章节、evaluation 中的决策审计或 Handoff Packet 的定位字段。
 - 表格必须包含 `traceability_map_ready`。证据指向 Traceability Map 章节或独立 traceability 文档，说明文档、测试、输出和代码位置可以互相定位。
 - 表格必须包含 `phase_plan_written_before_edits`、`phase_completion_matrix_ready`、`optimization_matrix_ready`、
-  `micro_stop_guard` 和 `continue_stop_decision`。证据指向当前 phase plan/result、optimization matrix、
+  `roadmap_default_recovery_queue_ready`、`micro_stop_guard` 和 `continue_stop_decision`。证据指向当前 phase plan/result、optimization matrix、
   `unblocked_next_actions`、`stop_condition_hit` 和 Handoff 的 `phase_loop_state`；若当前任务不是多阶段优化，写 `not_applicable` 并说明为什么没有 phase loop。
 - 表格必须包含 `ready_for_review_validity_check`。如果本轮输出 `ready_for_review`、`done`、
   `stop_for_review` 或 `unblocked_next_actions=none`，证据必须指向 roadmap、optimization matrix、

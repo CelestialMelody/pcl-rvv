@@ -84,6 +84,15 @@
 `result.zh.md` 和 Handoff 必须写明为什么当前 topic 不适用、当前暂缓是否影响 reviewer 可读性、
 以及下一轮恢复条件。
 
+若配置解析出的 `test_support.internal_directory` 是 `include/impl`，且当前 topic 仍使用旧
+`test_support/` 目录保存常规测试支撑内部头，worker 必须把 internal helper layout（内部 helper
+布局）列为 structure parity 的独立 area 或与 test source split 合并处理。成熟 sibling 的
+`include/impl` 结构是目录职责和 reviewer 路径的 quality bar，不是唯一实现模板；文件名、切分粒度
+和具体 helper 仍按当前 topic 决定。不能仅因“路径重命名 churn”“现有 code map 可读”或“等 reviewer
+要求”就关闭该 area。若没有真实 blocker，这类迁移是 `phase_deferred + unblocked`，应成为默认下一
+phase，直到 adopted、rejected with evidence、not_applicable with evidence 或
+turn_stop_deferred with stop_condition_hit。
+
 成熟度审计还必须检查 topic-local doc suite（主题本地文档套件）是否达到当前 topic 复杂度需要。若相邻成熟 topic 已经提供 `README.zh.md`、`doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` 和 `doc/<topic>-evaluation.zh.md` 这类结构，worker 应把它作为文档成熟度 quality bar。具体内容不能复制，但结构、读者路径、证据白名单和代码地图必须做 `adopt / defer / reject` 决策。evaluation 仍在 topic 根目录、缺少 README、缺少测试/bench/代码地图或长期 `doc-rvv` 与 topic-local docs 互相挤压时，都是可继续推进的 unblocked doc-suite action。
 文档迁移默认不保留 legacy pointer（旧路径指针）、compatibility alias（兼容别名）或重复正文。只有存在明确外部依赖、用户限定必须兼容、跨 topic 脚本暂时无法同轮更新，或 dirty isolation 会误删用户改动时，才可以临时保留；保留时必须在 phase result / Handoff 写出依赖证据、删除条件和下一阶段删除动作。缺少证据的“避免旧引用断开”不是充分理由。
 
@@ -101,6 +110,8 @@ structure-parity phase 的最小审计表必须覆盖：
 
 - test/bench source layout：根目录长 `test_*.cpp` / `bench_*.cpp`、`src/`、Makefile / board target / case-filter 是否匹配配置解析结构。
 - aggregator and internal helpers：聚合头、单个大 header、旧 `test_support/` 目录、已有 `include/impl/`、reference / fixtures / row source / candidate / assertion / bench harness / bench cases 职责拆分。
+- internal helper layout：当配置解析内部目录为 `include/impl` 且当前 topic 仍有旧 `test_support/`
+  内部头时，是否迁移到配置目录、更新 include graph / Makefile / 文档引用，并删除无依赖旧入口。
 - script and bench registry：topic-local script、case label 字典、bench case registry、checksum / trace / asm 输出合同。
 - topic-local docs：README、testing overview、correctness tests、benchmark/evidence、optimization evidence、test-support code map、evaluation 主路径和 phase index。
 - long-term docs：`doc-rvv` 主题文档是否只保存长期 production 行为、当前采用方式、证据链和边界，不承担测试工程全量说明。
@@ -134,6 +145,17 @@ roadmap candidate family 可以来自模型自行分析、当前源码证据、�
 roadmap 更新规则：
 
 - 新 phase 开始前，先读取 roadmap，选择当前最值得闭合的 unblocked candidate 或结构 maturity action。
+- roadmap 中的“默认恢复动作”、`next_phase_default`、`resume condition`、`next action` 或等价字段
+  必须被解析成 `roadmap_default_recovery_queue`。该队列是短 prompt 恢复合同，不是人工 follow-up
+  清单。每项必须标注 `phase_deferred + unblocked`、`turn_stop_deferred with stop_condition_hit`、
+  `blocked`、`rejected with evidence` 或 `not_applicable with evidence`。
+- 如果 roadmap 把某些动作写成“若 reviewer 要求继续”，worker 仍要重新判断它们是否其实已在当前
+  prompt 授权范围内。测试源码拆分、internal helper layout、topic-local docs、evidence registry
+  和无依赖 legacy 清理默认属于当前 topic 内的可执行结构动作；没有真实 blocker 时不得等待 reviewer
+  二次触发。
+- 多个未阻塞恢复动作不能被压缩成一个 `ready_for_review_validity_checked` 状态。worker 必须选择
+  队列中第一个未阻塞 phase 并推进；若两个动作触碰同一批测试资产，例如 `test-source-split` 和
+  `internal-helper-layout`，可以合并成一个窄结构 phase，但 phase plan 必须逐项列出二者的完成判据。
 - 若 mature sibling parity audit 发现当前 topic 缺少 source / aggregator / internal helper 布局、完整 topic-local doc suite、evaluation 主路径迁移或 legacy 清理，且这些动作仍在当前 topic 测试 / 文档边界内，roadmap 必须把它们合并成高优先级 structure-parity phase，默认排在 evidence registry、helper shape 微调和可选性能探索之前，除非写出真实阻塞或更高风险证据动作。
 - phase 结束后，必须把实际发现的新候选、负向解释、异常模式和可继续动作回填 roadmap。这个更新应像 evolutionary search（演化式搜索）的候选前沿：保留已经 validated（验证通过）的路线、带证据拒绝的路线、因阻塞暂停的路线，以及阶段反思中新产生的路线；下一 phase 从最高优先级未阻塞项中选择，而不是回到人工待办清单。
 - 阶段反思不能只写“无新增”。若本阶段完成了结构迁移、证据登记、candidate A/B、负向归因或文档重构，worker 必须至少判断是否生成了新的测试输入、消融、ILP / LMUL、row source、doc-suite 或 agent asset candidate；确无新增时写证据化理由。
@@ -184,6 +206,8 @@ worker 按下列步骤循环，直到命中停止条件：
 7. **阶段反思**：用本阶段证据反推是否出现新的 candidate family、消融需求、ILP / LMUL 取舍、文档结构缺口或测试输入缺口；把它们更新到 roadmap，并标注优先级、证据需求和恢复条件。
 8. **更新计划**：将剩余动作按 `blocked` / `unblocked` 标记；为下一阶段写默认目标或创建下一阶段 plan。计划变更必须保留原因，不得把未执行动作直接勾成完成。
 9. **继续 / 停止决策**：如果 roadmap 或矩阵中存在授权且未阻塞的下一动作，默认继续同轮推进；只有命中明确 stop condition 才输出 Handoff 并停止。若本阶段只是建立 roadmap、迁移单份 evaluation、补一个指针或完成一个局部 layout 子任务，而结构 parity / doc suite / legacy 清理仍未闭合，不能把 `next_phase_default` 写成 `ready_for_review`。如果最近 Handoff 或 phase README 已经写了 `ready_for_review`，但恢复扫描发现 roadmap / matrix / mature sibling parity 仍有 `phase_deferred + unblocked`，worker 必须把该 `ready_for_review` 降级为 stale stop decision（过期停止决策），并恢复到第一个未阻塞 phase。
+   若 roadmap 的“默认恢复动作”列出多个候选，worker 不能只复述该列表后停止；必须执行或计划执行
+   队列中的未阻塞项。`ready_for_review_validity_checked` 是检查结果标签，不是 stop condition。
 
 worker 应优先完成能改变决策的证据链，而不是堆积无关 case。阶段大小由“是否形成可审查的决策闭环”决定，不由文件数量决定。
 

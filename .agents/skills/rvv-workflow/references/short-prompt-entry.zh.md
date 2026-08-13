@@ -23,6 +23,12 @@ second-pass（第二轮筛选）或 follow-up（复筛）状态表自动选择�
 随后按当前 phase 继续推进实现、测试、证据解释、阶段反思和计划更新。
 `phase_deferred` 只表示当前 phase 暂缓，不表示本轮可以停止；只要 roadmap 或矩阵里仍有当前 topic 授权范围内、
 未阻塞且风险可控的下一动作，worker 默认继续创建或修订下一 phase 并推进。
+恢复扫描还必须读取 roadmap 中的“默认恢复动作”、`next_phase_default`、`next action`、
+`resume condition` 或等价小节。这些不是面向人工的松散建议，而是下一阶段恢复队列的输入。
+worker 应把它们归一成 `roadmap_default_recovery_queue`：每项写明 phase 名、范围、是否仍在当前 topic
+授权内、是否有 blocker、是否可与其它结构动作合并执行。若队列中存在未阻塞的测试资产、topic-local
+文档、evidence registry、legacy 清理或结构成熟度动作，`ready_for_review_validity_checked` 只能表示旧停止位已被检查，
+不能作为终点；worker 必须继续到队列中的第一个未阻塞 phase。
 如果最近 phase README、result、Handoff 或 worker 输出写着 `ready_for_review`，worker 仍必须重新验证该停止决定：
 只要 roadmap、optimization matrix、mature sibling parity audit 或当前 shape scan 暴露未阻塞的结构 / 文档 /
 legacy / 测试优化动作，就把旧 `ready_for_review` 标成 stale stop decision，并恢复到第一个未阻塞 phase。
@@ -45,6 +51,16 @@ reference、fixtures、row source、candidate、assertion 和 bench harness 分�
 和风险来源，不能机械复制其实现；但 worker 必须给出 `adopt / defer / reject` 决策。若不重构，
 phase plan / result / Handoff 必须说明暂缓原因、对 reviewer 可读性和后续候选扩展的影响，
 并把仍未阻塞的重构列入 `unblocked_next_actions`，不能因为局部代码清理已通过测试就提前 closeout。
+如果配置解析出的内部目录是 `include/impl`，而当前 topic 仍用旧 `test_support/` 目录承载常规测试支撑
+内部头，worker 应把 `test_support/ -> include/impl` 作为 structure parity 的默认候选动作。
+相邻成熟 topic 的该目录结构可以作为规范级 quality bar，但不能写死某个 sibling 为唯一参考对象。
+“只是路径 churn”“已有 code map 可读”或“reviewer 需要时再做”不能单独支撑 `ready_for_review`；
+若暂缓且无真实 blocker，默认恢复入口必须是 `internal-helper-layout` 或与 `test-source-split`
+合并的下一 phase。
+如果 roadmap 的默认恢复队列同时包含 `test-source-split`，而当前 shape scan 又发现旧 `test_support/`
+需要迁移到 `include/impl`，worker 不能把二者互相遮蔽。默认做法是先写一个结构 phase，明确选择
+“合并执行 test source split + internal helper layout”或“按依赖顺序连续执行两个窄 phase”；只要二者
+都仍在当前 topic 测试资产边界内且没有真实 blocker，最终 `ready_for_review` 前必须闭合二者。
 若相邻成熟 topic 的 README、topic-local doc suite、evaluation 主路径、`doc-rvv` 长期文档分工或
 legacy 清理明显更成熟，worker 必须把这些结构差距合并成当前 topic 的 structure-parity 候选 phase。
 除非存在真实外部依赖、dirty isolation 风险或用户限定范围，否则该 phase 是默认下一步，不能把

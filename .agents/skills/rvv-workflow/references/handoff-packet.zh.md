@@ -110,6 +110,10 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
   - `phase_result_paths`：当前和最近完成阶段 `result.zh.md` 路径。
   - `phase_completion_matrix`：计划动作的 `done / partial / deferred / blocked` 状态摘要。
   - `optimization_roadmap_status`：topic-level roadmap 路径、是否 fresh、当前 high-priority candidate family、阶段反思新增项和下一阶段默认候选；没有 roadmap 时写明必须创建的配置解析路径。
+  - `roadmap_default_recovery_queue`：从 roadmap / phase README / result / Handoff 解析出的默认恢复动作队列。
+    每项写 phase 名、范围、状态、blocker / stop condition、是否可与其它结构动作合并，以及下一步。
+    队列中仍有当前 topic 授权范围内的 `phase_deferred + unblocked` 时，`continue_stop_decision` 不能写成
+    `stop_for_review`，除非另有真实 stop condition。
   - `optimization_matrix_status`：candidate family、row source、点类型 / `Scalar`、test、bench、board、asm 和 Evidence Doctor 的矩阵状态。
   - `phase_deferred_unblocked_items`：当前 phase 未做但仍可继续做的事项；必须区分 `phase_deferred` 和 `turn_stop_deferred`。测试优化、topic-local 文档重构、测试支撑结构迁移、evaluation 迁移、doc suite 对齐、无依赖 legacy 清理和低风险 candidate / bench 补齐通常属于 `phase_deferred + unblocked`。
   - `unblocked_next_actions`：仍被本轮或下一轮授权、且没有工具 / 权限 / 证据阻塞的具体动作；没有时写 `none` 并说明为什么。
@@ -168,6 +172,10 @@ worker 输出 Handoff Packet 前应检查：
 - 如果声明对齐成熟 sibling 结构，是否输出 `mature_sibling_parity_status`、`test_support_shape_scan` 和
   `legacy_compatibility_decision`；若仍有低风险结构 / 文档 / legacy 清理缺口，是否把它们放进
   `phase_deferred_unblocked_items` 和 `next_phase_default`，而不是停在 `ready_for_review`。
+- 若配置解析出的内部目录为 `include/impl`，当前 topic 仍存在旧 `test_support/` 内部头，且 mature
+  sibling / local quality bar 指向 `include/impl` 职责布局，是否把 `internal-helper-layout` 明确写成
+  adopted、rejected with evidence、not_applicable with evidence 或 `phase_deferred + unblocked`。只写
+  “路径 churn”“code map 已足够”或“reviewer 需要时再做”不足以支撑 `ready_for_review`。
 - 如果声称 `ready_for_review`、`done` 或 `unblocked_next_actions=none`，是否输出
   `ready_for_review_validity_check`，且检查没有被 roadmap、matrix、mature sibling parity、
   current shape scan、doc suite 或 legacy compatibility 推翻。
