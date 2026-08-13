@@ -24,6 +24,13 @@ estimation（对应关系估计）。它补充通用 `rvv-test` 规则，不替�
 - row source diagnostic 出现稳定正向时，worker 必须进入 production integration loop（生产接入闭环）：补 production helper、public dispatch、fallback / gate tests、dedicated bench target、board smoke、repeated board summary，以及 asm attribution 或等价路径证据。若仍不接 production，文档必须写出阻塞条件、负向证据或维护成本。
 - row source 升级为 production 前，必须检查当前 topic 是否已有 adopted implementation family。若 full-cloud 已采用 block-reduction、A/B/C/N block groups、fused formula 或 ILP code shape，新 row source 不能默认沿用早期 staged-row / compressed-tail helper。worker 必须新增同边界 implementation-family comparison，或在 evaluation 中写出不适用原因，例如重复 gather 成本、寄存器压力、spill、VLEN / LMUL 限制、index staging 成本或 correctness 风险。
 - 如果某个 policy 已有 adopted family，而另一个 policy 还没有尝试过该 family，worker 的默认顺序是先做 family carry-over audit：先在配置解析出的 RVV test 资产中补同 family 的 policy-specific candidate、bench 和 board 证据，再决定 production integration。不要把一个 policy 的 positive summary 直接外推到其它 policy。
+- family carry-over audit 是 optimization roadmap 的 candidate generation（候选生成）动作，不是收尾备注。
+  当 full-cloud 已采用 block-reduction、A/B/C/N block groups、fused formula、ILP code shape、staged-gather
+  或 compressed-tail 等 family，而 source-indexed、dual-indices 或 correspondences 尚未做同边界比较时，
+  roadmap 必须生成 policy-specific candidate 矩阵。矩阵至少列出：要迁移的 math family、row-source
+  adapter、gather / staging / reduction 成本假设、正确性 target、bench case-filter、asm 边界、
+  board repeated evidence 和 Evidence Doctor 输入。没有板卡时可把 board 证据标成 blocked，但本地
+  candidate / correctness / bench-smoke / asm 仍可作为下一 phase 默认动作，除非 dirty isolation 或权限扩大不安全。
 - row source 状态变化后，topic 文档中的范围决策表、target 表、EvidenceDecision、可提交证据白名单、evidence registry 状态和 `.gitignore` allowlist 必须同步更新。不能让旧的 `deferred` / `仅诊断` 结论和新的 production evidence 同时存在。
 - RowSourcePolicy 只负责 row source。finite mask（有限值掩码）、formula（公式）、
   staging/reduction（暂存 / 规约）、`accepted_points`、`ATA/ATb` 或输出容器属于 shared math pipeline（共享数学流水线）或后段。

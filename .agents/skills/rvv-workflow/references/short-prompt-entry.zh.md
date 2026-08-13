@@ -23,6 +23,9 @@ second-pass（第二轮筛选）或 follow-up（复筛）状态表自动选择�
 随后按当前 phase 继续推进实现、测试、证据解释、阶段反思和计划更新。
 `phase_deferred` 只表示当前 phase 暂缓，不表示本轮可以停止；只要 roadmap 或矩阵里仍有当前 topic 授权范围内、
 未阻塞且风险可控的下一动作，worker 默认继续创建或修订下一 phase 并推进。
+如果最近 phase README、result、Handoff 或 worker 输出写着 `ready_for_review`，worker 仍必须重新验证该停止决定：
+只要 roadmap、optimization matrix、mature sibling parity audit 或当前 shape scan 暴露未阻塞的结构 / 文档 /
+legacy / 测试优化动作，就把旧 `ready_for_review` 标成 stale stop decision，并恢复到第一个未阻塞 phase。
 如果选中的 topic 属于 registration（配准）类，row-source family carry-over audit 只是常见的第一阶段，不是整轮默认终点；
 它应作为 phase loop 中的一个候选 phase，被放进矩阵后继续判断下一个未阻塞 phase。
 不要把一个 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
@@ -36,7 +39,7 @@ aggregator header（聚合头文件）入口和 internal header（内部头文�
 `test_support.topic_abbrev_policy` 为长 topic 采用缩写 topic token（主题短标识）、以及是否应把
 reference、fixtures、row source、candidate、assertion 和 bench harness 分职责拆分。审计对象从当前 topic
 实际文件形态推导：可能是根目录长 `.cpp`、单个大 header、旧 `test_support/` 目录、已有 `include/` /
-`include/impl/`、script 或其它等价测试支撑文件；不要假设字面量 `test_support/` 一定存在，也不要因为
+`include/impl/`、script、bench case registry 或其它等价测试支撑文件；不要假设字面量 `test_support/` 一定存在，也不要因为
 没有该目录就跳过结构迁移。具体目录和文件名按
 `artifact_layout`、`test_support` 和当前 topic 既有等价结构解析。历史 sibling topic（同类主题）只能作为结构质量 bar
 和风险来源，不能机械复制其实现；但 worker 必须给出 `adopt / defer / reject` 决策。若不重构，
@@ -46,6 +49,8 @@ phase plan / result / Handoff 必须说明暂缓原因、对 reviewer 可读性�
 legacy 清理明显更成熟，worker 必须把这些结构差距合并成当前 topic 的 structure-parity 候选 phase。
 除非存在真实外部依赖、dirty isolation 风险或用户限定范围，否则该 phase 是默认下一步，不能把
 roadmap-only、evaluation-only 或 pointer-only 小阶段收口成 `ready_for_review`。
+该规则不写死任何 sibling 名称：worker 应从同模块、同数据流、同测试复杂度或最近 reviewer 通过的 topic
+中选取成熟度标尺；若没有合适 sibling，也要按配置和当前 topic 的真实 shape 自行形成 quality bar。
 如果短 prompt 的目标是恢复 S0、冻结偏好或复核产物发布边界，先读 `.agents/skills/rvv-workflow/references/s0-preferences-and-recovery.zh.md`，再决定是否继续 phase loop。
 
 worker（执行者）和 reviewer（审查者）启动时先读取：
@@ -62,8 +67,10 @@ worker（执行者）和 reviewer（审查者）启动时先读取：
 S0 必须在输出中写明 `preferences_loaded`，并冻结注释、文档、证据、日志和 agent asset（代理资产）反馈偏好。若 local override
 存在，worker 还要报告读取到的本机覆盖范围；若不存在，写明只使用 defaults。
 默认 agent asset feedback mode（代理资产反馈模式）是 `report-only`（只报告建议）。worker 在 S4 测试计划、
-S10 EvidenceDecision（证据决策）、S11 closeout（收尾）或 blocked（阻塞）边界发现可复用规则、资产缺口或冗余规则时，
-才输出 `agent_asset_feedback`；没有发现时省略。reviewer 在 closeout review（收尾审查）中按同一规则报告建议。
+S10 EvidenceDecision（证据决策）、S11 closeout（收尾）、blocked（阻塞）边界、短 prompt 恢复失败、
+过早停止复盘或用户 / reviewer 明确反馈工作流程问题时，必须判断是否存在可复用规则、资产缺口或冗余规则。
+若存在，输出 `agent_asset_feedback`；没有发现时省略。reviewer 在 closeout review（收尾审查）中按同一规则报告建议。
+当用户授权 workflow improvement 时，应先修订对应 `.agents/` skill/reference，再回到 topic 工作；不要只把流程缺口写入 topic follow-up。
 
 ## 最短启动写法
 
@@ -223,6 +230,10 @@ production 决策，就跳过当前源码复核、QEMU correctness、反汇编�
 `phase_plan_paths`、`phase_result_paths`、optimization roadmap、optimization matrix 和 evidence paths（证据路径）。
 `phase_loop_state.next_phase_default` 是默认续作入口；`next_worker_action_if_review_passes` 只作为兼容别名。
 除非用户新指令覆盖，不要绕过 phase loop 自行选择下一个 topic 或重跑旧阶段。
+若恢复入口写 `ready_for_review`，必须先执行 `ready_for_review_validity_check`：读取 roadmap、matrix、
+最近 phase result 和成熟度审计，确认没有 `phase_deferred + unblocked` 的 structure parity、doc suite、
+legacy cleanup、test source split、internal helper layout、row-source family carry-over 或证据 freshness 缺口。
+任一项未闭合时，`ready_for_review` 失效，worker 默认创建或修订下一 phase plan。
 当恢复到 `partial-production-candidate` 并进入 PI1 时，还必须读取：
 
 1. `.agents/skills/rvv-implementation/SKILL.md`
@@ -296,6 +307,7 @@ worker 最终输出必须包含：
 - 若当前结论是窄范围、局部候选、不接入生产但仍有可复用后续方向，输出给用户的后续路径选项：
   默认建议、继续当前 topic、另开 follow-up topic、当前不建议做的方向。
 - 如果本轮停止时仍有 `phase_deferred + unblocked` 项，明确列出“本轮没有做但可继续做”的事项、默认下一 phase、停止条件和需要用户 / reviewer 判断的边界；不能只写成泛泛 remaining risks。
+- 如果最终输出 `ready_for_review`，必须同时写 `ready_for_review_validity_check` 摘要，说明 structure parity、doc suite、legacy compatibility、roadmap、optimization matrix 和 shape scan 中没有未阻塞缺口；否则不得使用该结论。
 
 reviewer 最终输出必须符合 reviewer protocol（审查协议）：
 
@@ -340,5 +352,6 @@ workflow improvement 最终输出必须包含：
 - 是否需要用户授权写 production、进入 workflow improvement 或创建 commit。
 - 默认读取链是否足以启动本轮任务。
 - 若目标是继续 RVV 优化工作，是否已经恢复或创建 phase plan、optimization roadmap 和 optimization matrix，并判断 `phase_deferred` 是否仍可在本轮继续。
+- 若恢复状态声称 `ready_for_review`，是否已证明该状态没有被 roadmap、matrix、mature sibling parity 或当前源码 shape scan 推翻。
 
 如果无法推导模块、topic 或 worker 输出，先提出一个具体问题。其余默认条件从本文读取。

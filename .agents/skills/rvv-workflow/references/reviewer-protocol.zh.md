@@ -152,10 +152,12 @@ reviewer 应至少检查：
   继续当前 topic 的扩展动作、应另开 topic 的消融 / 扩展动作和当前不建议做的方向。
 - 如果 worker 使用短 prompt 启动，Handoff Packet 是否包含 `worker_quality_gate_check`，且该字段真实覆盖标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、证据模型和 stop condition。缺失或虚写时，应视为 workflow/worker 执行缺口。
 - 如果 worker 继续已有 topic 或声明处于 phase loop，Handoff Packet 是否包含 `phase_loop_state`，并列出当前 phase、phase plan/result 路径、completion matrix、optimization matrix、unblocked next actions、stop condition、continue/stop decision 和 next phase default。
+- 如果 worker 声称 `ready_for_review`、`stop_for_review`、`done` 或 `unblocked_next_actions=none`，reviewer 是否额外检查 `ready_for_review_validity_check`；只要 roadmap、matrix、mature sibling parity、test support shape scan 或 legacy compatibility 仍有 `phase_deferred + unblocked`，该停止状态就应视为过早停止。
 - reviewer 必须检查 worker 是否过早停止：当前 phase plan 是否在修改前存在；plan 的每个动作是否在 result 和矩阵中回填；若仍有 `unblocked_next_actions`，worker 是否错误地停在一个 helper、隔离层、target、bench、summary、roadmap-only、evaluation-only、pointer-only 或表格之后；Evidence Doctor Warning / Error 是否被解释、重跑、降级或阻塞。发现早停时，至少列为 `High` finding，并在 `Worker prompt patch` 要求回到第一个 unblocked next action。
 - `worker_quality_gate_check` 是否是证据化表格，而不是只有 `true` / `false`。reviewer 应抽查每项 `evidence` 是否能在当前 topic 产物中定位；若找不到对应文件、章节、日志或代码注释，应把该项判为未闭合。
 - `worker_quality_gate_check` 是否在适用时覆盖 `experience_migration_audit_ready`、`test_support_shape_scan_ready`、`test_support_split_decision_ready`、`mature_sibling_parity_action_ready` 和 `legacy_compatibility_decision_ready`。若 worker 声称不适用，reviewer 应抽查当前 topic 是否确实没有 sibling topic 经验、长 helper / 长源文件、多职责支撑代码、legacy 入口或成熟 sibling 结构差距。
 - `worker_quality_gate_check` 是否覆盖 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`。
+- `worker_quality_gate_check` 是否覆盖 `ready_for_review_validity_check`；如果 worker 仍有 `phase_deferred + unblocked` 却宣布 `ready_for_review`，应把该项判为 fail 并把问题写进 findings。
 - `worker_quality_gate_check` 是否覆盖 `correctness_efficiency_evidence_chain_ready`。
 - `worker_quality_gate_check` 是否覆盖 `evidence_doctor_result_ready`，并指向 doctor report 或人工 Errors / Warnings / Suggestions 摘要。若本轮涉及性能、checksum 或 asm 证据但该项缺失，应把 EvidenceDecision 判为未闭合。
 - `worker_quality_gate_check` 是否覆盖 `dirty_isolation_ready`、`implementation_review_ready`、`candidates_added_or_deferred_ready`、`document_ownership_matrix_ready`、`traceability_map_ready`、`ilp_lmul_decision_ready`、`numerical_budget_result_ready`、`asm_attribution_ready`、`board_evidence_paths_ready`、`evidence_decision_ready`、`production_decision_ready` 和 `validation_summary_ready`。不适用项必须有理由，不能直接省略。

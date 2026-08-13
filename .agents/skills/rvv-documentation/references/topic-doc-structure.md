@@ -205,6 +205,11 @@ topic-local benchmark/evidence 文档应把 `run_bench_*`、`run_board_bench_*` 
 需要从文档回答测试语义、bench label、checksum、证据白名单和代码地图，topic-local doc suite 应视为
 结构成熟度的一部分，而不是可选装饰。只做 evaluation 迁移、只新增 roadmap 或只保留一个指针文件，
 不足以关闭 doc-suite 缺口。
+如果相邻成熟 topic 已经用 doc suite 解决了这些读者问题，worker 应把它作为 structure-parity 审计的
+quality bar，而不是写成“reviewer 需要时再做”。具体内容不能复制，文件名也可按当前 topic 和配置调整；
+但 README、测试总览、正确性测试说明、benchmark/evidence 说明、optimization evidence 和 code map 的
+读者路径必须逐项 `adopt / defer / reject`。未阻塞的 `defer` 属于 `phase_deferred + unblocked`，
+不能支持 `ready_for_review`。
 
 推荐 doc suite：
 

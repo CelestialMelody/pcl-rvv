@@ -40,6 +40,7 @@ document_ownership_check (文档归属检查；说明长期事实、候选取舍
 traceability_map_status (可追踪性地图状态；required / updated / not_required / deferred，并列出 map 位置或暂缓理由):
 optimization_roadmap_status (优化路线图状态；required / updated / not_required / deferred，并列出 roadmap 路径、候选搜索空间和下一阶段恢复条件):
 mature_sibling_parity_status (成熟相邻主题结构对齐状态；source / include / doc suite / doc-rvv / legacy 清理的 adopted / deferred / rejected 决策):
+ready_for_review_validity_check (ready_for_review 合法性检查；说明 roadmap / matrix / parity / shape scan 是否还有 phase_deferred + unblocked):
 ilp_lmul_decision (ILP / LMUL 取舍；说明寄存器压力、accumulator 数、VL/LMUL、unroll 或暂不适用原因):
 numerical_budget_result (数值预算结果；说明 FMA、reduction tree、误差阈值、near-cancellation 和矩阵 / checksum 结果):
 evidence_doctor_result (证据体检结果；Errors / Warnings / Suggestions、未解决 warning、处理动作、是否重跑 / 降级 / 修改结论):
@@ -90,6 +91,13 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
   topic-local doc suite、evaluation 主路径、`doc-rvv` 长期文档分工和 legacy 清理逐项给出
   `adopted / deferred / rejected`。若存在当前 topic 授权范围内、未阻塞、低风险的 deferred 项，
   `next_phase_default` 不能是 `ready_for_review`，必须指向 structure-parity 或对应清理 phase。
+- `ready_for_review_validity_check` 在 worker 声称 `ready_for_review`、`done`、`stop_for_review`
+  或 `unblocked_next_actions=none` 时必须输出。字段应说明：
+  - 检查过哪些文件：最近 phase result、phase README、optimization roadmap、optimization matrix、
+    mature sibling parity 状态、test support shape scan、legacy compatibility decision 和 topic-local doc suite。
+  - 是否还有 `phase_deferred + unblocked` 项；若有，列出每项和默认下一 phase。
+  - 若仍停止，命中的真实 `stop_condition_hit` 是什么。
+  - 若检查失败，`next_phase_default` 不得写 `ready_for_review`。
 - `ilp_lmul_decision` 适用于含 RVV kernel、reduction、staging 或性能候选的 topic。必须说明 LMUL（向量寄存器分组）、VLEN gate、accumulator 数、unroll / ILP（指令级并行）、寄存器压力或 spill 风险；若不适用，写清为什么当前工作没有新的 ILP / LMUL 决策。
 - `numerical_budget_result` 适用于手写浮点、FMA、reduction、近抵消、阈值谓词、`ATA/ATb`、matrix 或 checksum 证据。它必须写清参考链路、误差阈值、最大 / 关键误差或 checksum 结果、失败样本状态和反汇编 / FMA 归属。若只做文档或整数路径，可写 `not_applicable` 并说明原因。
 - `evidence_doctor_result` 适用于任何 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision。字段必须说明是否运行 `artifact_layout.evidence_doctor_script_template` 解析出的脚本或按 `rvv-test/references/evidence-doctor.zh.md` 人工检查，输入 manifest / summary 路径，Errors / Warnings / Suggestions 数量，未解决 warning，每项处理动作，以及是否因此重跑、降级证据边界、修改结论或保留风险。如果没有运行脚本，必须写 `not_run` 和原因，并给出人工 doctor 检查摘要；不能省略。
@@ -160,6 +168,9 @@ worker 输出 Handoff Packet 前应检查：
 - 如果声明对齐成熟 sibling 结构，是否输出 `mature_sibling_parity_status`、`test_support_shape_scan` 和
   `legacy_compatibility_decision`；若仍有低风险结构 / 文档 / legacy 清理缺口，是否把它们放进
   `phase_deferred_unblocked_items` 和 `next_phase_default`，而不是停在 `ready_for_review`。
+- 如果声称 `ready_for_review`、`done` 或 `unblocked_next_actions=none`，是否输出
+  `ready_for_review_validity_check`，且检查没有被 roadmap、matrix、mature sibling parity、
+  current shape scan、doc suite 或 legacy compatibility 推翻。
 - 是否输出 `evidence_freshness_status`；如果复跑改变了数值、decision bucket 或证据角色，旧 summary / phase result 是否已标成 historical / stale，相关文档是否已刷新。
 - 是否输出 `evidence_registry_status`；如果 registry 不可用，是否列出人工检查路径和下一轮接入动作；如果发现未登记变化，是否暂停当前数值结论。
 - 是否输出 `rerun_budget_decision`；如果板卡结果波动，是否按预设预算停止并给出 stable / unstable 决策桶，而不是无限复跑。
@@ -170,6 +181,8 @@ worker 输出 Handoff Packet 前应检查：
 - `language_check` 是否覆盖文档、代码注释、测试输出、Handoff Packet 和最终回复；是否按 `writing-style.md` 执行触发词检查，并说明命中项、改写结果或保留理由。
 - `worker_quality_gate_check` 是否真实反映写文件前质量门禁，且每项带 reviewer 可定位的证据；如果短 prompt 启动后产物质量下降，应在这里暴露，而不是只写 agent asset trace。
 - `phase_loop_state` 是否能让下一轮 worker 用一句短 prompt 恢复当前 phase 和 roadmap；如果仍有 `phase_deferred_unblocked_items` 或 `unblocked_next_actions` 却选择停止，是否写清合法 `stop_condition_hit` 和 `continue_stop_decision`。
+- 如果 Handoff 把未做项列为 `deferred`、`optional`、`reviewer-triggered` 或 `independent follow-up`，
+  是否说明它们属于 `phase_deferred + unblocked` 还是 `turn_stop_deferred`；若是前者，是否默认继续到下一 phase。
 - 是否明确哪些日志、build（构建）产物和本机配置只作为工作区证据，不进入提交。
 - 如果 topic 进入 production integration loop，是否写明生产接入计划和需要人工确认的风险。
 - 如果 topic 完成 production integration loop，是否写明最终主题文档已经按生产证据重写，而不是沿用诊断阶段结论。

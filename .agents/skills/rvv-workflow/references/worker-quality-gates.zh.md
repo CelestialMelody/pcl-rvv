@@ -258,6 +258,7 @@ phase_completion_matrix_ready:
 optimization_matrix_ready:
 micro_stop_guard:
 continue_stop_decision:
+ready_for_review_validity_check:
 ```
 
 - `phase_plan_written_before_edits`：当前 phase 的 `plan.zh.md` 必须先于该 phase 的实现、测试、bench 或 production 修改存在。若历史 topic 没有阶段目录，先创建 `doc/phases/000-current-state-and-gaps/plan.zh.md`。
@@ -266,6 +267,7 @@ continue_stop_decision:
 - `optimization_matrix_ready`：复杂 topic 必须维护 candidate family × row source policy × point type / `Scalar` / layout × test × bench × board × asm × doctor × decision 矩阵；`planned` 或 `deferred` 不能伪装成 adopted。
 - `micro_stop_guard`：如果只完成一个小 helper、一个隔离层、一个 target、一次 bench、一个 summary 或一张表，但当前计划仍有授权且未阻塞 next action，worker 不允许停；必须继续推进下一个动作，或写出真实停止条件。
 - `continue_stop_decision`：最终输出和 Handoff 必须解释为什么继续或为什么停。停止必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权，或当前 phase 矩阵、optimization matrix 和 roadmap 都已闭合且没有 unblocked next action。
+- `ready_for_review_validity_check`：如果任何 phase README、result、Handoff 或最终回复声称 `ready_for_review`，worker 必须重新验证 mature sibling parity、doc suite、legacy 清理、shape scan、roadmap 和 optimization matrix 是否仍有 `phase_deferred + unblocked`。只要有未闭合缺口，`ready_for_review` 就失效，必须恢复到下一 phase。
 
 `micro_stop_guard` 是强规则：worker 不能把一个局部 positive / negative、row-source audit 表、Evidence Doctor warning 解释或 isolated bench 当作 topic 完成。若继续推进会扩大范围，则停止理由必须写清扩大到哪里、需要谁授权、恢复入口是什么。
 
@@ -366,6 +368,7 @@ phase_completion_matrix_ready:
 optimization_matrix_ready:
 micro_stop_guard:
 continue_stop_decision:
+ready_for_review_validity_check:
 doc_quality_refs_loaded:
 current_optimization_section_ready:
 test_comment_strategy_frozen:
@@ -439,6 +442,11 @@ followup_options_ready:
 - 表格必须包含 `phase_plan_written_before_edits`、`phase_completion_matrix_ready`、`optimization_matrix_ready`、
   `micro_stop_guard` 和 `continue_stop_decision`。证据指向当前 phase plan/result、optimization matrix、
   `unblocked_next_actions`、`stop_condition_hit` 和 Handoff 的 `phase_loop_state`；若当前任务不是多阶段优化，写 `not_applicable` 并说明为什么没有 phase loop。
+- 表格必须包含 `ready_for_review_validity_check`。如果本轮输出 `ready_for_review`、`done`、
+  `stop_for_review` 或 `unblocked_next_actions=none`，证据必须指向 roadmap、optimization matrix、
+  mature sibling parity 状态、test support shape scan、legacy compatibility decision 和 doc suite 审计；
+  若这些位置仍有 `phase_deferred + unblocked`，该项必须写 `fail`，且 `next_phase_default` 不能是
+  `ready_for_review`。
 - 表格必须包含 `dirty_isolation_ready`。证据指向 Handoff Packet 的 `dirty_isolation`，说明当前 worktree 的无关 diff、raw logs、build 输出和本轮可审查 / 可提交路径边界。
 - 表格必须包含 `implementation_review_ready`。若本轮改了 production、diagnostic helper、bench-facing helper 或 RVV kernel，证据指向 Handoff Packet 的 `implementation_review` 或主题文档“当前采用的优化方式”；若纯文档 cleanup，写 `not_applicable` 并说明原因。
 - 表格必须包含 `candidates_added_or_deferred_ready`。证据指向本轮候选路线表、experience-migration audit 或 Handoff Packet 的 `candidates_added_or_deferred`，说明新增、尝试、暂缓或拒绝的候选。

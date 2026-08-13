@@ -47,6 +47,19 @@ row source -> field load/gather -> finite mask -> formula -> staging/reduction -
   `test_support/` 当作必然存在的目录；只有当前 topic 真的有旧 `test_support/` 目录时，才把
   “移出 `test_support/`”写成具体动作。
 
+shape scan 的最小输出表：
+
+```text
+| shape | present | paths | roles found | risk if unchanged | decision | next action |
+```
+
+`shape` 至少覆盖 root test source、root bench source、`src/` source、aggregator header、single large
+helper header、legacy `test_support/` directory、`include/impl` internal helpers、topic-local script、
+bench case registry、Makefile / board target、topic-local docs、`doc-rvv` long-term doc 和 evidence registry。
+没有某种形态时写 `not_present`；存在但暂不迁移时写清它属于 `phase_deferred + unblocked` 还是
+`turn_stop_deferred`。如果当前 topic 已有旧 `test_support/`，默认动作是按 `test_support.internal_directory`
+解析出的内部目录迁移或拆分；只有外部依赖、用户兼容要求、dirty isolation 风险或同轮无法更新引用时才临时保留。
+
 - 默认偏好来自 `.agents/config/defaults.yaml` 的 `test_support` 配置：helper header 超过
   `helper_split_soft_line_limit`（默认约 800 行）时应评估拆分；超过
   `helper_split_hard_line_limit`（默认约 1000 行），或同时包含不少于

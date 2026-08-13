@@ -37,7 +37,7 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
 - 优先使用匹配的 RVV skill：`rvv-workflow`、`rvv-project-config`、`rvv-screening`、`rvv-test`、`rvv-implementation`、`rvv-documentation`、`rvv-math-vectorization`。
 - `rvv-test` 是统一测试与证据 skill。旧 diagnostics / benchmarking 职责已经迁移到 `rvv-test`，
   不再保留独立 skill 入口。
-- `rvv-test/references/optimization-phase-loop.zh.md` 是多阶段优化循环的细则源。短 prompt 继续已有 topic 时，worker 必须恢复或创建 phase plan，按阶段完成实现、测试、证据解释、矩阵更新和 continue / stop decision；仍有 unblocked next action 时不得因微任务完成而早停。
+- `rvv-test/references/optimization-phase-loop.zh.md` 是多阶段优化循环的细则源。短 prompt 继续已有 topic 时，worker 必须恢复或创建 phase plan，按阶段完成实现、测试、证据解释、矩阵更新和 continue / stop decision；仍有 unblocked next action 时不得因微任务完成而早停。若历史 phase 或 Handoff 写着 `ready_for_review`，仍要重新执行 `ready_for_review_validity_check`，确认 roadmap、matrix、structure parity、doc suite、legacy 清理和 shape scan 没有未阻塞缺口。
 - 回复、代码注释、测试说明、文档、汇报必须遵循 `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`：面向中文读者时不要堆英文术语，英文专有术语首次出现必须用括号解释中文含义。
 - 除非用户明确要求，不修改 PCL 生产源码。短 prompt 中“处理 topic”视为授权修改该 topic 对应的、
   由 `artifact_layout` 解析出的测试资产和主题文档产物；不要把该授权扩展到其它 topic。

@@ -33,6 +33,11 @@
 | screening（筛选）队列、模块级优先级和 topic 状态 | `artifact_layout.screening_root_template` 解析目录或配置解析出的状态表 | Handoff 和 closeout 引用状态同步结果 | 主题文档复制模块队列表 |
 | 通用 workflow、reviewer 或文档规则 | `.agents/skills/`、`.agents/knowledge/` 和 `agent_asset_feedback` | Handoff 说明建议更新位置 | topic 文档写成通用 agent 规则 |
 
+用户或 reviewer 对工作流程、停止条件、文档拆分、测试支撑结构、恢复方式或 reviewer 可读性的反馈，
+默认先进入 agent asset audit（代理资产审计）。若反馈暴露的是可跨 topic 复用的规则缺口，worker / reviewer
+应在 Handoff 的 `agent_asset_feedback` 中写明建议更新的 skill/reference；获得 workflow improvement
+授权后，先更新 `.agents/`，不要只把它记成当前 topic follow-up。
+
 复杂 topic 可以把测试和证据说明拆成多份 topic-local 文档。推荐分工：
 
 - `testing-overview`：测试类型定义、运行入口分类、覆盖矩阵和证据白名单。
@@ -45,6 +50,12 @@
 - evaluation：EvidenceDecision、当前证据、历史候选取舍、accepted risk 和 Traceability Map。
 
 README 只作为导航、常用命令和证据白名单入口。它不承担每个测试、每个 bench case 或每个 helper 的长解释。
+
+当 topic 已经命中复杂 topic 条件，或相邻成熟 topic 已经通过 README + topic-local doc suite 解决测试语义、
+bench label、证据白名单和代码地图问题时，doc suite parity（文档套件对齐）是 structure maturity
+（结构成熟度）的一部分。worker 可以根据当前 topic 的真实复杂度合并或裁剪文档，但必须在 phase plan/result
+和 Handoff 中逐项说明 `adopted / deferred / rejected`。若只是暂缓且不存在用户限定、dirty isolation
+风险、工具阻塞或生产范围扩大，默认继续到下一 phase；不要把“只有 reviewer 需要才补”写成合法 closeout。
 
 ## 写入顺序
 

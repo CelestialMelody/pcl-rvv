@@ -26,7 +26,9 @@ description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适
 “继续完善 RVV 优化工作”时，还必须读取 `rvv-test/references/optimization-phase-loop.zh.md`，
 恢复或创建 phase plan（阶段计划）、topic-level optimization roadmap（主题级优化路线图）
 和 optimization matrix（优化矩阵）。roadmap 负责持续保留搜索空间和下一阶段候选；phase
-plan/result 负责本阶段闭环；matrix 负责证据状态。
+plan/result 负责本阶段闭环；matrix 负责证据状态。恢复到 `ready_for_review` 时也必须重新做
+`ready_for_review_validity_check`：只要 structure parity、doc suite、legacy 清理、shape scan、
+roadmap 或 matrix 仍有 `phase_deferred + unblocked`，默认继续下一 phase。
 
 S0 恢复和偏好冻结的合同见 [references/s0-preferences-and-recovery.zh.md](references/s0-preferences-and-recovery.zh.md)。
 当工作需要从默认偏好、local override 和 prompt override 里恢复当前轮的有效策略、解析已配置的
