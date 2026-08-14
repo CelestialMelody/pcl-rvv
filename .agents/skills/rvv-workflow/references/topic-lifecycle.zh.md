@@ -6,10 +6,16 @@
 
 - S0-S12 是主干状态，不是线性流水账。
 - S10 `EvidenceDecision`（证据决策）是分支点。
-- 如果证据不支持生产接入，进入诊断 / bench closeout（收尾）并在 S12 结束。
-- 如果证据支持生产接入，进入 production integration loop（生产接入闭环），完成生产实现后重新跑必要的测试、反汇编、板卡和证据决策，再做最终文档 closeout。
+- 如果证据不支持生产接入，进入诊断 / bench closeout（收尾）并在 S12 结束；若已有 production patch，
+  先进入待用户确认回滚状态，不能自动撤回。
+- 如果证据支持生产接入，进入 production integration loop（生产接入闭环），完成生产实现后重新跑必要的测试、
+  反汇编、板卡和证据决策；PI5 的正负结论都必须先经过用户检查确认，再做最终文档 closeout 或回滚。
 - Commit phase（提交阶段）是可选独立阶段，不属于 S0-S12 的固定后缀。
 - S3-S10 不是一次性瀑布。它们是可重复的优化循环：设计、实现、测试、证据解释、矩阵更新和决策可以在同一 topic 内重复多轮，只要还有授权且未阻塞的下一步动作。
+- phase scope（阶段范围）不等于 topic scope（主题范围）。阶段只关闭计划中冻结的入口、row source、点类型、
+  `Scalar`、布局和规模组合；具体点型或代表性点型的正向结果不能自动升级为整个模板入口的泛型结论。
+  未覆盖的点类型必须进入 `point_type_expansion_queue`（点类型扩展队列，或等价字段），并由后续 phase
+  重新完成 correctness、fallback、bench、asm、board、Evidence Doctor 和必要的 production integration loop。
 
 ## Phase Groups（阶段分组）
 
@@ -96,8 +102,8 @@ S10 汇总 evidence bundle（证据包）并给出明确决策：
 
 S10 必须写清“证据证明了什么”和“不能证明什么”。QEMU 或反汇编不能被写成生产性能结论。
 进入 closeout 或 production-candidate 后，文档必须包含证据链。`artifact_layout.topic_doc_template`
-解析出的 `doc-rvv` 长期主题文档只适用于 adopted production behavior（已采用生产行为）、production patch
-（生产补丁）或 PI5 生产证据闭环通过后的主题，并使用“正确性与高效性证据链”。未接 production 的诊断结论
+解析出的 `doc-rvv` 长期主题文档只适用于 adopted production behavior（已采用生产行为）、用户确认保留的 production patch
+（生产补丁）或 PI5 生产证据闭环通过且用户确认采纳后的主题，并使用“正确性与高效性证据链”。未接 production 的诊断结论
 写入 topic-local evaluation / phase closeout 的“诊断证据链”，并说明 diagnostic evidence（诊断证据）不能替代
 production evidence（生产证据）。
 S10 如果发现 EvidenceDecision（证据决策）依赖了尚未写入 `rvv-test`、`rvv-implementation`
@@ -133,7 +139,8 @@ S10 是当前 phase 的决策点，不是 topic 的天然终点。若 `current_d
 边界和证据计划可控。不能把 partial candidate 自动升级成 production-ready。
 
 当用户明确授权“进入 / 推进 production integration loop（生产接入闭环）”时，默认目标是同一轮完成
-PI1-PI5 加 S11 closeout，而不是每个 PI 阶段结束都等待人工确认。PI1 是生产补丁前的 gate：
+PI1-PI5 的接入、测试和证据采集，而不是每个 PI 阶段结束都等待人工确认；PI5 完成后必须停在对称的
+用户检查点，不能自动进入 S11 closeout。PI1 是生产补丁前的 gate：
 如果 PI1 能冻结候选范围、不可扩大范围、fallback 矩阵、生产直连测试和暂停条件，worker 应继续
 PI2-PI5；只有命中下方暂停条件，或用户明确要求“只做 PI1 / 只写计划 / 暂不改 production”，才停在 PI1。
 
@@ -143,10 +150,21 @@ PI2-PI5；只有命中下方暂停条件，或用户明确要求“只做 PI1 / 
 2. `PI2 production_patch`（生产补丁）：最小修改生产源码，保留 `__RVV10__` 未启用时的原路径。
 3. `PI3 production_direct_tests`（生产直连测试）：补真实入口、真实 fallback 和必要上游测试。
 4. `PI4 production_evidence_rerun`（生产证据重跑）：重新执行 S7-S9 中与生产路径相关的测试、QEMU、反汇编和板卡验证。
-5. `PI5 production_evidence_decision`（生产证据决策）：再次执行 S10。若证据仍成立，进入 S11；若证据不成立，回退或转入 Branch A。
+5. `PI5 production_evidence_decision`（生产证据决策）：再次执行 S10。无论证据支持还是不支持生产接入，
+   都进入“待用户检查确认”状态。worker 必须先保留当前 patch，展示 production diff、真实公开入口、
+   可复现测试命令、板卡 / Evidence Doctor 结果和拟议下一步。证据支持时进入
+   `pending_user_confirmation_adopt_production`，用户明确确认保留 / 采纳后才能视为 adopted production behavior、
+   进入 S11 和更新适用的 `doc-rvv`；用户只授权补充验证时，不得提前收口。证据不支持时进入
+   `pending_user_confirmation_rollback`，用户明确授权回滚后才能回滚、删除或覆盖 production patch，再转入
+   Branch A；用户未确认时不得自行恢复 no-production。
+   用户此前授权“推进 production integration loop”或后续只说“继续”，不覆盖上述最终采纳或回滚动作；
+   未确认时应以 `blocked` 或 `turn_stop_deferred` 交接，并明确对应的
+   `production_adoption_requires_user_authorization` / `production_rollback_requires_user_authorization`。
 
 如果用户授权“继续推进 production integration loop”“连续推进 PI2-PI5”或等价目标，worker 可以在同一轮连续完成 PI2-PI5，
-不需要每个 PI 阶段都暂停等待用户确认。连续推进仍必须按顺序产出证据，且不得扩大 PI1 已冻结的候选范围。
+不需要每个 PI 阶段都暂停等待用户确认；但 PI5 仍是必须停下供用户检查的最终生产决策点。连续推进仍必须
+按顺序产出证据，且不得扩大 PI1 已冻结的候选范围。PI1 冻结的具体点型或代表性点型不能在同一轮
+被默认为 PointXYZ-like 或其它泛型点类型集合；若要扩大范围，必须先创建 / 修订后续 point-type expansion phase。
 
 连续推进的默认暂停条件：
 
@@ -157,6 +175,8 @@ PI2-PI5；只有命中下方暂停条件，或用户明确要求“只做 PI1 / 
 - 反汇编不能证明生产 helper 命中预期 RVV 指令，或关键指令无法归属到 production 符号范围。
 - 板卡或目标硬件证据不可用，或 production direct 性能不成立。
 - 发现诊断证据与 production direct 证据矛盾，需要 reviewer 或用户判断是否回退。
+- PI5 证据支持采纳，但用户尚未明确确认保留 / 采纳并进入生产 closeout。
+- PI5 需要回滚、删除或覆盖 production patch，且用户尚未明确授权回滚。
 
 PI1 若涉及模板点类型、PCL traits（点类型字段特征）、字段 offset、泛型 source / target 组合、`Scalar=double`
 或从诊断 `PointNormal` 扩展到 production 模板入口，必须读取并应用：
@@ -209,7 +229,10 @@ S11 是最终文档收口，不是所有文档的首次出现。
 - bench-only 或 diagnostic 结论成立，且文档和队列表同步完成。
 - rollback/no-production 结论成立，且生产改动已回收或未发生。
 
-`blocked` 必须带恢复条件，不能只写“等待板卡”或“需要更多测试”。
+`blocked` 必须带恢复条件，不能只写“等待板卡”或“需要更多测试”。如果阻塞原因是
+`production_adoption_requires_user_authorization` 或 `production_rollback_requires_user_authorization`，
+Handoff 必须附上当前 production diff、用户可执行的验证命令、证据摘要、拟议下一步和明确的恢复动作；
+在授权前不得自行采纳、收口或回滚。
 
 ## Commit Phase
 

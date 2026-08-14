@@ -29,6 +29,13 @@ worker 应把它们归一成 `roadmap_default_recovery_queue`：每项写明 pha
 授权内、是否有 blocker、是否可与其它结构动作合并执行。若队列中存在未阻塞的测试资产、topic-local
 文档、evidence registry、legacy 清理或结构成熟度动作，`ready_for_review_validity_check` 只能表示旧停止位已被重新检查，
 不能作为终点状态；worker 必须继续到队列中的第一个未阻塞 phase。
+恢复时还必须把 phase scope（阶段范围）和 topic scope（主题范围）分开审计。当前 phase 只覆盖
+具体点类型、代表性点类型、单一 source/target 组合、row source、`Scalar`、布局或规模时，worker
+必须读取并维护 `point_type_expansion_queue`（点类型扩展队列，或等价字段），同时列出已验证和未验证
+范围、下一扩展 phase、恢复条件及其 correctness / fallback / bench / asm / board / Evidence Doctor
+要求。`std::is_same_v<PointXYZ>` 或其它 exact-type gate 只能是阶段性窄范围例外；它不能关闭
+PointXYZ-like、PointNormal-like、PointXYZINormal 或其它满足 traits 条件的模板实例，也不能自动升级为
+整个模板入口的 production 结论。
 如果最近 phase README、result、Handoff 或 worker 输出写着 `ready_for_review`，worker 仍必须重新验证该停止决定：
 只要 roadmap、optimization matrix、mature sibling parity audit 或当前 shape scan 暴露未阻塞的结构 / 文档 /
 legacy / 测试优化动作，就把旧 `ready_for_review` 标成 stale stop decision，并恢复到第一个未阻塞 phase。
@@ -148,8 +155,8 @@ worker 默认进入 `PI1 production_integration_plan`（生产接入计划），
 
 如果用户明确说“进入 / 推进 production integration loop（生产接入闭环）”“尝试生产接入”
 或等价目标，短 prompt 默认含义不是“只做 PI1 计划”。worker 应把 PI1 当作同轮闭环的第一道
-gate（门禁）：PI1 能冻结候选范围且未命中暂停条件时，继续同轮推进 PI2-PI5，并在 PI5 后完成
-S11 文档 closeout（收尾文档）。只有用户明确说“只做 PI1 / 只写计划 / 先不要改 production”，
+gate（门禁）：PI1 能冻结候选范围且未命中暂停条件时，继续同轮推进 PI2-PI5 的接入、测试和证据采集；
+PI5 完成后必须进入对称的用户检查点，不能自动进入 S11 文档 closeout（收尾文档）。只有用户明确说“只做 PI1 / 只写计划 / 先不要改 production”，
 或 PI1 gate 不能闭合，才停在 PI1 并输出 Handoff Packet。
 
 如果最近 Handoff Packet 的 `phase_reached` 已经是 `PI1 production_integration_plan complete`，
@@ -296,12 +303,23 @@ workflow improvement 再读：
 
 worker 默认权限：
 
-- 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产、topic-local evaluation / phase 文档和适用的文档产物。`artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 长期主题文档只有在存在 adopted production behavior、production patch 或 PI5 生产证据闭环通过时才适用；no-production / bench-only / 未接 production 的 partial-production-candidate 只写 topic-local evaluation、phase result、roadmap / matrix 和 Handoff。
+- 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产、topic-local evaluation / phase 文档和适用的文档产物。`artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 长期主题文档只有在存在 adopted production behavior、用户确认保留的 production patch 或 PI5 生产证据闭环通过且用户确认采纳时才适用；no-production / bench-only / 未接 production 的 partial-production-candidate 只写 topic-local evaluation、phase result、roadmap / matrix 和 Handoff。
 - 对测试优化和 topic-local 文档成熟度工作，短 prompt 默认授权 worker 在当前 topic 内连续推进多个低风险 phase，例如测试支撑结构迁移、legacy 聚合头 / pointer 清理、evaluation 迁入 `doc/`、README / doc suite 补齐、source-indexed-cloud-pair 或其它 row source 的 candidate / correctness / bench / asm / Evidence Doctor 阶段。除非继续会扩大到 production、public API、其它 topic、板卡不可用、证据矛盾或 dirty isolation 不安全，否则不应因为一个小 phase 完成就停止。
+- 每轮 production integration loop 只关闭 PI1 明确冻结的范围。一个 concrete point type（具体点类型）、
+  representative point type（代表性点类型）或单一 row source 的 production direct 结果，不能自动覆盖
+  其它 source/target 点型组合、PointXYZ-like 泛型集合、其它 `Scalar`、布局或 row source；这些范围必须
+  作为新的 phase 进入恢复队列，并重新完成对应测试和证据闭环。
 - 如果 phase plan、optimization matrix、EvidenceDecision 或 production gate 需要板卡 / 目标硬件证据，且配置显示板卡可用或当前会话已确认可用，短 prompt 默认授权 worker 在有界复跑预算内继续执行板卡 correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新，并据此推进下一阶段。“需要板卡验证”本身不是停止条件；只有板卡不可达、登录 / rsync / 工具失败、预算耗尽后 decision bucket 仍不稳定、证据矛盾或 dirty isolation 不安全，才可写成 `turn_stop_deferred`。
 - 不把该授权扩展到其它 topic 的测试资产、topic-local 文档、production 长期主题文档或生产源码。
 - S10 `EvidenceDecision`（证据决策）前不修改 production（生产源码）。
 - 如果证据支持 production-ready（可接入生产），先输出 Handoff Packet，等待用户确认后进入 production integration loop（生产接入闭环）。
+- production integration loop 的用户授权不包含 PI5 后的最终生产决策。PI5 是对称的用户检查点：
+  无论 production direct 证据支持还是不支持接入，worker 都必须暂停，保留当前 production patch，
+  向用户展示 production diff、公开入口、测试命令、板卡 / Evidence Doctor 结果和拟议下一步。
+  证据支持时，等待用户明确确认保留 / 采纳后，才能视为 adopted production behavior、进入 S11 closeout、
+  更新适用的 `doc-rvv` 或提交；证据不支持时，等待用户明确授权后才能回滚、删除或覆盖 patch。
+  用户此前说“进入 / 推进闭环”或后续只说“继续”，都不能视为对 PI5 最终采纳或回滚的授权；
+  在用户确认前，后续 worker 必须先恢复这个待确认状态。
 - 默认不创建 commit（提交）。
 - 默认不要求用户预先指定输出路径；只有用户要求落盘、保存到固定 work-log（工作日志）或跨对话复用时，才写入路径。
 - S0 必须记录 `preferences_loaded`，并写明是否读取了 `.agents/config/defaults.yaml` 与 `.agents/local/user-preferences.yaml`。

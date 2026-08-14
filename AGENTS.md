@@ -32,6 +32,13 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
   写文件前的轻量质量门禁，避免为了 prompt 变短而丢失文档、注释、bench 和证据质量要求。
 - `.agents/knowledge/pcl-rvv-knowledge-map.md` 是轻量知识索引入口，只说明按配置解析出的文档 / 测试资产读取策略，不复制具体产物内容。
 - 短 prompt 继续已有 topic、恢复阶段状态或目标含有“继续完善 RVV 优化工作”时，必须读取 `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`；它定义 `artifact_layout.phase_root_template` 解析目录下的 plan/result、optimization matrix、Evidence Doctor 异常处理和继续 / 停止规则。
+- phase scope（阶段范围）不等于 topic scope（主题范围）。每一轮只能关闭计划中明确冻结的入口、row source、点类型、
+  `Scalar`、布局和规模组合；如果本轮只证明了代表性点类型、具体点型或单一 source/target 组合，必须同时记录已验证范围、
+  未验证范围、下一扩展 phase 和恢复条件。`std::is_same_v<PointXYZ>` 之类的具体类型门禁只能作为有明确理由的阶段性范围，
+  不能被解释成模板入口的最终泛型结论。
+- 短 prompt 恢复时，必须把 phase result、optimization matrix、roadmap 和 Handoff 中的
+  `point_type_expansion_queue`（点类型扩展队列，或等价字段）与 row source / `Scalar` / layout 扩展队列一起检查；
+  只要仍有当前授权范围内、未阻塞的扩展动作，就不能把当前窄范围阶段写成 topic closeout。
 - 未提交的本地迁移材料不作为正式 agent instructions；正常 RVV topic（主题）工作不要读取或依赖这些材料，除非用户明确要求做历史追溯或规则迁移。
 
 ## RVV 工作规则
@@ -44,10 +51,19 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
 - 除非用户明确要求，不修改 PCL 生产源码。短 prompt 中“处理 topic”视为授权修改该 topic 对应的、
   由 `artifact_layout` 解析出的测试资产、topic-local evaluation / phase 文档和适用的文档产物；不要把该授权扩展到其它 topic。
   `artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 长期主题文档只适用于已有 adopted production behavior（已采用生产行为）、
-  production patch（生产补丁）或 PI5 生产证据闭环通过后的主题。`diagnostic`、`bench-only`、`rollback/no-production`
+  用户确认保留的 production patch（生产补丁）或 PI5 生产证据闭环通过且用户确认采纳后的主题。`diagnostic`、`bench-only`、`rollback/no-production`
   或未进入生产接入闭环的 `partial-production-candidate` 不默认创建 `doc-rvv`；其诊断证据链写入 topic-local
   evaluation、phase result、roadmap / matrix 和 Handoff。
 - RVV 结论必须有证据链，区分 correctness（正确性）、QEMU 证据、反汇编证据、板卡性能、fallback（回退路径）边界和生产接入判断。
+- production integration loop（生产接入闭环）中的 production patch（生产补丁）是用户可见的生产源码变更。
+  用户对“进入 / 推进 production integration loop”或“连续推进 PI2-PI5”的授权，只覆盖已说明范围内的接入、
+  测试和证据采集，不自动包含 PI5 后的生产决策。PI5 是对称的用户检查点：无论生产证据支持采纳还是不支持采纳，
+  worker 都必须先暂停，保留当前 patch，报告生产 diff、实际公开入口、可复现测试命令、板卡 / Evidence Doctor
+  结果和拟议下一步，等待用户检查确认。若证据支持采纳，只有用户明确确认保留 / 采纳后，才能把 patch 视为
+  adopted production behavior、进入 S11 production closeout、更新适用的 `doc-rvv` 或创建相关提交；若证据不支持
+  接入生产，只有用户明确授权回滚后，才能回滚、删除或覆盖 patch。用户此前说“进入 / 推进闭环”或后续只说“继续”，
+  都不能视为对 PI5 最终采纳或回滚的授权；未确认时不能自行收口，也不能以“证据优先级更高”“清理”或
+  “恢复 no-production”为理由撤回生产改动。
 - bench（性能测试）默认在板卡或目标硬件上跑；QEMU 默认只编译 bench binary 或跑窄范围 smoke，不运行完整 bench matrix，不把 QEMU bench compare 的计时写成性能结论。
 - 板卡复跑必须先有 bounded rerun budget（有界复跑预算）和 decision bucket（决策桶）。数字小幅波动但决策桶不变时不要无限复跑；预算耗尽仍摇摆时标成 `unstable`、降级证据或交给人工判断。
 - 如果一次复跑改变了已写文档中的方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，旧 summary / phase result 立即降级为历史 run；必须刷新对应 evaluation、phase 文档、Handoff Packet 和适用的 production 长期主题文档，不允许继续把旧数值当当前 truth。若当前结论为 no-production 且没有 adopted production behavior，不得为了刷新而新建 `doc-rvv`。
