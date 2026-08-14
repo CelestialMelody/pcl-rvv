@@ -2,7 +2,7 @@
 
 主题文档面向 production 长期维护，强调算法、实现设计、staging 边界、数值语义和生产接入理由。
 `artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 主题文档只在存在 adopted production behavior
-（已采用生产行为）、production patch（生产补丁）或 PI5 生产证据闭环通过后适用。`diagnostic`、
+（已采用生产行为）、用户确认保留的 production patch（生产补丁）或 PI5 生产证据闭环通过且用户确认采纳后适用。`diagnostic`、
 `bench-only`、`rollback/no-production` 或未接 production 的 `partial-production-candidate` 的诊断证据链
 应写在 topic-local evaluation / phase closeout；不得为了 no-production closeout 新建 `doc-rvv`。
 
@@ -45,6 +45,10 @@
 - production closeout 或 production-candidate 阶段必须包含“正确性与高效性证据链”小节。该小节是 reviewer 判断依据，不能只写说明文字。未接 production 的 no-production 结论使用 topic-local “诊断证据链”。
 - 若当前结论是 partial-production-candidate（局部生产候选），必须写清“候选范围”和“尚不能生产接入的原因”。候选范围要窄到入口形态、点类型、数据布局、规模、fallback 条件和目标硬件；不能把局部诊断收益写成整个函数族可接入。
 - 若已经接入 production（生产源码），主题文档必须从“诊断原型说明”升级为“生产实现说明”：写清真实 production patch（生产补丁）、真实 dispatch / fallback、production direct（真实生产入口直连）测试、反汇编符号归属、板卡 production bench 和 PI5 EvidenceDecision（生产证据决策）。不要把早期诊断 speedup 当作最终生产结论。
+- 每一轮 production 接入或窄范围 production candidate 都必须在 `artifact_layout.phase_root_template`
+  解析目录保留对应 plan/result 和矩阵记录。`doc-rvv` 只能描述已经用户确认采纳的长期 production 行为；
+  第一轮具体点型、代表性点型或单一 row source 的 closeout 只能说明当前阶段采用范围，不能伪装成整个
+  模板入口、所有 row source、所有 `Scalar` 或所有 layout 的最终实现。
 
 ## 当前采用的优化方式
 
@@ -60,6 +64,10 @@ production closeout（收尾）或 production-candidate（生产候选）文档�
 - 分组或阶段职责：如果有 A/B/C/N、predicate group、staging group、lane helper 或 block group，必须说明每组累加、筛选、写回或交给后续阶段的标量语义。
 - 暂缓或拒绝的替代方案：例如 fused formula（融合公式）、FMA contraction（融合乘加收缩）、额外 row source policy、`Scalar=double`、泛型点类型或更多 production 入口。每项写清状态、原因和恢复条件。
 - 证据边界：当前证据覆盖哪些入口、点类型、`Scalar`、数据布局、规模和目标硬件；不能把 representative pointtypes（代表性点类型）、diagnostic bench 或 QEMU timing（QEMU 计时）写成更宽范围的生产性能结论。
+- 如果当前 production gate 是 exact-type gate（具体类型门控），必须在“覆盖范围与 fallback”和“生产接入后的 closeout”
+  中列出未覆盖点类型、其它模板实例 fallback、`point_type_expansion_queue` 和下一 phase 的证据要求。
+  后续 PointXYZ-like 泛型、PointNormal-like 泛型、其它点型、row source、`Scalar` 或 layout 扩展必须新建
+  phase，并重新补 production direct 测试、bench、asm、板卡和 Evidence Doctor。
 
 推荐用一张表把采用和暂缓状态列清：
 
@@ -241,7 +249,7 @@ README 只负责导航、常用命令和可提交证据入口。`testing-overvie
 
 ## 生产接入后的 Closeout 章节
 
-topic 完成 PI2-PI5 后，production 长期主题文档应新增或更新生产 closeout 章节。该章节不需要复述完整代码，
+topic 完成 PI2-PI5 且用户确认采纳后，production 长期主题文档应新增或更新生产 closeout 章节。该章节不需要复述完整代码，
 但必须让 reviewer 能从文档直接看出“实际接入了什么、如何回退、证据是否仍成立”：
 
 ```text

@@ -14,13 +14,14 @@
 每类事实只设一个主归属。其它文档可以引用主归属的路径、章节、表格、run label（运行标签）或 evidence path（证据路径），但不要复制长段正文、raw log（原始日志）或完整实验流水。
 `artifact_layout.qemu_output_subdir` 和 `artifact_layout.board_output_subdir` 解析目录下的生成证据，只有被 `paths.doc_root` 或 `paths.test_root` 解析目录下的文档明确引用时才进入提交候选；因此长期文档和 evaluation 引用证据时要写具体文件、run label 或 summary artifact 路径，而不是只写输出目录。
 
-阶段探索归属在 `artifact_layout.phase_root_template` 解析目录：计划、负向尝试、异常解释、optimization matrix 和 unblocked next action 都先放这里。`artifact_layout.topic_doc_template` 解析出的 production 长期主题文档只保存最终 production 行为、当前采用实现、证据链和长期维护边界；它可以引用阶段文档作为审计来源，但不要把阶段流水或临时计划复制进去。没有 adopted production behavior、production patch 或 PI5 生产证据闭环通过时，该模板为 `not_applicable`，不得为了 no-production closeout 新建 `doc-rvv`。跨阶段的 candidate 搜索空间、阶段反思新增路线和恢复条件归到 `artifact_layout.optimization_roadmap_template` 解析出的 roadmap，不要塞进 phase result 或 evaluation。
+阶段探索归属在 `artifact_layout.phase_root_template` 解析目录：计划、负向尝试、异常解释、optimization matrix 和 unblocked next action 都先放这里。每一轮 production 接入尝试、具体点型 production candidate、代表性点型验证、row source 扩展和 point-type expansion（点类型扩展）都必须保留对应 phase plan/result；这些阶段记录保存测试事实和范围边界。`artifact_layout.topic_doc_template` 解析出的 production 长期主题文档只保存用户确认采纳后的最终 production 行为、当前采用实现、证据链和长期维护边界；它可以引用阶段文档作为审计来源，但不要把阶段流水或临时计划复制进去。没有 adopted production behavior、用户确认保留的 production patch 或 PI5 生产证据闭环通过且用户确认采纳时，该模板为 `not_applicable`，不得为了 no-production closeout 新建 `doc-rvv`。跨阶段的 candidate 搜索空间、阶段反思新增路线和恢复条件归到 `artifact_layout.optimization_roadmap_template` 解析出的 roadmap，不要塞进 phase result 或 evaluation。
 
 | 信息类型 | 主归属 | 允许引用 | 不应复制 |
 | --- | --- | --- | --- |
 | 当前采用的生产优化方式、覆盖范围、fallback（回退路径）和生产边界 | `artifact_layout.topic_doc_template` 解析出的 production 长期主题文档，仅在 production 行为已采用后适用 | evaluation 的实现方式审计表、Handoff 摘要、模块状态表 | output summary 的 raw 表、每轮 bench 全量日志、对话过程；no-production 诊断结论 |
 | S2 evaluation、候选路线、采用 / 尝试 / 暂缓 / 拒绝理由、no-production 诊断证据链 | `artifact_layout.evaluation_doc_template` 解析出的 evaluation 文档 | production 长期主题文档只在适用时引用最终采用状态和证据路径；Handoff 引用下一步动作 | production 长期主题文档复制完整候选流水账；Handoff 写成完整实验报告 |
 | 阶段计划、阶段结果、优化矩阵、unblocked next action、early-stop 证据 | `artifact_layout.phase_root_template` 解析目录 | Handoff 的 `phase_loop_state`、evaluation 的阶段审计、适用时的 production 长期主题文档最终结论 | production 长期主题文档的最终生产行为说明、长期结论和跨阶段通用规则 |
+| 具体点型 / 代表性点型 production 接入记录、未覆盖点类型、`point_type_expansion_queue` 和每轮扩展证据 | `artifact_layout.phase_root_template` 解析目录与 optimization matrix | production 长期主题文档只引用用户确认采纳的当前范围和下一扩展状态；Handoff 引用恢复队列 | 把第一阶段窄范围 gate 写成整个模板入口最终实现；在 `doc-rvv` 复制每轮探索流水 |
 | 跨阶段候选搜索空间、阶段反思新增路线、恢复条件和优先级 | `artifact_layout.optimization_roadmap_template` 解析出的 roadmap | phase result 的反思摘要、Handoff 的 `optimization_roadmap_status`、evaluation 的候选取舍索引 | 单阶段流水、board 统计明细和 production 最终结论 |
 | test、diagnostic、bench case 的输入构造、计时边界和证明点 | evaluation 文档和对应测试 / bench 源码注释 | 适用的 production 长期主题文档只引用能支撑结论的 case；Handoff 列命令和路径 | production 长期主题文档复制每个 TEST 的长注释；output summary 承担测试设计说明 |
 | bench 统计、A/B 公式、异常值口径、run label 和复现命令 | `artifact_layout.board_output_subdir` 解析目录下的 summary 或 analysis script（分析脚本） | evaluation / 适用的 production 长期主题文档引用 summary 路径、脚本路径和关键结论 | production 长期主题文档或 Handoff 复制 raw log；把 QEMU timing 写成性能结论 |
