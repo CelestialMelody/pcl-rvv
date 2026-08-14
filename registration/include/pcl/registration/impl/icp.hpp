@@ -42,72 +42,319 @@
 #define PCL_REGISTRATION_IMPL_ICP_HPP_
 
 #include <pcl/correspondence.h>
+#if defined(__RVV10__)
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
+#endif
+
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <type_traits>
 
 namespace pcl {
 // NOLINTBEGIN(readability-container-data-pointer)
 
-template <typename PointSource, typename PointTarget, typename Scalar>
-void
-IterativeClosestPoint<PointSource, PointTarget, Scalar>::transformCloud(
-    const PointCloudSource& input, PointCloudSource& output, const Matrix4& transform)
+namespace registration {
+namespace detail {
+
+template <typename PointT>
+inline void
+transformCloudStandard(const pcl::PointCloud<PointT>& input,
+                       pcl::PointCloud<PointT>& output,
+                       const Eigen::Matrix4f& transform,
+                       const bool has_normals,
+                       const std::size_t x_idx_offset,
+                       const std::size_t y_idx_offset,
+                       const std::size_t z_idx_offset,
+                       const std::size_t nx_idx_offset,
+                       const std::size_t ny_idx_offset,
+                       const std::size_t nz_idx_offset)
 {
   Eigen::Vector4f pt(0.0f, 0.0f, 0.0f, 1.0f), pt_t;
-  Eigen::Matrix4f tr = transform.template cast<float>();
 
   // XYZ is ALWAYS present due to the templatization, so we only have to check for
   // normals
-  if (source_has_normals_) {
+  if (has_normals) {
     Eigen::Vector3f nt, nt_t;
-    Eigen::Matrix3f rot = tr.block<3, 3>(0, 0);
+    Eigen::Matrix3f rot = transform.block<3, 3>(0, 0);
 
     for (std::size_t i = 0; i < input.size(); ++i) {
       const auto* data_in = reinterpret_cast<const std::uint8_t*>(&input[i]);
       auto* data_out = reinterpret_cast<std::uint8_t*>(&output[i]);
-      memcpy(&pt[0], data_in + x_idx_offset_, sizeof(float));
-      memcpy(&pt[1], data_in + y_idx_offset_, sizeof(float));
-      memcpy(&pt[2], data_in + z_idx_offset_, sizeof(float));
+      memcpy(&pt[0], data_in + x_idx_offset, sizeof(float));
+      memcpy(&pt[1], data_in + y_idx_offset, sizeof(float));
+      memcpy(&pt[2], data_in + z_idx_offset, sizeof(float));
 
       if (!std::isfinite(pt[0]) || !std::isfinite(pt[1]) || !std::isfinite(pt[2]))
         continue;
 
-      pt_t.noalias() = tr * pt;
+      pt_t.noalias() = transform * pt;
 
-      memcpy(data_out + x_idx_offset_, &pt_t[0], sizeof(float));
-      memcpy(data_out + y_idx_offset_, &pt_t[1], sizeof(float));
-      memcpy(data_out + z_idx_offset_, &pt_t[2], sizeof(float));
+      memcpy(data_out + x_idx_offset, &pt_t[0], sizeof(float));
+      memcpy(data_out + y_idx_offset, &pt_t[1], sizeof(float));
+      memcpy(data_out + z_idx_offset, &pt_t[2], sizeof(float));
 
-      memcpy(&nt[0], data_in + nx_idx_offset_, sizeof(float));
-      memcpy(&nt[1], data_in + ny_idx_offset_, sizeof(float));
-      memcpy(&nt[2], data_in + nz_idx_offset_, sizeof(float));
+      memcpy(&nt[0], data_in + nx_idx_offset, sizeof(float));
+      memcpy(&nt[1], data_in + ny_idx_offset, sizeof(float));
+      memcpy(&nt[2], data_in + nz_idx_offset, sizeof(float));
 
       if (!std::isfinite(nt[0]) || !std::isfinite(nt[1]) || !std::isfinite(nt[2]))
         continue;
 
       nt_t.noalias() = rot * nt;
 
-      memcpy(data_out + nx_idx_offset_, &nt_t[0], sizeof(float));
-      memcpy(data_out + ny_idx_offset_, &nt_t[1], sizeof(float));
-      memcpy(data_out + nz_idx_offset_, &nt_t[2], sizeof(float));
+      memcpy(data_out + nx_idx_offset, &nt_t[0], sizeof(float));
+      memcpy(data_out + ny_idx_offset, &nt_t[1], sizeof(float));
+      memcpy(data_out + nz_idx_offset, &nt_t[2], sizeof(float));
     }
   }
   else {
     for (std::size_t i = 0; i < input.size(); ++i) {
       const auto* data_in = reinterpret_cast<const std::uint8_t*>(&input[i]);
       auto* data_out = reinterpret_cast<std::uint8_t*>(&output[i]);
-      memcpy(&pt[0], data_in + x_idx_offset_, sizeof(float));
-      memcpy(&pt[1], data_in + y_idx_offset_, sizeof(float));
-      memcpy(&pt[2], data_in + z_idx_offset_, sizeof(float));
+      memcpy(&pt[0], data_in + x_idx_offset, sizeof(float));
+      memcpy(&pt[1], data_in + y_idx_offset, sizeof(float));
+      memcpy(&pt[2], data_in + z_idx_offset, sizeof(float));
 
       if (!std::isfinite(pt[0]) || !std::isfinite(pt[1]) || !std::isfinite(pt[2]))
         continue;
 
-      pt_t.noalias() = tr * pt;
+      pt_t.noalias() = transform * pt;
 
-      memcpy(data_out + x_idx_offset_, &pt_t[0], sizeof(float));
-      memcpy(data_out + y_idx_offset_, &pt_t[1], sizeof(float));
-      memcpy(data_out + z_idx_offset_, &pt_t[2], sizeof(float));
+      memcpy(data_out + x_idx_offset, &pt_t[0], sizeof(float));
+      memcpy(data_out + y_idx_offset, &pt_t[1], sizeof(float));
+      memcpy(data_out + z_idx_offset, &pt_t[2], sizeof(float));
     }
   }
+}
+
+#if defined(__RVV10__)
+inline constexpr std::size_t kICPTransformCloudMinRVVPoints = 32;
+
+inline vbool16_t
+finiteMaskF32M2ICP(vfloat32m2_t value, const std::size_t vl)
+{
+  vbool16_t finite = __riscv_vmfeq_vv_f32m2_b16(value, value, vl);
+  finite = __riscv_vmand_mm_b16(
+      finite,
+      __riscv_vmflt_vf_f32m2_b16(
+          __riscv_vfabs_v_f32m2(value, vl), std::numeric_limits<float>::infinity(), vl),
+      vl);
+  return finite;
+}
+
+template <typename PointT,
+          std::size_t kStride,
+          std::size_t kX,
+          std::size_t kY,
+          std::size_t kZ>
+inline void
+transformCloudXYZRVV(const pcl::PointCloud<PointT>& input,
+                     pcl::PointCloud<PointT>& output,
+                     const Eigen::Matrix4f& transform)
+{
+  const auto* base_in = reinterpret_cast<const std::uint8_t*>(input.data());
+  auto* base_out = reinterpret_cast<std::uint8_t*>(output.data());
+  for (std::size_t i = 0; i < input.size();) {
+    const std::size_t vl = __riscv_vsetvl_e32m2(input.size() - i);
+    const std::uint8_t* in = base_in + i * sizeof(PointT);
+    std::uint8_t* out = base_out + i * sizeof(PointT);
+    vfloat32m2_t x, y, z;
+    pcl::rvv_load::strided_load3_f32m2<kStride, kX, kY, kZ>(in, vl, x, y, z);
+
+    vbool16_t keep = finiteMaskF32M2ICP(x, vl);
+    keep = __riscv_vmand_mm_b16(keep, finiteMaskF32M2ICP(y, vl), vl);
+    keep = __riscv_vmand_mm_b16(keep, finiteMaskF32M2ICP(z, vl), vl);
+
+    vfloat32m2_t tx = __riscv_vfmul_vf_f32m2(x, transform(0, 0), vl);
+    tx = __riscv_vfmacc_vf_f32m2(tx, transform(0, 1), y, vl);
+    tx = __riscv_vfmacc_vf_f32m2(tx, transform(0, 2), z, vl);
+    tx = __riscv_vfadd_vf_f32m2(tx, transform(0, 3), vl);
+
+    vfloat32m2_t ty = __riscv_vfmul_vf_f32m2(x, transform(1, 0), vl);
+    ty = __riscv_vfmacc_vf_f32m2(ty, transform(1, 1), y, vl);
+    ty = __riscv_vfmacc_vf_f32m2(ty, transform(1, 2), z, vl);
+    ty = __riscv_vfadd_vf_f32m2(ty, transform(1, 3), vl);
+
+    vfloat32m2_t tz = __riscv_vfmul_vf_f32m2(x, transform(2, 0), vl);
+    tz = __riscv_vfmacc_vf_f32m2(tz, transform(2, 1), y, vl);
+    tz = __riscv_vfmacc_vf_f32m2(tz, transform(2, 2), z, vl);
+    tz = __riscv_vfadd_vf_f32m2(tz, transform(2, 3), vl);
+
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep, reinterpret_cast<float*>(out + kX), tx, vl);
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep, reinterpret_cast<float*>(out + kY), ty, vl);
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep, reinterpret_cast<float*>(out + kZ), tz, vl);
+    i += vl;
+  }
+}
+
+template <typename PointT,
+          std::size_t kStride,
+          std::size_t kX,
+          std::size_t kY,
+          std::size_t kZ,
+          std::size_t kNX,
+          std::size_t kNY,
+          std::size_t kNZ>
+inline void
+transformCloudXYZNormalRVV(const pcl::PointCloud<PointT>& input,
+                           pcl::PointCloud<PointT>& output,
+                           const Eigen::Matrix4f& transform)
+{
+  const auto* base_in = reinterpret_cast<const std::uint8_t*>(input.data());
+  auto* base_out = reinterpret_cast<std::uint8_t*>(output.data());
+  for (std::size_t i = 0; i < input.size();) {
+    const std::size_t vl = __riscv_vsetvl_e32m2(input.size() - i);
+    const std::uint8_t* in = base_in + i * sizeof(PointT);
+    std::uint8_t* out = base_out + i * sizeof(PointT);
+    vfloat32m2_t x, y, z;
+    pcl::rvv_load::strided_load3_f32m2<kStride, kX, kY, kZ>(in, vl, x, y, z);
+
+    vbool16_t keep_xyz = finiteMaskF32M2ICP(x, vl);
+    keep_xyz = __riscv_vmand_mm_b16(keep_xyz, finiteMaskF32M2ICP(y, vl), vl);
+    keep_xyz = __riscv_vmand_mm_b16(keep_xyz, finiteMaskF32M2ICP(z, vl), vl);
+
+    vfloat32m2_t tx = __riscv_vfmul_vf_f32m2(x, transform(0, 0), vl);
+    tx = __riscv_vfmacc_vf_f32m2(tx, transform(0, 1), y, vl);
+    tx = __riscv_vfmacc_vf_f32m2(tx, transform(0, 2), z, vl);
+    tx = __riscv_vfadd_vf_f32m2(tx, transform(0, 3), vl);
+
+    vfloat32m2_t ty = __riscv_vfmul_vf_f32m2(x, transform(1, 0), vl);
+    ty = __riscv_vfmacc_vf_f32m2(ty, transform(1, 1), y, vl);
+    ty = __riscv_vfmacc_vf_f32m2(ty, transform(1, 2), z, vl);
+    ty = __riscv_vfadd_vf_f32m2(ty, transform(1, 3), vl);
+
+    vfloat32m2_t tz = __riscv_vfmul_vf_f32m2(x, transform(2, 0), vl);
+    tz = __riscv_vfmacc_vf_f32m2(tz, transform(2, 1), y, vl);
+    tz = __riscv_vfmacc_vf_f32m2(tz, transform(2, 2), z, vl);
+    tz = __riscv_vfadd_vf_f32m2(tz, transform(2, 3), vl);
+
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep_xyz, reinterpret_cast<float*>(out + kX), tx, vl);
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep_xyz, reinterpret_cast<float*>(out + kY), ty, vl);
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep_xyz, reinterpret_cast<float*>(out + kZ), tz, vl);
+
+    vfloat32m2_t nx, ny, nz;
+    pcl::rvv_load::strided_load3_f32m2<kStride, kNX, kNY, kNZ>(in, vl, nx, ny, nz);
+    vbool16_t keep_normal = finiteMaskF32M2ICP(nx, vl);
+    keep_normal = __riscv_vmand_mm_b16(keep_normal, finiteMaskF32M2ICP(ny, vl), vl);
+    keep_normal = __riscv_vmand_mm_b16(keep_normal, finiteMaskF32M2ICP(nz, vl), vl);
+    keep_normal = __riscv_vmand_mm_b16(keep_normal, keep_xyz, vl);
+
+    vfloat32m2_t tnx = __riscv_vfmul_vf_f32m2(nx, transform(0, 0), vl);
+    tnx = __riscv_vfmacc_vf_f32m2(tnx, transform(0, 1), ny, vl);
+    tnx = __riscv_vfmacc_vf_f32m2(tnx, transform(0, 2), nz, vl);
+
+    vfloat32m2_t tny = __riscv_vfmul_vf_f32m2(nx, transform(1, 0), vl);
+    tny = __riscv_vfmacc_vf_f32m2(tny, transform(1, 1), ny, vl);
+    tny = __riscv_vfmacc_vf_f32m2(tny, transform(1, 2), nz, vl);
+
+    vfloat32m2_t tnz = __riscv_vfmul_vf_f32m2(nx, transform(2, 0), vl);
+    tnz = __riscv_vfmacc_vf_f32m2(tnz, transform(2, 1), ny, vl);
+    tnz = __riscv_vfmacc_vf_f32m2(tnz, transform(2, 2), nz, vl);
+
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep_normal, reinterpret_cast<float*>(out + kNX), tnx, vl);
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep_normal, reinterpret_cast<float*>(out + kNY), tny, vl);
+    pcl::rvv_store::masked_strided_store_f32m2<kStride>(
+        keep_normal, reinterpret_cast<float*>(out + kNZ), tnz, vl);
+    i += vl;
+  }
+}
+
+template <typename PointT>
+inline bool
+tryTransformCloudRVV(const pcl::PointCloud<PointT>& input,
+                     pcl::PointCloud<PointT>& output,
+                     const Eigen::Matrix4f& transform,
+                     const bool has_normals,
+                     const std::size_t x_idx_offset,
+                     const std::size_t y_idx_offset,
+                     const std::size_t z_idx_offset,
+                     const std::size_t nx_idx_offset,
+                     const std::size_t ny_idx_offset,
+                     const std::size_t nz_idx_offset)
+{
+  if (input.size() < kICPTransformCloudMinRVVPoints)
+    return false;
+
+  if (!has_normals) {
+    if constexpr (pcl::rvv::kRVVXYZAoSPointCompatible<PointT>) {
+      using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+      if (x_idx_offset == Layout::kX && y_idx_offset == Layout::kY &&
+          z_idx_offset == Layout::kZ) {
+        transformCloudXYZRVV<PointT, sizeof(PointT), Layout::kX, Layout::kY, Layout::kZ>(
+            input, output, transform);
+        return true;
+      }
+    }
+  }
+  else {
+    if constexpr (pcl::rvv::kRVVXYZNormalPointCompatible<PointT>) {
+      using Layout = pcl::rvv::RVVXYZNormalFloatLayout<PointT>;
+      if (x_idx_offset == Layout::kX && y_idx_offset == Layout::kY &&
+          z_idx_offset == Layout::kZ && nx_idx_offset == Layout::kNX &&
+          ny_idx_offset == Layout::kNY && nz_idx_offset == Layout::kNZ) {
+        transformCloudXYZNormalRVV<PointT,
+                                   sizeof(PointT),
+                                   Layout::kX,
+                                   Layout::kY,
+                                   Layout::kZ,
+                                   Layout::kNX,
+                                   Layout::kNY,
+                                   Layout::kNZ>(input, output, transform);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+#endif // defined(__RVV10__)
+
+} // namespace detail
+} // namespace registration
+
+template <typename PointSource, typename PointTarget, typename Scalar>
+void
+IterativeClosestPoint<PointSource, PointTarget, Scalar>::transformCloud(
+    const PointCloudSource& input, PointCloudSource& output, const Matrix4& transform)
+{
+  Eigen::Matrix4f tr = transform.template cast<float>();
+
+#if defined(__RVV10__)
+  if constexpr (std::is_same_v<Scalar, float>) {
+    if (registration::detail::tryTransformCloudRVV<PointSource>(input,
+                                                                output,
+                                                                tr,
+                                                                source_has_normals_,
+                                                                x_idx_offset_,
+                                                                y_idx_offset_,
+                                                                z_idx_offset_,
+                                                                nx_idx_offset_,
+                                                                ny_idx_offset_,
+                                                                nz_idx_offset_))
+      return;
+  }
+#endif
+
+  registration::detail::transformCloudStandard<PointSource>(input,
+                                                            output,
+                                                            tr,
+                                                            source_has_normals_,
+                                                            x_idx_offset_,
+                                                            y_idx_offset_,
+                                                            z_idx_offset_,
+                                                            nx_idx_offset_,
+                                                            ny_idx_offset_,
+                                                            nz_idx_offset_);
 }
 
 template <typename PointSource, typename PointTarget, typename Scalar>
