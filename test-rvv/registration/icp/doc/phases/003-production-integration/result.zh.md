@@ -36,7 +36,8 @@ Phase 003 已完成，EvidenceDecision 为 `production_direct_positive`。RVV pa
 `long_tail_or_variance` 和 `group_outlier`。该 case 所有 run 都明显正向，且其它 case 没有跨方向或接近阈值，
 因此本 phase 不扩大预算；结论保持 positive，并在 evaluation / topic doc 中保留这些 warnings。
 
-## 下一步
+## 后续状态
 
-当前 topic 可以进入 review。若 reviewer 希望进一步降低风险，可追加 20-run board confirmation 或把
-collector 改成一次部署、多次远端运行，但这不是当前 production adoption 的阻塞项。
+Phase 004 已补齐 doc-suite parity closeout，当前 topic 可进入 review。若 reviewer 希望进一步降低性能风险，
+可追加 20-run board confirmation 或把 collector 改成一次部署、多次远端运行；这不是当前 production
+adoption 的阻塞项。

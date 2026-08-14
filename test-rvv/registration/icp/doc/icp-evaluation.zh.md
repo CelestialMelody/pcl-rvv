@@ -9,48 +9,70 @@
 与可选 `normal_x/y/z` field offset 和 traits offset 一致；否则调用
 `pcl::registration::detail::transformCloudStandard` 标量 fallback。
 
-板卡证据来自 Milkv-Jupiter 5-run repeated benchmark：
+板卡证据来自 Milkv-Jupiter 5-run production direct repeated benchmark：
 `test-rvv/registration/icp/log/board/transform_cloud_repeated/summary.md`。median speedup 为
 `PointXYZ 64K=5.68x`、`PointXYZ 256K=5.30x`、`PointNormal 64K=3.76x`、
 `PointNormal 256K=3.93x`。Evidence Doctor：
 `test-rvv/registration/icp/log/board/transform_cloud_repeated/evidence_doctor.md`，
-Errors=0，Warnings=2，Suggestions=0；warnings 均来自 `PointXYZ 64K` 的 long-tail / variance
-和 group outlier，全部 5-run 仍大于 5.2x，decision bucket 保持 positive。
+Errors=0，Warnings=2，Suggestions=0。
 
-## 标量语义
+## 函数语义
 
 `computeTransformation` 在初始 guess、每轮 ICP 迭代和最终输出阶段调用 `transformCloud`。目标函数按
 `setInputSource()` 解析出的运行期 field offset，用 `memcpy` 从 `PointSource` 读取 XYZ。XYZ 任一分量
-不是有限值时跳过整个点；否则执行 3x4 rigid transform（刚体变换）并写回 XYZ。若 source 有 normals，
-函数再读取 `normal_x/y/z`，normal 任一分量非有限时只跳过 normal 写回，已经写出的 XYZ 保持变换后状态。
-函数声明允许 input 和 output 是同一对象。
+不是有限值时跳过整个点；否则执行 3x4 rigid transform 并写回 XYZ。若 source 有 normals，函数再读取
+`normal_x/y/z`，normal 任一分量非有限时只跳过 normal 写回，已经写出的 XYZ 保持变换后状态。函数声明允许
+input 和 output 是同一对象。
 
 RVV 实现保持这些语义：不负责 `output = input`，只按原函数写回应该写回的字段。因此 caller 预置 output、
 resize 后 output 或 in-place output 的行为仍由原调用边界决定。
 
-## Traceability Map（可追踪性地图）
+## EvidenceDecision 审计
 
-| 符号 / 文件 | 层级 | 作用 | 调用者 / 上游入口 | 证据角色 |
-| --- | --- | --- | --- | --- |
-| `IterativeClosestPoint::computeTransformation` | production public entry | ICP 主循环中决定何时调用 transformCloud。 | `Registration::align` | 入口调用链审计。 |
-| `IterativeClosestPoint::transformCloud` | production dispatch entry | cast matrix，RVV 短路，失败后调用 Std fallback。 | ICP 主循环和最终输出变换 | RVV 接入点和 fallback 边界。 |
-| `pcl::registration::detail::transformCloudStandard` | production Std fallback | 保留上游标量语义，按运行期 offset 变换 XYZ 和可选 normals。 | `transformCloud` | 非 RVV 构建、unsupported Scalar / layout / size fallback。 |
-| `pcl::registration::detail::tryTransformCloudRVV` | production dispatch helper | 检查 size、`Scalar=float` 外层 gate、traits layout 和运行期 offset。 | `transformCloud` | fallback / gate 证据。 |
-| `transformCloudXYZRVV` | production RVV helper | `PointT` AoS XYZ full-cloud masked transform。 | `tryTransformCloudRVV` | `PointXYZ` / generic XYZ path。 |
-| `transformCloudXYZNormalRVV` | production RVV helper | XYZ 和 normal 两套 finite mask。 | `tryTransformCloudRVV` | `PointNormal` / generic normal path。 |
-| `support::transformCloudStd` | test reference | 复刻 production 标量语义。 | gtest | correctness reference。 |
-| `src/test_icp.cpp` | correctness tests | 覆盖 diagnostic helper 与 production direct。 | `run_test_compare` / board test | QEMU 和板卡正确性。 |
-| `src/bench_icp.cpp` / `include/bench_icp.h` | production-direct bench wrapper | 通过 exposed ICP 调用 production `transformCloud`。 | board repeated collector | 性能证据。 |
+| 维度 | 状态 | 证据 |
+| --- | --- | --- |
+| production patch | pass | `registration/include/pcl/registration/impl/icp.hpp` 中 Std helper、RVV helpers 和 dispatch gate。 |
+| production direct correctness | pass | QEMU Std/RVV 12 tests passed；board RVV 12 tests passed。 |
+| fallback correctness | pass | small input、`Scalar=double`、runtime offset mismatch 和 in-place tests。 |
+| generic layout correctness | pass | `PointXYZI` / `PointXYZINormal` production direct tests。 |
+| board performance | pass | 4 个 board repeated case median 3.76x 至 5.68x。 |
+| Evidence Doctor | pass with accepted warnings | `PointXYZ 64K` long-tail / group-outlier warning 已解释。 |
+| asm attribution | pass | RVV 指令簇位于 production `transformCloud` 符号内。 |
+| QEMU bench policy | pass | QEMU bench compare 只作为历史 smoke，不参与性能结论。 |
+| doc-suite parity | pass | `doc/phases/004-structure-parity-doc-suite/result.zh.md`。 |
 
-## 测试与证据
+## Traceability Map
 
-| 证据类型 | 当前入口 | 当前结果 | 能证明 | 不能证明 |
-| --- | --- | --- | --- | --- |
-| QEMU correctness | `make -C test-rvv/registration/icp run_test_compare record_qemu_correctness_state` | Std/RVV 构建各 12 tests passed。 | 标量 / RVV production direct 对拍、finite gate、fallback gate、in-place、泛型 layout gate。 | 性能结论。 |
-| board correctness | `make -C test-rvv/registration/icp run_board_test fetch_board_logs` | 板卡 RVV 构建 12 tests passed。 | 目标硬件上 production direct correctness 可运行。 | 稳定性能分布。 |
-| board performance | `make -C test-rvv/registration/icp collect_board_transform_cloud_repeated run_board_evidence_doctor record_board_evidence_state` | 5-run repeated，median 3.76x 至 5.68x。 | 目标硬件 production `transformCloud` full-cloud 路径稳定正向。 | ICP 端到端整体加速比、nearest-neighbor 或 SVD 成本。 |
-| disassembly | `make -C test-rvv/registration/icp dump_bench_rvv` | production `transformCloud` 符号内有 RVV 指令簇，Std fallback 有独立 `transformCloudStandard` 符号。 | bench 确实调用 production RVV hot path，fallback 边界可归因。 | 每条指令的周期归因。 |
-| QEMU bench smoke | guarded historical only | 历史 raw logs 仍在工作区。 | 历史日志形状。 | 性能排序、采纳审计或 EvidenceDecision。 |
+| 符号 / 文件 | 层级 | 作用 | 调用者 / 上游入口 | 被调用者 / 下游消费者 | 证据角色 | 位置 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `IterativeClosestPoint::computeTransformation` | production public entry | ICP 主循环中决定何时调用 `transformCloud`。 | `Registration::align` | `transformCloud` | 入口调用链审计。 | `registration/include/pcl/registration/impl/icp.hpp` |
+| `IterativeClosestPoint::transformCloud` | production dispatch entry | cast matrix，尝试 RVV，失败后调用 Std fallback。 | ICP 主循环和最终输出变换 | `tryTransformCloudRVV` / `transformCloudStandard` | RVV 接入点。 | `registration/include/pcl/registration/impl/icp.hpp` |
+| `transformCloudStandard` | production Std fallback | 保留上游标量语义，按运行期 offset 变换 XYZ 和可选 normals。 | `transformCloud` | none | fallback coverage。 | `registration/include/pcl/registration/impl/icp.hpp` |
+| `tryTransformCloudRVV` | production dispatch helper | 检查 size、layout traits、runtime offsets 和 normal branch。 | `transformCloud` | RVV helpers | production boundary。 | `registration/include/pcl/registration/impl/icp.hpp` |
+| `finiteMaskF32M2ICP` | production RVV helper | NaN/Inf finite mask。 | RVV helpers | RVV intrinsics | numerical gate。 | `registration/include/pcl/registration/impl/icp.hpp` |
+| `transformCloudXYZRVV` | production RVV helper | `PointT` AoS XYZ full-cloud masked transform。 | `tryTransformCloudRVV` | RVV load/store helpers | `PointXYZ` / generic XYZ path。 | `registration/include/pcl/registration/impl/icp.hpp` |
+| `transformCloudXYZNormalRVV` | production RVV helper | XYZ 和 normal 两套 finite mask。 | `tryTransformCloudRVV` | RVV load/store helpers | `PointNormal` / generic normal path。 | `registration/include/pcl/registration/impl/icp.hpp` |
+| `support::transformCloudStd` | test reference | 复刻 production 标量语义。 | gtest | assertions | correctness oracle。 | `test-rvv/registration/icp/include/impl/icp_transform_cloud.hpp` |
+| `support::transformCloudCandidate` | diagnostic candidate | Phase 001/002 test-only RVV candidate。 | gtest | test-only RVV helpers | diagnostic carry-over。 | `test-rvv/registration/icp/include/impl/icp_transform_cloud.hpp` |
+| `src/test_icp.cpp` | correctness tests | 12 个 gtest 覆盖 production direct 与 fallback。 | `run_test_compare` / board test | production `transformCloud` | correctness gate。 | `test-rvv/registration/icp/src/test_icp.cpp` |
+| `include/bench_icp.h` | bench wrapper | 通过 exposed ICP 调用 production `transformCloud` 并输出 4 个 case。 | `bench_icp.cpp` | production `transformCloud` | board performance。 | `test-rvv/registration/icp/include/bench_icp.h` |
+| `collect_icp_board_repeated.py` | analysis script | 多轮 board compare 并生成 summary。 | Make target | repeated summary | board evidence collection。 | `test-rvv/registration/icp/script/collect_icp_board_repeated.py` |
+| `summary.md` | evidence output summary | 记录 board repeated median/min/max。 | collector | docs / Doctor | performance summary。 | `test-rvv/registration/icp/log/board/transform_cloud_repeated/summary.md` |
+| `evidence_doctor.md` | evidence output summary | 记录 Errors / Warnings / Suggestions。 | Evidence Doctor | docs | risk audit。 | `test-rvv/registration/icp/log/board/transform_cloud_repeated/evidence_doctor.md` |
+| `doc/benchmark-and-evidence.zh.md` | documentation section | bench/evidence 主归属。 | README / evaluation | reviewer | evidence boundary。 | `test-rvv/registration/icp/doc/benchmark-and-evidence.zh.md` |
+| `doc-rvv/registration/icp-RVV.zh.md` | production long-term doc | adopted production 行为和长期证据链。 | README / evaluation | reviewer | production maintenance。 | `doc-rvv/registration/icp-RVV.zh.md` |
+
+## 文档分工审计
+
+| 信息类型 | 主归属 | evaluation 中的角色 |
+| --- | --- | --- |
+| 测试类型、入口和覆盖矩阵 | `doc/testing-overview.zh.md` | 引用，不复制完整矩阵。 |
+| gtest case 语义 | `doc/correctness-tests.zh.md` | 引用关键覆盖结论。 |
+| bench label、board repeated、Doctor 和提交边界 | `doc/benchmark-and-evidence.zh.md` | 引用 performance / risk 摘要。 |
+| 优化方式和证据映射 | `doc/optimization-evidence.zh.md` | 引用 adopted / rejected 状态。 |
+| test support 代码地图 | `doc/test-support-code-map.zh.md` | Traceability Map 覆盖关键对象。 |
+| adopted production 行为 | `../../../doc-rvv/registration/icp-RVV.zh.md` | 引用长期结论和维护边界。 |
+| doc-suite parity gate | `doc/phases/004-structure-parity-doc-suite/result.zh.md` | 作为 closeout validity 证据。 |
 
 ## 当前证据路径
 
@@ -63,7 +85,7 @@ resize 后 output 或 in-place output 的行为仍由原调用边界决定。
 | `test-rvv/registration/icp/log/board/transform_cloud_repeated/evidence_manifest.json` | `evidence_role=production_direct`，包含 production boundary 和 asm boundary。 |
 | `test-rvv/registration/icp/log/board/transform_cloud_repeated/evidence_doctor.md` | Errors=0，Warnings=2，Suggestions=0。 |
 | `test-rvv/registration/icp/doc/asm-attribution.zh.md` | production symbol 反汇编归因。 |
-| `test-rvv/registration/icp/log/evidence_registry.json` | 当前证据登记文件。 |
+| `test-rvv/registration/icp/log/evidence_registry.json` | evidence freshness registry。 |
 
 历史 QEMU bench 文件 `test-rvv/registration/icp/log/qemu/run_bench_std.log`、
 `test-rvv/registration/icp/log/qemu/run_bench_rvv.log`、
@@ -72,11 +94,26 @@ resize 后 output 或 in-place output 的行为仍由原调用边界决定。
 `test-rvv/registration/icp/log/qemu/evidence_doctor.md` 只保留为 `qemu_smoke_only` 历史证据。
 公共 Makefile 已默认禁止 QEMU `run_bench_compare`，除非显式 `ALLOW_QEMU_BENCH_COMPARE=1`。
 
-## 风险与边界
+## Accepted Risks
 
-- `PointXYZ 64K` repeated speedup 的 min/median/max 为 5.29x/5.68x/6.50x，Doctor 报
-  long-tail 和 group outlier warning；因所有 run 均明显正向，当前结论不降级，但文档保留该波动。
-- `PointXYZI` 和 `PointXYZINormal` 有 production direct correctness test；性能 repeated 代表点型仍是
-  `PointXYZ` 和 `PointNormal`。
-- `IterativeClosestPointWithNormals` 不走本函数，另属 `pcl::transformPointCloudWithNormals` 路径。
-- 当前 bench 边界是 `transformCloud` full-cloud microbench，不声称 ICP 端到端整体加速同等幅度。
+| 风险 | 当前处理 |
+| --- | --- |
+| `PointXYZ 64K` repeated warning | min/median/max 为 5.29x/5.68x/6.50x，全部 run 明显正向；不降级，但不把该 case 收益外推到其它 case。 |
+| generic 点型 performance | `PointXYZI` / `PointXYZINormal` 只有 production direct correctness；性能由 `PointXYZ` / `PointNormal` 代表。 |
+| microbench 范围 | 当前 bench 只计 `transformCloud` full-cloud，不声称 ICP 端到端整体加速。 |
+| `IterativeClosestPointWithNormals` | 不走本函数；若优化应另开 topic。 |
+| QEMU bench smoke 历史文件 | 只作历史日志形状，不能进入性能排序。 |
+
+## 质量门禁摘要
+
+| gate | status | evidence | missing_items |
+| --- | --- | --- | --- |
+| `current_optimization_section_ready` | pass | `../../../doc-rvv/registration/icp-RVV.zh.md` 的“当前采用的优化方式”。 | none |
+| `correctness_efficiency_evidence_chain_ready` | pass | 本文 EvidenceDecision 审计和长期文档证据链。 | none |
+| `document_ownership_matrix_ready` | pass | 本文“文档分工审计”。 | none |
+| `traceability_map_ready` | pass | 本文 Traceability Map。 | none |
+| `doc_suite_parity_closeout_ready` | pass | Phase 004 result。 | none |
+| `bench_backend_choice_ready` | pass | `doc/benchmark-and-evidence.zh.md`：性能只看 board / target hardware。 | none |
+| `qemu_bench_smoke_scope_ready` | pass | QEMU bench compare guard 和 historical smoke 边界。 | none |
+| `board_evidence_paths_ready` | pass | board summary / Doctor / manifest 路径。 | none |
+| `ready_for_review_validity_check` | pass | doc suite parity 全部 adopted；无 `phase_deferred + unblocked`。 | none |
