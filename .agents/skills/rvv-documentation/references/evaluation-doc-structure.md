@@ -139,7 +139,7 @@ evaluation（函数级评估）文档应保留轻量“实现方式审计”表�
 - layout / traits gate：点类型、字段 offset、stride、AoS / SoA、weight、index 或 correspondence 的布局条件。
 - staging / reduction：固定 buffer、`vcompress`、block reduction、vector reduction、scatter、scalar tail 或其它组织方式。
 - formula / FMA：公式树、FMA contraction、误差预算、反汇编归属和是否需要消融。
-- row source policy：full-cloud、source-indexed、dual-indices、correspondences 或其它入口形态是否逐 policy 独立批准。
+- row source policy：ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair、correspondence-pair 或其它入口形态是否逐 policy 独立批准。
 - production scope：production direct、production-shaped diagnostic、bench 诊断主题或 no-production 的最终边界。
 
 如果 production 长期主题文档已经有完整“当前采用的优化方式”小节，evaluation 文档可以只保留表格和证据路径；不要把聊天过程或历史流水账搬进长期评估文档。候选路线、bench 统计和 output summary 应按 `document-ownership-and-traceability.zh.md` 的归属矩阵引用，避免同一段结论在 production 长期主题文档、evaluation、summary 和 Handoff 中重复。

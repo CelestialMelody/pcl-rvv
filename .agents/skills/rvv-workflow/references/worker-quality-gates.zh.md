@@ -56,7 +56,8 @@ S2 evaluation（函数级评估）不能只写函数名或数学名词。worker 
 ### 3. Production 数据流与诊断数据流映射
 
 如果 production 源码通过 iterator、indices、correspondences、wrapper 或 dispatch 把多种入口统一，
-而 diagnostic（诊断代码）为了 RVV 显式拆成 full-cloud（全云顺序扫描）、gather、scatter 或 staging，
+而 diagnostic（诊断代码）为了 RVV 显式拆成 ordered-cloud-pair（顺序点云对，source/target
+按相同下标一一对应）、gather、scatter 或 staging，
 worker 必须写清映射关系：
 
 - 每条 diagnostic 路径来自哪个公开入口；
@@ -87,7 +88,7 @@ worker 必须写清映射关系：
 
 至少覆盖这些维度：
 
-- row source（行来源）：full-cloud、source-indexed、dual-indices、correspondences 或其它入口形态。
+- row source（行来源）：ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair、correspondence-pair 或其它入口形态。
 - source / weight policy（源 / 权重策略）：index、weight、field offset、valid-index-only 和展开成本。
 - shared math pipeline（共享数学流水线）：finite mask、formula、accepted_points、ATA/ATb、输出容器或状态更新。
 - staging / reduction（暂存 / 规约）：`vcompress`、buffer 写回、scalar tail、vector reduction、block reduction 或其它候选组织。
@@ -260,8 +261,9 @@ worker 在测试计划和 Handoff 中必须分开列出当前 topic 需要覆盖
 - benchmark、component ablation（组件消融）、diagnostic/probing（诊断 / 探针测试）和 upstream/integration smoke（上游 / 集成冒烟）。
 - sanitizer（运行时检查工具）和 profiling（性能剖析）为可选项；只有当前风险需要时才列为必须项。
 
-full-cloud（全云顺序扫描）、source-indexed（源索引路径）、dual-indices（双索引路径）和
-correspondences（对应关系路径）是不同 row source policy（行来源策略）。production 必须逐 policy
+ordered-cloud-pair（顺序点云对，source/target 按相同下标一一对应）、source-indexed-cloud-pair
+（源索引点云对）、dual-indexed-cloud-pair（双索引点云对）和 correspondence-pair
+（对应关系点对）是不同 row source policy（行来源策略）。production 必须逐 policy
 独立批准。RowSourcePolicy 只负责 row source；shared math pipeline（共享数学流水线）负责
 finite mask（有限值掩码）、formula（公式）、staging/reduction、accepted_points、ATA/ATb。
 如果当前 topic 已有 adopted math family，worker 写实现前必须检查该 family 是否已经按 row source

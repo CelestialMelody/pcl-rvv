@@ -17,7 +17,7 @@ bench 输出必须可解析。至少保留：
 复杂 topic 的 bench 文档必须给出 case label（用例标签）语法或字典。读者看到一条 label 后，应能判断：
 
 - 入口边界是真实 public overload、production helper、production-shaped test helper，还是 component no-solve helper。
-- row source policy 是 full-cloud、source-indexed、dual-indices、correspondences 或其它形态。
+- row source policy 是 ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair、correspondence-pair 或其它形态。
 - 点型、字段 layout、权重来源和输入规模是什么。
 - 计时是否包含 setup、index/weight 展开、solver、matrix 构造或 trace 输出。
 - 该 label 能证明什么，不能证明什么。
@@ -62,7 +62,7 @@ QEMU timing（QEMU 计时）不作为性能结论。QEMU 只用于 correctness�
 
 如果 topic 已经形成一个 adopted implementation family（已采纳实现族），新 production 接入口不能只拿旧 diagnostic helper 里第一个正向实现直接接入。worker 必须先做 implementation-family comparison（实现族比较），至少尝试当前已采纳家族迁移到新入口，或给出为什么不适用的证据化理由。这里的“已采纳家族”包括 block-reduction、fused formula、ILP code shape、layout-gated generic path、staged-gather / compressed-tail path 等。没有比较就直接接入，只能写成 provisional adoption（暂定采纳）或 deferred family comparison（实现族比较暂缓），不能写成 current best。
 
-implementation-family comparison 可以复用同一 math kernel 或 reduction/formula helper，但 row-source ingress 必须按 full-cloud、source-indexed、dual-indices 和 correspondences 分别适配。统一 family 不等于统一证据；每个 policy 的 gather、index staging、weight source、mask 和计时边界都要单独记录。
+implementation-family comparison 可以复用同一 math kernel 或 reduction/formula helper，但 row-source ingress 必须按 ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair 和 correspondence-pair 分别适配。统一 family 不等于统一证据；每个 policy 的 gather、index staging、weight source、mask 和计时边界都要单独记录。
 
 当 diagnostic repeated summary（重复诊断摘要）为 negative（负向）但 production public
 Std/RVV repeated summary（真实公开入口标量 / RVV 重复摘要）为 positive（正向）时，不要直接拒绝
@@ -168,9 +168,9 @@ fused formula（融合公式）候选必须拆分成独立候选再判断，不�
 
 fused formula 的 `block-baseline` 应代表同一 test_support 或同一 production helper 边界下的非 fused 公式。production public overload 可作为 production direct 证据，也可作为明确标注的 mixed-boundary cross-check；它不能在未说明的情况下放进 helper 消融表当作中性的 `block-baseline`。
 
-如果某个 topic 里 full-cloud 已经采纳了更强的实现族，而 source-indexed 或其它 row source 入口还停留在旧实现，worker 必须把“当前入口为什么不适合迁移相同实现族”写成证据化说明，不能默认旧实现足够好。缺少这层说明时，evaluation 和主题文档必须把该入口标成 `implementation-family comparison pending`，而不是直接写成最终最优实现。
+如果某个 topic 里 ordered-cloud-pair 已经采纳了更强的实现族，而 source-indexed-cloud-pair 或其它 row source 入口还停留在旧实现，worker 必须把“当前入口为什么不适合迁移相同实现族”写成证据化说明，不能默认旧实现足够好。缺少这层说明时，evaluation 和主题文档必须把该入口标成 `implementation-family comparison pending`，而不是直接写成最终最优实现。
 
-如果 source-indexed 当前采用 staged-gather / compressed-tail，这仍然属于 adopted family；但 evaluation 和主题文档必须同时写出它与 source-indexed block-reduction / fused-formula family 的比较状态。当前 family adopted 不等于已完成家族比较。
+如果 source-indexed-cloud-pair 当前采用 staged-gather / compressed-tail，这仍然属于 adopted family；但 evaluation 和主题文档必须同时写出它与 source-indexed-cloud-pair block-reduction / fused-formula family 的比较状态。当前 family adopted 不等于已完成家族比较。
 
 production asm attribution（生产反汇编归因）不能只硬编码一种符号形态。编译器可能把 detail helper 内联/合并到 RVV wrapper、public overload 或 clone 边界。脚本应按优先级寻找真实承载边界，并在输出表中记录 `boundary`；缺少某个 detail 符号只能触发调用链排查，不能直接写成 RVV 路径未命中。
 

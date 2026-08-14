@@ -146,7 +146,7 @@ caller-shaped smoke now has a sanity gate and batch RVV path.
 
 对于不是标准库 API 或论文中固定使用的词，优先使用中文主称，再把英文放进括号。英文保留的目的应是方便读者对应源码、case 名、反汇编或 RVV intrinsic，而不是让标题和段落变成英文标签串。例如：
 
-- `full-cloud` 写成 `全云顺序扫描（full-cloud，source/target 按相同下标一一对应）`。
+- `ordered-cloud-pair` 写成 `顺序点云对（ordered-cloud-pair，source/target 按相同下标一一对应）`。
 - `correspondences` 写成 `对应关系索引路径（correspondences，由 index_query/index_match 指定点对）`。
 - `staging` 写成 `分阶段暂存（staging，把 RVV 算出的中间量交给后续阶段）`。
 - `lane` 写成 `向量通道（lane，RVV 向量寄存器中的一个元素位置）`。

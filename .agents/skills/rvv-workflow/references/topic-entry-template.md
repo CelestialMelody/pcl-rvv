@@ -87,7 +87,7 @@ topic-local doc suite、evaluation、phase result、optimization matrix / roadma
 - 不运行 QEMU `run_bench_compare` 或完整 bench compare；QEMU 只用于 correctness / build / log-shape smoke，性能结论只来自板卡或目标硬件。
 - bench 输出必须能解析 `Dataset:`、`Iterations:`、case avg、`Total Time` 和 checksum；格式异常先修 bench 或脚本。
 - benchmark、board summary、checksum、asm attribution 或 EvidenceDecision 前必须执行 Evidence Doctor（证据体检）检查；Error 阻塞严格结论，Warning 必须进入 summary / evaluation / Handoff 的风险说明。
-- full-cloud、source-indexed、dual-indices 和 correspondences 是不同 row source policy；production 必须逐 policy 独立批准。
+- ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair 和 correspondence-pair 是不同 row source policy；production 必须逐 policy 独立批准。
 - production-shaped diagnostic 和 production direct 分层记录；diagnostic evidence 不能替代 production evidence。
 - 若手工展开浮点表达式，检查源码公式、标量反汇编和 RVV intrinsic 求值顺序。
 - FMA / reduction 测试需要反汇编归属、误差预算和必要板卡 A/B；不能仅凭源码表达式判断是否允许 fused 指令。

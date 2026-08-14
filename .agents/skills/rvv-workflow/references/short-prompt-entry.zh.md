@@ -297,7 +297,7 @@ workflow improvement 再读：
 worker 默认权限：
 
 - 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产、topic-local evaluation / phase 文档和适用的文档产物。`artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 长期主题文档只有在存在 adopted production behavior、production patch 或 PI5 生产证据闭环通过时才适用；no-production / bench-only / 未接 production 的 partial-production-candidate 只写 topic-local evaluation、phase result、roadmap / matrix 和 Handoff。
-- 对测试优化和 topic-local 文档成熟度工作，短 prompt 默认授权 worker 在当前 topic 内连续推进多个低风险 phase，例如测试支撑结构迁移、legacy 聚合头 / pointer 清理、evaluation 迁入 `doc/`、README / doc suite 补齐、source-indexed 或其它 row source 的 candidate / correctness / bench / asm / Evidence Doctor 阶段。除非继续会扩大到 production、public API、其它 topic、板卡不可用、证据矛盾或 dirty isolation 不安全，否则不应因为一个小 phase 完成就停止。
+- 对测试优化和 topic-local 文档成熟度工作，短 prompt 默认授权 worker 在当前 topic 内连续推进多个低风险 phase，例如测试支撑结构迁移、legacy 聚合头 / pointer 清理、evaluation 迁入 `doc/`、README / doc suite 补齐、source-indexed-cloud-pair 或其它 row source 的 candidate / correctness / bench / asm / Evidence Doctor 阶段。除非继续会扩大到 production、public API、其它 topic、板卡不可用、证据矛盾或 dirty isolation 不安全，否则不应因为一个小 phase 完成就停止。
 - 如果 phase plan、optimization matrix、EvidenceDecision 或 production gate 需要板卡 / 目标硬件证据，且配置显示板卡可用或当前会话已确认可用，短 prompt 默认授权 worker 在有界复跑预算内继续执行板卡 correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新，并据此推进下一阶段。“需要板卡验证”本身不是停止条件；只有板卡不可达、登录 / rsync / 工具失败、预算耗尽后 decision bucket 仍不稳定、证据矛盾或 dirty isolation 不安全，才可写成 `turn_stop_deferred`。
 - 不把该授权扩展到其它 topic 的测试资产、topic-local 文档、production 长期主题文档或生产源码。
 - S10 `EvidenceDecision`（证据决策）前不修改 production（生产源码）。

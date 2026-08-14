@@ -30,7 +30,7 @@
 
 - 被优化函数对象或函数入口在库中的作用。
 - 公开入口、wrapper、dispatch、真实实现层之间的调用链。
-- 源码中的数据流形态和诊断中的显式数据流形态是否一致。若 production 通过 iterator（迭代器）、wrapper（包装层）、callback（回调）、dispatch（分流逻辑）或模板 helper 隐藏了全云顺序扫描（full-cloud）、indices（索引）、mask（掩码）、correspondences（对应关系）等差异，主题文档必须先说明源码如何统一这些入口，再说明 RVV 诊断为什么要重新拆成跨步加载（stride load）、离散加载（gather）、连续加载（contiguous load）、离散写回（scatter）或分阶段暂存（staging）路径。
+- 源码中的数据流形态和诊断中的显式数据流形态是否一致。若 production 通过 iterator（迭代器）、wrapper（包装层）、callback（回调）、dispatch（分流逻辑）或模板 helper 隐藏了顺序点云对（ordered-cloud-pair，source/target 按相同下标一一对应）、indices（索引）、mask（掩码）、correspondences（对应关系）等差异，主题文档必须先说明源码如何统一这些入口，再说明 RVV 诊断为什么要重新拆成跨步加载（stride load）、离散加载（gather）、连续加载（contiguous load）、离散写回（scatter）或分阶段暂存（staging）路径。
 - 标量实现的可读解释：输入如何进入关键循环，关键局部变量、公式和状态如何生成，输出或 solver 如何使用这些中间量。不要只列函数名或公式片段。
 - RVV 实现的可读解释：每个 VL chunk 如何取数，使用 stride/gather/segment/contiguous load 的原因，mask 如何构造，staging 或输出如何写回，后续消费者是谁。
 - RVV 覆盖原标量代码的哪一段，哪些阶段仍是标量，原因是什么。
@@ -116,7 +116,7 @@ production closeout（收尾）或 production-candidate 文档必须新增或更
 - 覆盖 / fallback 边界。
 - 是否改变公开 API 或对象可见状态。
 
-若诊断数据流不是源码中直接可见的形态，必须额外说明映射关系。例如源码 helper 只看到 iterator 同步前进，但 RVV 诊断拆成“全云顺序扫描”和“对应关系索引扫描”；这时文档要写清每条诊断路径来自哪个公开入口、为什么必须显式展开 index/weight、额外成本是否计入 bench，以及该拆分不能证明哪些真实 production 分流。
+若诊断数据流不是源码中直接可见的形态，必须额外说明映射关系。例如源码 helper 只看到 iterator 同步前进，但 RVV 诊断拆成“顺序点云对”和“对应关系索引扫描”；这时文档要写清每条诊断路径来自哪个公开入口、为什么必须显式展开 index/weight、额外成本是否计入 bench，以及该拆分不能证明哪些真实 production 分流。
 
 多个 staging 名称应给出对照表：
 
@@ -264,7 +264,7 @@ topic 完成 PI2-PI5 后，production 长期主题文档应新增或更新生产
 
 当板卡结果显示某一条诊断路径有稳定收益，但还没有修改 production（生产源码）或没有真实公开入口 direct evidence（直接生产路径证据）时，可以写 `partial-production-candidate`。此时文档必须比 no-production closeout 更谨慎：
 
-- 先写候选范围，例如“只限全云顺序扫描 `PointNormal` / `float` / 连续 AoS 布局 / 目标板卡”。
+- 先写候选范围，例如“只限顺序点云对 `PointNormal` / `float` / 连续 AoS 布局 / 目标板卡”。
 - 再写明确不覆盖的范围，例如 indices、correspondences、泛型点类型、`Scalar=double`、非 RVV fallback、生产 dispatch、上游完整测试。
 - 列出下一轮 production integration loop（生产接入闭环）前必须补的证据：最小生产补丁、真实入口测试、fallback gate、反汇编符号归属、板卡 production bench、误差预算或数值审计。
 - 对负向路径保持独立结论。一个入口有收益不能抵消另一个入口退化；对应关系索引路径慢时，应明确保持标量或先做消融。

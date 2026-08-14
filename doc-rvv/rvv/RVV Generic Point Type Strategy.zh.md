@@ -163,8 +163,8 @@ PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心
 | `pcl::rvv::RVVFieldScalar<T>` | 去掉 cv/ref，得到字段表达式的实际标量类型。 | 兼容旧 member gate 中的 `decltype(point.x)` 判断。 |
 | `pcl::rvv::RVVFloatFieldLayout<PointT, Field>` | 判断 PCL traits 注册字段是否为单个 `float`。 | 组合 xyz、normal 或其它字段语义 gate。 |
 | `pcl::rvv::RVVXYZFloatLayout<PointT>` | 判断 `x/y/z` 是否是 PCL traits 注册的单个 `float` 字段，并暴露 `kX/kY/kZ` offset。 | CEOP 这类只需要 xyz 字段语义、并由具体 helper / 本地 gate 承担底层访问前提的路径。 |
-| `pcl::rvv::RVVXYZAoSFloatLayout<PointT>` | 判断 `x/y/z` 是 PCL traits 注册的单个 `float` 字段，并检查 POD standard-layout、`sizeof(PointT)==sizeof(POD)`、stride 和字段 offset 的 float alignment；暴露 `kX/kY/kZ`。 | TEPTPL 这类 source 只直接按 AoS byte offset 读取 xyz 的 full-cloud production 路径。 |
-| `pcl::rvv::RVVXYZNormalFloatLayout<PointT>` | 判断 `x/y/z/normal_x/normal_y/normal_z` 是否都是单个 `float`，并检查 POD、standard-layout、`sizeof(PointT)==sizeof(POD)`、`sizeof(PointT)` 和字段 offset 的 float alignment；暴露 `kX/kY/kZ/kNX/kNY/kNZ`。 | symmetric LLS 这类直接按 AoS byte offset 读取 xyz 和 normal 的 full-cloud production 路径。 |
+| `pcl::rvv::RVVXYZAoSFloatLayout<PointT>` | 判断 `x/y/z` 是 PCL traits 注册的单个 `float` 字段，并检查 POD standard-layout、`sizeof(PointT)==sizeof(POD)`、stride 和字段 offset 的 float alignment；暴露 `kX/kY/kZ`。 | TEPTPL 这类 source 只直接按 AoS byte offset 读取 xyz 的 ordered-cloud-pair production 路径。 |
+| `pcl::rvv::RVVXYZNormalFloatLayout<PointT>` | 判断 `x/y/z/normal_x/normal_y/normal_z` 是否都是单个 `float`，并检查 POD、standard-layout、`sizeof(PointT)==sizeof(POD)`、`sizeof(PointT)` 和字段 offset 的 float alignment；暴露 `kX/kY/kZ/kNX/kNY/kNZ`。 | symmetric LLS 这类直接按 AoS byte offset 读取 xyz 和 normal 的 ordered-cloud-pair production 路径。 |
 | `pcl::rvv::kRVVXYZPointCompatible<PointT>` | 旧 load/store 兼容 gate：要求成员 `x/y/z` 存在、类型都是 `float`，且 `PointT` 是 standard-layout。 | 保持 `rvv_point_load/store` 旧接口和 common 调用点语义稳定。 |
 | `pcl::rvv::kRVVXYZAoSPointCompatible<PointT>` | `RVVXYZAoSFloatLayout<PointT>::value` 的变量模板形式。 | 需要变量模板风格 strong xyz AoS gate 的调用点。 |
 | `pcl::rvv::kRVVXYZNormalPointCompatible<PointT>` | `RVVXYZNormalFloatLayout<PointT>::value` 的变量模板形式。 | 需要变量模板风格 gate 的调用点。 |
@@ -185,8 +185,8 @@ PCL 注册点类型通过 traits 描述字段语义。RVV f32 路径通常关心
 | --- | --- | --- | --- | --- |
 | member `x/y/z` + standard-layout | `kRVVXYZPointCompatible<PointT>` | C++ 成员 `x/y/z` 存在、成员表达式类型为 `float`、`PointT` 是 standard-layout。 | 不依赖 PCL traits 的 `has_xyz` / `datatype` 语义；不证明 normal；不证明 `sizeof(PointT)==sizeof(POD)`。 | load/store 旧兼容 gate，以及沿用旧 helper 名称的 common 调用点。 |
 | PCL traits xyz 单 float | `RVVXYZFloatLayout<PointT>` | PCL traits 注册了 `x/y/z`，且三个字段都是单个 `float`；提供当前点类型的 xyz offset。 | 不额外要求 POD / standard-layout / `sizeof(PointT)==sizeof(POD)`；不证明 normal。 | CEOP 这类只需要 xyz 字段语义的算法 gate。底层 helper 的 standard-layout / alignment 前提仍需由 helper `static_assert` 或本地 gate 保证。 |
-| xyz 单 float + AoS layout 前提 | `RVVXYZAoSFloatLayout<PointT>` 或 `kRVVXYZAoSPointCompatible<PointT>` | PCL traits 注册了 xyz，三个字段都是单个 `float`；POD standard-layout；`sizeof(PointT)==sizeof(POD)`；stride 和字段 offset 满足 float alignment。 | 不证明 normal；不代表构造完整 `PointT` 输出语义；仍不包含算法规模、VLEN、索引类型或输出 `Scalar` 条件。 | TEPTPL full-cloud source 侧只读 xyz 的 production RVV 路径。 |
-| xyz + normal 单 float + AoS layout 前提 | `RVVXYZNormalFloatLayout<PointT>` 或 `kRVVXYZNormalPointCompatible<PointT>` | PCL traits 注册了 xyz 和 normal，六个字段都是单个 `float`；POD standard-layout；`sizeof(PointT)==sizeof(POD)`；stride 和字段 offset 满足 float alignment。 | 不代表所有 normal 算法都可直接接入；仍不包含算法规模、VLEN、索引类型、输出语义等 dispatch 条件。 | TEPTPL target 侧、symmetric LLS full-cloud production RVV 路径，直接按 AoS byte offset 读取 xyz 和 normal。 |
+| xyz 单 float + AoS layout 前提 | `RVVXYZAoSFloatLayout<PointT>` 或 `kRVVXYZAoSPointCompatible<PointT>` | PCL traits 注册了 xyz，三个字段都是单个 `float`；POD standard-layout；`sizeof(PointT)==sizeof(POD)`；stride 和字段 offset 满足 float alignment。 | 不证明 normal；不代表构造完整 `PointT` 输出语义；仍不包含算法规模、VLEN、索引类型或输出 `Scalar` 条件。 | TEPTPL ordered-cloud-pair source 侧只读 xyz 的 production RVV 路径。 |
+| xyz + normal 单 float + AoS layout 前提 | `RVVXYZNormalFloatLayout<PointT>` 或 `kRVVXYZNormalPointCompatible<PointT>` | PCL traits 注册了 xyz 和 normal，六个字段都是单个 `float`；POD standard-layout；`sizeof(PointT)==sizeof(POD)`；stride 和字段 offset 满足 float alignment。 | 不代表所有 normal 算法都可直接接入；仍不包含算法规模、VLEN、索引类型、输出语义等 dispatch 条件。 | TEPTPL target 侧、symmetric LLS ordered-cloud-pair production RVV 路径，直接按 AoS byte offset 读取 xyz 和 normal。 |
 
 选择原则：
 

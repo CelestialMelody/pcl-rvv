@@ -15,13 +15,14 @@ diagnostic evidence（诊断证据）不等于 production evidence（生产证�
 
 ## Row Source Policy
 
-full-cloud（全云顺序扫描）、source-indexed（源索引路径）、dual-indices（双索引路径）和
-correspondences（对应关系路径）是不同 row source policy（行来源策略）。production 必须逐 policy 独立批准。
+ordered-cloud-pair（顺序点云对，source/target 按相同下标一一对应）、source-indexed-cloud-pair
+（源索引点云对）、dual-indexed-cloud-pair（双索引点云对）和 correspondence-pair
+（对应关系点对）是不同 row source policy（行来源策略）。production 必须逐 policy 独立批准。
 
-- full-cloud：source 和 target 按同一下标一一对应。
-- source-indexed：source 由 indices 指定，target 可能顺序扫描或另有策略。
-- dual-indices：source 和 target 分别由两个索引数组指定。
-- correspondences：点对由 correspondence 结构中的 query/match 索引指定。
+- ordered-cloud-pair：source 和 target 按同一下标一一对应。
+- source-indexed-cloud-pair：source 由 indices 指定，target 可能顺序扫描或另有策略。
+- dual-indexed-cloud-pair：source 和 target 分别由两个索引数组指定。
+- correspondence-pair：点对由 correspondence 结构中的 query/match 索引指定。
 
 RowSourcePolicy 只负责 row source。shared math pipeline（共享数学流水线）负责 finite mask（有限值掩码）、公式、staging/reduction、`accepted_points` 和 `ATA/ATb` 等后段。
 
@@ -31,7 +32,7 @@ RowSourcePolicy 只负责 row source。shared math pipeline（共享数学流水
 row source -> field load/gather -> finite mask -> formula -> staging/reduction -> accepted_points -> ATA/ATb
 ```
 
-这里的 row source policy（行来源策略）更准确地说是 row-source ingress policy（行来源入口策略）。它只描述每一行从哪里来、如何展开成 source/target/weight 三元组，以及这些展开是否计入 bench；它不等于整条 RVV 优化 family（优化族）或完整的生产策略。full-cloud、source-indexed、dual-indices 和 correspondences 可以共享同一段 math kernel（数学内核）或 reduction/formula family，但每个 policy 都需要单独的 entry adapter（入口适配器）和证据边界。
+这里的 row source policy（行来源策略）更准确地说是 row-source ingress policy（行来源入口策略）。它只描述每一行从哪里来、如何展开成 source/target/weight 三元组，以及这些展开是否计入 bench；它不等于整条 RVV 优化 family（优化族）或完整的生产策略。ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair 和 correspondence-pair 可以共享同一段 math kernel（数学内核）或 reduction/formula family，但每个 policy 都需要单独的 entry adapter（入口适配器）和证据边界。
 
 如果已有某个 policy 采纳了更强的 math family，其他 policy 不能默认继承“同一 family 也一定适用”。必须按 policy 逐一补 candidate、bench、board 和 production direct 证据，或者写出为什么 dataflow / gather / spill / staging 成本让 family 不适用。
 

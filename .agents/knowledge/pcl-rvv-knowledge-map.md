@@ -87,7 +87,7 @@ PCL RVV 工作中各类知识、历史案例、可执行证据和当前源码状
 当当前 topic 出现下列信号时，worker 应自动检索同模块历史经验，不需要用户在短 prompt
 里额外说明：
 
-- 公开入口不止一种，例如 full-cloud、indices、dual indices、correspondences、weights。
+- 公开入口不止一种，例如 ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair、correspondence-pair、weights。
 - 标量源码通过 iterator、helper 或对象状态把不同入口统一起来，但 RVV 需要重新区分
   stride load（跨步加载）、gather（离散加载）、weight load（权重加载）或 append tail（追加尾段）。
 - 设计中出现 staging（分阶段暂存）、row source / weight source、policy（策略类型）、

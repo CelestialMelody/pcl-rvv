@@ -104,7 +104,7 @@ topic 文档表格中的“测试类型”栏应优先写中文名称，例如�
 
 涉及点云、索引或字段布局时，测试矩阵至少审计：
 
-- row source policy（行来源策略）：full-cloud、source-indexed、dual-indices、correspondences。
+- row source policy（行来源策略）：ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair、correspondence-pair。
 - mixed fields（混合字段）：xyz、normal、intensity、label 或自定义字段是否同时满足布局条件。
 - point traits（点类型字段特征）：字段是否存在、类型是否匹配、offset（字段偏移）是否可用。
 - AoS stride（结构数组跨步）：字段间距是否固定，是否满足 load/store 计划。

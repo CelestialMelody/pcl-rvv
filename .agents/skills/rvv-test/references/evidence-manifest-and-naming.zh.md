@@ -226,7 +226,7 @@ strict A/B 或 production direct 默认要求 baseline 和 candidate 共享以�
 | ------------------- | ------------------------------------------------------------------------------------------- |
 | `boundary`        | 实现边界，例如 public overload、production helper、test support helper。                    |
 | `wrapper`         | bench 或被测 wrapper 名。                                                                   |
-| `row_source`      | 行来源策略，例如`full_cloud`、`source_indexed`、`dual_indices`、`correspondences`。 |
+| `row_source`      | 行来源策略，例如`ordered_cloud_pair`、`source_indexed_cloud_pair`、`dual_indexed_cloud_pair`、`correspondence_pair`。 |
 | `solve`           | 计时是否包含 solve 阶段。                                                                   |
 | `checksum_policy` | checksum 覆盖对象，例如 matrix、normal equation、accepted points。                          |
 | `timer_boundary`  | 计时边界，例如 estimate-only、include-setup、include-index-expand。                         |
@@ -269,7 +269,7 @@ CASE_LABELS = {
     "<case-label>": {
         "case_kind": "production_direct",
         "point_type": "pointnormal",
-        "row_source": "full_cloud",
+        "row_source": "ordered_cloud_pair",
         "size": 262144,
         "boundary": "production_dispatch",
         "solve": True,

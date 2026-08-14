@@ -10,19 +10,20 @@ estimation（对应关系估计）。它补充通用 `rvv-test` 规则，不替�
 ## 共同证据边界
 
 - public entry（公开入口）是否真实命中，必须和 test-only wrapper（测试专用包装）分开。
-- row source policy（行来源策略）必须逐项列出：full-cloud（全云顺序扫描）、
-  source-indexed（源索引路径）、dual-indices（双索引路径）和 correspondences（对应关系路径）。
-- row source policy 只定义 row 的入口形态，不等于整条优化 family。full-cloud 里采纳的
+- row source policy（行来源策略）必须逐项列出：ordered-cloud-pair（顺序点云对，source/target
+  按相同下标一一对应）、source-indexed-cloud-pair（源索引点云对）、dual-indexed-cloud-pair
+  （双索引点云对）和 correspondence-pair（对应关系点对）。
+- row source policy 只定义 row 的入口形态，不等于整条优化 family。ordered-cloud-pair 里采纳的
   block-reduction、A/B/C/N block groups、fused formula 或 ILP code shape，可以作为
   candidate family 迁移到其它 policy 的起点，但不能默认继承为其它 policy 的结论。
   worker 必须按 policy 逐一尝试、记录或说明不适用原因。
-- row source scope decision（行来源范围决策）必须逐项映射到代码路径、test target、bench target、board evidence 和当前状态。full-cloud adopted、indexed deferred 或 correspondences rejected 这类结论不能只写成自然语言。
-- row source scope decision 不能只依赖默认综合 bench。默认综合 bench 可以作为 smoke 或 broad diagnostic（宽口径诊断）。用于判断 full-cloud、source-indexed、dual-indices 或 correspondences 取舍时，应提供专门的 row-source case-filter / make target，或把该项写成 `diagnostic gap`。
+- row source scope decision（行来源范围决策）必须逐项映射到代码路径、test target、bench target、board evidence 和当前状态。ordered-cloud-pair adopted、source-indexed-cloud-pair deferred 或 correspondence-pair rejected 这类结论不能只写成自然语言。
+- row source scope decision 不能只依赖默认综合 bench。默认综合 bench 可以作为 smoke 或 broad diagnostic（宽口径诊断）。用于判断 ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair 或 correspondence-pair 取舍时，应提供专门的 row-source case-filter / make target，或把该项写成 `diagnostic gap`。
 - row source bench target 应配套板卡入口。推荐形态是 `run_bench_row_sources`、`run_board_bench_row_sources` 和 `collect_board_row_sources_repeated` 分别覆盖 QEMU 窄 smoke、单次板卡 smoke 和 repeated board 诊断；默认不在 QEMU 上运行完整 bench。没有 repeated board 时，row source 取舍只能停留在诊断候选。
 - registration topic 的测试数据应同时保留 deterministic corpus（确定性样本集）和 seeded random stress（带种子随机压力样本）：前者用于稳定回归和精确复现，后者用于暴露漏掉的边界。文档必须写清 corpus label、seed 和它们对应的 row source / point type / size，不能把一次偶然正向当成全覆盖。
 - row source 诊断若稳定正向，worker 必须把触发日志单独写入证据索引，例如单次板卡 `analyze_bench_compare.log` 或等价摘要，再进入 production integration loop（生产接入闭环）。不能只凭默认综合 bench 口头升级，也不能把触发日志混写成最终 production summary。
 - row source diagnostic 出现稳定正向时，worker 必须进入 production integration loop（生产接入闭环）：补 production helper、public dispatch、fallback / gate tests、dedicated bench target、board smoke、repeated board summary，以及 asm attribution 或等价路径证据。若仍不接 production，文档必须写出阻塞条件、负向证据或维护成本。
-- row source 升级为 production 前，必须检查当前 topic 是否已有 adopted implementation family。若 full-cloud 已采用 block-reduction、A/B/C/N block groups、fused formula 或 ILP code shape，新 row source 不能默认沿用早期 staged-row / compressed-tail helper。worker 必须新增同边界 implementation-family comparison，或在 evaluation 中写出不适用原因，例如重复 gather 成本、寄存器压力、spill、VLEN / LMUL 限制、index staging 成本或 correctness 风险。
+- row source 升级为 production 前，必须检查当前 topic 是否已有 adopted implementation family。若 ordered-cloud-pair 已采用 block-reduction、A/B/C/N block groups、fused formula 或 ILP code shape，新 row source 不能默认沿用早期 staged-row / compressed-tail helper。worker 必须新增同边界 implementation-family comparison，或在 evaluation 中写出不适用原因，例如重复 gather 成本、寄存器压力、spill、VLEN / LMUL 限制、index staging 成本或 correctness 风险。
 - row source production probe 若和 pre-production diagnostic 方向相反，必须分清两个问题：
   public Std/RVV speedup（公开入口标量 / RVV 加速比）只能证明真实公开入口接入 RVV 是否快于标量；
   同一 row source 内的新 family 是否优于既有 adopted family，必须用同边界 production detail RVV-vs-RVV
@@ -30,8 +31,8 @@ estimation（对应关系估计）。它补充通用 `rvv-test` 规则，不替�
   若同边界 A/B 为 mixed / negative，默认生产路径应回到既有 adopted family，新 family 只保留为显式 probe / 实验路径。
 - 如果某个 policy 已有 adopted family，而另一个 policy 还没有尝试过该 family，worker 的默认顺序是先做 family carry-over audit：先在配置解析出的 RVV test 资产中补同 family 的 policy-specific candidate、bench 和 board 证据，再决定 production integration。不要把一个 policy 的 positive summary 直接外推到其它 policy。
 - family carry-over audit 是 optimization roadmap 的 candidate generation（候选生成）动作，不是收尾备注。
-  当 full-cloud 已采用 block-reduction、A/B/C/N block groups、fused formula、ILP code shape、staged-gather
-  或 compressed-tail 等 family，而 source-indexed、dual-indices 或 correspondences 尚未做同边界比较时，
+  当 ordered-cloud-pair 已采用 block-reduction、A/B/C/N block groups、fused formula、ILP code shape、staged-gather
+  或 compressed-tail 等 family，而 source-indexed-cloud-pair、dual-indexed-cloud-pair 或 correspondence-pair 尚未做同边界比较时，
   roadmap 必须生成 policy-specific candidate 矩阵。矩阵至少列出：要迁移的 math family、row-source
   adapter、gather / staging / reduction 成本假设、正确性 target、bench case-filter、asm 边界、
   board repeated evidence 和 Evidence Doctor 输入。没有板卡时可把 board 证据标成 blocked，但本地

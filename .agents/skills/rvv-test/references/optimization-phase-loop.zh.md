@@ -234,7 +234,7 @@ roadmap 更新规则：
 
 如果一个条目是 `phase_deferred + unblocked`，`result.zh.md`、optimization matrix、roadmap 和 Handoff 都必须写出下一阶段动作。最终回复也要明确“这些没有做，但仍可继续”，不能只写“已完成”。若 worker 选择停止，必须把这些条目放入面向用户的显式清单，而不是藏在 `remaining_risks`、roadmap 底部或 `follow-up only` 的宽泛描述里。
 
-当 topic 存在多个 row source policy（尤其 registration topic 中常见的 `full-cloud`、`source-indexed`、`dual-indices` 和 `correspondences`）时，它们必须独立批准。一个 policy 的 adopted family 不会自动关闭其它 policy。代表性点型、`Scalar`、布局和规模也必须在矩阵中单独标出；代表性性能不能外推成全泛型生产性能。
+当 topic 存在多个 row source policy（尤其 registration topic 中常见的 `ordered-cloud-pair`、`source-indexed-cloud-pair`、`dual-indexed-cloud-pair` 和 `correspondence-pair`）时，它们必须独立批准。一个 policy 的 adopted family 不会自动关闭其它 policy。代表性点型、`Scalar`、布局和规模也必须在矩阵中单独标出；代表性性能不能外推成全泛型生产性能。
 
 当候选涉及公式、FMA、reduction、staging、ILP 或 LMUL 时，矩阵中必须能回到对应的数值预算、反汇编归属和板卡 A/B 证据。只有源码形式变化、没有机器码或同边界性能差异的候选，标为实现形态诊断，不能写成独立收益。
 
