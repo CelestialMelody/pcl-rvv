@@ -74,6 +74,23 @@ correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新�
 
 计划不是愿望清单。每个动作都必须能在 `result.zh.md` 中回填为事实、证据路径、结论和下一步。
 
+### Phase Scope 与扩展队列
+
+phase scope（阶段范围）必须显式小于或等于 topic scope（主题范围），不能隐式等同。若当前阶段只覆盖
+一个具体点型、代表性点型、单一 source/target 组合、row source、`Scalar`、布局、规模或 production
+入口，`plan.zh.md` 必须写清：
+
+- `validated_scope`：本阶段准备证明的入口、row source、点类型、`Scalar`、布局和规模。
+- `unvalidated_scope`：topic 中仍未验证的泛型点类型、其它 source/target 组合、row source、`Scalar`、
+  layout、indices 或 correspondences。
+- `point_type_expansion_queue`：后续点类型扩展 phase，包含恢复条件、traits / layout 阻塞项、fallback
+  测试、dedicated bench、QEMU / asm、repeated board 和 Evidence Doctor 输入。
+- `phase_closeout_boundary`：本阶段完成后只能关闭哪些矩阵条目，不能关闭哪些 topic-level 条目。
+
+`std::is_same_v<PointXYZ>`、`PointNormal` exact-type gate 或任何代表性点型 gate 都只能作为阶段性门控。
+如果没有 traits / layout 阻塞理由和后续扩展队列，不能把这类门控写成最终 production generic template
+结论。
+
 ## Topic Maturity Audit
 
 恢复已有 topic 或创建 `000-current-state-and-gaps` 阶段时，worker 必须审计五类完成度。这个审计不依赖任何特定历史 topic；历史 sibling（同类主题）只能提供候选风险、结构 quality bar 和验证方向，不能被机械照搬成实现方案。
@@ -238,6 +255,9 @@ roadmap 更新规则：
 如果一个条目是 `phase_deferred + unblocked`，`result.zh.md`、optimization matrix、roadmap 和 Handoff 都必须写出下一阶段动作。最终回复也要明确“这些没有做，但仍可继续”，不能只写“已完成”。若 worker 选择停止，必须把这些条目放入面向用户的显式清单，而不是藏在 `remaining_risks`、roadmap 底部或 `follow-up only` 的宽泛描述里。
 
 当 topic 存在多个 row source policy（尤其 registration topic 中常见的 `ordered-cloud-pair`、`source-indexed-cloud-pair`、`dual-indexed-cloud-pair` 和 `correspondence-pair`）时，它们必须独立批准。一个 policy 的 adopted family 不会自动关闭其它 policy。代表性点型、`Scalar`、布局和规模也必须在矩阵中单独标出；代表性性能不能外推成全泛型生产性能。
+当 production 使用具体点型 gate 时，矩阵还必须列出 exact gate hit、非覆盖模板实例 fallback、
+未验证 traits 集合、下一 point-type expansion phase 和每个组合的 production direct 证据状态。
+一个点类型的 positive 结果不能关闭其它点类型、混合 source/target 组合或整个模板函数族。
 
 当候选涉及公式、FMA、reduction、staging、ILP 或 LMUL 时，矩阵中必须能回到对应的数值预算、反汇编归属和板卡 A/B 证据。只有源码形式变化、没有机器码或同边界性能差异的候选，标为实现形态诊断，不能写成独立收益。
 

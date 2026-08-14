@@ -73,6 +73,10 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 - diagnostic evidence（诊断证据）不等于 production evidence（生产证据）。
 - component-only ablation（仅组件消融）只能提供瓶颈线索，不能替代端到端 profile（剖析），也不能单独决定 production。
 - ordered-cloud-pair（顺序点云对，source/target 按相同下标一一对应）、source-indexed-cloud-pair（源索引点云对）、dual-indexed-cloud-pair（双索引点云对）和 correspondence-pair（对应关系点对）是不同 row source policy。production 必须逐 policy 独立批准。
+- point type（点类型）和 row source policy 一样是独立批准维度。`PointXYZ`、`PointNormal`、
+  `PointXYZINormal`、PointXYZ-like traits 集合、PointNormal-like traits 集合、source/target 混合组合、
+  `Scalar` 和 layout 都必须在 correctness / fallback / bench / asm / board / Evidence Doctor 矩阵中分别闭合。
+  具体点型或代表性点型的正向结果不能外推成泛型模板入口、其它 source/target 组合或其它 `Scalar` 已证明。
 - `paths.test_root` 解析目录下的全局 `script/` 只放跨 topic 可复用脚本；与当前优化对象强绑定的脚本放在 `artifact_layout.topic_test_dir_template` 解析目录的本地 `script/` 下。通用 Evidence Doctor 脚本路径由 `artifact_layout.evidence_doctor_script_template` 解析，通用 evidence registry（证据登记表）脚本路径由 `artifact_layout.evidence_registry_script_template` 解析；若 raw log 解析依赖某个 topic 的 case label、helper 名、字段布局或反汇编符号，应在 topic-local `script/` 下生成 manifest 后再调用全局 doctor / registry。
 - compiler auto-vectorization（编译器自动向量化）诊断默认不开启；需要评估编译器潜力或解释 missed-vectorization（未自动向量化）原因时，显式运行 topic Makefile 的 `generate_vec_report` 或等价目标。
 - benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision 前必须按 `references/evidence-doctor.zh.md` 执行 Evidence Doctor（证据体检）检查；发现 Errors / Warnings / Suggestions 时，summary、evaluation 或 Handoff Packet 必须说明处理动作，不能无解释地把异常数据转成结论。

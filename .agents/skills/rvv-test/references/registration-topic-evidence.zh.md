@@ -21,6 +21,18 @@ estimation（对应关系估计）。它补充通用 `rvv-test` 规则，不替�
 - row source scope decision 不能只依赖默认综合 bench。默认综合 bench 可以作为 smoke 或 broad diagnostic（宽口径诊断）。用于判断 ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair 或 correspondence-pair 取舍时，应提供专门的 row-source case-filter / make target，或把该项写成 `diagnostic gap`。
 - row source bench target 应配套板卡入口。推荐形态是 `run_bench_row_sources`、`run_board_bench_row_sources` 和 `collect_board_row_sources_repeated` 分别覆盖 QEMU 窄 smoke、单次板卡 smoke 和 repeated board 诊断；默认不在 QEMU 上运行完整 bench。没有 repeated board 时，row source 取舍只能停留在诊断候选。
 - registration topic 的测试数据应同时保留 deterministic corpus（确定性样本集）和 seeded random stress（带种子随机压力样本）：前者用于稳定回归和精确复现，后者用于暴露漏掉的边界。文档必须写清 corpus label、seed 和它们对应的 row source / point type / size，不能把一次偶然正向当成全覆盖。
+- point type scope decision（点类型范围决策）和 row source scope decision 一样必须逐项映射到代码路径、
+  production gate、test target、bench target、board evidence、fallback target 和当前状态。`PointXYZ -> PointXYZ`
+  adopted 不能写成 PointXYZ-like 泛型集合 adopted；representative pointtypes（代表性点类型）只能支撑其明示边界。
+- 如果 production patch 使用 exact-type gate（具体类型门控），证据矩阵必须列出 gate hit（命中门控）、
+  其它模板实例 fallback、未验证点类型、source/target 混合组合和下一 `point_type_expansion_queue`
+  条目。该矩阵至少覆盖 deterministic corpus、必要的 seeded random stress、production direct correctness、
+  fallback correctness、dedicated bench、QEMU / asm、repeated board、Evidence Doctor；证据成立后，再按当前
+  点型组合重新跑 production integration loop。
+- 一个点类型的 positive result（正向结果）不能关闭其它点类型、PointXYZ-like / PointNormal-like traits
+  集合、混合 source/target 组合或整个模板函数族。若算法只读取 `x/y/z`，后续泛型扩展应优先验证 traits gate、
+  offset、POD / standard-layout、alignment、`sizeof` / stride 和 source / target 两端字段类型；若读取 normal
+  或其它字段，也要分别补对应字段证据。
 - row source 诊断若稳定正向，worker 必须把触发日志单独写入证据索引，例如单次板卡 `analyze_bench_compare.log` 或等价摘要，再进入 production integration loop（生产接入闭环）。不能只凭默认综合 bench 口头升级，也不能把触发日志混写成最终 production summary。
 - row source diagnostic 出现稳定正向时，worker 必须进入 production integration loop（生产接入闭环）：补 production helper、public dispatch、fallback / gate tests、dedicated bench target、board smoke、repeated board summary，以及 asm attribution 或等价路径证据。若仍不接 production，文档必须写出阻塞条件、负向证据或维护成本。
 - row source 升级为 production 前，必须检查当前 topic 是否已有 adopted implementation family。若 ordered-cloud-pair 已采用 block-reduction、A/B/C/N block groups、fused formula 或 ILP code shape，新 row source 不能默认沿用早期 staged-row / compressed-tail helper。worker 必须新增同边界 implementation-family comparison，或在 evaluation 中写出不适用原因，例如重复 gather 成本、寄存器压力、spill、VLEN / LMUL 限制、index staging 成本或 correctness 风险。
