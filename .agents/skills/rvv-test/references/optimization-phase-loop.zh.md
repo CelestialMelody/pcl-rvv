@@ -82,6 +82,7 @@ correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新�
 2. **RVV test support architecture**：测试支撑是否有稳定聚合入口；reference、fixtures、row source adapter、RVV math、reduction / formula candidate、assertions、bench harness / bench cases 是否按职责可审查；大型单文件、重复 helper、混合 production-direct 与 diagnostic 职责、bench/test wrapper 相互缠绕，都是可列入本阶段的工程债。
 3. **test harness layout and naming**：测试 / bench 源码、聚合头文件和内部职责拆分是否仍停在当前 topic 既有布局，是否应迁移到 `artifact_layout.source_subdir`、`artifact_layout.test_source_template`、`artifact_layout.bench_source_template`、`test_support.aggregator_directory` 和 `test_support.internal_directory` 解析出的结构；长 topic 是否应按 `test_support.topic_abbrev_policy` 使用缩写 topic token 作为文件名；Makefile、board target、日志路径、文档引用和现有 case 名在迁移后是否保持兼容。此项必须给出 `adopt / defer / reject` 决策，不能被包含在泛泛的“测试支撑可读性”里。
    审计对象按当前 topic 真实形态枚举：根目录长 `test_*.cpp` / `bench_*.cpp`、单个聚合头、多职责 helper header、旧 `test_support/` 目录、已有 `include/` / `include/impl/`、script 或其它等价测试支撑文件都要纳入；不要假设每个 topic 都有字面量 `test_support/` 目录，也不要因为没有该目录就跳过布局迁移审计。
+   本项还必须包含 target granularity audit（测试 target 粒度审计）：从当前 topic 的 `Makefile`、`board.mk`、`src/test_*.cpp`、`src/bench_*.cpp`、topic-local `script/` 和 evidence registry 抽取真实 target，区分 correctness aggregate、correctness aliases、bench diagnostic aliases、QEMU smoke aliases、board smoke aliases、board repeated aliases、doctor / registry aliases 和 historical probe guarded aliases。若缺少某类 target，worker 应说明本阶段补齐、`not_applicable with evidence`、`phase_deferred + unblocked` 或 `turn_stop_deferred with stop_condition_hit`。成熟 sibling 只能校准粒度和读者路径，不能提供要照抄的 target 名、case 名或日志路径。
 4. **evidence and docs**：correctness、fallback、asm、bench、board summary、Evidence Doctor、evaluation、topic docs 和 remaining risks 是否一致；QEMU correctness、diagnostic bench、production-shaped bench 和 production-dispatch board evidence 是否分层；stale helper、旧风险、旧结论或未登记覆盖日志是否需要刷新。
 5. **closeout hygiene**：dirty isolation 是否只允许当前 topic 或当前 agent instruction patch；`git diff --check`、
    std/RVV correctness、必要 asm / bench / board 边界是否运行或有明确不运行理由；phase result /
@@ -125,6 +126,7 @@ turn_stop_deferred with stop_condition_hit。
 
 - README navigation：是否提供“先读哪份文档”、目录分工、常用命令、当前可提交证据、默认不提交的生成产物和当前结果。
 - `testing-overview`：是否说明 test / bench / board / QEMU 的入口分类、覆盖矩阵和证据白名单。
+- target granularity audit：是否按当前 topic 真实 `Makefile`、`board.mk`、test / bench 源码、script 和 registry 抽取 target，并说明 aggregate target、细分 alias、board smoke、board repeated、doctor / registry、historical guarded probe 的采用、缺失或暂缓状态。
 - `correctness-tests`：是否逐个 gtest 或测试族说明输入、被测路径、断言和证明范围。
 - `benchmark-and-evidence`：是否说明 bench label、case-filter、QEMU smoke 边界、board repeated target、Evidence Doctor、manifest、registry 和提交边界。
 - `optimization-evidence`：是否把 adopted / rejected / deferred 优化方式映射到 production / test_support / bench / board evidence。
@@ -158,6 +160,7 @@ structure-parity phase 的最小审计表必须覆盖：
 - internal helper layout：当配置解析内部目录为 `include/impl` 且当前 topic 仍有旧 `test_support/`
   内部头时，是否迁移到配置目录、更新 include graph / Makefile / 文档引用，并删除无依赖旧入口。
 - script and bench registry：topic-local script、case label 字典、bench case registry、checksum / trace / asm 输出合同。
+- target granularity：Makefile / board.mk 中 correctness aggregate、correctness aliases、bench diagnostic aliases、QEMU smoke aliases、board smoke aliases、board repeated aliases、doctor / registry aliases 和 historical probe guarded aliases 是否与当前 topic 复杂度匹配；缺失项是否有证据化裁剪或下一阶段动作。
 - topic-local docs：README、testing overview、correctness tests、benchmark/evidence、optimization evidence、test-support code map、evaluation 主路径和 phase index。
 - long-term docs：`doc-rvv` 主题文档是否只保存长期 production 行为、当前采用方式、证据链和边界，不承担测试工程全量说明。
 - legacy compatibility：root evaluation pointer、compatibility alias、旧路径 wrapper、重复正文和旧引用。

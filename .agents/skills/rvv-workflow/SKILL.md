@@ -93,7 +93,9 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 
 ## 指令来源追踪
 
-最终 Handoff Packet 当前字段合同仍包含 `agent_asset_trace`，用短清单把关键决策映射到实际读取并影响本轮行为的 instruction sources（指令来源）或规则。例如：
+最终 Handoff Packet 字段合同使用 `loaded_instruction_sources`、`instruction_trace` 和
+`instruction_feedback`，用短清单把关键决策映射到实际读取并影响本轮行为的 instruction
+sources（指令来源）或规则。例如：
 
 - `rvv-workflow/references/reviewability-and-language.zh.md` -> `TEST` 说明、术语解释和注释策略。
 - `rvv-test` -> test taxonomy、diagnostic policy、数值一致性、bench / ablation 和 evidence logs。

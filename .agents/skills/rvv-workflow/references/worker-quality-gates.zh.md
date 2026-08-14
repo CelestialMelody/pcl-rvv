@@ -423,6 +423,7 @@ micro_stop_guard:
 continue_stop_decision:
 ready_for_review_validity_check:
 doc_quality_refs_loaded:
+target_granularity_audit_ready:
 current_optimization_section_ready:
 test_comment_strategy_frozen:
 test_support_split_decision_ready:
@@ -495,6 +496,16 @@ followup_options_ready:
 - 表格必须包含 `document_ownership_matrix_ready`。证据指向文档归属矩阵章节、evaluation 中的决策审计或 Handoff Packet 的定位字段。
 - 表格必须包含 `traceability_map_ready`。证据指向 Traceability Map 章节或独立 traceability 文档，说明文档、测试、输出和代码位置可以互相定位。
 - 表格必须包含 `doc_suite_quality_bar_ready`。凡本轮涉及 topic-local README、testing overview、correctness tests、benchmark/evidence、optimization evidence、test-support code map、phase index、evaluation 或 `doc-rvv` 适用性，证据必须指向 `doc-suite-quality-bar.zh.md` 审计表或当前 phase result。若用户 / reviewer 点名成熟 sibling，可在证据中写 optional calibration，但不能只用 sibling 路径替代 canonical quality bar。
+- 表格必须包含 `target_granularity_audit_ready`。凡本轮新建、重排或 closeout topic-local doc suite，
+  或用户 / reviewer 质疑测试工程与测试文档是否足够可审查，证据必须指向
+  `doc-suite-quality-bar.zh.md` 的 testing target granularity audit（测试 target 粒度审计）、
+  当前 phase result 或 Handoff。该项必须说明 worker 是否从当前 topic 的真实 `Makefile`、
+  `board.mk`、`src/test_*.cpp`、`src/bench_*.cpp`、topic-local `script/` 和 evidence registry
+  抽取了 target，而不是从 sibling topic 复制 target 名。审计至少区分 correctness aggregate、
+  correctness aliases、bench diagnostic aliases、QEMU smoke aliases、board smoke aliases、
+  board repeated aliases、doctor / registry aliases 和 historical probe guarded aliases。缺少某类
+  target 时，应写成 `adopted`、`not_applicable with evidence`、`phase_deferred + unblocked`
+  或 `turn_stop_deferred with stop_condition_hit`；文档不得虚构不存在的 target。
 - 表格必须包含 `phase_plan_written_before_edits`、`phase_completion_matrix_ready`、`optimization_matrix_ready`、
   `roadmap_default_recovery_queue_ready`、`board_availability_continue_ready`、`micro_stop_guard` 和 `continue_stop_decision`。证据指向当前 phase plan/result、optimization matrix、
   `unblocked_next_actions`、`stop_condition_hit` 和 Handoff 的 `phase_loop_state`；若当前任务不是多阶段优化，写 `not_applicable` 并说明为什么没有 phase loop。
@@ -538,7 +549,7 @@ followup_options_ready:
   表格必须包含 `doc_suite_parity_closeout_ready`。证据必须指向当前 phase result 或
   `structure-parity-doc-suite` phase result，且审计表至少覆盖 README、`testing-overview`、
   `correctness-tests`、`benchmark-and-evidence`、`optimization-evidence`、`test-support-code-map`、
-  evaluation、长期 `doc-rvv` 和 phase index / result。每个 area 必须是 `adopted`、
+  evaluation、长期 `doc-rvv`、phase index / result 和 target 粒度审计。每个 area 必须是 `adopted`、
   `rejected with evidence`、`not_applicable with evidence` 或
   `turn_stop_deferred with stop_condition_hit`；若仍有 `phase_deferred + unblocked`，该 gate
   必须写 `fail`，并把 `next_phase_default` 指向具体文档补齐 phase。
@@ -548,7 +559,7 @@ followup_options_ready:
 - 表格必须包含 `legacy_compatibility_decision_ready`。证据必须说明是否存在 legacy pointer / alias /
   旧路径 wrapper；默认处理是删除并更新引用。若保留，必须列出具体外部依赖、删除条件和下一阶段。
 - 若 `language_check` 声称通过，必须能在同一张表或相邻段落中指出诊断代码、测试、bench 和文档的术语 / 中文注释证据。
-- 表格必须包含 `writing_style_trigger_check`。检查范围至少覆盖主题文档、evaluation / closeout 文档、workflow 文档、Handoff Packet、worker / reviewer 最终回复和 `agent_asset_feedback`；触发词清单来自 `rvv-documentation/references/writing-style.md`。若某个命中词是必要技术术语，必须写清保留理由。
+- 表格必须包含 `writing_style_trigger_check`。检查范围至少覆盖主题文档、evaluation / closeout 文档、workflow 文档、Handoff Packet、worker / reviewer 最终回复和 `instruction_feedback`；触发词清单来自 `rvv-documentation/references/writing-style.md`。若某个命中词是必要技术术语，必须写清保留理由。
 - 若当前结论强于 no-production，例如 `partial-production-candidate`，表格必须额外列出 production direct 尚未闭合的证据项，避免把诊断收益误写成 production-ready。
 - 若本轮进入 PI1，表格必须额外列出 `pi1_production_scope_ready`、`generic_point_type_strategy_ready`、
   `fallback_dispatch_strategy_ready` 和 `production_direct_test_plan_ready`。不适用时写明原因，不能省略。

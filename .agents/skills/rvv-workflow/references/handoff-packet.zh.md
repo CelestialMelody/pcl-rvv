@@ -50,15 +50,16 @@ evidence_registry_status (证据登记表状态；fresh / not_available / unregi
 rerun_budget_decision (板卡复跑预算与决策桶；run budget、实际复跑次数、decision bucket、是否用完预算、是否降级或需要人工判断):
 board_availability_continue_status (板卡可用性与持续推进状态；说明当前 phase 是否需要板卡证据、板卡是否配置 / 可达 / 当前会话已确认可用、已跑或将继续跑的 board target / summary / Evidence Doctor / registry、真实停止条件):
 phase_loop_state (多阶段优化循环状态；current_phase、phase_plan_paths、phase_result_paths、phase_completion_matrix、optimization_roadmap_status、optimization_matrix_status、phase_deferred_unblocked_items、unblocked_next_actions、stop_condition_hit、continue_stop_decision、next_phase_default):
-agent_assets_used (本次读取或调用的 agent 资产，例如 skills（技能）、knowledge map（知识索引）、PCL adapter（PCL 适配器）、规则集):
-agent_asset_trace (资产使用追踪，关键工作行为分别来自哪些实际读取并使用过的资产 / 规则):
-agent_asset_feedback (可选；本轮发现的可沉淀规则、资产缺口或冗余规则，默认 report-only):
+loaded_instruction_sources (本次实际读取并用于决策的 instruction sources（指令来源），例如 workflow skills（工作流技能）、workflow references（工作流参考）、workflow config（工作流配置）、knowledge map（知识索引）或 PCL adapter（PCL 适配器）):
+instruction_trace (指令追踪；关键工作行为分别来自哪些实际读取并使用过的 instruction sources / 规则):
+instruction_feedback (可选；本轮发现的可沉淀规则、instruction gap（指令缺口）或冗余规则，默认 report-only):
 preferences_loaded (S0 读取的偏好层级，例如 defaults、local override、prompt override，以及是否只报告 env var 名):
 work_preferences (S0 冻结的工作偏好，例如注释详细度、注释语言、production（生产源码）注释上限、测试资产 / diagnostic 注释下限、是否处于单 topic 校准重跑):
-commit_preferences (S0 冻结的提交偏好，例如是否允许 commit（提交）、topic / log / agent asset 是否拆分、evidence log policy（证据日志策略）是 summary-only / sanitized-logs / raw-logs):
+commit_preferences (S0 冻结的提交偏好，例如是否允许 commit（提交）、topic / log / agent instruction patch 是否拆分、evidence log policy（证据日志策略）是 summary-only / sanitized-logs / raw-logs):
 artifact_publication_decision (S0 解析出的产物发布判断；列出 `s0_run_record`、`phase_docs`、`current_handoff`、`production_topic_docs`、`topic_local_evaluation`、`evidence_summary`、`sanitized_logs`、`raw_logs` 和 `agent_asset_patch` 的默认策略与提交边界；no-production 时 `production_topic_docs` 必须写 `not_applicable`):
 experience_migration_audit (可选；声明采用 sibling topic 经验时，列出 adopted / attempted / deferred / rejected 对照表):
 test_support_shape_scan (测试支撑形态扫描；列出当前 topic 的根目录源文件、聚合头、内部 helper、旧 test_support 目录、script 或等价支撑代码):
+target_granularity_audit (测试 target 粒度审计；从当前 topic 的 Makefile、board.mk、test / bench 源码、script 和 registry 抽取真实 target，区分 aggregate、alias、QEMU / board smoke、board repeated、doctor / registry 和 historical guarded probe):
 test_support_split_decision (可选；长 helper 或多职责 helper 是否已按 test_support 配置拆分，或暂缓理由):
 legacy_compatibility_decision (旧路径 / 兼容入口决策；说明删除、保留理由、外部依赖和删除阶段):
 language_check (语言规范校验结果，例如术语解释、文档和代码注释是否达标):
@@ -73,7 +74,7 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 
 - `phase_reached` 必须使用当前状态机中的阶段或分支，例如 `S4 test_plan_ready`、`S10 EvidenceDecision`、`PI1 production_integration_plan`、`S12 blocked`。
 - `current_decision` 必须是陈述句，不能只写 `done`、`ok` 或 `needs review`。
-- `files_changed` 应区分 production（生产源码）、配置解析出的 topic 测试资产、topic 文档、agent asset（代理资产）和本地证据文件。
+- `files_changed` 应区分 production（生产源码）、配置解析出的 topic 测试资产、topic 文档、agent instruction patch（agent 指令改动）和本地证据文件。
 - `dirty_isolation` 必须说明当前 worktree 是否含有与本 topic 无关的 diff（差异），并列出本轮允许 reviewer / commit 关注的路径集合。若存在其它 topic、agent instruction patch、raw logs、build 输出或用户未授权改动，必须写成“ignore / do not stage / separate commit”等明确边界。检查不能只依赖普通 `git status --short`；对当前 topic 和本轮 agent instruction 路径必须使用包含未跟踪文件的路径限定扫描，例如 `git status --short --untracked-files=all -- <allowed-paths>`，必要时再用 `git check-ignore -v` 判定是否被忽略。
 - `artifact_tracking_status` 必须列出本轮新增、修改或被 README / evaluation / Handoff 引用的 topic-local docs、phase docs、summary evidence 和长期 `doc-rvv` 是否已经 tracked（已跟踪）、to-be-staged（待暂存）、ignored-local（忽略且只本地）或 excluded（排除提交）。若 README 或 roadmap 引用的 doc-suite 文件仍是 untracked，不能写 `ready_for_review`；必须说明要纳入 topic commit、单独 commit，或移除该引用。
 - `artifacts_created_or_updated` 应说明产物作用，不要只列路径。
@@ -129,9 +130,9 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
   - `stop_condition_hit`：停止原因，必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权，或 phase 矩阵、optimization matrix 和 roadmap 都已闭合且无 unblocked next action。
   - `continue_stop_decision`：为什么继续或为什么停；不能只写 `done`。
   - `next_phase_default`：下一轮短 prompt 默认恢复的一个动作；替代路径放入 `followup_options_for_user`。
-- `agent_assets_used` 只列实际读取或调用过的资产，不要机械列全量 skill。
-- `agent_asset_trace` 必须把行为映射到资产，例如 `reviewability-and-language.zh.md -> TEST 注释和术语解释`。如果某资产只读过但没有影响决策，不要放入 trace。
-- `agent_asset_feedback` 只在发现可复用规则、资产缺口或冗余规则时输出。默认模式是 `report-only`：只写建议，不修改 `.agents`、prompt 或 knowledge map。该字段至少说明发现项、建议更新的 skill/reference、适用范围是 topic-specific 还是 cross-topic（跨主题），以及是否建议进入 workflow improvement（工作流改进）。用户对工作流程、停止条件、测试体系、文档结构、恢复方式或 reviewer 可读性的反馈，默认要审计是否属于 agent asset 缺口；若属于，不能只写入 topic 文档。
+- `loaded_instruction_sources` 只列实际读取并用于本轮决策的 instruction sources，不要机械列全量 skill。
+- `instruction_trace` 必须把行为映射到 instruction sources，例如 `reviewability-and-language.zh.md -> TEST 注释和术语解释`。如果某个 instruction source 只读过但没有影响决策，不要放入 trace。
+- `instruction_feedback` 只在发现可复用规则、instruction gap（指令缺口）或冗余规则时输出。默认模式是 `report-only`：只写建议，不修改 `.agents`、prompt 或 knowledge map。该字段至少说明发现项、建议更新的 skill/reference、适用范围是 topic-specific 还是 cross-topic（跨主题），以及是否建议进入 workflow improvement（工作流改进）。用户对工作流程、停止条件、测试体系、文档结构、恢复方式或 reviewer 可读性的反馈，默认要审计是否属于 instruction gap；若属于，不能只写入 topic 文档。
 - `preferences_loaded` 必须写清 `.agents/config/defaults.yaml` 是否读取、`.agents/local/user-preferences.yaml` 是否存在、当前 prompt 是否覆盖配置。涉及板卡、用户名、私有路径时，只写 env var（环境变量）名或 local override 覆盖范围，不写实际值。
 - `resolved_artifacts` 必须列出本轮通过 `artifact_layout` 解析出的关键 worklog、phase、handoff 或 topic 文档路径，并标明 template key、resolved path 和 publication class；若解析失败，写缺失键而不是猜路径。
 - `work_preferences` 和 `commit_preferences` 应与 S0 报告一致；若中途改变，写明用户授权或改变原因。`work_preferences` 至少覆盖 `comment_policy_frozen` 和 `documentation_policy_frozen`；`commit_preferences` 至少覆盖 `evidence_policy_frozen`。
@@ -140,13 +141,20 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `test_support_shape_scan` 在恢复旧 topic、长 topic、或声明对齐成熟 sibling 结构时必须输出。它应列出当前
   topic 实际存在的测试支撑形态：根目录 test / bench 源码、聚合头、内部 helper、旧 `test_support/`
   目录、script、bench case registry 或其它等价文件；没有某种形态时写 `not_present`。
+- `target_granularity_audit` 在新建、重排或 closeout topic-local doc suite，或用户 / reviewer 询问测试工程
+  是否足够可审查时必须输出。它必须说明 worker 是否从当前 topic 的真实 `Makefile`、`board.mk`、
+  `src/test_*.cpp`、`src/bench_*.cpp`、topic-local `script/` 和 evidence registry 抽取 target，而不是
+  从 sibling topic 复制 target 名。至少覆盖 correctness aggregate、correctness aliases、bench diagnostic aliases、
+  QEMU smoke aliases、board smoke aliases、board repeated aliases、doctor / registry aliases 和 historical probe
+  guarded aliases；缺少某类 target 时写 `not_applicable with evidence`、`phase_deferred + unblocked`、
+  `turn_stop_deferred with stop_condition_hit` 或本阶段已补齐的路径。
 - `test_support_split_decision` 在单个测试支撑 helper、测试 / bench 源文件或等价支撑代码超过配置阈值，
   或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation
   中三类以上职责时必须输出。若已拆分，说明 aggregator（聚合头文件）和按 `test_support` 配置解析出的内部结构职责；若暂缓，说明 deferred reason 以及对 reviewer 可读性和后续维护的影响。
 - `legacy_compatibility_decision` 必须说明本轮是否发现 legacy pointer、compatibility alias、旧路径 wrapper
   或重复正文。默认处理是删除并更新引用；若保留，必须列出具体外部依赖、用户要求、dirty isolation 风险
   或同轮无法安全更新的脚本，并写清删除条件和默认下一阶段。
-- `language_check` 不允许虚写。若配置解析出的测试资产、diagnostic（诊断代码）或 prototype（原型代码）没有详细中文注释，必须写成未达标。通过时应列出覆盖面，例如“诊断 helper 注释、TEST 注释、bench 文件头、主题文档术语解释”，并给出文件或章节证据。该字段还必须说明是否执行 `writing_style_trigger_check`，以及它覆盖了文档、Handoff Packet、最终回复、reviewer 报告或 `agent_asset_feedback` 中的哪些文本。
+- `language_check` 不允许虚写。若配置解析出的测试资产、diagnostic（诊断代码）或 prototype（原型代码）没有详细中文注释，必须写成未达标。通过时应列出覆盖面，例如“诊断 helper 注释、TEST 注释、bench 文件头、主题文档术语解释”，并给出文件或章节证据。该字段还必须说明是否执行 `writing_style_trigger_check`，以及它覆盖了文档、Handoff Packet、最终回复、reviewer 报告或 `instruction_feedback` 中的哪些文本。
 - `worker_quality_gate_check` 不允许虚写。必须使用证据化表格，至少覆盖 `worker-quality-gates.zh.md` 中的 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen`、标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、optimization roadmap、证据模型、Evidence Doctor（证据体检）和 stop condition（停止条件）。表格列建议为 `gate | status | evidence | missing_items`；未完成项要列入 `risks_or_open_questions`。
 - `worker_quality_gate_check` 中的 `status` 不应只有 `true` / `false`。使用 `pass`、`partial`、`fail` 或 `not_applicable`，并为每项提供文件 / 章节 / 日志路径证据。
 - 如果 `current_decision` 是 `partial-production-candidate` 或任何强于 no-production 的结论，`worker_quality_gate_check` 必须额外列出 production direct 尚未闭合项，例如真实公开入口 direct test、fallback、点类型 traits、`Scalar=double`、indices / correspondences 策略、生产 bench 重跑和人工确认点。
@@ -193,12 +201,12 @@ worker 输出 Handoff Packet 前应检查：
 - 是否输出 `evidence_freshness_status`；如果复跑改变了数值、decision bucket 或证据角色，旧 summary / phase result 是否已标成 historical / stale，相关文档是否已刷新。
 - 是否输出 `evidence_registry_status`；如果 registry 不可用，是否列出人工检查路径和下一轮接入动作；如果发现未登记变化，是否暂停当前数值结论。
 - 是否输出 `rerun_budget_decision`；如果板卡结果波动，是否按预设预算停止并给出 stable / unstable 决策桶，而不是无限复跑。
-- `agent_asset_trace` 是否是真实使用记录。
-- 如果本轮发现可沉淀规则、资产缺口或冗余规则，是否按 `agent_asset_feedback` 报告；没有发现时可以省略该字段。
+- `instruction_trace` 是否是真实指令使用记录。
+- 如果本轮发现可沉淀规则、instruction gap 或冗余规则，是否按 `instruction_feedback` 报告；没有发现时可以省略该字段。
 - 如果声明采用 sibling topic 经验，是否输出 `experience_migration_audit`，且没有遗漏相邻成功或负向方案中的主要维度。
 - 如果长 helper、长 test / bench 源码或多职责支撑代码命中拆分阈值，是否输出 `test_support_split_decision`，并说明拆分或暂缓理由。
 - `language_check` 是否覆盖文档、代码注释、测试输出、Handoff Packet 和最终回复；是否按 `writing-style.md` 执行触发词检查，并说明命中项、改写结果或保留理由。
-- `worker_quality_gate_check` 是否真实反映写文件前质量门禁，且每项带 reviewer 可定位的证据；如果短 prompt 启动后产物质量下降，应在这里暴露，而不是只写 agent asset trace。
+- `worker_quality_gate_check` 是否真实反映写文件前质量门禁，且每项带 reviewer 可定位的证据；如果短 prompt 启动后产物质量下降，应在这里暴露，而不是只写 instruction_trace。
 - `phase_loop_state` 是否能让下一轮 worker 用一句短 prompt 恢复当前 phase 和 roadmap；如果仍有 `phase_deferred_unblocked_items` 或 `unblocked_next_actions` 却选择停止，是否写清合法 `stop_condition_hit` 和 `continue_stop_decision`。
 - 如果 Handoff 把未做项列为 `deferred`、`optional`、`reviewer-triggered` 或 `independent follow-up`，
   是否说明它们属于 `phase_deferred + unblocked` 还是 `turn_stop_deferred`；若是前者，是否默认继续到下一 phase。
