@@ -76,7 +76,14 @@
 3. **test harness layout and naming**：测试 / bench 源码、聚合头文件和内部职责拆分是否仍停在当前 topic 既有布局，是否应迁移到 `artifact_layout.source_subdir`、`artifact_layout.test_source_template`、`artifact_layout.bench_source_template`、`test_support.aggregator_directory` 和 `test_support.internal_directory` 解析出的结构；长 topic 是否应按 `test_support.topic_abbrev_policy` 使用缩写 topic token 作为文件名；Makefile、board target、日志路径、文档引用和现有 case 名在迁移后是否保持兼容。此项必须给出 `adopt / defer / reject` 决策，不能被包含在泛泛的“测试支撑可读性”里。
    审计对象按当前 topic 真实形态枚举：根目录长 `test_*.cpp` / `bench_*.cpp`、单个聚合头、多职责 helper header、旧 `test_support/` 目录、已有 `include/` / `include/impl/`、script 或其它等价测试支撑文件都要纳入；不要假设每个 topic 都有字面量 `test_support/` 目录，也不要因为没有该目录就跳过布局迁移审计。
 4. **evidence and docs**：correctness、fallback、asm、bench、board summary、Evidence Doctor、evaluation、topic docs 和 remaining risks 是否一致；QEMU correctness、diagnostic bench、production-shaped bench 和 production-dispatch board evidence 是否分层；stale helper、旧风险、旧结论或未登记覆盖日志是否需要刷新。
-5. **closeout hygiene**：dirty isolation 是否只允许当前 topic 或当前 agent asset；`git diff --check`、std/RVV correctness、必要 asm / bench / board 边界是否运行或有明确不运行理由；phase result / evaluation / Handoff 是否能让下一轮短 prompt 恢复。
+5. **closeout hygiene**：dirty isolation 是否只允许当前 topic 或当前 agent instruction patch；`git diff --check`、
+   std/RVV correctness、必要 asm / bench / board 边界是否运行或有明确不运行理由；phase result /
+   evaluation / Handoff 是否能让下一轮短 prompt 恢复。若本阶段新增 README、topic-local doc suite、
+   phase result、summary 或长期 `doc-rvv` 引用，必须对当前 topic 路径执行包含未跟踪文件的扫描，例如
+   `git status --short --untracked-files=all -- <topic-paths>` 或
+   `git ls-files --others --exclude-standard -- <topic-paths>`。README、evaluation、roadmap 或 Handoff
+   引用的新增文档若仍是 untracked（未跟踪）文件，不能声明 closeout / ready_for_review；必须把它们列入
+   topic artifact tracking / commit boundary，或移除引用并说明原因。
 
 若 test support 架构已经影响审计定位、证据边界或后续 candidate 扩展，框架化整理本身就是 unblocked next action。worker 不需要等用户显式说“重构测试框架”才把它纳入计划；但必须在 phase plan 中写清范围、保持 case 名 / bench 输出合同的策略和验证命令。
 如果 topic 与相邻成熟 topic 有相同模块、相似数据流或相似 test_support 复杂度，worker 必须把相邻 topic 的测试支撑源码布局、聚合入口、内部职责拆分和 topic token 命名作为结构经验审计对象；具体目录和文件名仍按当前 topic 既有结构、`artifact_layout` 与 `test_support` 配置解析。`不要机械复制`
@@ -93,18 +100,18 @@
 phase，直到 adopted、rejected with evidence、not_applicable with evidence 或
 turn_stop_deferred with stop_condition_hit。
 
-成熟度审计还必须检查 topic-local doc suite（主题本地文档套件）是否达到当前 topic 复杂度需要。若相邻成熟 topic 已经提供 `README.zh.md`、`doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` 和 `doc/<topic>-evaluation.zh.md` 这类结构，worker 应把它作为文档成熟度 quality bar。具体内容不能复制，但结构、读者路径、证据白名单和代码地图必须做 `adopted / rejected with evidence / not_applicable with evidence / turn_stop_deferred with stop_condition_hit` 决策。evaluation 仍在 topic 根目录、缺少 README、缺少测试/bench/代码地图或长期 `doc-rvv` 与 topic-local docs 互相挤压时，都是可继续推进的 unblocked doc-suite action。
-当 mature sibling 已存在，或用户 / reviewer 明确指出某个成熟 topic 作为质量参照时，doc-suite parity 不能只写在 roadmap、Handoff 或最终回复里。worker 必须在当前 phase result 中完成审计，或新建明确的 `structure-parity-doc-suite` phase 并产出 `plan.zh.md` / `result.zh.md`。若缺口只涉及 topic-local docs、长期 `doc-rvv` 分工、evaluation、README 导航或 evidence path 对齐，且没有用户限定、dirty isolation、工具失败或真实外部依赖阻塞，则默认下一 phase 必须先补文档套件，不能声明 `ready_for_review`。
+成熟度审计还必须检查 topic-local doc suite（主题本地文档套件）是否达到当前 topic 复杂度需要。默认 quality bar 来自 `rvv-documentation/references/doc-suite-quality-bar.zh.md`，而不是某个具体 sibling topic。worker 应按该规范审计 `README.zh.md`、`doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md`、`doc/<topic>-evaluation.zh.md`、phase index 和 `doc-rvv` 适用性。具体内容可以按当前 topic 裁剪，但结构、读者路径、证据白名单和代码地图必须做 `adopted / rejected with evidence / not_applicable with evidence / turn_stop_deferred with stop_condition_hit` 决策。evaluation 仍在 topic 根目录、缺少 README、缺少测试/bench/代码地图或长期 `doc-rvv` 与 topic-local docs 互相挤压时，都是可继续推进的 unblocked doc-suite action。
+若用户 / reviewer 明确指出某个成熟 topic 作为质量参照，它只能作为 optional calibration（可选校准样例）：不复制算法、数值、phase 名、文件名或 production 结论，只补充检查本文 quality bar 是否漏掉了读者路径、证据白名单或代码地图问题。doc-suite parity 不能只写在 roadmap、Handoff 或最终回复里。worker 必须在当前 phase result 中完成审计，或新建明确的 `structure-parity-doc-suite` phase 并产出 `plan.zh.md` / `result.zh.md`。若缺口只涉及 topic-local docs、长期 `doc-rvv` 分工、evaluation、README 导航或 evidence path 对齐，且没有用户限定、dirty isolation、工具失败或真实外部依赖阻塞，则默认下一 phase 必须先补文档套件，不能声明 `ready_for_review`。
 文档迁移默认不保留 legacy pointer（旧路径指针）、compatibility alias（兼容别名）或重复正文。只有存在明确外部依赖、用户限定必须兼容、跨 topic 脚本暂时无法同轮更新，或 dirty isolation 会误删用户改动时，才可以临时保留；保留时必须在 phase result / Handoff 写出依赖证据、删除条件和下一阶段删除动作。缺少证据的“避免旧引用断开”不是充分理由。
 
 ### Doc Suite Parity Closeout Gate
 
-当当前 topic 命中复杂 topic 条件、存在 production direct 结论、或 mature sibling doc suite 已被点名作为质量参照时，production closeout / production-ready / done / stop-for-review 声明必须先满足本门禁。
+当当前 topic 命中复杂 topic 条件、存在 production direct 结论、board / Evidence Doctor 证据链，或用户 / reviewer 要求审计文档结构时，production closeout / production-ready / done / stop-for-review 声明必须先满足本门禁。成熟 sibling doc suite 被点名时，只作为 optional calibration；默认规范仍是 `doc-suite-quality-bar.zh.md`。
 
 最小审计表必须覆盖以下文档 area，并使用与 structure-parity phase 相同的列：
 
 ```text
-| area | current shape scan | mature sibling / local quality bar | decision | blocker / evidence | next action |
+| area | current shape scan | quality bar / optional calibration | decision | blocker / evidence | next action |
 ```
 
 `area` 至少包含：
@@ -118,6 +125,9 @@ turn_stop_deferred with stop_condition_hit。
 - evaluation：是否承载 EvidenceDecision、Traceability Map、文档分工审计、accepted risk 和不覆盖范围。
 - long-term `doc-rvv`：是否只写 adopted production 行为、当前优化方式、dispatch / fallback、范围边界、证据链和长期风险。
 - phase index / result：是否记录本次 doc-suite parity 的采用、拒绝、暂缓理由和默认恢复动作。
+- artifact tracking：README、evaluation、roadmap、phase index / result 或长期 `doc-rvv` 引用的
+  topic-local doc-suite 文件是否已存在并出现在当前 topic 的 tracked / to-be-staged artifact 集合中。
+  不能只凭普通 `git status --short` 或本地文件可读性判断文档已闭合；必须用包含未跟踪文件的路径限定扫描确认。
 
 每个 area 的 `decision` 只能是 `adopted`、`rejected with evidence`、`not_applicable with evidence` 或
 `turn_stop_deferred with stop_condition_hit`，除非下一阶段就是该 area 的补齐 phase。`deferred` 必须写成
@@ -126,12 +136,12 @@ turn_stop_deferred with stop_condition_hit。
 
 ### Structure Parity Completion Contract
 
-若当前 topic 与同模块成熟 sibling 有相似复杂度、相似数据流或相似 reviewer 负担，worker 必须把 mature sibling parity（成熟相邻主题对齐）执行成默认下一 phase，而不是只把它写入 roadmap。成熟 sibling 可以提供结构成熟度 quality bar；它不能成为唯一参考对象，也不能固定算法、文件名或性能结论。
+若当前 topic 存在测试支撑布局、topic-local doc suite、evaluation 主路径、`doc-rvv` 分工或 legacy 清理缺口，worker 必须先按 `artifact_layout`、`test_support` 配置和 `doc-suite-quality-bar.zh.md` 执行 structure parity（结构对齐）审计，而不是只把它写入 roadmap。若当前 topic 与同模块成熟 sibling 有相似复杂度、相似数据流或相似 reviewer 负担，成熟 sibling 只能提供 optional calibration（可选校准样例）；它不能成为唯一参考对象，也不能固定算法、文件名或性能结论。
 
 structure-parity phase 的最小审计表必须覆盖：
 
 ```text
-| area | current shape scan | mature sibling / local quality bar | decision | blocker / evidence | next action |
+| area | current shape scan | config / quality bar / optional calibration | decision | blocker / evidence | next action |
 ```
 
 `area` 至少包含：

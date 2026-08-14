@@ -51,22 +51,30 @@
 
 README 只作为导航、常用命令和证据白名单入口。它不承担每个测试、每个 bench case 或每个 helper 的长解释。
 
-当 topic 已经命中复杂 topic 条件，或相邻成熟 topic 已经通过 README + topic-local doc suite 解决测试语义、
-bench label、证据白名单和代码地图问题时，doc suite parity（文档套件对齐）是 structure maturity
-（结构成熟度）的一部分。worker 可以根据当前 topic 的真实复杂度合并或裁剪文档，但必须在 phase plan/result
-和 Handoff 中逐项说明 `adopted / rejected with evidence / not_applicable with evidence /
-turn_stop_deferred with stop_condition_hit`。若只是暂缓且不存在用户限定、dirty isolation 风险、工具阻塞、
-生产范围扩大或真实外部依赖，默认继续到下一 phase；不要把“只有 reviewer 需要才补”写成合法 closeout。
+topic-local doc suite 的 canonical quality bar（规范质量门槛）见 `doc-suite-quality-bar.zh.md`。当 topic
+命中复杂 topic 条件，或已有 production direct、board summary、Evidence Doctor、多阶段 phase loop
+等恢复 / 审查负担时，doc suite parity（文档套件对齐）是 structure maturity（结构成熟度）的一部分。
+worker 可以根据当前 topic 的真实复杂度合并或裁剪文档，但必须在 phase plan/result 和 Handoff 中逐项说明
+`adopted / rejected with evidence / not_applicable with evidence / turn_stop_deferred with stop_condition_hit`。
+若只是暂缓且不存在用户限定、dirty isolation 风险、工具阻塞、生产范围扩大或真实外部依赖，默认继续到下一
+phase；不要把“只有 reviewer 需要才补”写成合法 closeout。
 
-production closeout、production-ready、done 或 stop-for-review 声明前，若 mature sibling doc suite 已存在
-或被用户 / reviewer 点名，worker 必须产出一个 doc-suite parity 审计结果。该结果可以写在当前 phase
-`result.zh.md`，也可以新建 `structure-parity-doc-suite` phase，但不能只出现在 roadmap、最终回复或 Handoff。
+production closeout、production-ready、done 或 stop-for-review 声明前，若当前 topic 命中上述 doc-suite
+quality bar 条件，worker 必须产出一个 doc-suite parity 审计结果。该结果可以写在当前 phase `result.zh.md`，
+也可以新建 `structure-parity-doc-suite` phase，但不能只出现在 roadmap、最终回复或 Handoff。成熟 sibling topic
+只能作为 optional calibration（可选校准样例）：用户 / reviewer 点名时可用来补充 quality bar，但不能成为唯一规范源。
 审计表必须使用以下列，并覆盖 README、`testing-overview`、`correctness-tests`、`benchmark-and-evidence`、
-`optimization-evidence`、`test-support-code-map`、evaluation、长期 `doc-rvv` 和 phase index / result：
+`optimization-evidence`、`test-support-code-map`、evaluation、长期 `doc-rvv`、phase index / result 和 artifact tracking：
 
 ```text
-| area | current shape scan | mature sibling / local quality bar | decision | blocker / evidence | next action |
+| area | current shape scan | quality bar / optional calibration | decision | blocker / evidence | next action |
 ```
+
+审计完成后还必须检查文档引用的 artifact tracking（产物跟踪状态）：README、evaluation、roadmap、
+phase result 或长期 `doc-rvv` 中引用的 topic-local doc-suite 文件必须存在，并在当前 topic 的
+tracked / to-be-staged artifact 集合中，或明确标成 local-only / excluded 且不作为提交后文档入口。
+worker 应使用包含未跟踪文件的路径限定扫描，而不是只看普通 `git status --short`。如果新增文档仍是
+untracked 且没有提交边界说明，doc-suite parity 只能写 `partial`，不能支撑 `ready_for_review`。
 
 裁剪规则：
 

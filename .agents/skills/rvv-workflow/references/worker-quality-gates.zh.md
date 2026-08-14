@@ -22,6 +22,7 @@
 - 如果短 prompt 是“继续完善 <topic> 的 RVV 优化工作”、当前 topic 已有 phase plan/result，
   或当前计划仍有 `unblocked_next_actions`，必须读取 `rvv-test/references/optimization-phase-loop.zh.md`，
   并把 phase loop 状态、optimization roadmap 状态和 `phase_deferred` / `turn_stop_deferred` 判断纳入写文件前自查和 Handoff Packet。
+- 如果本轮新建、重排或审查 topic-local doc suite（主题本地文档套件），或用户 / reviewer 询问文档是否对齐成熟质量门槛，必须读取 `rvv-documentation/references/doc-suite-quality-bar.zh.md`。该规范是默认质量来源；成熟 sibling topic 只作为 optional calibration（可选校准样例），不得替代规范或被机械复制。
 
 ## 最小门禁
 
@@ -172,7 +173,7 @@ no-production closeout 至少要在 topic-local 文档中包含：
 - 是否缺少 `test_support.aggregator_directory` 解析出的聚合入口，以及 `test_support.internal_directory` 解析出的内部职责拆分；
 - 长 topic 是否仍使用超长文件名，是否应按 `test_support.topic_abbrev_policy` 采用缩写 topic token；
 - Makefile、board target、日志路径和现有文档引用是否能在迁移后保持正确；
-- 相邻成熟 topic 的测试支撑源码布局、聚合入口、内部职责拆分和 topic token 命名经验是否适用，哪些只作为 quality bar，不迁移实现细节；具体目录和文件名仍按当前 topic 既有结构、`artifact_layout` 与 `test_support` 配置解析。
+- 相邻成熟 topic 的测试支撑源码布局、聚合入口、内部职责拆分和 topic token 命名经验是否适用，哪些只作为 optional calibration（可选校准样例），不迁移实现细节；具体目录和文件名仍按当前 topic 既有结构、`artifact_layout` 与 `test_support` 配置解析。
 
 worker 必须把结果写成 `adopted / deferred / rejected` 中的一种：`adopted` 表示本 phase
 执行布局迁移；`deferred` 表示它是未阻塞但本 phase 因范围或风险暂缓的下一动作；`rejected`
@@ -481,6 +482,7 @@ followup_options_ready:
 - 表格必须包含 `correctness_efficiency_evidence_chain_ready`。production 结论的证据指向 production 长期主题文档中的“正确性与高效性证据链”；no-production 结论的证据指向 evaluation / phase closeout 中的“诊断证据链”。
 - 表格必须包含 `document_ownership_matrix_ready`。证据指向文档归属矩阵章节、evaluation 中的决策审计或 Handoff Packet 的定位字段。
 - 表格必须包含 `traceability_map_ready`。证据指向 Traceability Map 章节或独立 traceability 文档，说明文档、测试、输出和代码位置可以互相定位。
+- 表格必须包含 `doc_suite_quality_bar_ready`。凡本轮涉及 topic-local README、testing overview、correctness tests、benchmark/evidence、optimization evidence、test-support code map、phase index、evaluation 或 `doc-rvv` 适用性，证据必须指向 `doc-suite-quality-bar.zh.md` 审计表或当前 phase result。若用户 / reviewer 点名成熟 sibling，可在证据中写 optional calibration，但不能只用 sibling 路径替代 canonical quality bar。
 - 表格必须包含 `phase_plan_written_before_edits`、`phase_completion_matrix_ready`、`optimization_matrix_ready`、
   `roadmap_default_recovery_queue_ready`、`micro_stop_guard` 和 `continue_stop_decision`。证据指向当前 phase plan/result、optimization matrix、
   `unblocked_next_actions`、`stop_condition_hit` 和 Handoff 的 `phase_loop_state`；若当前任务不是多阶段优化，写 `not_applicable` 并说明为什么没有 phase loop。
@@ -490,6 +492,12 @@ followup_options_ready:
   若这些位置仍有 `phase_deferred + unblocked`，该项必须写 `fail`，且 `next_phase_default` 不能是
   `ready_for_review`。
 - 表格必须包含 `dirty_isolation_ready`。证据指向 Handoff Packet 的 `dirty_isolation`，说明当前 worktree 的无关 diff、raw logs、build 输出和本轮可审查 / 可提交路径边界。
+- 表格必须包含 `artifact_tracking_status_ready`。凡本轮新增、移动或引用 topic-local doc suite、
+  phase docs、summary evidence 或长期 `doc-rvv`，证据必须指向包含未跟踪文件的路径限定扫描，例如
+  `git status --short --untracked-files=all -- <topic-paths>` 或
+  `git ls-files --others --exclude-standard -- <topic-paths>`，并说明新增文档是 tracked、to-be-staged、
+  ignored-local 还是 excluded。README、evaluation、roadmap 或 Handoff 引用的新增文档若未进入
+  tracked / to-be-staged 集合，该 gate 只能是 `partial` 或 `fail`。
 - 表格必须包含 `implementation_review_ready`。若本轮改了 production、diagnostic helper、bench-facing helper 或 RVV kernel，证据指向 Handoff Packet 的 `implementation_review` 或适用的 production 长期主题文档“当前采用的优化方式”；若纯文档 cleanup，写 `not_applicable` 并说明原因。
 - 表格必须包含 `candidates_added_or_deferred_ready`。证据指向本轮候选路线表、experience-migration audit 或 Handoff Packet 的 `candidates_added_or_deferred`，说明新增、尝试、暂缓或拒绝的候选。
 - 表格必须包含 `ilp_lmul_decision_ready`。含 RVV kernel、reduction、staging 或性能候选时，证据必须说明 LMUL、VLEN gate、accumulator 数、ILP / unroll、寄存器压力或 spill 风险；不适用时说明原因。
@@ -511,8 +519,8 @@ followup_options_ready:
   解析出的 source、aggregator、internal header 和长 topic 缩写文件名策略，以及 sibling 结构经验是 adopted、deferred 还是 rejected。
   若暂缓迁移，必须把它写入 `unblocked_next_actions` 或说明阻塞条件。
 - 若相邻成熟 topic 已经形成更完整的测试工程或 topic-local doc suite，表格必须包含
-  `mature_sibling_parity_action_ready`；证据必须说明结构差距是否已经采用、拒绝，或作为高优先级
-  `phase_deferred + unblocked` 继续推进。若停止，必须指向真实 stop condition。
+  `mature_sibling_parity_action_ready`；证据必须说明它只是 optional calibration，并说明结构差距是否已经采用、拒绝，或作为高优先级
+  `phase_deferred + unblocked` 继续推进。若未点名或没有可迁移 sibling 经验，可写 `not_applicable`，但 `doc_suite_quality_bar_ready` 仍需按 canonical quality bar 审计。
 - 若 production closeout、production-ready、done、stop-for-review 或 `unblocked_next_actions=none`
   涉及的 topic 存在 mature sibling doc suite，或用户 / reviewer 已点名成熟 topic 作为质量参照，
   表格必须包含 `doc_suite_parity_closeout_ready`。证据必须指向当前 phase result 或

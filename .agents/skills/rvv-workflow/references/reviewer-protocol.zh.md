@@ -122,6 +122,7 @@ reviewer 应至少检查：
 - 配置解析出的测试资产、diagnostic（诊断代码）、prototype（原型代码）是否有足够中文注释和文件级阅读提示。
 - production 长期主题文档是否只在 adopted production behavior、production patch 或 PI5 通过后适用，并区分 S2 evaluation 和 S11 closeout（收尾）。
 - 文档归属是否符合 `document-ownership-and-traceability.zh.md`：production 长期主题文档负责 adopted production 事实，evaluation 负责候选取舍和 no-production 诊断证据链，output summary / analysis script 负责 bench 统计，Handoff Packet 负责恢复动作；长段重复、互相矛盾、证据错放，或 no-production 默认发布 `doc-rvv` 应视为可审查性缺口。
+- topic-local doc suite 是否按 `rvv-documentation/references/doc-suite-quality-bar.zh.md` 审计。成熟 sibling topic 只能作为 optional calibration，不应成为唯一规范源；如果 worker 只写“参考某成熟 topic”而没有 canonical quality bar 审计表，应视为文档门禁缺口。
 - 复杂 topic 是否有 Traceability Map，且能从文档定位到 production 入口、diagnostic / candidate helper、bench wrapper、analysis script、output summary 和 Handoff 恢复字段。
 - 文档是否能让读者理解标量实现做了什么、RVV 方案如何实现、bench case 如何构造和证明什么；如果只列公式、helper 名、指令名或 speedup，视为可审查性缺口。
 - 对 buffer/staging、scalar tail（标量尾段）、fused multiply-add（融合乘加）、vector reduction（向量规约）、数学函数是否向量化等实现取舍，worker 是否给出理由、替代方案和需要补的证据。
@@ -133,7 +134,7 @@ reviewer 应至少检查：
   但不能只用“路径重命名 churn”“code map 已经足够”或“reviewer 需要时再做”把目录职责迁移降成
   `turn_stop_deferred`；除非存在真实 blocker，否则应要求默认下一 phase 为
   `internal-helper-layout` 或与 `test-source-split` 合并的窄 phase。
-- 如果相邻成熟 topic 已经形成更完整的 source / include / include/impl、topic-local doc suite、evaluation 主路径和 `doc-rvv` 分工，reviewer 应检查 worker 是否输出 mature sibling parity status。该审计只迁移结构成熟度，不复制 sibling 算法；若 worker 把结构差距标为低优先级 follow-up，却没有真实阻塞，应作为早停或质量门禁缺口。
+- 如果相邻成熟 topic 已经形成更完整的 source / include / include/impl、topic-local doc suite、evaluation 主路径和 `doc-rvv` 分工，reviewer 应检查 worker 是否把它作为 optional calibration 输出 mature sibling parity status。该审计只迁移结构成熟度，不复制 sibling 算法；若 worker 没有先按 canonical quality bar 审计，或把结构差距标为低优先级 follow-up 却没有真实阻塞，应作为早停或质量门禁缺口。
 - reviewer 应检查 legacy pointer、compatibility alias、旧路径 wrapper 或重复正文。默认应更新引用并删除旧入口；若 worker 保留，只写“避免旧引用断开”而没有具体外部依赖、用户要求、dirty isolation 风险和删除阶段，应作为可审查性缺口。
 - 负向性能结论是否有受证据约束的归因；不能把未验证猜测写成事实，也不能只写“不接生产”而不解释为什么慢。
 - 是否存在不该提交的 build（构建）产物、日志、本机路径、私有地址或 `config.mk`。
@@ -158,7 +159,7 @@ reviewer 应至少检查：
   继续当前 topic 的扩展动作、应另开 topic 的消融 / 扩展动作和当前不建议做的方向。
 - 如果 worker 使用短 prompt 启动，Handoff Packet 是否包含 `worker_quality_gate_check`，且该字段真实覆盖标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、证据模型和 stop condition。缺失或虚写时，应视为 workflow/worker 执行缺口。
 - 如果 worker 继续已有 topic 或声明处于 phase loop，Handoff Packet 是否包含 `phase_loop_state`，并列出当前 phase、phase plan/result 路径、completion matrix、optimization matrix、unblocked next actions、stop condition、continue/stop decision 和 next phase default。
-- 如果 worker 声称 `ready_for_review`、`stop_for_review`、`done` 或 `unblocked_next_actions=none`，reviewer 是否额外检查 `ready_for_review_validity_check`；只要 roadmap、matrix、mature sibling parity、test support shape scan 或 legacy compatibility 仍有 `phase_deferred + unblocked`，该停止状态就应视为过早停止。
+- 如果 worker 声称 `ready_for_review`、`stop_for_review`、`done` 或 `unblocked_next_actions=none`，reviewer 是否额外检查 `ready_for_review_validity_check`；只要 roadmap、matrix、doc-suite quality bar、mature sibling optional calibration、test support shape scan 或 legacy compatibility 仍有 `phase_deferred + unblocked`，该停止状态就应视为过早停止。
 - reviewer 必须读取 topic roadmap 的“默认恢复动作”或等价下一步小节。若其中列出的 test source split、
   internal helper layout、doc suite、registry、legacy 清理或其它当前 topic 授权内动作尚未执行，且 worker
   只是写成“若 reviewer 要求继续”或停在 `ready_for_review_validity_checked`，应视为早停。reviewer
@@ -167,6 +168,7 @@ reviewer 应至少检查：
 - `worker_quality_gate_check` 是否是证据化表格，而不是只有 `true` / `false`。reviewer 应抽查每项 `evidence` 是否能在当前 topic 产物中定位；若找不到对应文件、章节、日志或代码注释，应把该项判为未闭合。
 - `worker_quality_gate_check` 是否在适用时覆盖 `experience_migration_audit_ready`、`test_support_shape_scan_ready`、`test_support_split_decision_ready`、`mature_sibling_parity_action_ready` 和 `legacy_compatibility_decision_ready`。若 worker 声称不适用，reviewer 应抽查当前 topic 是否确实没有 sibling topic 经验、长 helper / 长源文件、多职责支撑代码、legacy 入口或成熟 sibling 结构差距。
 - `worker_quality_gate_check` 是否覆盖 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen` 和 `documentation_policy_frozen`。
+- `worker_quality_gate_check` 是否覆盖 `doc_suite_quality_bar_ready`；如果本轮涉及 topic-local 文档套件或 reviewer 点名文档对齐，但该项缺失，应视为文档可审查性缺口。
 - `worker_quality_gate_check` 是否覆盖 `ready_for_review_validity_check`；如果 worker 仍有 `phase_deferred + unblocked` 却宣布 `ready_for_review`，应把该项判为 fail 并把问题写进 findings。
 - `worker_quality_gate_check` 是否覆盖 `correctness_efficiency_evidence_chain_ready`。
 - `worker_quality_gate_check` 是否覆盖 `evidence_doctor_result_ready`，并指向 doctor report 或人工 Errors / Warnings / Suggestions 摘要。若本轮涉及性能、checksum 或 asm 证据但该项缺失，应把 EvidenceDecision 判为未闭合。

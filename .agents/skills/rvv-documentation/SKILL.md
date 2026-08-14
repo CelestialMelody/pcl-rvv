@@ -15,6 +15,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - 函数级评估文档：见 [references/evaluation-doc-structure.md](references/evaluation-doc-structure.md)。
 - 函数级评估与 closeout 分工：见 [references/function-evaluation-and-closeout.zh.md](references/function-evaluation-and-closeout.zh.md)。
 - 文档归属矩阵与 Traceability Map（可追踪性地图）：见 [references/document-ownership-and-traceability.zh.md](references/document-ownership-and-traceability.zh.md)。
+- 主题本地文档套件质量门槛与模板：见 [references/doc-suite-quality-bar.zh.md](references/doc-suite-quality-bar.zh.md)。
 - 筛选文档：见 [references/screening-docs.md](references/screening-docs.md)。
 - 诊断和回退文档：见 [references/diagnostic-docs.md](references/diagnostic-docs.md)。
 - closeout 重排和写作风格：见 [references/closeout-style.md](references/closeout-style.md)。
@@ -31,6 +32,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - 如果文档引用 `artifact_layout.qemu_output_subdir` 或 `artifact_layout.board_output_subdir` 解析目录下的可提交证据，应写明确文件路径、run label 或 summary artifact 路径；这些引用是后续提交日志 / 摘要文件的白名单来源。
 - 复杂 topic 必须在 evaluation、topic-local 文档或适用的 production 长期主题文档中维护 Traceability Map，列出关键 production、RVV test 资产、script、output 和文档位置；默认不新建巨型函数文档，除非 map 已经大到影响主文档可读性。
 - 多阶段优化 topic 应在配置解析出的 topic test `doc/optimization-roadmap.zh.md` 或等价位置维护主题级优化路线图。路线图只记录候选家族、搜索空间、阶段反思、新增想法、优先级和恢复条件；不要把它写成阶段流水，也不要替代 evaluation 的取舍审计。
+- 复杂 topic 的 README、testing overview、correctness tests、benchmark/evidence、optimization evidence、test-support code map、phase index 和 evaluation 应优先按 `doc-suite-quality-bar.zh.md` 审计。成熟 sibling topic（同模块相邻主题）只作为 optional calibration（可选校准样例），不得成为必须点名的规范源，也不得复制其 topic-specific 算法、数值、phase 名或结论。
 - S2 函数级评估阶段就应创建或更新 evaluation（评估）文档，用来记录函数功能、可向量化点、RVV 优先级、初步接入判断和需要补齐的证据。不要把这些判断只留到 S11 closeout（收尾）阶段。
 - S11 closeout 文档负责记录实验后的最终状态、证据边界、生产接入或不接入理由、遗留风险和队列表同步。如果 topic 进入 production integration loop（生产接入闭环），S11 必须发生在生产补丁、生产直连测试、生产证据重跑和再次 EvidenceDecision（证据决策）之后。
 - `diagnostic`、`bench-only`、`rollback/no-production` 或未接 production 的 `partial-production-candidate` 不默认创建 `artifact_layout.topic_doc_template` / `doc-rvv`。这些结论的“诊断证据链”主归属是 topic-local evaluation、phase result、roadmap / matrix 和 Handoff；若已有 `doc-rvv` 仅承载诊断或 no-production 结论，应删除或标为 not_applicable，除非用户明确要求保留历史归档。
