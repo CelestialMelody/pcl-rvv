@@ -39,7 +39,7 @@ artifact layout（产物布局）或判断产物发布边界时，先按该 refe
 
 单个 RVV topic（主题）的状态机见 [references/topic-lifecycle.zh.md](references/topic-lifecycle.zh.md)。S0-S12 是主干状态，不是线性流水账；S3-S10 可按 phase loop 反复执行设计、实现、测试、证据解释、矩阵更新和 EvidenceDecision。S10 `EvidenceDecision`（证据决策）之后必须按证据进入 no-production closeout（不接入生产收尾）、production integration loop（生产接入闭环）、下一 phase 或 blocked handoff（阻塞交接）。不要把生产接入简单追加成固定 S13；如果进入生产接入，必须完成生产补丁、生产直连测试、生产证据重跑和再次证据决策后，才进入最终文档 closeout。
 
-worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（阻塞）时，应按 [references/handoff-packet.zh.md](references/handoff-packet.zh.md) 输出 Handoff Packet（交接数据包）。涉及文档 closeout、evaluation、output summary 或复杂 topic 定位时，Handoff 还要包含 document ownership（文档归属）和 Traceability Map（可追踪性地图）状态。reviewer 审查 worker 产物时，应按 [references/reviewer-protocol.zh.md](references/reviewer-protocol.zh.md) 输出 findings（问题清单）、worker prompt patch（给 worker 的提示词补丁）和 agent asset（代理资产）更新建议。
+worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（阻塞）时，应按 [references/handoff-packet.zh.md](references/handoff-packet.zh.md) 输出 Handoff Packet（交接数据包）。涉及文档 closeout、evaluation、output summary 或复杂 topic 定位时，Handoff 还要包含 document ownership（文档归属）和 Traceability Map（可追踪性地图）状态。reviewer 审查 worker 产物时，应按 [references/reviewer-protocol.zh.md](references/reviewer-protocol.zh.md) 输出 findings（问题清单）、worker prompt patch（给 worker 的提示词补丁）和 agent instructions（agent 指令体系）更新建议。
 
 ## 开工前偏好冻结
 
@@ -54,7 +54,7 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 - 文档策略：closeout 当前状态优先，必须有数值算例，长期文档不保留对话流程话术。
 - 提交策略：默认不创建 commit；如果用户授权提交，先冻结是否提交 evidence logs、是否使用已脱敏日志、是否拆分 commit。
 - 证据策略：默认 `summary-only`，raw logs 不默认提交。
-- agent asset 反馈策略：默认 `report-only`（只报告建议），不自动修改 skill、knowledge map 或 prompt。
+- instruction feedback（指令反馈）策略：默认 `report-only`（只报告建议），不自动修改 skill、knowledge map 或 prompt。
 - 校准模式：如果用户要求单 topic 反复校准，先确认是否需要清理上一轮 worker 产物；未清理前不要在旧产物上继续扩写。
 
 偏好冻结不是长篇计划。它应以几行清单出现在 S0 报告和最终 handoff packet 中，便于 reviewer 判断 worker 是否按本轮约束执行。
@@ -66,9 +66,9 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 - `topic-only`：只提交 topic 源码、测试、bench、文档和队列表；不提交 evidence logs。默认选项。
 - `topic-plus-sanitized-logs`：提交 topic，并把脱敏后的 evidence logs 作为单独 commit。用户说要提交 log 时默认采用这个策略。
 - `topic-plus-raw-logs`：提交 topic，并把 raw evidence logs（原始证据日志）作为单独 commit；只在用户明确要求保留原文、脱敏日志不足以复核、且 reviewer 已确认没有凭据或私有地址风险时使用。
-- `split-topic-logs-agent-assets`：topic、evidence logs、agent asset 改动分拆成多个 commit。适合 workflow 校准和证据归档同时发生的任务。
+- `split-topic-logs-agent-assets`：topic、evidence logs、agent instruction patch（agent 指令改动）分拆成多个 commit。适合 workflow 校准和证据归档同时发生的任务。
 
-提交 evidence logs 前必须优先运行 topic 目录提供的 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或直接运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本并传入 `--check <logs>`；如果 topic 未接入公共 Makefile，再说明等效检查方式。提交前列出将加入的文件、排除的文件、是否仍包含本机路径 / 远端路径 / 用户名 / 私有地址，以及脱敏是否改变 benchmark（性能测试）数值、checksum（校验和）或命令参数。不要把 `build/` 二进制、临时编译日志、`config.mk`、私有地址或聊天记录混入 topic commit。agent asset 改动应单独提交，不和 topic 内容混在同一 commit，除非用户明确要求。
+提交 evidence logs 前必须优先运行 topic 目录提供的 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或直接运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本并传入 `--check <logs>`；如果 topic 未接入公共 Makefile，再说明等效检查方式。提交前列出将加入的文件、排除的文件、是否仍包含本机路径 / 远端路径 / 用户名 / 私有地址，以及脱敏是否改变 benchmark（性能测试）数值、checksum（校验和）或命令参数。不要把 `build/` 二进制、临时编译日志、`config.mk`、私有地址或聊天记录混入 topic commit。agent instruction patch 应单独提交，不和 topic 内容混在同一 commit，除非用户明确要求。
 
 ## 普通主题入口
 
@@ -91,15 +91,15 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 
 函数级评估是生产接入门禁。建议队列表示优先评估，不表示跳过检验直接改生产路径。
 
-## 资产使用追踪
+## 指令来源追踪
 
-最终 Handoff Packet 应包含 `agent_asset_trace`，用短清单把关键决策映射到实际读取过的 agent 资产或规则。例如：
+最终 Handoff Packet 当前字段合同仍包含 `agent_asset_trace`，用短清单把关键决策映射到实际读取并影响本轮行为的 instruction sources（指令来源）或规则。例如：
 
 - `rvv-workflow/references/reviewability-and-language.zh.md` -> `TEST` 说明、术语解释和注释策略。
 - `rvv-test` -> test taxonomy、diagnostic policy、数值一致性、bench / ablation 和 evidence logs。
 - `pcl-rvv-knowledge-map.md` -> 读取范围控制。
 
-只写真正影响了本轮行为的资产；不要把未读取或未使用的 skill 机械列入 trace。
+只写真正影响了本轮行为的 instruction sources；不要把未读取或未使用的 skill 机械列入 trace。
 
 ## 中断恢复
 

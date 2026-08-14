@@ -1,24 +1,24 @@
-# PCL RVV Agent Assets 导览
+# PCL RVV Agent Instructions 导览
 
-这份文档帮助读者先理解 PCL 仓库中的 agent 资产，再逐个审查和修改它们。它不是新的规则源，也不替代任何 skill 或 reference。它只解释资产如何分层、阅读时先看哪里、哪些文件负责长期规则，哪些文件只是索引或审查材料。
+这份文档帮助读者先理解 PCL 仓库中的 agent instructions（agent 指令体系），再逐个审查和修改相关入口、skill（技能）和 reference（参考文件）。它不是新的规则源，也不替代任何 skill 或 reference。它只解释指令如何分层、阅读时先看哪里、哪些文件负责长期规则，哪些文件只是索引或审查材料。
 
-PCL RVV agent 资产的主要问题不是缺少规则，而是规则分布在多个层级：仓库入口、配置、知识索引、skill 入口、详细 reference、local override 和历史备份。若不先建立这套分层模型，读者很容易把导航文件当成规则，把历史迁移材料当成当前事实，或在一个 skill 中加入本应属于另一个 skill 的内容。
+PCL RVV agent instructions 的主要问题不是缺少规则，而是规则分布在多个层级：仓库入口、配置、知识索引、skill 入口、详细 reference、local override 和历史备份。若不先建立这套分层模型，读者很容易把导航文件当成规则，把历史迁移材料当成当前事实，或在一个 skill 中加入本应属于另一个 skill 的内容。
 
 ## 总入口：`AGENTS.md`
 
-`AGENTS.md` 是仓库级总入口。它定义这套 agent 资产的最高边界：哪些路径承载可复用规则，worker 和 reviewer 默认先读什么，短 prompt 如何展开，哪些改动不能和 production、topic 文档、topic 测试或 evidence logs 混在同一批变更中。
+`AGENTS.md` 是仓库级总入口。它定义这套 agent instructions 的最高边界：哪些路径承载可复用规则，worker 和 reviewer 默认先读什么，短 prompt 如何展开，哪些改动不能和 production、topic 文档、topic 测试或 evidence logs 混在同一批变更中。
 
-因此，审查 agent 资产时应先读 `AGENTS.md`。它不需要包含每条细则，但必须能回答三个问题：
+因此，审查 agent instructions 时应先读 `AGENTS.md`。它不需要包含每条细则，但必须能回答三个问题：
 
-1. 当前仓库的正式 agent 资产放在哪里。
+1. 当前仓库的正式 agent instructions 放在哪里。
 2. worker、reviewer 和 workflow improvement 的默认读取链从哪里开始。
 3. 哪些文件是 source of truth，哪些只是导航、索引、本机覆盖或迁移材料。
 
 如果 `AGENTS.md` 发生变化，后续应复核 `.agents/docs/README.md`、`.agents/knowledge/pcl-rvv-knowledge-map.md` 和相关 skill 是否仍与它一致。S0 恢复、偏好冻结和产物发布边界的具体合同见 `.agents/skills/rvv-workflow/references/s0-preferences-and-recovery.zh.md`。
 
-## 资产分层模型
+## 指令分层模型
 
-PCL 当前的 agent 资产可以按职责分成六层。越靠上越接近入口和边界，越靠下越接近具体执行细则。
+PCL 当前的 agent instructions 可以按职责分成六层。越靠上越接近入口和边界，越靠下越接近具体执行细则。
 
 ```text
 AGENTS.md
@@ -43,7 +43,7 @@ AGENTS.md
 | Skill 入口 | `.agents/skills/<skill>/SKILL.md` | 说明该 skill 适用范围、职责边界和应读取哪些 reference | skill source of truth |
 | 细则文档 | `.agents/skills/<skill>/references/*.md` | 承载具体流程、质量门禁、模板、证据合同和 reviewer 检查点 | detailed source |
 | Agent 适配 | `.agents/skills/<skill>/agents/openai.yaml` | 保存 OpenAI/Codex 适配元数据 | adapter metadata |
-| 审查导览 | `.agents/docs/README.md` | 帮助用户理解和审查 agent 资产 | navigation only |
+| 审查导览 | `.agents/docs/README.md` | 帮助用户理解和审查 agent instructions | navigation only |
 | 历史备份 | `.agents/backup/` | 保存旧版本或迁移前快照 | archive only |
 
 ## `skill`、`reference`、`config`、`knowledge` 与 `local override` 的分工
@@ -94,14 +94,14 @@ Reviewer 默认只读。它先确认 worker 是否遵守仓库级边界，再按
 
 ### Workflow improvement
 
-Workflow improvement 先按 reviewer 链确认当前缺口，再只读并修改与缺口直接相关的 asset。它不应借一次审查同时大改多个 skill。若要进入 Phase 6，默认一轮只处理一个 skill，并输出文件地图、问题清单、建议改动、forward test 和 Handoff Packet。
+Workflow improvement 先按 reviewer 链确认当前缺口，再只读并修改与缺口直接相关的 instruction file、skill 或 reference。它不应借一次审查同时大改多个 skill。若要进入 Phase 6，默认一轮只处理一个 skill，并输出文件地图、问题清单、建议改动、forward test 和 Handoff Packet。
 
 ## 建议的 Phase 0.5 / Phase 6 审查顺序
 
-当前目标是先熟悉资产，再逐个审查和修剪。建议顺序如下：
+当前目标是先熟悉 agent instructions，再逐个审查和修剪。建议顺序如下：
 
 1. `AGENTS.md`：确认仓库级入口是否清楚，是否正确说明 source of truth、读取链和修改边界。
-2. `.agents/docs/README.md`：确认导览是否帮助用户理解资产分层，而不是变成第二份规则书。
+2. `.agents/docs/README.md`：确认导览是否帮助用户理解指令分层，而不是变成第二份规则书。
 3. `rvv-workflow`：审查生命周期、短 prompt、worker/reviewer 权限、Handoff Packet 和质量门禁。
 4. `rvv-documentation`：审查 topic 文档、evaluation、closeout、文档归属和 traceability map。
 5. `rvv-test`：审查测试、diagnostic、bench、A/B、board stability、evidence policy 和输出摘要合同。
@@ -136,7 +136,7 @@ Workflow improvement 先按 reviewer 链确认当前缺口，再只读并修改�
 
 ## 审查时的读法
 
-读一个 asset 时，先问四个问题：
+读一个 instruction file、skill 或 reference 时，先问四个问题：
 
 1. 这个文件解决什么问题。
 2. 它的上游 source of truth 是什么。

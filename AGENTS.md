@@ -1,28 +1,30 @@
 # PCL RVV Agent 指南
 
-本仓库的可复用 RVV agent 资产放在 `.agents/skills/`。开始 PCL RVV 优化工作的筛选、配置、测试、实现或文档前，优先使用匹配的 skill。
+本仓库的可复用 RVV agent instructions（agent 指令体系）以 `AGENTS.md` 为入口，主要由 `.agents/skills/` 下的 workflow skills（工作流技能）和 workflow references（工作流参考）承载；`.agents/config/defaults.yaml` 保存可提交 workflow config（工作流配置），`.agents/knowledge/` 保存轻量读取索引。开始 PCL RVV 优化工作的筛选、配置、测试、实现或文档前，优先使用匹配的 skill。
 
 S0（恢复和偏好冻结）时，worker 和 reviewer 先读取
 `.agents/config/defaults.yaml`，如果存在再读取 `.agents/local/user-preferences.yaml`。
-S0 输出必须显式记录 `preferences_loaded`，并把注释、文档、证据、agent asset（代理资产）
+S0 输出必须显式记录 `preferences_loaded`，并把注释、文档、证据、instruction_feedback（指令反馈）
 反馈和 work log（工作日志）偏好冻结下来。默认偏好只说明规则；本机私有覆盖只放在 `.agents/local/`。
 
 如果用户给出的是短 prompt（提示词），例如只给角色、工作目录和目标，先按
 `.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md` 的默认读取链启动。
 用户不需要在每轮重复列出“先读哪些文件”；默认读取链会从仓库入口展开。
+角色词只选择 worker、reviewer 或 workflow improvement 的启动模式；agent 先完成指令读取、目标解析、权限边界和 dirty isolation（脏工作区隔离）判断，再进入 topic 文件。
 worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固定工作日志或跨对话复用时才指定。
 若需要保存，默认路径由 `PCL_RVV_WORK_LOG_ROOT` 控制；未设置时使用 `<repo>/tmp/rvv-work-logs/`。
 短 prompt 只减少用户输入，不降低 worker 产物门槛。worker 选中 topic 后、开始写
 配置解析出的 topic 测试资产、topic 文档或 production 前，必须按
 `.agents/skills/rvv-workflow/references/worker-quality-gates.zh.md` 自查；需要详细规则时再按该文件
 渐进读取 `rvv-documentation`、`rvv-test` 和 `rvv-implementation` 的窄 reference。
+涉及 workflow improvement、术语迁移、输出字段或启动合同时，启动输出必须记录 `loaded_instruction_sources`，列出本轮实际读取并用于决策的 instruction sources（指令来源）。
 
 ## 目录约定
 
-- `.agents/skills/<skill-name>/SKILL.md` 是通用 agent skill 说明。
+- `.agents/skills/<skill-name>/SKILL.md` 是通用 workflow skill 说明。
 - `.agents/skills/<skill-name>/agents/openai.yaml` 是 OpenAI/Codex 适配元数据；未来其它 agent 可以忽略。
-- `.agents/skills/<skill-name>/references/` 放按需加载的详细规则。
-- `.agents/config/defaults.yaml` 放可提交默认偏好。
+- `.agents/skills/<skill-name>/references/` 放按需加载的 workflow references。
+- `.agents/config/defaults.yaml` 放可提交 workflow config 默认值。
 - `.agents/local/user-preferences.yaml` 放本机私有覆盖，默认不提交。
 - `.agents/skills/rvv-workflow/references/short-prompt-entry.zh.md` 定义 worker、
   reviewer 和 workflow improvement 的短启动入口、默认读取链和默认权限。
@@ -30,7 +32,7 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
   写文件前的轻量质量门禁，避免为了 prompt 变短而丢失文档、注释、bench 和证据质量要求。
 - `.agents/knowledge/pcl-rvv-knowledge-map.md` 是轻量知识索引入口，只说明按配置解析出的文档 / 测试资产读取策略，不复制具体产物内容。
 - 短 prompt 继续已有 topic、恢复阶段状态或目标含有“继续完善 RVV 优化工作”时，必须读取 `.agents/skills/rvv-test/references/optimization-phase-loop.zh.md`；它定义 `artifact_layout.phase_root_template` 解析目录下的 plan/result、optimization matrix、Evidence Doctor 异常处理和继续 / 停止规则。
-- 未提交的本地迁移材料不作为正式 agent 资产；正常 RVV topic（主题）工作不要读取或依赖这些材料，除非用户明确要求做历史追溯或规则迁移。
+- 未提交的本地迁移材料不作为正式 agent instructions；正常 RVV topic（主题）工作不要读取或依赖这些材料，除非用户明确要求做历史追溯或规则迁移。
 
 ## RVV 工作规则
 
@@ -57,5 +59,5 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
 
 ## 变更边界
 
-整理 agent 资产时，diff（差异）应聚焦在 `.agents/skills/`、`.agents/knowledge/`、`.agents/config/`、`AGENTS.md` 和必要忽略规则。除非用户点名要求，不把 PCL 源码改动或 RVV 主题内容混入同一批变更。
+整理 agent instructions 时，diff（差异）应聚焦在 `.agents/skills/`、`.agents/knowledge/`、`.agents/config/`、`AGENTS.md` 和必要忽略规则。除非用户点名要求，不把 PCL 源码改动或 RVV 主题内容混入同一批变更。
 workflow improvement（工作流改进）如果会批量改 skill、knowledge map（知识索引）或入口 prompt，先在 `.agents/backup/` 下创建不提交的备份目录，并在 Handoff Packet 写清 `backup_path`。

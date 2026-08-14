@@ -10,7 +10,7 @@
 - PCL RVV 工作。
 - worker（执行者）、reviewer（审查者）或 workflow improvement（工作流改进）角色。
 - 工作目录，或当前对话已经位于 PCL 仓库。
-- 至少一个粗目标，例如“处理下一个 topic”“审查上一轮 worker 结果”“复核 workflow asset（工作流资产）”。
+- 至少一个粗目标，例如“处理下一个 topic”“审查上一轮 worker 结果”“复核 workflow instructions（工作流指令）”。
 
 如果用户只说“处理下一个 topic”，worker 先根据当前对话、模块工作日志和
 second-pass（第二轮筛选）或 follow-up（复筛）状态表自动选择模块；若模块仍然
@@ -27,8 +27,8 @@ second-pass（第二轮筛选）或 follow-up（复筛）状态表自动选择�
 `resume condition` 或等价小节。这些不是面向人工的松散建议，而是下一阶段恢复队列的输入。
 worker 应把它们归一成 `roadmap_default_recovery_queue`：每项写明 phase 名、范围、是否仍在当前 topic
 授权内、是否有 blocker、是否可与其它结构动作合并执行。若队列中存在未阻塞的测试资产、topic-local
-文档、evidence registry、legacy 清理或结构成熟度动作，`ready_for_review_validity_checked` 只能表示旧停止位已被检查，
-不能作为终点；worker 必须继续到队列中的第一个未阻塞 phase。
+文档、evidence registry、legacy 清理或结构成熟度动作，`ready_for_review_validity_check` 只能表示旧停止位已被重新检查，
+不能作为终点状态；worker 必须继续到队列中的第一个未阻塞 phase。
 如果最近 phase README、result、Handoff 或 worker 输出写着 `ready_for_review`，worker 仍必须重新验证该停止决定：
 只要 roadmap、optimization matrix、mature sibling parity audit 或当前 shape scan 暴露未阻塞的结构 / 文档 /
 legacy / 测试优化动作，就把旧 `ready_for_review` 标成 stale stop decision，并恢复到第一个未阻塞 phase。
@@ -80,12 +80,13 @@ worker（执行者）和 reviewer（审查者）启动时先读取：
 7. `.agents/skills/rvv-workflow/references/reviewability-and-language.zh.md`
 8. `.agents/skills/rvv-workflow/references/s0-preferences-and-recovery.zh.md`
 
-S0 必须在输出中写明 `preferences_loaded`，并冻结注释、文档、证据、日志和 agent asset（代理资产）反馈偏好。若 local override
+启动输出必须记录 `loaded_instruction_sources`，列出本轮实际读取并用于启动 / 决策的 instruction sources（指令来源）。
+S0 必须在输出中写明 `preferences_loaded`，并冻结注释、文档、证据、日志和 instruction_feedback（指令反馈）偏好。若 local override
 存在，worker 还要报告读取到的本机覆盖范围；若不存在，写明只使用 defaults。
-默认 agent asset feedback mode（代理资产反馈模式）是 `report-only`（只报告建议）。worker 在 S4 测试计划、
+默认 instruction_feedback mode（指令反馈模式）是 `report-only`（只报告建议）。worker 在 S4 测试计划、
 S10 EvidenceDecision（证据决策）、S11 closeout（收尾）、blocked（阻塞）边界、短 prompt 恢复失败、
-过早停止复盘或用户 / reviewer 明确反馈工作流程问题时，必须判断是否存在可复用规则、资产缺口或冗余规则。
-若存在，输出 `agent_asset_feedback`；没有发现时省略。reviewer 在 closeout review（收尾审查）中按同一规则报告建议。
+过早停止复盘或用户 / reviewer 明确反馈工作流程问题时，必须判断是否存在可复用规则、instruction gap（指令缺口）或冗余规则。
+若存在，输出 `agent_asset_feedback`（当前字段合同名，Phase 003 待迁移到 `instruction_feedback`）；没有发现时省略。reviewer 在 closeout review（收尾审查）中按同一规则报告建议。
 当用户授权 workflow improvement 时，应先修订对应 `.agents/` skill/reference，再回到 topic 工作；不要只把流程缺口写入 topic follow-up。
 
 ## 最短启动写法
@@ -165,7 +166,7 @@ workflow improvement 可用：
 
 ```text
 在 <repo> 中，以 RVV workflow improvement 身份复核 <path>。
-允许修改 agent asset，不修改 production 或配置解析出的 topic 文档 / 测试产物。
+允许修改 agent instructions（agent 指令体系）文件，不修改 production 或配置解析出的 topic 文档 / 测试产物。
 ```
 
 用户补充的规则优先级高于本文默认值。用户没有覆盖时，使用本文默认值。
@@ -286,7 +287,7 @@ reviewer 再读：
 workflow improvement 再读：
 
 1. reviewer 默认读取链。
-2. worker 或 reviewer 指出的 agent asset（代理资产）缺口所在 skill（技能）或 reference（参考文件）。
+2. worker 或 reviewer 指出的 instruction gap（指令缺口）所在 skill（技能）或 reference（参考文件）。
 3. 需要更新的 prompt 模板。
 
 不要读取 `tmp/agent-migration-sources/`。只有用户明确要求历史追溯、迁移审计或规则迁移时才读取。
@@ -309,7 +310,7 @@ reviewer 默认权限：
 
 - 只读审查。
 - 可以运行 `git diff`、`git status`、`rg`、`sed`、`find` 等只读命令。
-- 不修改 production、配置解析出的 topic 文档 / 测试产物或 agent asset。
+- 不修改 production、配置解析出的 topic 文档 / 测试产物或 agent instructions。
 - 不创建 commit。
 
 workflow improvement 默认权限：
@@ -330,10 +331,11 @@ worker 最终输出必须包含：
 - Evidence Doctor result（证据体检结果），包含 Errors / Warnings / Suggestions、未解决 warning、处理动作和是否降级证据边界；没有运行脚本时说明人工检查边界。
 - `language_check`。
 - `worker_quality_gate_check`，使用 `gate | status | evidence | missing_items` 证据化表格，并覆盖 `document_ownership_matrix_ready` 与 `traceability_map_ready`。
+- `loaded_instruction_sources`。
 - `preferences_loaded`。
-- `agent_asset_trace`。
-- `agent_asset_feedback`，仅在本轮发现可沉淀规则、资产缺口或冗余规则时输出；默认只报告建议，不自动改 agent asset。
-- 用户或 reviewer 对工作流程、测试体系、文档结构、恢复方式、停止方式和可读性的反馈，必须先判断是否属于 agent asset 缺口；若是，写入 `agent_asset_feedback`，并在获得 workflow improvement 授权时优先修订对应 skill/reference，避免同类问题重复出现。
+- `agent_asset_trace`（当前字段合同名，Phase 003 待迁移到 `instruction_trace`）。
+- `agent_asset_feedback`（当前字段合同名，Phase 003 待迁移到 `instruction_feedback`），仅在本轮发现可沉淀规则、instruction gap（指令缺口）或冗余规则时输出；默认只报告建议，不自动改 `.agents` 指令文件。
+- 用户或 reviewer 对工作流程、测试体系、文档结构、恢复方式、停止方式和可读性的反馈，必须先判断是否属于 instruction gap；若是，写入 `agent_asset_feedback`（当前字段合同名），并在获得 workflow improvement 授权时优先修订对应 skill/reference，避免同类问题重复出现。
 - Handoff Packet。
 - 若当前结论是窄范围、局部候选、不接入生产但仍有可复用后续方向，输出给用户的后续路径选项：
   默认建议、继续当前 topic、另开 follow-up topic、当前不建议做的方向。
@@ -347,14 +349,16 @@ reviewer 最终输出必须符合 reviewer protocol（审查协议）：
 - Suggested next worker actions（建议 worker 下一步动作）。
 - Worker prompt patch（给 worker 的提示词补丁）。
 - Suggested skill / knowledge-map updates（建议更新的 skill 或知识索引）。
-- `agent_asset_feedback` 或等价小节，仅在发现可沉淀规则、资产缺口或冗余规则时输出。
+- `loaded_instruction_sources`。
+- `agent_asset_feedback`（当前字段合同名）或等价小节，仅在发现可沉淀规则、instruction gap 或冗余规则时输出。
 
 workflow improvement 最终输出必须包含：
 
 - Findings。
-- Asset gaps（资产缺口）。
+- Instruction gaps（指令缺口）。
 - Diff-level summary（diff 级别摘要），按文件说明新增、修改和未触碰范围。
 - Changes made in Workflow improvement mode（工作流改进模式的实际改动）。
+- `loaded_instruction_sources`。
 - `backup_path`，如果本轮创建了备份。
 - Validation（验证命令和结果）。
 - Handoff Packet（交接数据包），至少包含 files_changed、implementation_review、candidates_added_or_deferred、document_ownership_check、traceability_map_status、evidence_doctor_result、dirty_isolation、validation、remaining_risks 和 next_worker_action。
