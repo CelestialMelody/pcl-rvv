@@ -53,6 +53,12 @@ description: 实现或审查 C/C++ 高性能库中的 RVV 生产路径。适用�
 - 泛型接入：用 PCL traits（点类型字段特征）、字段 offset、POD / standard-layout 和 alignment gate 证明当前 `PointSource` / `PointTarget` 可走 RVV；不满足时 fallback。
 - 窄范围接入：明确只对已证明的具体点类型或布局分流，其它模板实例 fallback；文档和 Handoff Packet 不能把它写成泛型成立。
 
+如果生产算法只读取标准 `x/y/z` 字段，模板入口的默认目标应是 PointXYZ-like traits gate，而不是
+`std::is_same_v<PointXYZ>` exact-type gate。exact-type gate 只能作为阶段性例外，必须在 phase
+plan/result、optimization matrix 和 Handoff 中写清：为什么 traits / wrapper 暂时阻塞、哪些点类型未覆盖、
+其它模板实例如何 fallback、下一 `point_type_expansion_queue` phase 如何补 correctness、fallback、
+bench、asm、board 和 Evidence Doctor。不能把 exact-type gate 写成最终 generic template 实现。
+
 模板点类型的标量语义应先按源码字段访问理解：例如 source 只读 `x/y/z`、target 读 `x/y/z/normal_x/normal_y/normal_z` 时，原标量路径支持的是“这些字段访问能编译且语义成立”的点型组合，不是一定 `PointSource == PointTarget`，也不是一定 exact `PointNormal`。RVV 若只覆盖 `PointNormal -> PointNormal`，这是有意收窄的 production gate；若要扩成泛型，必须分别证明 source 和 target 当前读取字段、布局、stride/gather、Scalar 和数据流证据，不能把某个 exact 点型的 bench 或测试外推成模板泛型成立。
 
 point-to-plane、normal-based registration（基于法线的配准）还必须额外证明 normal 字段。`x/y/z` traits 成立不代表 `normal_x/normal_y/normal_z` 成立；若公共 normal field gate 不足，先收窄到已证明点类型，或补 traits gate 后再接入。

@@ -39,8 +39,16 @@ PCL 模板入口不能硬编码 `PointXYZ` 或复用某个具体点类型的 off
 - 使用 `pcl::traits::offset<PointT, pcl::fields::x/y/z>::value` 取得当前点类型 offset。
 - 传给公共 wrapper 的 `typename pcl::traits::POD<PointT>::type` 满足 wrapper 的 `standard-layout` 前提。
 - 字段 offset 满足 f32 load/store alignment 前提。
+- `sizeof(PointT)`、AoS stride、POD / wrapper view、standard-layout 和 alignment 与当前 RVV load/store 方式一致。
 
-`PointSource` 和 `PointTarget` 必须分别 gate、分别取 `sizeof`、POD 和 offset。不能把 source 的 layout 假设复用到 target；`PointXYZ -> PointXYZI` 这类组合只有在两端各自证明 `float x/y/z` 和 offset 后才可进入 RVV。
+`PointSource` 和 `PointTarget` 必须分别 gate、分别取 `sizeof`、POD、standard-layout、alignment、stride 和 offset。
+不能把 source 的 layout 假设复用到 target；`PointXYZ -> PointXYZI` 这类组合只有在两端各自证明
+`float x/y/z`、offset 和 load/store stride 后才可进入 RVV。
+
+如果当前阶段为了先闭合 production direct 证据而使用 `std::is_same_v<PointXYZ>`、`PointNormal` 或其它
+exact-type gate，必须把它写成 phase-local exception（阶段局部例外）：列出 traits / wrapper 阻塞理由、
+未覆盖点类型、其它模板实例 fallback 测试和下一 point-type expansion phase。该写法不能成为最终
+PointXYZ-like / PointNormal-like 泛型生产门控，也不能替代 source / target 分别的 traits 审计。
 
 基于法线的算法不能只证明 `x/y/z`。如果 RVV 路径读取 `normal_x/normal_y/normal_z`，还必须分别对 `PointSource`
 和 `PointTarget` 证明 normal 字段存在、字段类型是单个 `float`、offset 可由 traits 取得且满足 wrapper 前提。
