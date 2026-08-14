@@ -54,8 +54,30 @@ README 只作为导航、常用命令和证据白名单入口。它不承担每�
 当 topic 已经命中复杂 topic 条件，或相邻成熟 topic 已经通过 README + topic-local doc suite 解决测试语义、
 bench label、证据白名单和代码地图问题时，doc suite parity（文档套件对齐）是 structure maturity
 （结构成熟度）的一部分。worker 可以根据当前 topic 的真实复杂度合并或裁剪文档，但必须在 phase plan/result
-和 Handoff 中逐项说明 `adopted / deferred / rejected`。若只是暂缓且不存在用户限定、dirty isolation
-风险、工具阻塞或生产范围扩大，默认继续到下一 phase；不要把“只有 reviewer 需要才补”写成合法 closeout。
+和 Handoff 中逐项说明 `adopted / rejected with evidence / not_applicable with evidence /
+turn_stop_deferred with stop_condition_hit`。若只是暂缓且不存在用户限定、dirty isolation 风险、工具阻塞、
+生产范围扩大或真实外部依赖，默认继续到下一 phase；不要把“只有 reviewer 需要才补”写成合法 closeout。
+
+production closeout、production-ready、done 或 stop-for-review 声明前，若 mature sibling doc suite 已存在
+或被用户 / reviewer 点名，worker 必须产出一个 doc-suite parity 审计结果。该结果可以写在当前 phase
+`result.zh.md`，也可以新建 `structure-parity-doc-suite` phase，但不能只出现在 roadmap、最终回复或 Handoff。
+审计表必须使用以下列，并覆盖 README、`testing-overview`、`correctness-tests`、`benchmark-and-evidence`、
+`optimization-evidence`、`test-support-code-map`、evaluation、长期 `doc-rvv` 和 phase index / result：
+
+```text
+| area | current shape scan | mature sibling / local quality bar | decision | blocker / evidence | next action |
+```
+
+裁剪规则：
+
+- 当前 topic 没有某类 row source、test family、bench family、script 或 evidence output 时，可以写
+  `not_applicable with evidence`，并在 evidence 中列出不存在的对象。
+- 当前 topic 规模较小但仍有 production dispatch / fallback、board evidence、Evidence Doctor 或
+  Traceability Map 需求时，不能把 topic-local docs 全部合并进 README；至少要让测试语义、bench 证据、
+  优化证据和代码地图各有稳定主归属。
+- 长期 `doc-rvv` 不承担 test support 全量说明；若它开始复制测试工程细节，worker 应把内容迁回
+  topic-local docs，并在长期文档只保留 production 行为与证据链摘要。
+- README 是入口和证据白名单，不是每个 gtest、bench case、helper 或 phase 的正文归属。
 
 ## 写入顺序
 

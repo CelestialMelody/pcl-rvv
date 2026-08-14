@@ -93,8 +93,36 @@
 phase，直到 adopted、rejected with evidence、not_applicable with evidence 或
 turn_stop_deferred with stop_condition_hit。
 
-成熟度审计还必须检查 topic-local doc suite（主题本地文档套件）是否达到当前 topic 复杂度需要。若相邻成熟 topic 已经提供 `README.zh.md`、`doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` 和 `doc/<topic>-evaluation.zh.md` 这类结构，worker 应把它作为文档成熟度 quality bar。具体内容不能复制，但结构、读者路径、证据白名单和代码地图必须做 `adopt / defer / reject` 决策。evaluation 仍在 topic 根目录、缺少 README、缺少测试/bench/代码地图或长期 `doc-rvv` 与 topic-local docs 互相挤压时，都是可继续推进的 unblocked doc-suite action。
+成熟度审计还必须检查 topic-local doc suite（主题本地文档套件）是否达到当前 topic 复杂度需要。若相邻成熟 topic 已经提供 `README.zh.md`、`doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` 和 `doc/<topic>-evaluation.zh.md` 这类结构，worker 应把它作为文档成熟度 quality bar。具体内容不能复制，但结构、读者路径、证据白名单和代码地图必须做 `adopted / rejected with evidence / not_applicable with evidence / turn_stop_deferred with stop_condition_hit` 决策。evaluation 仍在 topic 根目录、缺少 README、缺少测试/bench/代码地图或长期 `doc-rvv` 与 topic-local docs 互相挤压时，都是可继续推进的 unblocked doc-suite action。
+当 mature sibling 已存在，或用户 / reviewer 明确指出某个成熟 topic 作为质量参照时，doc-suite parity 不能只写在 roadmap、Handoff 或最终回复里。worker 必须在当前 phase result 中完成审计，或新建明确的 `structure-parity-doc-suite` phase 并产出 `plan.zh.md` / `result.zh.md`。若缺口只涉及 topic-local docs、长期 `doc-rvv` 分工、evaluation、README 导航或 evidence path 对齐，且没有用户限定、dirty isolation、工具失败或真实外部依赖阻塞，则默认下一 phase 必须先补文档套件，不能声明 `ready_for_review`。
 文档迁移默认不保留 legacy pointer（旧路径指针）、compatibility alias（兼容别名）或重复正文。只有存在明确外部依赖、用户限定必须兼容、跨 topic 脚本暂时无法同轮更新，或 dirty isolation 会误删用户改动时，才可以临时保留；保留时必须在 phase result / Handoff 写出依赖证据、删除条件和下一阶段删除动作。缺少证据的“避免旧引用断开”不是充分理由。
+
+### Doc Suite Parity Closeout Gate
+
+当当前 topic 命中复杂 topic 条件、存在 production direct 结论、或 mature sibling doc suite 已被点名作为质量参照时，production closeout / production-ready / done / stop-for-review 声明必须先满足本门禁。
+
+最小审计表必须覆盖以下文档 area，并使用与 structure-parity phase 相同的列：
+
+```text
+| area | current shape scan | mature sibling / local quality bar | decision | blocker / evidence | next action |
+```
+
+`area` 至少包含：
+
+- README navigation：是否提供“先读哪份文档”、目录分工、常用命令、当前可提交证据、默认不提交的生成产物和当前结果。
+- `testing-overview`：是否说明 test / bench / board / QEMU 的入口分类、覆盖矩阵和证据白名单。
+- `correctness-tests`：是否逐个 gtest 或测试族说明输入、被测路径、断言和证明范围。
+- `benchmark-and-evidence`：是否说明 bench label、case-filter、QEMU smoke 边界、board repeated target、Evidence Doctor、manifest、registry 和提交边界。
+- `optimization-evidence`：是否把 adopted / rejected / deferred 优化方式映射到 production / test_support / bench / board evidence。
+- `test-support-code-map`：是否能从文档定位到聚合头、internal helper、src、script、production helper 和 evidence output。
+- evaluation：是否承载 EvidenceDecision、Traceability Map、文档分工审计、accepted risk 和不覆盖范围。
+- long-term `doc-rvv`：是否只写 adopted production 行为、当前优化方式、dispatch / fallback、范围边界、证据链和长期风险。
+- phase index / result：是否记录本次 doc-suite parity 的采用、拒绝、暂缓理由和默认恢复动作。
+
+每个 area 的 `decision` 只能是 `adopted`、`rejected with evidence`、`not_applicable with evidence` 或
+`turn_stop_deferred with stop_condition_hit`，除非下一阶段就是该 area 的补齐 phase。`deferred` 必须写成
+`phase_deferred + unblocked` 并把 `next_phase_default` 指向具体文档补齐 phase。`当前 topic 更小`、`内容较少` 或
+`reviewer 需要再补` 只能作为裁剪理由的输入，不能替代证据；若因此不采用 mature sibling 的某个文档形态，必须写明哪类测试、bench、helper 或证据职责在当前 topic 不存在。
 
 ### Structure Parity Completion Contract
 

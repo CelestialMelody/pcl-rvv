@@ -513,6 +513,18 @@ followup_options_ready:
 - 若相邻成熟 topic 已经形成更完整的测试工程或 topic-local doc suite，表格必须包含
   `mature_sibling_parity_action_ready`；证据必须说明结构差距是否已经采用、拒绝，或作为高优先级
   `phase_deferred + unblocked` 继续推进。若停止，必须指向真实 stop condition。
+- 若 production closeout、production-ready、done、stop-for-review 或 `unblocked_next_actions=none`
+  涉及的 topic 存在 mature sibling doc suite，或用户 / reviewer 已点名成熟 topic 作为质量参照，
+  表格必须包含 `doc_suite_parity_closeout_ready`。证据必须指向当前 phase result 或
+  `structure-parity-doc-suite` phase result，且审计表至少覆盖 README、`testing-overview`、
+  `correctness-tests`、`benchmark-and-evidence`、`optimization-evidence`、`test-support-code-map`、
+  evaluation、长期 `doc-rvv` 和 phase index / result。每个 area 必须是 `adopted`、
+  `rejected with evidence`、`not_applicable with evidence` 或
+  `turn_stop_deferred with stop_condition_hit`；若仍有 `phase_deferred + unblocked`，该 gate
+  必须写 `fail`，并把 `next_phase_default` 指向具体文档补齐 phase。
+- `doc_suite_parity_closeout_ready` 不能用“当前 topic 更小”“内容较少”“reviewer 需要再补”作为通过理由。
+  若裁剪 mature sibling 的某个文档形态，证据必须说明当前 topic 缺少哪类 row source、test family、
+  bench family、script、helper 或 evidence output；否则默认补齐 topic-local doc suite。
 - 表格必须包含 `legacy_compatibility_decision_ready`。证据必须说明是否存在 legacy pointer / alias /
   旧路径 wrapper；默认处理是删除并更新引用。若保留，必须列出具体外部依赖、删除条件和下一阶段。
 - 若 `language_check` 声称通过，必须能在同一张表或相邻段落中指出诊断代码、测试、bench 和文档的术语 / 中文注释证据。
