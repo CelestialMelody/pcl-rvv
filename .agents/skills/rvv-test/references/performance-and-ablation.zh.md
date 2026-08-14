@@ -29,9 +29,9 @@ bench 输出必须可解析。至少保留：
 - 单次运行能够结束，并输出非空 checksum、accepted-point 或等价路径统计。
 - 同边界 A/B 的 checksum 和 correctness 结果符合预期。
 
-这个检查用于发现递归 wrapper、错误模板实例化、错误 layout 调用和未命中 gate。QEMU 可以完成这一步，但只作为编译、正确性和日志形状 smoke。默认可以在 QEMU 上编译 bench binary，但不要在 QEMU 上运行完整 bench matrix；若确实需要 QEMU bench smoke，只运行小规模、少 case、少 iteration 的可运行性检查，并写清 `qemu_smoke_only`。bench 的数值分析默认在板卡或目标硬件上做。
+这个检查用于发现递归 wrapper、错误模板实例化、错误 layout 调用和未命中 gate。QEMU 可以完成编译、正确性和日志形状 smoke，但默认不得在 QEMU 上执行 `run_bench_compare`、完整 bench matrix，或任何会生成 Std/RVV 数值对比表的 bench compare target；QEMU bench compare 没有性能意义且浪费时间。若确实需要 QEMU bench smoke，只运行非 compare、极小规模、少 case、少 iteration 的可运行性检查，并写清 `qemu_smoke_only`。bench 的数值分析只能在板卡或目标硬件上做。
 
-QEMU timing（QEMU 计时）不作为性能结论。QEMU 只用于 correctness（正确性）、路径和日志形状；若必须保留 QEMU bench 输出，文档必须标成 `qemu_smoke_only`。
+QEMU timing（QEMU 计时）不作为性能结论。QEMU 只用于 correctness（正确性）、路径和日志形状；若历史遗留或特殊调试必须保留 QEMU bench 输出，文档必须标成 `qemu_smoke_only`，并说明它不是默认执行路径、不能进入性能排序、采纳审计或 EvidenceDecision。
 
 ## 优化采纳证据索引
 
@@ -132,7 +132,7 @@ direct diagnostic、production-shaped diagnostic 和 production direct 若同时
 2. 静态实现质量更高。这一项和第 1 项是主要参考因素，必须审计公式形态、目标指令吞吐、RAW dependency（read-after-write，写后读依赖）、寄存器压力或 spill 风险、ILP / unroll（指令级并行 / 展开）、LMUL `m1/m2/m4`（向量寄存器分组）取舍，以及 asm attribution（反汇编归属，关键 RVV 指令是否归属于 production 符号或 hot path）。
 3. 平均情况更好。文档必须声明使用的平均口径，例如 summary 脚本定义的 mean、median 或 repeated-board 汇总代表值。
 4. 异常频率不算很高。异常值不能先验剔除，除非能证明是测量污染；异常频率应作为人工风险判断输入。
-5. bench 类结论必须来自 board 或 target hardware。QEMU bench 只能作为 build / correctness / log-shape smoke，不能进入性能排序、采纳审计或 EvidenceDecision；默认不在 QEMU 上运行完整 bench，只在必要时做窄范围 smoke。
+5. bench 类结论必须来自 board 或 target hardware。QEMU bench compare 不能进入性能排序、采纳审计或 EvidenceDecision，worker 默认不得在 QEMU 上运行 `run_bench_compare` 或完整 bench matrix；只在必要调试时做非 compare 的窄范围 smoke。
 
 第 1 和第 2 是主门槛。若二者闭合，而第 3 或第 4 存在争议，例如平均值受少数异常点影响、个别 case 的 `B/A < 1` 频率偏高但有合理解释，人工仍可决定接入；此时 output summary、evaluation 或主题文档必须说明数据分析口径、异常值情况、可能原因、风险边界，以及为什么仍接受接入。
 

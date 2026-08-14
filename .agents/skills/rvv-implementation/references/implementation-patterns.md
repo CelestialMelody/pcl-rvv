@@ -8,7 +8,9 @@ public entry
   -> else: *_Std(...)
 ```
 
-`*_Std` 保留原标量语义，非 RVV 构建、未覆盖类型、小规模、non-dense、indexed 等路径必须自然落回 Std。`*_RVV` 名字应只用于真实 RVV 路径或公开短路分流层；这类 helper 默认放在 `__RVV10__` 条件编译内。不要为了让公开入口少写一层 `#if`，在非 RVV 构建里常驻一个名字带 `RVV`、只返回 false 的 helper，除非有跨文件 ABI、模板兼容或已有 SIMD 风格要求，并在主题文档里说明原因。
+`*_Std` / `*_Standard` 保留原标量语义，非 RVV 构建、未覆盖类型、小规模、non-dense、indexed 等路径必须自然落回 Std。该 helper 可以是成熟 topic 常见的成员函数，也可以是在不想扩大类声明 / ABI / protected API 表面时使用的邻近 internal 或 `detail` free helper；关键是 public entry 只做小型分发，fallback 边界可被 reviewer 直接引用。`*_RVV` 名字应只用于真实 RVV 路径或公开短路分流层；这类 helper 默认放在 `__RVV10__` 条件编译内。不要为了让公开入口少写一层 `#if`，在非 RVV 构建里常驻一个名字带 `RVV`、只返回 false 的 helper，除非有跨文件 ABI、模板兼容或已有 SIMD 风格要求，并在主题文档里说明原因。
+
+生产接入阶段必须把原标量主体变成可命名、可引用、可测试或可反汇编归因的 `*_Std` / `*_Standard` 路径。不能让公开入口保留大段上游标量循环，再在函数开头插入一个 RVV try-and-return；这种形态虽然语义上可能能 fallback，但 reviewer 很难判断原标量路径边界、fallback 覆盖和后续维护风险。若旧接口、模板可见性、ABI 或重载关系使拆分代价过高，必须在生产接入计划、Handoff Packet 和主题文档中写明原因、保留的标量主体行号和额外验证。
 
 公开入口应尽量只保留上游语义检查和短路 dispatch（分流）。如果 RVV 接入后公开入口里同时出现
 非平凡 RVV gate、iterator 构造和标量主体调用，优先抽成命名清楚的 `*_Std` / `*_RVV`

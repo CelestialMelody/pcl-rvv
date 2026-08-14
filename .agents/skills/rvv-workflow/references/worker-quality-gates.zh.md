@@ -210,10 +210,12 @@ worker 必须分开写：
 QEMU 不能作为性能结论。板卡退化只能支持 no-production，不能自动证明 gather、buffer、
 FMA 或 tail 是单一主因；没有消融 bench 或 profile 时必须写成假设。
 
-bench 类性能结论默认只来自 board / target hardware。QEMU 默认可以编译 bench binary，但不运行完整
-bench matrix；若确实需要 QEMU bench，只能跑小规模、少 case、少 iteration 的 build / correctness /
-log-shape smoke。若本轮只跑了 QEMU bench smoke，worker 必须把性能证据写成 missing / blocked，
-不能把 `analyze_bench_compare.log` 的 QEMU 计时用于排序或 EvidenceDecision。
+bench 类性能结论默认只来自 board / target hardware。QEMU 默认可以编译 bench binary，但不运行
+`run_bench_compare`、完整 bench matrix 或任何会生成 Std/RVV 数值对比表的 compare target；QEMU
+bench compare 没有性能意义且浪费时间。若确实需要 QEMU bench，只能跑非 compare、小规模、少 case、
+少 iteration 的 build / correctness / log-shape smoke。若本轮只跑了 QEMU bench smoke，worker 必须把
+性能证据写成 missing / blocked，不能把 `analyze_bench_compare.log` 的 QEMU 计时用于排序或
+EvidenceDecision。
 
 每次复跑都要做 evidence freshness check（证据新鲜度检查）。若新 run 改变了文档中的 speedup、
 方向、decision bucket、run count、Evidence Doctor 数量或证据角色，旧 run 只能保留为 historical evidence；
@@ -332,6 +334,12 @@ PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 �
 - `entry_structure`：公开入口是否只做上游语义检查和短路分流；原标量路径是否抽成清晰的
   `*_Std` helper；RVV 主路径是否抽成清晰的 `*_RVV` helper；多个入口共享 policy 时，public
   overload 仍不能堆叠大段 RVV gate 或标量主体。
+- `std_helper_extraction`：生产接入不得只在公开入口开头插入 RVV try-and-return，然后把原标量循环留在同一入口
+  后半段。除非存在明确 ABI、模板可见性或旧接口约束，否则必须抽成 `*_Std` / `*_Standard` helper；若例外，
+  Handoff Packet 必须列出保留原因、标量主体边界、fallback 测试和 reviewer 风险。
+- `std_helper_shape`：`*_Std` / `*_Standard` helper 不强制必须是成员函数；若成员 helper 会要求修改公开
+  header、protected API、显式实例化或模板声明表面，可使用邻近 internal / `detail` free helper。Handoff
+  Packet 必须说明 helper 形态选择，且 public entry 仍只能呈现“语义检查 -> RVV 短路 -> Std fallback”。
 - 复杂 eligibility（适用性）解析，例如动态 condition / field metadata / policy 分解，应收进窄
   RVV wrapper 或 `*_RVV` helper，由 public overload 维持“语义检查 -> RVV 短路 -> Std fallback”的形状。
 - `evidence_commands`：PI3/PI4 需要运行的 test、bench、asm 和 board 命令。
@@ -344,6 +352,8 @@ PI2-PI5 结束后，Handoff Packet 必须新增或等价覆盖：
 - `fallback_results`：每个 fallback gate 的测试或构建证据。
 - `entry_structure_review`：是否复核 public entry / `*_Std` / `*_RVV` 分层符合所在文件已有
   SIMD 或 PCL 源码风格；若因旧接口或模板限制无法完全拆分，说明保留原因。
+- `std_helper_extraction_review`：是否确认原标量主体已抽成命名清楚的 Std/Standard fallback helper；若没有抽，
+  不能只写“自然 fallback”，必须把例外原因和额外验证写成 reviewer 可审查事实。
 - `asm_hotspot_attribution`：按 production 符号范围归属关键 RVV 指令。
 - `board_production_results`：目标硬件 production direct bench 结果；若未运行，写明阻塞原因。
 - `pi5_evidence_decision`：基于 production direct 证据的新 EvidenceDecision。
@@ -463,7 +473,7 @@ followup_options_ready:
   和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
 - 表格必须包含 `evidence_doctor_result_ready`。凡本轮涉及 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision，证据必须指向 `artifact_layout.evidence_doctor_script_template` 解析出的脚本生成的 report，或按 `rvv-test/references/evidence-doctor.zh.md` 人工填写的 Errors / Warnings / Suggestions 摘要；未运行脚本时说明原因和当前 doctor 边界。
 - 表格必须包含 `bench_backend_choice_ready`。凡本轮涉及 bench，证据必须说明性能结论是否来自 board / target hardware；若只跑 QEMU bench smoke，状态应为 `partial` 或 `not_applicable`，并写清它只用于 build / correctness / log-shape smoke；若没有运行 QEMU bench，应写明默认策略是只编译或只跑 gtest / correctness。
-- 表格必须包含 `qemu_bench_smoke_scope_ready`。如果运行了 QEMU bench，证据必须列出 case-filter、规模、iteration 和为什么它不是完整 bench；如果没有运行，写 `not_applicable` 并说明性能验证只走 board / target hardware。
+- 表格必须包含 `qemu_bench_smoke_scope_ready`。如果运行了 QEMU bench，证据必须列出 case-filter、规模、iteration、是否显式绕过 guard，以及为什么它不是完整 bench compare；如果没有运行，写 `not_applicable` 并说明性能验证只走 board / target hardware。
 - 表格必须包含 `rerun_budget_decision_ready`。凡本轮涉及 board performance 或 repeated summary，证据必须指向 phase plan / summary 中的 run budget、decision bucket、是否用完预算和是否需要降级 / 人工判断。
 - 表格必须包含 `evidence_registry_status_ready`。证据指向 `log/evidence_registry.json`、`make evidence_status` / `make check_evidence_freshness` 输出或等价人工检查；若 topic 尚未接入 registry，写 `partial` 并列出应补的 target / script。
 - 表格必须包含 `evidence_freshness_check_ready`。证据指向 Handoff Packet 的 `evidence_freshness_status`、phase result、evaluation 或 topic 文档；若复跑改变了旧数值、decision bucket 或证据角色，必须列出已刷新和待刷新的路径。

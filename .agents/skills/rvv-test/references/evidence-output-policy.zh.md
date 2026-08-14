@@ -54,7 +54,8 @@ registry 可以进入提交候选，但只有被 `evidence.committable_log_refer
 
 bench 类 target 的性能结论默认只来自 board（板卡）或 target hardware（目标硬件）。QEMU bench 只允许作为 build / correctness / log-shape smoke（编译、正确性和日志形状冒烟），并且必须是窄范围 smoke，不是完整 bench matrix：
 
-- agent 默认不为了性能分析单独运行 QEMU bench compare；默认可以编译 bench binary，但不在 QEMU 上运行完整计时统计。
+- agent 默认不为了性能分析单独运行 QEMU bench compare；默认可以编译 bench binary，但不在 QEMU 上运行 `run_bench_compare`、完整计时统计或任何会生成 Std/RVV 数值对比表的 compare target。
+- 若公共 Makefile 提供 guard，默认不得绕过；只有历史/窄范围 log-shape smoke 才能显式设置类似 `ALLOW_QEMU_BENCH_COMPARE=1` 的开关，并在文档中写明 `qemu_smoke_only`。
 - 若需要检查 bench binary 能否启动、case label 是否完整或 checksum shape 是否可解析，可以运行小规模、少 case、少 iteration 的 QEMU smoke，并在文档中明确 `qemu_smoke_only`、case-filter、规模和它不能证明性能。
 - QEMU 生成的 `analyze_bench_compare.log` 不能进入 performance evidence（性能证据）或 EvidenceDecision，只能作为可运行性 / 日志格式辅助证据。
 - 同一份 bench compare 中，std / RVV 两侧必须来自同一 bench wrapper、row source、输入 corpus、size、iterations 和 checksum policy。若有意比较 production wrapper 与 test-only helper，必须命名为 mixed-boundary cross-check（混合边界交叉检查），并降级证据角色。

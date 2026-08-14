@@ -43,6 +43,7 @@ UPSTREAM_TEST_RVV_OUTPUT_FILE ?= $(OUTPUT_DIR_QEMU)/run_upstream_test_rvv.log
 ANALYZE_VEC_SCRIPT    ?= $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_vec_log.py
 BENCH_COMPARE_SCRIPT  ?= $(TEST_RVV_SHARED_SCRIPT_DIR)/analyze_bench_compare.py
 SANITIZE_LOGS_SCRIPT  ?= $(TEST_RVV_SHARED_SCRIPT_DIR)/sanitize_evidence_logs.py
+ALLOW_QEMU_BENCH_COMPARE ?= 0
 
 # Optional data files to deploy beside the board binaries. Keep the list in the
 # topic Makefile so inputs such as PCD fixtures remain topic-owned.
@@ -172,7 +173,13 @@ run_bench_std: clean_bench_std | $(OUTPUT_DIR_QEMU)
 	@$(MAKE) -C $(CURDIR) run_bench USE_PCL_RVV10=0 TARGET_BENCH=$(TARGET_BENCH_STD) BENCH_ARGS="$(BENCH_ARGS)" 2>&1 | tee $(BENCH_STD_OUTPUT_FILE)
 analyze_bench_compare: $(BENCH_STD_OUTPUT_FILE) $(BENCH_RVV_OUTPUT_FILE) | $(OUTPUT_DIR_QEMU)
 	@$(PYTHON_RUN) $(BENCH_COMPARE_SCRIPT) --std-log $(BENCH_STD_OUTPUT_FILE) --rvv-log $(BENCH_RVV_OUTPUT_FILE) 2>&1 | tee $(BENCH_COMPARE_OUTPUT_FILE)
-run_bench_compare: run_bench_std run_bench_rvv analyze_bench_compare
+guard_qemu_bench_compare:
+	@if [ "$(ALLOW_QEMU_BENCH_COMPARE)" != "1" ]; then \
+		echo "[guard] QEMU run_bench_compare is disabled by default; use board/target hardware for bench conclusions." >&2; \
+		echo "[guard] For a deliberate narrow QEMU log-shape smoke only, rerun with ALLOW_QEMU_BENCH_COMPARE=1 and document qemu_smoke_only." >&2; \
+		exit 2; \
+	fi
+run_bench_compare: guard_qemu_bench_compare run_bench_std run_bench_rvv analyze_bench_compare
 
 generate_vec_report: | $(LOG_DIR) $(LOG_VEC_MISS_DIR)
 	@$(MAKE) -C $(CURDIR) clean_bench
@@ -278,4 +285,4 @@ check_output_logs_sanitized:
 		$(PYTHON_RUN) "$(SANITIZE_LOGS_SCRIPT)" --check $$files; \
 	fi
 
-.PHONY: run_test run_test_std run_test_rvv run_test_compare run_upstream_test run_upstream_test_std run_upstream_test_rvv run_upstream_test_compare run_test_all run_bench run_bench_std run_bench_rvv run_bench_compare analyze_bench_compare generate_vec_report dump_bench_rvv clean clean_test clean_test_std clean_test_rvv clean_upstream_test clean_upstream_test_std clean_upstream_test_rvv clean_bench clean_bench_std clean_bench_rvv check_board_ssh deploy_files deploy_bench_rvv deploy_bench_std deploy_test deploy_board run_board_test run_board_bench_compare fetch_board_logs board_smoke sanitize_output_logs check_output_logs_sanitized
+.PHONY: run_test run_test_std run_test_rvv run_test_compare run_upstream_test run_upstream_test_std run_upstream_test_rvv run_upstream_test_compare run_test_all run_bench run_bench_std run_bench_rvv guard_qemu_bench_compare run_bench_compare analyze_bench_compare generate_vec_report dump_bench_rvv clean clean_test clean_test_std clean_test_rvv clean_upstream_test clean_upstream_test_std clean_upstream_test_rvv clean_bench clean_bench_std clean_bench_rvv check_board_ssh deploy_files deploy_bench_rvv deploy_bench_std deploy_test deploy_board run_board_test run_board_bench_compare fetch_board_logs board_smoke sanitize_output_logs check_output_logs_sanitized

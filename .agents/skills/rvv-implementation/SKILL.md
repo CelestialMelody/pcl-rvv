@@ -14,9 +14,12 @@ description: 实现或审查 C/C++ 高性能库中的 RVV 生产路径。适用�
 ## 实现结构
 
 - 公开 API 不变。
-- 常驻 `*_Std` 标量 helper。
+- 常驻 `*_Std` / `*_Standard` 标量 helper；可做成既有类的成员 helper，也可在不改变公开 API /
+  protected 声明更稳时做成邻近 internal / `detail` free helper，但必须让 public entry 的 Std fallback
+  边界一眼可见。
 - `__RVV10__` 下提供 `*_RVV` helper；承载 RVV 指令或 RVV 分流语义的 helper 默认不要在非 RVV 构建中以“只返回 false”的 stub 常驻，公开入口用条件编译包住 RVV 尝试并自然落回 Std。
 - 公开入口用短路分流选择 RVV 或自然落回 Std。
+- 生产接入后，公开入口不能表现为“先尝试 RVV，失败后继续在同一个入口里执行大段原标量主体”。必须把原标量主体抽成命名清楚的 `*_Std` / `*_Standard` helper，或在主题文档和 Handoff Packet 中说明无法拆分的具体语言 / ABI / 模板约束。仅保留几行参数准备、已有语义检查和最终 `Std` fallback 调用。
 - 不强制新增 dispatch helper；只有多个公开入口共享复杂选择逻辑时才增加。
 - 主路径 helper 放在对应分发入口附近，命名空间遵循所在文件风格。
 - 主路径 RVV helper 不额外包入 `detail`，除非该文件已有同类历史 SIMD 风格。

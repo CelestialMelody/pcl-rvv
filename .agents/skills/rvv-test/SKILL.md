@@ -65,7 +65,7 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 
 - QEMU（仿真器）只证明 correctness（正确性）、日志形状和路径命中，不证明真实性能。
 - 板卡或目标硬件 benchmark 才能支撑性能结论。
-- bench compare 默认跑板卡或目标硬件；QEMU 默认只编译 bench binary 或跑窄范围 smoke，不运行完整 bench matrix。若保留 QEMU bench 输出，只能写成 `qemu_smoke_only`，不能进入性能排序或 EvidenceDecision；凡是要给用户看的数值 bench，默认只在板卡或目标硬件上运行。
+- bench compare 只能跑板卡或目标硬件。worker 默认不得在 QEMU 上执行 `run_bench_compare`、完整 bench matrix 或任何会生成 Std/RVV 数值对比表的 bench compare target；QEMU bench compare 没有性能意义且浪费时间。QEMU 侧默认只允许编译 bench binary，或在确有调试必要时运行非 compare、极小规模、少 case、少 iteration 的可运行性 smoke，并写清 `qemu_smoke_only`。凡是要给用户看的数值 bench，默认只在板卡或目标硬件上运行。
 - 板卡复跑必须有 bounded rerun budget（有界复跑预算）和 decision bucket（决策桶）。数字轻微波动但决策桶不变时不要无限复跑；预算耗尽后仍摇摆时标成 `unstable`、降级结论或交给人工判断。
 - 如果一次复跑改变了已经写入文档的方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，旧 summary 和 phase result 立即降级为 historical evidence；必须刷新相关 topic 文档、evaluation、Handoff Packet 和 phase 文档，不能继续把旧数值当当前 truth。
 - staged candidate（分阶段候选）、production-shaped diagnostic 和 production direct 必须分层，不能互相替代。
