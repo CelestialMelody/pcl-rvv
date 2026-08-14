@@ -1,0 +1,1206 @@
+{
+  "files": {
+    "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.asm": {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "asm_attribution",
+      "freshness_state": "historical_probe",
+      "recorded_at_epoch": 1786627465,
+      "related": {},
+      "run_label": "qemu_bench_rvv_asm_production_probe",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786625754635892109,
+        "path": "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.asm",
+        "sha256": "sha256:28160cb22093e4463f0ede6f46141b50ec640bdc6b3c106a61eb7895472a0a7e",
+        "size": 49896
+      },
+      "target": "dump_bench_rvv"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm": {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "asm_attribution_historical_probe",
+      "freshness_state": "historical_probe",
+      "recorded_at_epoch": 1786628999,
+      "related": {},
+      "run_label": "qemu_bench_rvv_full_asm_production_probe",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786625754625892099,
+        "path": "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm",
+        "sha256": "sha256:e8d905670d0022fa135db5a35156bee787e6686589bfef97bf1e77aaae2f0898",
+        "size": 1182691
+      },
+      "target": "dump_bench_rvv"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/summary.md"
+      },
+      "run_label": "acceptance_filter_confirm",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621164859396534,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_doctor.md",
+        "sha256": "sha256:8cf011c194ee0996ac3a65b463ce3fadb5c9e1e68c4ed11eaa49078749aa82ba",
+        "size": 2270
+      },
+      "target": "run_board_bench_acceptance_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/summary.md"
+      },
+      "run_label": "acceptance_filter_confirm",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621164821389237,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_manifest.json",
+        "sha256": "sha256:e99d022aadd43b4a4043bdc76ad4b8ead7a71bd46ce6674e13572c43776b6c38",
+        "size": 6085
+      },
+      "target": "run_board_bench_acceptance_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/summary.md": {
+      "backend": "board",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/summary.md"
+      },
+      "run_label": "acceptance_filter_confirm",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621164821389237,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/summary.md",
+        "sha256": "sha256:5194d6868e5cd6872dfa0a548e7831bcb00d612bc986388d957c985750806dc3",
+        "size": 1489
+      },
+      "target": "run_board_bench_acceptance_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/summary.md"
+      },
+      "run_label": "acceptance_filter_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621061608457328,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_doctor.md",
+        "sha256": "sha256:ae25ae37c0068124f1ab320f0efaf843be801e7e77cdd6ed1d9dea6dab4807cb",
+        "size": 1433
+      },
+      "target": "run_board_bench_acceptance_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/summary.md"
+      },
+      "run_label": "acceptance_filter_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621061572448881,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_manifest.json",
+        "sha256": "sha256:53e7e480b1687b9fa8dfbc1aa57d36660e1cff620bcd7215bc586c76836f142b",
+        "size": 6090
+      },
+      "target": "run_board_bench_acceptance_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/summary.md"
+      },
+      "run_label": "acceptance_filter_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621061572448881,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/summary.md",
+        "sha256": "sha256:31bbf2a61c52ede6539f56e99e2b157dcec8d1fef41bb677f3997517ebd8b2c3",
+        "size": 1490
+      },
+      "target": "run_board_bench_acceptance_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "edge-batch",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/summary.md"
+      },
+      "run_label": "edge_batch_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786620996408495539,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_doctor.md",
+        "sha256": "sha256:54ac4f12e22099b5578d32e4be3e182a0a85c32df678f385eac8e0ef831175cd",
+        "size": 659
+      },
+      "target": "run_board_bench_edge_batch_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "edge-batch",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/summary.md"
+      },
+      "run_label": "edge_batch_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786620996372496741,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_manifest.json",
+        "sha256": "sha256:b0c15d3a7ea394568b9df6d472fca1026a924f7744085d29c7080a72f2ad154a",
+        "size": 5861
+      },
+      "target": "run_board_bench_edge_batch_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "edge-batch",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/010-board-and-production-boundary/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786621433,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/summary.md"
+      },
+      "run_label": "edge_batch_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786620996372496741,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/summary.md",
+        "sha256": "sha256:7d0c30b33819211b7bf35618ec86333871076dd1201abf62845565a8082b03cc",
+        "size": 1477
+      },
+      "target": "run_board_bench_edge_batch_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "edge-gather-staging",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/020-production-shaped-gather-diagnostic/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786622148,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/summary.md"
+      },
+      "run_label": "edge_gather_staging_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786622075809527451,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_doctor.md",
+        "sha256": "sha256:50669fb52f5967108627d73a0875c32168b9ed56a362ae84b56105311142e599",
+        "size": 677
+      },
+      "target": "run_board_bench_edge_gather_staging_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "edge-gather-staging",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/020-production-shaped-gather-diagnostic/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786622148,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/summary.md"
+      },
+      "run_label": "edge_gather_staging_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786622075774526287,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_manifest.json",
+        "sha256": "sha256:334ce9a0ecc5e13e919dd8c07e6ca78f9acdb4fc5fbfe5d0d5ddf055a613707d",
+        "size": 6303
+      },
+      "target": "run_board_bench_edge_gather_staging_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "edge-gather-staging",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/020-production-shaped-gather-diagnostic/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786622148,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/summary.md"
+      },
+      "run_label": "edge_gather_staging_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786622075774526287,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/summary.md",
+        "sha256": "sha256:b07373c04d2a7c084a13fb043c3fb732796b34651c7db9c430ff8c6495081309",
+        "size": 1508
+      },
+      "target": "run_board_bench_edge_gather_staging_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab_historical_production_probe",
+      "freshness_state": "historical_probe",
+      "recorded_at_epoch": 1786629444,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
+      },
+      "run_label": "production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786629426139829016,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
+        "sha256": "sha256:8f7c79ed64cdaa62ac0a7ff349ebf0c14c62a01b0c487ad62c30241bff3c7501",
+        "size": 2507
+      },
+      "target": "run_board_bench_production_direct_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab_historical_production_probe",
+      "freshness_state": "historical_probe",
+      "recorded_at_epoch": 1786629444,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
+      },
+      "run_label": "production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786629426106828980,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
+        "sha256": "sha256:935a30e657559240460344dac4aee9292946f93b9049743a6fd8dd96456c1d0a",
+        "size": 6439
+      },
+      "target": "run_board_bench_production_direct_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "strict_ab_historical_production_probe",
+      "freshness_state": "historical_probe",
+      "recorded_at_epoch": 1786629444,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
+      },
+      "run_label": "production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786629426106828980,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md",
+        "sha256": "sha256:5bc9e41bc347e387cf91c1da7efbb13a207e2ec7f9094472aa4147fa4997f032",
+        "size": 1704
+      },
+      "target": "run_board_bench_production_direct_repeated"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log": {
+      "backend": "board",
+      "case_filter": "correctness",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correctness-tests.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "correctness",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786629124,
+      "related": {},
+      "run_label": "board_correctness_phase030_closeout",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786629093191518129,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log",
+        "sha256": "sha256:82c9afe8a8144be793fd7f1122877d1baf17cbf4d5d007a8b8fbba30e4fd93c7",
+        "size": 2565
+      },
+      "target": "run_board_test_smoke"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_doctor.md": {
+      "backend": "qemu",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1786614721,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_acceptance.log"
+      },
+      "run_label": "qemu_acceptance_filter_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786614666610736582,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_doctor.md",
+        "sha256": "sha256:d530b6d22d883a409524b1017719ec715282cc44e66c2b88b452583783c5e825",
+        "size": 600
+      },
+      "target": "run_evidence_doctor_acceptance_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_manifest.json": {
+      "backend": "qemu",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1786614721,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_acceptance.log"
+      },
+      "run_label": "qemu_acceptance_filter_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786614666580737586,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_manifest.json",
+        "sha256": "sha256:119f79cde9502bdbf797d7300b6c37cbbbd92e5a596a5dac9f43bf86f9f58b6e",
+        "size": 5036
+      },
+      "target": "run_evidence_doctor_acceptance_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_acceptance.log": {
+      "backend": "qemu",
+      "case_filter": "acceptance-filter",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1786614721,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_acceptance.log"
+      },
+      "run_label": "qemu_acceptance_filter_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786613752898406549,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_acceptance.log",
+        "sha256": "sha256:bcfad0cf2972b3379fc845e4d35f4894666ec159fcd0009886a81a548f5b155b",
+        "size": 1617
+      },
+      "target": "run_evidence_doctor_acceptance_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_batch.log": {
+      "backend": "qemu",
+      "case_filter": "edge-batch",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1786614721,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_batch.log"
+      },
+      "run_label": "qemu_edge_batch_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786613744076704716,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_batch.log",
+        "sha256": "sha256:5c48e357087cf58bc53be7e640d2027f7142a5dd629d90de20cb50d43d3a6b22",
+        "size": 1521
+      },
+      "target": "run_evidence_doctor_edge_batch_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_gather_staging.log": {
+      "backend": "qemu",
+      "case_filter": "edge-gather-staging",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/020-production-shaped-gather-diagnostic/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786622148,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_gather_staging.log"
+      },
+      "run_label": "qemu_edge_gather_staging_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621967693541226,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_gather_staging.log",
+        "sha256": "sha256:7d7f76b55f9a9b5b1d78ae71fe1675bca092dfbacfd9c1187c343f59a9438977",
+        "size": 1666
+      },
+      "target": "run_evidence_doctor_edge_gather_staging_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log": {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "qemu_smoke",
+      "freshness_state": "historical_probe",
+      "recorded_at_epoch": 1786626976,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log"
+      },
+      "run_label": "production_direct_qemu_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786625754599892070,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log",
+        "sha256": "sha256:b43dff4021a5b99a5b0e31a786b574022ddc08e9bae2fe3e8612b4598f61e486",
+        "size": 1866
+      },
+      "target": "run_bench_production_direct_smoke"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_doctor.md": {
+      "backend": "qemu",
+      "case_filter": "edge-batch",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1786614721,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_batch.log"
+      },
+      "run_label": "qemu_edge_batch_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786614666557738355,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_doctor.md",
+        "sha256": "sha256:e04eafd316a780c0ce3ee106c5385219b89db77d9a1067da25c3a0eae2db3426",
+        "size": 600
+      },
+      "target": "run_evidence_doctor_edge_batch_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_manifest.json": {
+      "backend": "qemu",
+      "case_filter": "edge-batch",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1786614721,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_batch.log"
+      },
+      "run_label": "qemu_edge_batch_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786614666521739558,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_manifest.json",
+        "sha256": "sha256:eaeade2e943c355778704ae7c140847456ea0b4aac51fd140e78095aa5e714f2",
+        "size": 4858
+      },
+      "target": "run_evidence_doctor_edge_batch_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_doctor.md": {
+      "backend": "qemu",
+      "case_filter": "edge-gather-staging",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/020-production-shaped-gather-diagnostic/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786622148,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_gather_staging.log"
+      },
+      "run_label": "qemu_edge_gather_staging_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621973374771697,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_doctor.md",
+        "sha256": "sha256:b3727a74d132037c1d4a4a96fd69f404d02bba518564f6c43a68f1b82a6800d4",
+        "size": 609
+      },
+      "target": "run_evidence_doctor_edge_gather_staging_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_manifest.json": {
+      "backend": "qemu",
+      "case_filter": "edge-gather-staging",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/020-production-shaped-gather-diagnostic/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786622148,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_gather_staging.log"
+      },
+      "run_label": "qemu_edge_gather_staging_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786621973340770325,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_manifest.json",
+        "sha256": "sha256:cb9ebf51d1772a39be79f9d12cbb86c6f053339484df3d20b81939af95030e77",
+        "size": 5269
+      },
+      "target": "run_evidence_doctor_edge_gather_staging_qemu"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md": {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "qemu_smoke",
+      "freshness_state": "historical_probe",
+      "recorded_at_epoch": 1786626976,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log"
+      },
+      "run_label": "production_direct_qemu_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786625754679892157,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
+        "sha256": "sha256:eb3778d5295a2c50c7627a6c27992f5f765e74607a345cf994f190dbf7e72bb8",
+        "size": 607
+      },
+      "target": "run_bench_production_direct_smoke"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json": {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "qemu_smoke",
+      "freshness_state": "historical_probe",
+      "recorded_at_epoch": 1786626976,
+      "related": {
+        "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log"
+      },
+      "run_label": "production_direct_qemu_smoke",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786625754652892128,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json",
+        "sha256": "sha256:267db956c73a3a71790591174a7e4361d6367f5bec27b0c3d692dc2a2077b4c5",
+        "size": 5385
+      },
+      "target": "run_bench_production_direct_smoke"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log": {
+      "backend": "qemu",
+      "case_filter": "correctness",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correctness-tests.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "correctness",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786629124,
+      "related": {},
+      "run_label": "qemu_correctness_phase030_closeout",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786629084477463609,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log",
+        "sha256": "sha256:a149693ad5aa2acd3a3af1ed23e76c13c76dc06343ab13b97f8492c4d9503e82",
+        "size": 2567
+      },
+      "target": "run_test_compare"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log": {
+      "backend": "qemu",
+      "case_filter": "correctness",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/correctness-tests.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "correctness",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786629124,
+      "related": {},
+      "run_label": "qemu_correctness_phase030_closeout",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786629079800458610,
+        "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log",
+        "sha256": "sha256:7466b68bf3068d2c9906a709fbfcbb4d16e2317768e84a8e04bc3d10a9888695",
+        "size": 2567
+      },
+      "target": "run_test_compare"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/script/generate_crpoly_evidence_manifest.py": {
+      "backend": "host",
+      "case_filter": "all",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/test-support-code-map.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "topic_local_tooling",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786628999,
+      "related": {},
+      "run_label": "qemu_manifest_wrapper",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786625141894208498,
+        "path": "test-rvv/registration/correspondence_rejection_poly/script/generate_crpoly_evidence_manifest.py",
+        "sha256": "sha256:58597930d7ab83069af779b5e43b937394705e1ed21ace45d0be6a5017986076",
+        "size": 11932
+      },
+      "target": "script_update"
+    },
+    "test-rvv/registration/correspondence_rejection_poly/script/summarize_crpoly_board_repeated.py": {
+      "backend": "host",
+      "case_filter": "production-direct",
+      "doc_refs": [
+        "test-rvv/registration/correspondence_rejection_poly/doc/test-support-code-map.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
+        "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
+      ],
+      "evidence_role": "topic_local_tooling",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786629444,
+      "related": {},
+      "run_label": "summarize_script_binary_hash_override",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786629411050812891,
+        "path": "test-rvv/registration/correspondence_rejection_poly/script/summarize_crpoly_board_repeated.py",
+        "sha256": "sha256:b4811013c9ec3e4f6bc22136870fdd07bffef2c7f884e901661b45eea84c9238",
+        "size": 20722
+      },
+      "target": "script_update"
+    }
+  },
+  "runs": [
+    {
+      "backend": "qemu",
+      "case_filter": "edge-batch",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_batch.log",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1786614721,
+      "run_label": "qemu_edge_batch_smoke",
+      "target": "run_evidence_doctor_edge_batch_qemu"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "acceptance-filter",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/acceptance_filter/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_acceptance.log"
+      ],
+      "recorded_at_epoch": 1786614721,
+      "run_label": "qemu_acceptance_filter_smoke",
+      "target": "run_evidence_doctor_acceptance_qemu"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "gtest",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786614721,
+      "run_label": "qemu_correctness_compare",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "bench-rvv",
+      "evidence_role": "asm_attribution",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.asm"
+      ],
+      "recorded_at_epoch": 1786614721,
+      "run_label": "qemu_bench_rvv_asm_summary",
+      "target": "dump_bench_rvv"
+    },
+    {
+      "backend": "board",
+      "case_filter": "gtest",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log"
+      ],
+      "recorded_at_epoch": 1786621433,
+      "run_label": "board_test_smoke",
+      "target": "run_board_test_smoke"
+    },
+    {
+      "backend": "board",
+      "case_filter": "edge-batch",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/edge_batch_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786621433,
+      "run_label": "edge_batch_repeated",
+      "target": "run_board_bench_edge_batch_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "acceptance-filter",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786621433,
+      "run_label": "acceptance_filter_repeated",
+      "target": "run_board_bench_acceptance_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "acceptance-filter",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/acceptance_filter_confirm/summary.md"
+      ],
+      "recorded_at_epoch": 1786621433,
+      "run_label": "acceptance_filter_confirm",
+      "target": "run_board_bench_acceptance_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "gtest",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786622148,
+      "run_label": "qemu_correctness_compare_phase020",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "gtest",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log"
+      ],
+      "recorded_at_epoch": 1786622148,
+      "run_label": "board_test_smoke_phase020",
+      "target": "run_board_test_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "edge-gather-staging",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_edge_gather_staging.log",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_gather_staging/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1786622148,
+      "run_label": "qemu_edge_gather_staging_smoke",
+      "target": "run_evidence_doctor_edge_gather_staging_qemu"
+    },
+    {
+      "backend": "board",
+      "case_filter": "edge-gather-staging",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/edge_gather_staging_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786622148,
+      "run_label": "edge_gather_staging_repeated",
+      "target": "run_board_bench_edge_gather_staging_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "bench-rvv",
+      "evidence_role": "asm_attribution",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.asm"
+      ],
+      "recorded_at_epoch": 1786622148,
+      "run_label": "qemu_bench_rvv_asm_phase020",
+      "target": "dump_bench_rvv"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production-direct",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786626976,
+      "run_label": "production_direct_repeated",
+      "target": "run_board_bench_production_direct_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "evidence_role": "qemu_smoke",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1786626976,
+      "run_label": "production_direct_qemu_smoke",
+      "target": "run_bench_production_direct_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "gtest",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786626976,
+      "run_label": "qemu_correctness_after_rollback",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "gtest",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log"
+      ],
+      "recorded_at_epoch": 1786626976,
+      "run_label": "board_correctness_after_rollback",
+      "target": "run_board_test_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "evidence_role": "asm_attribution",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.asm"
+      ],
+      "recorded_at_epoch": 1786627465,
+      "run_label": "qemu_bench_rvv_asm_production_probe",
+      "target": "dump_bench_rvv"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production-direct",
+      "evidence_role": "strict_ab_historical_production_probe",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786628897,
+      "run_label": "production_direct_repeated",
+      "target": "run_board_bench_production_direct_repeated"
+    },
+    {
+      "backend": "host",
+      "case_filter": "production-direct",
+      "evidence_role": "topic_local_tooling",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/script/summarize_crpoly_board_repeated.py"
+      ],
+      "recorded_at_epoch": 1786628897,
+      "run_label": "summarize_script_boundary_update",
+      "target": "script_update"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "evidence_role": "asm_attribution_historical_probe",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm"
+      ],
+      "recorded_at_epoch": 1786628999,
+      "run_label": "qemu_bench_rvv_full_asm_production_probe",
+      "target": "dump_bench_rvv"
+    },
+    {
+      "backend": "host",
+      "case_filter": "all",
+      "evidence_role": "topic_local_tooling",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/script/generate_crpoly_evidence_manifest.py"
+      ],
+      "recorded_at_epoch": 1786628999,
+      "run_label": "qemu_manifest_wrapper",
+      "target": "script_update"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correctness",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786629124,
+      "run_label": "qemu_correctness_phase030_closeout",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correctness",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log"
+      ],
+      "recorded_at_epoch": 1786629124,
+      "run_label": "board_correctness_phase030_closeout",
+      "target": "run_board_test_smoke"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production-direct",
+      "evidence_role": "strict_ab_historical_production_probe",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786629444,
+      "run_label": "production_direct_repeated",
+      "target": "run_board_bench_production_direct_repeated"
+    },
+    {
+      "backend": "host",
+      "case_filter": "production-direct",
+      "evidence_role": "topic_local_tooling",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/script/summarize_crpoly_board_repeated.py"
+      ],
+      "recorded_at_epoch": 1786629444,
+      "run_label": "summarize_script_binary_hash_override",
+      "target": "script_update"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1786629444
+}
