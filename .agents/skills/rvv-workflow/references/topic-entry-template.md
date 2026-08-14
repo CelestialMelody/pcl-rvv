@@ -43,6 +43,12 @@
 “开始写文件前的自查”。短 prompt 只减少用户需要输入的文字，不减少 worker 必须满足的
 文档、注释、bench 和证据门槛。
 
+短 prompt 开启新 topic 时，worker 不要求用户额外写长条件。该入口已经默认包含 S0 偏好 /
+配置读取、phase plan、当前源码 shape scan、成熟 sibling optional calibration、canonical
+doc-suite quality bar 审计、QEMU bench compare 禁止规则，以及 production / closeout 时的
+topic-local doc suite、evaluation、phase result、optimization matrix / roadmap、适用 `doc-rvv`
+和新增文档 artifact tracking / commit boundary 同步要求。
+
 如果用户用短 prompt 继续已有 topic，且最近 Handoff Packet 的结论是
 `partial-production-candidate`（局部生产候选），默认进入 PI1 production integration plan
 （生产接入计划），不是直接改 production。PI1 涉及模板点类型、traits、字段 offset、fallback
@@ -57,9 +63,17 @@
 
 - 从状态表选择第一条未完成主题。
 - 按 `artifact_layout.evaluation_doc_template` 复查或建立函数级评估文档。
+- 若同模块已有成熟 sibling topic 或用户点名质量参照，先把 mature sibling parity audit 写入当前
+  phase plan：至少审计 test / bench source layout、aggregator / internal helper、topic-local doc suite、
+  evaluation 主路径、适用的 `doc-rvv` 分工、legacy 清理和新增文档 artifact tracking。审计结果必须落到
+  phase result 或明确的 structure-parity phase；不能只在最终回复里说“已参考”。
 - 先回答生产价值：RVV 是否覆盖入口主成本，fallback 和维护边界是否可控。
 - 证据不足时收敛为 bench 诊断主题、暂缓或不接生产。
 - 证据成立时再进入 RVV 实现、专项 test/bench、QEMU、反汇编、板卡验证和文档 closeout。
+- 若当前证据计划需要板卡 / 目标硬件，且板卡在配置或当前会话中可用，worker 默认继续完成板卡
+  correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新，并用结果推进下一阶段。
+  只有板卡不可达、工具失败、复跑预算耗尽后 bucket 仍不稳定、证据矛盾、dirty isolation 不安全或
+  继续会扩大权限时，才能把板卡相关动作写成停止条件。
 
 ## 短提醒
 
@@ -70,6 +84,7 @@
 - 对 registration（配准）类 topic，如果已有 adopted math family 只在某个 row source policy 上闭合，而其它 policy 仍未尝试同 family，默认先做 family carry-over audit：在配置解析出的 RVV test 资产中补对应 policy 的 candidate、bench 和 board 证据，再决定是否进入 production integration loop。不要把单一 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
 - QEMU 不写成性能结论。
 - 板卡或目标硬件结果才是性能结论。
+- 不运行 QEMU `run_bench_compare` 或完整 bench compare；QEMU 只用于 correctness / build / log-shape smoke，性能结论只来自板卡或目标硬件。
 - bench 输出必须能解析 `Dataset:`、`Iterations:`、case avg、`Total Time` 和 checksum；格式异常先修 bench 或脚本。
 - benchmark、board summary、checksum、asm attribution 或 EvidenceDecision 前必须执行 Evidence Doctor（证据体检）检查；Error 阻塞严格结论，Warning 必须进入 summary / evaluation / Handoff 的风险说明。
 - full-cloud、source-indexed、dual-indices 和 correspondences 是不同 row source policy；production 必须逐 policy 独立批准。

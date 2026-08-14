@@ -18,6 +18,7 @@
 - topic 已有 RVV 优化，但出现新的实现族、row source、点类型、`Scalar`、布局、入口或证据缺口。
 - 一个阶段结束后，计划矩阵仍有 `unblocked`（未阻塞）动作。
 - topic 需要在接入 production（生产源码）前后分别补测试、bench、fallback、反汇编或板卡证据。
+- phase plan、optimization matrix 或 EvidenceDecision 需要板卡 / 目标硬件证据，且配置或当前会话显示板卡可用。
 
 用户明确限定“只写计划”“只做一个指定 target”“只修一个文件”时，限定范围覆盖默认继续规则；worker 仍要记录未完成的 phase loop 状态。
 
@@ -64,6 +65,12 @@
 9. **继续 / 停止条件**：下一阶段默认入口、unblocked next actions、扩大权限或需要人工判断的边界。
 10. **文档更新清单**：phase result、topic test 文档、evaluation、Handoff；production 行为只有在真实接入后才同步到 `artifact_layout.topic_doc_template` 解析出的主题文档。
 11. **roadmap 同步动作**：本阶段会新增、尝试、拒绝、暂缓或重排哪些 roadmap candidate；哪些新想法来自阶段反思、同模块成熟 sibling、开源/论文启发或当前源码证据。
+
+若阶段计划需要板卡证据，计划还必须写明 board availability check（板卡可用性检查）和继续策略：
+配置解析出的 board target / rsync / ssh 入口是否存在、当前会话是否已确认板卡可用、可用时本轮要跑到哪一级
+correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新，以及何时因为真实 blocker
+转为 `turn_stop_deferred`。不要把“下一步需要板卡验证”作为可停止动作；板卡可用时它是同轮 phase loop
+的下一个执行动作。
 
 计划不是愿望清单。每个动作都必须能在 `result.zh.md` 中回填为事实、证据路径、结论和下一步。
 
@@ -239,7 +246,7 @@ worker 按下列步骤循环，直到命中停止条件：
 2. **读/建 roadmap**：读取 `artifact_layout.optimization_roadmap_template` 解析出的 roadmap；不存在时先创建；已有内容与当前源码、phase result、Evidence Doctor 或文档结构冲突时先标记并修订。
 3. **建计划**：没有当前 plan 时先写；已有 plan 与当前源码或证据不一致时先修订并记录变更原因。计划必须先于本阶段任何实现或测试资产修改。
 4. **冻结门禁**：完成 `phase_plan_written_before_edits`、roadmap、范围、依赖、文档归属、Evidence Doctor 输入和继续 / 停止条件检查。
-5. **连续推进**：按依赖顺序完成一个足够大的闭环，通常包括 candidate / test、correctness、QEMU 路径检查、bench / ablation、asm、板卡或明确的板卡阻塞处理。只完成隔离层、一个 target、一个局部 bench 或一个文档段落，不等于阶段完成。
+5. **连续推进**：按依赖顺序完成一个足够大的闭环，通常包括 candidate / test、correctness、QEMU 路径检查、bench / ablation、asm、板卡或明确的板卡阻塞处理。只完成隔离层、一个 target、一个局部 bench 或一个文档段落，不等于阶段完成。若板卡已配置、可达或用户已说明可用，而当前矩阵需要板卡证据，worker 必须在有界复跑预算内继续跑板卡 target、summary、Evidence Doctor 和 registry 刷新；不能停在“等待板卡验证”。
 6. **解释证据**：把实际结果、输入口径、A/B 边界、checksum、长尾、异常频率、decision bucket、rerun budget、asm attribution、目标硬件和不能证明的范围写入 `result.zh.md`，并更新矩阵状态。
 7. **阶段反思**：用本阶段证据反推是否出现新的 candidate family、消融需求、ILP / LMUL 取舍、文档结构缺口或测试输入缺口；把它们更新到 roadmap，并标注优先级、证据需求和恢复条件。
 8. **更新计划**：将剩余动作按 `blocked` / `unblocked` 标记；为下一阶段写默认目标或创建下一阶段 plan。计划变更必须保留原因，不得把未执行动作直接勾成完成。
@@ -282,7 +289,7 @@ benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecis
 1. 当前 phase plan 的完成矩阵已闭合，roadmap 和 optimization matrix 均没有授权、未阻塞的 high-priority next action；下一阶段已经明确标为 `not_yet_started`，并有可恢复的 plan 入口。
 2. 用户明确限制本轮范围，且 worker 已完成该范围并记录剩余 loop 状态。
 3. 继续需要扩大到未授权的 production 文件、public API、其它 topic、其它入口 / 点型 / `Scalar` / row source，或需要用户批准生产接入。
-4. 需要板卡、工具链、远端环境或依赖，当前无法获得；已完成可运行的本地证据，并记录解除阻塞的命令与路径。
+4. 需要板卡、工具链、远端环境或依赖，当前无法获得；已完成可运行的本地证据，并记录解除阻塞的命令与路径。若配置或当前会话已经确认板卡可用，`需要板卡验证` 不命中此停止条件，worker 必须继续执行有界板卡验证。
 5. 板卡复跑预算已经按 plan 用完：如果 decision bucket 稳定，可以用该桶关闭当前证据动作；如果 bucket 仍摇摆，必须标为 `unstable`、降级 EvidenceDecision 或交给 reviewer / 用户判断，而不是继续自动复跑。
 6. Evidence Doctor Error 未能修复，registry 显示未登记变更无法归属，或不同证据层之间矛盾，需要 reviewer / 用户判断。
 7. dirty isolation 不安全，无法确认哪些文件属于当前阶段，或用户已有修改会被覆盖。

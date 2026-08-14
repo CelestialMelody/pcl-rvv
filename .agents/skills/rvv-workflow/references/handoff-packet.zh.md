@@ -24,7 +24,8 @@ topic (当前所属任务主题):
 phase_reached (当前抵达的工作阶段):
 current_decision (Worker 当前结论，例如继续优化、回退、不接入生产、需要人工介入):
 files_changed (本次操作改动的源码、配置文件、文档清单):
-dirty_isolation (工作区隔离；说明本轮 diff 与其它 topic / agent asset / raw logs 的边界):
+dirty_isolation (工作区隔离；说明本轮 diff 与其它 topic / agent instruction patch / raw logs 的边界):
+artifact_tracking_status (产物跟踪状态；说明本轮新增 / 引用的 topic 文档、phase、summary 是否 tracked、to-be-staged、ignored 或 local-only):
 artifacts_created_or_updated (产出物，例如优化代码、benchmark（性能测试）日志、测试报告、性能对比数据):
 commands_run (本次执行过的编译、测试、benchmark、git 命令，要求能复现):
 validation (验证摘要；列出测试、bench、反汇编、板卡和未运行项):
@@ -47,6 +48,7 @@ evidence_doctor_result (证据体检结果；Errors / Warnings / Suggestions、�
 evidence_freshness_status (当前 run 是否覆盖旧数值；fresh / stale / refreshed，并列出被刷新文档路径):
 evidence_registry_status (证据登记表状态；fresh / not_available / unregistered_change / unregistered_file / manual_run_detected / stale_doc_pending_refresh，并列出 registry、扫描命令和待刷新路径):
 rerun_budget_decision (板卡复跑预算与决策桶；run budget、实际复跑次数、decision bucket、是否用完预算、是否降级或需要人工判断):
+board_availability_continue_status (板卡可用性与持续推进状态；说明当前 phase 是否需要板卡证据、板卡是否配置 / 可达 / 当前会话已确认可用、已跑或将继续跑的 board target / summary / Evidence Doctor / registry、真实停止条件):
 phase_loop_state (多阶段优化循环状态；current_phase、phase_plan_paths、phase_result_paths、phase_completion_matrix、optimization_roadmap_status、optimization_matrix_status、phase_deferred_unblocked_items、unblocked_next_actions、stop_condition_hit、continue_stop_decision、next_phase_default):
 agent_assets_used (本次读取或调用的 agent 资产，例如 skills（技能）、knowledge map（知识索引）、PCL adapter（PCL 适配器）、规则集):
 agent_asset_trace (资产使用追踪，关键工作行为分别来自哪些实际读取并使用过的资产 / 规则):
@@ -72,7 +74,8 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `phase_reached` 必须使用当前状态机中的阶段或分支，例如 `S4 test_plan_ready`、`S10 EvidenceDecision`、`PI1 production_integration_plan`、`S12 blocked`。
 - `current_decision` 必须是陈述句，不能只写 `done`、`ok` 或 `needs review`。
 - `files_changed` 应区分 production（生产源码）、配置解析出的 topic 测试资产、topic 文档、agent asset（代理资产）和本地证据文件。
-- `dirty_isolation` 必须说明当前 worktree 是否含有与本 topic 无关的 diff（差异），并列出本轮允许 reviewer / commit 关注的路径集合。若存在其它 topic、agent asset、raw logs、build 输出或用户未授权改动，必须写成“ignore / do not stage / separate commit”等明确边界。
+- `dirty_isolation` 必须说明当前 worktree 是否含有与本 topic 无关的 diff（差异），并列出本轮允许 reviewer / commit 关注的路径集合。若存在其它 topic、agent instruction patch、raw logs、build 输出或用户未授权改动，必须写成“ignore / do not stage / separate commit”等明确边界。检查不能只依赖普通 `git status --short`；对当前 topic 和本轮 agent instruction 路径必须使用包含未跟踪文件的路径限定扫描，例如 `git status --short --untracked-files=all -- <allowed-paths>`，必要时再用 `git check-ignore -v` 判定是否被忽略。
+- `artifact_tracking_status` 必须列出本轮新增、修改或被 README / evaluation / Handoff 引用的 topic-local docs、phase docs、summary evidence 和长期 `doc-rvv` 是否已经 tracked（已跟踪）、to-be-staged（待暂存）、ignored-local（忽略且只本地）或 excluded（排除提交）。若 README 或 roadmap 引用的 doc-suite 文件仍是 untracked，不能写 `ready_for_review`；必须说明要纳入 topic commit、单独 commit，或移除该引用。
 - `artifacts_created_or_updated` 应说明产物作用，不要只列路径。
 - `commands_run` 应保留关键参数、工作目录和失败命令；如果没有运行命令，要写明原因。
 - `validation` 应用短表或清单列出本轮实际运行和未运行的验证：unit / regression、QEMU correctness、bench build、可选 QEMU bench smoke、反汇编、board / target benchmark、sanitizer 或等价检查。未运行项必须写明原因，不能只省略；若没有运行 QEMU bench，应写明完整 bench 默认只在 board / target hardware 运行。
@@ -104,6 +107,12 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `evidence_freshness_status` 用于说明本轮数值结论是否已经刷新过旧文档。若复跑改变了方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，必须把旧 summary 标成 historical / stale，列出被刷新或尚未刷新的 phase result、evaluation、topic doc、README 或 Handoff 路径；不能让 Handoff 只报新数值而不说明旧数值是否已失效。
 - `evidence_registry_status` 用于说明 topic-local `log/evidence_registry.json` 或等价登记表是否可用，是否运行 `make evidence_status` / `make check_evidence_freshness` / `artifact_layout.evidence_registry_script_template` 解析出的脚本执行 `check`，是否发现 `unregistered_change`、`unregistered_file`、`manual_run_detected` 或 `stale_doc_pending_refresh`。如果 topic 尚未接入 registry，写 `not_available`，列出人工检查过的 summary / manifest / doctor / analyze log 路径和下一步接入 target。
 - `rerun_budget_decision` 用于说明 board performance 的有界复跑策略。字段必须列出计划 run budget、实际复跑轮数、统计口径、decision bucket（例如 positive / weak-positive / neutral / negative / unstable）、是否用完预算、是否因为 bucket 摇摆而降级 EvidenceDecision 或需要人工判断。若本轮不涉及 board performance，写 `not_applicable` 并说明原因。
+- `board_availability_continue_status` 用于避免 worker 停在“下一步需要板卡验证”。若当前 phase、optimization matrix、
+  EvidenceDecision 或 production gate 需要板卡 / 目标硬件证据，该字段必须写明板卡是否已配置、是否可达、
+  当前会话或 local override 是否确认可用，以及本轮已经执行或应继续执行的 board target、summary、
+  Evidence Doctor 和 registry 刷新。板卡可用时，`stop_condition_hit` 不能写成“需要板卡验证”；
+  只能在板卡不可达、ssh / rsync / make target 失败、复跑预算耗尽后 bucket 仍不稳定、证据矛盾、
+  dirty isolation 不安全或继续会扩大权限时停止。
 - `phase_loop_state` 适用于短 prompt 继续已有 topic、复杂 topic 回访或任何还有 unblocked next action（未阻塞下一步）的优化阶段。它必须至少列出：
   - `current_phase`：当前 phase id、名称和状态。
   - `phase_plan_paths`：当前和下一阶段 `plan.zh.md` 路径；没有计划时写明必须先创建的路径。
@@ -168,6 +177,8 @@ worker 输出 Handoff Packet 前应检查：
 - 字段是否完整，没有用“见上文”替代关键内容。
 - 是否列出了能复现当前结论的命令和证据路径。
 - 是否输出 `dirty_isolation`，并把本轮可审查 / 可提交路径与其它脏 diff 分开。
+- 是否输出 `artifact_tracking_status`，并确认 README、evaluation、roadmap、phase result 或长期 `doc-rvv`
+  引用的新增 topic-local 文档没有停留在未跟踪但未说明的状态。
 - 是否输出 `implementation_review`、`candidates_added_or_deferred`、`document_ownership_check`、`traceability_map_status`、`ilp_lmul_decision`、`numerical_budget_result`、`evidence_doctor_result`、`phase_loop_state`、`asm_attribution`、`board_evidence_paths`、`evidence_decision`、`production_decision` 和 `validation`；不适用项是否写明原因。
 - 如果声明对齐成熟 sibling 结构，是否输出 `mature_sibling_parity_status`、`test_support_shape_scan` 和
   `legacy_compatibility_decision`；若仍有低风险结构 / 文档 / legacy 清理缺口，是否把它们放进

@@ -229,6 +229,13 @@ Handoff 必须写 `evidence_registry_status=not_available` 并列出人工检查
 每个精确数字完全稳定；预算用完后，如果 bucket 稳定即可关闭该证据动作，如果仍摇摆则标成
 `unstable`、降级 EvidenceDecision 或交给 reviewer / 用户判断。
 
+当当前 phase、optimization matrix、EvidenceDecision 或 production gate 需要板卡 / 目标硬件证据时，
+worker 必须先判断 board availability（板卡可用性）：配置入口是否存在、当前会话或本地 override 是否说明
+板卡可用、必要 ssh / rsync / make target 是否可执行。若板卡可用，worker 应在有界预算内继续运行板卡
+correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新，并把结果用于继续 / 停止决策。
+`需要板卡验证` 不能单独写成阻塞；只有板卡不可达、工具失败、预算耗尽后 bucket 仍不稳定、
+证据矛盾或 dirty isolation 不安全，才可作为真实停止条件。
+
 closeout 或 production-candidate topic 文档必须包含“正确性与高效性证据链”小节。该小节至少检查：
 
 - correctness：public entry 是否真实命中；row semantics 是否清楚；`accepted_points`、中间态、matrix 和 fallback 是否有证据。
@@ -285,6 +292,7 @@ optimization_roadmap_ready:
 roadmap_default_recovery_queue_ready:
 phase_completion_matrix_ready:
 optimization_matrix_ready:
+board_availability_continue_ready:
 micro_stop_guard:
 continue_stop_decision:
 ready_for_review_validity_check:
@@ -299,6 +307,7 @@ ready_for_review_validity_check:
   test source split、internal helper layout、doc suite、registry 或 legacy 清理，`ready_for_review` 无效。
 - `phase_completion_matrix_ready`：分两个时间点检查。写文件前，`plan.zh.md` 必须已有可回填的 action / completion scaffold（计划动作表、依赖和完成判据），让后续 `result.zh.md` 能逐项回填；阶段结束或 Handoff 前，`result.zh.md` 或 Handoff 必须逐项列出计划动作的 `done / partial / deferred / blocked` 状态、证据路径和缺口，不能只写“完成本阶段”。
 - `optimization_matrix_ready`：复杂 topic 必须维护 candidate family × row source policy × point type / `Scalar` / layout × test × bench × board × asm × doctor × decision 矩阵；`planned` 或 `deferred` 不能伪装成 adopted。
+- `board_availability_continue_ready`：若当前阶段需要板卡证据，worker 必须记录板卡是否配置 / 可达 / 当前会话已确认可用。板卡可用时，下一动作应是执行有界板卡验证和证据刷新；不能把“需要板卡验证”写成 `turn_stop_deferred`。板卡不可用或工具失败时，证据必须列解除阻塞命令、已完成的本地证据和 EvidenceDecision 限制。
 - `micro_stop_guard`：如果只完成一个小 helper、一个隔离层、一个 target、一次 bench、一个 summary 或一张表，但当前计划仍有授权且未阻塞 next action，worker 不允许停；必须继续推进下一个动作，或写出真实停止条件。
 - `continue_stop_decision`：最终输出和 Handoff 必须解释为什么继续或为什么停。停止必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权，或当前 phase 矩阵、optimization matrix 和 roadmap 都已闭合且没有 unblocked next action。
 - `ready_for_review_validity_check`：如果任何 phase README、result、Handoff 或最终回复声称 `ready_for_review`，worker 必须重新验证 mature sibling parity、doc suite、legacy 清理、shape scan、roadmap 和 optimization matrix 是否仍有 `phase_deferred + unblocked`。只要有未闭合缺口，`ready_for_review` 就失效，必须恢复到下一 phase。
@@ -476,6 +485,7 @@ followup_options_ready:
 - 表格必须包含 `bench_backend_choice_ready`。凡本轮涉及 bench，证据必须说明性能结论是否来自 board / target hardware；若只跑 QEMU bench smoke，状态应为 `partial` 或 `not_applicable`，并写清它只用于 build / correctness / log-shape smoke；若没有运行 QEMU bench，应写明默认策略是只编译或只跑 gtest / correctness。
 - 表格必须包含 `qemu_bench_smoke_scope_ready`。如果运行了 QEMU bench，证据必须列出 case-filter、规模、iteration、是否显式绕过 guard，以及为什么它不是完整 bench compare；如果没有运行，写 `not_applicable` 并说明性能验证只走 board / target hardware。
 - 表格必须包含 `rerun_budget_decision_ready`。凡本轮涉及 board performance 或 repeated summary，证据必须指向 phase plan / summary 中的 run budget、decision bucket、是否用完预算和是否需要降级 / 人工判断。
+- 表格必须包含 `board_availability_continue_ready`。凡当前 phase、optimization matrix、EvidenceDecision 或 production gate 需要板卡证据，证据必须说明板卡是否配置 / 可达 / 当前会话已确认可用；若可用，必须指向已运行或即将继续运行的 board target、summary、Evidence Doctor 和 registry 刷新。未跑板卡时必须写真实 blocker；不能把“需要板卡验证”本身作为 blocker。
 - 表格必须包含 `evidence_registry_status_ready`。证据指向 `log/evidence_registry.json`、`make evidence_status` / `make check_evidence_freshness` 输出或等价人工检查；若 topic 尚未接入 registry，写 `partial` 并列出应补的 target / script。
 - 表格必须包含 `evidence_freshness_check_ready`。证据指向 Handoff Packet 的 `evidence_freshness_status`、phase result、evaluation 或 topic 文档；若复跑改变了旧数值、decision bucket 或证据角色，必须列出已刷新和待刷新的路径。
 - 表格必须包含 `production_topic_doc_applicability_ready`。证据说明 `artifact_layout.topic_doc_template` 是 applicable 还是 not_applicable；no-production 时必须说明没有新建 `doc-rvv`，或已有遗留 `doc-rvv` 已删除 / 标为历史归档。
@@ -484,7 +494,7 @@ followup_options_ready:
 - 表格必须包含 `traceability_map_ready`。证据指向 Traceability Map 章节或独立 traceability 文档，说明文档、测试、输出和代码位置可以互相定位。
 - 表格必须包含 `doc_suite_quality_bar_ready`。凡本轮涉及 topic-local README、testing overview、correctness tests、benchmark/evidence、optimization evidence、test-support code map、phase index、evaluation 或 `doc-rvv` 适用性，证据必须指向 `doc-suite-quality-bar.zh.md` 审计表或当前 phase result。若用户 / reviewer 点名成熟 sibling，可在证据中写 optional calibration，但不能只用 sibling 路径替代 canonical quality bar。
 - 表格必须包含 `phase_plan_written_before_edits`、`phase_completion_matrix_ready`、`optimization_matrix_ready`、
-  `roadmap_default_recovery_queue_ready`、`micro_stop_guard` 和 `continue_stop_decision`。证据指向当前 phase plan/result、optimization matrix、
+  `roadmap_default_recovery_queue_ready`、`board_availability_continue_ready`、`micro_stop_guard` 和 `continue_stop_decision`。证据指向当前 phase plan/result、optimization matrix、
   `unblocked_next_actions`、`stop_condition_hit` 和 Handoff 的 `phase_loop_state`；若当前任务不是多阶段优化，写 `not_applicable` 并说明为什么没有 phase loop。
 - 表格必须包含 `ready_for_review_validity_check`。如果本轮输出 `ready_for_review`、`done`、
   `stop_for_review` 或 `unblocked_next_actions=none`，证据必须指向 roadmap、optimization matrix、

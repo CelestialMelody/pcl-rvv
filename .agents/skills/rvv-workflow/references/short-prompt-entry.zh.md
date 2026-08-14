@@ -96,6 +96,20 @@ worker 可用：
 在 <repo> 中，以 RVV worker 身份处理下一个未完成 topic。
 ```
 
+开启新 topic 也只需要一句：
+
+```text
+在 <repo> 中，以 RVV worker 身份开启新的 RVV topic：<source-path>。
+```
+
+这句短 prompt 默认自动展开为：先执行 S0 偏好 / 配置读取、phase plan、当前源码 shape scan、
+mature sibling parity audit（存在成熟相邻主题或用户点名质量参照时作为 optional calibration）、
+以及 canonical doc-suite quality bar 审计；若本轮进入 production integration、production closeout、
+production-ready、done 或 stop-for-review，必须同步补齐 topic-local doc suite、evaluation、
+phase result、optimization matrix / roadmap，以及适用的长期 `doc-rvv`。README、evaluation、
+roadmap、phase result、Handoff 或长期 `doc-rvv` 引用的新增文档必须纳入 topic artifact tracking /
+commit boundary，不能只因本地文件存在就视为 closeout 完成。
+
 继续当前 topic 可用：
 
 ```text
@@ -283,6 +297,7 @@ worker 默认权限：
 
 - 短 prompt 中“处理 topic”视为授权修改该 topic 对应的、由 `artifact_layout` 解析出的测试资产、topic-local evaluation / phase 文档和适用的文档产物。`artifact_layout.topic_doc_template` 解析出的 `doc-rvv` 长期主题文档只有在存在 adopted production behavior、production patch 或 PI5 生产证据闭环通过时才适用；no-production / bench-only / 未接 production 的 partial-production-candidate 只写 topic-local evaluation、phase result、roadmap / matrix 和 Handoff。
 - 对测试优化和 topic-local 文档成熟度工作，短 prompt 默认授权 worker 在当前 topic 内连续推进多个低风险 phase，例如测试支撑结构迁移、legacy 聚合头 / pointer 清理、evaluation 迁入 `doc/`、README / doc suite 补齐、source-indexed 或其它 row source 的 candidate / correctness / bench / asm / Evidence Doctor 阶段。除非继续会扩大到 production、public API、其它 topic、板卡不可用、证据矛盾或 dirty isolation 不安全，否则不应因为一个小 phase 完成就停止。
+- 如果 phase plan、optimization matrix、EvidenceDecision 或 production gate 需要板卡 / 目标硬件证据，且配置显示板卡可用或当前会话已确认可用，短 prompt 默认授权 worker 在有界复跑预算内继续执行板卡 correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新，并据此推进下一阶段。“需要板卡验证”本身不是停止条件；只有板卡不可达、登录 / rsync / 工具失败、预算耗尽后 decision bucket 仍不稳定、证据矛盾或 dirty isolation 不安全，才可写成 `turn_stop_deferred`。
 - 不把该授权扩展到其它 topic 的测试资产、topic-local 文档、production 长期主题文档或生产源码。
 - S10 `EvidenceDecision`（证据决策）前不修改 production（生产源码）。
 - 如果证据支持 production-ready（可接入生产），先输出 Handoff Packet，等待用户确认后进入 production integration loop（生产接入闭环）。
@@ -354,6 +369,7 @@ workflow improvement 最终输出必须包含：
 - production 注释默认克制，只解释维护边界、fallback（回退路径）、dispatch（分流逻辑）、数值风险和数据布局。
 - 英文专有术语首次出现时默认写中文解释。
 - QEMU（仿真器）默认只作为 correctness（正确性）、路径和日志形状证据。
+- 默认不在 QEMU 上运行 `run_bench_compare`、完整 bench matrix 或会生成 Std/RVV 性能对比表的 compare target；QEMU 只允许小规模 correctness / build / log-shape smoke。
 - 板卡或目标硬件结果才支撑性能结论。
 - evidence logs（证据日志）默认 `summary-only`，不提交 raw logs（原始日志）；用户要求提交时先脱敏并拆分 commit。
 
@@ -369,5 +385,8 @@ workflow improvement 最终输出必须包含：
 - 默认读取链是否足以启动本轮任务。
 - 若目标是继续 RVV 优化工作，是否已经恢复或创建 phase plan、optimization roadmap 和 optimization matrix，并判断 `phase_deferred` 是否仍可在本轮继续。
 - 若恢复状态声称 `ready_for_review`，是否已证明该状态没有被 roadmap、matrix、mature sibling parity 或当前源码 shape scan 推翻。
+- 若下一阶段需要板卡验证，是否先判断板卡是否配置 / 可达 / 本轮已确认可用；板卡可用时是否继续执行有界板卡验证，而不是把“需要板卡”写成停止理由。
+- 若用户点名 mature sibling、文档结构对齐、PPT 展示材料或“做得好的 topic”，是否已把 doc-suite parity
+  作为当前 topic 的 phase 输入，而不是只在最终回复里口头说明。
 
 如果无法推导模块、topic 或 worker 输出，先提出一个具体问题。其余默认条件从本文读取。
