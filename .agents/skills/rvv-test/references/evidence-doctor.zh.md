@@ -26,6 +26,26 @@ manifest 字段、文件命名、topic-local wrapper（主题本地包装脚本�
 
 板卡性能证据还应记录环境字段，例如 device、taskset、governor、freq、temperature、VLEN 和 binary hash（或等价二进制身份）。这些字段缺失不必然推翻结果，但会削弱对长尾、方向反转和 run-to-run 波动的解释能力。若 bench 直接展示 Std/RVV timing，却没有 warmup_iterations，Evidence Doctor 应至少给出 warning，并把这类结果视为 no-warmup diagnostic，而不是默认性能结论。
 
+## 决策边界检查
+
+Evidence Doctor 必须检查 evidence role（证据角色）和 A/B boundary（A/B 边界）是否足以支撑 worker
+准备声明的结论。manifest、summary 或人工检查记录应能读出：
+
+- evidence role：`diagnostic`、`production-shaped diagnostic`、`production-public` 或 `production-detail`。
+- A/B boundary：`test helper`、`production-shaped helper`、`public overload` 或 `production detail helper`。
+- 当前决策问题：`RVV-vs-scalar`、`RVV-family-selection`、`fallback correctness`
+  或 `implementation-shape`。
+- row source、point type、`Scalar`、layout、wrapper、timer boundary、baseline path 和 candidate path。
+
+若 diagnostic 或 production-shaped diagnostic 的 repeated board 结果为 `weak`、`negative`、`neutral`
+或 `unstable`，并且 worker 准备声明 `no-production`、`rejected` 或拒绝 bounded production probe，
+Evidence Doctor 应要求先补 `diagnostic-to-production mismatch audit`。缺少该审计时，结论角色不成立。
+
+若 production public Std/RVV positive 被用于 RVV-family-selection，Evidence Doctor 应提示
+production-public 证据只证明当前 public RVV path 是否快于当前 public scalar path。缺少同一
+production boundary 内的 RVV-vs-RVV detail A/B 时，不能 clean-adopt 新 family；只能降级为 bounded
+production candidate、explicit probe（显式探针）或 experiment path（实验路径）。
+
 ## 输出分级
 
 Evidence Doctor 输出固定分为三类：
@@ -65,6 +85,11 @@ conclusion_policy:
 - strict A/B 两侧的 boundary、row_source、solve、checksum_policy、timer_boundary、gate、mask 或 reduction 不一致，且没有明确降级为 cross-check。
 - summary 没有 comparison 或 comparison 结构不可解析，却被当成证据通过。
 - 表格声称 production direct 或 production-ready（可接入生产），但 public entry（公开入口）、fallback（回退路径）、asm attribution 或 board performance 缺失，且没有降级说明。
+- diagnostic 或 production-shaped diagnostic 的 `weak`、`negative`、`neutral`、`unstable` 结果被直接写成
+  `no-production` / `rejected`，或被用来拒绝 bounded production probe，但没有
+  `diagnostic-to-production mismatch audit`。
+- production public Std/RVV positive 被写成新 RVV family clean adopted 或 family selection 结论，
+  但没有同一 production boundary 内的 RVV-vs-RVV detail A/B。
 
 这些 Error 不表示一定有实现 bug；它们表示当前 evidence 不能支撑所声明的结论角色。
 
@@ -73,6 +98,8 @@ conclusion_policy:
 下列情况默认是 Warning：
 
 - summary 名称暗示 strict A/B、production direct 或 production-ready，但 metadata 只支持 diagnostic、cross-check 或 unknown role。
+- summary 或 manifest 缺少 evidence role、A/B boundary、timer boundary、wrapper、row source、
+  baseline path 或 candidate path，且该结果参与 production 取舍。
 - std/RVV（标量 / RVV）对比不是同一个 case 的两个 build，而是不同 wrapper、row source、输入规模或数据口径。
 - asm boundary（反汇编边界）缺失或目标 RVV 指令无法归因到 hot symbol（热点符号）。
 - run_count、iterations、warmup_iterations、device、taskset、governor、freq、temperature 或 binary hash 缺失。

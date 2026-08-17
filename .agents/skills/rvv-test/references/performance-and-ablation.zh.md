@@ -33,6 +33,39 @@ bench 输出必须可解析。至少保留：
 
 QEMU timing（QEMU 计时）不作为性能结论。QEMU 只用于 correctness（正确性）、路径和日志形状；若历史遗留或特殊调试必须保留 QEMU bench 输出，文档必须标成 `qemu_smoke_only`，并说明它不是默认执行路径、不能进入性能排序、采纳审计或 EvidenceDecision。
 
+## Diagnostic 参与 production 取舍的事前规则
+
+只要 diagnostic（诊断）或 production-shaped diagnostic（生产形态诊断）结果参与 production
+取舍，不管结果是正向、弱正向、负向、中性还是不稳定，计划、summary、evaluation 或 Handoff
+必须先声明：
+
+- evidence role（证据角色）：`diagnostic`、`production-shaped diagnostic`、`production-public`
+  或 `production-detail`。
+- A/B boundary（A/B 边界）：`test helper`、`production-shaped helper`、`public overload`
+  或 `production detail helper`。
+- 计时边界：是否包含 setup、index / weight 展开、buffer 写回、solver、输出构造、wrapper 或 trace。
+- row source：ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair、correspondence-pair
+  或其它真实 policy。
+- wrapper：baseline 和 candidate 各自通过哪个 test helper、production-shaped helper、public overload
+  或 production detail helper。
+- baseline / candidate 各自路径：包括源码路径、bench target、board target、summary 或 manifest 路径。
+- 当前证据能证明什么，不能证明什么。
+
+diagnostic 或 production-shaped diagnostic repeated board 结果为 `weak`、`negative`、`neutral` 或
+`unstable` 时，worker 不能直接推出 `no-production` / `rejected`，也不能直接拒绝 bounded production
+probe（有界生产探针）。必须先完成 `diagnostic-to-production mismatch audit`，判断 diagnostic 是否可外推
+到 production、是否存在 comparison-boundary / baseline mismatch（比较边界 / 基线不一致）风险，以及
+允许 bounded production probe 的条件、范围和停止条件。
+
+production public Std/RVV（真实公开入口标量 / RVV）positive 只证明当前 public RVV path 是否快于
+当前 public scalar path。它不能证明新 RVV family（实现族）优于已有 adopted RVV family。若当前决策是
+RVV-family-selection（实现族选择），必须补同一 production boundary 内的 RVV-vs-RVV detail A/B；
+否则只能写成 bounded production candidate、explicit probe（显式探针）或 experiment path（实验路径），
+不能 clean-adopt。
+
+row source、point type、`Scalar` 和 layout 必须继续独立批准。ordered-cloud-pair 的结论不能外推到
+source-indexed、dual-indexed 或 correspondence；代表点型或具体点型的结论不能外推成完整泛型结论。
+
 ## 优化采纳证据索引
 
 复杂 topic 中每个 adopted、attempted、deferred 或 rejected 优化方式都应有证据索引。索引至少包含：
@@ -64,13 +97,14 @@ QEMU timing（QEMU 计时）不作为性能结论。QEMU 只用于 correctness�
 
 implementation-family comparison 可以复用同一 math kernel 或 reduction/formula helper，但 row-source ingress 必须按 ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair 和 correspondence-pair 分别适配。统一 family 不等于统一证据；每个 policy 的 gather、index staging、weight source、mask 和计时边界都要单独记录。
 
-当 diagnostic repeated summary（重复诊断摘要）为 negative（负向）但 production public
-Std/RVV repeated summary（真实公开入口标量 / RVV 重复摘要）为 positive（正向）时，不要直接拒绝
-production probe（生产探针），也不要直接 clean-adopt（干净采纳）新 family。worker 必须先标记
-comparison-boundary / baseline mismatch（比较边界 / 基线不一致）：public Std/RVV 只回答
-“当前 public RVV path 是否快于 public scalar path”，不能证明某个新 RVV family 快于已有 adopted
-RVV family。若决策问题是 family selection（实现族选择），必须补同一 production boundary（生产边界）
-内的 RVV-vs-RVV detail A/B，或把新 family 保留为 explicit probe（显式探针）/ experiment path（实验路径），默认路径继续使用已有 adopted family。
+当 diagnostic repeated summary（重复诊断摘要）为 `weak`、`negative`、`neutral` 或 `unstable`，
+而 production public Std/RVV repeated summary（真实公开入口标量 / RVV 重复摘要）为 positive（正向）时，
+不要直接拒绝 production probe（生产探针），也不要直接 clean-adopt（干净采纳）新 family。worker 必须先标记
+comparison-boundary / baseline mismatch（比较边界 / 基线不一致），并按上方事前规则补
+diagnostic-to-production mismatch audit。public Std/RVV 只回答“当前 public RVV path 是否快于 public
+scalar path”，不能证明某个新 RVV family 快于已有 adopted RVV family。若决策问题是 family selection
+（实现族选择），必须补同一 production boundary（生产边界）内的 RVV-vs-RVV detail A/B，或把新 family
+保留为 explicit probe / experiment path，默认路径继续使用已有 adopted family。
 
 候选升级为 adopted 后，文档中的 case-filter 字典、细粒度 target 表、EvidenceDecision 和提交证据白名单必须同步更新。
 

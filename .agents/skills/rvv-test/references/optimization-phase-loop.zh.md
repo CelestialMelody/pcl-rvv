@@ -65,6 +65,24 @@
 9. **继续 / 停止条件**：下一阶段默认入口、unblocked next actions、扩大权限或需要人工判断的边界。
 10. **文档更新清单**：phase result、topic test 文档、evaluation、Handoff；production 行为只有在真实接入后才同步到 `artifact_layout.topic_doc_template` 解析出的主题文档。
 11. **roadmap 同步动作**：本阶段会新增、尝试、拒绝、暂缓或重排哪些 roadmap candidate；哪些新想法来自阶段反思、同模块成熟 sibling、开源/论文启发或当前源码证据。
+12. **diagnostic-to-production mismatch audit（诊断到生产错配审计）**：凡本阶段 diagnostic、
+    production-shaped diagnostic、benchmark 或 repeated board 结果会参与 production 取舍，计划必须新增同名
+    必填小节。即使 diagnostic 结果预计为 positive，也必须先写清证据边界；若结果为 `weak`、`negative`、
+    `neutral` 或 `unstable`，该审计必须先于 `no-production`、`rejected` 或拒绝 production probe 的结论。
+
+推荐最小表：
+
+```text
+| question | answer |
+| --- | --- |
+| evidence role | diagnostic / production-shaped diagnostic / production-public / production-detail |
+| A/B boundary | test helper / production-shaped helper / public overload / production detail helper |
+| 当前决策问题 | RVV-vs-scalar / RVV-family-selection / fallback correctness / implementation-shape |
+| diagnostic 是否可外推到 production | yes / no / unknown + reason |
+| comparison-boundary / baseline mismatch 风险 | yes / no + reason |
+| diagnostic 弱 / 负 / 中性 / 不稳定时是否允许 bounded production probe | yes / no + 条件 |
+| clean adoption 是否需要同一 production boundary 内的 RVV-vs-RVV detail A/B | yes / no + reason |
+```
 
 若阶段计划需要板卡证据，计划还必须写明 board availability check（板卡可用性检查）和继续策略：
 配置解析出的 board target / rsync / ssh 入口是否存在、当前会话是否已确认板卡可用、可用时本轮要跑到哪一级
@@ -259,6 +277,13 @@ roadmap 更新规则：
 未验证 traits 集合、下一 point-type expansion phase 和每个组合的 production direct 证据状态。
 一个点类型的 positive 结果不能关闭其它点类型、混合 source/target 组合或整个模板函数族。
 
+矩阵中凡出现 production public Std/RVV positive，都必须把它标为 `production-public` evidence role。
+该证据只回答当前 public RVV path 是否快于当前 public scalar path；如果矩阵 decision 是
+RVV-family-selection，不能用这条 Std/RVV positive 关闭新 family 与已有 adopted RVV family 的比较。
+clean adoption 必须有同一 production boundary 内的 RVV-vs-RVV detail A/B；缺失时 decision 只能是
+`bounded production candidate`、`explicit probe`、`experiment path`、`deferred` 或
+`implementation-family comparison pending`。
+
 当候选涉及公式、FMA、reduction、staging、ILP 或 LMUL 时，矩阵中必须能回到对应的数值预算、反汇编归属和板卡 A/B 证据。只有源码形式变化、没有机器码或同边界性能差异的候选，标为实现形态诊断，不能写成独立收益。
 
 ## 执行循环
@@ -297,6 +322,9 @@ benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecis
 - 每个计划动作的 `done / partial / deferred / blocked` 状态、命令、证据路径和结论。
 - optimization matrix 的更新，以及 adopted / attempted / rejected / deferred 的理由。
 - correctness、QEMU、asm、board performance 和 production boundary 的分层结论。
+- `diagnostic-to-production mismatch audit` 的回填结果：实际 evidence role、A/B boundary、计时边界、
+  row source、point type / `Scalar` / layout、baseline / candidate 路径、能证明什么、不能证明什么、
+  以及弱 / 负 / 中性 / 不稳定 diagnostic 是否允许 bounded production probe。
 - Evidence Doctor 的 Errors / Warnings / Suggestions、异常解释、重跑 / 降级 / 阻塞动作。
 - evidence registry 状态：是否 fresh、是否发现人工或未登记复跑、哪些文档需要刷新。
 - 板卡 rerun budget 和 decision bucket：是否用完预算、桶是否稳定、是否因此降级或需要人工判断。

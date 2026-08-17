@@ -55,6 +55,21 @@ worker 或 reviewer 输出路径不是必填项；只有用户要求保存到固
   或未进入生产接入闭环的 `partial-production-candidate` 不默认创建 `doc-rvv`；其诊断证据链写入 topic-local
   evaluation、phase result、roadmap / matrix 和 Handoff。
 - RVV 结论必须有证据链，区分 correctness（正确性）、QEMU 证据、反汇编证据、板卡性能、fallback（回退路径）边界和生产接入判断。
+- diagnostic evidence（诊断证据）和 production evidence（生产证据）必须分层。diagnostic 或
+  production-shaped diagnostic（生产形态诊断）的 repeated board 结果为 `weak`、`negative`、`neutral`
+  或 `unstable` 时，只能说明该 diagnostic boundary（诊断边界）当前不支持对应候选，不能直接推出
+  `no-production` / `rejected`，也不能直接拒绝 bounded production probe（有界生产探针）。凡 diagnostic
+  结果参与 production 取舍，必须先完成 `diagnostic-to-production mismatch audit`，写清 evidence role
+  （证据角色）、A/B boundary（A/B 边界）、当前决策问题、是否可外推到 production、comparison-boundary /
+  baseline mismatch（比较边界 / 基线不一致）风险、弱 / 负 / 中性 / 不稳定时允许 bounded production probe 的条件，
+  以及 clean adoption（干净采纳）是否需要同一 production boundary 内的 RVV-vs-RVV detail A/B。
+- production public Std/RVV（真实公开入口标量 / RVV）positive 只证明“当前 public RVV path 是否快于
+  当前 public scalar path”。它不能证明新 RVV family（实现族）优于已有 adopted RVV family。若当前决策
+  是 RVV-family-selection，必须补同一 production boundary 内的 RVV-vs-RVV detail A/B；否则只能写成
+  bounded production candidate（有界生产候选）、explicit probe（显式探针）或 experiment path（实验路径），
+  不能写成 clean adopted。
+- row source、point type、`Scalar` 和 layout 必须继续独立批准。ordered-cloud-pair 的结论不能外推到
+  source-indexed、dual-indexed 或 correspondence；代表点型或具体点型的结论不能外推成完整泛型结论。
 - production integration loop（生产接入闭环）中的 production patch（生产补丁）是用户可见的生产源码变更。
   用户对“进入 / 推进 production integration loop”或“连续推进 PI2-PI5”的授权，只覆盖已说明范围内的接入、
   测试和证据采集，不自动包含 PI5 后的生产决策。PI5 是对称的用户检查点：无论生产证据支持采纳还是不支持采纳，

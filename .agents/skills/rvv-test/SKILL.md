@@ -71,6 +71,18 @@ reviewer（审查者）协议。`rvv-test` 负责回答“该写哪些 test/diag
 - staged candidate（分阶段候选）、production-shaped diagnostic 和 production direct 必须分层，不能互相替代。
 - public-entry-shaped（公开入口形态相似）不等于 production dispatch（生产分流）。
 - diagnostic evidence（诊断证据）不等于 production evidence（生产证据）。
+- diagnostic 或 production-shaped diagnostic 的 repeated board 结果为 `weak`、`negative`、`neutral` 或
+  `unstable` 时，worker 不能直接推出 `no-production` / `rejected`，也不能直接拒绝 bounded production
+  probe（有界生产探针）。只要 diagnostic 结果参与 production 取舍，必须先完成
+  `diagnostic-to-production mismatch audit`：写清 evidence role（证据角色）、A/B boundary（A/B 边界）、
+  当前决策问题、diagnostic 是否可外推到 production、comparison-boundary / baseline mismatch
+  （比较边界 / 基线不一致）风险、弱 / 负 / 中性 / 不稳定时 bounded production probe 的条件，
+  以及 clean adoption 是否需要同一 production boundary（生产边界）内的 RVV-vs-RVV detail A/B。
+- production public Std/RVV（真实公开入口标量 / RVV）positive 只证明当前 public RVV path 是否快于
+  当前 public scalar path；它不能证明新 RVV family（实现族）优于已有 adopted RVV family。若决策是
+  RVV-family-selection（RVV 实现族选择），必须补同一 production boundary 内的 RVV-vs-RVV detail A/B；
+  否则只能写成 bounded production candidate、explicit probe（显式探针）或 experiment path（实验路径），
+  不能 clean-adopt。
 - component-only ablation（仅组件消融）只能提供瓶颈线索，不能替代端到端 profile（剖析），也不能单独决定 production。
 - ordered-cloud-pair（顺序点云对，source/target 按相同下标一一对应）、source-indexed-cloud-pair（源索引点云对）、dual-indexed-cloud-pair（双索引点云对）和 correspondence-pair（对应关系点对）是不同 row source policy。production 必须逐 policy 独立批准。
 - point type（点类型）和 row source policy 一样是独立批准维度。`PointXYZ`、`PointNormal`、

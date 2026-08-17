@@ -70,6 +70,35 @@ worker 必须写清映射关系：
 详细规则见 `rvv-test/SKILL.md`、`rvv-test/references/entry-shapes-and-test-support.zh.md`、
 `rvv-test/references/registration-topic-evidence.zh.md` 和 `rvv-documentation/references/topic-doc-structure.md`。
 
+### 3A. Diagnostic 到 production mismatch audit
+
+只要 diagnostic（诊断）、production-shaped diagnostic（生产形态诊断）或 diagnostic repeated board
+结果参与 production 取舍，worker 必须先完成 `diagnostic-to-production mismatch audit`。该审计是
+phase plan、EvidenceDecision 和 Handoff 的前置门禁，不是负向结果出现后的补充说明。
+
+审计至少回答：
+
+- evidence role（证据角色）：`diagnostic`、`production-shaped diagnostic`、`production-public`
+  或 `production-detail`。
+- A/B boundary（A/B 边界）：`test helper`、`production-shaped helper`、`public overload`
+  或 `production detail helper`。
+- 当前决策问题：`RVV-vs-scalar`、`RVV-family-selection`、`fallback correctness`
+  或 `implementation-shape`。
+- diagnostic 是否可外推到 production，以及理由；不能只写“形态接近”。
+- 是否存在 comparison-boundary / baseline mismatch（比较边界 / 基线不一致）风险。
+- diagnostic 为 `weak`、`negative`、`neutral` 或 `unstable` 时，是否仍允许 bounded production probe
+  （有界生产探针），以及允许条件、范围、停止条件和不得触碰路径。
+- clean adoption（干净采纳）是否需要同一 production boundary（生产边界）内的 RVV-vs-RVV detail A/B。
+
+弱、负、中性或不稳定的 diagnostic 只说明该 diagnostic boundary 当前不支持对应候选，不能直接推出
+`no-production` / `rejected`，也不能直接拒绝 bounded production probe。production public Std/RVV
+positive 只说明当前 public RVV path 是否快于当前 public scalar path；若当前决策是
+RVV-family-selection，必须补同一 production boundary 内的 RVV-vs-RVV detail A/B，否则只能写成
+bounded production candidate、explicit probe（显式探针）或 experiment path（实验路径），不能 clean-adopt。
+
+row source、point type、`Scalar` 和 layout 仍按独立批准处理。ordered-cloud-pair 的结论不能外推到
+source-indexed、dual-indexed 或 correspondence；代表点型或具体点型结论不能外推成完整泛型结论。
+
 ### 4. Sibling Experience Migration Audit
 
 如果 worker 在 prompt、设计说明、Handoff Packet 或最终回复中写到“参考 / 迁移 / 复用 sibling topic
@@ -297,6 +326,9 @@ correspondences 或 indexed 路径退化时，归因必须列出 query/match 展
 phase_plan_written_before_edits:
 optimization_roadmap_ready:
 roadmap_default_recovery_queue_ready:
+diagnostic_to_production_mismatch_audit_ready:
+production_public_vs_family_selection_ready:
+evidence_role_and_ab_boundary_ready:
 phase_completion_matrix_ready:
 optimization_matrix_ready:
 board_availability_continue_ready:
@@ -312,6 +344,17 @@ ready_for_review_validity_check:
   队列项必须区分当前授权内的 `phase_deferred + unblocked`、命中真实停止条件的 `turn_stop_deferred`、
   `blocked`、`rejected with evidence` 和 `not_applicable with evidence`。若队列中仍有测试资产结构迁移、
   test source split、internal helper layout、doc suite、registry 或 legacy 清理，`ready_for_review` 无效。
+- `diagnostic_to_production_mismatch_audit_ready`：凡 diagnostic 或 production-shaped diagnostic 结果参与
+  production 取舍，phase plan、result 或 Handoff 必须包含 `diagnostic-to-production mismatch audit`。
+  弱 / 负 / 中性 / 不稳定 diagnostic 缺少该审计时，不能声明 `no-production`、`rejected` 或拒绝 bounded
+  production probe。
+- `production_public_vs_family_selection_ready`：凡使用 production public Std/RVV positive 参与决策，
+  必须说明它只证明当前 public RVV path 是否快于当前 public scalar path。若决策是 RVV-family-selection，
+  必须有同一 production boundary 内的 RVV-vs-RVV detail A/B；否则不能 clean-adopt，只能保留为 bounded
+  production candidate、explicit probe 或 experiment path。
+- `evidence_role_and_ab_boundary_ready`：凡本轮涉及 benchmark、board summary、diagnostic、production direct
+  或 EvidenceDecision，必须写清 evidence role、A/B boundary、计时边界、row source、wrapper、
+  baseline / candidate 各自路径，以及当前证据能证明什么、不能证明什么。
 - `phase_completion_matrix_ready`：分两个时间点检查。写文件前，`plan.zh.md` 必须已有可回填的 action / completion scaffold（计划动作表、依赖和完成判据），让后续 `result.zh.md` 能逐项回填；阶段结束或 Handoff 前，`result.zh.md` 或 Handoff 必须逐项列出计划动作的 `done / partial / deferred / blocked` 状态、证据路径和缺口，不能只写“完成本阶段”。
 - `optimization_matrix_ready`：复杂 topic 必须维护 candidate family × row source policy × point type / `Scalar` / layout × test × bench × board × asm × doctor × decision 矩阵；`planned` 或 `deferred` 不能伪装成 adopted。
 - `board_availability_continue_ready`：若当前阶段需要板卡证据，worker 必须记录板卡是否配置 / 可达 / 当前会话已确认可用。板卡可用时，下一动作应是执行有界板卡验证和证据刷新；不能把“需要板卡验证”写成 `turn_stop_deferred`。板卡不可用或工具失败时，证据必须列解除阻塞命令、已完成的本地证据和 EvidenceDecision 限制。
@@ -425,6 +468,9 @@ writing_style_trigger_check:
 heading_numbering_check_ready:
 scalar_path_ready:
 production_to_diagnostic_mapping_ready:
+diagnostic_to_production_mismatch_audit_ready:
+production_public_vs_family_selection_ready:
+evidence_role_and_ab_boundary_ready:
 document_ownership_matrix_ready:
 traceability_map_ready:
 experience_migration_audit_ready:
@@ -496,6 +542,14 @@ followup_options_ready:
 - `evidence` 至少指向当前 topic 的 evaluation、topic-local phase / diagnostic 文档、适用的 production 长期主题文档、测试资产注释、bench 说明、证据日志或 Handoff 段落。
 - `missing_items` 必须写成陈述句；没有缺口时写 `none`。
 - `loaded_instruction_sources`、`instruction_trace`、`instruction_feedback`、`preferences_loaded`、`work_preferences`、`commit_preferences`、`resolved_artifacts` 和 `artifact_publication_decision`。证据指向 S0 报告、Handoff Packet 或配置读取摘要；其中 `comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen` 作为 `work_preferences` 的细项，不可遗漏。
+- 表格必须包含 `diagnostic_to_production_mismatch_audit_ready`、`production_public_vs_family_selection_ready`
+  和 `evidence_role_and_ab_boundary_ready`。凡本轮使用 diagnostic / production-shaped diagnostic、
+  production-public Std/RVV、production-detail A/B、board summary、benchmark 或 EvidenceDecision 支撑
+  production 取舍，这三项必须指向 phase plan/result、summary、evaluation 或 Handoff 中的证据角色、
+  A/B 边界、计时边界、row source、wrapper、baseline / candidate 路径、可证明范围和不可证明范围。
+  缺少这些门禁时，worker 不能声明 `ready_for_review`、`no-production`、`clean adopted`、`rejected`
+  或拒绝 bounded production probe；只能写 `partial` / `blocked` / `bounded production candidate`
+  / `experiment path` 并列出补证据动作。
 - 表格必须包含 `evidence_doctor_result_ready`。凡本轮涉及 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision，证据必须指向 `artifact_layout.evidence_doctor_script_template` 解析出的脚本生成的 report，或按 `rvv-test/references/evidence-doctor.zh.md` 人工填写的 Errors / Warnings / Suggestions 摘要；未运行脚本时说明原因和当前 doctor 边界。
 - 表格必须包含 `bench_backend_choice_ready`。凡本轮涉及 bench，证据必须说明性能结论是否来自 board / target hardware；若只跑 QEMU bench smoke，状态应为 `partial` 或 `not_applicable`，并写清它只用于 build / correctness / log-shape smoke；若没有运行 QEMU bench，应写明默认策略是只编译或只跑 gtest / correctness。
 - 表格必须包含 `qemu_bench_smoke_scope_ready`。如果运行了 QEMU bench，证据必须列出 case-filter、规模、iteration、是否显式绕过 guard，以及为什么它不是完整 bench compare；如果没有运行，写 `not_applicable` 并说明性能验证只走 board / target hardware。
