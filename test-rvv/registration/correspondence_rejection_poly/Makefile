@@ -51,8 +51,6 @@ CRPOLY_BOARD_BENCH_WARMUP_ITERATIONS ?= 5
 CRPOLY_BOARD_BENCH_ITERATIONS ?= 50
 CRPOLY_BOARD_DEVICE_LABEL ?= RISC-V board / target hardware
 CRPOLY_BOARD_VLEN_DESC ?= see SoC / ELF (board)
-CRPOLY_ENABLE_PRODUCTION_DIRECT_PROBE ?= 0
-
 QEMU_EDGE_EVIDENCE_DIR = $(OUTPUT_DIR_QEMU)/edge_batch
 QEMU_EDGE_GATHER_EVIDENCE_DIR = $(OUTPUT_DIR_QEMU)/edge_gather_staging
 QEMU_ACCEPTANCE_EVIDENCE_DIR = $(OUTPUT_DIR_QEMU)/acceptance_filter
@@ -81,15 +79,7 @@ run_bench_acceptance_smoke: | $(OUTPUT_DIR_QEMU)
 run_bench_full_rejection_smoke: | $(OUTPUT_DIR_QEMU)
 	@$(MAKE) -C $(CURDIR) run_bench_compare BENCH_ARGS="--case-filter full-entry --iterations $(CRPOLY_BENCH_ITERATIONS) --warmup-iterations $(CRPOLY_BENCH_WARMUP_ITERATIONS) --rejection-iterations $(CRPOLY_REJECTION_ITERATIONS)" BENCH_STD_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_full_entry_std.log BENCH_RVV_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_full_entry_rvv.log BENCH_COMPARE_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/analyze_bench_compare_full_entry.log
 
-require_production_direct_probe:
-	@if [ "$(CRPOLY_ENABLE_PRODUCTION_DIRECT_PROBE)" != "1" ]; then \
-		echo "[SKIP] production-direct is a historical probe target after rollback."; \
-		echo "[SKIP] CRPOLY_ENABLE_PRODUCTION_DIRECT_PROBE only unlocks this Makefile target; it does not apply or enable a production RVV patch."; \
-		echo "[SKIP] Set it only while a temporary production dispatch candidate is present in the production headers."; \
-		exit 2; \
-	fi
-
-run_bench_production_direct_smoke: require_production_direct_probe | $(OUTPUT_DIR_QEMU)
+run_bench_production_direct_smoke: | $(OUTPUT_DIR_QEMU)
 	@$(MAKE) -C $(CURDIR) run_bench_compare BENCH_ARGS="--case-filter production-direct --iterations $(CRPOLY_BENCH_ITERATIONS) --warmup-iterations $(CRPOLY_BENCH_WARMUP_ITERATIONS) --rejection-iterations $(CRPOLY_REJECTION_ITERATIONS)" BENCH_STD_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_production_direct_std.log BENCH_RVV_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/run_bench_production_direct_rvv.log BENCH_COMPARE_OUTPUT_FILE=$(OUTPUT_DIR_QEMU)/analyze_bench_compare_production_direct.log
 
 run_bench_qemu_smoke: run_bench_edge_batch_smoke run_bench_edge_gather_staging_smoke run_bench_acceptance_smoke
@@ -188,7 +178,7 @@ run_board_evidence_doctor_acceptance: generate_board_evidence_manifest_acceptanc
 
 run_board_bench_acceptance_repeated: collect_board_bench_acceptance_repeated run_board_evidence_doctor_acceptance
 
-collect_board_bench_production_direct_repeated: require_production_direct_probe deploy_board | $(BOARD_PRODUCTION_DIRECT_REPEATED_DIR)
+collect_board_bench_production_direct_repeated: deploy_board | $(BOARD_PRODUCTION_DIRECT_REPEATED_DIR)
 	@for run in $$(seq 1 $(CRPOLY_BOARD_REPEATED_RUNS)); do \
 		run_id=$$(printf "%02d" "$$run"); \
 		remote_dir="$(REMOTE_DIR)/log/board/$(BOARD_PRODUCTION_DIRECT_RUN_LABEL)/run-$$run_id"; \
@@ -209,4 +199,4 @@ run_board_bench_production_direct_repeated: collect_board_bench_production_direc
 
 run_board_bench_repeated: run_board_bench_edge_batch_repeated run_board_bench_edge_gather_staging_repeated run_board_bench_acceptance_repeated
 
-.PHONY: run_bench_edge_batch_smoke run_bench_edge_gather_staging_smoke run_bench_acceptance_smoke run_bench_full_rejection_smoke require_production_direct_probe run_bench_production_direct_smoke run_bench_qemu_smoke generate_qemu_evidence_manifest_edge_batch run_evidence_doctor_edge_batch_qemu generate_qemu_evidence_manifest_edge_gather_staging run_evidence_doctor_edge_gather_staging_qemu generate_qemu_evidence_manifest_acceptance run_evidence_doctor_acceptance_qemu generate_qemu_evidence_manifest_production_direct run_evidence_doctor_production_direct_qemu generate_qemu_evidence_manifest run_evidence_doctor_qemu run_board_test_smoke collect_board_bench_edge_batch_repeated generate_board_evidence_manifest_edge_batch run_board_evidence_doctor_edge_batch run_board_bench_edge_batch_repeated collect_board_bench_edge_gather_staging_repeated generate_board_evidence_manifest_edge_gather_staging run_board_evidence_doctor_edge_gather_staging run_board_bench_edge_gather_staging_repeated collect_board_bench_acceptance_repeated generate_board_evidence_manifest_acceptance run_board_evidence_doctor_acceptance run_board_bench_acceptance_repeated collect_board_bench_production_direct_repeated generate_board_evidence_manifest_production_direct run_board_evidence_doctor_production_direct run_board_bench_production_direct_repeated run_board_bench_repeated
+.PHONY: run_bench_edge_batch_smoke run_bench_edge_gather_staging_smoke run_bench_acceptance_smoke run_bench_full_rejection_smoke run_bench_production_direct_smoke run_bench_qemu_smoke generate_qemu_evidence_manifest_edge_batch run_evidence_doctor_edge_batch_qemu generate_qemu_evidence_manifest_edge_gather_staging run_evidence_doctor_edge_gather_staging_qemu generate_qemu_evidence_manifest_acceptance run_evidence_doctor_acceptance_qemu generate_qemu_evidence_manifest_production_direct run_evidence_doctor_production_direct_qemu generate_qemu_evidence_manifest run_evidence_doctor_qemu run_board_test_smoke collect_board_bench_edge_batch_repeated generate_board_evidence_manifest_edge_batch run_board_evidence_doctor_edge_batch run_board_bench_edge_batch_repeated collect_board_bench_edge_gather_staging_repeated generate_board_evidence_manifest_edge_gather_staging run_board_evidence_doctor_edge_gather_staging run_board_bench_edge_gather_staging_repeated collect_board_bench_acceptance_repeated generate_board_evidence_manifest_acceptance run_board_evidence_doctor_acceptance run_board_bench_acceptance_repeated collect_board_bench_production_direct_repeated generate_board_evidence_manifest_production_direct run_board_evidence_doctor_production_direct run_board_bench_production_direct_repeated run_board_bench_repeated

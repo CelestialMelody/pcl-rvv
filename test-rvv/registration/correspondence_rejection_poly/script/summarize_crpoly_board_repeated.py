@@ -413,13 +413,12 @@ def write_summary(path: Path, manifest: dict[str, Any]) -> None:
         )
     if metadata.get("case_filter") == "production-direct":
         boundary_line = (
-            "- 这是 board / target hardware（板卡 / 目标硬件）上的 historical production direct probe"
-            "（历史真实生产入口探针）重复测试；只有临时生产补丁存在并显式设置"
-            " `CRPOLY_ENABLE_PRODUCTION_DIRECT_PROBE=1` 时才应重新采集。"
+            "- 这是 board / target hardware（板卡 / 目标硬件）上的 production-direct"
+            "（真实生产入口）重复测试；重新采集前必须确认当前 production patch 是否存在。"
         )
         dispatch_line = (
-            "- 当前 topic 的生产补丁已回滚；该 summary 只作为 rollback/no-production"
-            "（回滚且不接入生产）的历史负向证据，不代表当前 production 源码仍有 RVV dispatch。"
+            "- 该 target 不修改 production 源码；summary 的证据角色取决于运行时的 production diff。"
+            "有 Standard / RVV dispatch 时才可按 production RVV evidence（生产 RVV 证据）审查。"
         )
     else:
         boundary_line = (
@@ -428,7 +427,7 @@ def write_summary(path: Path, manifest: dict[str, Any]) -> None:
         )
         dispatch_line = (
             "- `full_entry_diagnostic` 若出现，只证明真实 public entry（公开入口）标量完整调用可运行；"
-            "当前没有 production RVV dispatch。"
+            "test support candidate 仍不能单独证明 production RVV dispatch。"
         )
 
     lines.extend(
