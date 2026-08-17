@@ -2,7 +2,7 @@
 
 本文定义 RVV topic（主题）工作中的 Handoff Packet（交接数据包）。它服务 worker（执行者）、reviewer（审查者）和未来 `rvv-agent` 的内部状态恢复。
 
-Handoff Packet 不是普通总结。它必须让 reviewer 不依赖完整对话，也能复核当前阶段、证据、风险和下一步动作。
+Handoff Packet 不是普通总结。它必须让 reviewer 不依赖完整对话，也能复核当前阶段、证据、风险和下一步动作。本文只保留交接包的核心合同；详细质量门禁和审查规则通过 reference（参考文件）承载，避免把 Handoff 写成第二份规则书。
 
 ## 何时输出
 
@@ -16,158 +16,119 @@ worker 应在这些边界输出 Handoff Packet：
 
 如果 worker 继续向后推进，也必须在最终输出中补齐最近一个 Handoff Packet。不要只在中间阶段输出，最终 closeout 却没有结构化交接。
 
-## 字段结构
+## 使用原则
+
+- 核心字段默认必须输出；条件字段只在触发条件成立时输出，不适用时写 `not_applicable` 和一句原因。
+- 字段内容要可复核：给出路径、命令、阶段名、证据角色或明确的下一步，不用“见上文”替代。
+- Handoff 只承载恢复和审查定位，不复制 `worker-quality-gates.zh.md`、`reviewer-protocol.zh.md`、`optimization-phase-loop.zh.md` 中的完整规则。
+- 若用户要求保存到当前 Handoff 路径，按 `artifact_layout.current_handoff_template` 和 `artifact_layout.current_handoff_structured_template` 解析；否则可只在最终回复中输出。
+
+## 核心字段
+
+以下字段是多数 Handoff 的最小骨架：
 
 ```text
 Handoff Packet（交接数据包）
-topic (当前所属任务主题):
-phase_reached (当前抵达的工作阶段):
-current_decision (Worker 当前结论，例如继续优化、回退、不接入生产、需要人工介入):
-files_changed (本次操作改动的源码、配置文件、文档清单):
-dirty_isolation (工作区隔离；说明本轮 diff 与其它 topic / agent instruction patch / raw logs 的边界):
-artifact_tracking_status (产物跟踪状态；说明本轮新增 / 引用的 topic 文档、phase、summary 是否 tracked、to-be-staged、ignored 或 local-only):
-artifacts_created_or_updated (产出物，例如优化代码、benchmark（性能测试）日志、测试报告、性能对比数据):
-commands_run (本次执行过的编译、测试、benchmark、git 命令，要求能复现):
-validation (验证摘要；列出测试、bench、反汇编、板卡和未运行项):
-evidence_paths (证据文件路径，例如编译日志、测试输出、性能数据、反汇编结果):
-board_evidence_paths (板卡或目标硬件证据路径；区分 summary、sanitized logs 和 raw logs):
-asm_attribution (反汇编归属；说明关键指令是否归属当前 helper / production 符号 / bench harness):
-evidence_decision_summary (EvidenceDecision 与证据链摘要，说明 correctness、performance、boundary 和 risk):
-evidence_decision (本轮 EvidenceDecision，例如 production-ready、partial-production-candidate、bench-only/no-production、blocked):
-production_decision (生产接入判断；说明是否修改 production、是否进入 / 暂缓 production integration loop，以及原因):
-implementation_review (实现自审；说明入口分层、fallback、helper 边界、维护风险和本轮是否只限 diagnostic):
-candidates_added_or_deferred (候选实现或诊断路线；列出新增、尝试、暂缓、拒绝的候选及理由):
-document_ownership_check (文档归属检查；说明长期事实、候选取舍、bench 统计、output summary 和恢复动作分别写到哪里):
-traceability_map_status (可追踪性地图状态；required / updated / not_required / deferred，并列出 map 位置或暂缓理由):
-optimization_roadmap_status (优化路线图状态；required / updated / not_required / deferred，并列出 roadmap 路径、候选搜索空间和下一阶段恢复条件):
-mature_sibling_parity_status (成熟相邻主题结构对齐状态；source / include / doc suite / doc-rvv / legacy 清理的 adopted / deferred / rejected 决策):
-ready_for_review_validity_check (ready_for_review 合法性检查；说明 roadmap / matrix / parity / shape scan 是否还有 phase_deferred + unblocked):
-ilp_lmul_decision (ILP / LMUL 取舍；说明寄存器压力、accumulator 数、VL/LMUL、unroll 或暂不适用原因):
-numerical_budget_result (数值预算结果；说明 FMA、reduction tree、误差阈值、near-cancellation 和矩阵 / checksum 结果):
-evidence_doctor_result (证据体检结果；Errors / Warnings / Suggestions、未解决 warning、处理动作、是否重跑 / 降级 / 修改结论):
-evidence_freshness_status (当前 run 是否覆盖旧数值；fresh / stale / refreshed，并列出被刷新文档路径):
-evidence_registry_status (证据登记表状态；fresh / not_available / unregistered_change / unregistered_file / manual_run_detected / stale_doc_pending_refresh，并列出 registry、扫描命令和待刷新路径):
-doc_rvv_freshness_status (doc-rvv 文档新鲜度；进入 production integration loop、生产 diff / Evidence Doctor 变化或提交前输出，状态为 fresh / stale_doc_pending_refresh / not_applicable):
-doc_rvv_action (doc-rvv 处理动作；refresh_now / keep_as_is / remove / not_applicable，并说明与当前 production truth 的对照结果):
-rerun_budget_decision (板卡复跑预算与决策桶；run budget、实际复跑次数、decision bucket、是否用完预算、是否降级或需要人工判断):
-board_availability_continue_status (板卡可用性与持续推进状态；说明当前 phase 是否需要板卡证据、板卡是否配置 / 可达 / 当前会话已确认可用、已跑或将继续跑的 board target / summary / Evidence Doctor / registry、真实停止条件):
-phase_loop_state (多阶段优化循环状态；current_phase、phase_plan_paths、phase_result_paths、phase_completion_matrix、optimization_roadmap_status、optimization_matrix_status、phase_deferred_unblocked_items、unblocked_next_actions、stop_condition_hit、continue_stop_decision、next_phase_default):
-loaded_instruction_sources (本次实际读取并用于决策的 instruction sources（指令来源），例如 workflow skills（工作流技能）、workflow references（工作流参考）、workflow config（工作流配置）、knowledge map（知识索引）或 PCL adapter（PCL 适配器）):
-instruction_trace (指令追踪；关键工作行为分别来自哪些实际读取并使用过的 instruction sources / 规则):
-instruction_feedback (可选；本轮发现的可沉淀规则、instruction gap（指令缺口）或冗余规则，默认 report-only):
-preferences_loaded (S0 读取的偏好层级，例如 defaults、local override、prompt override，以及是否只报告 env var 名):
-work_preferences (S0 冻结的工作偏好，例如注释详细度、注释语言、production（生产源码）注释上限、测试资产 / diagnostic 注释下限、是否处于单 topic 校准重跑):
-commit_preferences (S0 冻结的提交偏好，例如是否允许 commit（提交）、topic / log / agent instruction patch 是否拆分、evidence log policy（证据日志策略）是 summary-only / sanitized-logs / raw-logs):
-artifact_publication_decision (S0 解析出的产物发布判断；列出 `s0_run_record`、`phase_docs`、`current_handoff`、`production_topic_docs`、`topic_local_evaluation`、`evidence_summary`、`sanitized_logs`、`raw_logs` 和 `agent_asset_patch` 的默认策略与提交边界；no-production 时 `production_topic_docs` 必须写 `not_applicable`):
-experience_migration_audit (可选；声明采用 sibling topic 经验时，列出 adopted / attempted / deferred / rejected 对照表):
-test_support_shape_scan (测试支撑形态扫描；列出当前 topic 的根目录源文件、聚合头、内部 helper、旧 test_support 目录、script 或等价支撑代码):
-target_granularity_audit (测试 target 粒度审计；从当前 topic 的 Makefile、board.mk、test / bench 源码、script 和 registry 抽取真实 target，区分 aggregate、alias、QEMU / board smoke、board repeated、doctor / registry 和 historical guarded probe):
-test_support_split_decision (可选；长 helper 或多职责 helper 是否已按 test_support 配置拆分，或暂缓理由):
-legacy_compatibility_decision (旧路径 / 兼容入口决策；说明删除、保留理由、外部依赖和删除阶段):
-language_check (语言规范校验结果，例如术语解释、文档和代码注释是否达标):
-worker_quality_gate_check (worker 写文件前质量门禁执行结果，例如标量路径、数据流映射、文档结构、注释策略、bench 边界、证据模型是否闭合):
-risks_or_open_questions / remaining_risks (遗留风险、未解决疑问):
-recommended_reviewer_focus (给 reviewer 的重点检查清单):
-followup_options_for_user (给用户的可选后续路径):
-next_worker_action_if_review_passes / next_worker_action (评审通过后 worker 应执行的下一步):
+topic:
+phase_reached:
+current_decision:
+files_changed:
+dirty_isolation:
+artifact_tracking_status:
+resolved_artifacts:
+commands_run:
+validation:
+evidence_paths:
+evidence_decision_summary:
+evidence_decision:
+production_decision:
+implementation_review:
+document_ownership_check:
+loaded_instruction_sources:
+instruction_trace:
+instruction_feedback:
+preferences_loaded:
+work_preferences:
+commit_preferences:
+artifact_publication_decision:
+language_check:
+worker_quality_gate_check:
+risks_or_open_questions / remaining_risks:
+recommended_reviewer_focus:
+followup_options_for_user:
+next_worker_action_if_review_passes / next_worker_action:
 ```
 
-## 字段要求
+核心字段要求：
 
-- `phase_reached` 必须使用当前状态机中的阶段或分支，例如 `S4 test_plan_ready`、`S10 EvidenceDecision`、`PI1 production_integration_plan`、`S12 blocked`。
-- `current_decision` 必须是陈述句，不能只写 `done`、`ok` 或 `needs review`。
-- `files_changed` 应区分 production（生产源码）、配置解析出的 topic 测试资产、topic 文档、agent instruction patch（agent 指令改动）和本地证据文件。
-- `dirty_isolation` 必须说明当前 worktree 是否含有与本 topic 无关的 diff（差异），并列出本轮允许 reviewer / commit 关注的路径集合。若存在其它 topic、agent instruction patch、raw logs、build 输出或用户未授权改动，必须写成“ignore / do not stage / separate commit”等明确边界。检查不能只依赖普通 `git status --short`；对当前 topic 和本轮 agent instruction 路径必须使用包含未跟踪文件的路径限定扫描，例如 `git status --short --untracked-files=all -- <allowed-paths>`，必要时再用 `git check-ignore -v` 判定是否被忽略。
-- `artifact_tracking_status` 必须列出本轮新增、修改或被 README / evaluation / Handoff 引用的 topic-local docs、phase docs、summary evidence 和长期 `doc-rvv` 是否已经 tracked（已跟踪）、to-be-staged（待暂存）、ignored-local（忽略且只本地）或 excluded（排除提交）。若 README 或 roadmap 引用的 doc-suite 文件仍是 untracked，不能写 `ready_for_review`；必须说明要纳入 topic commit、单独 commit，或移除该引用。
-- `artifacts_created_or_updated` 应说明产物作用，不要只列路径。
-- `commands_run` 应保留关键参数、工作目录和失败命令；如果没有运行命令，要写明原因。
-- `validation` 应用短表或清单列出本轮实际运行和未运行的验证：unit / regression、QEMU correctness、bench build、可选 QEMU bench smoke、反汇编、board / target benchmark、sanitizer 或等价检查。未运行项必须写明原因，不能只省略；若没有运行 QEMU bench，应写明完整 bench 默认只在 board / target hardware 运行。
-- `evidence_paths` 只列当前结论真正依赖的证据。大型日志可以列路径和摘要，不要复制长日志。
-- `board_evidence_paths` 只列目标硬件证据，并明确每个路径是 summary artifact（摘要证据）、sanitized log（脱敏日志）还是 raw log（原始日志）。默认 `summary-only` 时，raw log 只能作为本机证据，不进入默认提交边界。
-- `asm_attribution` 必须说明关键 RVV 指令或缺失证据归属到当前 helper、production 符号、bench harness、Eigen/libm、编译器自动向量化或无关代码。归属不清时写“指令存在但热点归属未闭合”。如果使用 `generate_vec_report` 辅助解释自动向量化疑点，Handoff 只记录命令、摘要路径和它不能替代 objdump 归因的边界。
-- `evidence_decision_summary` 必须对应 production 长期主题文档的“正确性与高效性证据链”，或 topic-local evaluation / phase closeout 中未接 production 诊断结论的“诊断证据链”。摘要至少写清 public entry 是否真实命中、row semantics、`accepted_points` / 中间态 / matrix / fallback 证据、repeated board 或目标硬件性能来源、EvidenceDecision 边界和未覆盖风险。
-- `evidence_decision` 应是 S10 / PI5 的明确枚举或陈述，例如 `production-ready`、`partial-production-candidate`、`bench-only/no-production`、`rollback/no-production`、`blocked`。它可以和 `current_decision` 内容一致，但不能只隐含在长摘要里。
-- `production_decision` 必须独立于性能结论写清是否修改 production（生产源码）、是否进入 production integration loop（生产接入闭环）、是否只保留 diagnostic，以及哪些入口 / 点类型 / `Scalar` / row source 仍保持标量。诊断板卡收益不能自动写成 production-ready。
-- `implementation_review` 适用于任何实现或诊断 helper 改动。它至少说明 public entry / `*_Std` / `*_RVV` 或 diagnostic helper 分层、fallback 与 gate、是否新增 public API、是否复用公共 load/store / traits / policy、维护风险，以及 reviewer 应重点看哪些实现边界。
-- `candidates_added_or_deferred` 应列出本轮新增、尝试、暂缓或拒绝的候选路线。可复用 `adopted`、`attempted`、`deferred`、`rejected`、`not_applicable` 状态；每项必须写理由、证据或下一轮恢复条件。
-- `document_ownership_check` 应按文档归属矩阵说明本轮长期事实、候选取舍、bench 统计、output summary、恢复动作和通用 asset feedback 分别写到哪里。若只是引用其它文档，必须给出 path、anchor（章节 / 符号 / run label）或 role（证据角色）。
-- `traceability_map_status` 应说明复杂 topic 的 Traceability Map 是 `required`、`updated`、`not_required` 还是 `deferred`。`updated` 时列出章节或独立文档；`not_required` 时说明 topic 为什么简单；`deferred` 时说明缺少哪些代码、测试、脚本或 output 路径。
-- `mature_sibling_parity_status` 在相邻成熟 topic 已经提供更完整结构时必须输出。它不要求复制 sibling
-  的算法、文件清单或性能结论；它要求当前 topic 对 source / aggregator / internal helper 布局、
-  topic-local doc suite、evaluation 主路径、`doc-rvv` production-only 适用性和 legacy 清理逐项给出
-  `adopted / deferred / rejected`。若存在当前 topic 授权范围内、未阻塞、低风险的 deferred 项，
-  `next_phase_default` 不能是 `ready_for_review`，必须指向 structure-parity 或对应清理 phase。
-- `ready_for_review_validity_check` 在 worker 声称 `ready_for_review`、`done`、`stop_for_review`
-  或 `unblocked_next_actions=none` 时必须输出。字段应说明：
-  - 检查过哪些文件：最近 phase result、phase README、optimization roadmap、optimization matrix、
-    mature sibling parity 状态、test support shape scan、legacy compatibility decision 和 topic-local doc suite。
-  - 是否还有 `phase_deferred + unblocked` 项；若有，列出每项和默认下一 phase。
-  - 若仍停止，命中的真实 `stop_condition_hit` 是什么。
-  - 若检查失败，`next_phase_default` 不得写 `ready_for_review`。
-- `ilp_lmul_decision` 适用于含 RVV kernel、reduction、staging 或性能候选的 topic。必须说明 LMUL（向量寄存器分组）、VLEN gate、accumulator 数、unroll / ILP（指令级并行）、寄存器压力或 spill 风险；若不适用，写清为什么当前工作没有新的 ILP / LMUL 决策。
-- `numerical_budget_result` 适用于手写浮点、FMA、reduction、近抵消、阈值谓词、`ATA/ATb`、matrix 或 checksum 证据。它必须写清参考链路、误差阈值、最大 / 关键误差或 checksum 结果、失败样本状态和反汇编 / FMA 归属。若只做文档或整数路径，可写 `not_applicable` 并说明原因。
-- `evidence_doctor_result` 适用于任何 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision。字段必须说明是否运行 `artifact_layout.evidence_doctor_script_template` 解析出的脚本或按 `rvv-test/references/evidence-doctor.zh.md` 人工检查，输入 manifest / summary 路径，Errors / Warnings / Suggestions 数量，未解决 warning，每项处理动作，以及是否因此重跑、降级证据边界、修改结论或保留风险。如果没有运行脚本，必须写 `not_run` 和原因，并给出人工 doctor 检查摘要；不能省略。
-- `evidence_freshness_status` 用于说明本轮数值结论是否已经刷新过旧文档。若复跑改变了方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，必须把旧 summary 标成 historical / stale，列出被刷新或尚未刷新的 phase result、evaluation、topic doc、README 或 Handoff 路径；不能让 Handoff 只报新数值而不说明旧数值是否已失效。
-- `evidence_registry_status` 用于说明 topic-local `log/evidence_registry.json` 或等价登记表是否可用，是否运行 `make evidence_status` / `make check_evidence_freshness` / `artifact_layout.evidence_registry_script_template` 解析出的脚本执行 `check`，是否发现 `unregistered_change`、`unregistered_file`、`manual_run_detected` 或 `stale_doc_pending_refresh`。如果 topic 尚未接入 registry，写 `not_available`，列出人工检查过的 summary / manifest / doctor / analyze log 路径和下一步接入 target。
-- `doc_rvv_freshness_status` 和 `doc_rvv_action` 在进入 production integration loop、生产 diff / Evidence Doctor 结果变化或准备提交前必须输出。检查时把当前 `doc-rvv` 与 production truth、phase result、board / Evidence Doctor 结果逐项对照；若不一致，写 `stale_doc_pending_refresh` 并 `refresh_now`，或明确 `remove` / `keep_as_is` 的依据。普通 diagnostic phase 不要求每轮完整比对。
-- `rerun_budget_decision` 用于说明 board performance 的有界复跑策略。字段必须列出计划 run budget、实际复跑轮数、统计口径、decision bucket（例如 positive / weak-positive / neutral / negative / unstable）、是否用完预算、是否因为 bucket 摇摆而降级 EvidenceDecision 或需要人工判断。若本轮不涉及 board performance，写 `not_applicable` 并说明原因。
-- `board_availability_continue_status` 用于避免 worker 停在“下一步需要板卡验证”。若当前 phase、optimization matrix、
-  EvidenceDecision 或 production gate 需要板卡 / 目标硬件证据，该字段必须写明板卡是否已配置、是否可达、
-  当前会话或 local override 是否确认可用，以及本轮已经执行或应继续执行的 board target、summary、
-  Evidence Doctor 和 registry 刷新。板卡可用时，`stop_condition_hit` 不能写成“需要板卡验证”；
-  只能在板卡不可达、ssh / rsync / make target 失败、复跑预算耗尽后 bucket 仍不稳定、证据矛盾、
-  dirty isolation 不安全或继续会扩大权限时停止。
-- `phase_loop_state` 适用于短 prompt 继续已有 topic、复杂 topic 回访或任何还有 unblocked next action（未阻塞下一步）的优化阶段。它必须至少列出：
-  - `current_phase`：当前 phase id、名称和状态。
-  - `phase_plan_paths`：当前和下一阶段 `plan.zh.md` 路径；没有计划时写明必须先创建的路径。
-  - `phase_result_paths`：当前和最近完成阶段 `result.zh.md` 路径。
-  - `phase_completion_matrix`：计划动作的 `done / partial / deferred / blocked` 状态摘要。
-  - `optimization_roadmap_status`：topic-level roadmap 路径、是否 fresh、当前 high-priority candidate family、阶段反思新增项和下一阶段默认候选；没有 roadmap 时写明必须创建的配置解析路径。
-  - `roadmap_default_recovery_queue`：从 roadmap / phase README / result / Handoff 解析出的默认恢复动作队列。
-    每项写 phase 名、范围、状态、blocker / stop condition、是否可与其它结构动作合并，以及下一步。
-    队列中仍有当前 topic 授权范围内的 `phase_deferred + unblocked` 时，`continue_stop_decision` 不能写成
-    `stop_for_review`，除非另有真实 stop condition。
-  - `optimization_matrix_status`：candidate family、row source、点类型 / `Scalar`、test、bench、board、asm 和 Evidence Doctor 的矩阵状态。
-  - `phase_deferred_unblocked_items`：当前 phase 未做但仍可继续做的事项；必须区分 `phase_deferred` 和 `turn_stop_deferred`。测试优化、topic-local 文档重构、测试支撑结构迁移、evaluation 迁移、doc suite 对齐、无依赖 legacy 清理和低风险 candidate / bench 补齐通常属于 `phase_deferred + unblocked`。
-  - `unblocked_next_actions`：仍被本轮或下一轮授权、且没有工具 / 权限 / 证据阻塞的具体动作；没有时写 `none` 并说明为什么。
-  - `stop_condition_hit`：停止原因，必须命中用户限定范围、权限扩大、板卡 / 工具阻塞、证据矛盾、dirty isolation 风险、生产接入需授权，或 phase 矩阵、optimization matrix 和 roadmap 都已闭合且无 unblocked next action。
-  - `continue_stop_decision`：为什么继续或为什么停；不能只写 `done`。
-  - `next_phase_default`：下一轮短 prompt 默认恢复的一个动作；替代路径放入 `followup_options_for_user`。
-- `loaded_instruction_sources` 只列实际读取并用于本轮决策的 instruction sources，不要机械列全量 skill。
-- `instruction_trace` 必须把行为映射到 instruction sources，例如 `reviewability-and-language.zh.md -> TEST 注释和术语解释`。如果某个 instruction source 只读过但没有影响决策，不要放入 trace。
-- `instruction_feedback` 只在发现可复用规则、instruction gap（指令缺口）或冗余规则时输出。默认模式是 `report-only`：只写建议，不修改 `.agents`、prompt 或 knowledge map。该字段至少说明发现项、建议更新的 skill/reference、适用范围是 topic-specific 还是 cross-topic（跨主题），以及是否建议进入 workflow improvement（工作流改进）。用户对工作流程、停止条件、测试体系、文档结构、恢复方式或 reviewer 可读性的反馈，默认要审计是否属于 instruction gap；若属于，不能只写入 topic 文档。
-- `preferences_loaded` 必须写清 `.agents/config/defaults.yaml` 是否读取、`.agents/local/user-preferences.yaml` 是否存在、当前 prompt 是否覆盖配置。涉及板卡、用户名、私有路径时，只写 env var（环境变量）名或 local override 覆盖范围，不写实际值。
-- `resolved_artifacts` 必须列出本轮通过 `artifact_layout` 解析出的关键 worklog、phase、handoff 或 topic 文档路径，并标明 template key、resolved path 和 publication class；若解析失败，写缺失键而不是猜路径。
-- `work_preferences` 和 `commit_preferences` 应与 S0 报告一致；若中途改变，写明用户授权或改变原因。`work_preferences` 至少覆盖 `comment_policy_frozen` 和 `documentation_policy_frozen`；`commit_preferences` 至少覆盖 `evidence_policy_frozen`。
-- `artifact_publication_decision` 应与 `.agents/config/defaults.yaml` 中的 `artifact_publication` 默认分类保持一致；若本轮改写了发布边界，说明原因和授权来源。当前结论为 `diagnostic`、`bench-only`、`rollback/no-production` 或未接 production 的 `partial-production-candidate` 时，`production_topic_docs` 必须写 `not_applicable`，不能把 `artifact_layout.topic_doc_template` 当作默认 closeout 产物。
-- `experience_migration_audit` 在 worker 声明采用 sibling topic（同模块相邻主题）经验时必须输出。它至少覆盖 row source、source / weight policy、shared math pipeline、staging / reduction、formula / FMA、evidence model 和 production boundary，并用 `adopted`、`attempted`、`deferred` 或 `rejected` 说明每个历史经验维度的处理结果。该字段不要求当前 topic 实现 sibling 的具体算法，但要求未采用的成功或负向方案有理由或下一轮验证计划。
-- `test_support_shape_scan` 在恢复旧 topic、长 topic、或声明对齐成熟 sibling 结构时必须输出。它应列出当前
-  topic 实际存在的测试支撑形态：根目录 test / bench 源码、聚合头、内部 helper、旧 `test_support/`
-  目录、script、bench case registry 或其它等价文件；没有某种形态时写 `not_present`。
-- `target_granularity_audit` 在新建、重排或 closeout topic-local doc suite，或用户 / reviewer 询问测试工程
-  是否足够可审查时必须输出。它必须说明 worker 是否从当前 topic 的真实 `Makefile`、`board.mk`、
-  `src/test_*.cpp`、`src/bench_*.cpp`、topic-local `script/` 和 evidence registry 抽取 target，而不是
-  从 sibling topic 复制 target 名。至少覆盖 correctness aggregate、correctness aliases、bench diagnostic aliases、
-  QEMU smoke aliases、board smoke aliases、board repeated aliases、doctor / registry aliases 和 historical probe
-  guarded aliases；缺少某类 target 时写 `not_applicable with evidence`、`phase_deferred + unblocked`、
-  `turn_stop_deferred with stop_condition_hit` 或本阶段已补齐的路径。
-- `test_support_split_decision` 在单个测试支撑 helper、测试 / bench 源文件或等价支撑代码超过配置阈值，
-  或混合 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation
-  中三类以上职责时必须输出。若已拆分，说明 aggregator（聚合头文件）和按 `test_support` 配置解析出的内部结构职责；若暂缓，说明 deferred reason 以及对 reviewer 可读性和后续维护的影响。
-- `legacy_compatibility_decision` 必须说明本轮是否发现 legacy pointer、compatibility alias、旧路径 wrapper
-  或重复正文。默认处理是删除并更新引用；若保留，必须列出具体外部依赖、用户要求、dirty isolation 风险
-  或同轮无法安全更新的脚本，并写清删除条件和默认下一阶段。
-- `language_check` 不允许虚写。若配置解析出的测试资产、diagnostic（诊断代码）或 prototype（原型代码）没有详细中文注释，必须写成未达标。通过时应列出覆盖面，例如“诊断 helper 注释、TEST 注释、bench 文件头、主题文档术语解释”，并给出文件或章节证据。该字段还必须说明是否执行 `writing_style_trigger_check`，以及它覆盖了文档、Handoff Packet、最终回复、reviewer 报告或 `instruction_feedback` 中的哪些文本。
-- `worker_quality_gate_check` 不允许虚写。必须使用证据化表格，至少覆盖 `worker-quality-gates.zh.md` 中的 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen`、标量路径、production/diagnostic 数据流映射、文档结构、测试资产注释、bench 边界、替代方案审计、optimization roadmap、证据模型、Evidence Doctor（证据体检）和 stop condition（停止条件）。表格列建议为 `gate | status | evidence | missing_items`；未完成项要列入 `risks_or_open_questions`。
-- `worker_quality_gate_check` 中的 `status` 不应只有 `true` / `false`。使用 `pass`、`partial`、`fail` 或 `not_applicable`，并为每项提供文件 / 章节 / 日志路径证据。
-- 如果 `current_decision` 是 `partial-production-candidate` 或任何强于 no-production 的结论，`worker_quality_gate_check` 必须额外列出 production direct 尚未闭合项，例如真实公开入口 direct test、fallback、点类型 traits、`Scalar=double`、indices / correspondences 策略、生产 bench 重跑和人工确认点。
-- `recommended_reviewer_focus` 应指向具体风险，例如“检查 fallback gate 是否被单独覆盖”，不要写成“请全面审查”。
-- `followup_options_for_user` 用于把 reviewer 和用户需要做的人工选择显式暴露出来。当前结论是窄范围 production-ready、partial-production-candidate、bench-only/no-production 但仍存在可复用扩展方向时，必须列出 2-4 个选项：推荐默认动作、继续当前 topic 的扩展动作、应另开 topic 的动作、明确不建议做的动作。每个选项都要写清收益、风险、需要补的证据和是否会扩大 production 范围。
-- `next_worker_action_if_review_passes` 是下一轮短 prompt 继续工作的默认恢复入口，应是可执行动作，例如“进入 PI1 生产接入计划”“按已冻结范围连续推进 PI2-PI5”“继续 roadmap 中的 source-indexed-cloud-pair family audit”或“只做 S11 文档收尾”，不要写成泛泛的“继续优化”。如果下一步要限制范围，例如只做 ordered-cloud-pair、保持 indices / correspondences 标量、只修文档不改 production，必须写在该字段中。
-- `next_worker_action_if_review_passes` 只能有一个默认动作；如果存在重要替代路径，不要把它们藏在 `risks_or_open_questions` 里，应放进 `followup_options_for_user`。例如窄范围 `PointNormal` 接入完成后，应主动提示是否继续做泛型 normal traits（法线字段特征）扩展、`Scalar=double` 评估、indexed / correspondences 消融，或进入下一个 topic。
-- 如果建议下一轮连续推进 PI2-PI5，`next_worker_action_if_review_passes` 必须同时写清候选范围、不可扩大范围和暂停条件摘要；完整细则可指向主题文档 PI1 计划和 `topic-lifecycle.zh.md`。
-- 如果本轮已经完成 PI2-PI5，Handoff Packet 必须写清 S11 文档 closeout 是否已同步 production patch、fallback 矩阵、production direct 测试、反汇编归属、板卡 production bench、PI5 EvidenceDecision 和未覆盖路径；不能只说“文档已更新”。
-- Handoff Packet 不能只列 `commands_run`。EvidenceDecision 必须有证据链摘要；diagnostic evidence、QEMU timing、representative pointtypes、indexed / correspondences 边界、dirty isolation、implementation review、numerical budget、Evidence Doctor、asm attribution 和 board evidence boundary 不能被省略。
+- `phase_reached` 使用状态机阶段或分支，例如 `S4 test_plan_ready`、`S10 EvidenceDecision`、`PI1 production_integration_plan`、`S12 blocked`。
+- `current_decision` 写成陈述句，不能只写 `done`、`ok` 或 `needs review`。
+- `files_changed` 区分 production（生产源码）、配置解析出的 topic 测试资产、topic 文档、agent instruction patch（agent 指令改动）和本地证据文件。
+- `dirty_isolation` 说明当前 worktree 是否有无关 diff（差异），并列出本轮允许 reviewer / commit 关注的路径集合；无关 topic、raw logs、build 输出或用户未授权改动必须标成 `ignore / do not stage / separate commit`。
+- `artifact_tracking_status` 列出本轮新增、修改或被 README / evaluation / Handoff 引用的 topic-local docs、phase docs、summary evidence 和长期 `doc-rvv` 是 tracked、to-be-staged、ignored-local 还是 excluded。
+- `resolved_artifacts` 列出本轮通过 `artifact_layout` 解析出的关键 worklog、phase、handoff、evaluation、topic doc 或 evidence registry 路径；解析失败时写缺失键，不猜路径。
+- `commands_run` 保留关键参数、工作目录和失败命令；没有运行命令时写原因。
+- `validation` 用短表或清单列出已运行和未运行的 unit / regression、QEMU correctness、bench build、反汇编、board / target benchmark、sanitizer 或等价检查。
+- `evidence_paths` 只列当前结论真正依赖的证据，大型日志只列路径和摘要。
+- `evidence_decision_summary` 区分 correctness（正确性）、performance（性能）、boundary（证据边界）和 risk（风险），并说明诊断证据不能替代 production evidence（生产证据）。
+- `evidence_decision` 使用明确结论，例如 `production-ready`、`partial-production-candidate`、`bench-only/no-production`、`rollback/no-production`、`blocked`。
+- `production_decision` 独立于性能结论写清是否修改 production、是否进入 production integration loop、是否只保留 diagnostic，以及哪些入口 / 点类型 / `Scalar` / row source 保持标量。
+- `implementation_review` 说明 public entry / `*_Std` / `*_RVV` 或 diagnostic helper 分层、fallback、gate、公共 API 边界和维护风险；纯文档工作可写 `not_applicable`。
+- `document_ownership_check` 说明长期事实、候选取舍、bench 统计、output summary 和恢复动作分别归属到哪些文档或证据路径。
+- `loaded_instruction_sources` 只列实际读取并用于本轮决策的 instruction sources（指令来源），不要机械列全量 skill。
+- `instruction_trace` 把关键行为映射到 instruction sources；只读过但没有影响决策的来源不放入 trace。
+- `instruction_feedback` 只在发现可复用规则、instruction gap（指令缺口）或冗余规则时输出；默认 `report-only`，不代表已经修改 `.agents`。
+- `preferences_loaded`、`work_preferences`、`commit_preferences` 和 `artifact_publication_decision` 与 S0 记录一致；涉及板卡、用户名、私有路径时只写 env var（环境变量）名或覆盖范围。
+- `language_check` 和 `worker_quality_gate_check` 可以摘要化，但必须有证据路径或 reference，不允许虚写为 `pass` 而不给依据。
+- `recommended_reviewer_focus` 指向具体风险；不要写成“请全面审查”。
+- `followup_options_for_user` 用于窄范围、局部候选或 no-production 结论后的 2-4 个可选路径。
+- `next_worker_action_if_review_passes / next_worker_action` 只能给一个默认恢复动作；重要替代路径放入 `followup_options_for_user`。
+
+## 条件字段
+
+这些字段按触发条件输出。未触发时可以省略；如果当前结论需要解释为什么不适用，应写 `not_applicable`。
+
+```text
+artifacts_created_or_updated:
+board_evidence_paths:
+asm_attribution:
+candidates_added_or_deferred:
+traceability_map_status:
+optimization_roadmap_status:
+mature_sibling_parity_status:
+ready_for_review_validity_check:
+ilp_lmul_decision:
+numerical_budget_result:
+evidence_doctor_result:
+evidence_freshness_status:
+evidence_registry_status:
+doc_rvv_freshness_status:
+doc_rvv_action:
+rerun_budget_decision:
+board_availability_continue_status:
+phase_loop_state:
+experience_migration_audit:
+test_support_shape_scan:
+target_granularity_audit:
+test_support_split_decision:
+legacy_compatibility_decision:
+```
+
+条件字段触发规则：
+
+- `board_evidence_paths`、`rerun_budget_decision` 和 `board_availability_continue_status`：涉及 board / target hardware（板卡 / 目标硬件）性能、repeated summary、production gate 或需要板卡证据时输出。
+- `asm_attribution`：涉及反汇编归属、RVV 指令存在性或自动向量化疑点时输出。
+- `evidence_doctor_result`：涉及 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision 时输出；没有运行脚本时写人工检查边界。
+- `evidence_freshness_status` 和 `evidence_registry_status`：复跑、覆盖 summary、registry 可用或发现未登记证据变化时输出。
+- `doc_rvv_freshness_status` 和 `doc_rvv_action`：进入 production integration loop、生产 diff / evidence 变化或提交前输出；说明当前 `doc-rvv` 与 production truth 是否一致，状态使用 `fresh`、`stale_doc_pending_refresh` 或 `not_applicable`，动作使用 `refresh_now`、`keep_as_is`、`remove` 或 `not_applicable`。普通 diagnostic phase 不要求每轮输出该字段。
+- `phase_loop_state`：短 prompt 继续已有 topic、复杂 topic 回访或仍有 unblocked next action（未阻塞下一步）时输出。
+- `optimization_roadmap_status`：复杂 topic、返工 topic、phase loop 或 roadmap 影响下一步时输出。
+- `ready_for_review_validity_check`：worker 声称 `ready_for_review`、`done`、`stop_for_review` 或 `unblocked_next_actions=none` 时输出。
+- `mature_sibling_parity_status`、`test_support_shape_scan`、`target_granularity_audit`、`test_support_split_decision` 和 `legacy_compatibility_decision`：恢复旧 topic、长 topic、结构对齐、doc-suite（文档套件）审计、测试工程审计或 legacy 清理时输出。
+- `traceability_map_status`：topic 代码、测试、脚本、output 或文档定位复杂，reviewer 需要从文档跳到证据和实现位置时输出。
+- `ilp_lmul_decision`：涉及 RVV kernel、reduction（规约）、staging（分阶段暂存）、unroll、LMUL 或寄存器压力时输出。
+- `numerical_budget_result`：涉及 FMA（融合乘加）、reduction tree、浮点阈值、near-cancellation（近抵消）、`ATA/ATb`、matrix 或 checksum 风险时输出。
+- `candidates_added_or_deferred` 和 `experience_migration_audit`：本轮新增、尝试、暂缓或引用 sibling topic（同模块相邻主题）经验时输出。
 
 ## 证据边界
 
@@ -181,42 +142,14 @@ Handoff Packet 中必须区分：
 
 QEMU 和反汇编不能写成真实性能结论。若没有板卡或目标硬件 benchmark（性能测试），`current_decision` 不能写 production performance（生产性能）成立。
 
-## 交给 Reviewer 前的自查
+## 自查引用
 
-worker 输出 Handoff Packet 前应检查：
+worker 输出 Handoff 前，只在本文做轻量确认；详细检查从对应 reference 读取：
 
-- 字段是否完整，没有用“见上文”替代关键内容。
-- 是否列出了能复现当前结论的命令和证据路径。
-- 是否输出 `dirty_isolation`，并把本轮可审查 / 可提交路径与其它脏 diff 分开。
-- 是否输出 `artifact_tracking_status`，并确认 README、evaluation、roadmap、phase result 或长期 `doc-rvv`
-  引用的新增 topic-local 文档没有停留在未跟踪但未说明的状态。
-- 是否输出 `implementation_review`、`candidates_added_or_deferred`、`document_ownership_check`、`traceability_map_status`、`ilp_lmul_decision`、`numerical_budget_result`、`evidence_doctor_result`、`phase_loop_state`、`asm_attribution`、`board_evidence_paths`、`evidence_decision`、`production_decision` 和 `validation`；不适用项是否写明原因。
-- 如果声明对齐成熟 sibling 结构，是否输出 `mature_sibling_parity_status`、`test_support_shape_scan` 和
-  `legacy_compatibility_decision`；若仍有低风险结构 / 文档 / legacy 清理缺口，是否把它们放进
-  `phase_deferred_unblocked_items` 和 `next_phase_default`，而不是停在 `ready_for_review`。
-- 若配置解析出的内部目录为 `include/impl`，当前 topic 仍存在旧 `test_support/` 内部头，且 mature
-  sibling / local quality bar 指向 `include/impl` 职责布局，是否把 `internal-helper-layout` 明确写成
-  adopted、rejected with evidence、not_applicable with evidence 或 `phase_deferred + unblocked`。只写
-  “路径 churn”“code map 已足够”或“reviewer 需要时再做”不足以支撑 `ready_for_review`。
-- 如果声称 `ready_for_review`、`done` 或 `unblocked_next_actions=none`，是否输出
-  `ready_for_review_validity_check`，且检查没有被 roadmap、matrix、mature sibling parity、
-  current shape scan、doc suite 或 legacy compatibility 推翻。
-- 是否输出 `evidence_freshness_status`；如果复跑改变了数值、decision bucket 或证据角色，旧 summary / phase result 是否已标成 historical / stale，相关文档是否已刷新。
-- 是否输出 `evidence_registry_status`；如果 registry 不可用，是否列出人工检查路径和下一轮接入动作；如果发现未登记变化，是否暂停当前数值结论。
-- 是否输出 `rerun_budget_decision`；如果板卡结果波动，是否按预设预算停止并给出 stable / unstable 决策桶，而不是无限复跑。
-- 进入 production integration loop、生产 diff / Evidence Doctor 变化或提交前，是否输出 `doc_rvv_freshness_status` 和 `doc_rvv_action`，并刷新或标记已有 `doc-rvv` 的 stale 状态。
-- `instruction_trace` 是否是真实指令使用记录。
-- 如果本轮发现可沉淀规则、instruction gap 或冗余规则，是否按 `instruction_feedback` 报告；没有发现时可以省略该字段。
-- 如果声明采用 sibling topic 经验，是否输出 `experience_migration_audit`，且没有遗漏相邻成功或负向方案中的主要维度。
-- 如果长 helper、长 test / bench 源码或多职责支撑代码命中拆分阈值，是否输出 `test_support_split_decision`，并说明拆分或暂缓理由。
-- `language_check` 是否覆盖文档、代码注释、测试输出、Handoff Packet 和最终回复；是否按 `writing-style.md` 执行触发词检查，并说明命中项、改写结果或保留理由。
-- `worker_quality_gate_check` 是否真实反映写文件前质量门禁，且每项带 reviewer 可定位的证据；如果短 prompt 启动后产物质量下降，应在这里暴露，而不是只写 instruction_trace。
-- `phase_loop_state` 是否能让下一轮 worker 用一句短 prompt 恢复当前 phase 和 roadmap；如果仍有 `phase_deferred_unblocked_items` 或 `unblocked_next_actions` 却选择停止，是否写清合法 `stop_condition_hit` 和 `continue_stop_decision`。
-- 如果 Handoff 把未做项列为 `deferred`、`optional`、`reviewer-triggered` 或 `independent follow-up`，
-  是否说明它们属于 `phase_deferred + unblocked` 还是 `turn_stop_deferred`；若是前者，是否默认继续到下一 phase。
-- 是否明确哪些日志、build（构建）产物和本机配置只作为工作区证据，不进入提交。
-- 如果 topic 进入 production integration loop，是否写明生产接入计划和需要人工确认的风险。
-- 如果 topic 完成 production integration loop，是否写明最终主题文档已经按生产证据重写，而不是沿用诊断阶段结论。
-- 窄范围结论或局部候选是否提供 `followup_options_for_user`，让用户能选择“进入下个 topic”还是“继续扩展当前 topic”。
-- `next_worker_action_if_review_passes` / `next_worker_action` 是否足够让下一轮 worker 用一句短 prompt 恢复工作；如果缺少范围、权限或停止条件，应在 Handoff Packet 中补齐。
-- `preferences_loaded` 和三个冻结策略是否能让下一轮 worker 复用同一注释、文档和证据策略。
+- S0 偏好冻结、`resolved_artifacts` 和 publication class：见 `s0-preferences-and-recovery.zh.md`。
+- 写文件前质量门禁和 `worker_quality_gate_check` 表格：见 `worker-quality-gates.zh.md`。
+- reviewer 如何判定 blocking issue、早停和证据缺口：见 `reviewer-protocol.zh.md`。
+- 多阶段恢复、roadmap、optimization matrix、ready-for-review 合法性和继续 / 停止条件：见 `rvv-test/references/optimization-phase-loop.zh.md`。
+- 文档归属、Traceability Map（可追踪性地图）和 doc-suite 质量：见 `rvv-documentation/references/document-ownership-and-traceability.zh.md` 及相关文档 reference。
+
+最终自查只需确认：核心字段完整、触发的条件字段已输出或说明不适用、证据边界没有越界、dirty isolation 清楚、下一步动作可执行。

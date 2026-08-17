@@ -93,7 +93,7 @@ S0 必须在输出中写明 `preferences_loaded`，并冻结注释、文档、�
 默认 instruction_feedback mode（指令反馈模式）是 `report-only`（只报告建议）。worker 在 S4 测试计划、
 S10 EvidenceDecision（证据决策）、S11 closeout（收尾）、blocked（阻塞）边界、短 prompt 恢复失败、
 过早停止复盘或用户 / reviewer 明确反馈工作流程问题时，必须判断是否存在可复用规则、instruction gap（指令缺口）或冗余规则。
-若存在，输出 `agent_asset_feedback`（当前字段合同名，Phase 003 待迁移到 `instruction_feedback`）；没有发现时省略。reviewer 在 closeout review（收尾审查）中按同一规则报告建议。
+若存在，输出 `instruction_feedback`；没有发现时省略。reviewer 在 closeout review（收尾审查）中按同一规则报告建议。
 当用户授权 workflow improvement 时，应先修订对应 `.agents/` skill/reference，再回到 topic 工作；不要只把流程缺口写入 topic follow-up。
 
 ## 最短启动写法
@@ -129,7 +129,7 @@ commit boundary，不能只因本地文件存在就视为 closeout 完成。
 
 ```text
 在 <repo> 中，以 RVV worker 身份继续当前 topic。
-请按当前 Handoff Packet 的 next_worker_action_if_review_passes 恢复，并保存本轮 work log。
+请按当前 Handoff Packet 的 next_worker_action 恢复，并保存本轮 work log。
 ```
 
 如果已经完成 PI1，继续生产闭环可用：
@@ -139,10 +139,10 @@ commit boundary，不能只因本地文件存在就视为 closeout 完成。
 请按当前 Handoff Packet 恢复，并推进 production integration loop，保存本轮 work log。
 ```
 
-用户不需要知道 `next_worker_action_if_review_passes` 字段名。只要短 prompt 表达“继续当前 topic”
+用户不需要知道 `next_worker_action` 字段名。只要短 prompt 表达“继续当前 topic”
 或“进入下一阶段”，worker 默认就要从最近 Handoff Packet 里的 `phase_loop_state` 恢复：
 先读 `current_phase`、`phase_plan_paths`、`phase_result_paths`、`unblocked_next_actions`
-和 `next_phase_default`。`next_worker_action_if_review_passes` 仍可作为兼容字段，但不再是唯一主来源。
+和 `next_phase_default`。`next_worker_action` 是默认主来源，`next_worker_action_if_review_passes` 仅作为兼容别名。
 若 phase loop 状态缺失、路径不存在或与用户新指令冲突，worker 先说明恢复风险，
 再按 `phase_reached`、`current_decision`、reviewer prompt patch（审查者提示词补丁）和当前源码证据推导下一步。
 
@@ -266,7 +266,7 @@ production 决策，就跳过当前源码复核、QEMU correctness、反汇编�
 如果短 prompt 是“继续当前 topic”或“进入下一阶段”，worker 应先读取最近 work log（工作日志）
 或 Handoff Packet，恢复 `phase_loop_state`、`phase_reached`、`current_decision`、
 `phase_plan_paths`、`phase_result_paths`、optimization roadmap、optimization matrix 和 evidence paths（证据路径）。
-`phase_loop_state.next_phase_default` 是默认续作入口；`next_worker_action_if_review_passes` 只作为兼容别名。
+`phase_loop_state.next_phase_default` 是默认续作入口；`next_worker_action` 是默认主来源，`next_worker_action_if_review_passes` 只作为兼容别名。
 除非用户新指令覆盖，不要绕过 phase loop 自行选择下一个 topic 或重跑旧阶段。
 若恢复入口写 `ready_for_review`，必须先执行 `ready_for_review_validity_check`：读取 roadmap、matrix、
 最近 phase result 和成熟度审计，确认没有 `phase_deferred + unblocked` 的 structure parity、doc suite、
@@ -351,9 +351,13 @@ worker 最终输出必须包含：
 - `worker_quality_gate_check`，使用 `gate | status | evidence | missing_items` 证据化表格，并覆盖 `document_ownership_matrix_ready` 与 `traceability_map_ready`。
 - `loaded_instruction_sources`。
 - `preferences_loaded`。
-- `agent_asset_trace`（当前字段合同名，Phase 003 待迁移到 `instruction_trace`）。
-- `agent_asset_feedback`（当前字段合同名，Phase 003 待迁移到 `instruction_feedback`），仅在本轮发现可沉淀规则、instruction gap（指令缺口）或冗余规则时输出；默认只报告建议，不自动改 `.agents` 指令文件。
-- 用户或 reviewer 对工作流程、测试体系、文档结构、恢复方式、停止方式和可读性的反馈，必须先判断是否属于 instruction gap；若是，写入 `agent_asset_feedback`（当前字段合同名），并在获得 workflow improvement 授权时优先修订对应 skill/reference，避免同类问题重复出现。
+- `work_preferences`。
+- `commit_preferences`。
+- `resolved_artifacts`。
+- `artifact_publication_decision`。
+- `instruction_trace`。
+- `instruction_feedback`，仅在本轮发现可沉淀规则、instruction gap（指令缺口）或冗余规则时输出；默认只报告建议，不自动改 `.agents` 指令文件。
+- 用户或 reviewer 对工作流程、测试体系、文档结构、恢复方式、停止方式和可读性的反馈，必须先判断是否属于 instruction gap；若是，写入 `instruction_feedback`，并在获得 workflow improvement 授权时优先修订对应 skill/reference，避免同类问题重复出现。
 - Handoff Packet。
 - 若当前结论是窄范围、局部候选、不接入生产但仍有可复用后续方向，输出给用户的后续路径选项：
   默认建议、继续当前 topic、另开 follow-up topic、当前不建议做的方向。
@@ -368,7 +372,7 @@ reviewer 最终输出必须符合 reviewer protocol（审查协议）：
 - Worker prompt patch（给 worker 的提示词补丁）。
 - Suggested skill / knowledge-map updates（建议更新的 skill 或知识索引）。
 - `loaded_instruction_sources`。
-- `agent_asset_feedback`（当前字段合同名）或等价小节，仅在发现可沉淀规则、instruction gap 或冗余规则时输出。
+- `instruction_feedback` 或等价小节，仅在发现可沉淀规则、instruction gap 或冗余规则时输出。
 
 workflow improvement 最终输出必须包含：
 

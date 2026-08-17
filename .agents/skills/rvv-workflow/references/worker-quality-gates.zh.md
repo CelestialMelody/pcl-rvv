@@ -33,14 +33,17 @@ S0 必须读取 `.agents/config/defaults.yaml`。如果存在 `.agents/local/use
 
 worker 必须在 S0 报告和最终 Handoff Packet（交接数据包）中写清：
 
+- `loaded_instruction_sources`：本轮实际读取并用于决策的指令来源。
 - `preferences_loaded`：读取了 defaults、local override（本机私有覆盖）或 prompt override（提示词覆盖）中的哪些层。
+- `work_preferences`：注释、文档、证据和日志等工作偏好如何冻结；细项由下方门禁表复核。
+- `commit_preferences`：提交偏好是否已冻结；若不提交，写明原因。
 - `comment_policy_frozen`：配置解析出的测试资产、diagnostic（诊断代码）、prototype（原型代码）和 production（生产源码）的注释策略。
 - `evidence_policy_frozen`：evidence logs（证据日志）策略，默认 `summary-only`；raw logs（原始日志）不默认提交。
 - `documentation_policy_frozen`：closeout（收尾文档）是否 current-state-first（当前状态优先）、是否必须有数值算例、长期文档是否禁止保留对话流程话术。
 
 如果 local override 中配置了板卡、依赖库、交叉编译工具链或私有路径，Handoff 只报告“已读取对应覆盖项”和使用的 env var（环境变量）名。不要复制 IP、用户名或个人绝对路径。
 
-S0 字段级合同、artifact layout（产物布局）解析和 artifact publication（产物发布）判断见 `rvv-workflow/references/s0-preferences-and-recovery.zh.md`；S0 输出要把 `preferences_loaded`、`frozen_policies`、`resolved_artifacts`、`artifact_publication_decision`、`dirty_isolation`、`validation` 和 `next_action` 回填到 Handoff Packet（交接数据包），而不是散落在不同段落里。
+S0 字段级合同、artifact layout（产物布局）解析和 artifact publication（产物发布）判断见 `rvv-workflow/references/s0-preferences-and-recovery.zh.md`；S0 输出要把 Handoff 核心字段回填到 Handoff Packet（交接数据包），至少包括 `loaded_instruction_sources`、`instruction_trace`、`instruction_feedback`、`preferences_loaded`、`work_preferences`、`commit_preferences`、`resolved_artifacts`、`artifact_publication_decision`、`dirty_isolation`、`validation` 和 `next_worker_action`（兼容字段 `next_worker_action_if_review_passes`），而不是散落在不同段落里。
 
 ### 2. 标量路径重建
 
@@ -340,7 +343,7 @@ PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 �
 ### 11. PI2-PI5 连续推进门禁
 
 当用户用短 prompt 授权继续 production integration loop（生产接入闭环），且最近 Handoff Packet 的
-`next_worker_action_if_review_passes` 已给出 PI2 范围时，worker 可以同轮连续推进 PI2-PI5。连续推进前必须冻结：
+`next_worker_action`（兼容字段 `next_worker_action_if_review_passes`）已给出 PI2 范围时，worker 可以同轮连续推进 PI2-PI5。连续推进前必须冻结：
 
 - `pi2_scope`：入口、点类型、`Scalar`、数据布局、规模 gate 和不可触碰路径。
 - `forbidden_expansion`：不得扩大到 PI1 未授权的泛型、indices、correspondences、public API 或公共 helper 变更。
@@ -398,7 +401,7 @@ Handoff Packet 中给出 `followup_options_for_user`：
 - 如果要扩大到泛型点类型，应读取哪些策略文档、需要哪些 traits / offset / fallback / board 证据。
 - 哪些入口虽然“看起来相近”，但因为负向性能、语义风险或测试缺口不能一起扩大。
 
-`next_worker_action_if_review_passes` 仍只保留一个默认动作；其它重要选择放在 `followup_options_for_user`，
+`next_worker_action`（兼容字段 `next_worker_action_if_review_passes`）仍只保留一个默认动作；其它重要选择放在 `followup_options_for_user`，
 避免用户只能靠人工复查发现下一步。
 
 ## 开始写文件前的自查
@@ -406,7 +409,14 @@ Handoff Packet 中给出 `followup_options_for_user`：
 worker 在创建或更新 topic 产物前，先确认：
 
 ```text
+loaded_instruction_sources:
+instruction_trace:
+instruction_feedback:
 preferences_loaded:
+work_preferences:
+commit_preferences:
+resolved_artifacts:
+artifact_publication_decision:
 comment_policy_frozen:
 evidence_policy_frozen:
 documentation_policy_frozen:
@@ -474,7 +484,7 @@ followup_options_ready:
 
 ## 交接前的证据化门禁
 
-最终 Handoff Packet（交接数据包）里的 `worker_quality_gate_check` 不能只写 true / false。worker 必须把上面的自查改写成可复核表格：
+最终 Handoff Packet（交接数据包）里的 `worker_quality_gate_check` 不能只写 true / false。worker 必须把上面的自查改写成可复核表格；表格先覆盖 Handoff 核心字段，再覆盖本文件的阶段 / 证据门禁，不要把已下放到 Handoff 的长规则重新抄一遍：
 
 ```text
 | gate（门禁项） | status（状态） | evidence（文件 / 章节 / 行或段落） | missing_items（缺口） |
@@ -485,8 +495,7 @@ followup_options_ready:
 - `status` 可写 `pass`、`partial`、`fail` 或 `not_applicable`；不要用没有证据的 `true`。
 - `evidence` 至少指向当前 topic 的 evaluation、topic-local phase / diagnostic 文档、适用的 production 长期主题文档、测试资产注释、bench 说明、证据日志或 Handoff 段落。
 - `missing_items` 必须写成陈述句；没有缺口时写 `none`。
-- 表格必须包含 `preferences_loaded`、`comment_policy_frozen`、`evidence_policy_frozen`
-  和 `documentation_policy_frozen`。证据指向 S0 报告、Handoff Packet 或配置读取摘要。
+- `loaded_instruction_sources`、`instruction_trace`、`instruction_feedback`、`preferences_loaded`、`work_preferences`、`commit_preferences`、`resolved_artifacts` 和 `artifact_publication_decision`。证据指向 S0 报告、Handoff Packet 或配置读取摘要；其中 `comment_policy_frozen`、`evidence_policy_frozen`、`documentation_policy_frozen` 作为 `work_preferences` 的细项，不可遗漏。
 - 表格必须包含 `evidence_doctor_result_ready`。凡本轮涉及 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision，证据必须指向 `artifact_layout.evidence_doctor_script_template` 解析出的脚本生成的 report，或按 `rvv-test/references/evidence-doctor.zh.md` 人工填写的 Errors / Warnings / Suggestions 摘要；未运行脚本时说明原因和当前 doctor 边界。
 - 表格必须包含 `bench_backend_choice_ready`。凡本轮涉及 bench，证据必须说明性能结论是否来自 board / target hardware；若只跑 QEMU bench smoke，状态应为 `partial` 或 `not_applicable`，并写清它只用于 build / correctness / log-shape smoke；若没有运行 QEMU bench，应写明默认策略是只编译或只跑 gtest / correctness。
 - 表格必须包含 `qemu_bench_smoke_scope_ready`。如果运行了 QEMU bench，证据必须列出 case-filter、规模、iteration、是否显式绕过 guard，以及为什么它不是完整 bench compare；如果没有运行，写 `not_applicable` 并说明性能验证只走 board / target hardware。
