@@ -107,6 +107,8 @@ component ablation 或负向历史方案，worker 必须在表中审计它们。
 - `production_topic_doc_applicable`：存在 adopted production behavior（已采用生产行为）、production patch（生产补丁）或 PI5 生产证据闭环通过。
 - `production_topic_doc_not_applicable`：当前结论是 `diagnostic`、`bench-only`、`rollback/no-production`，或未接 production 的 `partial-production-candidate`。此时不创建 `doc-rvv`；诊断证据链写入 topic-local evaluation / phase closeout / roadmap / matrix / Handoff。
 
+若 topic 已有 `doc-rvv`，则只有在进入 production integration loop、生产 diff / Evidence Doctor 结果变化或准备提交前，才强制执行 `doc-rvv` freshness check（文档新鲜度检查）。检查时要把长期文档和当前 production truth、phase result、board / Evidence Doctor 结果逐项对照；若不一致，先标记 `stale_doc_pending_refresh` 或刷新后再继续 closeout / commit。普通 diagnostic phase 不要求每轮都做完整 `doc-rvv` 比对。
+
 适用时，production 长期主题文档至少要包含：
 
 - 函数入口作用和标量路径；
@@ -283,7 +285,7 @@ correspondences 或 indexed 路径退化时，归因必须列出 query/match 展
 `rvv-test/references/registration-topic-evidence.zh.md`、`rvv-test/references/numerical-consistency.zh.md`
 和 `rvv-test/references/performance-and-ablation.zh.md`。
 
-### 8a. Phase loop 防早停门禁
+### 9. Phase loop 防早停门禁
 
 复杂 topic、短 prompt 继续已有 topic 或任何含多阶段优化计划的 topic，必须把 `rvv-test/references/optimization-phase-loop.zh.md`
 作为 phase loop 的 source of truth。worker 写配置解析出的 RVV test 资产、bench、production 或长期文档前至少闭合下列门禁：
@@ -318,7 +320,7 @@ ready_for_review_validity_check:
 
 `phase_deferred` 和 `turn_stop_deferred` 必须分开写。测试优化阶段、topic-local 文档重构、测试支撑结构迁移、evaluation 路径迁移、doc suite 对齐、无依赖 legacy 清理、candidate / bench / asm / Evidence Doctor 补齐，通常都属于可继续推进的 `phase_deferred + unblocked`。只有高风险、真实 blocker 或明确授权边界才允许转成 `turn_stop_deferred`。
 
-### 9. PI1 生产接入计划门禁
+### 10. PI1 生产接入计划门禁
 
 当 worker 继续一个 `partial-production-candidate` topic 并进入 PI1 时，先产出 production integration plan，
 再考虑生产补丁。若用户目标是“进入 / 推进 production integration loop（生产接入闭环）”，PI1 是同轮
@@ -335,7 +337,7 @@ fallback、测试或泛型策略不能闭合，才停在 PI1。PI1 至少写清�
 
 PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 后 production direct 证据闭合，才能升级 EvidenceDecision。
 
-### 10. PI2-PI5 连续推进门禁
+### 11. PI2-PI5 连续推进门禁
 
 当用户用短 prompt 授权继续 production integration loop（生产接入闭环），且最近 Handoff Packet 的
 `next_worker_action_if_review_passes` 已给出 PI2 范围时，worker 可以同轮连续推进 PI2-PI5。连续推进前必须冻结：
@@ -379,7 +381,7 @@ PI2-PI5 结束后必须继续完成 S11 文档 closeout（收尾文档）。work
 - `production_doc_decision_delta`：是否说明诊断阶段结论如何被生产证据确认、缩窄、推翻或回退。
 - `production_doc_remaining_scope`：是否写清仍保持标量或未覆盖的入口，以及下一轮扩展必须补的证据。
 
-### 11. 窄范围结论后的后续路径门禁
+### 12. 窄范围结论后的后续路径门禁
 
 当当前结论不是“整个模板入口都完成”，而是 `narrow`、`partial`、`bench-only`、`no-production`
 或带有明确 fallback / 未覆盖范围时，worker 不能只写“进入下一个 topic”。必须在最终输出和
@@ -410,6 +412,7 @@ evidence_policy_frozen:
 documentation_policy_frozen:
 markdown_time_wording_check:
 writing_style_trigger_check:
+heading_numbering_check_ready:
 scalar_path_ready:
 production_to_diagnostic_mapping_ready:
 document_ownership_matrix_ready:
@@ -491,6 +494,7 @@ followup_options_ready:
 - 表格必须包含 `board_availability_continue_ready`。凡当前 phase、optimization matrix、EvidenceDecision 或 production gate 需要板卡证据，证据必须说明板卡是否配置 / 可达 / 当前会话已确认可用；若可用，必须指向已运行或即将继续运行的 board target、summary、Evidence Doctor 和 registry 刷新。未跑板卡时必须写真实 blocker；不能把“需要板卡验证”本身作为 blocker。
 - 表格必须包含 `evidence_registry_status_ready`。证据指向 `log/evidence_registry.json`、`make evidence_status` / `make check_evidence_freshness` 输出或等价人工检查；若 topic 尚未接入 registry，写 `partial` 并列出应补的 target / script。
 - 表格必须包含 `evidence_freshness_check_ready`。证据指向 Handoff Packet 的 `evidence_freshness_status`、phase result、evaluation 或 topic 文档；若复跑改变了旧数值、decision bucket 或证据角色，必须列出已刷新和待刷新的路径。
+- 表格必须包含 `heading_numbering_check_ready`。凡本轮新增、删除、移动或插入带编号章节、条款、表格行或 checklist，证据必须说明同层级编号已经连续顺延；若保留非连续编号，必须列出外部兼容原因和后续迁移计划。
 - 表格必须包含 `production_topic_doc_applicability_ready`。证据说明 `artifact_layout.topic_doc_template` 是 applicable 还是 not_applicable；no-production 时必须说明没有新建 `doc-rvv`，或已有遗留 `doc-rvv` 已删除 / 标为历史归档。
 - 表格必须包含 `correctness_efficiency_evidence_chain_ready`。production 结论的证据指向 production 长期主题文档中的“正确性与高效性证据链”；no-production 结论的证据指向 evaluation / phase closeout 中的“诊断证据链”。
 - 表格必须包含 `document_ownership_matrix_ready`。证据指向文档归属矩阵章节、evaluation 中的决策审计或 Handoff Packet 的定位字段。

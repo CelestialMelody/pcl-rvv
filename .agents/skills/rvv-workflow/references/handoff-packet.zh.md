@@ -47,6 +47,8 @@ numerical_budget_result (数值预算结果；说明 FMA、reduction tree、误�
 evidence_doctor_result (证据体检结果；Errors / Warnings / Suggestions、未解决 warning、处理动作、是否重跑 / 降级 / 修改结论):
 evidence_freshness_status (当前 run 是否覆盖旧数值；fresh / stale / refreshed，并列出被刷新文档路径):
 evidence_registry_status (证据登记表状态；fresh / not_available / unregistered_change / unregistered_file / manual_run_detected / stale_doc_pending_refresh，并列出 registry、扫描命令和待刷新路径):
+doc_rvv_freshness_status (doc-rvv 文档新鲜度；进入 production integration loop、生产 diff / Evidence Doctor 变化或提交前输出，状态为 fresh / stale_doc_pending_refresh / not_applicable):
+doc_rvv_action (doc-rvv 处理动作；refresh_now / keep_as_is / remove / not_applicable，并说明与当前 production truth 的对照结果):
 rerun_budget_decision (板卡复跑预算与决策桶；run budget、实际复跑次数、decision bucket、是否用完预算、是否降级或需要人工判断):
 board_availability_continue_status (板卡可用性与持续推进状态；说明当前 phase 是否需要板卡证据、板卡是否配置 / 可达 / 当前会话已确认可用、已跑或将继续跑的 board target / summary / Evidence Doctor / registry、真实停止条件):
 phase_loop_state (多阶段优化循环状态；current_phase、phase_plan_paths、phase_result_paths、phase_completion_matrix、optimization_roadmap_status、optimization_matrix_status、phase_deferred_unblocked_items、unblocked_next_actions、stop_condition_hit、continue_stop_decision、next_phase_default):
@@ -107,6 +109,7 @@ next_worker_action_if_review_passes / next_worker_action (评审通过后 worker
 - `evidence_doctor_result` 适用于任何 benchmark、board summary、checksum summary、asm attribution 或 EvidenceDecision。字段必须说明是否运行 `artifact_layout.evidence_doctor_script_template` 解析出的脚本或按 `rvv-test/references/evidence-doctor.zh.md` 人工检查，输入 manifest / summary 路径，Errors / Warnings / Suggestions 数量，未解决 warning，每项处理动作，以及是否因此重跑、降级证据边界、修改结论或保留风险。如果没有运行脚本，必须写 `not_run` 和原因，并给出人工 doctor 检查摘要；不能省略。
 - `evidence_freshness_status` 用于说明本轮数值结论是否已经刷新过旧文档。若复跑改变了方向、decision bucket、数值结论、Evidence Doctor 数量或证据角色，必须把旧 summary 标成 historical / stale，列出被刷新或尚未刷新的 phase result、evaluation、topic doc、README 或 Handoff 路径；不能让 Handoff 只报新数值而不说明旧数值是否已失效。
 - `evidence_registry_status` 用于说明 topic-local `log/evidence_registry.json` 或等价登记表是否可用，是否运行 `make evidence_status` / `make check_evidence_freshness` / `artifact_layout.evidence_registry_script_template` 解析出的脚本执行 `check`，是否发现 `unregistered_change`、`unregistered_file`、`manual_run_detected` 或 `stale_doc_pending_refresh`。如果 topic 尚未接入 registry，写 `not_available`，列出人工检查过的 summary / manifest / doctor / analyze log 路径和下一步接入 target。
+- `doc_rvv_freshness_status` 和 `doc_rvv_action` 在进入 production integration loop、生产 diff / Evidence Doctor 结果变化或准备提交前必须输出。检查时把当前 `doc-rvv` 与 production truth、phase result、board / Evidence Doctor 结果逐项对照；若不一致，写 `stale_doc_pending_refresh` 并 `refresh_now`，或明确 `remove` / `keep_as_is` 的依据。普通 diagnostic phase 不要求每轮完整比对。
 - `rerun_budget_decision` 用于说明 board performance 的有界复跑策略。字段必须列出计划 run budget、实际复跑轮数、统计口径、decision bucket（例如 positive / weak-positive / neutral / negative / unstable）、是否用完预算、是否因为 bucket 摇摆而降级 EvidenceDecision 或需要人工判断。若本轮不涉及 board performance，写 `not_applicable` 并说明原因。
 - `board_availability_continue_status` 用于避免 worker 停在“下一步需要板卡验证”。若当前 phase、optimization matrix、
   EvidenceDecision 或 production gate 需要板卡 / 目标硬件证据，该字段必须写明板卡是否已配置、是否可达、
@@ -201,6 +204,7 @@ worker 输出 Handoff Packet 前应检查：
 - 是否输出 `evidence_freshness_status`；如果复跑改变了数值、decision bucket 或证据角色，旧 summary / phase result 是否已标成 historical / stale，相关文档是否已刷新。
 - 是否输出 `evidence_registry_status`；如果 registry 不可用，是否列出人工检查路径和下一轮接入动作；如果发现未登记变化，是否暂停当前数值结论。
 - 是否输出 `rerun_budget_decision`；如果板卡结果波动，是否按预设预算停止并给出 stable / unstable 决策桶，而不是无限复跑。
+- 进入 production integration loop、生产 diff / Evidence Doctor 变化或提交前，是否输出 `doc_rvv_freshness_status` 和 `doc_rvv_action`，并刷新或标记已有 `doc-rvv` 的 stale 状态。
 - `instruction_trace` 是否是真实指令使用记录。
 - 如果本轮发现可沉淀规则、instruction gap 或冗余规则，是否按 `instruction_feedback` 报告；没有发现时可以省略该字段。
 - 如果声明采用 sibling topic 经验，是否输出 `experience_migration_audit`，且没有遗漏相邻成功或负向方案中的主要维度。

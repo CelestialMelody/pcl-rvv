@@ -54,6 +54,8 @@ S11 阶段更新 evaluation 文档、topic-local closeout 文档、模块状态�
 
 之后再做 S11 closeout。最终 production 长期主题文档必须按 `artifact_layout.topic_doc_template` 解析位置，并反映真实生产源码，而不是只反映 diagnostic prototype（诊断原型）或 bench-only 原型。若 S10 没有进入生产接入闭环，则该模板为 `not_applicable`，closeout 写入 evaluation / phase 文档。
 
+若在进入 production integration loop、准备 closeout 或准备提交前，已有 `doc-rvv`，worker 必须先对照当前 production diff、phase result 和 Evidence Doctor 做 freshness check；若 `doc-rvv` 与当前 truth 不一致，先标记 `stale_doc_pending_refresh` 或刷新，再把 closeout 写成完成。这个检查是生产接入 / 提交边界的硬门禁，不要求普通 diagnostic phase 每轮执行。
+
 如果用户授权进入生产接入闭环，且没有明确要求“只做 PI1 计划”，worker 默认应在同一轮完成 PI1-PI5
 和 S11 closeout。PI1 是继续生产补丁前的范围 gate，不是默认交付终点；只有命中生命周期中的暂停条件，
 才把 PI1 作为 handoff（交接）边界。

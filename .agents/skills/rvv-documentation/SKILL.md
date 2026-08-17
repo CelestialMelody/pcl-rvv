@@ -61,6 +61,8 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 
 production 长期主题文档修改后，如果影响生产接入结论、bench case 含义、新增诊断失败、workflow 规则或筛选状态，应同步函数级评估、模块工作日志和相关筛选状态表。no-production closeout 修改只同步 topic-local evaluation / phase 文档和状态表，不因此新建 `doc-rvv`。
 
+进入 production integration loop、准备最终 closeout 或准备提交前，若当前 topic 已有 `doc-rvv`，worker 必须先用当前 production diff、phase result 和 Evidence Doctor 做 freshness check；如果长期文档与当前 truth 不一致，先标记 `stale_doc_pending_refresh` 或刷新后再继续后续闭环。普通 diagnostic phase 不要求每轮都做完整 `doc-rvv` 比对。
+
 如果一次主题工作暴露出可复用文档规则，应沉淀到本 skill 或 reference，避免规则只停留在一次主题文档中。
 
 ## 质量门槛
