@@ -4,18 +4,18 @@
       "backend": "qemu",
       "case_filter": "production-direct",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/result.zh.md",
         "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
       "evidence_role": "asm_attribution",
-      "freshness_state": "historical_probe",
-      "recorded_at_epoch": 1786627465,
+      "freshness_state": "current_phase_050",
+      "recorded_at_epoch": 1786712286,
       "related": {},
-      "run_label": "qemu_bench_rvv_asm_production_probe",
+      "run_label": "qemu_bench_rvv_asm_phase050",
       "state": {
         "exists": true,
-        "mtime_ns": 1786625754635892109,
+        "mtime_ns": 1786712243813095803,
         "path": "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.asm",
         "sha256": "sha256:28160cb22093e4463f0ede6f46141b50ec640bdc6b3c106a61eb7895472a0a7e",
         "size": 49896
@@ -26,18 +26,18 @@
       "backend": "qemu",
       "case_filter": "production-direct",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/result.zh.md",
         "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
-      "evidence_role": "asm_attribution_historical_probe",
-      "freshness_state": "historical_probe",
-      "recorded_at_epoch": 1786628999,
+      "evidence_role": "asm_attribution_full",
+      "freshness_state": "current_phase_050",
+      "recorded_at_epoch": 1786712287,
       "related": {},
-      "run_label": "qemu_bench_rvv_full_asm_production_probe",
+      "run_label": "qemu_bench_rvv_full_asm_phase050",
       "state": {
         "exists": true,
-        "mtime_ns": 1786625754625892099,
+        "mtime_ns": 1786712243803095894,
         "path": "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm",
         "sha256": "sha256:e8d905670d0022fa135db5a35156bee787e6686589bfef97bf1e77aaae2f0898",
         "size": 1182691
@@ -384,27 +384,25 @@
       "backend": "board",
       "case_filter": "production-direct",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/result.zh.md",
         "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
-      "evidence_role": "strict_ab_historical_production_probe",
-      "freshness_state": "historical_probe",
-      "recorded_at_epoch": 1786629444,
+      "evidence_role": "strict_ab",
+      "freshness_state": "current_phase_050",
+      "recorded_at_epoch": 1786712286,
       "related": {
         "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
         "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
         "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
       },
-      "run_label": "production_direct_repeated",
+      "run_label": "production_direct_repeated_phase050",
       "state": {
         "exists": true,
-        "mtime_ns": 1786629426139829016,
+        "mtime_ns": 1786712225766260267,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
-        "sha256": "sha256:8f7c79ed64cdaa62ac0a7ff349ebf0c14c62a01b0c487ad62c30241bff3c7501",
-        "size": 2507
+        "sha256": "sha256:10ca68c031ea2adc8fae48e5c8cbadf416f12a90ccf89a449c234b3b400e2bde",
+        "size": 2508
       },
       "target": "run_board_bench_production_direct_repeated"
     },
@@ -412,27 +410,25 @@
       "backend": "board",
       "case_filter": "production-direct",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/result.zh.md",
         "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
-      "evidence_role": "strict_ab_historical_production_probe",
-      "freshness_state": "historical_probe",
-      "recorded_at_epoch": 1786629444,
+      "evidence_role": "strict_ab",
+      "freshness_state": "current_phase_050",
+      "recorded_at_epoch": 1786712286,
       "related": {
         "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
         "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
         "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
       },
-      "run_label": "production_direct_repeated",
+      "run_label": "production_direct_repeated_phase050",
       "state": {
         "exists": true,
-        "mtime_ns": 1786629426106828980,
+        "mtime_ns": 1786712225731260587,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
-        "sha256": "sha256:935a30e657559240460344dac4aee9292946f93b9049743a6fd8dd96456c1d0a",
-        "size": 6439
+        "sha256": "sha256:0869ea2136ebc0f03315d2c3143a2c951d2994e50d0cd9980f0dbe971d9650e3",
+        "size": 6443
       },
       "target": "run_board_bench_production_direct_repeated"
     },
@@ -440,48 +436,45 @@
       "backend": "board",
       "case_filter": "production-direct",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/result.zh.md",
         "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/optimization-evidence.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
-      "evidence_role": "strict_ab_historical_production_probe",
-      "freshness_state": "historical_probe",
-      "recorded_at_epoch": 1786629444,
+      "evidence_role": "strict_ab",
+      "freshness_state": "current_phase_050",
+      "recorded_at_epoch": 1786712286,
       "related": {
         "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
         "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
         "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
       },
-      "run_label": "production_direct_repeated",
+      "run_label": "production_direct_repeated_phase050",
       "state": {
         "exists": true,
-        "mtime_ns": 1786629426106828980,
+        "mtime_ns": 1786712225731260587,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md",
-        "sha256": "sha256:5bc9e41bc347e387cf91c1da7efbb13a207e2ec7f9094472aa4147fa4997f032",
-        "size": 1704
+        "sha256": "sha256:51ae656863acbdb09c3dfc3bad5cc36ed8505017dfabd5d8729e74d8c70352b9",
+        "size": 1636
       },
       "target": "run_board_bench_production_direct_repeated"
     },
     "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log": {
       "backend": "board",
-      "case_filter": "correctness",
+      "case_filter": "all",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/correctness-tests.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/plan.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
       "evidence_role": "correctness",
-      "freshness_state": "recorded",
-      "recorded_at_epoch": 1786629124,
+      "freshness_state": "current_pending_production_validation",
+      "recorded_at_epoch": 1786711052,
       "related": {},
-      "run_label": "board_correctness_phase030_closeout",
+      "run_label": "phase050_patch_replay_board_correctness",
       "state": {
         "exists": true,
-        "mtime_ns": 1786629093191518129,
+        "mtime_ns": 1786710729850733544,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log",
-        "sha256": "sha256:82c9afe8a8144be793fd7f1122877d1baf17cbf4d5d007a8b8fbba30e4fd93c7",
+        "sha256": "sha256:8ec195d42d131a246d284379b0b684f1deb728d9badf78fab605c440b2049efe",
         "size": 2565
       },
       "target": "run_board_test_smoke"
@@ -618,27 +611,27 @@
       "backend": "qemu",
       "case_filter": "production-direct",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
-      "evidence_role": "qemu_smoke",
-      "freshness_state": "historical_probe",
-      "recorded_at_epoch": 1786626976,
+      "evidence_role": "diagnostic_qemu_smoke_only",
+      "freshness_state": "current_phase_050",
+      "recorded_at_epoch": 1786712286,
       "related": {
         "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
         "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json",
         "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log"
       },
-      "run_label": "production_direct_qemu_smoke",
+      "run_label": "qemu_production_direct_phase050",
       "state": {
         "exists": true,
-        "mtime_ns": 1786625754599892070,
+        "mtime_ns": 1786712181324665256,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log",
-        "sha256": "sha256:b43dff4021a5b99a5b0e31a786b574022ddc08e9bae2fe3e8612b4598f61e486",
-        "size": 1866
+        "sha256": "sha256:299e01d3344dbd907428976618d8ad1ff6483212f9920876f5eb9608ae9b2575",
+        "size": 1868
       },
-      "target": "run_bench_production_direct_smoke"
+      "target": "run_evidence_doctor_production_direct_qemu"
     },
     "test-rvv/registration/correspondence_rejection_poly/log/qemu/edge_batch/evidence_doctor.md": {
       "backend": "qemu",
@@ -750,92 +743,90 @@
       "backend": "qemu",
       "case_filter": "production-direct",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
-      "evidence_role": "qemu_smoke",
-      "freshness_state": "historical_probe",
-      "recorded_at_epoch": 1786626976,
+      "evidence_role": "diagnostic_qemu_smoke_only",
+      "freshness_state": "current_phase_050",
+      "recorded_at_epoch": 1786712286,
       "related": {
         "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
         "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json",
         "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log"
       },
-      "run_label": "production_direct_qemu_smoke",
+      "run_label": "qemu_production_direct_phase050",
       "state": {
         "exists": true,
-        "mtime_ns": 1786625754679892157,
+        "mtime_ns": 1786712190398582571,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
         "sha256": "sha256:eb3778d5295a2c50c7627a6c27992f5f765e74607a345cf994f190dbf7e72bb8",
         "size": 607
       },
-      "target": "run_bench_production_direct_smoke"
+      "target": "run_evidence_doctor_production_direct_qemu"
     },
     "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json": {
       "backend": "qemu",
       "case_filter": "production-direct",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/phases/030-pi1-production-integration-plan/result.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/result.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/benchmark-and-evidence.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
-      "evidence_role": "qemu_smoke",
-      "freshness_state": "historical_probe",
-      "recorded_at_epoch": 1786626976,
+      "evidence_role": "diagnostic_qemu_smoke_only",
+      "freshness_state": "current_phase_050",
+      "recorded_at_epoch": 1786712286,
       "related": {
         "doctor_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
         "manifest_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json",
         "summary_path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log"
       },
-      "run_label": "production_direct_qemu_smoke",
+      "run_label": "qemu_production_direct_phase050",
       "state": {
         "exists": true,
-        "mtime_ns": 1786625754652892128,
+        "mtime_ns": 1786712190363582890,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json",
-        "sha256": "sha256:267db956c73a3a71790591174a7e4361d6367f5bec27b0c3d692dc2a2077b4c5",
-        "size": 5385
+        "sha256": "sha256:fe494606cf783e8ec2bf23383603222c936cf472827c7bf95cf83a674b53fd49",
+        "size": 5386
       },
-      "target": "run_bench_production_direct_smoke"
+      "target": "run_evidence_doctor_production_direct_qemu"
     },
     "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log": {
       "backend": "qemu",
-      "case_filter": "correctness",
+      "case_filter": "all",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/correctness-tests.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/plan.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
       "evidence_role": "correctness",
-      "freshness_state": "recorded",
-      "recorded_at_epoch": 1786629124,
+      "freshness_state": "current_pending_production_validation",
+      "recorded_at_epoch": 1786711044,
       "related": {},
-      "run_label": "qemu_correctness_phase030_closeout",
+      "run_label": "phase050_patch_replay_qemu_correctness",
       "state": {
         "exists": true,
-        "mtime_ns": 1786629084477463609,
+        "mtime_ns": 1786710704530123386,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log",
-        "sha256": "sha256:a149693ad5aa2acd3a3af1ed23e76c13c76dc06343ab13b97f8492c4d9503e82",
+        "sha256": "sha256:4f79a47b79fe3b4e9801397ed6cdb0ea3999fb6e9b18ad6a5854e6f202c10743",
         "size": 2567
       },
       "target": "run_test_compare"
     },
     "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log": {
       "backend": "qemu",
-      "case_filter": "correctness",
+      "case_filter": "all",
       "doc_refs": [
-        "test-rvv/registration/correspondence_rejection_poly/doc/correctness-tests.zh.md",
-        "test-rvv/registration/correspondence_rejection_poly/doc/correspondence_rejection_poly-evaluation.zh.md",
+        "test-rvv/registration/correspondence_rejection_poly/doc/phases/050-production-patch-replay-user-validation/plan.zh.md",
         "tmp/rvv-work-logs/registration/correspondence_rejection_poly/current-handoff/current-handoff.zh.md"
       ],
       "evidence_role": "correctness",
-      "freshness_state": "recorded",
-      "recorded_at_epoch": 1786629124,
+      "freshness_state": "current_pending_production_validation",
+      "recorded_at_epoch": 1786711036,
       "related": {},
-      "run_label": "qemu_correctness_phase030_closeout",
+      "run_label": "phase050_patch_replay_qemu_correctness",
       "state": {
         "exists": true,
-        "mtime_ns": 1786629079800458610,
+        "mtime_ns": 1786710699601168304,
         "path": "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log",
         "sha256": "sha256:7466b68bf3068d2c9906a709fbfcbb4d16e2317768e84a8e04bc3d10a9888695",
         "size": 2567
@@ -874,15 +865,15 @@
       ],
       "evidence_role": "topic_local_tooling",
       "freshness_state": "recorded",
-      "recorded_at_epoch": 1786629444,
+      "recorded_at_epoch": 1786711973,
       "related": {},
-      "run_label": "summarize_script_binary_hash_override",
+      "run_label": "summarize_script_drop_crpoly_probe_guard",
       "state": {
         "exists": true,
-        "mtime_ns": 1786629411050812891,
+        "mtime_ns": 1786711823027930443,
         "path": "test-rvv/registration/correspondence_rejection_poly/script/summarize_crpoly_board_repeated.py",
-        "sha256": "sha256:b4811013c9ec3e4f6bc22136870fdd07bffef2c7f884e901661b45eea84c9238",
-        "size": 20722
+        "sha256": "sha256:dadcc155e13fc651d5766fc7c4a34122e4c59fc28b68b968a103449468e72f2c",
+        "size": 20671
       },
       "target": "script_update"
     }
@@ -1199,8 +1190,100 @@
       "recorded_at_epoch": 1786629444,
       "run_label": "summarize_script_binary_hash_override",
       "target": "script_update"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "all",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786711036,
+      "run_label": "phase050_patch_replay_qemu_correctness",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "all",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log"
+      ],
+      "recorded_at_epoch": 1786711044,
+      "run_label": "phase050_patch_replay_qemu_correctness",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "all",
+      "evidence_role": "correctness",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log"
+      ],
+      "recorded_at_epoch": 1786711052,
+      "run_label": "phase050_patch_replay_board_correctness",
+      "target": "run_board_test_smoke"
+    },
+    {
+      "backend": "host",
+      "case_filter": "production-direct",
+      "evidence_role": "topic_local_tooling",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/script/summarize_crpoly_board_repeated.py"
+      ],
+      "recorded_at_epoch": 1786711973,
+      "run_label": "summarize_script_drop_crpoly_probe_guard",
+      "target": "script_update"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "evidence_role": "diagnostic_qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/qemu/production_direct/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1786712286,
+      "run_label": "qemu_production_direct_phase050",
+      "target": "run_evidence_doctor_production_direct_qemu"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production-direct",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_manifest.json",
+        "test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786712286,
+      "run_label": "production_direct_repeated_phase050",
+      "target": "run_board_bench_production_direct_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "evidence_role": "asm_attribution",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.asm"
+      ],
+      "recorded_at_epoch": 1786712286,
+      "run_label": "qemu_bench_rvv_asm_phase050",
+      "target": "dump_bench_rvv"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-direct",
+      "evidence_role": "asm_attribution_full",
+      "files": [
+        "test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm"
+      ],
+      "recorded_at_epoch": 1786712287,
+      "run_label": "qemu_bench_rvv_full_asm_phase050",
+      "target": "dump_bench_rvv"
     }
   ],
   "schema_version": 1,
-  "updated_at_epoch": 1786629444
+  "updated_at_epoch": 1786712287
 }

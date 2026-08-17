@@ -12,7 +12,7 @@
 
 ### 1. ba_degradation_frequency — production-direct public entry 2048 correspondences
 
-- observed_pattern：B/A values=0.911x, 0.863x, 0.89x, 0.917x, 0.901x；5/5 低于 1。
+- observed_pattern：B/A values=0.901x, 0.924x, 0.904x, 0.913x, 0.888x；5/5 低于 1。
 - why_suspicious：平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。
 - possible_non_bug_explanations：可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。
 - possible_bug_or_evidence_issues：也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。
@@ -21,7 +21,7 @@
 
 ### 2. ba_degradation_frequency — production-direct public entry 8192 correspondences
 
-- observed_pattern：B/A values=0.958x, 0.941x, 0.955x, 0.968x, 0.956x；5/5 低于 1。
+- observed_pattern：B/A values=0.892x, 0.977x, 0.984x, 0.971x, 0.977x；5/5 低于 1。
 - why_suspicious：平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。
 - possible_non_bug_explanations：可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。
 - possible_bug_or_evidence_issues：也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。
