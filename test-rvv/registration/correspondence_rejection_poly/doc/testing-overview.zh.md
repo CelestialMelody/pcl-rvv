@@ -10,14 +10,14 @@
 
 | 读者问题 | 首选入口 | 作用 |
 | --- | --- | --- |
-| 当前为什么是 `rollback/no-production` | `doc/correspondence_rejection_poly-evaluation.zh.md` | 记录标量流程、Traceability Map（可追踪性地图）、诊断证据链和生产接入判断。 |
+| 当前为什么不接入 production | `doc/correspondence_rejection_poly-evaluation.zh.md`、current Handoff | 区分历史 `rollback/no-production`、Phase 050 临时 patch replay、用户确认回滚和当前 clean production。 |
 | 测试类型和运行入口如何分层 | 本文 | 建立 public entry、test entry、bench entry、QEMU、board 和 historical probe（历史探针）的证据边界。 |
 | 每个 gtest 验证什么 | `doc/correctness-tests.zh.md` | 逐项解释输入、被测路径、断言、证明范围和不能证明的范围。 |
 | bench case、checksum（校验和）和 Evidence Doctor 如何解释 | `doc/benchmark-and-evidence.zh.md` | 说明 case-filter（用例过滤条件）、计时边界、summary / manifest / doctor、registry（证据登记表）和提交边界。 |
 | 每个 candidate（候选实现）为什么采用、拒绝或保留为历史线索 | `doc/optimization-evidence.zh.md`、`doc/phases/optimization-matrix.zh.md` | 把候选族映射到代码、target、board summary、asm attribution（反汇编归因）和 decision。 |
 | helper、script 和 output 在哪里 | `doc/test-support-code-map.zh.md` | 连接 `include/`、`include/impl/`、`src/`、script、output 和 production 对照。 |
-| production-direct 探针的负向证据在哪里 | `doc/phases/030-pi1-production-integration-plan/result.zh.md` | 记录 Phase 030 临时生产探针、board negative、Evidence Doctor Errors 和回滚结论。 |
-| 下一轮如何恢复 | `doc/optimization-roadmap.zh.md`、`doc/phases/README.zh.md`、current Handoff | 当前默认恢复动作是 `ready_for_review`；继续性能探索需另开 profile / ablation（性能剖析 / 组件消融）阶段。 |
+| production-direct 历史负向证据在哪里 | `doc/phases/030-pi1-production-integration-plan/result.zh.md` | 记录 Phase 030 临时生产探针、board negative、Evidence Doctor Errors 和历史回滚结论。 |
+| 当前如何继续验证 | `doc/phases/050-production-patch-replay-user-validation/result.zh.md`、current Handoff | Phase 050 已执行 QEMU smoke 和板卡 5-run；用户已确认回滚。继续时需另开 profile / ablation phase。 |
 
 ## 当前生产边界
 
@@ -26,20 +26,20 @@
 - `registration/include/pcl/registration/correspondence_rejection_poly.h`
 - `registration/include/pcl/registration/impl/correspondence_rejection_poly.hpp`
 
-当前 production 文件没有本 topic diff。Phase 030 曾临时接入 public dispatch（公开入口分流）到 RVV helper，再 fallback（回退）到 `Standard` helper；该探针的 QEMU / board correctness（正确性）通过，board repeated benchmark（板卡重复性能测试）为 negative。生产补丁已经回滚，`doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md` 对当前 no-production closeout（不接入生产收尾）不适用。
+当前 production 文件已还原为标量实现，没有本 topic production diff。Phase 050 回滚前曾临时加入 public dispatch（公开入口分流）到 RVV helper，再 fallback（回退）到 `Standard` helper；该 patch 的 Std/RVV 和 board correctness（正确性）通过，但 production-direct board repeated benchmark（板卡重复性能测试）仍为 negative。`doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md` 因 no-production closeout 仍不适用。
 
 ## Public / Test / Bench 入口对应关系
 
 | public entry / 数据流 | correctness test entry | bench entry | 当前证据角色 | 边界 |
 | --- | --- | --- | --- | --- |
-| `applyRejection` -> `getRemainingCorrespondences` 的 guard 和输出语义 | `MissingInputReturnsAllCorrespondences`、`CardinalityAndSimilarityGuardsReturnAll`、public-entry smoke | `full-entry` QEMU smoke | 证明回滚后当前 public entry 标量语义稳定 | 不证明 RVV production dispatch 已采用。 |
+| `applyRejection` -> `getRemainingCorrespondences` 的 guard 和输出语义 | `MissingInputReturnsAllCorrespondences`、`CardinalityAndSimilarityGuardsReturnAll`、public-entry smoke | `full-entry` QEMU smoke | 证明当前标量公开入口，以及 Phase 050 回滚前临时 Standard / RVV patch 的语义均与 reference 对齐 | 不证明性能收益或已采纳生产。 |
 | `thresholdEdgeLength` 的 `min/max` 边长比 | `EdgeSimilarityBatchMatchesReference` | `edge-batch` | 证明局部 edge predicate（边判断）公式和 NaN 拒绝语义 | 不覆盖 point cloud gather（点云离散读取）。 |
 | correspondence index gather（对应关系索引离散加载）和 squared distance staging（平方距离暂存） | `EdgeGatherStagingCandidateMatchesReference` | `edge-gather-staging` | 证明 production-shaped diagnostic（生产形态诊断）在 gather + staging 后仍正确 | 不覆盖完整 random sampling、histogram / Otsu 或输出 append。 |
 | accept rate（接受率）和 filter（筛选） | `AcceptanceRateCandidateKeepsZeroSampleSemantics` | `acceptance-filter` | 证明 `num_samples == 0` 和非零样本除法语义 | 不覆盖 histogram scatter（直方图散写）和 production 收益。 |
 | histogram / Otsu / output append | `HistogramOtsuAndFilterSemantics`、public-entry smoke | `full-entry` QEMU smoke | 证明 clamp、Otsu 空类跳过和输出顺序 | 不提供目标硬件性能结论。 |
-| Phase 030 historical production direct probe | `run_test_compare`、`run_board_test_smoke` 在临时补丁存在时覆盖正确性 | `production-direct` guarded target | 证明历史生产探针曾真实进入 public entry dispatch | 当前回滚状态下不能形成新的 production RVV evidence（生产 RVV 证据）。 |
+| Phase 050 production direct replay | `run_test_compare`、`run_board_test_smoke` 已覆盖回滚前临时 patch 正确性 | `production-direct` target | 回滚前 patch 的公开入口和板卡性能证据为 negative | 用户已确认回滚；当前不接 production。 |
 
-`run_test_compare` 同时运行 Std 和 RVV 构建。Std 构建禁用 `__RVV10__`，RVV 构建启用 `__RVV10__`。RVV 构建中的 test-only helper（测试专用 helper）可以命中 RVV candidate；真实 `CorrespondenceRejectorPoly` public entry 在当前源码中仍保持标量行为。
+`run_test_compare` 同时运行 Std 和 RVV 构建。当前 production 已回到标量实现；Phase 050 回滚前的临时 patch 中，Std 构建禁用 `__RVV10__`，走 `Standard` 标量主体，RVV 构建启用 `__RVV10__` 并先尝试 production RVV helper。该证据只证明临时 patch 的正确性，不证明板卡性能或最终采纳。
 
 ## 测试类型定义
 
@@ -49,7 +49,7 @@
 | seeded random stress（固定种子随机压力样本） | `std::mt19937` 固定 seed 生成点云扰动和乱序 correspondence | 扩大输入组合，降低漏掉 size / cardinality / threshold 组合的风险 | seed 固定后可复现；不提供性能证据。 |
 | local correctness（局部正确性） | edge batch、accept rate、histogram / Otsu helper 对拍 | 证明 test-only candidate 与 reference path（参考链路）一致 | 不证明真实 production dispatch。 |
 | production-shaped diagnostic（生产形态诊断） | `edge_gather_staging` 等 test-only helper | 模拟真实 row source（行来源）和 AoS point load（结构数组点加载） | 不能替代 production direct。 |
-| production direct（真实生产路径证据） | Phase 030 临时生产探针历史证据 | 在临时 production dispatch 存在时证明公开入口的真实正确性和性能 | 当前生产补丁已回滚；再次采集需要重新应用补丁。 |
+| production direct（真实生产路径证据） | Phase 030 历史证据 + Phase 050 replay | 在临时 production dispatch 存在时证明公开入口的真实正确性和性能 | Phase 050 replay 为 negative；不能支持生产采纳。 |
 | QEMU correctness（QEMU 正确性） | `run_test_compare` | 证明构建、gtest 正确性和 RVV helper 形状 | QEMU timing（QEMU 计时）不进入性能结论。 |
 | QEMU log-shape（QEMU 日志形状） | `run_bench_qemu_smoke` 和 Evidence Doctor manifest | 证明 bench 输出、case label、checksum 和 manifest 可解析 | 只支持日志合同，不支持目标硬件性能。 |
 | board correctness（板卡正确性） | `run_board_test_smoke` | 证明目标硬件上 correctness binary 可运行并通过 8 个 test | 不是 repeated performance evidence（重复性能证据）。 |
@@ -63,7 +63,7 @@
 | board correctness smoke | `make -C test-rvv/registration/correspondence_rejection_poly run_board_test_smoke` | board | 目标硬件上 correctness binary 可运行并通过 8 个 test。 |
 | QEMU bench smoke | `make -C test-rvv/registration/correspondence_rejection_poly run_bench_qemu_smoke` | QEMU | `edge-batch`、`edge-gather-staging` 和 `acceptance-filter` 的日志形状、case label 和 checksum 形状可解析。 |
 | board diagnostic repeated | `make -C test-rvv/registration/correspondence_rejection_poly run_board_bench_repeated` | board | edge / acceptance 诊断候选的重复性能摘要；aggregate target 不包含 `production-direct`。 |
-| historical production-direct repeated | `CRPOLY_ENABLE_PRODUCTION_DIRECT_PROBE=1 make -C test-rvv/registration/correspondence_rejection_poly run_board_bench_production_direct_repeated` | board | 只在临时生产探针补丁存在时支撑 production direct；当前回滚状态下不形成生产 RVV 证据。 |
+| production-direct repeated | `make -C test-rvv/registration/correspondence_rejection_poly run_board_bench_production_direct_repeated` | board | Phase 050 回滚前临时 patch 的 5-run production-direct 证据；结果 negative。当前直接运行只测标量 public entry。 |
 
 ## 输入数据策略
 
@@ -102,12 +102,12 @@
 | QEMU log-shape | `log/qemu/analyze_bench_compare_*.log`、`log/qemu/*/evidence_doctor.md` | bench 输出合同、case label、checksum 和 manifest 可解析 | QEMU timing 不进入 EvidenceDecision 的性能部分。 |
 | board correctness | `log/board/test_smoke/run_test.log` | 目标硬件上当前 correctness binary 通过 8 个 test | 只证明可运行和正确性。 |
 | board diagnostic repeated | `log/board/edge_batch_repeated/summary.md`、`log/board/edge_gather_staging_repeated/summary.md`、`log/board/acceptance_filter_confirm/summary.md` | 局部或 production-shaped diagnostic 的 weak-positive / neutral 线索 | 不能替代 production direct。 |
-| board production direct historical | `log/board/production_direct_repeated/summary.md`、`log/board/production_direct_repeated/evidence_doctor.md` | Phase 030 临时生产探针在目标硬件退化，支撑 `rollback/no-production` | 该证据属于历史探针；当前 production 源码已回滚。 |
-| asm historical probe | `build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm` | 回滚前探针中可见 `getRemainingCorrespondencesRVV` / `Standard` 和 RVV 指令 | 不代表当前 production 源码仍含 RVV dispatch。 |
+| board production direct replay | `log/board/production_direct_repeated/summary.md`、`log/board/production_direct_repeated/evidence_doctor.md` | Phase 050 临时生产 replay 在目标硬件退化，用户已确认回滚 | 不说明唯一退化根因。 |
+| asm Phase 050 refresh | `build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm` | 回滚前 asm 可见 `getRemainingCorrespondencesRVV` / `Standard` 和 RVV 指令 | 不能抵消 board negative。 |
 
-## Production-direct 历史探针开关
+## Production-direct 运行边界
 
-`CRPOLY_ENABLE_PRODUCTION_DIRECT_PROBE=1` 只解除 Makefile 的历史探针保护门。它不是编译宏，不会修改生产 header，不会应用 Phase 030 生产补丁，也不会让当前 production public entry 自动命中 RVV。
+`production-direct` target 不需要额外环境变量。它不会修改生产 header、应用补丁或自动让当前 public entry 命中 RVV；是否形成 production RVV evidence（生产 RVV 证据）取决于运行前是否存在当前 production dispatch patch。
 
 `production-direct` bench 的 C++ 入口是生产类公开调用：
 
@@ -119,10 +119,10 @@ rejector.getRemainingCorrespondences(correspondences, remaining)
 
 | 条件 | 当前状态 | 影响 |
 | --- | --- | --- |
-| 临时 production probe patch 存在 | 当前不存在；生产补丁已回滚 | 当前 public entry 没有 RVV dispatch。 |
-| 设置 `CRPOLY_ENABLE_PRODUCTION_DIRECT_PROBE=1` | 默认关闭 | 只允许 Makefile 跑历史 target。 |
+| 临时 production probe patch 存在 | 当前不存在；用户已确认回滚 | 当前直接运行只形成标量 public-entry timing；Phase 050 证据来自回滚前 replay。 |
+| 直接运行 `production-direct` target | 当前可用 | 只运行当前源码；不会修改 production patch。 |
 
-只设置环境变量会测到当前回滚后的标量公开入口。这样的结果不能登记为 production RVV evidence。既有 `production_direct_repeated` summary 是 Phase 030 历史探针证据；它的 board decision bucket 为 negative，Evidence Doctor 报告 Errors=2，当前 EvidenceDecision 因此保持 `rollback/no-production`。
+如果 production patch 不存在，target 仍会测到标量公开入口，不能登记为 production RVV evidence。当前 `production_direct_repeated` summary 是 Phase 050 replay 证据；它的 board decision bucket 为 negative，Evidence Doctor 报告 Errors=2。
 
 ## 当前可提交证据和默认排除项
 
@@ -148,20 +148,20 @@ rejector.getRemainingCorrespondences(correspondences, remaining)
 | candidate family 取舍 | `doc/optimization-evidence.zh.md`、`doc/phases/optimization-matrix.zh.md` | 本文只说明哪些测试和 bench 支撑这些取舍。 |
 | Phase 030 negative production direct | `doc/phases/030-pi1-production-integration-plan/result.zh.md` | 本文引用其历史探针和 rollback 结论。 |
 | Phase 040 doc-suite parity | `doc/phases/040-structure-parity-doc-suite/result.zh.md` | 本文作为 doc-suite area 的 `testing-overview` 主入口。 |
-| 跨阶段恢复和下一动作 | `doc/optimization-roadmap.zh.md`、current Handoff | 本文记录当前默认不继续生产补丁。 |
+| 跨阶段恢复和下一动作 | `doc/optimization-roadmap.zh.md`、Phase 050、current Handoff | 本文记录当前 production-direct 验证和 PI5 用户确认点。 |
 | helper、script 和 output 位置 | `doc/test-support-code-map.zh.md` | 本文只列关键路径，详细调用关系看代码地图。 |
 
 ## Reviewer 追踪路径
 
 | 要复核的结论 | 追踪路径 |
 | --- | --- |
-| 当前 production 文件无本 topic diff | `git diff -- registration/include/pcl/registration/correspondence_rejection_poly.h registration/include/pcl/registration/impl/correspondence_rejection_poly.hpp`；再读 evaluation 的 `范围和目标源码`。 |
+| 当前 production patch 是否存在 | `git diff -- registration/include/pcl/registration/correspondence_rejection_poly.h registration/include/pcl/registration/impl/correspondence_rejection_poly.hpp`；再读 Phase 050 plan 和 current Handoff。 |
 | public entry 标量语义 | production `applyRejection` / `getRemainingCorrespondences` -> evaluation `Public Entry 和输出语义` -> `src/test_correspondence_rejection_poly.cpp` 的 public-entry smoke。 |
 | test-only RVV candidate 正确性 | `include/impl/correspondence_rejection_poly_candidates.hpp` -> 8 个 gtest -> QEMU Std/RVV logs。 |
 | bench target 和 case-filter 含义 | `src/bench_correspondence_rejection_poly.cpp` -> `doc/benchmark-and-evidence.zh.md` -> QEMU / board summary。 |
 | Evidence Doctor 和 registry 状态 | `log/**/evidence_doctor.md` -> `log/evidence_registry.json` -> `python3 test-rvv/script/evidence_registry.py check --registry test-rvv/registration/correspondence_rejection_poly/log/evidence_registry.json`。 |
-| EvidenceDecision | board production-direct summary + Evidence Doctor Errors=2 -> Phase 030 result -> evaluation `诊断证据链` -> current Handoff。 |
+| EvidenceDecision | Phase 030 historical board summary + current Phase 050 production-direct replay -> PI5 user confirmation -> current Handoff。 |
 
 ## 当前结论边界
 
-这些测试和证据证明诊断 helper 与当前 production public entry 保持当前源码语义，也证明 Phase 030 临时生产探针在目标硬件上退化。它们支持当前 `rollback/no-production`。它们不能把 `edge_gather_staging` 的 historical weak-positive（历史弱正向）写成 production evidence，也不能把 QEMU timing 写成性能结论。继续当前 topic 的性能探索应先建立新的 profile / component ablation phase；不应默认恢复 Phase 030 production patch。
+这些测试和当前证据证明诊断 helper、Phase 050 临时 production patch 的正确性边界，以及 replay 在目标硬件上退化。不能把 QEMU timing 写成性能结论；用户已确认回滚，当前 EvidenceDecision 是 `rollback/no-production`。

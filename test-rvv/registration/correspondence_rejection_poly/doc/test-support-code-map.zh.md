@@ -22,7 +22,7 @@ README.zh.md
        -> doc/phases/optimization-matrix.zh.md
 ```
 
-测试源码只包含 topic-local include 路径。production 源码当前没有本 topic diff；回滚前 `getRemainingCorrespondencesRVV` / `getRemainingCorrespondencesStandard` 只保留在 historical asm 和 phase result 中作为负向探针证据。
+测试源码只包含 topic-local include 路径。production 源码当前没有本 topic diff，保持仓库标量实现。Phase 050 回滚前曾临时保留公开入口先尝试 `getRemainingCorrespondencesRVV`、失败时回到 `getRemainingCorrespondencesStandard` 的生产探针；该 replay 的 board 结果为 negative，用户已确认回滚。
 
 ## 目录形态
 
@@ -33,7 +33,7 @@ README.zh.md
 | `src/test_correspondence_rejection_poly.cpp` | gtest correctness | adopted |
 | `src/bench_correspondence_rejection_poly.cpp` | bench wrapper 和 case registry | adopted |
 | `script/generate_crpoly_evidence_manifest.py` | topic-local Evidence Doctor manifest wrapper | adopted |
-| `script/summarize_crpoly_board_repeated.py` | topic-local repeated board summary / manifest generator | adopted；production-direct case 会写成 historical probe 边界 |
+| `script/summarize_crpoly_board_repeated.py` | topic-local repeated board summary / manifest generator | adopted；production-direct case 会按当前 production diff 写证据边界 |
 | `doc/phases/` | phase plan/result 和 optimization matrix | adopted |
 | `log/evidence_registry.json` | evidence freshness registry | adopted |
 | `test_support/` | legacy directory | not_present |
@@ -56,7 +56,7 @@ README.zh.md
 | `edge_similarity_batch_candidate` | edge similarity RVV candidate | gtest、edge bench |
 | `edge_similarity_gather_reference`、`edge_similarity_gather_candidate` | correspondence index 读点、squared distance staging 和 RVV edge formula 诊断 | gtest、edge-gather bench |
 | `checksum_*` | bench checksum | bench wrapper |
-| `run_production_direct` | historical production direct probe 的 bench 输入构造 | `production-direct` case；默认 target 被显式开关保护 |
+| `run_production_direct` | production-direct bench 输入构造 | `production-direct` case；target 可直接运行，证据角色由当前 production diff 决定 |
 
 ## Scripts 与 Evidence Output
 
@@ -73,8 +73,9 @@ README.zh.md
 
 | 层级 | 当前状态 | 边界 |
 | --- | --- | --- |
-| production public entry | `CorrespondenceRejectorPoly::getRemainingCorrespondences` 当前为标量路径 | 本阶段只读复核，不修改 |
-| historical production probe | Phase 030 回滚前 `Standard` / `RVV` helper 分层 | 只保留在 phase result、summary 和 asm 证据中 |
+| production public entry | 当前仓库标量 `getRemainingCorrespondences` | production patch 已按用户确认回滚；无本 topic production diff |
+| Phase 050 temporary production probe | 回滚前 `getRemainingCorrespondences` -> RVV helper -> Standard fallback | 只作为 negative replay evidence 保留 |
+| historical production probe | Phase 030 的 `Standard` / `RVV` helper 分层和负向 board 结果 | 作为历史 evidence 保留，不能替代当前 replay |
 | test-only reference | `remaining_correspondences_reference` 等 helper | 用于 correctness 对拍，不能混入 production |
 | test-only RVV candidate | edge / gather / acceptance helpers | 用于诊断和 bench，不代表 production dispatch |
 | bench wrapper | case-filter 和 checksum 输出 | 计时边界由 `benchmark-and-evidence.zh.md` 解释 |
@@ -83,7 +84,7 @@ README.zh.md
 
 内部 helper 584 行，低于 800 行软阈值。它同时包含 fixtures、reference、candidate、production-shaped gather diagnostic 和 checksum，已接近多职责拆分阈值；当前仍可审查，因为职责集中在一个 topic-local helper 且有本 code map 定位。`src/test_*.cpp` 和 `src/bench_*.cpp` 已位于 `artifact_layout.source_subdir` 解析出的 `src/` 下；聚合入口和 `include/impl` 内部目录也已采用配置布局。
 
-Phase 030 已完成 production-direct 探针并回滚生产补丁，没有新的默认 PI1 / PI2 扩展动作。因此拆分不是当前 closeout 的未阻塞必要项。若后续另开 profile / ablation phase，或新增 production-direct helper、更多 row-source candidate，再把该 header 拆成 `fixtures`、`references`、`candidates` 和 `bench_harness` 职责头文件。
+Phase 030 已完成历史 production-direct 探针；Phase 050 只恢复既有 production 分层并完成 replay，随后按用户确认回滚，没有扩大到新的 helper 或 row-source candidate。因此拆分不是当前验证阶段的未阻塞必要项。若后续另开 profile / ablation phase，或新增 production-direct helper，再把该 header 拆成 `fixtures`、`references`、`candidates` 和 `bench_harness` 职责头文件。
 
 ## 拆分触发条件
 

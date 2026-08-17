@@ -7,17 +7,17 @@
 - `registration/include/pcl/registration/correspondence_rejection_poly.h`
 - `registration/include/pcl/registration/impl/correspondence_rejection_poly.hpp`
 
-当前 production（生产源码）没有本 topic diff。Phase 030 曾按 `Standard` / `RVV` helper 分层做过真实公开入口探针；板卡证据为负向后，生产补丁已回滚。
+当前 production（生产源码）已还原为仓库标量实现，两个目标文件当前无本 topic production diff。Phase 050 曾临时恢复 Standard / RVV 分层 patch 供用户检查并重新运行 production-direct 重跑；板卡结果仍为负向，用户随后确认不接入，worker 已回滚临时补丁。
 
 ## 函数级结论
 
-当前 EvidenceDecision（证据决策）是 `rollback/no-production`。
+历史 Phase 030 EvidenceDecision（证据决策）是 `rollback/no-production`；当前 Phase 050 closeout 也是 `rollback/no-production`。证据不支持 production adoption（生产采纳），用户已确认不接入，目标 production 文件已回到 clean 标量状态。
 
 本 topic 的 test-rvv 资产证明了三件事：
 
 - 当前标量语义已被可重复测试覆盖。QEMU Std/RVV 构建各 8 tests passed，板卡 smoke 8 tests passed。
 - 局部 `edge_gather_staging` 诊断在板卡上曾为 `weak_positive`，但它只覆盖 correspondence index gather（对应关系索引离散加载）、squared distance staging（平方距离暂存）和 RVV edge formula（RVV 边公式）。
-- 回滚前 production direct（真实生产入口直连）探针在板卡上为 `negative`：2048 和 8192 correspondences 两个 case 都是 5/5 degradation。该证据否决当前生产接入。
+- Phase 050 production direct（真实生产入口直连）重跑在板卡上仍为 `negative`：2048 median `0.904x`，8192 median `0.977x`，两个 case 都是 5/5 degradation。该证据不支持采纳回滚前临时 production patch。
 
 ## Public Entry 和输出语义
 
@@ -29,11 +29,11 @@
 
 | 阶段 | 当前源码语义 | RVV / 诊断状态 |
 | --- | --- | --- |
-| `applyRejection` | 调用 `getRemainingCorrespondences(*input_correspondences_, correspondences)`。 | 当前保持标量。 |
+| `applyRejection` | 调用 `getRemainingCorrespondences(*input_correspondences_, correspondences)`。 | 当前 production 保持标量；Phase 050 回滚前临时 RVV helper 只作为负向探针证据。 |
 | 输入 guard | `remaining_correspondences` 先复制输入；缺 source、缺 target、`cardinality_ < 2`、`cardinality_ >= nr_correspondences`、similarity threshold 不在 `[0,1]` 时返回输入副本。 | gtest 隔离覆盖 guard。 |
 | random sampling | 每轮 `std::rand() % n` 无放回抽样 `cardinality_` 个 correspondence。 | 保持标量；测试用固定 seed 对拍。 |
 | `thresholdPolygon` | `cardinality_ == 2` 检查一条边；否则检查相邻边和尾首边，任一边失败则拒绝整组。 | 局部 candidate 覆盖 edge predicate，完整控制流保持标量。 |
-| `thresholdEdgeLength` | source / target 两条边分别算 xyz squared distance，比较 `min/max >= similarity_threshold_squared_`。零长度 `0 / 0` 产生 NaN，比较为 false。 | gtest 保护 NaN 拒绝语义；生产探针正确但板卡退化。 |
+| `thresholdEdgeLength` | source / target 两条边分别算 xyz squared distance，比较 `min/max >= similarity_threshold_squared_`。零长度 `0 / 0` 产生 NaN，比较为 false。 | Standard 保持原公式；临时 RVV helper 批量计算 xyz edge predicate，gtest 保护 NaN 拒绝语义。 |
 | accept rate | `num_samples == 0` 时接受率为 0；否则 `num_accepted / num_samples`。 | `accept_rate_filter` 诊断为 neutral，不接 production。 |
 | histogram / Otsu | `hist_size = nr_correspondences / 2`；Otsu 最大化类间方差。 | 保持标量。 |
 | output | `accept_rate[i] > cut` 时按输入顺序 push 原 correspondence。 | 保持标量，保护输出顺序。 |
@@ -64,7 +64,8 @@
 | 符号 / 文件 | 层级 | 作用 | 上游 / 消费者 | 证据角色 | 位置 |
 | --- | --- | --- | --- | --- | --- |
 | `CorrespondenceRejectorPoly::applyRejection` | production public entry | 从 base class 输入 correspondences 进入目标 helper | 上游 registration rejector pipeline | production boundary（生产边界） | `registration/include/pcl/registration/correspondence_rejection_poly.h` |
-| `getRemainingCorrespondences` | production scalar helper | guard、随机采样、accept rate、histogram、Otsu 和输出构造 | `applyRejection` / 直接调用 | scalar truth（标量事实） | `registration/include/pcl/registration/impl/correspondence_rejection_poly.hpp` |
+| `getRemainingCorrespondences` | production public entry | 当前标量 guard、随机采样、accept rate、histogram、Otsu 和输出构造 | `applyRejection` / 直接调用 | scalar truth（标量事实） | `registration/include/pcl/registration/impl/correspondence_rejection_poly.hpp` |
+| Phase 050 temporary `getRemainingCorrespondencesStandard` / `getRemainingCorrespondencesRVV` | historical production probe | 回滚前临时分层：RVV helper 批量计算 polygon edge similarity，其余阶段保持标量 | `production-direct` bench replay | rejected production candidate（已拒绝生产候选） | `doc/phases/050-production-patch-replay-user-validation/result.zh.md` |
 | `thresholdPolygon` / `thresholdEdgeLength` | production scalar helper | 多边形边长比阈值判断 | `getRemainingCorrespondences` | formula source（公式来源） | `registration/include/pcl/registration/correspondence_rejection_poly.h` |
 | `include/correspondence_rejection_poly.h` | test support aggregator（测试支撑聚合入口） | 给 test / bench 提供稳定 include 入口 | `src/test_*.cpp`、`src/bench_*.cpp` | reviewer navigation（审查定位） | `test-rvv/registration/correspondence_rejection_poly/include/correspondence_rejection_poly.h` |
 | `include/impl/correspondence_rejection_poly_candidates.hpp` | reference / candidate helper | 标量参考和 test-only RVV 局部候选 | gtest、bench wrapper | correctness / asm smoke | `test-rvv/registration/correspondence_rejection_poly/include/impl/correspondence_rejection_poly_candidates.hpp` |
@@ -82,10 +83,10 @@
 | QEMU Std correctness | pass | `test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_std.log` | 8 tests passed。 |
 | QEMU RVV correctness | pass | `test-rvv/registration/correspondence_rejection_poly/log/qemu/run_test_rvv.log` | 8 tests passed。 |
 | board correctness | pass | `test-rvv/registration/correspondence_rejection_poly/log/board/test_smoke/run_test.log` | 8 tests passed。 |
-| QEMU production-direct smoke | pass as log-shape | `test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log`、`log/qemu/production_direct/evidence_doctor.md` | QEMU timing 不作为性能结论。 |
-| asm historical probe | pass for rollback evidence | `test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm` | 回滚前 `getRemainingCorrespondencesRVV` / `Standard` 符号可见；当前源码已回滚。 |
-| board production direct | negative | `test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md` | 2048 median 约 0.901x，8192 median 约 0.956x，两个 case 均 5/5 degradation。 |
-| Evidence Doctor board production direct | fail for adoption | `test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md` | Errors=2，Warnings=0，Suggestions=0。 |
+| QEMU production-direct smoke | pass as log-shape | `test-rvv/registration/correspondence_rejection_poly/log/qemu/analyze_bench_compare_production_direct.log`、`log/qemu/production_direct/evidence_doctor.md` | checksum match；QEMU 只作路径和日志形状证据，doctor Errors=0。 |
+| asm Phase 050 refresh | pass as historical path attribution | `test-rvv/registration/correspondence_rejection_poly/build/asm/riscv/bench_correspondence_rejection_poly_rvv.full.asm` | 回滚前 full asm 可见 `getRemainingCorrespondencesRVV` / `Standard` 符号和 RVV 指令。 |
+| board production direct | negative | `test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/summary.md` | 2048 median 0.904x，8192 median 0.977x；两组都是 5/5 degradation。 |
+| Evidence Doctor board production direct | Errors=2 | `test-rvv/registration/correspondence_rejection_poly/log/board/production_direct_repeated/evidence_doctor.md` | 两个 `ba_degradation_frequency` Error 阻止 production adoption。 |
 
 ## 诊断证据链
 
@@ -95,13 +96,13 @@
 | deterministic corpus | guard、edge formula、accept-rate、histogram / Otsu、输出顺序均有固定样本 | 已知边界可稳定回归 | 未列出的输入分布 |
 | seeded random stress | 固定 seed 随机点云和乱序 correspondence 与 production public entry 完全一致 | 扩大输入覆盖，降低遗漏风险 | 不代表 fuzz 全覆盖或性能收益 |
 | production-shaped diagnostic | `edge_gather_staging` board repeated 为 historical `weak_positive` | 局部 gather + staging 后 edge formula 有弱正向线索 | 完整 production public entry 加速 |
-| production direct | Phase 030 historical probe 的 board repeated 为 `negative`，2048 和 8192 均 5/5 degradation | 当前候选不能接入 production | 退化的单一根因 |
-| Evidence Doctor | production-direct board Errors=2，Warnings=0，Suggestions=0 | 生产采用失败，需回滚或降级 | 功能 bug 结论 |
+| production direct | Phase 050 replay 的 board repeated 为 `negative` | 回滚前 production patch 不支持采纳；用户已确认回滚 | 退化的单一根因 |
+| Evidence Doctor | 当前 production-direct board Errors=2 | 暴露 5/5 degradation，阻止 production adoption | 功能 bug 或唯一根因结论 |
 
-这条诊断证据链说明：局部 RVV 候选可正确运行，部分诊断 case 在板卡上有弱正向，但真实公开入口生产探针在目标硬件退化。当前结论因此停在 `rollback/no-production`，不会把 diagnostic evidence（诊断证据）写成 production evidence（生产证据）。
+这条证据链目前分为历史和当前两部分：局部 RVV 候选可正确运行，Phase 030 和 Phase 050 真实公开入口生产探针都在目标硬件退化。用户已经确认不接入，临时 patch 已回滚；diagnostic evidence（诊断证据）不会写成 production evidence（生产证据）。
 
 ## 生产接入判断
 
-不接入 production。当前生产补丁已回滚，`doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md` 按 no-production 发布边界删除。诊断证据链和 rollback 结论主归属是本 evaluation、Phase 030 result、optimization matrix、roadmap 和 current Handoff。
+当前不接入 production。Phase 050 production-direct 重跑已给出 negative 证据，用户已确认回滚，两个目标 production 文件当前无本 topic diff；`doc-rvv/registration/correspondence_rejection_poly-RVV.zh.md` 仍不适用。
 
-如果后续继续当前 topic，应先建立新的 profile / component ablation phase。该阶段需要解释完整 public entry 中 random sampling、edge staging、histogram / Otsu 和输出 append 的成本占比，再提出新候选。不能重新应用 Phase 030 的生产补丁作为默认下一步。
+若后续继续，只能先创建 profile / component ablation phase 来解释完整 public entry 的退化来源；不能直接恢复 Phase 050 生产补丁作为默认路径。

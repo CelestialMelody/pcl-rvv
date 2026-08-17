@@ -9,6 +9,7 @@
 | `020-production-shaped-gather-diagnostic` | completed | 把 correspondence index gather（对应关系索引离散加载）和 squared distance staging（平方距离暂存）纳入诊断。 | `020-production-shaped-gather-diagnostic/plan.zh.md` | `020-production-shaped-gather-diagnostic/result.zh.md` |
 | `030-pi1-production-integration-plan` | completed | 执行受控 production direct probe，证据负向后回滚生产补丁。 | `030-pi1-production-integration-plan/plan.zh.md` | `030-pi1-production-integration-plan/result.zh.md` |
 | `040-structure-parity-doc-suite` | completed | 按 canonical doc-suite quality bar（规范文档套件质量门槛）补齐 README、testing overview、correctness、benchmark/evidence、optimization evidence、code map、evaluation 和 Handoff。 | `040-structure-parity-doc-suite/plan.zh.md` | `040-structure-parity-doc-suite/result.zh.md` |
+| `050-production-patch-replay-user-validation` | completed_rollback_confirmed | 暂时恢复 production `Standard` / `RVV` 分层并重新执行 production-direct 验证；结果负向，用户确认不接入后已回滚生产补丁。 | `050-production-patch-replay-user-validation/plan.zh.md` | `050-production-patch-replay-user-validation/result.zh.md` |
 
 ## 文档归属
 
@@ -26,4 +27,4 @@
 
 ## 默认恢复动作
 
-默认恢复动作为 `ready_for_review`。Phase 040 已完成 doc-suite 审计和 topic-local 文档补齐。当前 EvidenceDecision 是 `rollback/no-production`，生产目标文件已恢复为标量路径。若继续性能探索，应先创建新的窄范围 profile / ablation phase，不能重新应用 Phase 030 的生产补丁作为默认动作。
+当前恢复入口是 `rollback/no-production` review。本阶段的 production patch 曾临时保留供用户检查；Phase 050 replay 已给出 negative 证据，用户确认不接入后已回滚。若用户要求继续验证，则先创建新的 profile / ablation phase plan。
