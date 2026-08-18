@@ -7,6 +7,7 @@
 - 新建或重排 `artifact_layout.topic_test_dir_template` 解析目录下的 `README.zh.md`、`doc/*.zh.md` 或 `doc/phases/**` 时读取。
 - closeout、production-ready、done、stop-for-review 或 `ready_for_review` 前，当前 topic 命中复杂 topic 条件、存在 production direct（真实生产路径证据）、board summary（板卡摘要）、Evidence Doctor（证据体检）或多阶段 phase loop（阶段循环）时读取。
 - 用户或 reviewer 要求“文档对齐”“可审查性”“文档结构是否像成熟 topic”时读取。若用户点名某个成熟 sibling，只把它作为 `optional calibration`，不要复制 topic-specific（当前主题特有）的算法、数值、phase 名或结论。
+- 用户已经表达“同意接入 / 可以提交 / 可以保留当前 patch”或 worker 准备停在“是否提交或取消接入”的判断点时，如果当前 topic 有 production patch 或 adopted production behavior，必须同时读取 `topic-doc-structure.md` 的 Production Doc Closeout Gate。此时 `doc-rvv` 的长期生产文档质量属于 closeout 本身，不是 `git commit` 前才做的机械检查。
 
 ## 质量目标
 
@@ -34,6 +35,8 @@ topic-local doc suite 应让下一轮 worker 或 reviewer 不依赖聊天上下�
 | `doc/phases/README.zh.md` | phase 恢复入口 | 当前恢复入口、阶段表、文档归属、早停规则、默认下一动作。 |
 | `doc/<topic>-evaluation.zh.md` | 函数级评估和 closeout 主归属 | 标量路径、RVV 边界、EvidenceDecision、生产接入判断、诊断证据链、Traceability Map（可追踪性地图）、遗留风险。 |
 | `doc-rvv/<module>/<topic>-RVV.zh.md` | production 长期主题文档 | 只在 adopted production behavior（已采用生产行为）、production patch（生产补丁）或 PI5 生产证据闭环通过后适用；不承载 no-production 的测试工程全量说明。 |
+
+当 `doc-rvv` 适用时，topic-local doc suite 仍负责保存 phase 审计、bench 字典、测试支撑代码地图和 evidence registry；`doc-rvv` 负责维护当前 production 行为。二者不能互相替代：phase 文档可以解释“为什么尝试 / 为什么撤下”，长期文档必须解释“当前源码实际如何工作、证据支持到哪里、哪些入口仍回退”。如果长期文档仍只是摘要，doc-suite closeout 应标为 `doc_closeout_pending`。
 
 ## Target 粒度审计
 

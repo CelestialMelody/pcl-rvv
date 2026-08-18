@@ -76,6 +76,13 @@ S11 阶段更新 evaluation 文档、topic-local closeout 文档、模块状态�
   同时说明 indices / correspondences 或 `Scalar=double` 是否应另开消融或保持标量。
 - 正确性与高效性证据链：public entry 是否真实命中；row semantics、`accepted_points`、中间态、matrix 和 fallback 的证据；性能结论是否只来自 repeated board 或目标硬件；EvidenceDecision 是否没有超过证据范围；未覆盖范围和扩展条件。
 
+当用户已经表达“同意接入 / 可以提交 / 可以保留当前 patch”，worker 不能把 production 长期主题文档完善推迟到
+真正执行 `git commit` 前的机械检查。此时应立即进入 production documentation closeout（生产文档收尾）：
+先按 `topic-doc-structure.md` 的 Production Doc Closeout Gate 补齐 `doc-rvv`，再运行 freshness check、
+`evidence_status` 和 `git diff --check`，最后才停在“是否提交或取消接入”的用户判断点。
+若 `doc-rvv` 仍只是短摘要、缺少函数语义、当前采用方式、范围决策表、Traceability Map、数值算例、
+fallback 矩阵或证据链，closeout 只能写 `doc_closeout_pending`，不能写 `ready_for_user_submit_or_cancel`。
+
 若生产补丁最终回退，文档也要写成 rollback/no-production closeout：说明回退了哪些生产改动、保留了哪些
 diagnostic / bench 资产、为什么生产证据不成立。若回退后没有 adopted production behavior，`doc-rvv`
 production 长期主题文档应删除、标为历史归档或判为 `not_applicable`；当前结论主归属回到 evaluation / phase closeout。

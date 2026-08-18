@@ -77,6 +77,52 @@ production closeout（收尾）或 production-candidate（生产候选）文档�
 
 状态建议使用 `adopted`、`attempted`、`deferred`、`rejected` 或 `not_now`。如果当前主题迁移了 sibling topic（同模块相邻主题）经验，该表可以和 experience-migration audit（经验迁移审计）互相引用，但不能只写“参考了相邻经验”。
 
+## Production Doc Closeout Gate
+
+当 production integration loop（生产接入闭环）已经完成 PI5 evidence（生产证据决策）、
+用户表达“同意接入 / 可以提交 / 可以保留当前生产补丁”或 worker 准备停在“是否提交”的用户判断点时，
+必须先执行 production `doc-rvv` closeout gate。这个 gate 发生在 `git commit` 前，而不是 commit
+命令即将执行时才检查；如果文档不达标，当前状态只能写成 `doc_closeout_pending`，不能写
+`ready_for_user_submit_or_cancel`。
+
+该 gate 的目标不是把 topic-local phase 流水搬进长期文档，而是把长期维护者需要复核的生产事实写完整。
+worker 应从当前 production diff、PI5 result、evaluation、optimization evidence、board summary、
+Evidence Doctor 和 topic-local docs 中抽取长期事实，并用当前源码复核。成熟 sibling topic
+（同模块相邻主题）可以作为 optional calibration（可选校准样例），用来校准结构完整度和读者路径；
+不能复制 sibling 的算法、数值、phase 名、文件名或 production 结论，也不能把某个 sibling 写成规范源。
+
+production `doc-rvv` closeout gate 至少检查并补齐这些 area：
+
+```text
+| area | required content | current status | action |
+| --- | --- | --- | --- |
+```
+
+`area` 至少包含：
+
+- 当前状态：production-adopted / retained-candidate / removed / scalar-only 的范围一句话，写清真实覆盖入口。
+- 稳定证据索引：production direct summary、QEMU correctness、asm、evaluation、optimization evidence 和 README 路径。
+- 函数语义：公开入口、row source / weight / correspondence 来源、标量关键循环、solver 或输出构造。
+- 当前采用的优化方式：dispatch / fallback、layout gate、VL chunk 内部流程、reduction / staging / gather 组织方式、后段标量边界。
+- 范围决策表：每个 row source policy、点类型 / `Scalar` / layout、adopted / rejected / deferred / scalar-only 状态、证据和下一步。
+- 标量路径与 RVV 路径差异表：逐阶段说明 RVV 接管哪段、保留哪段标量、对应测试 / 证据。
+- Traceability Map：production helper / public entry、test、bench、script、summary、evaluation 和长期文档章节之间能互相定位。
+- 数值算例或 VL chunk 图示：让读者能手工对齐一次 chunk 或单点贡献；复杂公式必须有示例。
+- Bench 与证据：case-filter、计时边界、board repeated 结果、Evidence Doctor 和 QEMU 不作为性能结论的边界。
+- 正确性与高效性证据链：correctness、path / asm、performance、boundary、risk 分层。
+- Fallback 矩阵：非 RVV 构建、`Scalar`、点型 / layout、规模、dense、indices / correspondences 等如何回到标量。
+- 遗留风险与后续条件：未覆盖范围、重开条件、需要另开 topic 的方向。
+- Production closeout 表：文件、helper、dispatch、public API、证据和回滚边界。
+
+如果当前 production 只保留窄范围，例如只保留部分 row source policy、具体点型或 `Scalar=float`，
+长期文档必须把未覆盖范围写成同等级一等公民，而不是藏在“风险”段落。若某条 row source 被移除或回退标量，
+应在范围决策表和 fallback 矩阵中同时出现。
+
+提交前如果新增或刷新了 `doc-rvv`，worker 还必须运行 freshness check（新鲜度检查）：用当前 production
+diff、`run_test_compare`、QEMU / board summary、Evidence Doctor 和 evidence registry 逐项对照。
+发现长期文档仍写旧 PI5 判断、旧测试数量、旧 case-filter、旧 evidence path 或把 removed path 写成 adopted 时，
+必须先修文档再继续。
+
 ## Traceability Map
 
 复杂 topic 的 production 长期主题文档应包含或引用 Traceability Map（可追踪性地图）。no-production topic 的 Traceability Map 主归属是 evaluation 或 topic-local doc suite。本小节回答“读者从长期文档如何跳到代码、测试、脚本和 output 复核”。
