@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion source-indexed family comparison",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/row_source_family_comparison_repeated/summary.md",
+    "label": "source-indexed staged ordered reuse vs direct indexed gather; not production direct",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_row_source_family_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "rvv=sha256:e042705bf1dbf58f6a741fb15a75c1c6af7f06efadfdcde283d8c22ea9575d48",
+      "dataset": "synthetic dense PointXYZ ordered full-cloud pairs; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve",
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/row_source_family_comparison_repeated",
+    "summary_path": "log/board/row_source_family_comparison_repeated/summary.md",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "source-indexed staged-vs-direct RVV family 256K",
+      "group": "tedq_source_indexed_implementation_family",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "strict_ab",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        1.505192349070813,
+        1.4699059315682919,
+        1.4675403497729624,
+        1.4707208976157082,
+        1.4575253151131502
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 13.1078,
+      "rvv_ms": 8.9125,
+      "allowed_contract_mismatches": [
+        "boundary",
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = staged ordered reuse RVV ms / direct indexed gather RVV ms. Both sides use the same RVV binary, row source, formula, solve and checksum policy; this is test-rvv family diagnostic evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "5080092635828533196"
+        ],
+        "timer_boundary": "source_index_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source_indexed_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_staged_ordered_reuse",
+        "std_ms": 13.1078
+      },
+      "candidate": {
+        "boundary": "test_support_source_indexed_direct_gather",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "5080092635828533196"
+        ],
+        "timer_boundary": "source_index_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source_indexed_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_source_indexed_direct_gather",
+        "rvv_ms": 8.9125
+      }
+    },
+    {
+      "name": "source-indexed staged-vs-direct RVV family 4K",
+      "group": "tedq_source_indexed_implementation_family",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "strict_ab",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        1.2539007092198584,
+        1.2431129476584022,
+        1.2422573984858911,
+        1.231190150478796,
+        1.2373113854595335
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.1804,
+      "rvv_ms": 0.1453,
+      "allowed_contract_mismatches": [
+        "boundary",
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = staged ordered reuse RVV ms / direct indexed gather RVV ms. Both sides use the same RVV binary, row source, formula, solve and checksum policy; this is test-rvv family diagnostic evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "12514643241532797462"
+        ],
+        "timer_boundary": "source_index_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source_indexed_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_staged_ordered_reuse",
+        "std_ms": 0.1804
+      },
+      "candidate": {
+        "boundary": "test_support_source_indexed_direct_gather",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "12514643241532797462"
+        ],
+        "timer_boundary": "source_index_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source_indexed_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_source_indexed_direct_gather",
+        "rvv_ms": 0.1453
+      }
+    },
+    {
+      "name": "source-indexed staged-vs-direct RVV family 64K",
+      "group": "tedq_source_indexed_implementation_family",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "strict_ab",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        1.4813865659562988,
+        1.4420013461969934,
+        1.4544093630919979,
+        1.4791789923997634,
+        1.4581445914114877
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 3.219,
+      "rvv_ms": 2.2076,
+      "allowed_contract_mismatches": [
+        "boundary",
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = staged ordered reuse RVV ms / direct indexed gather RVV ms. Both sides use the same RVV binary, row source, formula, solve and checksum policy; this is test-rvv family diagnostic evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "2672708023149722346"
+        ],
+        "timer_boundary": "source_index_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source_indexed_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_staged_ordered_reuse",
+        "std_ms": 3.219
+      },
+      "candidate": {
+        "boundary": "test_support_source_indexed_direct_gather",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "2672708023149722346"
+        ],
+        "timer_boundary": "source_index_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source_indexed_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_source_indexed_direct_gather",
+        "rvv_ms": 2.2076
+      }
+    }
+  ]
+}

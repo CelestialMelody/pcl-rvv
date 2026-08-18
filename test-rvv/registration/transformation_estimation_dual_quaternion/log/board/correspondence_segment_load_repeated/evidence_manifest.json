@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion correspondence segment-load comparison",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/correspondence_segment_load_repeated/summary.md",
+    "label": "correspondence direct index stream vs vlseg3e32 segment stream; test-rvv only",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_correspondence_segment_load_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "rvv=sha256:526752647eacf0b3c75636b692b55369573ed8c54823c048593aedb0743026c3",
+      "dataset": "synthetic dense PointXYZ ordered-cloud-pair; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve",
+      "decision_bucket": "negative"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/correspondence_segment_load_repeated",
+    "summary_path": "log/board/correspondence_segment_load_repeated/summary.md",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "correspondence direct index-vs-segment stream 256K",
+      "group": "tedq_correspondence_index_stream_shape",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "strict_ab",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        1.022852559271302,
+        1.0116578261924094,
+        0.9891189585362103,
+        0.9978323358936902,
+        1.0434832768728957
+      ],
+      "decision_bucket": "unstable",
+      "std_ms": 19.1869,
+      "rvv_ms": 19.0694,
+      "allowed_contract_mismatches": [
+        "boundary",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Phase 008 direct index-stream RVV ms / segment-load RVV ms. Both sides use the same correspondence rows, point gathers, formula, solve and checksum policy; only index ingress instruction shape differs.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "5080092635828533196"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 19.1869
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_segment_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "5080092635828533196"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_segment_index_stream",
+        "rvv_ms": 19.0694
+      }
+    },
+    {
+      "name": "correspondence direct index-vs-segment stream 4K",
+      "group": "tedq_correspondence_index_stream_shape",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "strict_ab",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        0.87221269296741,
+        1.0492368291482028,
+        0.9547134935304991,
+        0.9791969037252056,
+        0.9811142587346554
+      ],
+      "decision_bucket": "negative",
+      "std_ms": 0.2066,
+      "rvv_ms": 0.2118,
+      "allowed_contract_mismatches": [
+        "boundary",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Phase 008 direct index-stream RVV ms / segment-load RVV ms. Both sides use the same correspondence rows, point gathers, formula, solve and checksum policy; only index ingress instruction shape differs.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "12514643241532797462"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 0.2066
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_segment_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "12514643241532797462"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_segment_index_stream",
+        "rvv_ms": 0.2118
+      }
+    },
+    {
+      "name": "correspondence direct index-vs-segment stream 64K",
+      "group": "tedq_correspondence_index_stream_shape",
+      "case_kind": "implementation_family_comparison",
+      "evidence_role": "strict_ab",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        1.0011518209741115,
+        0.9752440143488779,
+        1.0165907552726408,
+        1.0106713470820536,
+        0.9248731464604169
+      ],
+      "decision_bucket": "negative",
+      "std_ms": 5.5576,
+      "rvv_ms": 5.4696,
+      "allowed_contract_mismatches": [
+        "boundary",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Phase 008 direct index-stream RVV ms / segment-load RVV ms. Both sides use the same correspondence rows, point gathers, formula, solve and checksum policy; only index ingress instruction shape differs.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "2672708023149722346"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 5.5576
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_segment_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "2672708023149722346"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_segment_index_stream",
+        "rvv_ms": 5.4696
+      }
+    }
+  ]
+}

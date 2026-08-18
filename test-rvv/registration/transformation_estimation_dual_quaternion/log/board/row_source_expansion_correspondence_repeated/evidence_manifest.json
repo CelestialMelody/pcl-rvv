@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion board repeated diagnostic",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/row_source_expansion_correspondence_repeated/summary.md",
+    "label": "correspondence-pair staged ordered reuse; not production direct",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_board_repeated_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "std=sha256:10a39ef73a0b5d61b946d4962c192b003276609dffdb0cb7c81fa67b559a5494; rvv=sha256:8d29cb830a17a65f7a9a5f136391589ad943f33228e0996d2c45c16d5fe30ebe",
+      "dataset": "synthetic dense PointXYZ ordered full-cloud pairs; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve",
+      "decision_bucket": "weak_positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/row_source_expansion_repeated",
+    "summary_path": "log/board/row_source_expansion_correspondence_repeated/summary.md",
+    "std_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_std",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "staged accum correspondence-pair same-boundary 4K",
+      "group": "tedq_row_source_staged_ordered_reuse",
+      "case_kind": "row_source_diagnostic",
+      "evidence_role": "strict_ab",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        1.165994783021105,
+        1.2691190706679574,
+        1.2230320699708452,
+        1.2087653157398681,
+        1.257226135535584
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.513,
+      "rvv_ms": 0.4132,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std staged correspondence-pair ms / RVV staged correspondence-pair ms for the same test-support row-source adapter. This is row-source diagnostic evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "12514643241532797462"
+        ],
+        "timer_boundary": "row_source_index_or_correspondence_expansion_plus_staging_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_staged_ordered_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.513
+      },
+      "candidate": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "12514643241532797462"
+        ],
+        "timer_boundary": "row_source_index_or_correspondence_expansion_plus_staging_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_staged_ordered_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_staged_ordered_reuse",
+        "rvv_ms": 0.4132
+      }
+    },
+    {
+      "name": "staged accum correspondence-pair same-boundary 64K",
+      "group": "tedq_row_source_staged_ordered_reuse",
+      "case_kind": "row_source_diagnostic",
+      "evidence_role": "strict_ab",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        1.1399138248789356,
+        1.0707612306084622,
+        1.139077417169525,
+        1.0738723361530158,
+        1.095241084881969
+      ],
+      "decision_bucket": "weak_positive",
+      "std_ms": 8.7225,
+      "rvv_ms": 7.9678,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std staged correspondence-pair ms / RVV staged correspondence-pair ms for the same test-support row-source adapter. This is row-source diagnostic evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "2672708023149722346"
+        ],
+        "timer_boundary": "row_source_index_or_correspondence_expansion_plus_staging_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_staged_ordered_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 8.7225
+      },
+      "candidate": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "2672708023149722346"
+        ],
+        "timer_boundary": "row_source_index_or_correspondence_expansion_plus_staging_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_staged_ordered_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_staged_ordered_reuse",
+        "rvv_ms": 7.9678
+      }
+    },
+    {
+      "name": "staged accum correspondence-pair same-boundary 256K",
+      "group": "tedq_row_source_staged_ordered_reuse",
+      "case_kind": "row_source_diagnostic",
+      "evidence_role": "strict_ab",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        1.092378640065266,
+        1.1085540130013336,
+        1.1020762524013596,
+        1.0816474445347044,
+        1.0998833264701844
+      ],
+      "decision_bucket": "weak_positive",
+      "std_ms": 44.7465,
+      "rvv_ms": 40.7976,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std staged correspondence-pair ms / RVV staged correspondence-pair ms for the same test-support row-source adapter. This is row-source diagnostic evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "5080092635828533196"
+        ],
+        "timer_boundary": "row_source_index_or_correspondence_expansion_plus_staging_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_staged_ordered_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 44.7465
+      },
+      "candidate": {
+        "boundary": "test_support_staged_ordered_reuse",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "5080092635828533196"
+        ],
+        "timer_boundary": "row_source_index_or_correspondence_expansion_plus_staging_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_staged_ordered_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_staged_ordered_reuse",
+        "rvv_ms": 40.7976
+      }
+    }
+  ]
+}

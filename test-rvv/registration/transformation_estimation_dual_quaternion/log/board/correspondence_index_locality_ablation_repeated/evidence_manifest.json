@@ -1,0 +1,469 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion correspondence index locality ablation",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/correspondence_index_locality_ablation_repeated/summary.md",
+    "label": "Phase 008 direct index stream under contiguous, local-window and strided correspondence patterns",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_correspondence_index_locality_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "rvv=sha256:a17a4c0487df52eec1405408e90c4b1b0f0191d825b98c85dc1ef86cea1a41ae",
+      "dataset": "synthetic dense PointXYZ ordered-cloud-pair; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "wrapper",
+      "row_source",
+      "point_type",
+      "scalar",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/correspondence_index_locality_ablation_repeated",
+    "summary_path": "log/board/correspondence_index_locality_ablation_repeated/summary.md",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "correspondence strided-vs-contiguous index locality 4K",
+      "group": "tedq_correspondence_index_locality",
+      "case_kind": "input_distribution_ablation",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        1.1689432063263838,
+        1.1711191335740072,
+        1.1936671575846833,
+        1.1256210078069553,
+        1.173160173160173
+      ],
+      "decision_bucket": "weak_positive",
+      "std_ms": 0.1622,
+      "rvv_ms": 0.1386,
+      "allowed_contract_mismatches": [
+        "input_distribution"
+      ],
+      "notes": "B/A = strided Phase 008 direct index-stream RVV ms / contiguous direct index-stream RVV ms. Only query/match index distribution changes; formula, gather implementation, solve and input corpus identity remains fixed. Output matrix fingerprints are retained separately because reduction order can change them.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "strided",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:4K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "12514643241532797462"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 0.1622
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "contiguous",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:4K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "17607411364856063416"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 0.1386
+      }
+    },
+    {
+      "name": "correspondence strided-vs-local-window index locality 4K",
+      "group": "tedq_correspondence_index_locality",
+      "case_kind": "input_distribution_ablation",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        0.9848576620230164,
+        0.9586288416075651,
+        0.9806412583182093,
+        0.9274853801169589,
+        0.9339460080413555
+      ],
+      "decision_bucket": "negative",
+      "std_ms": 0.1622,
+      "rvv_ms": 0.1692,
+      "allowed_contract_mismatches": [
+        "input_distribution"
+      ],
+      "notes": "B/A = strided Phase 008 direct index-stream RVV ms / local-window direct index-stream RVV ms. Only query/match index distribution changes; formula, gather implementation, solve and input corpus identity remains fixed. Output matrix fingerprints are retained separately because reduction order can change them.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "strided",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:4K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "12514643241532797462"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 0.1622
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "local-window",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:4K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "9526020774715885992"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 0.1692
+      }
+    },
+    {
+      "name": "correspondence strided-vs-contiguous index locality 64K",
+      "group": "tedq_correspondence_index_locality",
+      "case_kind": "input_distribution_ablation",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        1.2433011279805815,
+        1.2597576104590134,
+        1.3667332762394138,
+        1.2281480789006263,
+        1.2075927769088581
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 2.6275,
+      "rvv_ms": 2.1018,
+      "allowed_contract_mismatches": [
+        "input_distribution"
+      ],
+      "notes": "B/A = strided Phase 008 direct index-stream RVV ms / contiguous direct index-stream RVV ms. Only query/match index distribution changes; formula, gather implementation, solve and input corpus identity remains fixed. Output matrix fingerprints are retained separately because reduction order can change them.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "strided",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:64K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "2672708023149722346"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 2.6275
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "contiguous",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:64K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "16220467765181907414"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 2.1018
+      }
+    },
+    {
+      "name": "correspondence strided-vs-local-window index locality 64K",
+      "group": "tedq_correspondence_index_locality",
+      "case_kind": "input_distribution_ablation",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        0.43563019044125,
+        0.4419484432541011,
+        0.47625837257112535,
+        0.43472146390695054,
+        0.4242822886831412
+      ],
+      "decision_bucket": "negative",
+      "std_ms": 2.6275,
+      "rvv_ms": 6.0052,
+      "allowed_contract_mismatches": [
+        "input_distribution"
+      ],
+      "notes": "B/A = strided Phase 008 direct index-stream RVV ms / local-window direct index-stream RVV ms. Only query/match index distribution changes; formula, gather implementation, solve and input corpus identity remains fixed. Output matrix fingerprints are retained separately because reduction order can change them.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "strided",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:64K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "2672708023149722346"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 2.6275
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "local-window",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:64K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "13664659728778405370"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 6.0052
+      }
+    },
+    {
+      "name": "correspondence strided-vs-contiguous index locality 256K",
+      "group": "tedq_correspondence_index_locality",
+      "case_kind": "input_distribution_ablation",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        1.2948073701842544,
+        1.3271605673387241,
+        1.286616763612091,
+        1.3645602452251828,
+        1.3200232925713336
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 11.1076,
+      "rvv_ms": 8.3971,
+      "allowed_contract_mismatches": [
+        "input_distribution"
+      ],
+      "notes": "B/A = strided Phase 008 direct index-stream RVV ms / contiguous direct index-stream RVV ms. Only query/match index distribution changes; formula, gather implementation, solve and input corpus identity remains fixed. Output matrix fingerprints are retained separately because reduction order can change them.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "strided",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:256K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "5080092635828533196"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 11.1076
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "contiguous",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:256K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "3510663246802606337"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 8.3971
+      }
+    },
+    {
+      "name": "correspondence strided-vs-local-window index locality 256K",
+      "group": "tedq_correspondence_index_locality",
+      "case_kind": "input_distribution_ablation",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        0.4505843607006499,
+        0.4647641210422713,
+        0.44430449564923896,
+        0.45763201075460136,
+        0.46106653494444005
+      ],
+      "decision_bucket": "negative",
+      "std_ms": 11.1076,
+      "rvv_ms": 24.0911,
+      "allowed_contract_mismatches": [
+        "input_distribution"
+      ],
+      "notes": "B/A = strided Phase 008 direct index-stream RVV ms / local-window direct index-stream RVV ms. Only query/match index distribution changes; formula, gather implementation, solve and input corpus identity remains fixed. Output matrix fingerprints are retained separately because reduction order can change them.",
+      "baseline": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "strided",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:256K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "5080092635828533196"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "std_ms": 11.1076
+      },
+      "candidate": {
+        "boundary": "test_support_correspondence_direct_index_stream",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZ",
+        "scalar": "float",
+        "pattern": "local-window",
+        "solve": true,
+        "checksum_policy": "input_corpus_identity_matrix_correctness_checked_by_qemu_and_gtest",
+        "checksum": [
+          "correspondence-pattern-corpus:256K:PointXYZ:float"
+        ],
+        "output_checksum": [
+          "2205447154494785373"
+        ],
+        "timer_boundary": "correspondence_row_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_pointxyz_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 24.0911
+      }
+    }
+  ]
+}

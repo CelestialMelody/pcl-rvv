@@ -1,0 +1,872 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion indexed direct gather point-type layout repeated diagnostic",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/indexed_direct_gather_point_type_layout_repeated/summary.md",
+    "label": "source/dual indexed direct gather PointXYZI/PointXYZRGB layout diagnostic; test-rvv only",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_indexed_direct_gather_point_type_layout_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "std=sha256:a7daf8848c5936121e23bef08766b3f5db6405712c4827b76388b205a725e690; rvv=sha256:26467a7b80c871a15e62a2e06bb777ff312ca838bbb88e02cd1de08f2a68e8ad",
+      "dataset": "synthetic dense xyz AoS clouds; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve",
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "point_type",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/indexed_direct_gather_point_type_layout_repeated",
+    "summary_path": "log/board/indexed_direct_gather_point_type_layout_repeated/summary.md",
+    "std_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_std",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "indexed direct gather point-type layout dual-indexed-cloud-pair PointXYZI 4K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_dual-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "dual-indexed-cloud-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        2.369729249889037,
+        2.336712208021155,
+        2.4220837043633128,
+        2.241436925647452,
+        2.3750554815801155
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.5351,
+      "rvv_ms": 0.2253,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "13504791834394936957"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.5351
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1714001059226217133"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 0.2253
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout dual-indexed-cloud-pair PointXYZI 64K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_dual-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "dual-indexed-cloud-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        2.9200389105058364,
+        3.0341029925565848,
+        2.9541693345810964,
+        3.1262828861682728,
+        3.0840788964805985
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 11.9957,
+      "rvv_ms": 3.9498,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "16738174730709564258"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 11.9957
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "16738174730709564258"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 3.9498
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout dual-indexed-cloud-pair PointXYZI 256K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_dual-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "dual-indexed-cloud-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        4.685219501579409,
+        4.628457054934738,
+        4.673180526012365,
+        4.609942246950454,
+        4.520208211651894
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 70.5225,
+      "rvv_ms": 15.1639,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1664452477084261135"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 70.5225
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1706194153110589835"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 15.1639
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout dual-indexed-cloud-pair PointXYZRGB 4K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_dual-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "dual-indexed-cloud-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        2.4857518632178865,
+        2.5243429556225765,
+        2.4281277728482697,
+        2.464,
+        2.136886503067485
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.5573,
+      "rvv_ms": 0.2281,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5473982973002176763"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.5573
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5473982973002176763"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 0.2281
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout dual-indexed-cloud-pair PointXYZRGB 64K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_dual-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "dual-indexed-cloud-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        2.9821820722699144,
+        3.114855392284127,
+        2.8344402164921654,
+        3.028365930599369,
+        3.147022576500511
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 11.9978,
+      "rvv_ms": 3.9625,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5969376675335188272"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 11.9978
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5969376675335188272"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 3.9625
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout dual-indexed-cloud-pair PointXYZRGB 256K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_dual-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "dual-indexed-cloud-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        4.814133366100357,
+        4.86627663746895,
+        4.850383606621711,
+        4.862198650590284,
+        4.950233178323372
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 74.4395,
+      "rvv_ms": 15.2891,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "6877199880137518517"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 74.4395
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "dual-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "4832430135946210872"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_dual-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 15.2891
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout source-indexed-cloud-pair PointXYZI 4K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_source-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        2.47406914893617,
+        2.638780804150454,
+        2.4435746901500326,
+        2.408678756476684,
+        2.42
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.3746,
+      "rvv_ms": 0.1542,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "13504791834394936957"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.3746
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1714001059226217133"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 0.1542
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout source-indexed-cloud-pair PointXYZI 64K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_source-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        2.7995767111253094,
+        2.7806578688201693,
+        2.7976418864908075,
+        2.7727109658388804,
+        2.7996132749299556
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 7.0107,
+      "rvv_ms": 2.5087,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "16738174730709564258"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 7.0107
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "16738174730709564258"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 2.5087
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout source-indexed-cloud-pair PointXYZI 256K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_source-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        2.8447991576939886,
+        2.8460052178347945,
+        2.887221269296741,
+        2.861972587479361,
+        2.816925853929464
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 28.7737,
+      "rvv_ms": 10.0676,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1664452477084261135"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 28.7737
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1706194153110589835"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 10.0676
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout source-indexed-cloud-pair PointXYZRGB 4K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_source-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        2.608377659574468,
+        2.483365949119374,
+        2.4758169934640524,
+        2.4915364583333335,
+        2.3998732572877057
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.3807,
+      "rvv_ms": 0.1533,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5473982973002176763"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.3807
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5473982973002176763"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 0.1533
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout source-indexed-cloud-pair PointXYZRGB 64K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_source-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        2.8751945719417282,
+        2.835078009064292,
+        2.9496049796504664,
+        2.801553784860558,
+        2.8656406156306216
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 7.1684,
+      "rvv_ms": 2.5055,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5969376675335188272"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 7.1684
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5969376675335188272"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 2.5055
+      }
+    },
+    {
+      "name": "indexed direct gather point-type layout source-indexed-cloud-pair PointXYZRGB 256K",
+      "group": "tedq_indexed_direct_gather_point_type_layout_source-indexed-cloud-pair",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "source-indexed-cloud-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        2.8454507437720293,
+        2.8400153519130846,
+        2.827313374611145,
+        2.8691845373587315,
+        2.8955099365372585
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 28.7389,
+      "rvv_ms": 10.0434,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct gather ms / RVV direct gather ms for the same row source, point type and index corpus. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "6877199880137518517"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 28.7389
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_indexed_direct_gather_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "source-indexed-cloud-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "4832430135946210872"
+        ],
+        "timer_boundary": "indexed_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_source-indexed-cloud-pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_indexed_direct_gather",
+        "rvv_ms": 10.0434
+      }
+    }
+  ]
+}

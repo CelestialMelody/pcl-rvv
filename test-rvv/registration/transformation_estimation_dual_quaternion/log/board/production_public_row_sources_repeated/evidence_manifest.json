@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion board repeated diagnostic",
+    "evidence_role": "production_direct",
+    "summary_path": "log/board/production_public_row_sources_repeated/summary.md",
+    "label": "production public ordered-cloud-pair; production direct",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_board_repeated_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "std=sha256:761b89a8754928d1a06b2058d47f1f0d338a1719f7aaaf99929c3445de50a548; rvv=sha256:bebefb7431108966898e8d361f6164c9ae0cdd2d49a6e64fef520b28a58a3b04",
+      "dataset": "synthetic dense xyz AoS clouds; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve",
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/production_public_row_sources_repeated",
+    "summary_path": "log/board/production_public_row_sources_repeated/summary.md",
+    "std_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_std",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "production public same-boundary ordered-cloud-pair 4K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "row_source": "ordered-cloud-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        3.290929203539823,
+        3.2703296703296703,
+        3.3779795686719636,
+        3.246236559139785,
+        3.3018660812294183
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.2976,
+      "rvv_ms": 0.091,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production ordered-cloud-pair overload. Interpret it with production path-hit, asm and correctness evidence from the same source state.",
+      "baseline": {
+        "boundary": "production_public_ordered_cloud_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "17607411364856063416"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_cloud_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.2976
+      },
+      "candidate": {
+        "boundary": "production_public_ordered_cloud_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "17607411364856063416"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_cloud_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 0.091
+      }
+    },
+    {
+      "name": "production public same-boundary ordered-cloud-pair 64K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "row_source": "ordered-cloud-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        3.634279559966151,
+        3.6396832718327183,
+        3.640643027459426,
+        3.6205943331029715,
+        3.6225064717527027
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 4.7332,
+      "rvv_ms": 1.3008,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production ordered-cloud-pair overload. Interpret it with production path-hit, asm and correctness evidence from the same source state.",
+      "baseline": {
+        "boundary": "production_public_ordered_cloud_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "16220467765181907414"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_cloud_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 4.7332
+      },
+      "candidate": {
+        "boundary": "production_public_ordered_cloud_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "16220467765181907414"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_cloud_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 1.3008
+      }
+    },
+    {
+      "name": "production public same-boundary ordered-cloud-pair 256K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "row_source": "ordered-cloud-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        3.6389393178570044,
+        3.657839640198511,
+        3.6178368412966657,
+        3.6324570370513243,
+        3.6365934129541375
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 18.8417,
+      "rvv_ms": 5.1829,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production ordered-cloud-pair overload. Interpret it with production path-hit, asm and correctness evidence from the same source state.",
+      "baseline": {
+        "boundary": "production_public_ordered_cloud_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "3510663246802606337"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_cloud_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 18.8417
+      },
+      "candidate": {
+        "boundary": "production_public_ordered_cloud_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered-cloud-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "3510663246802606337"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_cloud_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 5.1829
+      }
+    }
+  ]
+}

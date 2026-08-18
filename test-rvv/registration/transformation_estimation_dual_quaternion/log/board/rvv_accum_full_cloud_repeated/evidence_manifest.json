@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion board repeated diagnostic",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/rvv_accum_full_cloud_repeated/summary.md",
+    "label": "board repeated diagnostic; not production direct",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_board_repeated_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "std=sha256:c4ce621b98e20a42805994bf8bb11fa178778325077e82182acf8366195a9dcc; rvv=sha256:3cbd6450f8c6f33e35355a8896880af8d3eca1123db899a2a62dfeb9449e8ee7",
+      "dataset": "synthetic dense PointXYZ ordered full-cloud pairs; dual-quaternion C1/C2 accumulation plus Eigen 4x4 solve",
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/rvv_accum_full_cloud_repeated",
+    "summary_path": "log/board/rvv_accum_full_cloud_repeated/summary.md",
+    "std_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_std",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "rvv accum same-boundary full-cloud 4K",
+      "group": "tedq_rvv_accum_same_boundary",
+      "case_kind": "board_diagnostic_same_boundary",
+      "evidence_role": "strict_ab",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        1.9119565217391306,
+        2.0393518518518516,
+        2.013793103448276,
+        2.0312499999999996,
+        1.9840909090909093
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.1755,
+      "rvv_ms": 0.087,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std helper ms / RVV helper ms for the same test-support ordered full-cloud candidate. This is board diagnostic evidence for PI1 readiness, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_rvv_accumulation_candidate",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "17607411364856063416"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.1755
+      },
+      "candidate": {
+        "boundary": "test_support_rvv_accumulation_candidate",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "17607411364856063416"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_test_support_helper",
+        "rvv_ms": 0.087
+      }
+    },
+    {
+      "name": "rvv accum same-boundary full-cloud 64K",
+      "group": "tedq_rvv_accum_same_boundary",
+      "case_kind": "board_diagnostic_same_boundary",
+      "evidence_role": "strict_ab",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        2.0658553493029346,
+        2.0597713496508865,
+        2.108154911838791,
+        2.093647572967067,
+        1.9944233772027662
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 2.6823,
+      "rvv_ms": 1.2983,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std helper ms / RVV helper ms for the same test-support ordered full-cloud candidate. This is board diagnostic evidence for PI1 readiness, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_rvv_accumulation_candidate",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "16220467765181907414"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 2.6823
+      },
+      "candidate": {
+        "boundary": "test_support_rvv_accumulation_candidate",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "16220467765181907414"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_test_support_helper",
+        "rvv_ms": 1.2983
+      }
+    },
+    {
+      "name": "rvv accum same-boundary full-cloud 256K",
+      "group": "tedq_rvv_accum_same_boundary",
+      "case_kind": "board_diagnostic_same_boundary",
+      "evidence_role": "strict_ab",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        2.0816267050091324,
+        2.09719889049498,
+        2.121507716660071,
+        2.10468519791769,
+        2.014851019832691
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 10.718,
+      "rvv_ms": 5.1194,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std helper ms / RVV helper ms for the same test-support ordered full-cloud candidate. This is board diagnostic evidence for PI1 readiness, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_rvv_accumulation_candidate",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "3510663246802606337"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 10.718
+      },
+      "candidate": {
+        "boundary": "test_support_rvv_accumulation_candidate",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "3510663246802606337"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_test_support_helper",
+        "rvv_ms": 5.1194
+      }
+    }
+  ]
+}

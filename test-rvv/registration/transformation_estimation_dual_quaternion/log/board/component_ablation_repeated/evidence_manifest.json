@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion board repeated diagnostic",
+    "evidence_role": "component_ablation",
+    "summary_path": "log/board/component_ablation_repeated/summary.md",
+    "label": "component accumulation-only ablation; not production direct",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_board_repeated_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "std=sha256:0675c4c2b6860bcae1a73ade4979edb80187a78564b8195e90de6c3a22908d8c; rvv=sha256:598d020bed1500d16f0d1b9e2911bb5752a34aa7cb07727044a7bddc76689da8",
+      "dataset": "synthetic dense PointXYZ ordered full-cloud pairs; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve",
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/component_ablation_repeated",
+    "summary_path": "log/board/component_ablation_repeated/summary.md",
+    "std_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_std",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "component accum-only same-boundary full-cloud 4K",
+      "group": "tedq_component_accum_only_same_boundary",
+      "case_kind": "component_ablation",
+      "evidence_role": "component_ablation",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        2.1582278481012658,
+        2.0761670761670765,
+        2.063882063882064,
+        2.0336943441636586,
+        2.096932515337423
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.169,
+      "rvv_ms": 0.0814,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std accumulation-only ms / RVV accumulation-only ms for the same test-support component. This is component ablation evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_accumulation_only_component",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": false,
+        "checksum_policy": "accumulation_checksum_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "14359263007619432446"
+        ],
+        "timer_boundary": "c1_c2_accumulation_only",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.169
+      },
+      "candidate": {
+        "boundary": "test_support_accumulation_only_component",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": false,
+        "checksum_policy": "accumulation_checksum_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "14359263007619432446"
+        ],
+        "timer_boundary": "c1_c2_accumulation_only",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_component_accumulation",
+        "rvv_ms": 0.0814
+      }
+    },
+    {
+      "name": "component accum-only same-boundary full-cloud 64K",
+      "group": "tedq_component_accum_only_same_boundary",
+      "case_kind": "component_ablation",
+      "evidence_role": "component_ablation",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        2.0868006856786656,
+        2.109107937251229,
+        2.10506991641278,
+        2.1021323471555595,
+        2.0999844382197326
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 2.6947,
+      "rvv_ms": 1.2813,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std accumulation-only ms / RVV accumulation-only ms for the same test-support component. This is component ablation evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_accumulation_only_component",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": false,
+        "checksum_policy": "accumulation_checksum_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "11532669798982526621"
+        ],
+        "timer_boundary": "c1_c2_accumulation_only",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 2.6947
+      },
+      "candidate": {
+        "boundary": "test_support_accumulation_only_component",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": false,
+        "checksum_policy": "accumulation_checksum_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "11532669798982526621"
+        ],
+        "timer_boundary": "c1_c2_accumulation_only",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_component_accumulation",
+        "rvv_ms": 1.2813
+      }
+    },
+    {
+      "name": "component accum-only same-boundary full-cloud 256K",
+      "group": "tedq_component_accum_only_same_boundary",
+      "case_kind": "component_ablation",
+      "evidence_role": "component_ablation",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        2.149302610033735,
+        2.094119937694704,
+        2.0964774381368265,
+        2.1093073593073592,
+        2.0866464369237905
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 10.7961,
+      "rvv_ms": 5.136,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std accumulation-only ms / RVV accumulation-only ms for the same test-support component. This is component ablation evidence, not production direct evidence.",
+      "baseline": {
+        "boundary": "test_support_accumulation_only_component",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": false,
+        "checksum_policy": "accumulation_checksum_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "18103149508744165852"
+        ],
+        "timer_boundary": "c1_c2_accumulation_only",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 10.7961
+      },
+      "candidate": {
+        "boundary": "test_support_accumulation_only_component",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": false,
+        "checksum_policy": "accumulation_checksum_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "18103149508744165852"
+        ],
+        "timer_boundary": "c1_c2_accumulation_only",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_component_accumulation",
+        "rvv_ms": 5.136
+      }
+    }
+  ]
+}

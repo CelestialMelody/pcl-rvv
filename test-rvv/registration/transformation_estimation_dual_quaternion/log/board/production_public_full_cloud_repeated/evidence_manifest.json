@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion board repeated diagnostic",
+    "evidence_role": "production_direct",
+    "summary_path": "log/board/production_public_full_cloud_repeated/summary.md",
+    "label": "production public ordered full-cloud; production direct",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_board_repeated_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "std=sha256:c4ce621b98e20a42805994bf8bb11fa178778325077e82182acf8366195a9dcc; rvv=sha256:f480a8ac877cfbc208f6f0b00dd190f15616f205f95fb772e3b05e4ccfbc85ba",
+      "dataset": "synthetic dense PointXYZ ordered full-cloud pairs; dual-quaternion C1/C2 accumulation plus Eigen 4x4 solve",
+      "decision_bucket": "neutral"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/production_public_full_cloud_repeated",
+    "summary_path": "log/board/production_public_full_cloud_repeated/summary.md",
+    "std_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_std",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "production public same-boundary full-cloud 4K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        1.00194678780013,
+        1.0009746588693955,
+        0.9919432806961005,
+        1.0077720207253884,
+        0.9878555449025247
+      ],
+      "decision_bucket": "neutral",
+      "std_ms": 0.3088,
+      "rvv_ms": 0.3088,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production ordered full-cloud overload. Interpret it with the source state used for the run; it does not by itself prove RVV instructions executed.",
+      "baseline": {
+        "boundary": "production_public_ordered_full_cloud_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "17607411364856063416"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.3088
+      },
+      "candidate": {
+        "boundary": "production_public_ordered_full_cloud_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "17607411364856063416"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 0.3088
+      }
+    },
+    {
+      "name": "production public same-boundary full-cloud 64K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        0.9931667475335599,
+        1.000491309955168,
+        1.0025366172980936,
+        1.0019155916936684,
+        1.012832563651968
+      ],
+      "decision_bucket": "neutral",
+      "std_ms": 4.9126,
+      "rvv_ms": 4.8938,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production ordered full-cloud overload. Interpret it with the source state used for the run; it does not by itself prove RVV instructions executed.",
+      "baseline": {
+        "boundary": "production_public_ordered_full_cloud_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "16220467765181907414"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 4.9126
+      },
+      "candidate": {
+        "boundary": "production_public_ordered_full_cloud_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "16220467765181907414"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 4.8938
+      }
+    },
+    {
+      "name": "production public same-boundary full-cloud 256K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        0.9966300916574468,
+        1.0013180703859843,
+        1.0026006935182714,
+        1.0007196998698416,
+        1.006436428754157
+      ],
+      "decision_bucket": "neutral",
+      "std_ms": 19.6056,
+      "rvv_ms": 19.545,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production ordered full-cloud overload. Interpret it with the source state used for the run; it does not by itself prove RVV instructions executed.",
+      "baseline": {
+        "boundary": "production_public_ordered_full_cloud_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "3510663246802606337"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 19.6056
+      },
+      "candidate": {
+        "boundary": "production_public_ordered_full_cloud_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "ordered_full_cloud",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "3510663246802606337"
+        ],
+        "timer_boundary": "c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_ordered_full_cloud_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 19.545
+      }
+    }
+  ]
+}

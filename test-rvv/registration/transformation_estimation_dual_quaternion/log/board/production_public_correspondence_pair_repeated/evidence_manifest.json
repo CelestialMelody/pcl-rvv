@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion board repeated diagnostic",
+    "evidence_role": "production_direct",
+    "summary_path": "log/board/production_public_correspondence_pair_repeated/summary.md",
+    "label": "production public correspondence-pair; production direct",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_board_repeated_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "std=sha256:761b89a8754928d1a06b2058d47f1f0d338a1719f7aaaf99929c3445de50a548; rvv=sha256:bebefb7431108966898e8d361f6164c9ae0cdd2d49a6e64fef520b28a58a3b04",
+      "dataset": "synthetic dense xyz AoS clouds; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve",
+      "decision_bucket": "negative"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/production_public_row_sources_repeated",
+    "summary_path": "log/board/production_public_correspondence_pair_repeated/summary.md",
+    "std_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_std",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "production public same-boundary correspondence-pair 4K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        2.443287037037037,
+        2.4358088658606794,
+        2.4808139534883726,
+        2.420256111757858,
+        2.443045220377791
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.4231,
+      "rvv_ms": 0.1728,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production correspondence-pair overload. Interpret it with production path-hit, asm and correctness evidence from the same source state.",
+      "baseline": {
+        "boundary": "production_public_correspondence_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "8861897610861320337"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.4231
+      },
+      "candidate": {
+        "boundary": "production_public_correspondence_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "8861897610861320337"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 0.1728
+      }
+    },
+    {
+      "name": "production public same-boundary correspondence-pair 64K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        0.7589379629527109,
+        0.624449622073824,
+        0.7456581277428864,
+        0.7135989645927706,
+        1.8784588248263698
+      ],
+      "decision_bucket": "negative",
+      "std_ms": 6.8158,
+      "rvv_ms": 9.0917,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production correspondence-pair overload. Interpret it with production path-hit, asm and correctness evidence from the same source state.",
+      "baseline": {
+        "boundary": "production_public_correspondence_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "6209801429187933464"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 6.8158
+      },
+      "candidate": {
+        "boundary": "production_public_correspondence_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "6209801429187933464"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 9.0917
+      }
+    },
+    {
+      "name": "production public same-boundary correspondence-pair 256K",
+      "group": "tedq_production_public_same_boundary",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZ",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        0.9657890795818731,
+        0.5351787792896178,
+        0.876058718548938,
+        0.8674158382045484,
+        0.7425275878022747
+      ],
+      "decision_bucket": "negative",
+      "std_ms": 32.4472,
+      "rvv_ms": 37.4992,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std public entry ms / RVV public entry ms for the same production correspondence-pair overload. Interpret it with production path-hit, asm and correctness evidence from the same source state.",
+      "baseline": {
+        "boundary": "production_public_correspondence_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "6095562342807769219"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 32.4472
+      },
+      "candidate": {
+        "boundary": "production_public_correspondence_pair_current_entry",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "6095562342807769219"
+        ],
+        "timer_boundary": "row_source_ingress_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_build_public_entry",
+        "asm_boundary": "production_public_entry_current_build",
+        "rvv_ms": 37.4992
+      }
+    }
+  ]
+}

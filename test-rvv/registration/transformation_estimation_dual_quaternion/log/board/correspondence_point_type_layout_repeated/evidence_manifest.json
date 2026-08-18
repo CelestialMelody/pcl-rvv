@@ -1,0 +1,464 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "transformation_estimation_dual_quaternion correspondence point-type layout repeated diagnostic",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/correspondence_point_type_layout_repeated/summary.md",
+    "label": "correspondence direct index stream PointXYZI/PointXYZRGB layout diagnostic; test-rvv only",
+    "analysis_script": "test-rvv/registration/transformation_estimation_dual_quaternion/script/generate_tedq_correspondence_point_type_layout_summary.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 20,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "std=sha256:6f9df11b0be5ac6c4f872326b65408bcf336f3f81b9dd5d54978fbd4c4880706; rvv=sha256:7b1033170a4a815d5512b21f7a9add4d148a4678f3b4a578ca0b0687598610d6",
+      "dataset": "synthetic dense xyz AoS clouds; dual-quaternion C1/C2 accumulation, component ablation, and Eigen 4x4 solve",
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "point_type",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5
+    }
+  },
+  "runs": [
+    "run-01",
+    "run-02",
+    "run-03",
+    "run-04",
+    "run-05"
+  ],
+  "artifacts": {
+    "input_dir": "log/board/correspondence_point_type_layout_repeated",
+    "summary_path": "log/board/correspondence_point_type_layout_repeated/summary.md",
+    "std_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_std",
+    "rvv_bin": "build/riscv/bench_transformation_estimation_dual_quaternion_rvv"
+  },
+  "comparisons": [
+    {
+      "name": "correspondence point-type layout PointXYZI 4K",
+      "group": "tedq_correspondence_point_type_layout",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        5.17524115755627,
+        5.802958579881657,
+        5.493870402802101,
+        5.065997888067582,
+        5.523307436182019
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.9657,
+      "rvv_ms": 0.1802,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct index stream ms / RVV direct index stream ms for the same point type and correspondence index pattern. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "13504791834394936957"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.9657
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1714001059226217133"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 0.1802
+      }
+    },
+    {
+      "name": "correspondence point-type layout PointXYZI 64K",
+      "group": "tedq_correspondence_point_type_layout",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        5.882895329629074,
+        6.685240294167949,
+        6.9251238499646135,
+        6.687046314282793,
+        6.9361299147697375
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 19.5871,
+      "rvv_ms": 2.9235,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct index stream ms / RVV direct index stream ms for the same point type and correspondence index pattern. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "16738174730709564258"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 19.5871
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "16738174730709564258"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 2.9235
+      }
+    },
+    {
+      "name": "correspondence point-type layout PointXYZI 256K",
+      "group": "tedq_correspondence_point_type_layout",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZI",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        5.06339632410044,
+        5.764445817609369,
+        6.573153349543054,
+        4.040750313404423,
+        6.67912665259894
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 78.3255,
+      "rvv_ms": 13.5939,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct index stream ms / RVV direct index stream ms for the same point type and correspondence index pattern. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1664452477084261135"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 78.3255
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZI",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "1706194153110589835"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZI_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 13.5939
+      }
+    },
+    {
+      "name": "correspondence point-type layout PointXYZRGB 4K",
+      "group": "tedq_correspondence_point_type_layout",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 4096,
+      "run_count": 5,
+      "ba_values": [
+        5.675347222222222,
+        5.718840579710146,
+        5.718293395675044,
+        5.7602100350058345,
+        5.7703875072296125
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 0.9865,
+      "rvv_ms": 0.1725,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct index stream ms / RVV direct index stream ms for the same point type and correspondence index pattern. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5473982973002176763"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 0.9865
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5473982973002176763"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 0.1725
+      }
+    },
+    {
+      "name": "correspondence point-type layout PointXYZRGB 64K",
+      "group": "tedq_correspondence_point_type_layout",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 65536,
+      "run_count": 5,
+      "ba_values": [
+        6.926824324324324,
+        5.284673230482983,
+        6.137884430562229,
+        5.350828512342608,
+        6.522901364940264
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 20.4501,
+      "rvv_ms": 3.3296,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct index stream ms / RVV direct index stream ms for the same point type and correspondence index pattern. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5969376675335188272"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 20.4501
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "5969376675335188272"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 3.3296
+      }
+    },
+    {
+      "name": "correspondence point-type layout PointXYZRGB 256K",
+      "group": "tedq_correspondence_point_type_layout",
+      "case_kind": "point_type_layout_diagnostic",
+      "evidence_role": "diagnostic",
+      "row_source": "correspondence-pair",
+      "point_type": "PointXYZRGB",
+      "scalar": "float",
+      "size": 262144,
+      "run_count": 5,
+      "ba_values": [
+        2.9599545480863876,
+        4.2845608435153455,
+        4.118656175795871,
+        5.387750136453011,
+        5.743680700114703
+      ],
+      "decision_bucket": "positive",
+      "std_ms": 81.869,
+      "rvv_ms": 19.1105,
+      "allowed_contract_mismatches": [
+        "reduction",
+        "asm_boundary"
+      ],
+      "notes": "B/A = Std direct index stream ms / RVV direct index stream ms for the same point type and correspondence index pattern. This is diagnostic evidence, not public-entry evidence.",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "6877199880137518517"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "scalar_same_chain",
+        "asm_boundary": "not_applicable_std_build",
+        "std_ms": 81.869
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_support_correspondence_direct_index_stream_point_type_layout",
+        "wrapper": "bench_tedq",
+        "row_source": "correspondence-pair",
+        "point_type": "PointXYZRGB",
+        "solve": true,
+        "checksum_policy": "path_fingerprint_matrix_correctness_checked_by_gtest_budget",
+        "checksum": [
+          "matrix_budget_passed_by_run_test_compare"
+        ],
+        "path_fingerprint": [
+          "4832430135946210872"
+        ],
+        "timer_boundary": "correspondence_index_stream_plus_gather_plus_c1_c2_accumulation_plus_eigen_4x4_solve",
+        "gate": "dense_correspondence_pair_PointXYZRGB_float_xyz_aos",
+        "mask": "not_applicable_dense_only",
+        "reduction": "rvv_f64_tree",
+        "asm_boundary": "bench_binary_correspondence_direct_index_stream",
+        "rvv_ms": 19.1105
+      }
+    }
+  ]
+}

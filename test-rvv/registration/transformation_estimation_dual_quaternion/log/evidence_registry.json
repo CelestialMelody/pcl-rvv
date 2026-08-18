@@ -1,0 +1,2337 @@
+{
+  "files": {
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "component-ablation",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/003-component-ablation/result.zh.md"
+      ],
+      "evidence_role": "component_ablation",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786699556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/summary.md"
+      },
+      "run_label": "board-tedq-component-ablation-repeated-phase003",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741435788931,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_doctor.md",
+        "sha256": "sha256:45cedc2816ec3248c32137693cc662152622928e6f2be006ecde69369a5656e2",
+        "size": 626
+      },
+      "target": "collect_board_bench_component_ablation_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "component-ablation",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/003-component-ablation/result.zh.md"
+      ],
+      "evidence_role": "component_ablation",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786699556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/summary.md"
+      },
+      "run_label": "board-tedq-component-ablation-repeated-phase003",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786699556679731446,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_manifest.json",
+        "sha256": "sha256:61e7d7562607770d478d653de3ca23a59bd82e34a8d118444a411bf50c2c3cf2",
+        "size": 8141
+      },
+      "target": "collect_board_bench_component_ablation_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "component-ablation",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/003-component-ablation/result.zh.md"
+      ],
+      "evidence_role": "component_ablation",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786699556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/summary.md"
+      },
+      "run_label": "board-tedq-component-ablation-repeated-phase003",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786699556679731446,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/summary.md",
+        "sha256": "sha256:e4afd07ba1efbc2a78dbb1696fba93684668fd0d5cdabfaf20802924f0ee262a",
+        "size": 4355
+      },
+      "target": "collect_board_bench_component_ablation_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "correspondence-direct-index-stream-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/008-correspondence-direct-index-stream/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786960887,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-direct-index-stream-phase008",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741470788612,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_doctor.md",
+        "sha256": "sha256:8b3ed30bac56f52e9190fc093b2cff2cbb4c58630406f73ae995d7ea0ee5f661",
+        "size": 5450
+      },
+      "target": "collect_board_bench_correspondence_direct_index_stream_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "correspondence-direct-index-stream-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/008-correspondence-direct-index-stream/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786960887,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-direct-index-stream-phase008",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786960886966267193,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_manifest.json",
+        "sha256": "sha256:7d75983f48fa20a0dd51d6136fdf222a5bf69f147af177c27b5cb8a1731f7267",
+        "size": 22888
+      },
+      "target": "collect_board_bench_correspondence_direct_index_stream_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "correspondence-direct-index-stream-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/008-correspondence-direct-index-stream/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786960887,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-direct-index-stream-phase008",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786960886967267184,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/summary.md",
+        "sha256": "sha256:cc2e8cb822e9694f6d8dbc91aed396c5f5dff75d044e24c0ee9db23da6fbdafa",
+        "size": 2903
+      },
+      "target": "collect_board_bench_correspondence_direct_index_stream_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "correspondence-index-locality-ablation",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786713173,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-index-locality-phase010",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741506788284,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_doctor.md",
+        "sha256": "sha256:11928ac489719dd1d26a93b8342b46a351fb4c3d008fb9957ec4b5d4bac4c64c",
+        "size": 6819
+      },
+      "target": "collect_board_bench_correspondence_index_locality_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "correspondence-index-locality-ablation",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786713173,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-index-locality-phase010",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786713172945628666,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_manifest.json",
+        "sha256": "sha256:77adbb9f7b22f097348560bb6bf2f92fdddbfec1b797cf8dc3efdceea21e43ff",
+        "size": 18852
+      },
+      "target": "collect_board_bench_correspondence_index_locality_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "correspondence-index-locality-ablation",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786713173,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-index-locality-phase010",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786713172945628666,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/summary.md",
+        "sha256": "sha256:90e641adcad4eaae23b3de38c23d75a70946112e2bb3093f8731e6ce4a6a7d87",
+        "size": 3133
+      },
+      "target": "collect_board_bench_correspondence_index_locality_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "correspondence-point-type-layout",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786961721,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-point-type-layout-phase012",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741543787947,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_doctor.md",
+        "sha256": "sha256:f5a87ceb75d9efb01cc6b11d4c78e39b896efa98ab8921d245664f83d94008d6",
+        "size": 4672
+      },
+      "target": "collect_board_bench_correspondence_point_type_layout_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "correspondence-point-type-layout",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786961721,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-point-type-layout-phase012",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786961721262664193,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_manifest.json",
+        "sha256": "sha256:e6e731b652c9b301b51d8d52ff411f36f31746aace9c7eb8cebe11b5f9054703",
+        "size": 18049
+      },
+      "target": "collect_board_bench_correspondence_point_type_layout_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "correspondence-point-type-layout",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786961721,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-point-type-layout-phase012",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786961721262664193,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/summary.md",
+        "sha256": "sha256:84f1943a0f5ee9f366ecef87ae9becf62490ed7ba3538692d8f7defe036fb7e9",
+        "size": 1869
+      },
+      "target": "collect_board_bench_correspondence_point_type_layout_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "correspondence-segment-load-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786710915,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-segment-load-phase009",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741579787619,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_doctor.md",
+        "sha256": "sha256:7e1ee29f12bbc2a9a82a5122bc82b3186646ef1fa14915fbcac9a3255494b79e",
+        "size": 6290
+      },
+      "target": "collect_board_bench_correspondence_segment_load_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "correspondence-segment-load-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786710915,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-segment-load-phase009",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786710915172203792,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_manifest.json",
+        "sha256": "sha256:65f1f956003629181a04c609d5d3c42eb3ba640acdd7d84286e3cad25d771325",
+        "size": 8795
+      },
+      "target": "collect_board_bench_correspondence_segment_load_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "correspondence-segment-load-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786710915,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/summary.md"
+      },
+      "run_label": "board-tedq-correspondence-segment-load-phase009",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786710915172203792,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/summary.md",
+        "sha256": "sha256:df6f1e3d7904a41b721a589072c349d7cd57cde2017243dd04c353f14b88604f",
+        "size": 1618
+      },
+      "target": "collect_board_bench_correspondence_segment_load_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "indexed-direct-gather-family-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/007-indexed-direct-gather-family-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786709418,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/summary.md"
+      },
+      "run_label": "board-tedq-indexed-direct-gather-family-comparison-phase007",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741615787290,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_doctor.md",
+        "sha256": "sha256:905c18f71ba19807f12d7687799d4d88b9d17dbcf234383ee761074405a43a49",
+        "size": 2464
+      },
+      "target": "collect_board_bench_indexed_direct_gather_family_comparison_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "indexed-direct-gather-family-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/007-indexed-direct-gather-family-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786709418,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/summary.md"
+      },
+      "run_label": "board-tedq-indexed-direct-gather-family-comparison-phase007",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786709418563842490,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_manifest.json",
+        "sha256": "sha256:b911847c2e964e531e367bec28788cfc1270eea01a8ccf7aa39a2761f72071e4",
+        "size": 22899
+      },
+      "target": "collect_board_bench_indexed_direct_gather_family_comparison_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "indexed-direct-gather-family-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/007-indexed-direct-gather-family-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786709418,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/summary.md"
+      },
+      "run_label": "board-tedq-indexed-direct-gather-family-comparison-phase007",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786709418563842490,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/summary.md",
+        "sha256": "sha256:18059b3d8118b57bd34b78d8f01dc64275ed9c20b13b091ef93fb03d6564e383",
+        "size": 3275
+      },
+      "target": "collect_board_bench_indexed_direct_gather_family_comparison_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "indexed-direct-gather-point-type-layout",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/013-indexed-direct-gather-point-type-layout/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786966875,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/summary.md"
+      },
+      "run_label": "board-tedq-indexed-direct-gather-point-type-layout-phase013",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741649786981,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_doctor.md",
+        "sha256": "sha256:fab74df5ebfebe52701ca33f7b7a57977b506979e78a895b815327c98acd09ed",
+        "size": 4320
+      },
+      "target": "collect_board_bench_indexed_direct_gather_point_type_layout_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "indexed-direct-gather-point-type-layout",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/013-indexed-direct-gather-point-type-layout/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786966875,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/summary.md"
+      },
+      "run_label": "board-tedq-indexed-direct-gather-point-type-layout-phase013",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786966875143697419,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_manifest.json",
+        "sha256": "sha256:89e508a5fe292d9232dd144030ccdbb3d271bb15ecc41d5b1e478eaee69f0742",
+        "size": 34008
+      },
+      "target": "collect_board_bench_indexed_direct_gather_point_type_layout_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "indexed-direct-gather-point-type-layout",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/013-indexed-direct-gather-point-type-layout/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786966875,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/summary.md"
+      },
+      "run_label": "board-tedq-indexed-direct-gather-point-type-layout-phase013",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786966875143697419,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/summary.md",
+        "sha256": "sha256:7623ec829ed8d99a7ccb9e1e7300dea634f46ec269cda4a727a2440d951f90eb",
+        "size": 3018
+      },
+      "target": "collect_board_bench_indexed_direct_gather_point_type_layout_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "production-public-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/plan.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786970556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-row-sources-repeated-phase015",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741679786707,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/evidence_doctor.md",
+        "sha256": "sha256:f77b0478bad9e283888c4fed8fe9aaab4f8814771719703dc4cb8d1ffa6d004a",
+        "size": 4893
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "production-public-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/plan.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786970556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-row-sources-repeated-phase015",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786970556033153457,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/evidence_manifest.json",
+        "sha256": "sha256:56e6ba4aa6e741e30a4d4a982ea168f660db60882b148e92d0e9b55f0bb7318e",
+        "size": 8763
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "production-public-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/plan.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786970556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-row-sources-repeated-phase015",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786970556033153457,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/summary.md",
+        "sha256": "sha256:7367833fb4103dff4de6f5ef54653ad49d27f8792106106dd33536960c78ecfd",
+        "size": 1902
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741707786452,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/evidence_doctor.md",
+        "sha256": "sha256:d0eea3ac35c9005613f31d1610f38df19925f152a9cd3e7166c4949e67360cdc",
+        "size": 648
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787021323251504535,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/evidence_manifest.json",
+        "sha256": "sha256:ea4f666de076d90b88d839f3bf16fedc6286c6aad9e461ac35f864b3312867c7",
+        "size": 8872
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787021323251504535,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/summary.md",
+        "sha256": "sha256:3f23cb5295b47afece13d5f02cda66397e4c1880882396c7a0c971eb895804f1",
+        "size": 1943
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "public-dual-quaternion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/002-production-integration-plan/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786697776,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-full-cloud-repeated-phase002",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741736786188,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_doctor.md",
+        "sha256": "sha256:32eeec58e7f6dad0c00c9c359ba1329b7bad868f41c7cf7b4e891079e980b3fc",
+        "size": 5292
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "public-dual-quaternion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/002-production-integration-plan/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786697776,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-full-cloud-repeated-phase002",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786697776443317938,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_manifest.json",
+        "sha256": "sha256:9f1d9280b83c617501c10a9148254186b351698bd9673b1bd439cb903e74edda",
+        "size": 8455
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "public-dual-quaternion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/002-production-integration-plan/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786697776,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-full-cloud-repeated-phase002",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786697776443317938,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/summary.md",
+        "sha256": "sha256:77a141112435db2adcc54c2628310fdfdb9de3a11f0855fd1784f1db14847759",
+        "size": 1877
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741764785933,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "sha256": "sha256:86145b3db295084b8301eb1be01b61a01fa2bb344c86f6f013ced649fe30bf2a",
+        "size": 645
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787021323139505556,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "sha256": "sha256:17e5de80ea08ca6a95d2ab5227dcba486475811aa37abfef8850282ef4db6c11",
+        "size": 8747
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787021323140505547,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md",
+        "sha256": "sha256:c630cf55300d5b9c93101df6ec6d383f12ebbe0bed2837ecfc20d461fdf7c990",
+        "size": 1909
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "production-public-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/plan.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786970556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-row-sources-repeated-phase015",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741792785678,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md",
+        "sha256": "sha256:c27ce67bc4bd5824db9c04545a87f203d6ec409992c030e5171004d6b5e9127a",
+        "size": 636
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "production-public-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/plan.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786970556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-row-sources-repeated-phase015",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786970555867154970,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json",
+        "sha256": "sha256:194ef65e6fa8aa9234a22f59d8c9e861f20c5c480cfaa2495063813c8af54c84",
+        "size": 8719
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "production-public-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/plan.zh.md",
+        "doc/phases/015-production-integration-all-row-sources/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786970556,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-row-sources-repeated-phase015",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786970555867154970,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md",
+        "sha256": "sha256:6dd64b20886735bb96f05f9bf853041259ae9c6e344334a566270fdcb5345997",
+        "size": 1873
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741820785422,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/evidence_doctor.md",
+        "sha256": "sha256:d071632232e2c60a1c3da142d998b2b67c7bafd4e3537942d68e889bd44f8c22",
+        "size": 650
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787021323196505036,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/evidence_manifest.json",
+        "sha256": "sha256:499c6b114d38637c2ab297546b8c2a6b8f4c5a3ea6dec5ef5f2411d1b329c09f",
+        "size": 8948
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787021323,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md"
+      },
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787021323196505036,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/summary.md",
+        "sha256": "sha256:768cec89e36e8b9a68948c53b3f3ea0e69e5ab65c49a6fbb612b78dc525b2392",
+        "size": 1959
+      },
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741847785176,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/evidence_doctor.md",
+        "sha256": "sha256:8ab20c1831ce4fd48f91ed18fd2f1a2957e32f4a1560b448b322daac33c55214",
+        "size": 635
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786704918012856137,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/evidence_manifest.json",
+        "sha256": "sha256:9f12ccadb5bf48334a14a02f6d5323c6d3e581466ce63441626bb3463c2e1efa",
+        "size": 8835
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786704918013856128,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/summary.md",
+        "sha256": "sha256:c02e0a59e6846b39c3bfaba0d93cda39cc5f68763889df72e45c8452ff831818",
+        "size": 1954
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741876784912,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/evidence_doctor.md",
+        "sha256": "sha256:e07e910a89d5aff45346aeab723d9e39a84722dc37917964353249cd6fdec48c",
+        "size": 633
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786704917969856528,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/evidence_manifest.json",
+        "sha256": "sha256:2747d6a9722eda99c967951214b491dfa2162eec7c09f8294d95fb3c32ed33ee",
+        "size": 8910
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786704917969856528,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/summary.md",
+        "sha256": "sha256:d4c6f8f5b4c08dd6ffae3a610b106c2978ecce6047133fd7828bf3b3a4886654",
+        "size": 1968
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741905784648,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "sha256": "sha256:239536aa6505bd828c87b2e72cf731c6801251640f01aba3ed72fd637682e453",
+        "size": 620
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786704917926856920,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "sha256": "sha256:cb772c69faddc6ea802d3bfa80b2e47caed307625103dbfcacafc3b2b4e2071d",
+        "size": 8905
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786704918,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786704917926856920,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md",
+        "sha256": "sha256:be07d102423f38780e548315facf451cac88564d45d768be843e0ea8a4c04ba7",
+        "size": 1924
+      },
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "row-source-family-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/006-test-support-split-and-row-source-family-comparison/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786706136,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-family-comparison-phase006",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741935784374,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_doctor.md",
+        "sha256": "sha256:0ea5cfbf8f94f26f7a91c5b6f9308ad2785e8555f08c1dc200ec84cf293f0a0a",
+        "size": 635
+      },
+      "target": "collect_board_bench_row_source_family_comparison_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "row-source-family-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/006-test-support-split-and-row-source-family-comparison/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786706136,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-family-comparison-phase006",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786706136343753555,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_manifest.json",
+        "sha256": "sha256:515da1fad28c18f21080dedfac72031994f796c633b4c75efef20159f24acb43",
+        "size": 8736
+      },
+      "target": "collect_board_bench_row_source_family_comparison_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "row-source-family-comparison",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/006-test-support-split-and-row-source-family-comparison/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786706136,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/summary.md"
+      },
+      "run_label": "board-tedq-row-source-family-comparison-phase006",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786706136343753555,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/summary.md",
+        "sha256": "sha256:e3260bef61c8ebf1e2af6008424053aa3ecac08f55a63c5d32acfe45fabf7137",
+        "size": 1846
+      },
+      "target": "collect_board_bench_row_source_family_comparison_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "rvv-accum-full-cloud",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/001-board-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "pre_production_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786695100,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/summary.md"
+      },
+      "run_label": "board-tedq-rvv-accum-full-cloud-repeated-phase001",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741963784119,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_doctor.md",
+        "sha256": "sha256:8f8f623c924471a433baa661808c47c88674447cf7ecc128c2a8515105ce3e37",
+        "size": 620
+      },
+      "target": "collect_board_bench_rvv_accum_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "rvv-accum-full-cloud",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/001-board-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "pre_production_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786695100,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/summary.md"
+      },
+      "run_label": "board-tedq-rvv-accum-full-cloud-repeated-phase001",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786695100381350779,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_manifest.json",
+        "sha256": "sha256:2e8d7294e15cbd0eeb2091b7733e20c909494ccfb4889e8aad4b4629485e3208",
+        "size": 8173
+      },
+      "target": "collect_board_bench_rvv_accum_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/summary.md": {
+      "backend": "board",
+      "case_filter": "rvv-accum-full-cloud",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/001-board-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "pre_production_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1786695100,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_manifest.json",
+        "summary_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/summary.md"
+      },
+      "run_label": "board-tedq-rvv-accum-full-cloud-repeated-phase001",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1786695100381350779,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/summary.md",
+        "sha256": "sha256:c4523b4aad640ee038c4bfd2619f2e19cc4c7f060566b6b3d32b26c05d2d28c5",
+        "size": 1661
+      },
+      "target": "collect_board_bench_rvv_accum_repeated"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md": {
+      "backend": "qemu",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md",
+        "doc/phases/011-row-source-taxonomy-and-pattern-boundary/result.zh.md",
+        "doc/phases/012-point-type-layout-expansion/plan.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "qemu_smoke_only",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787022062,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json"
+      },
+      "run_label": "qemu-tedq-production-public-retained-row-sources-smoke-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787029741400789250,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "sha256": "sha256:7911d0203a2fb8b281e8605c97410fe08ed374cb430cb26b7dbd2e1ecde64212",
+        "size": 9396
+      },
+      "target": "run_qemu_bench_smoke"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json": {
+      "backend": "qemu",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md",
+        "doc/phases/011-row-source-taxonomy-and-pattern-boundary/result.zh.md",
+        "doc/phases/012-point-type-layout-expansion/plan.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "qemu_smoke_only",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787022062,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json"
+      },
+      "run_label": "qemu-tedq-production-public-retained-row-sources-smoke-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787022062194770529,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "sha256": "sha256:6f9499c03fa6e176e379b972a9c6eb4c4a02387630804ffdc82731e06f8d3d1b",
+        "size": 19595
+      },
+      "target": "run_qemu_bench_smoke"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log": {
+      "backend": "qemu",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md",
+        "doc/phases/011-row-source-taxonomy-and-pattern-boundary/result.zh.md",
+        "doc/phases/012-point-type-layout-expansion/plan.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "qemu_smoke_only",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787022062,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json"
+      },
+      "run_label": "qemu-tedq-production-public-retained-row-sources-smoke-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787022062178770675,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "sha256": "sha256:4be4cb1a59b8ecb303771339b457d532d678dd5ca4edef5bef28351487e9dbd3",
+        "size": 4395
+      },
+      "target": "run_qemu_bench_smoke"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log": {
+      "backend": "qemu",
+      "case_filter": "production-public-retained-row-sources",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md",
+        "doc/phases/011-row-source-taxonomy-and-pattern-boundary/result.zh.md",
+        "doc/phases/012-point-type-layout-expansion/plan.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/plan.zh.md",
+        "doc/phases/016-production-adoption-scope-finalization/result.zh.md"
+      ],
+      "evidence_role": "qemu_smoke_only",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787022062,
+      "related": {
+        "doctor_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "manifest_path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json"
+      },
+      "run_label": "qemu-tedq-production-public-retained-row-sources-smoke-phase016",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787022046797910843,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log",
+        "sha256": "sha256:3bdb2d8d764dc485739804e8324be434a438e3c1f9d959d8da39d142901f68fe",
+        "size": 4378
+      },
+      "target": "run_qemu_bench_smoke"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log": {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout-correctness",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/transformation_estimation_dual_quaternion-evaluation.zh.md",
+        "doc/correctness-tests.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md",
+        "doc/phases/007-indexed-direct-gather-family-expansion/result.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md",
+        "doc/phases/011-row-source-taxonomy-and-pattern-boundary/result.zh.md",
+        "doc/phases/012-point-type-layout-expansion/plan.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md",
+        "doc/phases/013-indexed-direct-gather-point-type-layout/plan.zh.md",
+        "doc/phases/013-indexed-direct-gather-point-type-layout/result.zh.md"
+      ],
+      "evidence_role": "qemu_correctness",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787022195,
+      "related": {},
+      "run_label": "qemu-tedq-correctness-phase013",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787022176132732217,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "sha256": "sha256:c0c1204376b2f6ee8ea86f2574af29cfad066408eb52733d7a58a0c51860a810",
+        "size": 7060
+      },
+      "target": "run_test_compare"
+    },
+    "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log": {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout-correctness",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/transformation_estimation_dual_quaternion-evaluation.zh.md",
+        "doc/correctness-tests.zh.md",
+        "doc/phases/005-row-source-expansion/result.zh.md",
+        "doc/phases/007-indexed-direct-gather-family-expansion/result.zh.md",
+        "doc/phases/009-correspondence-segment-load/result.zh.md",
+        "doc/phases/010-correspondence-index-locality/plan.zh.md",
+        "doc/phases/010-correspondence-index-locality/result.zh.md",
+        "doc/phases/011-row-source-taxonomy-and-pattern-boundary/result.zh.md",
+        "doc/phases/012-point-type-layout-expansion/plan.zh.md",
+        "doc/phases/012-point-type-layout-expansion/result.zh.md",
+        "doc/phases/013-indexed-direct-gather-point-type-layout/plan.zh.md",
+        "doc/phases/013-indexed-direct-gather-point-type-layout/result.zh.md"
+      ],
+      "evidence_role": "qemu_correctness",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787022195,
+      "related": {},
+      "run_label": "qemu-tedq-correctness-phase013",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787022158288894831,
+        "path": "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log",
+        "sha256": "sha256:b851d30b943e382029448fc6d00d7630f9d6be72d892345ed356648f2e5f22cb",
+        "size": 6210
+      },
+      "target": "run_test_compare"
+    }
+  },
+  "records": [],
+  "runs": [
+    {
+      "backend": "qemu",
+      "case_filter": "ordered-full-cloud",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786693875,
+      "run_label": "qemu-tedq-correctness-phase000",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "rvv-accum-full-cloud",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1786693896,
+      "run_label": "qemu-tedq-accum-full-cloud-smoke-phase000",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "board",
+      "case_filter": "rvv-accum-full-cloud",
+      "evidence_role": "pre_production_diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/rvv_accum_full_cloud_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786695100,
+      "run_label": "board-tedq-rvv-accum-full-cloud-repeated-phase001",
+      "target": "collect_board_bench_rvv_accum_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "ordered-full-cloud",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786697057,
+      "run_label": "qemu-tedq-correctness-phase000",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public-dual-quaternion",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786697171,
+      "run_label": "board-tedq-production-public-full-cloud-repeated-phase002",
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public-dual-quaternion",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_full_cloud_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786697776,
+      "run_label": "board-tedq-production-public-full-cloud-repeated-phase002",
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "ordered-full-cloud",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786697830,
+      "run_label": "qemu-tedq-correctness-phase000",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "ordered-full-cloud",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786699345,
+      "run_label": "qemu-tedq-correctness-phase000",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "ordered-full-cloud",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786699455,
+      "run_label": "qemu-tedq-correctness-phase000",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "component-ablation",
+      "evidence_role": "component_ablation",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/component_ablation_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786699556,
+      "run_label": "board-tedq-component-ablation-repeated-phase003",
+      "target": "collect_board_bench_component_ablation_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "ordered-full-cloud",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786700106,
+      "run_label": "qemu-tedq-correctness-phase000",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786704374,
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786704459,
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "row-source-expansion-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786704913,
+      "run_label": "qemu-tedq-correctness-phase005",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "row-source-expansion",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_correspondence_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_dual_indexed_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_expansion_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786704918,
+      "run_label": "board-tedq-row-source-expansion-repeated-phase005",
+      "target": "collect_board_bench_row_source_expansion_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "row-source-family-comparison",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/row_source_family_comparison_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786706136,
+      "run_label": "board-tedq-row-source-family-comparison-phase006",
+      "target": "collect_board_bench_row_source_family_comparison_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "row-source-expansion-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786706818,
+      "run_label": "qemu-tedq-correctness-phase005",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "rvv-accum-full-cloud",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1786706850,
+      "run_label": "qemu-tedq-accum-full-cloud-smoke-phase000",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "rvv-accum-full-cloud",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1786706889,
+      "run_label": "qemu-tedq-accum-full-cloud-smoke-phase000",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "board",
+      "case_filter": "indexed-direct-gather-family-comparison",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_family_comparison_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786709418,
+      "run_label": "board-tedq-indexed-direct-gather-family-comparison-phase007",
+      "target": "collect_board_bench_indexed_direct_gather_family_comparison_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correspondence-direct-index-stream-comparison",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786710385,
+      "run_label": "board-tedq-correspondence-direct-index-stream-phase008",
+      "target": "collect_board_bench_correspondence_direct_index_stream_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correspondence-segment-load-comparison",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_segment_load_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786710915,
+      "run_label": "board-tedq-correspondence-segment-load-phase009",
+      "target": "collect_board_bench_correspondence_segment_load_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correspondence-index-locality-ablation",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786711804,
+      "run_label": "board-tedq-correspondence-index-locality-phase010",
+      "target": "collect_board_bench_correspondence_index_locality_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correspondence-index-locality-ablation",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786711897,
+      "run_label": "board-tedq-correspondence-index-locality-phase010",
+      "target": "collect_board_bench_correspondence_index_locality_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correspondence-index-locality-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786711951,
+      "run_label": "qemu-tedq-correctness-phase010",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correspondence-index-locality-ablation",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1786711979,
+      "run_label": "qemu-tedq-correspondence-index-locality-smoke-phase010",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correspondence-index-locality-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786713172,
+      "run_label": "qemu-tedq-correctness-phase010",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correspondence-index-locality-ablation",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_index_locality_ablation_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786713173,
+      "run_label": "board-tedq-correspondence-index-locality-phase010",
+      "target": "collect_board_bench_correspondence_index_locality_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correspondence-index-locality-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786713202,
+      "run_label": "qemu-tedq-correctness-phase010",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correspondence-index-locality-ablation",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1786713236,
+      "run_label": "qemu-tedq-correspondence-index-locality-smoke-phase010",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correspondence-index-locality-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786713339,
+      "run_label": "qemu-tedq-correctness-phase010",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correspondence-point-type-layout-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786960720,
+      "run_label": "qemu-tedq-correctness-phase012",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "correspondence-point-type-layout",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1786960749,
+      "run_label": "qemu-tedq-correspondence-point-type-layout-smoke-phase012",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correspondence-direct-index-stream-comparison",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_direct_index_stream_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786960887,
+      "run_label": "board-tedq-correspondence-direct-index-stream-phase008",
+      "target": "collect_board_bench_correspondence_direct_index_stream_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correspondence-point-type-layout",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786961648,
+      "run_label": "board-tedq-correspondence-point-type-layout-phase012",
+      "target": "collect_board_bench_correspondence_point_type_layout_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "correspondence-point-type-layout",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/correspondence_point_type_layout_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786961721,
+      "run_label": "board-tedq-correspondence-point-type-layout-phase012",
+      "target": "collect_board_bench_correspondence_point_type_layout_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1786962263,
+      "run_label": "qemu-tedq-correctness-phase013",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1786962294,
+      "run_label": "qemu-tedq-indexed-direct-gather-point-type-layout-smoke-phase013",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "board",
+      "case_filter": "indexed-direct-gather-point-type-layout",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/indexed_direct_gather_point_type_layout_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786966875,
+      "run_label": "board-tedq-indexed-direct-gather-point-type-layout-phase013",
+      "target": "collect_board_bench_indexed_direct_gather_point_type_layout_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production-public-row-sources",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_correspondence_pair_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_row_sources_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1786970556,
+      "run_label": "board-tedq-production-public-row-sources-repeated-phase015",
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1787020044,
+      "run_label": "qemu-tedq-correctness-phase013",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787020075,
+      "run_label": "qemu-tedq-indexed-direct-gather-point-type-layout-smoke-phase013",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-public-row-sources",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787020098,
+      "run_label": "qemu-tedq-production-public-row-sources-smoke-phase015",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787020170,
+      "run_label": "qemu-tedq-indexed-direct-gather-point-type-layout-smoke-phase013",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-public-row-sources",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787020170,
+      "run_label": "qemu-tedq-production-public-row-sources-smoke-phase015",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production-public-retained-row-sources",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_dual_indexed_cloud_pair_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_retained_row_sources_repeated/summary.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/board/production_public_source_indexed_cloud_pair_repeated/summary.md"
+      ],
+      "recorded_at_epoch": 1787021323,
+      "run_label": "board-tedq-production-public-retained-row-sources-repeated-phase016",
+      "target": "collect_board_bench_production_public_repeated"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1787022032,
+      "run_label": "qemu-tedq-correctness-phase013",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "production-public-retained-row-sources",
+      "evidence_role": "qemu_smoke_only",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_doctor.md",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/evidence_manifest.json",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787022062,
+      "run_label": "qemu-tedq-production-public-retained-row-sources-smoke-phase016",
+      "target": "run_qemu_bench_smoke"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "indexed-direct-gather-point-type-layout-correctness",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_rvv.log",
+        "test-rvv/registration/transformation_estimation_dual_quaternion/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1787022195,
+      "run_label": "qemu-tedq-correctness-phase013",
+      "target": "run_test_compare"
+    }
+  ],
+  "schema_version": 1,
+  "topic": "transformation_estimation_dual_quaternion",
+  "updated_at_epoch": 1787029741
+}
