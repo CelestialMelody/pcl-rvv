@@ -56,6 +56,23 @@ S2 evaluation（函数级评估）不能只写函数名或数学名词。worker 
 
 详细规则见 `rvv-documentation/references/evaluation-doc-structure.md`。
 
+### 2A. 数学函数热点与 helper 审计
+
+如果源码、candidate、benchmark 或 profile 中出现 `std::*` / libm 数学函数，worker 必须先判断它是否位于逐点、
+逐样本、逐邻域或逐像素热点循环内；只在初始化、常量预计算、少量角度预计算或 solver 外围出现的数学函数，
+默认不作为首选 RVV 点，除非 profile（性能剖析）证明其占比异常。
+
+命中热点时，worker 必须审计项目已有数学 helper，例如 PCL 当前的
+`common/include/pcl/common/impl/rvv_math.hpp`，并在 plan / evaluation / result 中写清：
+
+- 目标函数和标量类型，例如 double `std::exp`、float `std::expf`、`std::sin` / `std::cos`。
+- 现有 RVV helper 是否存在，函数名、精度类型、输入域、特殊值语义和 finite-domain fast approximation（有限输入域快速近似）/ strict libm replacement（严格 libm 替换）边界是否匹配。
+- 如果 helper 匹配，是否把它纳入候选计划、same-chain（同构链路）对拍、caller-shaped smoke（调用方形态 smoke）、QEMU、板卡和 Evidence Doctor 证据。
+- 如果 helper 不存在或存在类型 / 语义不匹配，暂停把该数学函数当作已解决优化点；在当前 phase result 中报告 gap，并把实现所需 helper 的计划交给 `rvv-math-vectorization`。
+
+不能把“存在标量数学函数”直接写成退化根因。没有 profile 或 ablation（消融对照）时，只能写成受证据约束的假设；
+如果负向结果涉及数学函数、staging、reduction、内存流量等多因素，必须逐项列出未消融边界。
+
 ### 3. Production 数据流与诊断数据流映射
 
 如果 production 源码通过 iterator、indices、correspondences、wrapper 或 dispatch 把多种入口统一，
