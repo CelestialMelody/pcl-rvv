@@ -7,7 +7,7 @@
 - `local fragment`：只证明局部片段正确或有潜力。
 - `production-shaped diagnostic`：test-only 入口接近生产调用形状，但尚未改生产源码。
 - `production direct`：真实生产入口已接入并直接验证。
-- `bench 诊断主题`：默认只在专项 test/bench、诊断文档和状态表内活动，不承诺生产分流。
+- `bench-only / diagnostic`：默认只在专项 test/bench、诊断文档和状态表内活动，不承诺生产分流。
 - `生产回退说明`：曾尝试生产接入，但目标硬件性能或维护边界不成立，生产路径已回收。
 
 ## Production-shaped 与 Production Direct
@@ -67,7 +67,7 @@ production-shaped 证据必须列出尚未覆盖的生产面，常见项包括�
 
 若当前环境无法跑目标硬件或 production case，closeout 写清待补的具体命令和缺口，不把缺口写成已完成结论。
 
-## bench 诊断升级生产
+## 诊断 / bench-only 升级生产
 
 升级生产路径不能只看 microbench 或局部片段收益。至少需要：
 

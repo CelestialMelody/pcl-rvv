@@ -19,7 +19,7 @@
 
 必检字段：
 
-- 当前状态：是否只做 `bench 诊断主题`、是否修改生产入口。
+- 当前状态：是否只做 `bench-only / diagnostic` 证据路径、是否修改生产入口。
 - 公开入口：用户如何进入目标函数，输入/输出和算法职责是什么。
 - 标量主链路：局部公式之后还有哪些 sort/search/map/状态机或输出阶段。
 - 证据分层：local fragment、full diagnostic、production case 分别对应哪些 case。

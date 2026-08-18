@@ -53,7 +53,7 @@ helper，让 reviewer 可以一眼看出：
 - 仍保留的标量阶段。
 - local fragment、full diagnostic 和生产入口分别对应哪些 case。
 
-局部片段正确且加速但 full 入口收益不足时，保留为 bench 诊断主题，不接入生产分流。
+局部片段正确且加速但 full 入口收益不足时，保留为 diagnostic / bench-only 证据路径，不接入生产分流。
 
 ## 生产失败回收
 

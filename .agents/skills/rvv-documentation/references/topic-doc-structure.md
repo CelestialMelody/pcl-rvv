@@ -36,7 +36,7 @@
 - RVV 覆盖原标量代码的哪一段，哪些阶段仍是标量，原因是什么。
 - 实现选择审计：如果使用 buffer/staging、`vcompress`、scatter、标量 tail、显式/非显式 fused multiply-add（融合乘加）、vector reduction（向量规约）或数学函数 helper，必须说明为什么这样做、替代方案是什么、当前证据是否足以排除或暂缓替代方案。
 - 哪些 gate 触发 fallback，fallback 后语义如何保持。
-- 当前主题属于 production direct、production-shaped diagnostic、bench 诊断主题，还是生产回退说明；若不是 adopted production behavior，说明 `doc-rvv` 是否 `not_applicable`。
+- 当前主题属于 production direct、production-shaped diagnostic、bench-only / diagnostic 证据路径，还是生产回退说明；若不是 adopted production behavior，说明 `doc-rvv` 是否 `not_applicable`。
 - 每个 bench case 的入口、规模、参数、是否命中 RVV、speedup 计算方式和证明点。
 - 板卡收益是否足以覆盖 staging、buffer 和维护成本。
 - production closeout 或 production-candidate 阶段必须包含“当前采用的优化方式”小节。该小节面向维护者解释当前代码实际采用的优化组织方式，不能只列历史尝试、bench 数字或最终 EvidenceDecision。no-production closeout 没有当前采用的 production 优化方式时，该内容应写成 evaluation / phase result 中的候选审计，不新建 `doc-rvv`。

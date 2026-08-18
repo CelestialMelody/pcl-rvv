@@ -72,7 +72,7 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 
 ## 普通主题入口
 
-从模块 second-pass 或 follow-up 状态表按推荐顺序选择第一条未完成主题。不要重新做模块级候选选择，除非文档与当前源码存在明确冲突。
+从模块 second-pass 或保留候选复筛状态表按推荐顺序选择第一条未完成主题。不要重新做模块级候选选择，除非文档与当前源码存在明确冲突。
 
 主题入口短模板见 [references/topic-entry-template.md](references/topic-entry-template.md)。
 

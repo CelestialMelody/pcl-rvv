@@ -18,19 +18,21 @@ S0 恢复时，先读：
 6. `rvv-workflow/references/handoff-packet.zh.md`
 7. `rvv-workflow/references/topic-lifecycle.zh.md`
 
-## S0 要回答的七个问题
+## S0 要回答的九个问题
 
-S0 记录只需要回答七件事：
+S0 记录只需要回答九件事：
 
 | 字段 | 作用 | 典型内容 |
 | --- | --- | --- |
+| `loaded_instruction_sources` | 说明本轮实际读取并用于决策的指令来源 | `AGENTS.md`、defaults、local override、相关 skill / reference |
 | `preferences_loaded` | 说明读了哪些偏好层 | `defaults`、`local_override`、`prompt_override` 的加载结果 |
-| `frozen_policies` | 说明本轮实际采用了什么策略 | 注释、文档、证据、work log、commit、agent asset 反馈的有效策略 |
+| `work_preferences` | 说明本轮实际采用了什么工作偏好 | 注释、文档、证据、work log 和 instruction feedback（指令反馈）的有效策略 |
+| `commit_preferences` | 说明提交偏好和拆分边界 | 默认不提交；若用户授权提交，说明 topic、日志和 agent instruction patch（agent 指令改动）是否拆分 |
 | `resolved_artifacts` | 说明哪些路径模板被解析成了实际产物 | `artifact_layout` 里的模板键、解析后的相对路径、用途和保存层级（包括 evidence registry） |
 | `artifact_publication_decision` | 说明这些产物是否默认可提交 | `artifact_publication.classes` 里的类别、默认策略和提交边界 |
 | `dirty_isolation` | 说明当前工作区如何与无关修改隔离 | 允许审查的路径集合、无关脏文件、必须忽略的产物 |
 | `validation` | 说明本轮做了哪些检查 | 配置读取、模板展开、私有值扫描、`git diff --check`、Handoff 一致性检查 |
-| `next_action` | 说明下一步应该做什么 | 一个可恢复、单一、具体的下一动作 |
+| `next_worker_action` | 说明下一步应该做什么 | 一个可恢复、单一、具体的下一动作 |
 
 ## 推荐记录形状
 
@@ -42,13 +44,21 @@ preferences_loaded:
   local_override: absent
   prompt_override: absent
 
-frozen_policies:
+loaded_instruction_sources:
+  - AGENTS.md
+  - .agents/config/defaults.yaml
+  - .agents/skills/rvv-workflow/references/s0-preferences-and-recovery.zh.md
+
+work_preferences:
   comment_policy: detailed_zh
   documentation_policy: closeout_current_state_first
   evidence_policy: summary-only
   work_log_policy: use_paths.work_log_root
+  instruction_feedback_policy: report-only
+
+commit_preferences:
   commit_policy: no_commit_without_user_request
-  agent_asset_feedback_policy: report-only
+  split_policy: topic_logs_instruction_patch_separate_when_committing
 
 resolved_artifacts:
   - artifact_key: s0_markdown
@@ -101,7 +111,7 @@ validation:
   private_value_scan: pass
   git_diff_check: pass
 
-next_action: "写 Handoff Packet，并按当前 topic 进入下一步或停在用户授权边界"
+next_worker_action: "写 Handoff Packet，并按当前 topic 进入下一步或停在用户授权边界"
 ```
 
 ## 字段说明
@@ -116,7 +126,7 @@ next_action: "写 Handoff Packet，并按当前 topic 进入下一步或停在�
 
 如果 local override 存在，只报告覆盖范围或 env var 名，不写 IP、用户名、私有绝对路径或 token。
 
-### `frozen_policies`
+### `work_preferences`
 
 这个字段回答“本轮有效策略是什么”。它应把可执行偏好冻结为简短陈述，例如：
 
@@ -124,8 +134,15 @@ next_action: "写 Handoff Packet，并按当前 topic 进入下一步或停在�
 - 文档策略：closeout current-state-first，长期文档不保留对话流程话术。
 - 证据策略：默认 summary-only，不提交 raw logs。
 - work log 策略：是否记录、默认根目录、是否需要保存交接摘要。
-- commit 策略：是否默认不提交，是否需要用户明确授权。
-- agent asset 策略：是否只报告建议，不自动改 `.agents`。
+- instruction feedback 策略：是否只报告建议，不自动改 `.agents`。
+
+### `commit_preferences`
+
+这个字段回答“本轮是否可以提交，以及提交时如何拆分”。默认不进入 commit phase（提交阶段）。只有用户明确授权提交时才写入具体提交策略，例如：
+
+- 是否只提交当前 topic 产物。
+- 是否单独提交 sanitized logs（脱敏日志）。
+- 是否把 agent instruction patch（agent 指令改动）与 topic 产物、evidence logs（证据日志）拆分。
 
 ### `resolved_artifacts`
 
@@ -173,7 +190,7 @@ next_action: "写 Handoff Packet，并按当前 topic 进入下一步或停在�
 
 如果某项没运行，要写原因，而不是省略。
 
-### `next_action`
+### `next_worker_action`
 
 这个字段只能写一个下一步动作。它应当可恢复、可执行、不会让下一轮 worker 重新猜上下文。例如：
 

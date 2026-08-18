@@ -51,7 +51,7 @@ description: 编写、重排或审查 C/C++ RVV 优化文档。适用于主题 R
 - `local fragment`
 - `production-shaped diagnostic`
 - `production direct`
-- `bench 诊断主题`
+- `diagnostic / bench-only 证据路径`
 - `上游生产分流`
 - `回退标量路径`
 
