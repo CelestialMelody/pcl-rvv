@@ -4,10 +4,10 @@
 
 ## 何时读取
 
-- 新建或重排 `artifact_layout.topic_test_dir_template` 解析目录下的 `README.zh.md`、`doc/*.zh.md` 或 `doc/phases/**` 时读取。
+- 新建或重排 `artifact_layout.topic_test_dir_template` 解析目录下的 topic_navigation、testing/evidence、phase suite、roadmap 或 evaluation role 文档时读取。
 - closeout、production-ready、done、stop-for-review 或 `ready_for_review` 前，当前 topic 命中复杂 topic 条件、存在 production direct（真实生产路径证据）、board summary（板卡摘要）、Evidence Doctor（证据体检）或多阶段 phase loop（阶段循环）时读取。
 - 用户或 reviewer 要求“文档对齐”“可审查性”“文档结构是否像成熟 topic”时读取。若用户点名某个成熟 sibling，只把它作为 `optional calibration`，不要复制 topic-specific（当前主题特有）的算法、数值、phase 名或结论。
-- 用户已经表达“同意接入 / 可以提交 / 可以保留当前 patch”或 worker 准备停在“是否提交或取消接入”的判断点时，如果当前 topic 有 production patch 或 adopted production behavior，必须同时读取 `topic-doc-structure.md` 的 Production Doc Closeout Gate。此时 `doc-rvv` 的长期生产文档质量属于 closeout 本身，不是 `git commit` 前才做的机械检查。
+- 用户已经表达“同意接入 / 可以提交 / 可以保留当前 patch”或 worker 准备停在“是否提交或取消接入”的判断点时，如果当前 topic 有 production patch 或 adopted production behavior，必须同时读取 `topic-doc-structure.md` 的 Production Doc Closeout Gate。此时 `artifact_layout.topic_doc_template` 解析出的长期生产文档质量属于 closeout 本身，不是 `git commit` 前才做的机械检查。
 
 ## 质量目标
 
@@ -19,24 +19,27 @@ topic-local doc suite 应让下一轮 worker 或 reviewer 不依赖聊天上下�
 - 若 no-production（不接入生产）或 rollback/no-production（回滚且不接入生产），诊断证据为什么不能替代 production evidence（生产证据）。
 - 若还有未阻塞动作，下一 phase 应从哪里恢复。
 
-## 推荐文档套件
+## Role-based 文档套件
 
-复杂 topic 默认维护以下文档。当前 topic 确实没有对应职责时，可以裁剪，但必须写 `not_applicable with evidence`，列出不存在的测试、bench、script、row source 或 production 行为。
+复杂 topic 默认维护一组文档 role（职责），而不是固定文件清单。role-based templates（基于职责的模板）见 [templates/template-index.zh.md](templates/template-index.zh.md)。模板只定义文档职责、内容结构、裁剪规则和 closeout checks；最终文件路径和命名优先服从 `.agents/config/defaults.yaml` 的 `artifact_layout`。
 
-| 文档 area | 主职责 | 最小内容 |
+当前 topic 确实没有对应职责时，可以裁剪，但必须写 `not_applicable with evidence`，列出不存在的测试、bench、script、row source 或 production 行为。若某个 role 需要跨 topic 稳定落到新文件名，先更新 `artifact_layout` 或配置中的 role/path 解析规则；不要在模板正文里把文件名写成规范。
+
+| role | 主职责 | 模板 |
 | --- | --- | --- |
-| `README.zh.md` | 入口导航 | 当前结论、production 文件、先读哪份文档、目录分工、常用命令、当前可提交证据、默认不提交的生成产物、`doc-rvv` 是否适用。 |
-| `doc/testing-overview.zh.md` | 测试体系总览 | 测试类型定义、运行入口分类、target 粒度审计、覆盖矩阵、QEMU / board / production direct 证据边界、证据白名单。 |
-| `doc/correctness-tests.zh.md` | gtest 语义 | 每个 TEST 或测试族的输入、被测路径、断言、证明范围、不能证明的范围、默认 target 和日志路径；若缺少细粒度 correctness alias，说明是否补齐或暂缓。 |
-| `doc/benchmark-and-evidence.zh.md` | bench 和证据口径 | CLI / case-filter 字典、bench label 语法、计时边界、checksum 来源、QEMU smoke、board smoke / repeated target、summary / manifest / doctor、registry、复现命令和提交边界。 |
-| `doc/optimization-evidence.zh.md` | 候选证据索引 | adopted / attempted / rejected / deferred / not_applicable 候选到 production / test support / target / board / asm / doctor / decision 的映射。 |
-| `doc/test-support-code-map.zh.md` | 测试支撑代码地图 | 聚合入口、internal helper、fixtures、reference、candidate、bench harness、script、production 对照、调用图和拆分审计。 |
-| `doc/optimization-roadmap.zh.md` | 跨阶段搜索空间 | candidate family、idea source、风险、所需证据、状态、默认恢复队列、阶段反思新增路线和拒绝 / 暂缓条件。 |
-| `doc/phases/README.zh.md` | phase 恢复入口 | 当前恢复入口、阶段表、文档归属、早停规则、默认下一动作。 |
-| `doc/<topic>-evaluation.zh.md` | 函数级评估和 closeout 主归属 | 标量路径、RVV 边界、EvidenceDecision、生产接入判断、诊断证据链、Traceability Map（可追踪性地图）、遗留风险。 |
-| `doc-rvv/<module>/<topic>-RVV.zh.md` | production 长期主题文档 | 只在 adopted production behavior（已采用生产行为）、production patch（生产补丁）或 PI5 生产证据闭环通过后适用；不承载 no-production 的测试工程全量说明。 |
+| topic_navigation | 入口导航、当前结论、阅读路径、常用命令、证据白名单和 production_topic_doc 适用性。 | [templates/topic-navigation-template.zh.md](templates/topic-navigation-template.zh.md) |
+| testing_overview | 测试类型定义、运行入口分类、target 粒度审计、覆盖矩阵和 QEMU / board / production direct 证据边界。 | [templates/testing-overview-template.zh.md](templates/testing-overview-template.zh.md) |
+| correctness_tests | 每个 TEST 或测试族的输入、被测路径、断言、证明范围、不能证明的范围和默认 target。 | [templates/correctness-tests-template.zh.md](templates/correctness-tests-template.zh.md) |
+| benchmark_and_evidence | CLI、case-filter、bench label、计时边界、checksum、QEMU / board、summary / manifest / doctor、registry 和提交边界。 | [templates/benchmark-and-evidence-template.zh.md](templates/benchmark-and-evidence-template.zh.md) |
+| optimization_evidence | adopted / attempted / rejected / deferred / not_applicable candidate 到代码、target、board、asm、doctor 和 decision 的映射。 | [templates/optimization-evidence-template.zh.md](templates/optimization-evidence-template.zh.md) |
+| optimization_roadmap | 跨 phase candidate family、idea source、风险、所需证据、优先级、恢复条件和搜索空间变化。 | [templates/optimization-roadmap-template.zh.md](templates/optimization-roadmap-template.zh.md) |
+| test_support_code_map | 测试支撑代码、fixtures、reference、candidate、bench harness、script、production 对照和拆分审计。 | [templates/test-support-code-map-template.zh.md](templates/test-support-code-map-template.zh.md) |
+| phase_index / phase_plan / phase_result / optimization_matrix | 阶段恢复入口、计划、结果、跨阶段优化矩阵、Evidence Doctor 异常处理和继续 / 停止判断。 | [templates/phase-suite-template.zh.md](templates/phase-suite-template.zh.md) |
+| evaluation_diagnostic | diagnostic / bench-only / partial-production-candidate 的函数级评估、诊断证据链、Traceability Map 和 production 接入前置条件。 | [templates/evaluation-diagnostic-template.zh.md](templates/evaluation-diagnostic-template.zh.md) |
+| evaluation_production | production integration loop 后的 production patch scope、fallback matrix、production direct tests、asm、board repeated evidence 和最终 EvidenceDecision。 | [templates/evaluation-production-template.zh.md](templates/evaluation-production-template.zh.md) |
+| production_topic_doc | adopted production behavior 的长期生产行为说明。 | 见 [topic-doc-structure.md](topic-doc-structure.md)；路径来自 `artifact_layout.topic_doc_template`。 |
 
-当 `doc-rvv` 适用时，topic-local doc suite 仍负责保存 phase 审计、bench 字典、测试支撑代码地图和 evidence registry；`doc-rvv` 负责维护当前 production 行为。二者不能互相替代：phase 文档可以解释“为什么尝试 / 为什么撤下”，长期文档必须解释“当前源码实际如何工作、证据支持到哪里、哪些入口仍回退”。如果长期文档仍只是摘要，doc-suite closeout 应标为 `doc_closeout_pending`。
+当 `artifact_layout.topic_doc_template` 解析出的 production 长期主题文档适用时，topic-local doc suite 仍负责保存 phase 审计、bench 字典、测试支撑代码地图和 evidence registry；production 长期主题文档负责维护当前 production 行为。二者不能互相替代：phase 文档可以解释“为什么尝试 / 为什么撤下”，长期文档必须解释“当前源码实际如何工作、证据支持到哪里、哪些入口仍回退”。如果长期文档仍只是摘要，doc-suite closeout 应标为 `doc_closeout_pending`。
 
 ## Target 粒度审计
 
@@ -53,122 +56,30 @@ topic-local doc suite 应让下一轮 worker 或 reviewer 不依赖聊天上下�
 
 | target 类别 | 应回答的问题 | 常见文档归属 |
 | --- | --- | --- |
-| correctness aggregate（正确性汇总入口） | 是否有一条总入口能跑完整 Std / RVV correctness；日志是否稳定可引用。 | `testing-overview`、`correctness-tests`、README。 |
-| correctness aliases（正确性细分入口） | 是否需要按 public semantics（公开入口语义）、input semantics（输入语义）、candidate correctness（候选正确性）、fallback（回退路径）或 production direct（真实生产路径）拆分 gtest target。 | `testing-overview` 的运行入口分类、`correctness-tests` 的 TEST 字典。 |
-| bench diagnostic aliases（bench 诊断入口） | case-filter 是否能隔离 row source（行来源）、candidate family（候选族）、component ablation（组件消融）或 output contract（输出合同）。 | `benchmark-and-evidence`、`optimization-evidence`。 |
-| QEMU smoke aliases（QEMU 小型验证入口） | QEMU 是否只用于 build / correctness / log-shape（日志形状）；是否避免完整 bench compare 被写成性能证据。 | `testing-overview`、`benchmark-and-evidence`。 |
-| board smoke aliases（板卡小型验证入口） | 单次板卡 target 证明什么：可运行、correctness、checksum 或输出形状；是否没有被写成 repeated performance。 | `testing-overview`、`benchmark-and-evidence`。 |
-| board repeated aliases（板卡重复采集入口） | 哪些 target 生成 repeated summary、manifest、Evidence Doctor；run budget 和 decision bucket 是否明确。 | `benchmark-and-evidence`、phase result、Handoff。 |
-| doctor / registry aliases（证据体检和登记入口） | 是否有生成 / 检查 manifest、Evidence Doctor 和 evidence registry 的 target 或脚本；未接入时是否有人工检查路径。 | `benchmark-and-evidence`、phase result、Handoff。 |
-| historical probe guarded aliases（历史探针保护入口） | 历史 production probe、回滚探针或不再默认运行的 target 是否有显式开关、误用保护和证据降级说明。 | README、`testing-overview`、`benchmark-and-evidence`、phase result。 |
+| correctness aggregate（正确性汇总入口） | 是否有一条总入口能跑完整 Std / RVV correctness；日志是否稳定可引用。 | testing_overview、correctness_tests、topic_navigation。 |
+| correctness aliases（正确性细分入口） | 是否需要按 public semantics（公开入口语义）、input semantics（输入语义）、candidate correctness（候选正确性）、fallback（回退路径）或 production direct（真实生产路径）拆分 gtest target。 | testing_overview 的运行入口分类、correctness_tests 的 TEST 字典。 |
+| bench diagnostic aliases（bench 诊断入口） | case-filter 是否能隔离 row source（行来源）、candidate family（候选族）、component ablation（组件消融）或 output contract（输出合同）。 | benchmark_and_evidence、optimization_evidence。 |
+| QEMU smoke aliases（QEMU 小型验证入口） | QEMU 是否只用于 build / correctness / log-shape（日志形状）；是否避免完整 bench compare 被写成性能证据。 | testing_overview、benchmark_and_evidence。 |
+| board smoke aliases（板卡小型验证入口） | 单次板卡 target 证明什么：可运行、correctness、checksum 或输出形状；是否没有被写成 repeated performance。 | testing_overview、benchmark_and_evidence。 |
+| board repeated aliases（板卡重复采集入口） | 哪些 target 生成 repeated summary、manifest、Evidence Doctor；run budget 和 decision bucket 是否明确。 | benchmark_and_evidence、phase_result、Handoff。 |
+| doctor / registry aliases（证据体检和登记入口） | 是否有生成 / 检查 manifest、Evidence Doctor 和 evidence registry 的 target 或脚本；未接入时是否有人工检查路径。 | benchmark_and_evidence、phase_result、Handoff。 |
+| historical probe guarded aliases（历史探针保护入口） | 历史 production probe、回滚探针或不再默认运行的 target 是否有显式开关、误用保护和证据降级说明。 | topic_navigation、testing_overview、benchmark_and_evidence、phase_result。 |
 
 如果 target 粒度不足已经影响 reviewer 定位、证据边界或后续 candidate 扩展，worker 应在当前 phase 补齐 alias target，或把它写成 `phase_deferred + unblocked` 的下一阶段动作。只有用户限定范围、dirty isolation 风险、工具 / 板卡不可用、需要扩大到 production / public API / 其它 topic，或存在外部脚本依赖时，才能写成 `turn_stop_deferred with stop_condition_hit`。
 
-文档不得虚构不存在的 target。若当前工程只有一个 aggregate target，`testing-overview` 可以先把 gtest、case-filter、board summary 和 EvidenceDecision 的映射写清；同时在 doc-suite parity 审计表中说明是否需要补 correctness aliases、bench aliases、board repeated aliases、doctor / registry aliases 或 historical probe guard。
+文档不得虚构不存在的 target。若当前工程只有一个 aggregate target，testing_overview role 可以先把 gtest、case-filter、board summary 和 EvidenceDecision 的映射写清；同时在 doc-suite parity 审计表中说明是否需要补 correctness aliases、bench aliases、board repeated aliases、doctor / registry aliases 或 historical probe guard。
 
-## 最小模板骨架
+## 模板使用规则
 
-### README
+role template 不是可直接复制的固定骨架。使用时先读取 [templates/template-index.zh.md](templates/template-index.zh.md)，再按当前 topic 命中的 role 读取对应模板。
 
-```text
-# <topic> RVV 主题入口
-## 当前结论
-## 先读哪份文档
-## 目录分工
-## 常用命令
-## 当前可提交证据
-## 默认不提交的生成产物
-## doc-rvv 适用性
-```
+写文档时遵守：
 
-### testing-overview
-
-```text
-# 测试体系总览
-## 本文职责
-## 文档阅读路径
-## 测试类型定义
-## 运行入口分类
-## Target 粒度审计
-## 细粒度 Target
-## 测试流程
-## 输入数据总览
-## 覆盖矩阵
-## 当前可提交证据
-## 默认不提交的生成产物
-## 当前结论边界
-```
-
-### correctness-tests
-
-```text
-# 正确性测试说明
-## 本文职责
-## 测试文件分工
-## 共同输入和断言
-## TEST / 测试族字典
-## 边界和随机样本策略
-## 验证命令
-```
-
-### benchmark-and-evidence
-
-```text
-# Benchmark 与证据说明
-## 本文职责
-## Bench 输出格式
-## CLI 参数
-## Bench Label / case-filter 字典
-## 推荐 Target
-## 计时边界
-## Checksum 来源
-## 当前 QEMU 证据
-## 当前 Board 证据
-## Evidence Doctor / Manifest 边界
-## ASM Attribution 口径
-## 复现命令
-## 提交边界
-```
-
-### optimization-evidence
-
-```text
-# 优化证据索引
-## 本文职责
-## 当前结论摘要
-## 优化方式总表
-## 标量路径与 RVV 路径差异
-## 代码级证据索引
-## 细粒度 target 字典
-## 当前可提交证据
-## 结论边界
-```
-
-### test-support-code-map
-
-```text
-# 测试支撑代码地图
-## 本文职责
-## 总调用图
-## 稳定聚合入口
-## Fixtures 与输入构造
-## 标量 Reference
-## Candidate / Diagnostic Helper
-## Bench Harness 与 Case Registry
-## Scripts 与 Evidence Output
-## Production 与 Test Support 边界
-## 拆分审计
-```
-
-### phases/README
-
-```text
-# 阶段索引
-## 当前恢复入口
-## 阶段表
-## 文档归属
-## 当前早停规则
-```
+- 先解析 `artifact_layout`，再决定 role 的实际文件路径。
+- 先判断当前 topic 是 diagnostic、partial-production-candidate、production integration 还是 adopted production behavior，再选择 evaluation 模板。
+- 当前 topic 已有成熟 role 文档时，可以保留既有文件名，只按模板补职责缺口。
+- 当前 topic 没有某个 role 时，必须在 phase result 或 Handoff 中用 `not_applicable with evidence`、`rejected with evidence`、`phase_deferred + unblocked` 或 `turn_stop_deferred with stop_condition_hit` 说明。
+- 模板章节可以合并、改名或裁剪，但 closeout checks 覆盖的问题不能消失。
 
 ## 审计表
 
@@ -190,7 +101,7 @@ doc-suite quality bar 审计表使用以下列。`quality bar / optional calibra
 
 ## Artifact Tracking
 
-README、evaluation、roadmap、phase result 或长期 `doc-rvv` 引用的 topic-local doc-suite 文件必须存在，并在当前 topic 的 tracked / to-be-staged artifact 集合中，或明确标为 local-only / excluded 且不作为提交后入口。
+topic_navigation、evaluation、roadmap、phase result 或 production 长期主题文档引用的 topic-local doc-suite 文件必须存在，并在当前 topic 的 tracked / to-be-staged artifact 集合中，或明确标为 local-only / excluded 且不作为提交后入口。
 
 审计时使用包含未跟踪文件的路径限定扫描，例如：
 

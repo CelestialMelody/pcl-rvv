@@ -14,14 +14,14 @@
 每类事实只设一个主归属。其它文档可以引用主归属的路径、章节、表格、run label（运行标签）或 evidence path（证据路径），但不要复制长段正文、raw log（原始日志）或完整实验流水。
 `artifact_layout.qemu_output_subdir` 和 `artifact_layout.board_output_subdir` 解析目录下的生成证据，只有被 `paths.doc_root` 或 `paths.test_root` 解析目录下的文档明确引用时才进入提交候选；因此长期文档和 evaluation 引用证据时要写具体文件、run label 或 summary artifact 路径，而不是只写输出目录。
 
-阶段探索归属在 `artifact_layout.phase_root_template` 解析目录：计划、负向尝试、异常解释、optimization matrix 和 unblocked next action 都先放这里。每一轮 production 接入尝试、具体点型 production candidate、代表性点型验证、row source 扩展和 point-type expansion（点类型扩展）都必须保留对应 phase plan/result；这些阶段记录保存测试事实和范围边界。`artifact_layout.topic_doc_template` 解析出的 production 长期主题文档只保存用户确认采纳后的最终 production 行为、当前采用实现、证据链和长期维护边界；它可以引用阶段文档作为审计来源，但不要把阶段流水或临时计划复制进去。没有 adopted production behavior、用户确认保留的 production patch 或 PI5 生产证据闭环通过且用户确认采纳时，该模板为 `not_applicable`，不得为了 no-production closeout 新建 `doc-rvv`。跨阶段的 candidate 搜索空间、阶段反思新增路线和恢复条件归到 `artifact_layout.optimization_roadmap_template` 解析出的 roadmap，不要塞进 phase result 或 evaluation。
+阶段探索归属在 `artifact_layout.phase_root_template` 解析目录：计划、负向尝试、异常解释、optimization matrix 和 unblocked next action 都先放这里。每一轮 production 接入尝试、具体点型 production candidate、代表性点型验证、row source 扩展和 point-type expansion（点类型扩展）都必须保留对应 phase plan/result；这些阶段记录保存测试事实和范围边界。`artifact_layout.topic_doc_template` 解析出的 production 长期主题文档只保存用户确认采纳后的最终 production 行为、当前采用实现、证据链和长期维护边界；它可以引用阶段文档作为审计来源，但不要把阶段流水或临时计划复制进去。没有 adopted production behavior、用户确认保留的 production patch 或 PI5 生产证据闭环通过且用户确认采纳时，该模板为 `not_applicable`，不得为了 no-production closeout 新建 production 长期主题文档。跨阶段的 candidate 搜索空间、阶段反思新增路线和恢复条件归到 `artifact_layout.optimization_roadmap_template` 解析出的 roadmap，不要塞进 phase result 或 evaluation。
 
 | 信息类型 | 主归属 | 允许引用 | 不应复制 |
 | --- | --- | --- | --- |
 | 当前采用的生产优化方式、覆盖范围、fallback（回退路径）和生产边界 | `artifact_layout.topic_doc_template` 解析出的 production 长期主题文档，仅在 production 行为已采用后适用 | evaluation 的实现方式审计表、Handoff 摘要、模块状态表 | output summary 的 raw 表、每轮 bench 全量日志、对话过程；no-production 诊断结论 |
 | S2 evaluation、候选路线、采用 / 尝试 / 暂缓 / 拒绝理由、no-production 诊断证据链 | `artifact_layout.evaluation_doc_template` 解析出的 evaluation 文档 | production 长期主题文档只在适用时引用最终采用状态和证据路径；Handoff 引用下一步动作 | production 长期主题文档复制完整候选流水账；Handoff 写成完整实验报告 |
 | 阶段计划、阶段结果、优化矩阵、unblocked next action、early-stop 证据 | `artifact_layout.phase_root_template` 解析目录 | Handoff 的 `phase_loop_state`、evaluation 的阶段审计、适用时的 production 长期主题文档最终结论 | production 长期主题文档的最终生产行为说明、长期结论和跨阶段通用规则 |
-| 具体点型 / 代表性点型 production 接入记录、未覆盖点类型、`point_type_expansion_queue` 和每轮扩展证据 | `artifact_layout.phase_root_template` 解析目录与 optimization matrix | production 长期主题文档只引用用户确认采纳的当前范围和下一扩展状态；Handoff 引用恢复队列 | 把第一阶段窄范围 gate 写成整个模板入口最终实现；在 `doc-rvv` 复制每轮探索流水 |
+| 具体点型 / 代表性点型 production 接入记录、未覆盖点类型、`point_type_expansion_queue` 和每轮扩展证据 | `artifact_layout.phase_root_template` 解析目录与 optimization matrix | production 长期主题文档只引用用户确认采纳的当前范围和下一扩展状态；Handoff 引用恢复队列 | 把第一阶段窄范围 gate 写成整个模板入口最终实现；在 production 长期主题文档复制每轮探索流水 |
 | 跨阶段候选搜索空间、阶段反思新增路线、恢复条件和优先级 | `artifact_layout.optimization_roadmap_template` 解析出的 roadmap | phase result 的反思摘要、Handoff 的 `optimization_roadmap_status`、evaluation 的候选取舍索引 | 单阶段流水、board 统计明细和 production 最终结论 |
 | test、diagnostic、bench case 的输入构造、计时边界和证明点 | evaluation 文档和对应测试 / bench 源码注释 | 适用的 production 长期主题文档只引用能支撑结论的 case；Handoff 列命令和路径 | production 长期主题文档复制每个 TEST 的长注释；output summary 承担测试设计说明 |
 | bench 统计、A/B 公式、异常值口径、run label 和复现命令 | `artifact_layout.board_output_subdir` 解析目录下的 summary 或 analysis script（分析脚本） | evaluation / 适用的 production 长期主题文档引用 summary 路径、脚本路径和关键结论 | production 长期主题文档或 Handoff 复制 raw log；把 QEMU timing 写成性能结论 |
@@ -41,14 +41,20 @@
 
 复杂 topic 可以把测试和证据说明拆成多份 topic-local 文档。推荐分工：
 
-- `testing-overview`：测试类型定义、运行入口分类、覆盖矩阵和证据白名单。
-- `correctness-tests`：每个 gtest 的中文含义、输入、被测路径、断言、证明范围和代码位置。
-- `benchmark-and-evidence`：bench label 语法、case-filter 字典、QEMU target、board smoke target、repeated board collect target、checksum 来源、trace、asm attribution、复现命令和提交边界。
-- `optimization-evidence`：每种 RVV 优化方式、候选或暂缓路径对应的 production / test_support 代码路径、test target、bench target、board evidence、结论和边界。
-- `test-support-code-map`：`artifact_layout` 与 `test_support` 解析出的源码、聚合入口、内部头文件、script 和 production helper 的函数族、调用关系和边界。
-- `phases`：阶段探索、阶段计划、阶段结果、optimization matrix、Evidence Doctor 异常处理、continue / stop decision 和早停检查。
-- `optimization-roadmap`：跨阶段 candidate family、idea source、阶段反思新增路线、优先级、恢复条件和搜索空间变化。
-- evaluation：EvidenceDecision、当前证据、历史候选取舍、accepted risk 和 Traceability Map。
+这些分工是 role（职责），不是固定文件名。具体路径先从 `.agents/config/defaults.yaml` 的 `artifact_layout`
+解析；如果某个 role 还没有精确路径 key，则使用当前 topic 已确认的 role/path index 或既有链接，并在需要跨
+topic 稳定复用时先补配置，不在模板正文里写死命名。role-based templates 见
+`templates/template-index.zh.md`。
+
+- `topic_navigation`：入口导航、当前结论、阅读路径、常用命令、证据白名单和 production_topic_doc 适用性。
+- `testing_overview`：测试类型定义、运行入口分类、覆盖矩阵和证据白名单。
+- `correctness_tests`：每个 gtest 的中文含义、输入、被测路径、断言、证明范围和代码位置。
+- `benchmark_and_evidence`：bench label 语法、case-filter 字典、QEMU target、board smoke target、repeated board collect target、checksum 来源、trace、asm attribution、复现命令和提交边界。
+- `optimization_evidence`：每种 RVV 优化方式、候选或暂缓路径对应的 production / test_support 代码路径、test target、bench target、board evidence、结论和边界。
+- `test_support_code_map`：`artifact_layout` 与 `test_support` 解析出的源码、聚合入口、内部头文件、script 和 production helper 的函数族、调用关系和边界。
+- `phase_index` / `phase_plan` / `phase_result` / `optimization_matrix`：阶段探索、阶段计划、阶段结果、optimization matrix、Evidence Doctor 异常处理、continue / stop decision 和早停检查。
+- `optimization_roadmap`：跨阶段 candidate family、idea source、阶段反思新增路线、优先级、恢复条件和搜索空间变化。
+- `evaluation_diagnostic` / `evaluation_production`：EvidenceDecision、当前证据、历史候选取舍、accepted risk、Traceability Map、production 接入判断和最终证据更新。
 
 README 只作为导航、常用命令和证据白名单入口。它不承担每个测试、每个 bench case 或每个 helper 的长解释。
 
@@ -64,15 +70,16 @@ production closeout、production-ready、done 或 stop-for-review 声明前，�
 quality bar 条件，worker 必须产出一个 doc-suite parity 审计结果。该结果可以写在当前 phase `result.zh.md`，
 也可以新建 `structure-parity-doc-suite` phase，但不能只出现在 roadmap、最终回复或 Handoff。成熟 sibling topic
 只能作为 optional calibration（可选校准样例）：用户 / reviewer 点名时可用来补充 quality bar，但不能成为唯一规范源。
-审计表必须使用以下列，并覆盖 README、`testing-overview`、`correctness-tests`、`benchmark-and-evidence`、
-`optimization-evidence`、`test-support-code-map`、evaluation、长期 `doc-rvv`、phase index / result 和 artifact tracking：
+审计表必须使用以下列，并覆盖 topic_navigation、testing_overview、correctness_tests、benchmark_and_evidence、
+optimization_evidence、optimization_roadmap、test_support_code_map、evaluation、production_topic_doc、phase suite 和 artifact tracking。
+审计表可以在 `area` 中同时写 role 和当前 topic 实际路径，但不能把模板名当成路径规范：
 
 ```text
 | area | current shape scan | quality bar / optional calibration | decision | blocker / evidence | next action |
 ```
 
 审计完成后还必须检查文档引用的 artifact tracking（产物跟踪状态）：README、evaluation、roadmap、
-phase result 或长期 `doc-rvv` 中引用的 topic-local doc-suite 文件必须存在，并在当前 topic 的
+phase result 或 production 长期主题文档中引用的 topic-local doc-suite 文件必须存在，并在当前 topic 的
 tracked / to-be-staged artifact 集合中，或明确标成 local-only / excluded 且不作为提交后文档入口。
 worker 应使用包含未跟踪文件的路径限定扫描，而不是只看普通 `git status --short`。如果新增文档仍是
 untracked 且没有提交边界说明，doc-suite parity 只能写 `partial`，不能支撑 `ready_for_review`。
@@ -84,7 +91,7 @@ untracked 且没有提交边界说明，doc-suite parity 只能写 `partial`，�
 - 当前 topic 规模较小但仍有 production dispatch / fallback、board evidence、Evidence Doctor 或
   Traceability Map 需求时，不能把 topic-local docs 全部合并进 README；至少要让测试语义、bench 证据、
   优化证据和代码地图各有稳定主归属。
-- 长期 `doc-rvv` 不承担 test support 全量说明；若它开始复制测试工程细节，worker 应把内容迁回
+- `artifact_layout.topic_doc_template` 解析出的 production 长期主题文档不承担 test support 全量说明；若它开始复制测试工程细节，worker 应把内容迁回
   topic-local docs，并在长期文档只保留 production 行为与证据链摘要。
 - README 是入口和证据白名单，不是每个 gtest、bench case、helper 或 phase 的正文归属。
 
