@@ -1,12 +1,12 @@
 # RVV 阶段与队列规则
 
-本文定义 `rvv-screening` 的阶段职责、队列命名、分类口径和二轮保留候选复筛规则。候选准入标准见 [screening-criteria.md](screening-criteria.md)；证据和执行边界见 [evidence-boundaries.md](evidence-boundaries.md)。
+本文定义 `rvv-screening` 的阶段职责、队列命名、分类口径和第三轮 / 保留候选复筛规则。候选准入标准见 [screening-criteria.md](screening-criteria.md)；证据和执行边界见 [evidence-boundaries.md](evidence-boundaries.md)。
 
 ## 阶段职责
 
 - 文件候选筛选：只回答“文件中是否存在值得继续下钻的可 SIMD/RVV 片段”，形成 `high/mid/low` 文件级粗筛基线。
 - 函数评估队列：把文件候选筛选 `high/mid` 候选下钻到公开入口、函数族和主成本覆盖类型，形成三类模块队列：`建议进行 RVV 优化的文件`、`保留实施的候选文件`、`暂缓或不推荐考虑 RVV 优化的文件`。
-- 二轮保留候选复筛：在建议队列完成、没有明确下一主题，或已完成主题证据改变排序口径时，复筛函数评估队列 `保留实施的候选文件`。
+- 第三轮 / 保留候选复筛：在建议队列完成、没有明确下一主题，或已完成主题证据改变排序口径时，复筛函数评估队列 `保留实施的候选文件`。路径或 artifact key 中的 `second-pass-retained-candidate-rescreen` 表示“复筛第二轮保留候选”，不是重新执行第二轮函数评估队列。
 
 ## 主成本覆盖类型
 
@@ -36,7 +36,7 @@
 
 暂缓或不推荐项用于主成本被 search/sort/map/heap/Eigen/外部 solver/分配释放稀释、只能覆盖尾段压缩或字段搬运、语义风险过高、测试不可构造或不具备独立实施边界的候选。
 
-## 二轮保留候选复筛输入边界
+## 第三轮 / 保留候选复筛输入边界
 
 保留候选复筛默认只读取函数评估队列 `保留实施的候选文件`。它不是静态函数评估队列重跑，也不重新扩大到全模块。
 
@@ -46,14 +46,14 @@
 - profile、上游使用场景或目标硬件证据明确指向漏筛。
 - 已完成主题暴露出新的可复用模式，且能映射到原保留候选之外的具体文件或函数入口。
 
-## 二轮保留候选复筛输出分组
+## 第三轮 / 保留候选复筛输出分组
 
 保留候选复筛只使用两类主分组：
 
 - `建议启动函数级评估`：值得进入单 topic S1-S2 评估和后续证据计划。
 - `暂缓 / 不单独实施`：当前不建议作为独立 topic 启动，或只作为其它主题上下文、伴随文件、使用场景触发项保留。
 
-`diagnostic`、`bench-only`、`production-shaped diagnostic`、`component ablation` 和 `production direct` 是后续 topic 内的证据路径或 EvidenceDecision（证据决策）结果，不是二轮保留候选复筛的固定候选队列名。模块复筛只负责选择是否启动函数级评估，以及首阶段要回答什么证据问题。
+`diagnostic`、`bench-only`、`production-shaped diagnostic`、`component ablation` 和 `production direct` 是后续 topic 内的证据路径或 EvidenceDecision（证据决策）结果，不是第三轮 / 保留候选复筛的固定候选队列名。模块复筛只负责选择是否启动函数级评估，以及首阶段要回答什么证据问题。
 
 `建议启动函数级评估` 表必须写清 `默认评估路径 / 首阶段证据问题`，常见取值包括：
 
