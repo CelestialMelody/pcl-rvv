@@ -56,7 +56,7 @@ worker_quality_gate_check:
 risks_or_open_questions / remaining_risks:
 recommended_reviewer_focus:
 followup_options_for_user:
-next_worker_action_if_review_passes / next_worker_action:
+next_worker_action:
 ```
 
 核心字段要求：
@@ -82,7 +82,7 @@ next_worker_action_if_review_passes / next_worker_action:
 - `language_check` 和 `worker_quality_gate_check` 可以摘要化，但必须有证据路径或 reference，不允许虚写为 `pass` 而不给依据。
 - `recommended_reviewer_focus` 指向具体风险；不要写成“请全面审查”。
 - `followup_options_for_user` 用于窄范围、局部候选或 no-production 结论后的 2-4 个可选路径。
-- `next_worker_action_if_review_passes / next_worker_action` 只能给一个默认恢复动作；重要替代路径放入 `followup_options_for_user`。
+- `next_worker_action` 只能给一个默认恢复动作；重要替代路径放入 `followup_options_for_user`。
 
 ## 条件字段
 

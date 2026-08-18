@@ -18,7 +18,7 @@
 - 哪些实现、测试、bench、文档和状态表仍未完成。
 - 旧结论是否被新证据推翻。
 - 下一步应该继续当前主题，还是进入下一个主题。
-- 最近 Handoff Packet 中是否存在 `next_worker_action_if_review_passes`。如果存在且不被用户新指令覆盖，
+- 最近 Handoff Packet 中是否存在 `next_worker_action`。如果存在且不被用户新指令覆盖，
   该字段是默认续作入口；worker 应按它恢复下一阶段，而不是自行重选 topic 或重跑已完成阶段。
 
 ## 交接 prompt 内容
@@ -43,8 +43,8 @@
 
 ```text
 在 <repo> 中，以 RVV worker 身份继续当前 topic。
-请按当前 Handoff Packet 的 next_worker_action_if_review_passes 恢复，并保存本轮 work log。
+请按当前 Handoff Packet 的 next_worker_action 恢复，并保存本轮 work log。
 ```
 
-如果用户没有显式写出 `next_worker_action_if_review_passes`，但说了“继续当前 topic”或“进入下一阶段”，
-worker 仍按同一规则读取最近 Handoff Packet 并使用该字段。
+如果用户没有显式写出 `next_worker_action`，但说了“继续当前 topic”或“进入下一阶段”，worker 仍按同一
+规则读取最近 Handoff Packet 并使用该字段。

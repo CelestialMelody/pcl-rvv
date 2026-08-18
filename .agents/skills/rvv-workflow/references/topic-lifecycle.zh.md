@@ -27,7 +27,7 @@
 - 检查 git status（工作区差异）。
 - 冻结本轮工作偏好：注释详细度、注释语言、production（生产源码）注释上限、配置解析出的测试资产 / diagnostic（诊断代码）注释下限。
 - 冻结文档偏好：closeout（收尾文档）当前状态优先、数值算例要求、长期文档不保留对话流程话术。
-- 冻结提交偏好：默认不提交；如果用户授权提交，再确认 topic、日志和 agent asset（代理资产）是否拆分。
+- 冻结提交偏好：默认不提交；如果用户授权提交，再确认 topic 产物、日志和 agent instruction patch（agent 指令改动）是否拆分。
 - 冻结 evidence logs（证据日志）策略：默认 `summary-only`，raw logs（原始日志）不默认提交。
 - 检查同 topic 是否残留上一轮 worker 产物；若存在且用户未确认复用，先停止。
 
@@ -74,7 +74,7 @@ production direct（真实生产路径证据）、component ablation（组件消
 `rvv-test` 执行。
 
 S4 如果暴露出可跨 topic 复用的测试矩阵、证据缺口或冗余规则，应在 Handoff Packet（交接数据包）的
-`agent_asset_feedback` 中按 `report-only`（只报告建议）记录；没有发现时省略，避免短 prompt（短提示词）输出膨胀。
+`instruction_feedback` 中按 `report-only`（只报告建议）记录；没有发现时省略，避免短 prompt（短提示词）输出膨胀。
 
 ### S5-S9 产物和验证（可重复执行）
 
@@ -107,7 +107,7 @@ S10 必须写清“证据证明了什么”和“不能证明什么”。QEMU �
 写入 topic-local evaluation / phase closeout 的“诊断证据链”，并说明 diagnostic evidence（诊断证据）不能替代
 production evidence（生产证据）。
 S10 如果发现 EvidenceDecision（证据决策）依赖了尚未写入 `rvv-test`、`rvv-implementation`
-或 `rvv-documentation` 的通用规则，应输出 `agent_asset_feedback`，但默认不修改 agent asset（代理资产）。
+或 `rvv-documentation` 的通用规则，应输出 `instruction_feedback`，但默认不修改 agent instructions（agent 指令体系）。
 
 S10 是当前 phase 的决策点，不是 topic 的天然终点。若 `current_decision` 之外仍存在授权且未阻塞的下一动作，worker 应把 S10 结果回填到 Handoff Packet，再回到 S3-S9 继续下一 phase，而不是把一次局部 positive / negative 当作最终完成。
 
@@ -208,7 +208,7 @@ PI1 若涉及模板点类型、PCL traits（点类型字段特征）、字段 of
 - 阻塞条件是什么。
 - 缺少的命令、工具、证据或用户判断是什么。
 - 下一轮从哪个文件、命令和文档恢复。
-- 如果 blocked（阻塞）来自 agent asset 缺口、规则冲突或短 prompt 恢复信息不足，写入 `agent_asset_feedback`。
+- 如果 blocked（阻塞）来自 instruction gap（指令缺口）、规则冲突或短 prompt 恢复信息不足，写入 `instruction_feedback`。
 
 ## S11 文档 Closeout
 
@@ -217,7 +217,7 @@ S11 是最终文档收口，不是所有文档的首次出现。
 - S2 文档回答“为什么值得或不值得继续”。
 - S11 文档回答“本轮实际证明了什么、接入了什么、没有接入什么、下一步该做什么”。
 - closeout 或 production-candidate 文档必须包含证据链：production 长期主题文档使用“正确性与高效性证据链”；未接 production 的诊断结论在 evaluation / phase closeout 中使用“诊断证据链”并标清 production direct 缺口。`doc-rvv` 不适用于无 adopted production behavior 的 no-production closeout。
-- S11 closeout 如果沉淀出新的跨 topic 规则、发现旧规则冗余，或发现后续回访文档需要统一整改，按 `agent_asset_feedback` 报告建议；只有用户授权 workflow improvement（工作流改进）时才修改 `.agents`。
+- S11 closeout 如果沉淀出新的跨 topic 规则、发现旧规则冗余，或发现后续回访文档需要统一整改，按 `instruction_feedback` 报告建议；只有用户授权 workflow improvement（工作流改进）时才修改 `.agents`。
 
 如果 topic 进入生产接入闭环，S11 必须发生在 PI5 之后。若 topic 不接入生产，S11 可以直接发生在第一次 S10 之后。
 
@@ -240,8 +240,8 @@ Handoff 必须附上当前 production diff、用户可执行的验证命令、�
 
 提交前必须确认：
 
-- topic 产物、evidence logs（证据日志）和 agent asset 是否拆分。
+- topic 产物、evidence logs（证据日志）和 agent instruction patch 是否拆分。
 - 日志是否需要 sanitize（脱敏）和 check（检查）。
 - 是否排除了 build（构建）产物、二进制、私有路径、私有地址、本机 `config.mk` 和聊天记录。
 
-agent asset 改动应单独提交，除非用户明确要求合并。
+agent instruction patch 应单独提交，除非用户明确要求合并。

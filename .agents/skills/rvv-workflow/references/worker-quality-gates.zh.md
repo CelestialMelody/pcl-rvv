@@ -43,7 +43,7 @@ worker 必须在 S0 报告和最终 Handoff Packet（交接数据包）中写清
 
 如果 local override 中配置了板卡、依赖库、交叉编译工具链或私有路径，Handoff 只报告“已读取对应覆盖项”和使用的 env var（环境变量）名。不要复制 IP、用户名或个人绝对路径。
 
-S0 字段级合同、artifact layout（产物布局）解析和 artifact publication（产物发布）判断见 `rvv-workflow/references/s0-preferences-and-recovery.zh.md`；S0 输出要把 Handoff 核心字段回填到 Handoff Packet（交接数据包），至少包括 `loaded_instruction_sources`、`instruction_trace`、`instruction_feedback`、`preferences_loaded`、`work_preferences`、`commit_preferences`、`resolved_artifacts`、`artifact_publication_decision`、`dirty_isolation`、`validation` 和 `next_worker_action`（兼容字段 `next_worker_action_if_review_passes`），而不是散落在不同段落里。
+S0 字段级合同、artifact layout（产物布局）解析和 artifact publication（产物发布）判断见 `rvv-workflow/references/s0-preferences-and-recovery.zh.md`；S0 输出要把 Handoff 核心字段回填到 Handoff Packet（交接数据包），至少包括 `loaded_instruction_sources`、`instruction_trace`、`instruction_feedback`、`preferences_loaded`、`work_preferences`、`commit_preferences`、`resolved_artifacts`、`artifact_publication_decision`、`dirty_isolation`、`validation` 和 `next_worker_action`，而不是散落在不同段落里。
 
 ### 2. 标量路径重建
 
@@ -386,7 +386,7 @@ PI1 中不要把诊断路径 speedup 写成 production-ready。只有 PI2-PI5 �
 ### 11. PI2-PI5 连续推进门禁
 
 当用户用短 prompt 授权继续 production integration loop（生产接入闭环），且最近 Handoff Packet 的
-`next_worker_action`（兼容字段 `next_worker_action_if_review_passes`）已给出 PI2 范围时，worker 可以同轮连续推进 PI2-PI5。连续推进前必须冻结：
+`next_worker_action` 已给出 PI2 范围时，worker 可以同轮连续推进 PI2-PI5。连续推进前必须冻结：
 
 - `pi2_scope`：入口、点类型、`Scalar`、数据布局、规模 gate 和不可触碰路径。
 - `forbidden_expansion`：不得扩大到 PI1 未授权的泛型、indices、correspondences、public API 或公共 helper 变更。
@@ -444,7 +444,7 @@ Handoff Packet 中给出 `followup_options_for_user`：
 - 如果要扩大到泛型点类型，应读取哪些策略文档、需要哪些 traits / offset / fallback / board 证据。
 - 哪些入口虽然“看起来相近”，但因为负向性能、语义风险或测试缺口不能一起扩大。
 
-`next_worker_action`（兼容字段 `next_worker_action_if_review_passes`）仍只保留一个默认动作；其它重要选择放在 `followup_options_for_user`，
+`next_worker_action` 只保留一个默认动作；其它重要选择放在 `followup_options_for_user`，
 避免用户只能靠人工复查发现下一步。
 
 ## 开始写文件前的自查

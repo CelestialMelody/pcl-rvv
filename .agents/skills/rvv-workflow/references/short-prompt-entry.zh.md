@@ -142,7 +142,7 @@ commit boundary，不能只因本地文件存在就视为 closeout 完成。
 用户不需要知道 `next_worker_action` 字段名。只要短 prompt 表达“继续当前 topic”
 或“进入下一阶段”，worker 默认就要从最近 Handoff Packet 里的 `phase_loop_state` 恢复：
 先读 `current_phase`、`phase_plan_paths`、`phase_result_paths`、`unblocked_next_actions`
-和 `next_phase_default`。`next_worker_action` 是默认主来源，`next_worker_action_if_review_passes` 仅作为兼容别名。
+和 `next_phase_default`。`next_worker_action` 是默认主来源。
 若 phase loop 状态缺失、路径不存在或与用户新指令冲突，worker 先说明恢复风险，
 再按 `phase_reached`、`current_decision`、reviewer prompt patch（审查者提示词补丁）和当前源码证据推导下一步。
 
@@ -266,7 +266,7 @@ production 决策，就跳过当前源码复核、QEMU correctness、反汇编�
 如果短 prompt 是“继续当前 topic”或“进入下一阶段”，worker 应先读取最近 work log（工作日志）
 或 Handoff Packet，恢复 `phase_loop_state`、`phase_reached`、`current_decision`、
 `phase_plan_paths`、`phase_result_paths`、optimization roadmap、optimization matrix 和 evidence paths（证据路径）。
-`phase_loop_state.next_phase_default` 是默认续作入口；`next_worker_action` 是默认主来源，`next_worker_action_if_review_passes` 只作为兼容别名。
+`phase_loop_state.next_phase_default` 是默认续作入口；`next_worker_action` 是默认主来源。
 除非用户新指令覆盖，不要绕过 phase loop 自行选择下一个 topic 或重跑旧阶段。
 若恢复入口写 `ready_for_review`，必须先执行 `ready_for_review_validity_check`：读取 roadmap、matrix、
 最近 phase result 和成熟度审计，确认没有 `phase_deferred + unblocked` 的 structure parity、doc suite、
