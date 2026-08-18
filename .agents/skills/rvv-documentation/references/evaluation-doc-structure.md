@@ -5,6 +5,7 @@
 推荐结构：
 
 - 范围和目标源码。
+- 函数 / 函数族作用速览（复杂 header-only / 状态机 topic 建议）。
 - 函数级结论。
 - 函数族评估表。
 - RVV 诊断或实现设计。
@@ -17,6 +18,18 @@
 - 增量诊断结果。
 - 生产接入判断。
 - 生产接入后的最终证据更新。
+
+## 函数 / 函数族作用速览
+
+当目标源码是 header-only（仅头文件模板）、状态机、solver（求解器）或多个 helper（辅助函数）组合时，evaluation 文档应在 RVV 取舍前先给 reader（读者）一个轻量源码语义导览。目的不是重写 API 文档，而是让 reviewer（审查者）不用打开源码也能知道每个函数族服务哪段算法、读写哪些关键状态，以及为什么它被采用、暂缓或拒绝。
+
+推荐表格：
+
+```text
+| 函数 / 函数族 | 作用 | 输入 / 输出状态 | 与主流程关系 | RVV 判断 |
+```
+
+这张表保持短小，通常 5-10 行即可。它应优先覆盖 public entry（公开入口）、主要状态推进函数、关键缓存 / wrapper、solver / interpolation（插值）和明确不适合 RVV 的标量控制流；细节公式、bench 数据和证据路径仍放在函数族评估表、Traceability Map 或 phase result 中。
 
 ## 测试计划表
 
@@ -47,7 +60,7 @@ local fragment -> full diagnostic -> production case -> production decision
 如果第 1 和第 2 项闭合，而平均情况或异常频率存在争议但人工决定接入，evaluation 文档必须留痕：
 数据分析口径、异常值情况、可能原因分析、风险边界、为什么仍接受接入。不要只写“人工判断可接受”。
 
-如果当前只适合 bench 诊断主题，应明确授权边界：诊断代码位于专项测试区域，上游生产入口保持不变，直到补齐 production-like 证据。
+如果当前只适合 diagnostic / bench-only 证据路径，应明确授权边界：诊断代码位于专项测试区域，上游生产入口保持不变，直到补齐 production-like 证据。
 
 ## 日期和“最新”表述
 
@@ -90,13 +103,14 @@ PI5 后，evaluation 文档必须更新 production decision（生产接入判断
 函数级评估必须先回答：
 
 - 具体可 RVV 化函数、loop 或 helper 是什么。
+- 复杂文件是否先提供了函数 / 函数族作用速览；若省略，应说明目标源码足够小或已有等价 Traceability Map。
 - 标量路径如何工作：关键循环、关键局部变量、公式、状态更新、solver 或输出写回分别做什么。
 - 源码真实数据流是什么：公开入口是否已经通过 iterator（迭代器）、indices（索引）、correspondences（对应关系）、mask（掩码）、wrapper（包装层）或 dispatch（分流逻辑）把不同输入形态统一；如果统一了，必须说明统一前后各自是什么。
 - 候选 RVV 路径准备如何工作：load/gather（加载/离散加载）、mask（掩码）、staging（分阶段暂存）、store/reduction（写回/规约）、scalar tail（标量尾段）和 fallback（回退路径）的职责边界。若 RVV 诊断把源码统一流重新拆成多条显式数据流，说明每条流的入口来源、访存形态、额外展开成本和 bench 计时边界。
 - RVV 是否覆盖入口主成本。
 - full diagnostic 或 production case 是否能在目标硬件上证明收益。
 - fallback 和维护边界是否可控。
-- 如果来自 bench 诊断主题，诊断问题是否代表真实入口。
+- 如果来自 diagnostic / bench-only 证据路径，诊断问题是否代表真实入口。
 
 ## 方案取舍记录
 
@@ -140,7 +154,7 @@ evaluation（函数级评估）文档应保留轻量“实现方式审计”表�
 - staging / reduction：固定 buffer、`vcompress`、block reduction、vector reduction、scatter、scalar tail 或其它组织方式。
 - formula / FMA：公式树、FMA contraction、误差预算、反汇编归属和是否需要消融。
 - row source policy：ordered-cloud-pair、source-indexed-cloud-pair、dual-indexed-cloud-pair、correspondence-pair 或其它入口形态是否逐 policy 独立批准。
-- production scope：production direct、production-shaped diagnostic、bench 诊断主题或 no-production 的最终边界。
+- production scope：production direct、production-shaped diagnostic、bench-only / diagnostic 或 no-production 的最终边界。
 
 如果 production 长期主题文档已经有完整“当前采用的优化方式”小节，evaluation 文档可以只保留表格和证据路径；不要把聊天过程或历史流水账搬进长期评估文档。候选路线、bench 统计和 output summary 应按 `document-ownership-and-traceability.zh.md` 的归属矩阵引用，避免同一段结论在 production 长期主题文档、evaluation、summary 和 Handoff 中重复。
 
@@ -153,7 +167,7 @@ bench 计划和结果表不应只写 case 名。每个 case 至少说明：
 - 证明点和不能证明的边界。
 - 结果不好时的初步归因和下一步定位实验；没有定位证据时明确写成待验证假设。
 
-建议队列主题和 bench 诊断主题都必须经过函数级评估。建议队列默认回答“是否值得生产接入”；bench 诊断主题默认回答局部诊断问题、收益归因或生产价值是否成立。
+建议队列主题、保留候选复筛建议项和 diagnostic / bench-only 证据路径都必须经过函数级评估。函数级评估先回答生产价值、局部诊断问题、收益归因或 no-production 判断需要哪些证据。
 
 ## 问题记录
 
