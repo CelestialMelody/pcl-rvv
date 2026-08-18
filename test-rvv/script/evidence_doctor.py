@@ -1362,7 +1362,7 @@ def main() -> int:
     report = render_markdown(manifest, issues)
 
     if args.output:
-        args.output.write_text(report + "\n", encoding="utf-8")
+        args.output.write_text(report.rstrip() + "\n", encoding="utf-8")
         print(f"wrote report: {args.output}")
     else:
         print(report)
