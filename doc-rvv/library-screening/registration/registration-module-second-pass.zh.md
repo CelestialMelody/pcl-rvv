@@ -50,7 +50,7 @@
 | `impl/transformation_estimation_2D.hpp`                           | 2D transformation estimation                                             | `direct-main-path`   | 固定 2D centroid / covariance / transform 公式，有批处理空间；上游覆盖和数据规模需函数级评估确认                                                                                                   |
 | `impl/transformation_estimation_svd.hpp`                          | SVD transform estimation                                                 | `partial-preprocess` | centroid / demean / covariance 构造可 RVV，最终 SVD 仍为 Eigen；适合在 LLS 主题后评估前置累加占比                                                                                                  |
 | `impl/transformation_estimation_dual_quaternion.hpp`              | dual quaternion transform estimation                                     | `partial-preprocess` | correspondence 累加有固定公式，但最终求解和数值路径复杂；需要专项评估收益和维护边界                                                                                                                |
-| `bfgs.h`                                                         | BFGS line search / update                                                | `diagnostic`    | 数学循环存在，但作为优化器内部状态机，单独接生产风险高；仅建议建立诊断问题，判断 GICP / NDT 是否受益                                                                                               |
+| `bfgs.h`                                                         | BFGS line search / update                                                | `diagnostic`    | 数学循环存在，但作为优化器内部状态机，单独接生产风险高；已建立 Phase 000 诊断计划，当前只确认 GICP BFGS caller，NDT 不外推                                                                           |
 
 ### 3.2 保留实施的候选文件
 
@@ -151,7 +151,7 @@
 |    9 | `transformation_estimation_2D`                             | `impl/transformation_estimation_2D.hpp`                        | 待评估    | 确认 2D 数据规模、上游测试和 fixed formula reduction 收益。 |
 |   10 | `transformation_estimation_svd`                            | `impl/transformation_estimation_svd.hpp`                       | 待评估    | 评估 centroid / covariance 前置累加是否被 Eigen SVD 稀释。 |
 |   11 | `transformation_estimation_dual_quaternion`                | `impl/transformation_estimation_dual_quaternion.hpp`           | 待评估    | 评估 dual quaternion 累加公式和数值维护边界。 |
-|   12 | `bfgs`                                                     | `bfgs.h`                                                       | 待评估    | 仅建立优化器局部诊断问题，确认是否服务 GICP / NDT 热点。 |
+|   12 | `bfgs`                                                     | `bfgs.h`                                                       | 评估已建 / diagnostic stop no production | Phase 000 已建立 topic-local evaluation、roadmap、matrix 和文档骨架；Phase 020 已完成 board repeated diagnostic，Milkv-Jupiter 5-run 结果 negative，默认停止生产推进。 |
 
 ### 4.2 建议优化文件状态矩阵
 
@@ -168,7 +168,7 @@
 | `transformation_estimation_2D`                           | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 | `transformation_estimation_svd`                          | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
 | `transformation_estimation_dual_quaternion`              | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
-| `bfgs`                                                   | 待建       | 未开始   | 未开始   | 未开始 | 未开始 | 未开始 | 未开始   | 未开始   | 已记录   |
+| `bfgs`                                                   | 已完成 / diagnostic stop no production | 未开始；production 不改 | done / negative | done / negative | done / negative | done / negative | 已完成 | topic-local scaffold 已建；doc-rvv 不适用；Phase 020 board negative | 本轮已落盘 work log |
 
 `transformation_validation_euclidean` 已完成首轮评估与诊断闭环，但板卡结果只证明 transform staging 片段加速，full validation 只有弱收益，因此该主题应保持为 bench 诊断，不进入生产接入队列。`correspondence_estimation_organized_projection` 已完成 production-ready closeout：production RVV 覆盖 source gather / finite / transform staging、projection-pixel staging 和 target-predicate final predicate；append 与 stored distance 写出保留标量。板卡 `board_smoke` 39 个专项测试通过，production identity fake/explicit 为 `1.64x` / `1.65x`，production non-identity fake/explicit 均为 `2.36x`。
 
