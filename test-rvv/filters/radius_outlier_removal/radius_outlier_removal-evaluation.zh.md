@@ -4,7 +4,7 @@
 
 | 项目 | 状态 |
 | --- | --- |
-| 模块执行来源 | `doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的 `6.2 bench 诊断主题` |
+| 模块执行来源 | `doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` |
 | 当前定位 | bench-only 诊断，生产不接入 |
 | 生产源码 | `filters/include/pcl/filters/impl/radius_outlier_removal.hpp`、`filters/src/radius_outlier_removal.cpp` 保持不变 |
 | 专项路径 | `test-rvv/filters/radius_outlier_removal/` |
@@ -58,7 +58,7 @@ FunctionCandidate：
 
 - topic：`radius_outlier_removal`
 - source file：`filters/include/pcl/filters/impl/radius_outlier_removal.hpp`
-- queue section：filters follow-up rescreen `6.2 bench 诊断主题` 第 7 项
+- queue section：filters 保留候选复筛 `6.2 暂缓 / 不单独实施（诊断路径记录）` 第 7 项
 - mode：`bench-only-diagnostic`
 - candidate fragment：`to_keep` 到 `indices` / `removed_indices_` 的尾段压缩
 - main-cost risk：`nearestKSearch` / `radiusSearch` 主导真实入口

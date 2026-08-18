@@ -6,8 +6,8 @@
 
 1. 项目 adapter 或配置说明。
 2. `<module_work_log>`。
-3. `<module_second_pass_doc>`。
-4. 如存在，`<module_followup_rescreen_doc>`。
+3. `<module_function_evaluation_queue_doc>`。
+4. 如存在，`<module_second_pass_retained_candidate_rescreen_doc>`（保留候选复筛文档）。
 5. 如存在，当前模块的问题与讨论文档。
 6. 目标源码、同类已完成主题文档和函数级评估。
 
@@ -22,7 +22,7 @@
 - `rvv-workflow/references/handoff-packet.zh.md`：worker 阶段边界和 blocked 时的结构化交接字段。
 - `rvv-workflow/references/worker-quality-gates.zh.md`：短 prompt worker 写文件前的标量路径、数据流映射、文档、注释、证据和归因门禁。
 - `rvv-workflow/references/reviewability-and-language.zh.md`：术语解释、注释密度、文档和 reviewer 汇报规则。
-- `rvv-screening/SKILL.md`：确认当前主题来自 second-pass 还是 follow-up，不重新筛选。
+- `rvv-screening/SKILL.md`：确认当前主题来自函数评估队列还是保留候选复筛，不重新筛选。
 - `rvv-documentation/references/evaluation-doc-structure.md`：函数级评估是 production gate。
 - `rvv-documentation/references/function-evaluation-and-closeout.zh.md`：S2 evaluation 与 S11 closeout 的文档职责分工。
 - `rvv-test/SKILL.md`：测试、诊断、benchmark、消融和 evidence logs 的统一规则。
@@ -37,7 +37,7 @@
 - `rvv-project-config/references/makefile-env.md`：专项 Makefile、board 入口和本机配置隔离。
 - `rvv-documentation/SKILL.md`：production 长期主题文档、评估文档、筛选状态、诊断文档和 closeout 同步。
 
-如果本主题属于 `bench 诊断主题`、涉及 staging、手工浮点表达式、目标硬件验证、上游测试或生产回退，必须读取对应 reference 后再写实现或结论。
+如果本主题首阶段证据路径涉及 diagnostic、bench-only、production-shaped diagnostic、staging、手工浮点表达式、目标硬件验证、上游测试或生产回退，必须读取对应 reference 后再写实现或结论。
 
 如果用户用短 prompt 启动，仍必须在选中 topic 后执行 `worker-quality-gates.zh.md` 的
 “开始写文件前的自查”。短 prompt 只减少用户需要输入的文字，不减少 worker 必须满足的
@@ -68,7 +68,7 @@ topic-local doc suite、evaluation、phase result、optimization matrix / roadma
   evaluation 主路径、适用的 `doc-rvv` 分工、legacy 清理和新增文档 artifact tracking。审计结果必须落到
   phase result 或明确的 structure-parity phase；不能只在最终回复里说“已参考”。
 - 先回答生产价值：RVV 是否覆盖入口主成本，fallback 和维护边界是否可控。
-- 证据不足时收敛为 bench 诊断主题、暂缓或不接生产。
+- 证据不足时收敛为 diagnostic、bench-only、暂缓或不接生产。
 - 证据成立时再进入 RVV 实现、专项 test/bench、QEMU、反汇编、板卡验证和文档 closeout。
 - 若当前证据计划需要板卡 / 目标硬件，且板卡在配置或当前会话中可用，worker 默认继续完成板卡
   correctness / benchmark / repeated summary / Evidence Doctor / registry 刷新，并用结果推进下一阶段。
@@ -77,10 +77,10 @@ topic-local doc suite、evaluation、phase result、optimization matrix / roadma
 
 ## 短提醒
 
-- 从 second-pass 或 follow-up 状态表选择第一条未完成主题；建议队列只授权进入函数级评估，不授权跳过检验直接改生产路径。
+- 从函数评估队列或保留候选复筛状态表选择第一条未完成主题；建议队列只授权进入函数级评估，不授权跳过检验直接改生产路径。
 - 函数级评估是 production gate：只有 full diagnostic 或 production case 能证明入口主成本、fallback、维护边界和板卡收益成立，才进入生产实现。
 - `1.05x ~ 1.2x` 弱收益不能机械接入；只适合入口常用、实现小、fallback 简单、语义风险低且证据完整的路径。
-- bench 诊断主题默认授权范围限于专项 test/bench、诊断文档和状态表；升级生产路径必须先有 full diagnostic 或 production case 的稳定目标硬件收益。
+- diagnostic / bench-only 证据路径默认授权范围限于专项 test/bench、诊断文档和状态表；升级生产路径必须先有 full diagnostic 或 production case 的稳定目标硬件收益。
 - 对 registration（配准）类 topic，如果已有 adopted math family 只在某个 row source policy 上闭合，而其它 policy 仍未尝试同 family，默认先做 family carry-over audit：在配置解析出的 RVV test 资产中补对应 policy 的 candidate、bench 和 board 证据，再决定是否进入 production integration loop。不要把单一 policy 的 positive summary 直接外推成其它 policy 的 production 结论。
 - QEMU 不写成性能结论。
 - 板卡或目标硬件结果才是性能结论。

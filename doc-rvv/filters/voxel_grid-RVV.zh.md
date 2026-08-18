@@ -6,7 +6,7 @@
 
 筛选与测试材料：
 
-- 模块二轮筛选：`doc-rvv/library-screening/filters-module-second-pass.zh.md`
+- 模块二轮筛选：`doc-rvv/library-screening/filters/filters-function-evaluation-queue.zh.md`
 - 函数级评估：`test-rvv/filters/voxel_grid/voxel_grid-evaluation.zh.md`
 - 专项测试与 bench：`test-rvv/filters/voxel_grid/`
 

@@ -82,7 +82,7 @@ production-adopted/full-cloud-and-source-indexed-staged-f32-aos-valid-index-with
 
 工作树仍包含非本阶段 / 非本 topic 的 dirty changes，例如：
 
-- `doc-rvv/library-screening/registration/registration-module-second-pass.zh.md`
+- `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md`
 - `doc-rvv/registration/transformation_estimation_point_to_plane_lls-RVV.zh.md`
 - `registration/include/pcl/registration/impl/transformation_estimation_point_to_plane_lls.hpp`
 - `test-rvv/registration/transformation_estimation_point_to_plane_lls/`

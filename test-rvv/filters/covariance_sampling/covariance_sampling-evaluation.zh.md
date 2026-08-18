@@ -6,11 +6,11 @@
 - 主文件：`filters/include/pcl/filters/impl/covariance_sampling.hpp`
 - 公开类：`pcl::CovarianceSampling<PointT, PointNT>`
 - 专项目录：`test-rvv/filters/covariance_sampling/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的 `6.2 bench 诊断主题` 第 13 项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` 第 13 项。
 
-follow-up rescreen 将本主题列为 `保留 / 待诊断`，诊断点是 centroid、scaled point 和 6D vector 构造。保留原因是 `Eigen` 6x6 solver、six-list sort 和 sampling state 可能主导 `applyFilter(Indices&)`，局部 RVV 片段不能直接代表生产入口收益。
+保留候选复筛将本主题列为 `保留 / 待诊断`，诊断点是 centroid、scaled point 和 6D vector 构造。保留原因是 `Eigen` 6x6 solver、six-list sort 和 sampling state 可能主导 `applyFilter(Indices&)`，局部 RVV 片段不能直接代表生产入口收益。
 
-本轮只建立 `test-rvv` bench-diagnosis 资产，不修改公开 API，不修改 `filters/include/...` 生产源码，不接入生产分流。
+本轮只建立 `test-rvv` diagnostic / bench-only 资产，不修改公开 API，不修改 `filters/include/...` 生产源码，不接入生产分流。
 
 ## 2. 函数级评估
 

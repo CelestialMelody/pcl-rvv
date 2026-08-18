@@ -1,12 +1,12 @@
-# filters 模块后续候选复筛报告
+# filters 模块保留候选复筛报告
 
-本文档记录 `filters` 模块建议优化队列完成后的保留候选复筛。输入范围限定为 `doc-rvv/library-screening/filters/filters-module-second-pass.zh.md` 中 `3.2 保留实施的候选文件` 的 26 个文件；未重新扩大到全模块。复筛结论基于已完成主题的板卡真实性能、回退原因、bench 诊断结果和当前源码中的函数级数据流。
+本文档记录 `filters` 模块建议进行 RVV 优化的文件队列完成后的保留候选复筛。输入范围限定为 `doc-rvv/library-screening/filters/filters-function-evaluation-queue.zh.md` 中 `3.2 保留实施的候选文件` 的 26 个文件；未重新扩大到全模块。复筛结论基于已完成主题的板卡真实性能、回退原因、diagnostic / bench-only 证据路径结果和当前源码中的函数级数据流。
 
 ## 1. 输入依据与复筛原因
 
 输入依据：
 
-- `doc-rvv/library-screening/filters/filters-module-second-pass.zh.md`
+- `doc-rvv/library-screening/filters/filters-function-evaluation-queue.zh.md`
 - `doc-rvv/library-screening/module-optimization-workflow.zh.md`
 - `doc-rvv/filters/*.zh.md`
 - `test-rvv/filters/*/*-evaluation.zh.md`
@@ -14,23 +14,22 @@
 
 复筛原因：
 
-- 二轮报告中的建议优化队列已经完成，其中 `voxel_grid`、`convolution`、`filter_indices/filter`、`passthrough`、`crop_box`、`voxel_grid_covariance`、`fast_bilateral`、`fast_bilateral_omp` 均已 closeout。
+- 二轮报告中的建议进行 RVV 优化的文件队列已经完成，其中 `voxel_grid`、`convolution`、`filter_indices/filter`、`passthrough`、`crop_box`、`voxel_grid_covariance`、`fast_bilateral`、`fast_bilateral_omp` 均已 closeout。
 - 已完成主题显示：直接主路径中的大规模线性扫描、organized 内区卷积、mask + `vcompress` 保序输出通常具备强收益；只覆盖前置预处理或尾段压缩的小片段时，整体收益容易被后续 lattice、map、sort、search、Eigen 或整点复制稀释。
-- `fast_bilateral` blur RVV 已作为 bench 诊断验证，正确性和指令路径成立但板卡为 `1.00x`，不接入生产；`filter_indices` normals prototype 曾约 `0.62x` 后回退；这些结果要求后续候选必须下钻到函数入口，不能只按循环数量排序。
+- `fast_bilateral` blur RVV 已作为 diagnostic / bench-only 路径验证，正确性和指令路径成立但板卡为 `1.00x`，不接入生产；`filter_indices` normals prototype 曾约 `0.62x` 后回退；这些结果要求后续候选必须下钻到函数入口，不能只按循环数量排序。
 
 ## 2. 筛选统计
 
-| 分类                              | 数量 | 说明                                                                  |
-| --------------------------------- | ---: | --------------------------------------------------------------------- |
-| 保留候选输入总数                  |   26 | 来自二轮报告`3.2 保留实施的候选文件`                                |
-| 建议进入函数级评估                |    6 | 公开入口直接包含线性几何筛选、organized 下采样或可限定的简单字段条件  |
-| bench 诊断主题                    |   19 | 有局部 RVV 实验问题，按状态分为已完成、可直接建 bench 或保留 / 待诊断 |
-| 暂缓主题                          |    1 | filters 文件本身不承载主要热点或当前不适合作为 filters 专项           |
-| 重新纳入 / 合并 / 删除 / 源码冲突 |    0 | 本轮未扩大范围；未发现需要推翻二轮候选全集的源码冲突                  |
+| 分类                              | 数量 | 说明                                                                           |
+| --------------------------------- | ---: | ------------------------------------------------------------------------------ |
+| 保留候选输入总数                  |   26 | 来自二轮报告`3.2 保留实施的候选文件`                                         |
+| 建议启动函数级评估                |    6 | 公开入口直接包含线性几何筛选、organized 下采样或可限定的简单字段条件           |
+| 暂缓 / 不单独实施                 |   20 | 当前不作为保留候选复筛的默认启动队列，其中 19 个保留 diagnostic / bench 路径记录 |
+| 重新纳入 / 合并 / 删除 / 源码冲突 |    0 | 本轮未扩大范围；未发现需要推翻二轮候选全集的源码冲突                           |
 
 ## 3. 已完成主题经验总结
 
-| 主题                      | 主路径收益范围                                                                                                          | 回退 / bench 暂缓结论                                                                             | 对后续排序的影响                                                                  |
+| 主题                      | 主路径收益范围                                                                                                          | 回退 / 诊断暂缓结论                                                                               | 对后续排序的影响                                                                  |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | `voxel_grid`            | `PCLPointCloud2 getMinMax3D` 基础约 `3.65x`~`4.58x`，indices 约 `3.60x`，distance field 约 `2.53x`~`2.70x` | `PointCloud<PointT>` distance field 因泛型布局暂缓；`applyFilter` voxel index + sort 暂缓     | 规整 min/max 规约是强模式；sort / 分组主导的 voxel 类不能只靠前置 floor loop 升级 |
 | `convolution`           | dense organized`PointXYZI` 行列内区约 `2.85x`~`3.85x`                                                             | 旧列方向大 stride VL chunk 曾约`0.36x`，改为横向 VL chunk 后成立；non-dense 与 RGB/RGBA 暂缓    | organized 图像式循环可优先，但 lane 组织必须贴合连续访存                          |
@@ -38,25 +37,25 @@
 | `passthrough`           | indices 主路径约`2.60x`~`3.21x`，cloud-out 约 `1.63x`                                                             | 显式 subset indices 与`PCLPointCloud2` 路径暂缓                                                 | 字段区间判断 + inlier/removed 双路保序输出是强模式；gather/subset 要后置          |
 | `crop_box`              | dense identity indices 约`2.09x`~`3.08x`，cloud-out 约 `2.63x`                                                    | subset、non-dense、transform、`PCLPointCloud2` 回退                                             | 多字段比较 +`vcompress` 是 filters 后续几何筛选的主要参考                       |
 | `voxel_grid_covariance` | dense leaf-id 预计算约`1.46x`~`1.52x`                                                                               | distance-field fallback`0.79x`，non-dense fallback `1.00x`；cov/eigen/searchable 状态保持标量 | 前置 leaf-id 可有中等收益，但不应优先于直接输出主路径                             |
-| `fast_bilateral`        | z 预处理整体约`1.04x`~`1.10x`                                                                                       | lattice blur bench 诊断 RVV 为`1.00x`，生产 blur 回退                                           | 只覆盖小前置片段通常是弱收益；邻域 / lattice / 冲突累加不因循环大自动升级         |
+| `fast_bilateral`        | z 预处理整体约`1.04x`~`1.10x`                                                                                       | lattice blur diagnostic RVV 为`1.00x`，生产 blur 回退                                          | 只覆盖小前置片段通常是弱收益；邻域 / lattice / 冲突累加不因循环大自动升级         |
 | `fast_bilateral_omp`    | z 预处理整体约`1.05x`~`1.16x`                                                                                       | OMP lattice 主体保持标量                                                                          | OMP + RVV 需要清晰边界；弱收益只适合极小、低风险、常用入口                        |
 
 ## 4. 筛选口径修正
 
 第二轮建议优化队列中的 `fast_bilateral` / `fast_bilateral_omp` 显示，organized 图像式循环和大规模数据本身不足以支撑生产优先级。两者在文件级具备大循环和深度图像式数据流，但当前可安全接入生产的 RVV 覆盖主要是 finite `z` 的 min/max 规约与 non-finite 替换；后续 lattice splat、blur、插值和 OpenMP 主体仍是主要成本。因此板卡整体收益只有 `1.04x`~`1.16x`，非 OMP blur microbench 正确且命中 RVV 指令，但板卡为 `1.00x`，不接入生产。
 
-相对地，`plane_clipper3D` 与 `frustum_culling` 在二轮报告中属于保留实施的几何裁剪候选，但 follow-up 后接入生产主路径后分别达到约 `2.48x`~`3.00x` 和 `4.33x`~`5.94x`。这类主题的共同点是 RVV 覆盖公开入口的直接筛选主成本：AoS stride 读取 `x/y/z`、生成几何谓词 mask、用 `vcompress` 保序输出 indices / removed indices。
+相对地，`plane_clipper3D` 与 `frustum_culling` 在二轮报告中属于保留实施的几何裁剪候选，但保留候选复筛后接入生产主路径并分别达到约 `2.48x`~`3.00x` 和 `4.33x`~`5.94x`。这类主题的共同点是 RVV 覆盖公开入口的直接筛选主成本：AoS stride 读取 `x/y/z`、生成几何谓词 mask、用 `vcompress` 保序输出 indices / removed indices。
 
 后续排序因此采用以下修正口径：
 
 - “文件里有大循环”不等同于“RVV 覆盖入口主成本”；
-- 只覆盖前置预处理、尾段压缩或小片段的候选，必须先证明该片段在整体入口中占比足够，或先降为 bench 诊断；
-- bench 诊断主题重新纳入生产候选时，不能只依据局部 microbench speedup；必须看 full diagnostic 或生产入口 case 是否在板卡上稳定明显收益，并确认收益覆盖入口主成本、fallback 边界清晰、语义风险和维护复杂度可接受；
-- 若局部片段正确且加速，但 sort / search / map / Eigen / 状态机 / 整点复制等后续主成本把 full diagnostic 稀释到弱收益区间，默认保留为 bench 诊断，不接入生产；
+- 只覆盖前置预处理、尾段压缩或小片段的候选，必须先证明该片段在整体入口中占比足够，或先作为后续 topic 内的 diagnostic / bench-only 证据路径；
+- diagnostic / bench-only 路径重新纳入生产候选时，不能只依据局部 microbench speedup；必须看 full diagnostic 或生产入口 case 是否在板卡上稳定明显收益，并确认收益覆盖入口主成本、fallback 边界清晰、语义风险和维护复杂度可接受；
+- 若局部片段正确且加速，但 sort / search / map / Eigen / 状态机 / 整点复制等后续主成本把 full diagnostic 稀释到弱收益区间，默认保留为 diagnostic / bench-only 证据路径，不接入生产；
 - search、sort、map、Eigen solver、lattice、冲突累加、随机采样、邻域不规则访问和整点字段复制会稀释局部 RVV 收益；
 - 直接线性扫描、organized 连续访存、规整字段遍历、mask + `vcompress` 保序输出是 filters 已完成主题中最稳定的强收益模式；
-- bench 诊断按状态分层，不再用“6.2 bench 诊断主题 / 6.3 观察暂不建 bench”硬切分；未完成且不作为默认继续队列的主题统一标为 `保留 / 待诊断`；
-- bench 诊断只收纳能回答明确局部问题或有机会形成明确诊断问题的候选，不把所有“有局部 loop”的暂缓项自动纳入。
+- diagnostic / bench-only 路径按状态分层，不再用旧的“6.2 诊断路径记录 / 6.3 观察暂不建 bench”硬切分；未完成且不作为默认继续队列的主题统一标为 `保留 / 待诊断`；
+- diagnostic / bench-only 路径只记录能回答明确局部问题或有机会形成明确诊断问题的候选，不把所有“有局部 loop”的暂缓项自动纳入。
 
 主成本覆盖类型使用以下口径：
 
@@ -70,26 +69,25 @@
 
 本节按推荐动作拆分逐项复筛结论。第 5 节侧重说明分类理由；第 6 节再给出可执行状态表，避免一个超宽总表同时承担分析和状态跟踪。
 
-| 分类               | 主题数 | 主要判断口径                                                                        |
-| ------------------ | -----: | ----------------------------------------------------------------------------------- |
-| 建议进入函数级评估 |      6 | RVV 有机会覆盖公开入口直接主路径，且专项 test/bench 可闭环                          |
-| bench 诊断主题     |     19 | 有局部 RVV 点或可隔离诊断问题；用状态字段区分已完成、可直接建 bench 与保留 / 待诊断 |
-| 暂缓主题           |      1 | filters 文件本身不承载主要热点或当前不适合作为 filters 专项                         |
+| 分类                    | 主题数 | 主要判断口径                                                                                 |
+| ----------------------- | -----: | -------------------------------------------------------------------------------------------- |
+| 建议启动函数级评估      |      6 | RVV 有机会覆盖公开入口直接主路径，且专项 test/bench 可闭环                                   |
+| 暂缓 / 不单独实施       |     20 | 当前不作为独立保留候选复筛默认启动项；其中 19 个保留 diagnostic / bench-only 证据路径记录    |
 
-### 5.1 建议进入函数级评估
+### 5.1 建议启动函数级评估
 
 | 主题                    | 关键入口                                                                              | 主成本覆盖类型                       | RVV 适配点                                                                                | 主要风险                                                                      | 推荐理由                                                                               |
 | ----------------------- | ------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `plane_clipper3D`     | `PlaneClipper3D::clipPointCloud3D`、`clipPoint3D`                                 | `direct-main-path`                 | `a*x+b*y+c*z+d` plane dot、mask、`vcompress` 保序输出                                 | subset indices gather、泛型 PointT 布局、polygon/line clip 非目标             | 公开入口直接线性筛选，语义比 frustum 更小，clipper 测试可复用，预期收益强              |
 | `frustum_culling`     | `FrustumCulling<PointT>::applyFilter(Indices&)`                                     | `direct-main-path`                 | 6 平面 dot、mask 合并、`negative_`、inlier/removed 保序压缩                             | far plane infinity、camera plane 预计算、subset indices gather、非标准 PointT | 直接筛选主路径，算术密度高于 crop_box，专项 test/bench 可控，预期中高到强              |
-| `shadowpoints`        | `ShadowPoints::applyFilter(Indices&)`、`applyFilter(PointCloud&)`                 | `direct-main-path`                 | point + normal 双 AoS dot、`abs` threshold、`negative_`、保序压缩                     | 双输入 stride load、cloud-out 整点复制、keep_organized 坏点写                 | 直接线性几何判定，可建专项和 bench；实际完成后已转为 bench 诊断生产回退，状态见第 6 节 |
+| `shadowpoints`        | `ShadowPoints::applyFilter(Indices&)`、`applyFilter(PointCloud&)`                 | `direct-main-path`                 | point + normal 双 AoS dot、`abs` threshold、`negative_`、保序压缩                     | 双输入 stride load、cloud-out 整点复制、keep_organized 坏点写                 | 直接线性几何判定，可建专项和 bench；实际完成后已转为 diagnostic-only 生产回退，状态见第 6 节 |
 | `box_clipper3D`       | `BoxClipper3D::clipPointCloud3D`                                                    | `direct-main-path`                 | affine box 变换后`abs(x/y/z)<=1`，保序 indices 输出                                     | 齐次`w` 修正、subset gather、line/polygon 未实现路径，与 `crop_box` 重叠  | 直接几何筛选，有中等收益机会；函数级评估需先证明独立入口价值                           |
 | `pyramid`             | `pcl::filters::Pyramid<PointT>::compute`                                            | `direct-main-path`                 | organized 小 kernel 下采样，dense 路径可横向 VL chunk                                     | RGB/RGBA 特化、non-dense threshold、PointT operator、OpenMP 边界              | 图像式循环候选，可建专项；需同时覆盖 impl/src 与点类型分支                             |
 | `conditional_removal` | `ConditionalRemoval<PointT>::applyFilter(PointCloud&)`、`ConditionBase::evaluate` | `direct-main-path`（限定简单条件） | 单字段`FieldComparison<float>` 字段 load + compare；`keep_organized_` 可做 mask store | 多态条件树、字段类型多、copyPoint、坏点填充和 removed_indices 语义复杂        | 简单条件形态可能成立，上游覆盖存在；低置信生产候选，排在几何筛选之后                   |
 
-### 5.2 bench 诊断主题
+### 5.2 暂缓 / 不单独实施（诊断路径记录）
 
-本节合并原 `bench 诊断主题` 与 `观察 / 暂不建 bench`。两者本质上都是“有局部 RVV 点或可隔离诊断问题，但当前不直接承诺生产分流”；区别用 `诊断成熟度 / 状态` 与“当前结论 / 重新考虑条件”表达：
+本节保留原诊断路径记录与 `观察 / 暂不建 bench` 的事实材料，但不再把它们作为模块复筛固定队列。它们本质上都是“有局部 RVV 点或可隔离诊断问题，但当前不直接承诺生产分流”；区别用 `诊断成熟度 / 状态` 与“当前结论 / 重新考虑条件”表达：
 
 - `已完成 / 升级生产`：诊断结果证明 full / production 入口收益、fallback 和维护边界成立；
 - `已完成 / 生产不接入`：局部实验正确，但 full diagnostic 或生产入口收益不足；
@@ -109,7 +107,7 @@
 | `statistical_outlier_removal`     | `StatisticalOutlierRemoval::applyFilterIndices`                           | `tail-compress`        | 保留 / 待诊断                    | distances mean/stddev 规约与 threshold compress               | KNN search 主导，整体收益预计有限；仅在距离数组已存在且统计尾段占比明确时推进                                                                                                               |
 | `uniform_sampling`                | `UniformSampling::applyFilter(Indices&)`                                  | `partial-preprocess`   | 保留 / 待诊断                    | leaf id 与 voxel center distance                              | `leaves_` map 和 per-leaf conflict update 主导；仅在 leaf-id / distance 片段能覆盖真实入口主成本时推进                                                                                    |
 | `src/voxel_grid_label.cpp`        | `VoxelGridLabel::applyFilter(PointCloud&)`                                | `partial-preprocess`   | 保留 / 待诊断                    | distance filter 与 leaf id 计算                               | sort、label histogram、`std::map` 和字段聚合主导，固定点类型适合后续按具体数据集做局部诊断                                                                                                |
-| `convolution_3d`                  | `Convolution3D::convolve`、`GaussianKernel::operator()`                 | `diagnostic`      | 已完成（生产不接入）             | 邻域 distances threshold、权重、加权求和                      | kernel-only 板卡约`1.85x`，但 full diagnostic 仅约 `1.09x`~`1.11x`，未改生产入口约 `1.00x`；`radiusSearch` 与不规则邻域访问稀释收益，保留 bench 诊断证据                          |
+| `convolution_3d`                  | `Convolution3D::convolve`、`GaussianKernel::operator()`                 | `diagnostic`      | 已完成（生产不接入）             | 邻域 distances threshold、权重、加权求和                      | kernel-only 板卡约`1.85x`，但 full diagnostic 仅约 `1.09x`~`1.11x`，未改生产入口约 `1.00x`；`radiusSearch` 与不规则邻域访问稀释收益，保留 diagnostic / bench-only 证据             |
 | `covariance_sampling`             | `initCompute`、`computeCovarianceMatrix`、`applyFilter(Indices&)`     | `partial-preprocess`   | 已完成（生产不接入）             | centroid、scaled point、6D vector 构造                        | 板卡 scaled-point 片段仅约`1.01x`~`1.08x`，6D-vector 有 `0.78x`~`0.79x` 退化 case，full diagnostic 约 `0.99x`~`1.00x`；Std/RVV checksum 不一致，生产语义证据不足，不接生产分流 |
 | `crop_hull`                       | `CropHull::applyFilter2D`、`applyFilter3D`                              | `diagnostic`      | 保留 / 待诊断                    | 固定 hull 的 polygon / ray triangle 判定                      | 多 polygon、多 ray、crossing 语义复杂，fixed hull microbench 泛化性弱；需限定常见 hull 形态并证明判定循环占主成本                                                                           |
 | `farthest_point_sampling`         | `FarthestPointSampling::applyFilter(Indices&)`                            | `diagnostic`      | 保留 / 待诊断                    | 每轮距离数组更新和 max 查找                                   | 每轮依赖上一采样点且 OpenMP reduction / 随机起点影响语义；需证明能保持采样顺序且距离更新 + max 是主要瓶颈                                                                                   |
@@ -118,9 +116,9 @@
 | `morphological_filter`            | `applyMorphologicalOperator`                                              | `diagnostic`      | 保留 / 待诊断                    | boxSearch 后 search-result min/max                            | octree boxSearch 主导，且已有`getMinMax3D` 间接受益；需确认 search-result 数组形态和 min/max 占比                                                                                         |
 | `voxel_grid_occlusion_estimation` | `VoxelGridOcclusionEstimation` ray traversal / occlusion APIs             | `diagnostic`      | 保留 / 待诊断                    | 坐标转换、ray step、box intersection                          | ray traversal 状态机和 occupancy 访问不规则；需把 ray math 与 occupancy 访问合成可归因诊断 case                                                                                             |
 
-bench 诊断主题不改变公开 API 和生产分流。只有诊断结果显示板卡收益、覆盖面和维护成本同时成立，才重新纳入生产候选。
+diagnostic / bench-only 路径记录不改变公开 API 和生产分流。只有诊断结果显示板卡收益、覆盖面和维护成本同时成立，才重新纳入生产候选。
 
-### 5.3 暂缓主题
+### 5.3 暂缓 / 不单独实施（非独立 filters 主题）
 
 | 主题                | 关键入口                        | 主成本覆盖类型     | 暂缓原因                                                                                           | 重新考虑条件                                                                                     |
 | ------------------- | ------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -128,22 +126,22 @@ bench 诊断主题不改变公开 API 和生产分流。只有诊断结果显示
 
 ## 6. 新的后续执行清单 / 状态表
 
-### 6.1 建议进入函数级评估
+### 6.1 建议启动函数级评估
 
 | 顺序 | 主题                    | 主文件                                                                        | 推荐入口 / 第一 RVV 目标                                                          | 状态                           | 当前结论 / 下一步条件                                                                                                                                                                                                         |
 | ---: | ----------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |    1 | `plane_clipper3D`     | `filters/include/pcl/filters/impl/plane_clipper3D.hpp`                      | `clipPointCloud3D` 的全云、XYZ-compatible、plane dot + mask + 保序输出        | 已完成                         | 全云`PointXYZ` 主路径已接入 RVV；当前源码 gate 已扩大为 XYZ-compatible，`PointXYZI` 正确性已由 QEMU 对拍覆盖，板卡类型 case 需后续重命名并重跑                                                                           |
 |    2 | `frustum_culling`     | `filters/include/pcl/filters/impl/frustum_culling.hpp`                      | `applyFilter(Indices&)` 的 6 平面 dot + mask + inlier/removed 压缩            | 已完成                         | dense 全云`PointXYZ` 主路径已接入 RVV；当前源码 gate 已扩大为 XYZ-compatible，`PointXYZI` 正确性已由 QEMU 对拍覆盖，板卡类型 case 需后续重命名并重跑                                                                     |
-|    3 | `shadowpoints`        | `filters/include/pcl/filters/impl/shadowpoints.hpp`                         | `applyFilter(Indices&)` 的 point + normal dot、`abs` threshold、`negative_` | 已完成（bench 诊断，生产回退） | bench 诊断 RVV helper 正确且指令命中，但 Milkv-Jupiter 主诊断 case 仅`0.44x`~`0.63x`，不接入生产；上游源码已回退，实验保留在 `test-rvv`；fallback case 约 `1.00x`                                                     |
+|    3 | `shadowpoints`        | `filters/include/pcl/filters/impl/shadowpoints.hpp`                         | `applyFilter(Indices&)` 的 point + normal dot、`abs` threshold、`negative_` | 已完成（diagnostic-only，生产回退） | diagnostic RVV helper 正确且指令命中，但 Milkv-Jupiter 主诊断 case 仅`0.44x`~`0.63x`，不接入生产；上游源码已回退，实验保留在 `test-rvv`；fallback case 约 `1.00x`                                                     |
 |    4 | `box_clipper3D`       | `filters/include/pcl/filters/impl/box_clipper3D.hpp`                        | `clipPointCloud3D` 的 affine box 判定和保序输出                                 | 已完成                         | 全云`PointXYZ` 主路径已接入 RVV；当前源码 gate 已扩大为 XYZ-compatible，`PointXYZI` 正确性已由 QEMU 对拍覆盖，板卡类型 case 需后续重命名并重跑                                                                           |
 |    5 | `pyramid`             | `filters/include/pcl/filters/impl/pyramid.hpp`、`filters/src/pyramid.cpp` | dense organized 小 kernel 下采样横向 VL chunk                                     | 已完成                         | dense`PointXYZ` small-kernel 单线程主路径已接入 RVV；Milkv-Jupiter 640x480 / 1280x720 small-kernel 约 `2.16x` / `2.13x`，显式多线程、5x5 large-kernel、non-dense、非 `PointXYZ` 与 RGB/RGBA/RGB 特化保持标量 fallback |
 |    6 | `conditional_removal` | `filters/include/pcl/filters/impl/conditional_removal.hpp`                  | 简单`FieldComparison<float>` 字段比较 + mask；通用条件 fallback                 | 已完成                         | XYZ-compatible 点类型、全云、dense、单个`FieldComparison<float>` 的 `GT/GE/LT/LE` 主路径已接入 RVV；Milkv-Jupiter 主路径约 `2.87x`~`4.65x`，`keep_organized`、subset、复合条件与 `EQ` fallback 保持标量           |
 
 后续普通主题优化应按本表第一条未完成项推进。若函数级评估确认某主题不适合生产 RVV，应在对应评估文档和本状态表中记录回退原因，再进入下一条。
 
-### 6.2 bench 诊断主题
+### 6.2 暂缓 / 不单独实施（诊断路径记录）
 
-bench 诊断主题的共同问题是局部 RVV 点或诊断问题不能直接等价于生产主路径收益。`保留 / 待诊断` 不是默认继续队列：若诊断方向已较明确，需要等待明确使用场景、profile、数据集或新方案证明目标片段接近入口主成本；若诊断问题尚不成熟，则需先证明 bench 问题能代表真实入口，再决定是否建立专项目录。bench 诊断主题默认不修改公开 API、不接入生产分流；只有 full diagnostic 或生产入口在板卡上稳定明显收益，且覆盖面、fallback 和维护成本同时成立，才重新纳入生产候选。
+诊断路径记录的共同问题是局部 RVV 点或诊断问题不能直接等价于生产主路径收益。`保留 / 待诊断` 不是默认继续队列：若诊断方向已较明确，需要等待明确使用场景、profile、数据集或新方案证明目标片段接近入口主成本；若诊断问题尚不成熟，则需先证明 bench 问题能代表真实入口，再决定是否建立专项目录。diagnostic / bench-only 路径默认不修改公开 API、不接入生产分流；只有 full diagnostic 或生产入口在板卡上稳定明显收益，且覆盖面、fallback 和维护成本同时成立，才重新纳入生产候选。
 
 | 顺序 | 主题                                | 诊断目标 / 局部 RVV 点                                                                                                            | 状态                             | 诊断文档 / 证据路径                                                                                                                                                                                                           | 当前结论 / 下一步条件                                                                                                                                                                                                                            |
 | ---: | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -167,9 +165,9 @@ bench 诊断主题的共同问题是局部 RVV 点或诊断问题不能直接等
 |   18 | `morphological_filter`            | search-result min/max                                                                                                             | 保留 / 待诊断                    | 待建                                                                                                                                                                                                                          | octree boxSearch 主导，且已有`getMinMax3D` 间接受益；需确认 search-result 数组形态和 min/max 占比                                                                                                                                              |
 |   19 | `voxel_grid_occlusion_estimation` | ray step、坐标转换、box intersection                                                                                              | 保留 / 待诊断                    | 待建                                                                                                                                                                                                                          | ray traversal 状态机和 occupancy 访问不规则，ray math microbench 与真实输出状态解耦过强；需把 ray math 与 occupancy 访问合成可归因诊断 case                                                                                                      |
 
-bench 诊断主题不是删除项。后续只有当能提出可隔离、可归因、可板卡验证的诊断问题，或已存在足够 profile 证明局部片段接近入口主成本时，才从本表重新启动专项评估。
+诊断路径记录不是删除项。后续只有当能提出可隔离、可归因、可板卡验证的诊断问题，或已存在足够 profile 证明局部片段接近入口主成本时，才从本表重新启动专项评估。
 
-### 6.3 暂缓主题
+### 6.3 暂缓 / 不单独实施（非独立 filters 主题）
 
 | 主题                | 暂缓原因                                                                                             | 重新考虑条件                                                            |
 | ------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
@@ -177,14 +175,14 @@ bench 诊断主题不是删除项。后续只有当能提出可隔离、可归�
 
 ## 7. 阶段性收尾 / 后续策略
 
-本阶段 filters follow-up 已完成直接主路径候选闭环：6.1 的直接主路径候选全部完成。统一后的 bench 诊断主题也已有一些结果：
+本阶段 filters 保留候选复筛已完成直接主路径候选闭环：6.1 的直接主路径候选全部完成。统一后的 diagnostic / bench-only 路径记录也已有一些结果：
 
 - `approximate_voxel_grid` 证明前置 staging 若能带动 full / production 入口，可以升级为生产路径；
 - `grid_minimum` 证明局部 cell-id 加速会被 sort 与 per-cell min-z 稀释；
 - `extract_indices` 证明局部 bitmap scan 加速不能直接代表 keep_organized full diagnostic 或真实生产入口；
 - `bilateral` 证明原观察项只要诊断设计能覆盖真实入口主成本，并补齐 common math helper、误差预算、full diagnostic 和生产入口证据，也可以升级为生产路径。
 
-其余所有有局部 RVV 点或可隔离实验问题的主题统一放入 bench 诊断主题，再用状态表达成熟度。后续策略改为：
+其余所有有局部 RVV 点或可隔离实验问题的主题统一放入 `暂缓 / 不单独实施` 中的 diagnostic / bench-only 路径记录，再用状态表达成熟度。后续策略改为：
 
 - 已完成主题进入维护和复核阶段，优先处理文档、日志、提交拆分和已发现问题；
 - `保留 / 待诊断` 主题不是默认继续队列；若诊断方向已较明确，需等待上游使用场景、profile、数据集或新方案证明“目标片段接近入口主成本”时再启动；若诊断问题尚不成熟，需先提出可隔离、可归因、可板卡验证的诊断问题，再决定是否建立 `test-rvv` 专项目录；

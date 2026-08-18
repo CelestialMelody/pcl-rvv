@@ -6,7 +6,7 @@
 - 主文件：`registration/include/pcl/registration/impl/transformation_validation_euclidean.hpp`
 - 公开入口：`pcl::registration::TransformationValidationEuclidean<PointSource, PointTarget, Scalar>::validateTransformation`
 - 专项目录：`test-rvv/registration/transformation_validation_euclidean/`
-- 模块依据：`doc-rvv/library-screening/registration/registration-module-second-pass.zh.md` 的建议优化队列第一项。
+- 模块依据：`doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` 的建议优化队列第一项。
 
 ## 函数级结论
 

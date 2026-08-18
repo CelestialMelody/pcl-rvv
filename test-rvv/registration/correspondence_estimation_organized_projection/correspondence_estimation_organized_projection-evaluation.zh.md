@@ -6,7 +6,7 @@
 - 主文件：`registration/include/pcl/registration/impl/correspondence_estimation_organized_projection.hpp`
 - 公开入口：`pcl::registration::CorrespondenceEstimationOrganizedProjection<PointSource, PointTarget, Scalar>::determineCorrespondences`
 - 专项目录：`test-rvv/registration/correspondence_estimation_organized_projection/`
-- 模块依据：`doc-rvv/library-screening/registration/registration-module-second-pass.zh.md` 的建议优化队列第二项。
+- 模块依据：`doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` 的建议优化队列第二项。
 
 ## Closeout 状态
 

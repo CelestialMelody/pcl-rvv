@@ -56,7 +56,7 @@ frozen_policies:
 | production helper | 三个 inline helper 尚无 RVV 分支 | `registration/include/pcl/registration/impl/correspondence_types.hpp` |
 | 上游声明 | 公开头只声明三个 helper 并 include impl | `registration/include/pcl/registration/correspondence_types.h` |
 | `Correspondence` 布局 | `index_query`、`index_match`、`distance/weight` 三个 32-bit 字段，容器使用 Eigen aligned allocator | `common/include/pcl/correspondence.h` |
-| 筛选队列 | `correspondence_types` 为 registration 建议优化队列第 7 项，状态为待评估 | `doc-rvv/library-screening/registration/registration-module-second-pass.zh.md` |
+| 筛选队列 | `correspondence_types` 为 registration 建议优化队列第 7 项，状态为待评估 | `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` |
 | topic-local 测试资产 | 不存在，需本阶段创建 | `test-rvv/registration/correspondence_types/` |
 
 ## 标量路径与候选族

@@ -4,13 +4,13 @@
 
 | 项目 | 状态 |
 | --- | --- |
-| 模块执行来源 | `doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的 `6.2 bench 诊断主题` |
+| 模块执行来源 | `doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` |
 | 当前定位 | bench 诊断，不修改生产源码 |
 | 生产源码 | `filters/include/pcl/filters/impl/extract_indices.hpp`、`filters/src/extract_indices.cpp` 保持不变 |
 | 专项路径 | `test-rvv/filters/extract_indices/` |
 | 主题文档 | `doc-rvv/filters/extract_indices-RVV.zh.md` |
 
-`extract_indices` 来自 follow-up rescreen 的诊断队列。当前工作不接入 `pcl::ExtractIndices` 生产分流，而是隔离两个局部问题：`full_indices + sort + set_difference` 是否可由 bitmap scan + RVV compress 替代，以及 `keep_organized` / `filterDirectly` 的 sparse bad-value 写回是否值得 RVV scatter。
+`extract_indices` 来自保留候选复筛的 diagnostic / bench-only 路径记录。当前工作不接入 `pcl::ExtractIndices` 生产分流，而是隔离两个局部问题：`full_indices + sort + set_difference` 是否可由 bitmap scan + RVV compress 替代，以及 `keep_organized` / `filterDirectly` 的 sparse bad-value 写回是否值得 RVV scatter。
 
 ## 2. 函数入口与标量语义
 
@@ -47,7 +47,7 @@ complement = set_difference(full_indices, sorted_input_indices)
 
 ## 4. 中优先级尝试与暂缓原因
 
-本主题属于 follow-up 表中的 `bench 诊断主题`，默认不接入生产。已经尝试的 RVV 点如下：
+本主题属于保留候选复筛中的 diagnostic / bench-only 路径记录，默认不接入生产。已经尝试的 RVV 点如下：
 
 | 尝试项 | 实现状态 | 风险 / 处理 |
 | --- | --- | --- |

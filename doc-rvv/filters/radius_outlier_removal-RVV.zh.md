@@ -21,7 +21,7 @@ tail:
   compress to_keep into output indices and optional removed_indices
 ```
 
-本主题来自 follow-up rescreen 的 bench 诊断队列。当前不修改 `filters/include/pcl/filters/impl/radius_outlier_removal.hpp` 或 `filters/src/radius_outlier_removal.cpp`，只在 `test-rvv/filters/radius_outlier_removal/` 中保留诊断 helper、测试和 bench。
+本主题来自保留候选复筛的 diagnostic / bench-only 路径记录。当前不修改 `filters/include/pcl/filters/impl/radius_outlier_removal.hpp` 或 `filters/src/radius_outlier_removal.cpp`，只在 `test-rvv/filters/radius_outlier_removal/` 中保留诊断 helper、测试和 bench。
 
 ## 2. 标量路径与诊断边界
 
@@ -32,7 +32,7 @@ to_keep[i] == 1 -> output indices.push_back(indices_[i])
 to_keep[i] == 0 -> optional removed_indices.push_back(indices_[i])
 ```
 
-follow-up rescreen 将本主题列为 `保留 / 待诊断`，诊断点是 `to_keep` 到 `indices` / `removed_indices_` 的尾段压缩。保留原因是 `nearestKSearch` / `radiusSearch` 主导生产入口，尾段压缩只能证明后处理成本上界。
+保留候选复筛将本主题列为 `保留 / 待诊断`，诊断点是 `to_keep` 到 `indices` / `removed_indices_` 的尾段压缩。保留原因是 `nearestKSearch` / `radiusSearch` 主导生产入口，尾段压缩只能证明后处理成本上界。
 
 本轮诊断拆成两个层次：
 

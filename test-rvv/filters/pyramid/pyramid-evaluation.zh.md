@@ -2,7 +2,7 @@
 
 ## 1. 目标与入口
 
-本主题来自 `doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的“建议进入函数级评估”清单。目标入口是 `pcl::filters::Pyramid<PointT>::compute(std::vector<PointCloudPtr>&)`，实现文件为 `filters/include/pcl/filters/impl/pyramid.hpp`，RGB/RGBA/RGB 显式特化位于 `filters/src/pyramid.cpp`。
+本主题来自 `doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的“建议启动函数级评估”清单。目标入口是 `pcl::filters::Pyramid<PointT>::compute(std::vector<PointCloudPtr>&)`，实现文件为 `filters/include/pcl/filters/impl/pyramid.hpp`，RGB/RGBA/RGB 显式特化位于 `filters/src/pyramid.cpp`。
 
 `Pyramid` 用于从 organized 点云构建多层尺度金字塔。`output[0]` 是输入点云副本，后续每层宽高各减半；每个输出点由上一层 `2*c,2*r` 周围的 3x3 或 5x5 binomial kernel 平滑下采样得到。该入口在 filters 管线中承担 organized smoothing + subsampling 职责。
 

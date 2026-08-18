@@ -1,6 +1,6 @@
 # PCL 全库 RVV 模块筛查报告
 
-本文档记录 PCL 全库 RVV 优化的模块级筛查结论。模块筛查位于第一轮文件级筛查之前，目标是确定哪些顶层模块进入后续文件级筛查，哪些模块排除、暂缓或后置单独评估。
+本文档记录 PCL 全库 RVV 优化的模块级筛查结论。模块筛查位于第一轮文件候选筛选之前，目标是确定哪些顶层模块进入后续文件候选筛选，哪些模块排除、暂缓或后置单独评估。
 
 ## 1. 筛查口径
 
@@ -12,14 +12,14 @@
 
 ## 2. 模块评分模型
 
-模块评分用于确定后续第一轮文件级筛查顺序，不直接决定具体 RVV 实现。它是模块级半定量 triage，不是性能结论；真实收益必须在具体主题中通过专项测试、QEMU 正确性、反汇编和板卡 bench 闭环确认。
+模块评分用于确定后续第一轮文件候选筛选顺序，不直接决定具体 RVV 实现。它是模块级半定量筛选，不是性能结论；真实收益必须在具体主题中通过专项测试、QEMU 正确性、反汇编和板卡 bench 闭环确认。
 
 总分 = 计算收益（0-40） + 热度证据（0-25） + 可实现性（0-20） + 可验证性（0-15）。
 
 | 分层 | 分数 | 含义 |
 | ---- | ---- | ---- |
-| 高优 | `>= 70` | 优先进入第一轮文件级筛查和后续二轮筛选 |
-| 中优 | `50-69` | 进入第一轮文件级筛查，但通常排在高优模块之后 |
+| 高优 | `>= 70` | 优先进入第一轮文件候选筛选和后续函数评估队列 |
+| 中优 | `50-69` | 进入第一轮文件候选筛选，但通常排在高优模块之后 |
 | 低优 | `< 50` | 暂不进入当前主线，后续有新证据时再评估 |
 
 ### 2.1 计算收益（0-40）
@@ -73,8 +73,8 @@
 ### 2.5 复核机制
 
 - 每个分项分数必须能对应上面的分档锚点；如果只能给经验判断，应在“依据”中说明不确定性。
-- 模块分数只用于确定是否进入第一轮文件级筛查；第一轮和第二轮可以推翻模块级预期。
-- 第一轮文件级筛查完成后，可以用 high/mid 占比、候选形态和漏筛情况反向修正模块级评分。
+- 模块分数只用于确定是否进入第一轮文件候选筛选；第一轮和第二轮可以推翻模块级预期。
+- 第一轮文件候选筛选完成后，可以用 high/mid 占比、候选形态和漏筛情况反向修正模块级评分。
 - 已完成主题的板卡结果、bench-only 回退和维护成本应反哺后续模块筛查；例如某类路径反复被 search / sort / Eigen / map 稀释，应下调同类模块的计算收益或可实现性。
 
 ## 3. 筛查候选模块
@@ -103,7 +103,7 @@
 | ---- | ---------: | -------: | -------: | -------: | -------: | ---: | ---- | -------- |
 | `registration` | 145 | 33 | 19 | 13 | 12 | 77 | 高 | 进入第一轮，已进入第二轮 |
 | `surface` | 346 | 34 | 20 | 12 | 11 | 77 | 高 | 进入第一轮 |
-| `filters` | 109 | 31 | 20 | 14 | 11 | 76 | 高 | 进入第一轮，已完成二轮和 follow-up 复筛 |
+| `filters` | 109 | 31 | 20 | 14 | 11 | 76 | 高 | 进入第一轮，已完成二轮和保留候选复筛 |
 | `io` | 151 | 30 | 21 | 13 | 11 | 75 | 高 | 进入第一轮 |
 | `gpu` | 226 | 32 | 18 | 11 | 10 | 71 | 高 | 暂缓主线，后置单独评估 |
 | `features` | 137 | 29 | 18 | 13 | 9 | 69 | 中 | 进入第一轮 |
@@ -131,27 +131,27 @@
 
 | 顺序 | 模块 | 分数 | 分层 | 第一轮文档 |
 | ---: | ---- | ---: | ---- | ---------- |
-| 1 | `registration` | 77 | 高 | `modules/registration-function-triage.zh.md` |
-| 2 | `surface` | 77 | 高 | `modules/surface-function-triage.zh.md` |
-| 3 | `filters` | 76 | 高 | `modules/filters-function-triage.zh.md` |
-| 4 | `io` | 75 | 高 | `modules/io-function-triage.zh.md` |
-| 5 | `features` | 69 | 中 | `modules/features-function-triage.zh.md` |
-| 6 | `segmentation` | 67 | 中 | `modules/segmentation-function-triage.zh.md` |
-| 7 | `sample_consensus` | 65 | 中 | `modules/sample_consensus-function-triage.zh.md` |
-| 8 | `recognition` | 61 | 中 | `modules/recognition-function-triage.zh.md` |
-| 9 | `keypoints` | 59 | 中 | `modules/keypoints-function-triage.zh.md` |
-| 10 | `tracking` | 57 | 中 | `modules/tracking-function-triage.zh.md` |
-| 11 | `kdtree` | 56 | 中 | `modules/kdtree-function-triage.zh.md` |
-| 12 | `geometry` | 55 | 中 | `modules/geometry-function-triage.zh.md` |
-| 13 | `search` | 54 | 中 | `modules/search-function-triage.zh.md` |
-| 14 | `ml` | 53 | 中 | `modules/ml-function-triage.zh.md` |
-| 15 | `stereo` | 52 | 中 | `modules/stereo-function-triage.zh.md` |
-| 16 | `octree` | 51 | 中 | `modules/octree-function-triage.zh.md` |
+| 1 | `registration` | 77 | 高 | `modules/registration-file-candidate-screening.zh.md` |
+| 2 | `surface` | 77 | 高 | `modules/surface-file-candidate-screening.zh.md` |
+| 3 | `filters` | 76 | 高 | `modules/filters-file-candidate-screening.zh.md` |
+| 4 | `io` | 75 | 高 | `modules/io-file-candidate-screening.zh.md` |
+| 5 | `features` | 69 | 中 | `modules/features-file-candidate-screening.zh.md` |
+| 6 | `segmentation` | 67 | 中 | `modules/segmentation-file-candidate-screening.zh.md` |
+| 7 | `sample_consensus` | 65 | 中 | `modules/sample_consensus-file-candidate-screening.zh.md` |
+| 8 | `recognition` | 61 | 中 | `modules/recognition-file-candidate-screening.zh.md` |
+| 9 | `keypoints` | 59 | 中 | `modules/keypoints-file-candidate-screening.zh.md` |
+| 10 | `tracking` | 57 | 中 | `modules/tracking-file-candidate-screening.zh.md` |
+| 11 | `kdtree` | 56 | 中 | `modules/kdtree-file-candidate-screening.zh.md` |
+| 12 | `geometry` | 55 | 中 | `modules/geometry-file-candidate-screening.zh.md` |
+| 13 | `search` | 54 | 中 | `modules/search-file-candidate-screening.zh.md` |
+| 14 | `ml` | 53 | 中 | `modules/ml-file-candidate-screening.zh.md` |
+| 15 | `stereo` | 52 | 中 | `modules/stereo-file-candidate-screening.zh.md` |
+| 16 | `octree` | 51 | 中 | `modules/octree-file-candidate-screening.zh.md` |
 
 ## 7. 后续衔接
 
 模块筛查之后的流程为：
 
-1. 第一轮文件级筛查：对主推进模块生成 `doc-rvv/library-screening/modules/<module>-function-triage.zh.md`。
-2. 第二轮模块筛选：把第一轮 high/mid 初始候选基线转成 `建议进行 RVV 优化的文件`、`保留实施的候选文件`、`暂缓或不推荐考虑 RVV 优化的文件`。
-3. 逐主题 RVV 优化：按 second-pass 或 follow-up rescreen 执行清单推进函数级评估、实现、测试、QEMU、反汇编、板卡闭环和主题文档。
+1. 第一轮文件候选筛选：对主推进模块生成 `doc-rvv/library-screening/modules/<module>-file-candidate-screening.zh.md`。
+2. 第二轮函数评估队列：把第一轮 high/mid 初始候选基线转成 `建议进行 RVV 优化的文件`、`保留实施的候选文件`、`暂缓或不推荐考虑 RVV 优化的文件`。
+3. 逐主题 RVV 优化：按函数评估队列或二轮保留候选复筛执行清单推进函数级评估、实现、测试、QEMU、反汇编、板卡闭环和主题文档。

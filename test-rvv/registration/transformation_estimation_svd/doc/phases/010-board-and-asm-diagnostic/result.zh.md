@@ -77,7 +77,7 @@ public build sanity（公开入口构建一致性）只检查 Std/RVV build drif
 - `doc/transformation_estimation_svd-evaluation.zh.md`
 - `doc/phases/README.zh.md`
 - `doc/phases/optimization-matrix.zh.md`
-- `doc-rvv/library-screening/registration/registration-module-second-pass.zh.md`
+- `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md`
 
 summary-only 证据路径为：
 

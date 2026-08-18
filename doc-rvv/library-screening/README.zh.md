@@ -1,18 +1,19 @@
 # PCL RVV 筛选文档索引
 
-本目录记录 PCL 库 RVV 优化进入具体主题前的筛选材料。当前筛选链路分为模块筛查、第一轮文件级筛查、第二轮模块筛选和 follow-up 复筛。
+本目录记录 PCL 库 RVV 优化进入具体主题前的筛选材料。当前筛选链路分为模块筛查、第一轮文件候选筛选、第二轮函数评估队列和二轮保留候选复筛。
 
 ## 1. 当前入口
 
 - 阶段化 workflow：`doc-rvv/library-screening/module-optimization-workflow.zh.md`
 - 全库模块筛查报告：`doc-rvv/library-screening/module-screening.zh.md`
 - 第一轮模块文档目录：`doc-rvv/library-screening/modules/`
-- 第一轮模板：`doc-rvv/library-screening/modules/_module-function-triage-template.zh.md`
-- 第二轮模板：`chats/rvv-workflow-prompt-skill/module_second_pass_prompt_template.md`
+- 第一轮模板：`doc-rvv/library-screening/modules/_module-file-candidate-screening-template.zh.md`
+- 函数评估队列模板：`.agents/skills/rvv-screening/references/templates/function-evaluation-queue-template.md`
+- 二轮保留候选复筛模板：`.agents/skills/rvv-screening/references/templates/second-pass-retained-candidate-rescreen-template.md`
 
 ## 2. 模块筛查口径
 
-模块筛查先确定哪些顶层模块进入后续第一轮文件级筛查。当前结论：
+模块筛查先确定哪些顶层模块进入后续第一轮文件候选筛选。当前结论：
 
 - 筛查候选模块：26 个顶层模块；
 - 优化模块池：21 个模块；
@@ -28,22 +29,22 @@
 
 | 顺序 | 模块 | 第一轮文档 | 第二轮 / 复筛状态 |
 | ---: | ---- | ---------- | ----------------- |
-| 1 | `registration` | `modules/registration-function-triage.zh.md` | `registration/registration-module-second-pass.zh.md` |
-| 2 | `surface` | `modules/surface-function-triage.zh.md` | 待二轮 |
-| 3 | `filters` | `modules/filters-function-triage.zh.md` | `filters/filters-module-second-pass.zh.md`，`filters/filters-module-followup-rescreen.zh.md` |
-| 4 | `io` | `modules/io-function-triage.zh.md` | 待二轮 |
-| 5 | `features` | `modules/features-function-triage.zh.md` | 待二轮 |
-| 6 | `segmentation` | `modules/segmentation-function-triage.zh.md` | 待二轮 |
-| 7 | `sample_consensus` | `modules/sample_consensus-function-triage.zh.md` | 已有部分 RVV 主题，后续按模块情况复筛 |
-| 8 | `recognition` | `modules/recognition-function-triage.zh.md` | 待二轮 |
-| 9 | `keypoints` | `modules/keypoints-function-triage.zh.md` | 待二轮 |
-| 10 | `tracking` | `modules/tracking-function-triage.zh.md` | 待二轮 |
-| 11 | `kdtree` | `modules/kdtree-function-triage.zh.md` | 待二轮 |
-| 12 | `geometry` | `modules/geometry-function-triage.zh.md` | 待二轮 |
-| 13 | `search` | `modules/search-function-triage.zh.md` | 待二轮 |
-| 14 | `ml` | `modules/ml-function-triage.zh.md` | 待二轮 |
-| 15 | `stereo` | `modules/stereo-function-triage.zh.md` | 待二轮 |
-| 16 | `octree` | `modules/octree-function-triage.zh.md` | 待二轮 |
+| 1 | `registration` | `modules/registration-file-candidate-screening.zh.md` | `registration/registration-function-evaluation-queue.zh.md` |
+| 2 | `surface` | `modules/surface-file-candidate-screening.zh.md` | 待二轮 |
+| 3 | `filters` | `modules/filters-file-candidate-screening.zh.md` | `filters/filters-function-evaluation-queue.zh.md`，`filters/filters-second-pass-retained-candidate-rescreen.zh.md` |
+| 4 | `io` | `modules/io-file-candidate-screening.zh.md` | 待二轮 |
+| 5 | `features` | `modules/features-file-candidate-screening.zh.md` | 待二轮 |
+| 6 | `segmentation` | `modules/segmentation-file-candidate-screening.zh.md` | 待二轮 |
+| 7 | `sample_consensus` | `modules/sample_consensus-file-candidate-screening.zh.md` | 已有部分 RVV 主题，后续按模块情况复筛 |
+| 8 | `recognition` | `modules/recognition-file-candidate-screening.zh.md` | 待二轮 |
+| 9 | `keypoints` | `modules/keypoints-file-candidate-screening.zh.md` | 待二轮 |
+| 10 | `tracking` | `modules/tracking-file-candidate-screening.zh.md` | 待二轮 |
+| 11 | `kdtree` | `modules/kdtree-file-candidate-screening.zh.md` | 待二轮 |
+| 12 | `geometry` | `modules/geometry-file-candidate-screening.zh.md` | 待二轮 |
+| 13 | `search` | `modules/search-file-candidate-screening.zh.md` | 待二轮 |
+| 14 | `ml` | `modules/ml-file-candidate-screening.zh.md` | 待二轮 |
+| 15 | `stereo` | `modules/stereo-file-candidate-screening.zh.md` | 待二轮 |
+| 16 | `octree` | `modules/octree-file-candidate-screening.zh.md` | 待二轮 |
 
 ## 4. 第一轮筛选口径
 

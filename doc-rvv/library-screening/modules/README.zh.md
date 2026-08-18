@@ -4,8 +4,8 @@
 
 ## 命名规则
 
-- 每个模块一个文件：`<module>-function-triage.zh.md`
-- 通用模板：`_module-function-triage-template.zh.md`
+- 每个模块一个文件：`<module>-file-candidate-screening.zh.md`
+- 通用模板：`_module-file-candidate-screening-template.zh.md`
 
 ## 固定结构
 
@@ -35,10 +35,10 @@
 
 ## 与第二轮筛选的关系
 
-第二轮筛选应读取本目录中的 `<module>-function-triage.zh.md`，把 `high/mid` 作为初始候选基线逐项交代去向，并输出：
+第二轮筛选应读取本目录中的 `<module>-file-candidate-screening.zh.md`，把 `high/mid` 作为初始候选基线逐项交代去向，并输出：
 
 ```text
-doc-rvv/library-screening/<module>/<module>-module-second-pass.zh.md
+doc-rvv/library-screening/<module>/<module>-function-evaluation-queue.zh.md
 ```
 
 第二轮按三类组织结论：

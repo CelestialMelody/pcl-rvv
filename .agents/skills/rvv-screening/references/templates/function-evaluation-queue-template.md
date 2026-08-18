@@ -1,28 +1,30 @@
-# Second-pass 模板
+# 函数评估队列模板
 
-用于把 first-pass 粗筛候选转成模块实施队列。目标是复核 `high/mid` 初始候选基线，修正误筛和漏筛，形成可执行但仍需函数级评估的主题队列。
+用于把文件候选筛选结果转成模块函数评估队列。目标是复核 `high/mid` 初始候选基线，修正误筛和漏筛，形成可执行但仍需函数级评估的主题队列。
 
 ## 输入
 
-- `artifact_layout.module_triage_doc_template` 解析出的 first-pass 文档。
+- `artifact_layout.module_file_candidate_screening_doc_template` 解析出的文件候选筛选文档。
 - `artifact_layout.screening_root_template` 解析出的模块优化流程或同类文档。
 - 模块源码、上游 test/benchmark 入口、同类已完成 RVV 文档。
 
 ## 输出
 
 ```text
-artifact_layout.module_second_pass_doc_template
+artifact_layout.module_function_evaluation_queue_doc_template
 ```
 
 ## 必须回答
 
-- 每个 first-pass `high/mid` 候选的去向。
+按 [../screening-criteria.md](../screening-criteria.md) 的候选判定矩阵和 [../stage-and-queue-policy.md](../stage-and-queue-policy.md) 的 `函数评估队列固定分类` 分类。本模板只规定证据槽位和文档形状，不重新定义“建议 / 保留 / 暂缓”的准入阈值。
+
+- 每个文件候选筛选 `high/mid` 候选的去向。
 - 新增补充候选的来源、证据和边界。
 - 具体函数入口或函数族，而不是只按文件名判断。
 - 主成本覆盖类型：`direct-main-path`、`partial-preprocess`、`tail-compress`、`diagnostic`、`non-standalone`。
 - 预期覆盖条件、fallback 条件、测试和 bench 可行性。
 
-`high/mid` 是必须复核的下限集合，不得静默丢弃。纳入 first-pass `low` 或未列入候选的文件时，必须说明来源、源码证据、为什么属于漏判，以及为什么没有扩展成重新全模块或全库筛选。
+`high/mid` 是必须复核的下限集合，不得静默丢弃。纳入文件候选筛选 `low` 或未列入候选的文件时，必须说明来源、源码证据、为什么属于漏判，以及为什么没有扩展成重新全模块或全库筛选。
 
 每个候选至少下钻到：
 
@@ -45,14 +47,10 @@ artifact_layout.module_second_pass_doc_template
 ## 固定分类
 
 - `建议进行 RVV 优化的文件`：优先进入函数级生产价值评估。
-- `保留实施的候选文件`：保留后续复筛或诊断价值，但当前不排入建议队列。
+- `保留实施的候选文件`：保留后续复筛或函数级评估路径选择价值，但当前不排入建议队列。
 - `暂缓或不推荐考虑 RVV 优化的文件`：当前证据不支持独立 RVV 主题。
 
-建议队列通常要求 RVV 覆盖 `direct-main-path`，或入口极常用、实现极小且风险低。只覆盖局部子公式的主题，必须能设计 full diagnostic 或 production case 来判断局部收益是否被后续主成本稀释。
-
-保留候选应说明后续复筛需要回答的问题，例如主成本是否被 search/sort/map/heap/Eigen/状态机稀释，是否能建立可归因 bench 诊断，或是否等待同模块已完成主题证据。
-
-暂缓或不推荐项应说明是否合并到其它主题、是否因真实循环在别处、是否因控制流/状态机/外部 solver 主导，以及什么条件下可重新考虑。
+分类理由必须引用 policy 维度和源码事实。建议项说明为什么覆盖主成本或具备可验证生产价值；保留项说明首阶段要回答的证据问题；暂缓或不推荐项说明重新考虑条件。
 
 ## 文档结构
 
@@ -68,7 +66,7 @@ artifact_layout.module_second_pass_doc_template
 
 统计至少包含：
 
-- first-pass 文件总数、`high/mid/low` 数量。
+- 文件候选筛选文件总数、`high/mid/low` 数量。
 - 第二轮初始候选基线数量，即 `high/mid` 必查数量。
 - 新增补充候选数量和来源；为 0 时也明确写出。
 - 第二轮候选总数，即 `high/mid` 必查和新增补充候选去重后的数量。
@@ -76,11 +74,11 @@ artifact_layout.module_second_pass_doc_template
 - 保留实施的候选文件数量。
 - 暂缓或不推荐考虑 RVV 优化的文件数量。
 - 源码冲突、合并、删除或不单独实施数量。
-- first-pass `high/mid` 中降级为不单独实施、暂缓或删除的数量。
+- 文件候选筛选 `high/mid` 中降级为不单独实施、暂缓或删除的数量。
 
 ## 文件级变化理由
 
-逐项说明 first-pass `high/mid` 候选为何保持、升级、降级、合并、转入 `bench 诊断主题`、暂缓或删除。若纳入 `low` 或未列出的补充候选，说明补充来源、证据和必要性。
+逐项说明文件候选筛选 `high/mid` 候选为何保持、升级、降级、合并、转入保留候选、暂缓或删除。若纳入 `low` 或未列出的补充候选，说明补充来源、证据和必要性。
 
 变化理由应区分“文件有大循环”和“RVV 覆盖公开入口主成本”。只覆盖前置预处理、尾段压缩或被不规则主成本稀释的文件，不应仅凭局部 loop 直接排入建议队列。
 
@@ -103,4 +101,4 @@ artifact_layout.module_second_pass_doc_template
 - 不建立 `artifact_layout.topic_test_dir_template` 解析出的 topic 测试资产目录。
 - 不运行目标硬件 bench。
 - 可以做非破坏性源码阅读、搜索、静态分析和必要的轻量构建或测试入口确认。
-- 发现 first-pass 与当前源码冲突时，在 second-pass 文档中记录并修正去向；不要扩展成全库重新筛选。
+- 发现文件候选筛选与当前源码冲突时，在函数评估队列文档中记录并修正去向；不要扩展成全库重新筛选。

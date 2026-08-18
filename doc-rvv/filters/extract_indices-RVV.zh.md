@@ -11,7 +11,7 @@
 
 该入口在算法管线中承担“按已有索引结果执行提取 / 剔除 / 坏点写回”的后处理职责。它自身不判断几何或字段 predicate，主成本通常来自补集生成、整点复制、字段循环写回和内存流量。
 
-本主题来自 follow-up rescreen 的 `bench 诊断主题`。当前不修改 `filters/include/pcl/filters/impl/extract_indices.hpp` 或 `filters/src/extract_indices.cpp` 的生产分流，只在 `test-rvv/filters/extract_indices/` 中保留诊断 helper、测试和 bench。
+本主题来自保留候选复筛的 diagnostic / bench-only 路径记录。当前不修改 `filters/include/pcl/filters/impl/extract_indices.hpp` 或 `filters/src/extract_indices.cpp` 的生产分流，只在 `test-rvv/filters/extract_indices/` 中保留诊断 helper、测试和 bench。
 
 ## 2. 上游标量路径与诊断边界
 

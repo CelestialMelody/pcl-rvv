@@ -2,7 +2,7 @@
 
 ## 1. 目标与源码入口
 
-本主题来自 `doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的后续执行清单，目标为 `filters/include/pcl/filters/impl/conditional_removal.hpp`。
+本主题来自 `doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的后续执行清单，目标为 `filters/include/pcl/filters/impl/conditional_removal.hpp`。
 
 `ConditionalRemoval<PointT>::applyFilter(PointCloud&)` 是 PCL 中按条件对象筛选点云的公开过滤器入口。用户通过 `ConditionAnd` / `ConditionOr` 组合 `FieldComparison`、`PackedRGBComparison`、`TfQuadraticXYZComparison` 等比较对象；`filter(output)` 调用 `applyFilter` 后输出满足条件的点云，必要时记录 `removed_indices_`。`keep_organized_` 会保留 organized 形状并把未保留点写成 `user_filter_value_`；显式 `setIndices()` 只筛选 subset。
 

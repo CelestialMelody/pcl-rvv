@@ -21,7 +21,7 @@
 
 | 对象 | 当前状态 | 路径 / 证据 | 本阶段动作 |
 | --- | --- | --- | --- |
-| second-pass 状态 | `bfgs` 是第 12 个建议优化 topic，状态为待评估，限定为局部诊断 | `doc-rvv/library-screening/registration/registration-module-second-pass.zh.md` | 更新为 evaluation 已建 / Phase 000 计划已建 |
+| second-pass 状态 | `bfgs` 是第 12 个建议优化 topic，状态为待评估，限定为局部诊断 | `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` | 更新为 evaluation 已建 / Phase 000 计划已建 |
 | production 源码 | BFGS 类模板和 `Eigen::PolynomialSolver<Scalar, 2>` 特化都在同一头文件内 | `registration/include/pcl/registration/bfgs.h` | 只读源码并记录标量路径 |
 | topic-local scaffold | 不存在 | `test-rvv/registration/bfgs/` | 新建 README、evaluation、phase index、roadmap 和 matrix |
 | test / bench | 不存在 | `test-rvv/registration/bfgs/src/` 未创建 | 本阶段只规划，不实现 |

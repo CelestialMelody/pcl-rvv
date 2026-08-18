@@ -88,4 +88,4 @@ summary 脚本必须分开输出两类读法：
 - `doc/optimization-evidence.zh.md`
 - `doc/transformation_estimation_svd-evaluation.zh.md`
 - `README.zh.md`
-- `doc-rvv/library-screening/registration/registration-module-second-pass.zh.md`
+- `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md`

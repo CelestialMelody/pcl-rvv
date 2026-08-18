@@ -5,7 +5,7 @@
 - 主文件：`filters/include/pcl/filters/impl/box_clipper3D.hpp`
 - 公开入口：`pcl::BoxClipper3D<PointT>::clipPointCloud3D(const PointCloud<PointT>&, Indices&, const Indices&)`
 - 专项目录：`test-rvv/filters/box_clipper3D/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的后续执行清单第四项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的后续执行清单第四项。
 
 ## 函数级结论
 

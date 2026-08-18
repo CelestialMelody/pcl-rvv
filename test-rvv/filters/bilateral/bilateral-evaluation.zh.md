@@ -2,7 +2,7 @@
 
 ## 1. 入口与真实数据流
 
-主题来自 `filters-module-followup-rescreen.zh.md` 的 `6.3` 观察项，本轮按诊断候选提升后完成函数级评估，并在补充误差预算后接入生产 `PointXYZI` 主路径；随后按公共 traits gate 扩展到上游同样预编译的 `PointXYZINormal`。
+主题来自 `filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.3` 观察项，本轮按诊断候选提升后完成函数级评估，并在补充误差预算后接入生产 `PointXYZI` 主路径；随后按公共 traits gate 扩展到上游同样预编译的 `PointXYZINormal`。
 
 `pcl::BilateralFilter<PointT>::applyFilter(PointCloud&)` 是 intensity 平滑入口：先复制输入到 `output`，再遍历 `indices_`；每个有效 center point 调用 `tree_->radiusSearch(idx, sigma_s_ * 2, k_indices, k_distances)`，随后 `computePointWeight` 对邻域点 intensity 做 bilateral 加权平均并写回 `output[idx].intensity`。
 

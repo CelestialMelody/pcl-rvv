@@ -1,6 +1,6 @@
 # filters `filter.hpp` / `filter_indices.hpp`：函数级梳理、筛选评估与 RVV closeout
 
-本文档记录 filters 通用 NaN / normal 清理主题的函数级筛选、实现范围和验证结论。该主题来自 `doc-rvv/library-screening/filters-module-second-pass.zh.md` 的第 3 个执行项，没有重新做模块级候选选择。
+本文档记录 filters 通用 NaN / normal 清理主题的函数级筛选、实现范围和验证结论。该主题来自 `doc-rvv/library-screening/filters/filters-function-evaluation-queue.zh.md` 的第 3 个执行项，没有重新做模块级候选选择。
 
 ## 1. 函数 / 函数组梳理
 

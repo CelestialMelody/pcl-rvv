@@ -7,7 +7,7 @@
 - 公开类：`pcl::filters::Convolution3D<PointInT, PointOutT, KernelT>`
 - 关键对象：`GaussianKernel<PointInT, PointOutT>::operator()`
 - 专项目录：`test-rvv/filters/convolution_3d/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 的 `6.2 bench 诊断主题` 第 12 项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` 第 12 项。
 
 `Convolution3D::convolve(output)` 用于非 organized 或未知宽高点云的三维邻域卷积。入口先 `initCompute()`，把输入点云或 `surface_` 接到 `search::Search`，再对每个 query point 执行 `radiusSearch(point, search_radius_, nn_indices, nn_distances)`，最后把邻域索引和 squared distances 交给 `kernel_(nn_indices, nn_distances)` 生成输出点。
 

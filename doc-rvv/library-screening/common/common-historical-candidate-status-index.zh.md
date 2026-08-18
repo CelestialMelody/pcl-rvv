@@ -1,8 +1,8 @@
 # common 模块 RVV 状态索引
 
-本文记录 `common` 模块早期 RVV 探索成果的状态索引，用于后续从当前 RVV 工作流恢复 common 状态。本文不回填 `common` 的 first-pass / high-mid 基线，不伪造标准 second-pass，也不重新筛选 common 模块。
+本文记录 `common` 模块早期 RVV 探索成果的状态索引，用于后续从当前 RVV 工作流恢复 common 状态。本文不回填 `common` 的文件候选筛选 high-mid 基线，不伪造标准函数评估队列，也不重新筛选 common 模块。
 
-`doc-rvv/common/module-evaluation.zh.md` 是 legacy exploration input：它反映早期探索阶段的候选判断和已处理方向，可作为历史依据参考，但不是当前可直接执行的状态队列。本文只把已完成主题、待补 closeout 和后续可能候选整理为 bridge follow-up / historical status index。后续新模块仍应按当前项目 RVV 工作流正常建立 first-pass、second-pass 或 follow-up 文档。
+`doc-rvv/common/module-evaluation.zh.md` 是 legacy exploration input：它反映早期探索阶段的候选判断和已处理方向，可作为历史依据参考，但不是当前可直接执行的状态队列。本文只把已完成主题、待补 closeout 和后续可能候选整理为历史状态索引。后续新模块仍应按当前项目 RVV 工作流正常建立文件候选筛选、函数评估队列或二轮保留候选复筛文档。
 
 ## 1. 输入依据与桥接原因
 
@@ -125,7 +125,7 @@
 
 本文不是重新筛选 common 模块。下表只说明如果未来恢复 common 工作，哪些历史候选可以重新进入评估，以及进入条件。
 
-### 6.1 可考虑进入函数级评估
+### 6.1 建议启动函数级评估
 
 | 主题                                          | 关键入口                                                                  | 依据                                                    | 主要风险                                              | 下一步条件                                                               |
 | --------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------ |
@@ -134,15 +134,15 @@
 | `distances` closeout repair                 | `getMaxSegment` cloud / indices                                         | 已有生产和板卡收益，但缺 evaluation 和路径证据          | 不是新优化，而是历史主题补证据                        | 恢复 common 状态时优先补文档 closeout，而非先改代码                      |
 | `common.hpp` / math helpers closeout repair | `getMeanStd`、`getMinMax3D`、math helpers                             | 已有主题文档和日志，但缺统一 evaluation                 | helper 与完整入口证据容易混淆                         | 其他模块复用 helper 前，先补 helper 误差预算和路径证据索引               |
 
-### 6.2 bench 诊断主题
+### 6.2 暂缓 / 不单独实施（诊断路径记录）
 
 | 主题                                   | 关键入口                                        | 诊断目标                                   | 当前结论 / 重新考虑条件                                                       |
 | -------------------------------------- | ----------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------- |
-| `centroid` `computeCentroidAndOBB` | `computeCentroidAndOBB` cloud / indices       | 分离前置统计/min-max 与 Eigen solver 成本  | 只有 profile 显示 OBB 是热点，且 Eigen solver 不主导总耗时，才建立 bench 诊断 |
+| `centroid` `computeCentroidAndOBB` | `computeCentroidAndOBB` cloud / indices       | 分离前置统计/min-max 与 Eigen solver 成本  | 只有 profile 显示 OBB 是热点，且 Eigen solver 不主导总耗时，才建立 diagnostic / bench-only 路径 |
 | common FFT                             | `common/src/fft/kiss_fft.c`、`kiss_fftr.c`  | 判断蝶形计算是否能形成可维护 RVV 路径      | 早期文档认为适配成本高；只有目标 workload 中 FFT 占比显著时再诊断             |
 | polynomial fitting                     | `impl/polynomial_calculations.hpp` 的拟合路径 | 判断样本循环、矩阵求解和算法替代的成本边界 | 先评估算法替代或 Eigen 求解成本，再考虑 RVV 片段                              |
 
-### 6.3 暂缓主题
+### 6.3 暂缓 / 不单独实施
 
 | 主题                                             | 暂缓原因                                                                      | 重新考虑条件                                        |
 | ------------------------------------------------ | ----------------------------------------------------------------------------- | --------------------------------------------------- |
@@ -162,7 +162,7 @@
 | 4    | `gaussian`                            | `common/src/gaussian.cpp`                                    | historical completed / production direct with evidence gap | 已完成 / closeout 待补 | rows/cols 板卡收益成立，QEMU 正确性和 local fragment 对拍已记录 | 补 RVV 构建库或对象文件反汇编证据后再视为完全闭合                |
 | 5    | `distances`                           | `common/include/pcl/common/distances.h`                      | historical completed / closeout repair                     | 已完成 / closeout 待补 | `getMaxSegment` 板卡收益成立                                  | 补函数级 evaluation、bench 输出合同和反汇编归档                  |
 | 6    | `common.hpp` / math helpers           | `common/include/pcl/common/impl/common.hpp`                  | historical completed / shared helper package               | 已完成 / closeout 待补 | common 入口和数学 helper 已有多项板卡/QEMU证据                  | 补函数级 evaluation 或 historical closeout，明确 helper 误差预算 |
-| 7    | `transforms` indexed / PointXY        | `common/include/pcl/common/impl/transforms.hpp`              | possible follow-up candidate                               | 未启动                 | 有已完成 dense 模式可参考，但不能直接升级                       | 有真实 workload 和函数级评估后再考虑                             |
+| 7    | `transforms` indexed / PointXY        | `common/include/pcl/common/impl/transforms.hpp`              | possible retained-candidate rescreen item                  | 未启动                 | 有已完成 dense 模式可参考，但不能直接升级                       | 有真实 workload 和函数级评估后再考虑                             |
 | 8    | `centroid` OBB                        | `common/include/pcl/common/impl/centroid.hpp`                | bench diagnostic candidate                                 | 未启动                 | 可能被 Eigen solver 稀释                                        | profile 证明主成本可由 RVV 覆盖时才建诊断                        |
 | 9    | FFT / polynomial / Eigen-adjacent paths | `common/src/fft/*`、`common/include/pcl/common/impl/*.hpp` | deferred / diagnostic only                                 | 暂缓                   | 历史文档已说明适配成本或主成本不适合直接生产 RVV                | 只有目标 workload 证明热点时才重新评估                           |
 

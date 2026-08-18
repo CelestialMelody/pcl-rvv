@@ -1,6 +1,6 @@
 # RVV 模块优化阶段化工作流
 
-本文档说明 PCL 模块从全库筛查进入 RVV 实施的通用推进方式。当前工作流分为模块筛查、第一轮文件级筛查、第二轮模块筛选、逐主题实施和 follow-up 复筛。
+本文档说明 PCL 模块从全库筛查进入 RVV 实施的通用推进方式。当前工作流分为模块筛查、第一轮文件候选筛选、第二轮函数评估队列、逐主题实施和二轮保留候选复筛。
 
 ## 1. 阶段定义
 
@@ -18,7 +18,7 @@
 doc-rvv/library-screening/module-screening.zh.md
 ```
 
-阶段 0 用于确定哪些模块进入后续第一轮文件级筛查，哪些模块排除、暂缓或后置单独评估。该阶段不进入具体文件和函数。
+阶段 0 用于确定哪些模块进入后续第一轮文件候选筛选，哪些模块排除、暂缓或后置单独评估。该阶段不进入具体文件和函数。
 
 当前结论：
 
@@ -27,7 +27,7 @@ doc-rvv/library-screening/module-screening.zh.md
 - `cuda`、`outofcore`、`simulation`、`visualization` 暂缓；
 - `apps`、`tools`、`benchmarks`、`examples`、`people` 排除出当前优化主线。
 
-### 阶段 A：第一轮文件级筛选
+### 阶段 A：第一轮文件候选筛选
 
 输入：
 
@@ -35,25 +35,25 @@ doc-rvv/library-screening/module-screening.zh.md
 - 目标模块源码；
 - 上游 test / benchmark 入口；
 - 已有同类 RVV 主题经验；
-- `doc-rvv/library-screening/modules/_module-function-triage-template.zh.md`。
+- `doc-rvv/library-screening/modules/_module-file-candidate-screening-template.zh.md`。
 
 输出：
 
 ```text
-doc-rvv/library-screening/modules/<module>-function-triage.zh.md
+doc-rvv/library-screening/modules/<module>-file-candidate-screening.zh.md
 ```
 
-阶段 A 是文件级粗筛，只回答“文件中是否存在值得第二轮继续下钻的可 SIMD/RVV 片段”。它生成 `high/mid/low` 文件级基线，但不直接决定最终 RVV 实施队列。
+阶段 A 是文件候选粗筛，只回答“文件中是否存在值得第二轮继续下钻的可 SIMD/RVV 片段”。它生成 `high/mid/low` 文件级基线，但不直接决定最终 RVV 实施队列。
 
 - `high/mid` 是第二轮必须复核并交代去向的初始候选基线；
 - `low` 是已覆盖但未进入二轮初始基线，不是永久排除；
 - 如果第二轮发现 `low` 或未列出文件存在明显漏判，可以补入并说明证据。
 
-### 阶段 B：第二轮模块筛选
+### 阶段 B：第二轮函数评估队列
 
 输入：
 
-- `doc-rvv/library-screening/modules/<module>-function-triage.zh.md`；
+- `doc-rvv/library-screening/modules/<module>-file-candidate-screening.zh.md`；
 - 当前源码；
 - 上游 test / benchmark；
 - 已有同类 RVV 经验。
@@ -61,10 +61,10 @@ doc-rvv/library-screening/modules/<module>-function-triage.zh.md
 输出：
 
 ```text
-doc-rvv/library-screening/<module>/<module>-module-second-pass.zh.md
+doc-rvv/library-screening/<module>/<module>-function-evaluation-queue.zh.md
 ```
 
-阶段 B 是模块实施说明 / 执行队列，不是重新全模块筛库。它必须把第一轮 `high/mid` 候选逐项交代去向，并按三类组织结论：
+阶段 B 是模块函数评估队列，不是重新全模块筛库。它必须把第一轮 `high/mid` 候选逐项交代去向，并按三类组织结论：
 
 - 建议进行 RVV 优化的文件；
 - 保留实施的候选文件；
@@ -74,7 +74,7 @@ doc-rvv/library-screening/<module>/<module>-module-second-pass.zh.md
 
 ### 阶段 C：逐主题 RVV 优化
 
-当 second-pass 或 follow-up rescreen 文档中仍有未完成建议主题时：
+当函数评估队列或二轮保留候选复筛文档中仍有未完成建议主题时：
 
 - 按执行清单和状态表选择下一主题；
 - 建立或复查函数级评估文档；
@@ -83,21 +83,21 @@ doc-rvv/library-screening/<module>/<module>-module-second-pass.zh.md
 
 该阶段不要重新做模块级候选选择，除非筛选文档与当前源码存在明确冲突。
 
-### 阶段 D：follow-up 复筛
+### 阶段 D：二轮保留候选复筛
 
 触发条件：
 
-- 建议优化队列已经完成或没有明确下一主题；
-- 已完成主题暴露出收益弱、bench-diagnosis 回退、验证成本高或筛选口径需要修正；
+- 建议进行 RVV 优化的文件队列已经完成或没有明确下一主题；
+- 已完成主题暴露出收益弱、diagnostic / bench-only 路径回退、验证成本高或筛选口径需要修正；
 - 需要用真实实现和板卡结果反哺保留候选排序。
 
 输出：
 
 ```text
-doc-rvv/library-screening/<module>/<module>-module-followup-rescreen.zh.md
+doc-rvv/library-screening/<module>/<module>-second-pass-retained-candidate-rescreen.zh.md
 ```
 
-复筛必须基于已完成主题证据，而不是重复第二轮筛选理由。复筛后形成新的建议主题、保留候选、诊断主题和暂缓项，然后回到阶段 C。
+复筛必须基于已完成主题证据，而不是重复函数评估队列理由。复筛后形成 `建议启动函数级评估` 与 `暂缓 / 不单独实施` 两类主分组；diagnostic / bench-only 是后续 topic 内证据路径，不是模块复筛固定队列。随后回到阶段 C。
 
 ## 2. 第一轮筛选判断标准
 

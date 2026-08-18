@@ -12,7 +12,7 @@
 
 ## 1. 输入依据
 
-- 原始模块 triage：`doc-rvv/library-screening/modules/filters-function-triage.zh.md`
+- 原始文件候选筛选：`doc-rvv/library-screening/modules/filters-file-candidate-screening.zh.md`
 - 源码范围：`filters/include/pcl/filters/**`、`filters/src/**`
 - 上游测试：`test/filters/*.cpp`
 - 上游 benchmark：`benchmarks/filters/voxel_grid.cpp`、`benchmarks/filters/radius_outlier_removal.cpp`
@@ -139,7 +139,7 @@
 | `src/statistical_outlier_removal.cpp`        | statistical outlier 主题                     | 伴随实现，核心收益受 search / neighbor 影响。                       |
 | `src/voxel_grid.cpp`                         | `voxel_grid` 主题                            | PCLPointCloud2 / 实例化伴随文件，需随 `impl/voxel_grid.hpp` 复核。  |
 
-### 3.4 相对第一轮 triage 的主要调整
+### 3.4 相对第一轮筛选的主要调整
 
 | 调整类型 | 文件或主题 | 变化理由 |
 | -------- | ---------- | -------- |
@@ -152,7 +152,7 @@
 
 ## 4. 执行清单 / 状态表
 
-### 4.1 建议优化文件队列
+### 4.1 建议进行 RVV 优化的文件
 
 | 顺序 | 主题                         | 主文件                               | 当前状态 | 当前结论 / 下一步条件 |
 | ---: | ---------------------------- | ------------------------------------ | -------- | --------------------- |
@@ -161,7 +161,7 @@
 |    3 | `filter_indices` / `filter`  | `impl/filter_indices.hpp`、`impl/filter.hpp` | 已完成   | non-dense 标准 `float x/y/z` indices-only 与 cloud-out RVV 已完成。 |
 |    4 | `passthrough`                | `impl/passthrough.hpp`               | 已完成   | `PointT` identity indices + FLOAT32 字段区间过滤 RVV 已完成；subset / PCLPointCloud2 暂缓。 |
 |    5 | `crop_box`                   | `impl/crop_box.hpp`                  | 已完成   | dense identity transform 的 xyz 区间裁剪已完成。 |
-|    6 | `voxel_grid_covariance`      | `impl/voxel_grid_covariance.hpp`     | 已完成   | dense 标准 float xyz 的 first-pass leaf id 预计算 RVV 已完成；covariance / Eigen 保持标量。 |
+|    6 | `voxel_grid_covariance`      | `impl/voxel_grid_covariance.hpp`     | 已完成   | dense 标准 float xyz 的文件候选筛选 leaf id 预计算 RVV 已完成；covariance / Eigen 保持标量。 |
 |    7 | `fast_bilateral`             | `impl/fast_bilateral.hpp`            | 已完成   | organized `PointXYZ` depth z 预处理 RVV 已完成；blur bench 诊断不接入生产。 |
 |    8 | `fast_bilateral_omp`         | `impl/fast_bilateral_omp.hpp`        | 已完成   | 复用 `fast_bilateral` z 预处理 helper；OpenMP lattice 主体保持标量。 |
 
@@ -180,10 +180,10 @@
 
 ## 5. 与后续复筛文档的关系
 
-本文档给出 `filters` 第二轮的三分类基线。其中 `保留实施的候选文件` 的 26 个文件已在 `doc-rvv/library-screening/filters/filters-module-followup-rescreen.zh.md` 中进一步复筛。后续复筛基于已完成主题的板卡结果和回退原因，将部分候选升级为生产主题、部分保留为 bench 诊断，或明确暂缓。
+本文档给出 `filters` 第二轮的三分类基线。其中 `保留实施的候选文件` 的 26 个文件已在 `doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 中进一步复筛。后续保留候选复筛基于已完成主题的板卡结果和回退原因，将候选分为 `建议启动函数级评估` 与 `暂缓 / 不单独实施`；diagnostic / bench-only 是后续 topic 内证据路径，不是模块复筛固定队列。
 
 因此，阅读顺序建议为：
 
 1. 先读本文档，理解第一轮 high/mid 候选如何被整理成三类；
-2. 再读 follow-up 复筛文档，理解 26 个保留候选在已完成主题经验之后如何继续分流；
+2. 再读保留候选复筛文档，理解 26 个保留候选在已完成主题经验之后如何继续分流；
 3. 最后进入具体主题文档和 `test-rvv/filters/*/*-evaluation.zh.md`，核对函数级评估、测试、bench、反汇编和板卡闭环证据。

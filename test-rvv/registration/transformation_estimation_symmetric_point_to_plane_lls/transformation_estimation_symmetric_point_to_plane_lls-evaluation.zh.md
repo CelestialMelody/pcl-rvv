@@ -6,7 +6,7 @@
 - 主文件：`registration/include/pcl/registration/impl/transformation_estimation_symmetric_point_to_plane_lls.hpp`
 - 公开入口：`TransformationEstimationSymmetricPointToPlaneLLS::estimateRigidTransformation`
 - 专项目录：`test-rvv/registration/transformation_estimation_symmetric_point_to_plane_lls/`
-- 模块依据：`doc-rvv/library-screening/registration/registration-module-second-pass.zh.md` 建议优化队列第五项。
+- 模块依据：`doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` 建议优化队列第五项。
 
 ## S0 偏好冻结
 

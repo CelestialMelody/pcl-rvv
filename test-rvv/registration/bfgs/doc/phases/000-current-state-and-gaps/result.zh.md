@@ -12,7 +12,7 @@
 | 写 S2 函数级评估 | done | `doc/bfgs-evaluation.zh.md` | 当前结论为 `diagnostic_planned` |
 | 建立 roadmap / matrix | done | `doc/optimization-roadmap.zh.md`、`doc/phases/optimization-matrix.zh.md` | planned / deferred / not_applicable 状态已区分 |
 | doc-suite shape scan | done | `doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` | 当前只有文档骨架，test/bench/source layout 为下一阶段 `phase_deferred + unblocked` |
-| 更新 module second-pass 状态 | done | `doc-rvv/library-screening/registration/registration-module-second-pass.zh.md` | `bfgs` 从待评估更新为评估已建 / diagnostic planned |
+| 更新 module second-pass 状态 | done | `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` | `bfgs` 从待评估更新为评估已建 / diagnostic planned |
 
 ## 源码事实
 

@@ -28,7 +28,7 @@ applyFilter(indices)
   -> 迭代采样并更新 6 个方向累计值
 ```
 
-follow-up rescreen 将本主题列为 `保留 / 待诊断`，诊断点是 centroid、scaled point 和 6D vector 构造。诊断边界必须覆盖 full diagnostic，因为局部 RVV 片段可能被 Eigen 6x6 solver、six-list sort 和 sampling state 稀释。
+保留候选复筛将本主题列为 `保留 / 待诊断`，诊断点是 centroid、scaled point 和 6D vector 构造。诊断边界必须覆盖 full diagnostic，因为局部 RVV 片段可能被 Eigen 6x6 solver、six-list sort 和 sampling state 稀释。
 
 本主题的 bench-only 原型覆盖 `PointXYZ` + `Normal` 的显式 indices 场景。RVV 只尝试两个局部片段：scaled-point 构造和 normal gather 后的 6D vector 构造。solver、list sort 和 sampling state 保持标量 / Eigen。生产入口没有接入新 RVV helper。
 
