@@ -6,7 +6,7 @@
 - 主文件：`filters/include/pcl/filters/impl/grid_minimum.hpp`
 - 公开类：`pcl::GridMinimum<PointT>`
 - 专项目录：`test-rvv/filters/grid_minimum/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` 第二项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` 第二项。
 
 `GridMinimum<PointT>` 在输入点云上建立二维 `x/y` 网格，并在每个 cell 中选择 `z` 最小的原始点索引。公开调用 `filter(output)` 时，`applyFilter(PointCloud&)` 先调用 `applyFilterIndices(indices)` 得到被保留点索引，再通过 `copyPointCloud` 生成输出点云。
 

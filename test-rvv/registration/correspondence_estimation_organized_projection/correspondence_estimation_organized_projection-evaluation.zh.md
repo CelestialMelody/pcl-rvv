@@ -12,7 +12,7 @@
 
 当前代码工作已达到 production-ready 边界：上游 production 入口已接入 source transform staging、projection-pixel staging 和 target-predicate final predicate；append 和 stored distance 写出保留标量。QEMU `run_test_compare` 通过，std 构建 39 个测试中 10 个 RVV-only 诊断按预期 skip，RVV 构建 39 个测试全部通过；QEMU bench checksum 对齐；板卡 `board_smoke` 39 个专项测试通过，production identity fake/explicit 为 `1.64x` / `1.65x`，production non-identity fake/explicit 均为 `2.36x`。
 
-本评估文档保留较多诊断细节，是为了说明 test-rvv 中 39 个专项测试的保留理由和历史风险边界。当前不建议继续把 `pcl::Correspondence` append RVV 化作为默认任务；后续更适合进入 PR 级整理、模块 second-pass 状态更新或选择下一个 registration 候选。
+本评估文档保留较多诊断细节，是为了说明 test-rvv 中 39 个专项测试的保留理由和历史风险边界。当前不建议继续把 `pcl::Correspondence` append RVV 化作为默认任务；后续更适合进入 PR 级整理、模块函数评估队列状态更新或选择下一个 registration 候选。
 
 ## 函数级结论
 

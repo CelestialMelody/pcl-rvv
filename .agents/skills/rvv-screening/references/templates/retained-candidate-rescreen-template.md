@@ -1,8 +1,8 @@
-# 第三轮 / 保留候选复筛模板
+# 保留候选复筛模板
 
-用于建议队列完成、没有明确下一主题，或已完成主题证据显示需要重新比较函数评估队列中的保留候选时。本文正式语义是第三轮 / 保留候选复筛。目标是用真实实现和板卡结果反哺排序。
+用于建议队列完成、没有明确下一主题，或已完成主题证据显示需要重新比较函数评估队列中的保留候选时。本文正式语义是保留候选复筛。目标是用真实实现和板卡结果反哺排序。
 
-模板文件名中的 `second-pass-retained-candidate-rescreen` 表示“复筛第二轮保留候选”，不是重新执行第二轮函数评估队列。
+模板文件名中的 `retained-candidate-rescreen` 表示复筛函数评估队列中的保留候选，不是重新执行第二轮函数评估队列。
 
 ## 输入
 
@@ -16,7 +16,7 @@
 ## 输出
 
 ```text
-artifact_layout.module_second_pass_retained_candidate_rescreen_doc_template
+artifact_layout.module_retained_candidate_rescreen_doc_template
 ```
 
 ## 已完成主题证据包

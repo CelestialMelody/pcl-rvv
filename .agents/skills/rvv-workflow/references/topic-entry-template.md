@@ -7,7 +7,7 @@
 1. 项目 adapter 或配置说明。
 2. `<module_work_log>`。
 3. `<module_function_evaluation_queue_doc>`。
-4. 如存在，`<module_second_pass_retained_candidate_rescreen_doc>`（保留候选复筛文档）。
+4. 如存在，`<module_retained_candidate_rescreen_doc>`（保留候选复筛文档）。
 5. 如存在，当前模块的问题与讨论文档。
 6. 目标源码、同类已完成主题文档和函数级评估。
 

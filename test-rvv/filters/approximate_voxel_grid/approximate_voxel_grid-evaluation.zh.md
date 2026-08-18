@@ -6,7 +6,7 @@
 - 主文件：`filters/include/pcl/filters/impl/approximate_voxel_grid.hpp`
 - 公开类：`pcl::ApproximateVoxelGrid<PointT>`
 - 专项目录：`test-rvv/filters/approximate_voxel_grid/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.2 bench-only / 诊断主题` 第一项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-retained-candidate-rescreen.zh.md` 的 `6.2 bench-only / 诊断主题` 第一项。
 
 `ApproximateVoxelGrid::applyFilter(PointCloud&)` 用固定大小的 history hash 表近似聚合相邻点。每个输入点先检查 `isXYZFinite`，再计算：
 

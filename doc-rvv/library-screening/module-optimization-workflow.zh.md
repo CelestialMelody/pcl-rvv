@@ -1,6 +1,6 @@
 # RVV 模块优化阶段化工作流
 
-本文档说明 PCL 模块从全库筛查进入 RVV 实施的通用推进方式。当前工作流分为模块筛查、第一轮文件候选筛选、第二轮函数评估队列、逐主题实施和二轮保留候选复筛。
+本文档说明 PCL 模块从全库筛查进入 RVV 实施的通用推进方式。当前工作流分为模块筛查、第一轮文件候选筛选、第二轮函数评估队列、逐主题实施和保留候选复筛。
 
 ## 1. 阶段定义
 
@@ -74,7 +74,7 @@ doc-rvv/library-screening/<module>/<module>-function-evaluation-queue.zh.md
 
 ### 阶段 C：逐主题 RVV 优化
 
-当函数评估队列或二轮保留候选复筛文档中仍有未完成建议主题时：
+当函数评估队列或保留候选复筛文档中仍有未完成建议主题时：
 
 - 按执行清单和状态表选择下一主题；
 - 建立或复查函数级评估文档；
@@ -83,7 +83,7 @@ doc-rvv/library-screening/<module>/<module>-function-evaluation-queue.zh.md
 
 该阶段不要重新做模块级候选选择，除非筛选文档与当前源码存在明确冲突。
 
-### 阶段 D：二轮保留候选复筛
+### 阶段 D：保留候选复筛
 
 触发条件：
 
@@ -94,7 +94,7 @@ doc-rvv/library-screening/<module>/<module>-function-evaluation-queue.zh.md
 输出：
 
 ```text
-doc-rvv/library-screening/<module>/<module>-second-pass-retained-candidate-rescreen.zh.md
+doc-rvv/library-screening/<module>/<module>-retained-candidate-rescreen.zh.md
 ```
 
 复筛必须基于已完成主题证据，而不是重复函数评估队列理由。复筛后形成 `建议启动函数级评估` 与 `暂缓 / 不单独实施` 两类主分组；diagnostic / bench-only 是后续 topic 内证据路径，不是模块复筛固定队列。随后回到阶段 C。

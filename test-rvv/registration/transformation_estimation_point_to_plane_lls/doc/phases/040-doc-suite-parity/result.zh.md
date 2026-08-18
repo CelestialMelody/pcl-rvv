@@ -113,7 +113,7 @@ registration/include/pcl/registration/impl/transformation_estimation_point_to_pl
 test-rvv/registration/transformation_estimation_point_to_plane_lls/
 ```
 
-worktree 中仍存在 agent asset、weighted topic、module second-pass、`test-rvv/.gitignore` 和 weighted board
+worktree 中仍存在 agent asset、weighted topic、module function-evaluation queue、`test-rvv/.gitignore` 和 weighted board
 evidence dirty。它们属于 separate review / do not stage for this phase。本阶段没有读取 weighted 证据数字作为当前
 topic 结论，只把 weighted sibling 的文档/目录结构作为 maturity quality bar。
 

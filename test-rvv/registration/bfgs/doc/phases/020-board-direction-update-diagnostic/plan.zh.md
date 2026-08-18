@@ -20,7 +20,7 @@
 | repeated run target | `Makefile` | `collect_board_bfgs_direction_update_repeated` | 默认 5 次，每次 Std/RVV 都用 `--case-filter direction-update`。 |
 | board summary / manifest | `script/generate_bfgs_board_repeated_summary.py` | `summary.md`、`evidence_manifest.json` | 解析每个 `run-*` 的 `run_bench_std.log` / `run_bench_rvv.log`，输出 B/A = Std ms / RVV ms。 |
 | Evidence Doctor / registry | `Makefile` | `evidence_doctor.md`、`log/evidence_registry.json` 记录 | manifest role 为 `strict_ab` + `pre_production_diagnostic`；registry 引用 Phase 020 结果文档。 |
-| 文档回填 | topic-local docs + second-pass 表 | Phase 020 result | 若 board 不可达，记录 blocker；若可达，记录 bucket 和后续决策。 |
+| 文档回填 | topic-local docs + 函数评估队列表 | Phase 020 result | 若 board 不可达，记录 blocker；若可达，记录 bucket 和后续决策。 |
 
 ## Board 运行合同
 

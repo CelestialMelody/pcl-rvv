@@ -12,6 +12,7 @@ description: 调度 C/C++ RVV 优化 agent 的 human-in-the-loop 工作流。适
 - 测试、诊断、benchmark 和证据层级：`rvv-test`
 - 生产实现：`rvv-implementation`
 - 文档和 closeout：`rvv-documentation`
+- 数学函数向量化：`rvv-math-vectorization`
 
 如果后续发现新规则，只补对应 skill/reference，不把大段历史材料重新塞回本入口。
 
@@ -72,7 +73,7 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 
 ## 普通主题入口
 
-从模块 second-pass 或保留候选复筛状态表按推荐顺序选择第一条未完成主题。不要重新做模块级候选选择，除非文档与当前源码存在明确冲突。
+从模块函数评估队列或保留候选复筛状态表按推荐顺序选择第一条未完成主题。不要重新做模块级候选选择，除非文档与当前源码存在明确冲突。
 
 主题入口短模板见 [references/topic-entry-template.md](references/topic-entry-template.md)。
 

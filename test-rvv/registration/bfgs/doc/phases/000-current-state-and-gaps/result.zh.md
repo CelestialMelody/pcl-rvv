@@ -12,7 +12,7 @@
 | 写 S2 函数级评估 | done | `doc/bfgs-evaluation.zh.md` | 当前结论为 `diagnostic_planned` |
 | 建立 roadmap / matrix | done | `doc/optimization-roadmap.zh.md`、`doc/phases/optimization-matrix.zh.md` | planned / deferred / not_applicable 状态已区分 |
 | doc-suite shape scan | done | `doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` | 当前只有文档骨架，test/bench/source layout 为下一阶段 `phase_deferred + unblocked` |
-| 更新 module second-pass 状态 | done | `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` | `bfgs` 从待评估更新为评估已建 / diagnostic planned |
+| 更新 module 函数评估队列状态 | done | `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` | `bfgs` 从待评估更新为评估已建 / diagnostic planned |
 
 ## 源码事实
 
@@ -74,7 +74,7 @@
 
 ## Continue / Stop Decision
 
-`continue_stop_decision`: 本轮可以停止在 Phase 000，因为用户请求是开启新 topic，本阶段已经完成 topic-local scaffold、evaluation、roadmap、matrix 和 second-pass 状态同步。继续到 Phase 010 会新增 Makefile、test / bench source 和运行证据，属于下一阶段实现工作。
+`continue_stop_decision`: 本轮可以停止在 Phase 000，因为用户请求是开启新 topic，本阶段已经完成 topic-local scaffold、evaluation、roadmap、matrix 和函数评估队列状态同步。继续到 Phase 010 会新增 Makefile、test / bench source 和运行证据，属于下一阶段实现工作。
 
 `stop_condition_hit`: 用户本轮目标限定为开启新 topic；production 需要后续证据和明确授权。
 

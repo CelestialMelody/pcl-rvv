@@ -37,7 +37,7 @@ optimization evidence 和 test-support code map。相邻成熟 weighted topic �
 | `preferences_loaded` | 已读取 `AGENTS.md`、`.agents/config/defaults.yaml`、`.agents/knowledge/pcl-rvv-knowledge-map.md`、`rvv-workflow`、short-prompt、S0、quality gates、phase loop、registration evidence、documentation ownership 和 Evidence Doctor；未发现 `.agents/local/user-preferences.yaml`；当前 prompt 覆盖为继续当前 topic 并自行判断下一步。 |
 | 注释 / 文档策略 | test-rvv 和 diagnostic 中文详细说明；长期文档当前状态优先；英文术语首次出现给中文解释；不把对话过程写入长期文档。 |
 | 证据策略 | summary-only；raw logs 不默认提交；QEMU 只用于 correctness 和日志形状；性能结论只来自 board summary。 |
-| dirty isolation | 当前 worktree 还混有 agent asset、weighted topic、module second-pass 和 generated evidence 改动。本阶段允许路径限于当前 topic 测试 / 文档、`doc-rvv/registration/transformation_estimation_point_to_plane_lls-RVV.zh.md`，以及若验证覆盖 QEMU log 时的当前 topic registry/log digest。其它 dirty 均 separate review / do not touch。 |
+| dirty isolation | 当前 worktree 还混有 agent asset、weighted topic、module function-evaluation queue 和 generated evidence 改动。本阶段允许路径限于当前 topic 测试 / 文档、`doc-rvv/registration/transformation_estimation_point_to_plane_lls-RVV.zh.md`，以及若验证覆盖 QEMU log 时的当前 topic registry/log digest。其它 dirty 均 separate review / do not touch。 |
 
 当前允许路径：
 

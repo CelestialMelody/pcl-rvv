@@ -6,7 +6,7 @@
 - 主文件：`filters/include/pcl/filters/impl/covariance_sampling.hpp`
 - 公开类：`pcl::CovarianceSampling<PointT, PointNT>`
 - 专项目录：`test-rvv/filters/covariance_sampling/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` 第 13 项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` 第 13 项。
 
 保留候选复筛将本主题列为 `保留 / 待诊断`，诊断点是 centroid、scaled point 和 6D vector 构造。保留原因是 `Eigen` 6x6 solver、six-list sort 和 sampling state 可能主导 `applyFilter(Indices&)`，局部 RVV 片段不能直接代表生产入口收益。
 

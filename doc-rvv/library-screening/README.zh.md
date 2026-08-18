@@ -1,6 +1,6 @@
 # PCL RVV 筛选文档索引
 
-本目录记录 PCL 库 RVV 优化进入具体主题前的筛选材料。当前筛选链路分为模块筛查、第一轮文件候选筛选、第二轮函数评估队列和二轮保留候选复筛。
+本目录记录 PCL 库 RVV 优化进入具体主题前的筛选材料。当前筛选链路分为模块筛查、第一轮文件候选筛选、第二轮函数评估队列和保留候选复筛。
 
 ## 1. 当前入口
 
@@ -9,7 +9,7 @@
 - 第一轮模块文档目录：`doc-rvv/library-screening/modules/`
 - 第一轮模板：`doc-rvv/library-screening/modules/_module-file-candidate-screening-template.zh.md`
 - 函数评估队列模板：`.agents/skills/rvv-screening/references/templates/function-evaluation-queue-template.md`
-- 二轮保留候选复筛模板：`.agents/skills/rvv-screening/references/templates/second-pass-retained-candidate-rescreen-template.md`
+- 保留候选复筛模板：`.agents/skills/rvv-screening/references/templates/retained-candidate-rescreen-template.md`
 
 ## 2. 模块筛查口径
 
@@ -31,7 +31,7 @@
 | ---: | ---- | ---------- | ----------------- |
 | 1 | `registration` | `modules/registration-file-candidate-screening.zh.md` | `registration/registration-function-evaluation-queue.zh.md` |
 | 2 | `surface` | `modules/surface-file-candidate-screening.zh.md` | 待二轮 |
-| 3 | `filters` | `modules/filters-file-candidate-screening.zh.md` | `filters/filters-function-evaluation-queue.zh.md`，`filters/filters-second-pass-retained-candidate-rescreen.zh.md` |
+| 3 | `filters` | `modules/filters-file-candidate-screening.zh.md` | `filters/filters-function-evaluation-queue.zh.md`，`filters/filters-retained-candidate-rescreen.zh.md` |
 | 4 | `io` | `modules/io-file-candidate-screening.zh.md` | 待二轮 |
 | 5 | `features` | `modules/features-file-candidate-screening.zh.md` | 待二轮 |
 | 6 | `segmentation` | `modules/segmentation-file-candidate-screening.zh.md` | 待二轮 |

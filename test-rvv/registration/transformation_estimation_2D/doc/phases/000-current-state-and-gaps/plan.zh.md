@@ -17,7 +17,7 @@
 
 | 对象 | 当前状态 | 证据路径 |
 | --- | --- | --- |
-| second-pass 队列表 | `transformation_estimation_2D` 为建议优化队列第 9 项，状态为待评估。 | `doc-rvv/library-screening/registration/registration-module-second-pass.zh.md` |
+| 函数评估队列表 | `transformation_estimation_2D` 为建议优化队列第 9 项，状态为待评估。 | `doc-rvv/library-screening/registration/registration-function-evaluation-queue.zh.md` |
 | 目标源码 | 四个公开 overload 统一构造 `ConstCloudIterator`，protected helper 做 centroid、demean、correlation、angle 和 matrix。 | `registration/include/pcl/registration/impl/transformation_estimation_2D.hpp` |
 | 上游专项测试 | 仓库中未发现直接命中 `TransformationEstimation2D` 的上游测试。 | `rg TransformationEstimation2D` 只命中 production 头。 |
 | topic 目录 | 本阶段开始前不存在同名 `test-rvv/registration/transformation_estimation_2D` 资产。 | `git ls-files` / untracked scan 无输出。 |

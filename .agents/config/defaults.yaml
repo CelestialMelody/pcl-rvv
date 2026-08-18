@@ -207,8 +207,8 @@ artifact_layout:
   module_file_candidate_screening_doc_template: "{artifact_layout.screening_root_template}/{artifact_layout.screening_modules_subdir}/{module}-file-candidate-screening.{documentation.language_suffix}.{documentation.markdown_extension}"
   # module_function_evaluation_queue_doc_template：模块函数评估队列文档路径。
   module_function_evaluation_queue_doc_template: "{artifact_layout.screening_root_template}/{module}/{module}-function-evaluation-queue.{documentation.language_suffix}.{documentation.markdown_extension}"
-  # module_second_pass_retained_candidate_rescreen_doc_template：模块二轮保留候选复筛文档路径。
-  module_second_pass_retained_candidate_rescreen_doc_template: "{artifact_layout.screening_root_template}/{module}/{module}-second-pass-retained-candidate-rescreen.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # module_retained_candidate_rescreen_doc_template：模块保留候选复筛文档路径。
+  module_retained_candidate_rescreen_doc_template: "{artifact_layout.screening_root_template}/{module}/{module}-retained-candidate-rescreen.{documentation.language_suffix}.{documentation.markdown_extension}"
   # generic_point_type_strategy_doc_template：泛型点类型策略文档路径。
   generic_point_type_strategy_doc_template: "{artifact_layout.reusable_rvv_knowledge_dir_template}/RVV Generic Point Type Strategy.{documentation.language_suffix}.{documentation.markdown_extension}"
   # math_test_subdir：数学专项 test-rvv 子目录。

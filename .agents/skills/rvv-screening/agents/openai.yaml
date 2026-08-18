@@ -1,3 +1,3 @@
 display_name: RVV 筛选
-short_description: 组织 RVV 文件候选筛选、函数评估队列和第三轮保留候选复筛队列。
+short_description: 组织 RVV 文件候选筛选、函数评估队列和保留候选复筛队列。
 default_prompt: 使用 RVV 筛选 skill，基于源码和已有证据整理模块候选队列，只产出筛选文档、首阶段证据问题和下一步条件，不进入实现。

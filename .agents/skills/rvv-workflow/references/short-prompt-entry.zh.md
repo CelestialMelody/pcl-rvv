@@ -13,7 +13,7 @@
 - 至少一个粗目标，例如“处理下一个 topic”“审查上一轮 worker 结果”“复核 workflow instructions（工作流指令）”。
 
 如果用户只说“处理下一个 topic”，worker 先根据当前对话、模块工作日志和
-second-pass（第二轮筛选）或保留候选复筛状态表自动选择模块；若模块仍然
+函数评估队列或保留候选复筛状态表自动选择模块；若模块仍然
 不唯一，才先询问模块名。模块一旦确定，worker 默认选择该模块下第一条未完成 topic（主题）。
 
 如果短 prompt 只是“继续完善 <topic> 的 RVV 优化工作”或类似粗目标，worker 默认先恢复 phase loop：

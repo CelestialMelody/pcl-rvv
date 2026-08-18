@@ -4,7 +4,7 @@
 
 | 项目 | 状态 |
 | --- | --- |
-| 模块执行来源 | `doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` |
+| 模块执行来源 | `doc-rvv/library-screening/filters/filters-retained-candidate-rescreen.zh.md` 的 `6.2 暂缓 / 不单独实施（诊断路径记录）` |
 | 当前定位 | bench-only 诊断，生产不接入 |
 | 生产源码 | `filters/include/pcl/filters/impl/radius_outlier_removal.hpp`、`filters/src/radius_outlier_removal.cpp` 保持不变 |
 | 专项路径 | `test-rvv/filters/radius_outlier_removal/` |

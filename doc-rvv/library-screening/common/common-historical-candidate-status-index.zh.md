@@ -2,7 +2,7 @@
 
 本文记录 `common` 模块早期 RVV 探索成果的状态索引，用于后续从当前 RVV 工作流恢复 common 状态。本文不回填 `common` 的文件候选筛选 high-mid 基线，不伪造标准函数评估队列，也不重新筛选 common 模块。
 
-`doc-rvv/common/module-evaluation.zh.md` 是 legacy exploration input：它反映早期探索阶段的候选判断和已处理方向，可作为历史依据参考，但不是当前可直接执行的状态队列。本文只把已完成主题、待补 closeout 和后续可能候选整理为历史状态索引。后续新模块仍应按当前项目 RVV 工作流正常建立文件候选筛选、函数评估队列或二轮保留候选复筛文档。
+`doc-rvv/common/module-evaluation.zh.md` 是 legacy exploration input：它反映早期探索阶段的候选判断和已处理方向，可作为历史依据参考，但不是当前可直接执行的状态队列。本文只把已完成主题、待补 closeout 和后续可能候选整理为历史状态索引。后续新模块仍应按当前项目 RVV 工作流正常建立文件候选筛选、函数评估队列或保留候选复筛文档。
 
 ## 1. 输入依据与桥接原因
 

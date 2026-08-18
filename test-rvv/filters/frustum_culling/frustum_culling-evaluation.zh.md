@@ -5,7 +5,7 @@
 - 主文件：`filters/include/pcl/filters/impl/frustum_culling.hpp`
 - 公开入口：`pcl::FrustumCulling<PointT>::applyFilter(Indices&)`
 - 专项目录：`test-rvv/filters/frustum_culling/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的后续执行清单第二项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-retained-candidate-rescreen.zh.md` 的后续执行清单第二项。
 
 ## 函数级结论
 

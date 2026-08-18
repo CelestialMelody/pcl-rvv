@@ -8,7 +8,7 @@
 
 | phase | 状态 | plan | result | 说明 |
 | --- | --- | --- | --- | --- |
-| `000-current-state-and-gaps` | done / diagnostic planning | `doc/phases/000-current-state-and-gaps/plan.zh.md` | `doc/phases/000-current-state-and-gaps/result.zh.md` | 建立 topic-local scaffold、evaluation、roadmap、matrix，并同步 second-pass 状态。 |
+| `000-current-state-and-gaps` | done / diagnostic planning | `doc/phases/000-current-state-and-gaps/plan.zh.md` | `doc/phases/000-current-state-and-gaps/result.zh.md` | 建立 topic-local scaffold、evaluation、roadmap、matrix，并同步函数评估队列状态。 |
 | `010-diagnostic-scaffold-and-asm-probe` | done / diagnostic continue | `doc/phases/010-diagnostic-scaffold-and-asm-probe/plan.zh.md` | `doc/phases/010-diagnostic-scaffold-and-asm-probe/result.zh.md` | Std/RVV gtest 各 6 个通过；QEMU direction-update smoke 和 Evidence Doctor 通过；不改 production。 |
 | `020-board-direction-update-diagnostic` | done / negative | `doc/phases/020-board-direction-update-diagnostic/plan.zh.md` | `doc/phases/020-board-direction-update-diagnostic/result.zh.md` | Milkv-Jupiter 5-run repeated board diagnostic 负向；默认停止生产推进。 |
 

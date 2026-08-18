@@ -180,7 +180,7 @@
 
 ## 5. 与后续复筛文档的关系
 
-本文档给出 `filters` 第二轮的三分类基线。其中 `保留实施的候选文件` 的 26 个文件已在 `doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 中进一步复筛。后续保留候选复筛基于已完成主题的板卡结果和回退原因，将候选分为 `建议启动函数级评估` 与 `暂缓 / 不单独实施`；diagnostic / bench-only 是后续 topic 内证据路径，不是模块复筛固定队列。
+本文档给出 `filters` 第二轮的三分类基线。其中 `保留实施的候选文件` 的 26 个文件已在 `doc-rvv/library-screening/filters/filters-retained-candidate-rescreen.zh.md` 中进一步复筛。后续保留候选复筛基于已完成主题的板卡结果和回退原因，将候选分为 `建议启动函数级评估` 与 `暂缓 / 不单独实施`；diagnostic / bench-only 是后续 topic 内证据路径，不是模块复筛固定队列。
 
 因此，阅读顺序建议为：
 

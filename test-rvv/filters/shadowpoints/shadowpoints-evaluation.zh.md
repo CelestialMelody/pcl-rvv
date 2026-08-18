@@ -6,7 +6,7 @@
 - 主文件：`filters/include/pcl/filters/impl/shadowpoints.hpp`
 - 公开类：`pcl::ShadowPoints<PointT, NormalT>`
 - 专项目录：`test-rvv/filters/shadowpoints/`
-- 模块依据：`doc-rvv/library-screening/filters/filters-second-pass-retained-candidate-rescreen.zh.md` 的后续执行清单第三项。
+- 模块依据：`doc-rvv/library-screening/filters/filters-retained-candidate-rescreen.zh.md` 的后续执行清单第三项。
 
 `ShadowPoints` 用输入点 `pt` 和同下标法线 `normal` 的点积筛除边缘不连续处的 shadow / ghost points。`filter(Indices&)` 输出通过判定的原始点下标；`filter(PointCloud&)` 输出点云，并受 `keep_organized_`、`user_filter_value_`、`extract_removed_indices_` 和 `negative_` 影响。
 

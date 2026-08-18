@@ -40,7 +40,7 @@
 | A2 bench cases | 新增 `component accum only ordered-cloud-pair` 和 `component solve only ordered-cloud-pair` 三个规模；`component-ablation` filter 同时跑 public、helper full-estimate 和两个 component family | `src/bench_tedq.cpp` | QEMU smoke 可输出全部 case label |
 | A3 summary script | 扩展 board repeated summary，支持 `--component-ablation`，分表输出 strict component A/B 和 mixed-boundary cross-check | `script/generate_tedq_board_repeated_summary.py` | summary / manifest / doctor 可生成 |
 | A4 Make targets / allowlist | 增加 component ablation repeated collect / record target，并放行 summary evidence | `Makefile`、`test-rvv/.gitignore` | `make record_board_component_ablation_state` 成功 |
-| A5 docs | 更新 README、benchmark/evidence、optimization evidence、roadmap、matrix 和 phase result | topic-local docs、模块 second-pass | 当前状态可恢复 |
+| A5 docs | 更新 README、benchmark/evidence、optimization evidence、roadmap、matrix 和 phase result | topic-local docs、模块函数评估队列 | 当前状态可恢复 |
 
 ## Evidence Doctor 和 registry 规则
 
