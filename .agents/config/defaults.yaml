@@ -201,6 +201,12 @@ artifact_layout:
   evaluation_doc_template: "{paths.test_root}/{module}/{topic}/{artifact_layout.evaluation_doc_subdir}/{topic}-{documentation.evaluation_doc_suffix}.{documentation.language_suffix}.{documentation.markdown_extension}"
   # screening_root_template：模块筛选/队列文档根目录。
   screening_root_template: "{paths.doc_root}/library-screening"
+  # screening_index_doc_template：筛选项目入口/索引文档路径。
+  screening_index_doc_template: "{artifact_layout.screening_root_template}/README.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # screening_module_status_doc_template：模块池、排除/暂缓模块和模块顺序文档路径。
+  screening_module_status_doc_template: "{artifact_layout.screening_root_template}/module-screening.{documentation.language_suffix}.{documentation.markdown_extension}"
+  # screening_workflow_status_doc_template：模块推进顺序、阶段说明和状态索引文档路径。
+  screening_workflow_status_doc_template: "{artifact_layout.screening_root_template}/module-optimization-workflow.{documentation.language_suffix}.{documentation.markdown_extension}"
   # screening_modules_subdir：模块文件候选筛选文档子目录。
   screening_modules_subdir: modules
   # module_file_candidate_screening_doc_template：模块文件候选筛选文档路径。

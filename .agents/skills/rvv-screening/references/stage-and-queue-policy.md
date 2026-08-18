@@ -1,6 +1,14 @@
 # RVV 阶段与队列规则
 
-本文定义 `rvv-screening` 的阶段职责、队列命名、分类口径和保留候选复筛规则。候选准入标准见 [screening-criteria.md](screening-criteria.md)；证据和执行边界见 [evidence-boundaries.md](evidence-boundaries.md)。
+本文定义 `rvv-screening` 的阶段职责、队列命名、分类口径和保留候选复筛规则。候选准入标准见 [screening-criteria.md](screening-criteria.md)；证据和执行边界见 [evidence-boundaries.md](evidence-boundaries.md)；项目阶段导航见 [project-stage-navigation.md](project-stage-navigation.md)。
+
+## 术语映射
+
+- 第一轮筛选 = 文件候选筛选 = `file-candidate-screening`。
+- 第二轮筛选 = 函数评估队列 = `function-evaluation-queue`。
+- 第三轮复筛 = 保留候选复筛 = `retained-candidate-rescreen`。
+
+`第三轮复筛` 是人类可读别名；文件名、模板名和 artifact key 使用 `retained-candidate-rescreen`。
 
 ## 阶段职责
 

@@ -1,6 +1,6 @@
 ---
 name: rvv-screening
-description: 组织 C/C++ 高性能库的 RVV 候选筛选流程。适用于全库或模块文件候选筛选、模块函数评估队列、保留候选复筛、候选队列维护、函数级评估入口选择，以及需要把源码事实整理成可执行 RVV 优化队列但尚不进入实现的任务。
+description: 组织 C/C++ 高性能库的 RVV 候选筛选流程。适用于全库或模块文件候选筛选、模块函数评估队列、保留候选复筛、模块阶段导航、候选队列维护、函数级评估入口选择，以及需要把源码事实整理成可执行 RVV 优化队列但尚不进入实现的任务。
 ---
 
 # RVV 筛选工作流
@@ -12,6 +12,7 @@ description: 组织 C/C++ 高性能库的 RVV 候选筛选流程。适用于全�
 先读最小必要 reference，再按任务读取对应模板：
 
 - 所有筛选任务：先读 [references/screening-criteria.md](references/screening-criteria.md) 和 [references/stage-and-queue-policy.md](references/stage-and-queue-policy.md)。
+- 涉及“下一个模块”、“下一阶段”、“模块状态”、“重做第一轮”或筛选阶段交接：再读 [references/project-stage-navigation.md](references/project-stage-navigation.md)，并按其中规则读取 `artifact_layout` 解析出的项目筛选状态文档。
 - 需要写证据、边界或 closeout：再读 [references/evidence-boundaries.md](references/evidence-boundaries.md)。
 
 - 全库或模块文件候选筛选：使用 [references/templates/file-candidate-screening-template.md](references/templates/file-candidate-screening-template.md)。
@@ -26,6 +27,7 @@ description: 组织 C/C++ 高性能库的 RVV 候选筛选流程。适用于全�
 4. 保留候选复筛必须先总结已完成主题的真实性能、回退原因、诊断价值和可复用模式，再复筛函数评估队列 `保留实施的候选文件`。
 5. 保留候选复筛使用 `建议启动函数级评估` 和 `暂缓 / 不单独实施` 两类主分组；diagnostic / bench 是后续 topic 内的证据路径，不是模块复筛固定队列。
 6. 筛选队列只授权进入函数级评估；是否接入生产由 full diagnostic、生产入口证据、测试、反汇编和板卡结果决定。
+7. 模块筛选进入逐主题实现时，交给 `rvv-workflow`；`rvv-screening` 只选择队列和首阶段证据问题，不推进实现闭环。
 
 ## 文档口径
 
