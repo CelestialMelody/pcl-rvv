@@ -1,6 +1,8 @@
 # transformation_estimation_2D RVV 主题入口
 
-本目录是 `registration/transformation_estimation_2D` 的 RVV topic（主题）入口。当前 production（生产源码）保留一个窄范围 RVV candidate（候选）：只覆盖 ordered-cloud-pair、`PointXYZ -> PointXYZ`、`Scalar=float`、两侧 dense finite 且点数不少于 16；其它公开入口继续走标量路径。
+本目录是 `registration/transformation_estimation_2D` 的 RVV topic（主题）入口。测试资产里的
+topic token（主题短标识）为 `te2d`；production 符号仍使用
+`transformation_estimation_2D`。
 
 目标 production 文件：
 
@@ -9,112 +11,114 @@ registration/include/pcl/registration/transformation_estimation_2D.h
 registration/include/pcl/registration/impl/transformation_estimation_2D.hpp
 ```
 
-测试资产里的 topic token（主题短标识）为 `te2d`。topic 名和 production 符号保持 `transformation_estimation_2D`。
-
 ## 当前结论
 
-当前 EvidenceDecision（证据决策）是 `production-candidate-supported / user-review-pending`：
+当前 production patch 保留三条 RVV 路径，并按用户“有收益的实现可以接入、先整理后提交”的
+授权纳入 topic-only commit：
 
-- `registration/include/pcl/registration/impl/transformation_estimation_2D.hpp` 当前保留 production patch；RVV 命中失败时回退现有标量 iterator 路径。
-- QEMU correctness（QEMU 正确性）通过：Std / RVV 构建各 16 个 gtest 全绿，日志为 `log/qemu/run_test_std.log` 和 `log/qemu/run_test_rvv.log`。
-- Phase 020 的 test-only fused 2D correlation candidate（测试专用融合 2D 相关项候选）仍保留为诊断资产；它的板卡 repeated summary 为 `weak_positive`，但它不是 production evidence（生产证据）。
-- Phase 050 的 QEMU production-public smoke（生产公开入口 QEMU 小型验证）通过，`log/qemu/production_public/evidence_doctor.md` 为 Errors=0、Warnings=0、Suggestions=0；反汇编摘要能在 public overload 或 `runPublicCase` 内联边界看到关键 RVV 指令。
-- 最新一次真实板卡 `Milkv-Jupiter` production-public repeated 为：4K median `4.222x`、64K `5.310x`、256K `4.947x`，三个规模均为 `positive`，每个规模 `B/A<1` 为 `0/5`；board Evidence Doctor 为 `0/0/0`。
-- Phase 030 的 source-indexed、dual-indexed 和 correspondence row-source candidate 已完成 materialize-to-ordered（先物化为顺序点云对）诊断和真实板卡 repeated：Std / RVV correctness 各 16/16，QEMU smoke 覆盖 9 个 case，row-source Evidence Doctor 为 Errors=1、Warnings=2、Suggestions=6。
-- row-source 64K 存在退化或长尾信号，三类 candidate 仍只是 test-only 诊断，不自动扩大 production dispatch；当前 production patch 只覆盖 ordered-cloud-pair 窄范围。
+| row source | 当前状态 | 生产 gate / fallback |
+| --- | --- | --- |
+| ordered-cloud-pair | adopted / retained | `Scalar=float`；source/target 分别满足 `RVVXYZAoSFloatLayout<PointT>`；dense、finite、size >= 16；失败回退现有 iterator scalar path。 |
+| source-indexed-cloud-pair | adopted / retained | exact `PointXYZ -> PointXYZ`；`Scalar=float`；source indices 有效；dense、finite、size >= 16；失败回退 source-indexed iterator scalar path。 |
+| dual-indexed-cloud-pair | adopted for current topic-only commit | exact `PointXYZ -> PointXYZ`；`Scalar=float`；source/target indices 有效；dense、finite、size >= 16；失败回退 dual-indexed iterator scalar path。 |
+| correspondence-pair | not adopted / rolled back | Phase 107 试接入后 family A/B 为 negative；当前 header 没有 correspondence RVV production dispatch。 |
 
-当前 production patch 和 PI5 证据闭环已存在，长期主题文档记录这一窄范围 candidate 及其 fallback 边界；不把 row-source 诊断写成生产行为。
+仍不能写成 adopted 的范围：
+
+- source-indexed generic PointXYZ-like widening：Phase 103/104 仍是 guarded probe；Phase 106 独立
+  20-run public variance 为 negative，不能 clean-adopt。
+- dual-indexed generic 和 correspondence generic：Phase 100 / 101 代表性点型诊断为 negative。
+- `Scalar=double`、未逐类型上板的自定义点型、RGB/RGBA 语义和其它 row source 不继承上述结论。
+
+## 接入后证据
+
+接入后测试是 production integration loop（生产接入闭环）的必跑项，不依赖用户提醒。本轮已完成：
+
+| 验证 | 当前结果 |
+| --- | --- |
+| correctness | Std `84/84` pass；RVV `84/84` pass。 |
+| ordered generic board | Phase 107 `generic_xyz_point_types_public_phase107_repeated`：16 cases 全部 positive，`PointXYZ->PointXYZ` 4K/64K/256K 为 `4.400x / 5.556x / 5.184x`；Doctor `0/4/0`。 |
+| source-indexed exact board | Phase 107 `source_indexed_public_phase107_repeated`：4K/64K/256K 为 `4.157x / 4.814x / 4.615x`；Doctor `0/0/0`。 |
+| dual-indexed exact board | Phase 107 `dual_indexed_family_ab_phase107_repeated`：direct/materialize B/A 4K/64K/256K 为 `1.085x / 1.691x / 1.678x`；4K 有 `1/5` below-1 caveat；Doctor `0/3/0`。 |
+| correspondence exact board | Phase 107 `correspondence_family_ab_phase107_repeated`：4K/64K/256K 为 `1.091x / 1.645x / 1.385x`，但 256K `4/20` below-1；overall negative，dispatch 已退回；Doctor `0/4/0`。 |
+| source-indexed generic variance | Phase 106 独立 20-run：12 positive、1 weak_positive、3 negative；`PointNormal->PointNormal 256K` 为 `7/20` below-1；Doctor `1/27/0`。 |
+
+QEMU（仿真器）只作为 correctness、路径命中、日志形状和反汇编归属证据；性能结论只引用 board /
+target hardware repeated benchmark（板卡或目标硬件重复性能测试）。
 
 ## 先读哪份文档
 
 | 问题 | 文档 |
 | --- | --- |
-| 函数做什么、标量路径如何工作、当前为什么不接 production | `doc/transformation_estimation_2D-evaluation.zh.md` |
+| 函数做什么、标量路径、生产接入判断和 Traceability Map（可追踪性地图） | `doc/transformation_estimation_2D-evaluation.zh.md` |
+| 当前 production 行为、fallback 矩阵和长期证据链 | `../../../doc-rvv/registration/transformation_estimation_2D-RVV.zh.md` |
 | 测试入口和覆盖矩阵 | `doc/testing-overview.zh.md` |
 | 每个 gtest 的输入、断言和证明范围 | `doc/correctness-tests.zh.md` |
 | bench label、QEMU / board / Evidence Doctor 边界 | `doc/benchmark-and-evidence.zh.md` |
-| candidate family（候选族）和后续恢复动作 | `doc/optimization-roadmap.zh.md` |
+| adopted / attempted / rejected / deferred 优化证据 | `doc/optimization-evidence.zh.md` |
+| 候选族和后续恢复动作 | `doc/optimization-roadmap.zh.md` |
 | 候选 × row source × 证据状态 | `doc/phases/optimization-matrix.zh.md` |
+| 阶段当前入口 | `doc/phases/README.zh.md` |
+| 历史 phase 为什么这么多 | `doc/phases/history.zh.md` |
 | 测试支撑代码地图 | `doc/test-support-code-map.zh.md` |
-| 当前 phase loop（阶段循环）如何恢复 | `doc/phases/README.zh.md` |
 
 ## 目录分工
 
-| 路径 | 当前状态 | 作用 |
-| --- | --- | --- |
-| `Makefile`、`board.mk` | created | topic-local build / QEMU / board skeleton，包含 production-public probe 的 evidence target。 |
-| `src/test_te2d.cpp` | created | public semantics、row-source 标量边界和 fused candidate correctness。 |
-| `src/bench_te2d.cpp` | created | QEMU smoke、test-only candidate bench 和 production-public probe bench 入口。 |
-| `include/te2d.h` | created | 稳定聚合入口。 |
-| `include/impl/te2d_candidates.hpp` | created | fixtures、reference、candidate 和 checksum helper。 |
-| `doc/*.zh.md` | created | topic-local doc suite。 |
-| `doc/phases/010-scaffold-and-ordered-cloud-pair-correlation-diagnostic/` | done | Phase 010 计划和结果。 |
-| `doc/phases/020-board-and-asm-evidence/` | done | Phase 020 诊断证据计划和结果。 |
-| `doc/phases/040-production-integration-plan/` | archived | PI1 计划历史状态；当前恢复入口由 Phase 050 决定。 |
-| `doc/phases/050-pi2-production-patch-and-direct-evidence/` | done / current evidence refreshed | PI2-PI5 production-public probe、真实板卡复跑和窄范围 production candidate 决策。 |
-| `doc/phases/030-row-source-family-carryover/` | done / diagnostic only | 三类 row-source materialize-to-ordered candidate 的 correctness、QEMU、asm、板卡 repeated 和 Doctor 已完成；仍不进入 production。 |
-| `log/` | local-only | QEMU / board evidence pointers 和 `evidence_registry.json`，默认不提交。 |
-| `build/` | local-only | 二进制和 asm dump，默认不提交。 |
+| 路径 | 作用 |
+| --- | --- |
+| `Makefile`、`board.mk` | topic-local build、QEMU、board、Evidence Doctor 和 evidence registry 入口。 |
+| `src/test_te2d.cpp` | public semantics、fallback、row source 和 production direct correctness。 |
+| `src/bench_te2d.cpp` | QEMU smoke、board repeated、family A/B 和 historical guarded probe bench 入口。 |
+| `include/te2d.h` | 稳定聚合入口。 |
+| `include/impl/te2d_candidates.hpp` | fixtures、reference、candidate、production-facing test helper 和 checksum helper。 |
+| `script/**` | topic-local summary、manifest、asm attribution、registry 和 board repeated 解析脚本。 |
+| `doc/*.zh.md` | topic-local doc suite（主题本地文档套件）。 |
+| `doc/phases/README.zh.md` | 当前 phase loop 恢复入口和提交前导航。 |
+| `doc/phases/history.zh.md` | Phase 000-107 压缩历史索引；替代 root README 的长 phase 目录表。 |
+| `doc/phases/optimization-matrix.zh.md` | 跨阶段候选、row source、点类型、证据和决策矩阵。 |
+| `doc/phases/106-*`、`107-*`、`108-*` | 当前提交前最关键的 source-indexed generic variance、beneficial adoption loop 和 doc compaction 记录。 |
+| `log/**` | evidence summary / manifest / Doctor 产物；raw logs 默认 local-only。 |
+| `build/**` | 二进制和 asm dump，默认 local-only。 |
 
 ## 常用命令
 
 ```bash
 make -C test-rvv/registration/transformation_estimation_2D run_test_compare
-make -C test-rvv/registration/transformation_estimation_2D run_test_public_semantics
-make -C test-rvv/registration/transformation_estimation_2D run_test_candidates
-make -C test-rvv/registration/transformation_estimation_2D run_bench_ordered_cloud_pair_smoke
-make -C test-rvv/registration/transformation_estimation_2D run_bench_ordered_cloud_pair_public_smoke
-make -C test-rvv/registration/transformation_estimation_2D run_bench_row_source_smoke
-make -C test-rvv/registration/transformation_estimation_2D run_qemu_production_public_evidence_doctor
-make -C test-rvv/registration/transformation_estimation_2D run_qemu_row_source_evidence_doctor
-make -C test-rvv/registration/transformation_estimation_2D run_board_bench_ordered_cloud_pair_public_repeated
-make -C test-rvv/registration/transformation_estimation_2D run_board_bench_row_source_repeated
+make -C test-rvv/registration/transformation_estimation_2D record_qemu_correctness_state
+make -C test-rvv/registration/transformation_estimation_2D record_qemu_production_public_state
+make -C test-rvv/registration/transformation_estimation_2D record_qemu_source_indexed_public_state
+make -C test-rvv/registration/transformation_estimation_2D record_qemu_dual_indexed_family_ab_state
+make -C test-rvv/registration/transformation_estimation_2D run_board_bench_generic_xyz_point_types_public_repeated TE2D_BOARD_GENERIC_PUBLIC_RUN_LABEL=generic_xyz_point_types_public_phase107_repeated
+make -C test-rvv/registration/transformation_estimation_2D run_board_bench_source_indexed_public_repeated TE2D_BOARD_SOURCE_INDEXED_PUBLIC_RUN_LABEL=source_indexed_public_phase107_repeated
+make -C test-rvv/registration/transformation_estimation_2D run_board_bench_dual_indexed_family_ab_repeated TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_RUN_LABEL=dual_indexed_family_ab_phase107_repeated
 make -C test-rvv/registration/transformation_estimation_2D evidence_status
 ```
 
-QEMU 只用于 correctness、构建和日志形状。性能结论必须来自 board / target hardware repeated benchmark（板卡或目标硬件重复性能测试）。
+历史 guarded probe、generic point-type 诊断和 correspondence profile target 仍保留在 `Makefile` /
+`board.mk` 中；默认阅读入口放在 `doc/testing-overview.zh.md` 和
+`doc/benchmark-and-evidence.zh.md`，不再在本 README 重复完整 target 清单。
 
-## 当前可提交证据
+## 本次提交边界
+
+本次提交采用 topic-only（仅主题）策略：
 
 | 产物 | 提交边界 |
 | --- | --- |
-| `README.zh.md`、`Makefile`、`board.mk`、`include/**`、`src/**`、`script/**`、`doc/**` | review 后可作为 topic test asset。 |
-| `log/**`、`build/**` | local-only，默认不提交。 |
-| `tmp/rvv-work-logs/registration/transformation_estimation_2D/**` | local-only，默认不提交。 |
-| `doc-rvv/registration/transformation_estimation_2D-RVV.zh.md` | current candidate record；只记录已接入窄范围和 fallback。 |
+| production patch | 提交 `registration/include/pcl/registration/impl/transformation_estimation_2D.hpp` 中已证据化的 ordered generic、source-indexed exact 和 dual-indexed exact RVV dispatch。 |
+| topic test assets | 提交 `Makefile`、`board.mk`、`include/**`、`src/**`、`script/**` 中支撑 correctness、QEMU、board、summary 和 registry 的变更。 |
+| topic docs | 提交 `README.zh.md`、`doc/*.zh.md`、`doc/phases/README.zh.md`、`doc/phases/history.zh.md`、`doc/phases/optimization-matrix.zh.md` 和关键 Phase 106/107/108 plan/result。 |
+| long-term doc | 提交 `doc-rvv/registration/transformation_estimation_2D-RVV.zh.md`，只记录当前 production 行为和未覆盖边界。 |
+| evidence summaries | 本次不提交 `log/**`；文档保留 run label 和 summary / manifest / Evidence Doctor 路径，作为本机 freshness 和后续复核入口。 |
+| local recovery | `tmp/rvv-work-logs/**` 默认 local-only；如本次需要保留交接包，可作为独立审查对象，不和 raw logs 混在一起。 |
 
-## 默认不提交的生成产物
+默认不提交：`log/**`、`build/`、raw QEMU logs、raw board logs、本机 `config.mk`、私有部署路径、聊天记录、
+未被文档引用的临时日志，以及无关 dirty files。
 
-`build/`、raw QEMU logs、raw board logs、本机 `config.mk`、私有部署路径和 `log/evidence_registry.json` 默认不提交。当前文档引用的 summary-only（摘要级）证据路径包括：
+## 当前恢复动作
 
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/asm_attribution.md`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/asm_attribution.json`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/evidence_manifest.json`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/evidence_doctor.md`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/production_public/asm_attribution.md`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/production_public/asm_attribution.json`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/production_public/evidence_manifest.json`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/production_public/evidence_doctor.md`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/row_source/run_bench_row_source_fused_rvv.log`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/row_source/asm_attribution.md`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/row_source/asm_attribution.json`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/row_source/evidence_manifest.json`
-- `test-rvv/registration/transformation_estimation_2D/log/qemu/row_source/evidence_doctor.md`
-- `test-rvv/registration/transformation_estimation_2D/log/board/ordered_cloud_pair_repeated/summary.md`
-- `test-rvv/registration/transformation_estimation_2D/log/board/ordered_cloud_pair_repeated/evidence_manifest.json`
-- `test-rvv/registration/transformation_estimation_2D/log/board/ordered_cloud_pair_repeated/evidence_doctor.md`
-- `test-rvv/registration/transformation_estimation_2D/log/board/ordered_cloud_pair_public_repeated/summary.md`
-- `test-rvv/registration/transformation_estimation_2D/log/board/ordered_cloud_pair_public_repeated/evidence_manifest.json`
-- `test-rvv/registration/transformation_estimation_2D/log/board/ordered_cloud_pair_public_repeated/evidence_doctor.md`
+Phase 108 已完成提交前 phase doc compaction（阶段文档压缩），并已按 topic-only 策略完成提交。
+提交后如继续优化，优先另开独立 phase：
 
-用户明确要求提交 evidence logs（证据日志）时，先做脱敏和提交边界审计。
-
-## 默认恢复动作
-
-当前窄范围 production candidate 的证据已闭合，下一阶段进入 review 和边界扩展规划，不自动恢复旧 PI2。推荐下一阶段是：
-
-```text
-060-production-candidate-review-and-row-source-boundaries
-```
-
-先审阅当前 production diff、fallback 和 16/16 correctness；若要扩大到 indexed / correspondence，必须重新设计 gather/staging 并建立新的 PI1，不得把 Phase 030 的弱收益直接升级为 production。
+1. dual-indexed exact 20-run variance：更严格复核 4K caveat。
+2. correspondence new bounded candidate：只在有新同边界候选时恢复。
+3. source-indexed generic negative-case investigation：只追查 Phase 106 negative case，不扩大生产 gate。

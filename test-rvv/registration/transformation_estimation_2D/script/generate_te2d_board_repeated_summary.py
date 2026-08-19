@@ -30,6 +30,18 @@ ITER_RE = re.compile(r"^Iterations:\s*(?P<value>[0-9]+)\s*$")
 WARMUP_RE = re.compile(r"^Warmup Iterations:\s*(?P<value>[0-9]+)\s*$")
 DATASET_RE = re.compile(r"^Dataset:\s*(?P<value>.+?)\s*$")
 BUILD_RE = re.compile(r"^Build:\s*(?P<value>.+?)\s*$")
+GENERIC_CASE_RE = re.compile(
+    r"^(?:public )?generic 2D (?P<source>[A-Za-z0-9_]+)->(?P<target>[A-Za-z0-9_]+) (?P<size>\d+K)\s*$"
+)
+SOURCE_INDEXED_GENERIC_CASE_RE = re.compile(
+    r"^(?:public )?source-indexed generic 2D (?P<source>[A-Za-z0-9_]+)->(?P<target>[A-Za-z0-9_]+) (?P<size>\d+K)\s*$"
+)
+DUAL_INDEXED_GENERIC_CASE_RE = re.compile(
+    r"^dual-indexed generic 2D (?P<source>[A-Za-z0-9_]+)->(?P<target>[A-Za-z0-9_]+) (?P<size>\d+K)\s*$"
+)
+CORRESPONDENCE_GENERIC_CASE_RE = re.compile(
+    r"^correspondence generic 2D (?P<source>[A-Za-z0-9_]+)->(?P<target>[A-Za-z0-9_]+) (?P<size>\d+K)\s*$"
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -121,9 +133,17 @@ def fused_case(size: str, row_source: str = "ordered-cloud-pair") -> str:
     return f"fused 2D correlation ordered-cloud-pair {size}"
 
 
+def direct_gather_case(size: str, row_source: str) -> str:
+    return f"direct-gather 2D correlation {row_source} {size}"
+
+
 def case_label(size: str, case_filter: str) -> str:
     if case_filter == "ordered-cloud-pair-public":
         return f"public 2D ordered-cloud-pair {size}"
+    if case_filter == "source-indexed-public":
+        return f"public 2D source-indexed-cloud-pair {size}"
+    if case_filter == "correspondence-public":
+        return f"public 2D correspondence-pair {size}"
     return fused_case(size)
 
 
@@ -132,66 +152,250 @@ def row_source_for_label(label: str) -> str:
         return "source_indexed_cloud_pair"
     if "dual-indexed-cloud-pair" in label:
         return "dual_indexed_cloud_pair"
+    if "correspondence generic" in label:
+        return "correspondence_pair"
     if "correspondence-pair" in label:
         return "correspondence_pair"
     return "ordered_cloud_pair"
 
 
-def case_specs(case_filter: str, first_names: list[str]) -> list[tuple[str, str, str]]:
-    sizes = sorted({size_suffix(name) for name in first_names}, key=size_value)
-    if case_filter != "row-source-fused":
-        return [
-            (
-                case_label(suffix, case_filter),
-                suffix,
-                row_source_for_label(case_label(suffix, case_filter)),
+def point_types_for_label(label: str, case_filter: str) -> dict[str, str]:
+    if case_filter in (
+        "generic-xyz-point-types",
+        "generic-xyz-point-types-public",
+        "source-indexed-generic-xyz-point-types",
+        "source-indexed-generic-xyz-point-types-public",
+        "source-indexed-generic-xyz-point-types-public-variance",
+        "source-indexed-generic-pointnormal-256k-public",
+        "dual-indexed-generic-xyz-point-types",
+        "correspondence-generic-xyz-point-types",
+    ):
+        if case_filter in (
+            "source-indexed-generic-xyz-point-types",
+            "source-indexed-generic-xyz-point-types-public",
+            "source-indexed-generic-xyz-point-types-public-variance",
+            "source-indexed-generic-pointnormal-256k-public",
+        ):
+            match = SOURCE_INDEXED_GENERIC_CASE_RE.match(label)
+        elif case_filter == "dual-indexed-generic-xyz-point-types":
+            match = DUAL_INDEXED_GENERIC_CASE_RE.match(label)
+        elif case_filter == "correspondence-generic-xyz-point-types":
+            match = CORRESPONDENCE_GENERIC_CASE_RE.match(label)
+        else:
+            match = GENERIC_CASE_RE.match(label)
+        if not match:
+            raise SystemExit(f"cannot parse generic point-type case label: {label}")
+        source = match.group("source")
+        target = match.group("target")
+        return {
+            "source_point_type": source,
+            "target_point_type": target,
+            "point_type": f"{source}->{target}",
+        }
+    return {
+        "source_point_type": "PointXYZ",
+        "target_point_type": "PointXYZ",
+        "point_type": "PointXYZ",
+    }
+
+
+def case_specs(case_filter: str, first_names: list[str]) -> list[dict[str, Any]]:
+    if case_filter in (
+        "generic-xyz-point-types",
+        "generic-xyz-point-types-public",
+                        "source-indexed-generic-xyz-point-types",
+                        "source-indexed-generic-xyz-point-types-public",
+                        "source-indexed-generic-xyz-point-types-public-variance",
+                        "source-indexed-generic-pointnormal-256k-public",
+        "dual-indexed-generic-xyz-point-types",
+        "correspondence-generic-xyz-point-types",
+    ):
+        specs: list[dict[str, Any]] = []
+        for label in first_names:
+            point_types = point_types_for_label(label, case_filter)
+            specs.append(
+                {
+                    "label": label,
+                    "size": size_suffix(label),
+                    "row_source": (
+                        "dual_indexed_cloud_pair"
+                        if case_filter == "dual-indexed-generic-xyz-point-types"
+                        else
+                        "correspondence_pair"
+                        if case_filter == "correspondence-generic-xyz-point-types"
+                        else
+                        "source_indexed_cloud_pair"
+                        if case_filter in (
+                            "source-indexed-generic-xyz-point-types",
+                            "source-indexed-generic-xyz-point-types-public",
+                            "source-indexed-generic-xyz-point-types-public-variance",
+                            "source-indexed-generic-pointnormal-256k-public",
+                        )
+                        else "ordered_cloud_pair"
+                    ),
+                    **point_types,
+                }
             )
+        return sorted(
+            specs,
+            key=lambda spec: (
+                spec["source_point_type"],
+                spec["target_point_type"],
+                size_value(spec["size"]),
+            ),
+        )
+
+    sizes = sorted({size_suffix(name) for name in first_names}, key=size_value)
+    if case_filter not in ("row-source-fused", "row-source-direct-gather"):
+        return [
+            {
+                "label": case_label(suffix, case_filter),
+                "size": suffix,
+                "row_source": row_source_for_label(case_label(suffix, case_filter)),
+                **point_types_for_label(case_label(suffix, case_filter), case_filter),
+            }
             for suffix in sizes
         ]
-    return [
-        (
-            fused_case(suffix, row_source),
-            suffix,
-            row_source_for_label(fused_case(suffix, row_source)),
-        )
-        for row_source in (
-            "source-indexed-cloud-pair",
-            "dual-indexed-cloud-pair",
-            "correspondence-pair",
-        )
-        for suffix in sizes
-    ]
+    specs: list[dict[str, Any]] = []
+    for row_source in (
+        "source-indexed-cloud-pair",
+        "dual-indexed-cloud-pair",
+        "correspondence-pair",
+    ):
+        for suffix in sizes:
+            label = (
+                direct_gather_case(suffix, row_source)
+                if case_filter == "row-source-direct-gather"
+                else fused_case(suffix, row_source)
+            )
+            specs.append(
+                {
+                    "label": label,
+                    "size": suffix,
+                    "row_source": row_source_for_label(label),
+                    **point_types_for_label(label, case_filter),
+                }
+            )
+    return specs
 
 
 def case_group(case_filter: str) -> str:
     if case_filter == "ordered-cloud-pair-public":
         return "te2d_ordered_cloud_pair_public"
+    if case_filter == "source-indexed-public":
+        return "te2d_source_indexed_cloud_pair_public"
+    if case_filter == "correspondence-public":
+        return "te2d_correspondence_pair_public"
     if case_filter == "row-source-fused":
         return "te2d_row_source_fused"
+    if case_filter == "row-source-direct-gather":
+        return "te2d_row_source_direct_gather"
+    if case_filter == "generic-xyz-point-types":
+        return "te2d_generic_xyz_point_types"
+    if case_filter == "generic-xyz-point-types-public":
+        return "te2d_generic_xyz_point_types_public"
+    if case_filter == "source-indexed-generic-xyz-point-types":
+        return "te2d_source_indexed_generic_xyz_point_types"
+    if case_filter == "source-indexed-generic-xyz-point-types-public":
+        return "te2d_source_indexed_generic_xyz_point_types_public"
+    if case_filter == "source-indexed-generic-xyz-point-types-public-variance":
+        return "te2d_source_indexed_generic_xyz_point_types_public_variance"
+    if case_filter == "source-indexed-generic-pointnormal-256k-public":
+        return "te2d_source_indexed_generic_pointnormal_256k_public"
+    if case_filter == "dual-indexed-generic-xyz-point-types":
+        return "te2d_dual_indexed_generic_xyz_point_types"
+    if case_filter == "correspondence-generic-xyz-point-types":
+        return "te2d_correspondence_generic_xyz_point_types"
     return "te2d_ordered_cloud_pair_fused"
 
 
 def case_kind(case_filter: str) -> str:
     if case_filter == "ordered-cloud-pair-public":
         return "board_production_public_same_boundary"
+    if case_filter == "source-indexed-public":
+        return "board_production_public_source_indexed_same_boundary"
+    if case_filter == "correspondence-public":
+        return "board_production_public_correspondence_same_boundary"
     if case_filter == "row-source-fused":
         return "board_diagnostic_row_source_same_boundary"
+    if case_filter == "row-source-direct-gather":
+        return "board_diagnostic_row_source_direct_gather_same_boundary"
+    if case_filter == "generic-xyz-point-types":
+        return "board_diagnostic_generic_xyz_point_types_same_boundary"
+    if case_filter == "generic-xyz-point-types-public":
+        return "board_production_public_generic_xyz_point_types_same_boundary"
+    if case_filter == "source-indexed-generic-xyz-point-types":
+        return "board_diagnostic_source_indexed_generic_xyz_point_types_same_boundary"
+    if case_filter == "source-indexed-generic-xyz-point-types-public":
+        return "board_production_public_source_indexed_generic_xyz_point_types_same_boundary"
+    if case_filter == "source-indexed-generic-xyz-point-types-public-variance":
+        return "board_production_public_source_indexed_generic_xyz_point_types_variance_same_boundary"
+    if case_filter == "source-indexed-generic-pointnormal-256k-public":
+        return "board_production_public_source_indexed_generic_pointnormal_256k_same_boundary"
+    if case_filter == "dual-indexed-generic-xyz-point-types":
+        return "board_diagnostic_dual_indexed_generic_xyz_point_types_same_boundary"
+    if case_filter == "correspondence-generic-xyz-point-types":
+        return "board_diagnostic_correspondence_generic_xyz_point_types_same_boundary"
     return "board_diagnostic_same_boundary"
 
 
 def summary_title(case_filter: str) -> str:
     if case_filter == "ordered-cloud-pair-public":
         return "transformation_estimation_2D ordered-cloud-pair production public repeated board"
+    if case_filter == "source-indexed-public":
+        return "transformation_estimation_2D source-indexed-cloud-pair production public repeated board"
+    if case_filter == "correspondence-public":
+        return "transformation_estimation_2D correspondence-pair production public repeated board"
     if case_filter == "row-source-fused":
         return "transformation_estimation_2D row-source repeated board diagnostic"
+    if case_filter == "row-source-direct-gather":
+        return "transformation_estimation_2D row-source direct-gather repeated board diagnostic"
+    if case_filter == "generic-xyz-point-types":
+        return "transformation_estimation_2D generic XYZ-like point-type repeated board diagnostic"
+    if case_filter == "generic-xyz-point-types-public":
+        return "transformation_estimation_2D generic XYZ-like point-type production public repeated board"
+    if case_filter == "source-indexed-generic-xyz-point-types":
+        return "transformation_estimation_2D source-indexed generic XYZ-like point-type repeated board diagnostic"
+    if case_filter == "source-indexed-generic-xyz-point-types-public":
+        return "transformation_estimation_2D source-indexed generic XYZ-like point-type production public repeated board"
+    if case_filter == "source-indexed-generic-xyz-point-types-public-variance":
+        return "transformation_estimation_2D source-indexed generic XYZ-like point-type production public variance repeated board"
+    if case_filter == "source-indexed-generic-pointnormal-256k-public":
+        return "transformation_estimation_2D source-indexed generic PointNormal 256K production public repeated board"
+    if case_filter == "dual-indexed-generic-xyz-point-types":
+        return "transformation_estimation_2D dual-indexed generic XYZ-like point-type repeated board diagnostic"
+    if case_filter == "correspondence-generic-xyz-point-types":
+        return "transformation_estimation_2D correspondence generic XYZ-like point-type repeated board diagnostic"
     return "transformation_estimation_2D ordered-cloud-pair repeated board diagnostic"
 
 
 def summary_label(case_filter: str) -> str:
     if case_filter == "ordered-cloud-pair-public":
         return "post-production public dispatch evidence"
+    if case_filter == "source-indexed-public":
+        return "source-indexed production public dispatch evidence"
+    if case_filter == "correspondence-public":
+        return "correspondence production public dispatch evidence"
     if case_filter == "row-source-fused":
         return "row-source diagnostic; materialize-to-ordered candidate; no production dispatch"
+    if case_filter == "row-source-direct-gather":
+        return "row-source diagnostic; direct gather candidate; no production dispatch"
+    if case_filter == "generic-xyz-point-types":
+        return "generic XYZ-like point-type candidate; ordered-cloud-pair; no production dispatch"
+    if case_filter == "generic-xyz-point-types-public":
+        return "generic XYZ-like point-type production public dispatch evidence"
+    if case_filter == "source-indexed-generic-xyz-point-types":
+        return "source-indexed generic XYZ-like point-type candidate; no production dispatch"
+    if case_filter == "source-indexed-generic-xyz-point-types-public":
+        return "source-indexed generic XYZ-like point-type production public dispatch evidence"
+    if case_filter == "source-indexed-generic-xyz-point-types-public-variance":
+        return "source-indexed generic XYZ-like point-type production public variance evidence"
+    if case_filter == "source-indexed-generic-pointnormal-256k-public":
+        return "source-indexed generic PointNormal 256K production public dispatch evidence"
+    if case_filter == "dual-indexed-generic-xyz-point-types":
+        return "dual-indexed generic XYZ-like point-type candidate; no production dispatch"
+    if case_filter == "correspondence-generic-xyz-point-types":
+        return "correspondence generic XYZ-like point-type candidate; no production dispatch"
     return "pre-production diagnostic; no production dispatch"
 
 
@@ -237,7 +441,8 @@ def metric(values: list[float]) -> dict[str, Any]:
 def build_case_metrics(runs: list[dict[str, Any]], case_filter: str) -> dict[str, dict[str, Any]]:
     first_names = sorted(runs[0]["std"]["cases"])
     result: dict[str, dict[str, Any]] = {}
-    for label, suffix, row_source in case_specs(case_filter, first_names):
+    for spec in case_specs(case_filter, first_names):
+        label = spec["label"]
         values: list[float] = []
         rows: list[dict[str, Any]] = []
         std_checksums: set[str] = set()
@@ -260,9 +465,12 @@ def build_case_metrics(runs: list[dict[str, Any]], case_filter: str) -> dict[str
             )
         result[label] = {
             "key": label,
-            "size": size_value(suffix),
+            "size": size_value(spec["size"]),
             "label": label,
-            "row_source": row_source,
+            "row_source": spec["row_source"],
+            "point_type": spec["point_type"],
+            "source_point_type": spec["source_point_type"],
+            "target_point_type": spec["target_point_type"],
             "metric": metric(values),
             "runs": rows,
             "checksums": {
@@ -300,9 +508,49 @@ def side(label: str,
         boundary = "production_public_ordered_cloud_pair_overload"
         timer_boundary = "public_ordered_cloud_pair_estimate_plus_2d_solve"
         gate = "exact_pointxyz_float_dense_finite_ordered_cloud_pair_size_ge_16_or_scalar_fallback"
+    elif args.case_filter == "source-indexed-public":
+        boundary = "production_public_source_indexed_cloud_pair_overload"
+        timer_boundary = "public_source_indexed_estimate_plus_2d_solve"
+        gate = "exact_pointxyz_float_valid_source_indices_dense_selected_finite_size_ge_16_or_scalar_fallback"
+    elif args.case_filter == "correspondence-public":
+        boundary = "production_public_correspondence_pair_overload"
+        timer_boundary = "public_correspondence_estimate_plus_2d_solve"
+        gate = "exact_pointxyz_float_valid_correspondences_dense_selected_finite_size_ge_16_or_scalar_fallback"
+    elif args.case_filter == "generic-xyz-point-types":
+        boundary = "test_support_generic_xyz_point_type_candidate"
+        timer_boundary = "generic_xyz_point_type_ordered_sum_tree_plus_2d_solve"
+        gate = "pointxyz_like_source_target_float_dense_finite_size_ge_16_or_scalar_fallback"
+    elif args.case_filter == "source-indexed-generic-xyz-point-types":
+        boundary = "test_support_source_indexed_generic_xyz_point_type_direct_gather_candidate"
+        timer_boundary = "source_indexed_generic_xyz_direct_gather_plus_2d_solve"
+        gate = "pointxyz_like_source_target_float_valid_source_indices_dense_selected_finite_size_ge_16_or_scalar_fallback"
+    elif args.case_filter in (
+        "source-indexed-generic-xyz-point-types-public",
+        "source-indexed-generic-xyz-point-types-public-variance",
+        "source-indexed-generic-pointnormal-256k-public",
+    ):
+        boundary = "production_public_source_indexed_generic_xyz_point_type_overload"
+        timer_boundary = "public_source_indexed_generic_xyz_point_type_estimate_plus_2d_solve"
+        gate = "pointxyz_like_source_target_float_valid_source_indices_dense_selected_finite_size_ge_16_or_scalar_fallback"
+    elif args.case_filter == "dual-indexed-generic-xyz-point-types":
+        boundary = "test_support_dual_indexed_generic_xyz_point_type_direct_gather_candidate"
+        timer_boundary = "dual_indexed_generic_xyz_direct_gather_plus_2d_solve"
+        gate = "pointxyz_like_source_target_float_valid_source_and_target_indices_dense_selected_finite_size_ge_16_or_scalar_fallback"
+    elif args.case_filter == "correspondence-generic-xyz-point-types":
+        boundary = "test_support_correspondence_generic_xyz_point_type_direct_gather_candidate"
+        timer_boundary = "correspondence_generic_xyz_direct_gather_plus_2d_solve"
+        gate = "pointxyz_like_source_target_float_valid_query_and_match_correspondences_dense_selected_finite_size_ge_16_or_scalar_fallback"
+    elif args.case_filter == "generic-xyz-point-types-public":
+        boundary = "production_public_generic_ordered_cloud_pair_overload"
+        timer_boundary = "public_generic_xyz_point_type_ordered_sum_tree_plus_2d_solve"
+        gate = "pointxyz_like_source_target_float_dense_finite_size_ge_16_or_scalar_fallback"
     elif args.case_filter == "row-source-fused":
         boundary = "test_support_row_source_materialize_to_ordered_candidate"
         timer_boundary = "row_source_materialize_plus_two_pass_centered_correlation_plus_2d_solve"
+        gate = "valid_indices_or_correspondences_pointxyz_float_dense_finite_size_ge_16_or_scalar_fallback"
+    elif args.case_filter == "row-source-direct-gather":
+        boundary = "test_support_row_source_direct_gather_candidate"
+        timer_boundary = "index_stream_load_plus_xyz_gather_plus_two_pass_centered_correlation_plus_2d_solve"
         gate = "valid_indices_or_correspondences_pointxyz_float_dense_finite_size_ge_16_or_scalar_fallback"
     else:
         boundary = "test_support_fused_2d_correlation_candidate"
@@ -324,6 +572,63 @@ def side(label: str,
     }
 
 
+def candidate_reduction_for_filter(case_filter: str) -> str:
+    if case_filter in (
+        "generic-xyz-point-types",
+        "generic-xyz-point-types-public",
+    ):
+        return "rvv_generic_two_pass_centered_sum_tree"
+    if case_filter == "source-indexed-generic-xyz-point-types":
+        return "rvv_source_indexed_generic_direct_gather_two_pass_centered_sum_tree"
+    if case_filter in (
+        "source-indexed-generic-xyz-point-types-public",
+        "source-indexed-generic-xyz-point-types-public-variance",
+        "source-indexed-generic-pointnormal-256k-public",
+    ):
+        return "rvv_production_source_indexed_generic_direct_gather_two_pass_centered_sum_tree"
+    if case_filter == "dual-indexed-generic-xyz-point-types":
+        return "rvv_dual_indexed_generic_direct_gather_two_pass_centered_sum_tree"
+    if case_filter == "correspondence-generic-xyz-point-types":
+        return "rvv_correspondence_generic_direct_gather_two_pass_centered_sum_tree"
+    if case_filter == "source-indexed-public":
+        return "rvv_production_source_indexed_direct_gather_two_pass_centered_sum_tree"
+    if case_filter == "correspondence-public":
+        return "rvv_production_correspondence_direct_gather_two_pass_centered_sum_tree"
+    if case_filter == "row-source-direct-gather":
+        return "rvv_direct_gather_two_pass_centered_sum_tree"
+    if case_filter == "row-source-fused":
+        return "rvv_materialize_then_ordered_sum_tree"
+    return "rvv_ordered_sum_tree"
+
+
+def candidate_asm_boundary_for_filter(case_filter: str) -> str:
+    if case_filter == "ordered-cloud-pair-public":
+        return "runPublicCase_lambda_production_public_boundary"
+    if case_filter == "source-indexed-public":
+        return "runPublicSourceIndexedCase_lambda_production_public_boundary"
+    if case_filter == "correspondence-public":
+        return "runPublicCorrespondenceCase_lambda_production_public_boundary"
+    if case_filter == "source-indexed-generic-xyz-point-types":
+        return "runSourceIndexedGenericCase_lambda_test_support_boundary"
+    if case_filter in (
+        "source-indexed-generic-xyz-point-types-public",
+        "source-indexed-generic-xyz-point-types-public-variance",
+        "source-indexed-generic-pointnormal-256k-public",
+    ):
+        return "runPublicSourceIndexedGenericCase_lambda_production_public_boundary"
+    if case_filter == "dual-indexed-generic-xyz-point-types":
+        return "runDualIndexedGenericCase_lambda_test_support_boundary"
+    if case_filter == "correspondence-generic-xyz-point-types":
+        return "runCorrespondenceGenericCase_lambda_test_support_boundary"
+    if case_filter == "generic-xyz-point-types-public":
+        return "runPublicGenericCase_lambda_production_public_boundary"
+    if case_filter in ("row-source-fused", "row-source-direct-gather"):
+        return "runRowSourceCase_lambda_test_support_boundary"
+    if case_filter == "generic-xyz-point-types":
+        return "runGenericCase_lambda_test_support_boundary"
+    return "runFusedCase_lambda_test_support_boundary"
+
+
 def build_manifest(runs: list[dict[str, Any]],
                    case_metrics: dict[str, dict[str, Any]],
                    summary_path: Path,
@@ -333,7 +638,7 @@ def build_manifest(runs: list[dict[str, Any]],
         f"std={sha256_file(Path(args.std_bin))}; rvv={sha256_file(Path(args.rvv_bin))}"
     )
     comparisons: list[dict[str, Any]] = []
-    for suffix, info in case_metrics.items():
+    for _, info in case_metrics.items():
         values = info["metric"]["values"]
         std_med = statistics.median(row["std_ms"] for row in info["runs"])
         rvv_med = statistics.median(row["rvv_ms"] for row in info["runs"])
@@ -341,10 +646,49 @@ def build_manifest(runs: list[dict[str, Any]],
             baseline_label = "Std build public ordered-cloud-pair"
             candidate_label = "RVV build public ordered-cloud-pair"
             baseline_reduction = "scalar_iterator_centroid_demean_correlation"
+        elif args.case_filter == "source-indexed-public":
+            baseline_label = "Std build public source-indexed-cloud-pair"
+            candidate_label = "RVV build public source-indexed-cloud-pair"
+            baseline_reduction = "scalar_source_indexed_iterator_centroid_demean_correlation"
+        elif args.case_filter == "correspondence-public":
+            baseline_label = "Std build public correspondence-pair"
+            candidate_label = "RVV build public correspondence-pair"
+            baseline_reduction = "scalar_correspondence_iterator_centroid_demean_correlation"
+        elif args.case_filter == "generic-xyz-point-types":
+            baseline_label = "Std build generic point-type candidate"
+            candidate_label = "RVV build generic point-type candidate"
+            baseline_reduction = "scalar_generic_two_pass_centered_sum"
+        elif args.case_filter == "source-indexed-generic-xyz-point-types":
+            baseline_label = "Std build source-indexed generic point-type candidate"
+            candidate_label = "RVV build source-indexed generic point-type candidate"
+            baseline_reduction = "scalar_source_indexed_direct_accessor_two_pass_centered_sum"
+        elif args.case_filter in (
+            "source-indexed-generic-xyz-point-types-public",
+            "source-indexed-generic-pointnormal-256k-public",
+        ):
+            baseline_label = "Std build public source-indexed generic point-type"
+            candidate_label = "RVV build public source-indexed generic point-type"
+            baseline_reduction = "scalar_source_indexed_iterator_centroid_demean_correlation"
+        elif args.case_filter == "dual-indexed-generic-xyz-point-types":
+            baseline_label = "Std build dual-indexed generic point-type candidate"
+            candidate_label = "RVV build dual-indexed generic point-type candidate"
+            baseline_reduction = "scalar_dual_indexed_direct_accessor_two_pass_centered_sum"
+        elif args.case_filter == "correspondence-generic-xyz-point-types":
+            baseline_label = "Std build correspondence generic point-type candidate"
+            candidate_label = "RVV build correspondence generic point-type candidate"
+            baseline_reduction = "scalar_correspondence_direct_accessor_two_pass_centered_sum"
+        elif args.case_filter == "generic-xyz-point-types-public":
+            baseline_label = "Std build public generic point-type ordered-cloud-pair"
+            candidate_label = "RVV build public generic point-type ordered-cloud-pair"
+            baseline_reduction = "scalar_iterator_centroid_demean_correlation"
         elif args.case_filter == "row-source-fused":
             baseline_label = "Std build row-source materialize-to-ordered candidate"
             candidate_label = "RVV build row-source materialize-to-ordered candidate"
             baseline_reduction = "scalar_materialize_then_two_pass_centered_sum"
+        elif args.case_filter == "row-source-direct-gather":
+            baseline_label = "Std build row-source direct scalar accessor candidate"
+            candidate_label = "RVV build row-source direct gather candidate"
+            baseline_reduction = "scalar_direct_index_accessor_two_pass_centered_sum"
         else:
             baseline_label = "Std build fused candidate"
             candidate_label = "RVV build fused candidate"
@@ -355,7 +699,9 @@ def build_manifest(runs: list[dict[str, Any]],
                 "group": case_group(args.case_filter),
                 "case_kind": case_kind(args.case_filter),
                 "evidence_role": "strict_ab",
-                "point_type": "PointXYZ",
+                "point_type": info["point_type"],
+                "source_point_type": info["source_point_type"],
+                "target_point_type": info["target_point_type"],
                 "scalar": "float",
                 "size": info["size"],
                 "row_source": info["row_source"],
@@ -379,16 +725,8 @@ def build_manifest(runs: list[dict[str, Any]],
                 ),
                 "candidate": side(
                     candidate_label,
-                    "rvv_materialize_then_ordered_sum_tree"
-                    if args.case_filter == "row-source-fused"
-                    else "rvv_ordered_sum_tree",
-                    "runPublicCase_lambda_production_public_boundary"
-                    if args.case_filter == "ordered-cloud-pair-public"
-                    else (
-                        "runRowSourceCase_lambda_test_support_boundary"
-                        if args.case_filter == "row-source-fused"
-                        else "runFusedCase_lambda_test_support_boundary"
-                    ),
+                    candidate_reduction_for_filter(args.case_filter),
+                    candidate_asm_boundary_for_filter(args.case_filter),
                     "rvv_ms",
                     rvv_med,
                     args,
@@ -418,9 +756,48 @@ def build_manifest(runs: list[dict[str, Any]],
                 "binary_hash": binary_hash,
                 "dataset": first_meta.get("dataset"),
                 "case_filter": args.case_filter,
+                "point_type": (
+                    "mixed_point_types"
+                    if args.case_filter in (
+                        "generic-xyz-point-types",
+                        "generic-xyz-point-types-public",
+                        "source-indexed-generic-xyz-point-types",
+                        "source-indexed-generic-xyz-point-types-public",
+                        "source-indexed-generic-xyz-point-types-public-variance",
+                        "dual-indexed-generic-xyz-point-types",
+                        "correspondence-generic-xyz-point-types",
+                    )
+                    else next(iter(case_metrics.values()))["point_type"]
+                ),
+                "source_point_type": (
+                    "mixed_point_types"
+                    if args.case_filter in (
+                        "generic-xyz-point-types",
+                        "generic-xyz-point-types-public",
+                        "source-indexed-generic-xyz-point-types",
+                        "source-indexed-generic-xyz-point-types-public",
+                        "source-indexed-generic-xyz-point-types-public-variance",
+                        "dual-indexed-generic-xyz-point-types",
+                        "correspondence-generic-xyz-point-types",
+                    )
+                    else next(iter(case_metrics.values()))["source_point_type"]
+                ),
+                "target_point_type": (
+                    "mixed_point_types"
+                    if args.case_filter in (
+                        "generic-xyz-point-types",
+                        "generic-xyz-point-types-public",
+                        "source-indexed-generic-xyz-point-types",
+                        "source-indexed-generic-xyz-point-types-public",
+                        "source-indexed-generic-xyz-point-types-public-variance",
+                        "dual-indexed-generic-xyz-point-types",
+                        "correspondence-generic-xyz-point-types",
+                    )
+                    else next(iter(case_metrics.values()))["target_point_type"]
+                ),
                 "row_source": (
                     "mixed_row_sources"
-                    if args.case_filter == "row-source-fused"
+                    if args.case_filter in ("row-source-fused", "row-source-direct-gather")
                     else next(iter(case_metrics.values()))["row_source"]
                 ),
                 "decision_bucket": overall_decision(case_metrics),
@@ -445,6 +822,24 @@ def render_summary(case_metrics: dict[str, dict[str, Any]], args: argparse.Names
     lines.append("")
     if args.case_filter == "ordered-cloud-pair-public":
         evidence_role = "post-production public dispatch（接入生产后公开入口证据）"
+    elif args.case_filter == "source-indexed-public":
+        evidence_role = "source-indexed production public dispatch（源索引生产公开入口证据）"
+    elif args.case_filter == "correspondence-public":
+        evidence_role = "correspondence production public dispatch（对应关系生产公开入口证据）"
+    elif args.case_filter == "generic-xyz-point-types-public":
+        evidence_role = "generic point-type production public dispatch（泛型点类型生产公开入口证据）"
+    elif args.case_filter == "source-indexed-generic-pointnormal-256k-public":
+        evidence_role = "source-indexed generic PointNormal 256K production public dispatch（源索引泛型 PointNormal 256K 生产公开入口证据）"
+    elif args.case_filter == "source-indexed-generic-xyz-point-types-public-variance":
+        evidence_role = "source-indexed generic production public variance（源索引泛型生产公开入口方差证据）"
+    elif args.case_filter == "generic-xyz-point-types":
+        evidence_role = "generic point-type diagnostic（泛型点类型诊断）"
+    elif args.case_filter == "source-indexed-generic-xyz-point-types":
+        evidence_role = "source-indexed generic point-type diagnostic（源索引泛型点类型诊断）"
+    elif args.case_filter == "dual-indexed-generic-xyz-point-types":
+        evidence_role = "dual-indexed generic point-type diagnostic（双索引泛型点类型诊断）"
+    elif args.case_filter == "correspondence-generic-xyz-point-types":
+        evidence_role = "correspondence generic point-type diagnostic（对应关系泛型点类型诊断）"
     elif args.case_filter == "row-source-fused":
         evidence_role = "row-source diagnostic（行来源诊断）"
     else:
@@ -458,6 +853,24 @@ def render_summary(case_metrics: dict[str, dict[str, Any]], args: argparse.Names
     lines.append("`B/A = Std_ms / RVV_ms`，大于 1 表示 RVV build 更快。")
     if args.case_filter == "ordered-cloud-pair-public":
         lines.append("本摘要用于 PI4 production public evidence；QEMU timing 仍不参与性能结论。")
+    elif args.case_filter == "source-indexed-public":
+        lines.append("本摘要用于 Phase 091 source-indexed production public probe；它不覆盖 dual-indexed 或 correspondence。")
+    elif args.case_filter == "correspondence-public":
+        lines.append("本摘要用于 Phase 094 correspondence production public probe；它不覆盖 source-indexed、dual-indexed 或泛型点型。")
+    elif args.case_filter == "generic-xyz-point-types-public":
+        lines.append("本摘要覆盖代表性 PointXYZ-like 点型和 mixed source/target 组合的真实 public ordered-cloud-pair；QEMU timing 仍不参与性能结论。")
+    elif args.case_filter == "generic-xyz-point-types":
+        lines.append("本摘要覆盖代表性 PointXYZ-like 点型和 mixed source/target 组合；不证明 production dispatch。")
+    elif args.case_filter == "source-indexed-generic-xyz-point-types":
+        lines.append("本摘要覆盖 source-indexed 代表性 PointXYZ-like 点型和 mixed source/target 组合；不证明 production dispatch。")
+    elif args.case_filter == "source-indexed-generic-pointnormal-256k-public":
+        lines.append("本摘要只覆盖 source-indexed public generic `PointNormal -> PointNormal 256K` 单例，用于隔离 Phase 103 的长尾；它不能单独证明泛型生产扩宽可采纳。")
+    elif args.case_filter == "source-indexed-generic-xyz-point-types-public-variance":
+        lines.append("本摘要用于 Phase 106 source-indexed generic public representative variance；它使用独立 evidence dir，不覆盖 Phase 103/104，且不能自动写成 adopted。")
+    elif args.case_filter == "dual-indexed-generic-xyz-point-types":
+        lines.append("本摘要覆盖 dual-indexed 代表性 PointXYZ-like 点型和 mixed source/target 组合；不证明 production dispatch。")
+    elif args.case_filter == "correspondence-generic-xyz-point-types":
+        lines.append("本摘要覆盖 correspondence 代表性 PointXYZ-like 点型和 mixed source/target 组合；不证明 production dispatch。")
     elif args.case_filter == "row-source-fused":
         lines.append("本摘要包含 materialize-to-ordered 展开成本；它只用于 row-source 诊断，不证明 production dispatch。")
     else:
@@ -465,14 +878,21 @@ def render_summary(case_metrics: dict[str, dict[str, Any]], args: argparse.Names
     lines.append("")
     lines.append("## 结果")
     lines.append("")
-    lines.append("| case | runs | median | min | max | p10 | p90 | B/A<1 | bucket | values |")
-    lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |")
+    lines.append("| case | point_type | source_pt | target_pt | runs | median | min | max | p10 | p90 | B/A<1 | bucket | values |")
+    lines.append("| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |")
     for _, info in sorted(
-        case_metrics.items(), key=lambda item: (item[1]["row_source"], item[1]["size"])
+        case_metrics.items(),
+        key=lambda item: (
+            item[1]["row_source"],
+            item[1]["source_point_type"],
+            item[1]["target_point_type"],
+            item[1]["size"],
+        ),
     ):
         metric_info = info["metric"]
         lines.append(
-            f"| `{info['label']}` | {len(metric_info['values'])} | "
+            f"| `{info['label']}` | `{info['point_type']}` | `{info['source_point_type']}` | "
+            f"`{info['target_point_type']}` | {len(metric_info['values'])} | "
             f"{metric_info['median']:.3f}x | {metric_info['min']:.3f}x | "
             f"{metric_info['max']:.3f}x | {metric_info['p10']:.3f}x | "
             f"{metric_info['p90']:.3f}x | {metric_info['below_one_count']} | "

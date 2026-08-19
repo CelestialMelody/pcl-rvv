@@ -1,5 +1,9 @@
 # Phase 060 Result: production-candidate-review-and-row-source-boundaries
 
+> 历史注释：本阶段审阅时点的 production gate 是 exact `PointXYZ -> PointXYZ`。Phase 080
+> 后当前 production header 已切换为 traits-gated generic ordered-cloud-pair dispatch；
+> 本文的 exact-only 结论只保留为恢复审阅历史。
+
 ## 当前结论
 
 本阶段完成了对 Phase 050 production candidate（生产候选）和 Phase 030 row-source

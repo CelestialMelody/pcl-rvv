@@ -25,7 +25,7 @@ from typing import Any
 RVV_RE = re.compile(
     r"\b("
     r"vsetvli?|"
-    r"vle\d+\.v|vlse\d+\.v|vluxei\d+\.v|"
+    r"vle\d+\.v|vlse\d+\.v|vluxei\d+\.v|vluxseg\d+ei\d+\.v|"
     r"vse\d+\.v|vsse\d+\.v|vsuxei\d+\.v|"
     r"vlseg\d+e\d+\.v|vsseg\d+e\d+\.v|"
     r"vlsseg\d+e\d+\.v|vssseg\d+e\d+\.v|"
@@ -48,6 +48,8 @@ SYMBOL_RE = re.compile(r"^\s*[0-9a-f]+\s+<(.+)>:\s*$")
 
 KEY_MNEMONICS = (
     "vlsseg3e32.v",
+    "vluxei32.v",
+    "vluxseg3ei32.v",
     "vfmacc",
     "vfredosum",
     "vfsub",
@@ -60,6 +62,71 @@ CATEGORIES = {
         "runPublicCase",
         "_M_invoke",
     ),
+    "production_public_source_indexed_lambda_boundary": (
+        "runPublicSourceIndexedCase",
+        "_M_invoke",
+    ),
+    "production_public_source_indexed_generic_lambda_boundary": (
+        "runPublicSourceIndexedGenericCase",
+        "_M_invoke",
+    ),
+    "production_public_correspondence_lambda_boundary": (
+        "runPublicCorrespondenceCase",
+        "_M_invoke",
+    ),
+    "production_public_generic_lambda_boundary": (
+        "runPublicGenericCase",
+        "_M_invoke",
+    ),
+    "source_indexed_family_ab_lambda_boundary": (
+        "runSourceIndexedFamilyAB",
+        "_M_invoke",
+    ),
+    "dual_indexed_family_ab_lambda_boundary": (
+        "runDualIndexedFamilyAB",
+        "_M_invoke",
+    ),
+    "correspondence_family_ab_lambda_boundary": (
+        "runCorrespondenceFamilyAB",
+        "_M_invoke",
+    ),
+    "correspondence_staging_profile_lambda_boundary": (
+        "runCorrespondenceStagedDualIndexedCase",
+        "_M_invoke",
+    ),
+    "correspondence_locality_order_profile_lambda_boundary": (
+        "runCorrespondenceLocalityOrderProfileCase",
+        "_M_invoke",
+    ),
+    "correspondence_component_ablation_lambda_boundary": (
+        "runCorrespondenceComponentAblationCase",
+        "_M_invoke",
+    ),
+    "correspondence_chunked_xyz_staging_lambda_boundary": (
+        "runCorrespondenceChunkedXYZStaging",
+        "_M_invoke",
+    ),
+    "production_public_source_indexed_boundary": (
+        "TransformationEstimation2D",
+        "estimateRigidTransformation(pcl::PointCloud<pcl::PointXYZ> const&, "
+        "std::vector<int, std::allocator<int> > const&, "
+        "pcl::PointCloud<pcl::PointXYZ> const&, "
+        "Eigen::Matrix",
+    ),
+    "production_public_source_indexed_generic_boundary": (
+        "TransformationEstimation2D",
+        "estimateRigidTransformation",
+        "std::vector<int, std::allocator<int> > const&",
+        "Eigen::Matrix",
+    ),
+    "production_public_dual_indexed_boundary": (
+        "TransformationEstimation2D",
+        "estimateRigidTransformation(pcl::PointCloud<pcl::PointXYZ> const&, "
+        "std::vector<int, std::allocator<int> > const&, "
+        "pcl::PointCloud<pcl::PointXYZ> const&, "
+        "std::vector<int, std::allocator<int> > const&, "
+        "Eigen::Matrix",
+    ),
     "production_public_boundary": (
         "TransformationEstimation2D",
         "estimateRigidTransformation(pcl::PointCloud<pcl::PointXYZ> const&, "
@@ -67,6 +134,22 @@ CATEGORIES = {
     ),
     "candidate_lambda_boundary": (
         "runFusedCase",
+        "_M_invoke",
+    ),
+    "generic_candidate_lambda_boundary": (
+        "runGenericCase",
+        "_M_invoke",
+    ),
+    "source_indexed_generic_candidate_lambda_boundary": (
+        "runSourceIndexedGenericCase",
+        "_M_invoke",
+    ),
+    "dual_indexed_generic_candidate_lambda_boundary": (
+        "runDualIndexedGenericCase",
+        "_M_invoke",
+    ),
+    "correspondence_generic_candidate_lambda_boundary": (
+        "runCorrespondenceGenericCase",
         "_M_invoke",
     ),
     "test_support_fixture": (
@@ -132,6 +215,68 @@ def parse_asm(path: Path) -> dict[str, Any]:
 def category_for(symbol: str) -> str:
     if (
         "_M_invoke" in symbol
+        and "runSourceIndexedFamilyAB" in symbol
+    ):
+        return "source_indexed_family_ab_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runDualIndexedFamilyAB" in symbol
+    ):
+        return "dual_indexed_family_ab_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runCorrespondenceFamilyAB" in symbol
+    ):
+        return "correspondence_family_ab_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runCorrespondenceStagedDualIndexedCase" in symbol
+    ):
+        return "correspondence_staging_profile_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runCorrespondenceLocalityOrderProfileCase" in symbol
+    ):
+        return "correspondence_locality_order_profile_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runCorrespondenceComponentAblationCase" in symbol
+    ):
+        return "correspondence_component_ablation_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runCorrespondenceChunkedXYZStaging" in symbol
+    ):
+        return "correspondence_chunked_xyz_staging_lambda_boundary"
+    if "accumulateFused2DCorrespondenceChunkedXYZStagingRVV" in symbol:
+        return "correspondence_chunked_xyz_staging_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runPublicSourceIndexedGenericCase" in symbol
+    ):
+        return "production_public_source_indexed_generic_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runPublicCorrespondenceCase" in symbol
+    ):
+        return "production_public_correspondence_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runSourceIndexedGenericCase" in symbol
+    ):
+        return "source_indexed_generic_candidate_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runDualIndexedGenericCase" in symbol
+    ):
+        return "dual_indexed_generic_candidate_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
+        and "runCorrespondenceGenericCase" in symbol
+    ):
+        return "correspondence_generic_candidate_lambda_boundary"
+    if (
+        "_M_invoke" in symbol
         and any(
             name in symbol
             for name in (
@@ -139,10 +284,57 @@ def category_for(symbol: str) -> str:
                 "runSourceIndexedCase",
                 "runDualIndexedCase",
                 "runCorrespondenceCase",
+                "runSourceIndexedDirectGatherCase",
+                "runDualIndexedDirectGatherCase",
+                "runCorrespondenceDirectGatherCase",
             )
         )
     ):
         return "row_source_lambda_boundary"
+    if (
+        "TransformationEstimation2D" in symbol
+        and "estimateRigidTransformation" in symbol
+        and "pcl::Correspondence" in symbol
+    ):
+        return "production_public_correspondence_boundary"
+    if (
+        "TransformationEstimation2D" in symbol
+        and "estimateRigidTransformation" in symbol
+        and "std::vector<int, std::allocator<int> > const&" in symbol
+        and any(
+            point_type in symbol
+            for point_type in ("PointXYZI", "PointNormal", "PointXYZINormal")
+        )
+    ):
+        return "production_public_source_indexed_generic_boundary"
+    if (
+        "TransformationEstimation2D" in symbol
+        and "estimateRigidTransformation" in symbol
+        and "estimateRigidTransformation(pcl::PointCloud<pcl::PointXYZ> const&, "
+        "std::vector<int, std::allocator<int> > const&, "
+        "pcl::PointCloud<pcl::PointXYZ> const&, "
+        "std::vector<int, std::allocator<int> > const&, "
+        "Eigen::Matrix" in symbol
+    ):
+        return "production_public_dual_indexed_boundary"
+    if (
+        "TransformationEstimation2D" in symbol
+        and "estimateRigidTransformation" in symbol
+        and "estimateRigidTransformation(pcl::PointCloud<pcl::PointXYZ> const&, "
+        "std::vector<int, std::allocator<int> > const&, "
+        "pcl::PointCloud<pcl::PointXYZ> const&, "
+        "Eigen::Matrix" in symbol
+    ):
+        return "production_public_source_indexed_boundary"
+    if (
+        "TransformationEstimation2D" in symbol
+        and "estimateRigidTransformation" in symbol
+        and any(
+            point_type in symbol
+            for point_type in ("PointXYZI", "PointNormal", "PointXYZINormal")
+        )
+    ):
+        return "production_public_generic_boundary"
     for category, needles in CATEGORIES.items():
         if all(needle in symbol for needle in needles):
             return category
@@ -188,9 +380,52 @@ def build_summary(std_full_asm: Path,
     categories = summarize_categories(rvv)
     production_public_entries = [
         categories.get("production_public_lambda_boundary", {"total": 0, "mnemonics": {}}),
+        categories.get(
+            "production_public_source_indexed_lambda_boundary",
+            {"total": 0, "mnemonics": {}},
+        ),
+        categories.get(
+            "production_public_source_indexed_generic_lambda_boundary",
+            {"total": 0, "mnemonics": {}},
+        ),
+        categories.get(
+            "production_public_correspondence_lambda_boundary",
+            {"total": 0, "mnemonics": {}},
+        ),
+        categories.get(
+            "production_public_generic_lambda_boundary",
+            {"total": 0, "mnemonics": {}},
+        ),
+        categories.get(
+            "production_public_source_indexed_boundary",
+            {"total": 0, "mnemonics": {}},
+        ),
+        categories.get(
+            "production_public_source_indexed_generic_boundary",
+            {"total": 0, "mnemonics": {}},
+        ),
+        categories.get(
+            "production_public_correspondence_boundary",
+            {"total": 0, "mnemonics": {}},
+        ),
+        categories.get(
+            "production_public_generic_boundary",
+            {"total": 0, "mnemonics": {}},
+        ),
         categories.get("production_public_boundary", {"total": 0, "mnemonics": {}}),
     ]
     candidate = categories.get("candidate_lambda_boundary", {"total": 0, "mnemonics": {}})
+    generic_candidate = categories.get(
+        "generic_candidate_lambda_boundary", {"total": 0, "mnemonics": {}}
+    )
+    source_indexed_generic_candidate = categories.get(
+        "source_indexed_generic_candidate_lambda_boundary",
+        {"total": 0, "mnemonics": {}},
+    )
+    dual_indexed_generic_candidate = categories.get(
+        "dual_indexed_generic_candidate_lambda_boundary",
+        {"total": 0, "mnemonics": {}},
+    )
     row_source = categories.get("row_source_lambda_boundary", {"total": 0, "mnemonics": {}})
     production = categories.get("production_scalar_boundary", {"total": 0, "mnemonics": {}})
     production_public = {
@@ -203,7 +438,17 @@ def build_summary(std_full_asm: Path,
         ),
     }
     production_public_key = key_counts(production_public["mnemonics"])
+    production_public_generic = categories.get(
+        "production_public_generic_boundary", {"total": 0, "mnemonics": {}}
+    )
     candidate_key = key_counts(candidate.get("mnemonics", {}))
+    generic_candidate_key = key_counts(generic_candidate.get("mnemonics", {}))
+    source_indexed_generic_candidate_key = key_counts(
+        source_indexed_generic_candidate.get("mnemonics", {})
+    )
+    dual_indexed_generic_candidate_key = key_counts(
+        dual_indexed_generic_candidate.get("mnemonics", {})
+    )
     row_source_key = key_counts(row_source.get("mnemonics", {}))
     production_key = key_counts(production.get("mnemonics", {}))
     focus_total = categories.get(focus_category, {}).get("total", 0)
@@ -211,11 +456,21 @@ def build_summary(std_full_asm: Path,
         decision = f"{focus_category}_present"
     elif production_public.get("total", 0):
         decision = "production_public_inline_boundary_present"
-    elif candidate["total"]:
+    elif (
+        candidate["total"]
+        or generic_candidate["total"]
+        or source_indexed_generic_candidate["total"]
+        or dual_indexed_generic_candidate["total"]
+    ):
         decision = "candidate_inline_boundary_present"
     else:
         decision = "candidate_boundary_not_found"
-    if candidate["total"] and production_public.get("total", 0):
+    if (
+        candidate["total"]
+        or generic_candidate["total"]
+        or source_indexed_generic_candidate["total"]
+        or dual_indexed_generic_candidate["total"]
+    ) and production_public.get("total", 0):
         decision += "_with_candidate_boundary"
     if production.get("total", 0):
         decision += "_with_other_rvv_boundaries"
@@ -237,19 +492,33 @@ def build_summary(std_full_asm: Path,
         "std_top_mnemonics": dict(Counter(std["by_mnemonic"]).most_common(20)),
         "categories": categories,
         "production_public_key_mnemonics": production_public_key,
+        "production_public_generic_key_mnemonics": key_counts(
+            production_public_generic.get("mnemonics", {})
+        ),
         "candidate_key_mnemonics": candidate_key,
+        "generic_candidate_key_mnemonics": generic_candidate_key,
+        "source_indexed_generic_candidate_key_mnemonics": (
+            source_indexed_generic_candidate_key
+        ),
+        "dual_indexed_generic_candidate_key_mnemonics": (
+            dual_indexed_generic_candidate_key
+        ),
         "row_source_key_mnemonics": row_source_key,
         "production_key_mnemonics": production_key,
         "focus_category": focus_category,
         "attribution_decision": decision,
         "boundary_note": (
-            "Production public RVV instructions are attributed to either the runPublicCase "
-            "lambda boundary or the exact PointXYZ ordered-cloud-pair public overload when "
-            "the wrapper is fully inlined. Candidate RVV instructions are attributed to the "
-            "runFusedCase lambda symbol; row-source candidates are attributed to the "
-            "runRowSourceCase / row-source wrapper lambda family. The header-only helper "
-            "may therefore be visible through an inlined caller symbol rather than a "
-            "standalone helper."
+            "Production public RVV instructions are attributed to the runPublicCase, "
+            "runPublicSourceIndexedCase, runPublicCorrespondenceCase, or "
+            "runPublicGenericCase lambda boundary, or to the corresponding public "
+            "overload when the wrapper is fully inlined. Candidate "
+        "RVV instructions are attributed to the runFusedCase lambda symbol or the "
+        "generic runGenericCase / source-indexed generic / dual-indexed generic "
+        "lambda boundary; "
+        "diagnostic row-source candidates are "
+            "attributed to the runRowSourceCase / row-source wrapper lambda family. The "
+            "header-only helper may therefore be visible through an inlined caller symbol "
+            "rather than a standalone helper."
         ),
     }
 
@@ -264,10 +533,14 @@ def render_markdown(summary: dict[str, Any]) -> str:
     lines.append("")
     lines.append(
         "当前 RVV bench binary 中，production public case 的关键指令优先归属到 "
-        "`runPublicCase` lambda 内联边界，或 exact `PointXYZ` ordered-cloud-pair "
+        "`runPublicCase` / `runPublicSourceIndexedCase` / "
+        "`runPublicCorrespondenceCase` / `runPublicGenericCase` "
+        "lambda 内联边界，或 production ordered/source-indexed-cloud-pair "
+        "/ correspondence-pair "
+        "template symbol for a traits-gated generic point type "
         "公开 overload 的 production symbol；test-only fused candidate 仍归属到 "
         "`runFusedCase` lambda 内联边界；row-source candidate 归属到 "
-        "`runRowSourceCase` 或具体 row-source wrapper lambda 内联边界。需要结合 case-filter 和 production direct tests "
+        "`runRowSourceCase`、`runSourceIndexedGenericCase` 或具体 row-source wrapper lambda 内联边界。需要结合 case-filter 和 production direct tests "
         "判断证据角色。"
     )
     lines.append("")
@@ -306,8 +579,11 @@ def render_markdown(summary: dict[str, Any]) -> str:
     lines.append("")
     lines.append("## 边界说明")
     lines.append("")
-    lines.append("- `runPublicCase` lambda 或 exact `PointXYZ` ordered-cloud-pair 公开 overload 边界用于 production public smoke / board bench，PI2 后可作为 production helper 命中证据的一部分。")
+    lines.append("- `runPublicCase` / `runPublicSourceIndexedCase` / `runPublicCorrespondenceCase` / `runPublicGenericCase` lambda 或 production ordered/source-indexed/correspondence 公开 overload / traits-gated generic production template symbol 边界用于 production public smoke / board bench，PI2 后可作为 production helper 命中证据的一部分。")
     lines.append("- `runFusedCase` lambda 内联边界对应 test-only fused candidate，不能替代 production public evidence。")
+    lines.append("- `runSourceIndexedGenericCase` lambda 内联边界对应 Phase 099 source-indexed generic point-type candidate，不能替代 production public evidence。")
+    lines.append("- `runDualIndexedGenericCase` lambda 内联边界对应 Phase 100 dual-indexed generic point-type candidate，不能替代 production public evidence。")
+    lines.append("- `runCorrespondenceGenericCase` lambda 内联边界对应 Phase 101 correspondence generic point-type candidate，不能替代 production public evidence。")
     lines.append("- `runRowSourceCase` 或 source-indexed、dual-indexed、correspondence wrapper lambda 边界对应 materialize-to-ordered row-source candidate，不能替代 production public evidence。")
     lines.append("- production fallback、Eigen / iterator 路径也可能含 RVV 指令；这些指令不能归入当前 production helper 收益。")
     lines.append("- 本摘要只支持 asm attribution（反汇编归属），不支持目标硬件性能结论。")

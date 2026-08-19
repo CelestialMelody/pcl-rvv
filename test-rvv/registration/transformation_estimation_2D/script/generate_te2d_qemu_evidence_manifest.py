@@ -25,6 +25,18 @@ ITER_RE = re.compile(r"^Iterations:\s*(?P<value>[0-9]+)\s*$")
 WARMUP_RE = re.compile(r"^Warmup Iterations:\s*(?P<value>[0-9]+)\s*$")
 DATASET_RE = re.compile(r"^Dataset:\s*(?P<value>.+?)\s*$")
 BUILD_RE = re.compile(r"^Build:\s*(?P<value>.+?)\s*$")
+GENERIC_CASE_RE = re.compile(
+    r"^(?:public )?generic 2D (?P<source>[A-Za-z0-9_]+)->(?P<target>[A-Za-z0-9_]+) (?P<size>\d+K)\s*$"
+)
+SOURCE_INDEXED_GENERIC_CASE_RE = re.compile(
+    r"^(?:public )?source-indexed generic 2D (?P<source>[A-Za-z0-9_]+)->(?P<target>[A-Za-z0-9_]+) (?P<size>\d+K)\s*$"
+)
+DUAL_INDEXED_GENERIC_CASE_RE = re.compile(
+    r"^dual-indexed generic 2D (?P<source>[A-Za-z0-9_]+)->(?P<target>[A-Za-z0-9_]+) (?P<size>\d+K)\s*$"
+)
+CORRESPONDENCE_GENERIC_CASE_RE = re.compile(
+    r"^correspondence generic 2D (?P<source>[A-Za-z0-9_]+)->(?P<target>[A-Za-z0-9_]+) (?P<size>\d+K)\s*$"
+)
 
 
 def parse_log(path: Path) -> dict[str, Any]:
@@ -72,11 +84,57 @@ def row_source_for_case(name: str, requested: str) -> str:
         return requested
     if "source-indexed-cloud-pair" in name:
         return "source_indexed_cloud_pair"
+    if "source-indexed generic" in name:
+        return "source_indexed_cloud_pair"
     if "dual-indexed-cloud-pair" in name:
         return "dual_indexed_cloud_pair"
+    if "dual-indexed generic" in name:
+        return "dual_indexed_cloud_pair"
+    if "correspondence generic" in name:
+        return "correspondence_pair"
     if "correspondence-pair" in name:
         return "correspondence_pair"
     return "ordered_cloud_pair"
+
+
+def point_types_for_case(name: str, case_filter: str) -> dict[str, str]:
+    if case_filter in (
+        "generic-xyz-point-types",
+        "generic-xyz-point-types-public",
+        "source-indexed-generic-xyz-point-types",
+        "source-indexed-generic-xyz-point-types-public",
+        "source-indexed-generic-xyz-point-types-public-variance",
+        "source-indexed-generic-pointnormal-256k-public",
+        "dual-indexed-generic-xyz-point-types",
+        "correspondence-generic-xyz-point-types",
+    ):
+        if case_filter in (
+            "source-indexed-generic-xyz-point-types",
+            "source-indexed-generic-xyz-point-types-public",
+            "source-indexed-generic-xyz-point-types-public-variance",
+            "source-indexed-generic-pointnormal-256k-public",
+        ):
+            match = SOURCE_INDEXED_GENERIC_CASE_RE.match(name)
+        elif case_filter == "dual-indexed-generic-xyz-point-types":
+            match = DUAL_INDEXED_GENERIC_CASE_RE.match(name)
+        elif case_filter == "correspondence-generic-xyz-point-types":
+            match = CORRESPONDENCE_GENERIC_CASE_RE.match(name)
+        else:
+            match = GENERIC_CASE_RE.match(name)
+        if not match:
+            raise SystemExit(f"cannot parse generic point-type case label: {name}")
+        source = match.group("source")
+        target = match.group("target")
+        return {
+            "source_point_type": source,
+            "target_point_type": target,
+            "point_type": f"{source}->{target}",
+        }
+    return {
+        "source_point_type": "PointXYZ",
+        "target_point_type": "PointXYZ",
+        "point_type": "PointXYZ",
+    }
 
 
 def load_asm_summary(path: Path) -> dict[str, Any]:
@@ -100,6 +158,40 @@ def rvv_instr_count_for_category(asm_summary: dict[str, Any], category: str) -> 
             categories.get(name, {}).get("total", 0)
             for name in ("production_public_lambda_boundary", "production_public_boundary")
         )
+    if category == "production_public_source_indexed_combined":
+        return sum(
+            categories.get(name, {}).get("total", 0)
+            for name in (
+                "production_public_source_indexed_lambda_boundary",
+                "production_public_source_indexed_boundary",
+            )
+        )
+    if category == "production_public_source_indexed_generic_combined":
+        return sum(
+            categories.get(name, {}).get("total", 0)
+            for name in (
+                "production_public_source_indexed_generic_lambda_boundary",
+                "production_public_source_indexed_generic_boundary",
+                "production_public_source_indexed_boundary",
+            )
+        )
+    if category == "production_public_correspondence_combined":
+        return sum(
+            categories.get(name, {}).get("total", 0)
+            for name in (
+                "production_public_correspondence_lambda_boundary",
+                "production_public_correspondence_boundary",
+            )
+        )
+    if category == "production_public_generic_combined":
+        return sum(
+            categories.get(name, {}).get("total", 0)
+            for name in (
+                "production_public_generic_lambda_boundary",
+                "production_public_generic_boundary",
+                "production_public_boundary",
+            )
+        )
     return categories.get(category, {}).get("total", 0)
 
 
@@ -109,13 +201,16 @@ def make_comparison(
     asm_summary: dict[str, Any],
     args: argparse.Namespace,
 ) -> dict[str, Any]:
+    point_types = point_types_for_case(name, args.case_filter)
     return {
         "name": name,
         "group": args.group,
         "evidence_role": args.comparison_evidence_role,
         "case_kind": args.case_kind,
         "row_source": row_source_for_case(name, args.row_source),
-        "point_type": "PointXYZ",
+        "point_type": point_types["point_type"],
+        "source_point_type": point_types["source_point_type"],
+        "target_point_type": point_types["target_point_type"],
         "scalar": "float",
         "size": size_for_case(name),
         "run_count": 1,
@@ -196,6 +291,7 @@ def main() -> int:
     parser.add_argument("--summary-evidence-role", default="diagnostic")
     parser.add_argument("--comparison-evidence-role", default="diagnostic")
     parser.add_argument("--case-kind", default="qemu_smoke_only")
+    parser.add_argument("--case-filter", default="ordered-cloud-pair-fused")
     parser.add_argument("--row-source", default="ordered_cloud_pair")
     parser.add_argument("--group", default="te2d_qemu_ordered_cloud_pair_smoke")
     parser.add_argument("--asm-category", default="candidate_lambda_boundary")

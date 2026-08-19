@@ -40,6 +40,7 @@
 
 #include <pcl/common/point_tests.h>
 #include <pcl/point_types.h>
+#include <pcl/rvv_point_traits.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -72,6 +73,14 @@ reduceTransformationEstimation2DF32M2(const vfloat32m2_t value,
       __riscv_vfredosum_vs_f32m2_f32m1(value, zero, vlmax));
 }
 
+template <typename PointT>
+inline bool
+isValidTransformationEstimation2DCloudIndex(const pcl::PointCloud<PointT>& cloud,
+                                            const pcl::index_t index)
+{
+  return index >= 0 && static_cast<std::size_t>(index) < cloud.size();
+}
+
 template <typename PointSource, typename PointTarget, typename Scalar>
 inline bool
 tryTransformationEstimation2DOrderedCloudPairRVV(
@@ -79,9 +88,10 @@ tryTransformationEstimation2DOrderedCloudPairRVV(
     const pcl::PointCloud<PointTarget>& cloud_tgt,
     Eigen::Matrix<Scalar, 4, 4>& transformation_matrix)
 {
-  if constexpr (!std::is_same_v<PointSource, pcl::PointXYZ> ||
-                !std::is_same_v<PointTarget, pcl::PointXYZ> ||
-                !std::is_same_v<Scalar, float>) {
+  using SourceLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointSource>;
+  using TargetLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointTarget>;
+  if constexpr (!std::is_same_v<Scalar, float> || !SourceLayout::value ||
+                !TargetLayout::value) {
     return false;
   }
 
@@ -109,14 +119,14 @@ tryTransformationEstimation2DOrderedCloudPairRVV(
     const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
     vfloat32m2_t sx, sy, sz, tx, ty, tz;
     pcl::rvv_load::strided_load3_f32m2<sizeof(PointSource),
-                                       offsetof(PointSource, x),
-                                       offsetof(PointSource, y),
-                                       offsetof(PointSource, z)>(
+                                       SourceLayout::kX,
+                                       SourceLayout::kY,
+                                       SourceLayout::kZ>(
         source_base + i * sizeof(PointSource), vl, sx, sy, sz);
     pcl::rvv_load::strided_load3_f32m2<sizeof(PointTarget),
-                                       offsetof(PointTarget, x),
-                                       offsetof(PointTarget, y),
-                                       offsetof(PointTarget, z)>(
+                                       TargetLayout::kX,
+                                       TargetLayout::kY,
+                                       TargetLayout::kZ>(
         target_base + i * sizeof(PointTarget), vl, tx, ty, tz);
     source_sum_x = __riscv_vfadd_vv_f32m2_tu(source_sum_x, source_sum_x, sx, vl);
     source_sum_y = __riscv_vfadd_vv_f32m2_tu(source_sum_y, source_sum_y, sy, vl);
@@ -142,14 +152,14 @@ tryTransformationEstimation2DOrderedCloudPairRVV(
     const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
     vfloat32m2_t sx, sy, sz, tx, ty, tz;
     pcl::rvv_load::strided_load3_f32m2<sizeof(PointSource),
-                                       offsetof(PointSource, x),
-                                       offsetof(PointSource, y),
-                                       offsetof(PointSource, z)>(
+                                       SourceLayout::kX,
+                                       SourceLayout::kY,
+                                       SourceLayout::kZ>(
         source_base + i * sizeof(PointSource), vl, sx, sy, sz);
     pcl::rvv_load::strided_load3_f32m2<sizeof(PointTarget),
-                                       offsetof(PointTarget, x),
-                                       offsetof(PointTarget, y),
-                                       offsetof(PointTarget, z)>(
+                                       TargetLayout::kX,
+                                       TargetLayout::kY,
+                                       TargetLayout::kZ>(
         target_base + i * sizeof(PointTarget), vl, tx, ty, tz);
     const vfloat32m2_t centered_source_x =
         __riscv_vfsub_vf_f32m2(sx, acc.source_centroid[0], vl);
@@ -199,6 +209,338 @@ tryTransformationEstimation2DOrderedCloudPairRVV(
   return true;
 }
 
+template <typename PointSource, typename PointTarget, typename Scalar>
+inline bool
+tryTransformationEstimation2DSourceIndexedCloudPairRVV(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::Indices& indices_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    Eigen::Matrix<Scalar, 4, 4>& transformation_matrix)
+{
+  using SourceLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointSource>;
+  using TargetLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointTarget>;
+  if constexpr (!std::is_same_v<PointSource, pcl::PointXYZ> ||
+                !std::is_same_v<PointTarget, pcl::PointXYZ> ||
+                !std::is_same_v<Scalar, float> || !SourceLayout::value ||
+                !TargetLayout::value) {
+    return false;
+  }
+  else {
+    using SourcePod = typename SourceLayout::Pod;
+    static_assert(sizeof(pcl::index_t) == sizeof(std::int32_t),
+                  "RVV source-indexed TransformationEstimation2D expects 32-bit "
+                  "PCL indices");
+
+    const std::size_t nr_points = indices_src.size();
+    if (nr_points < 16 || cloud_tgt.size() != nr_points || !cloud_src.is_dense ||
+        !cloud_tgt.is_dense ||
+        cloud_src.size() > pcl::rvv::rvvMaxU32ByteOffsetElements<PointSource>())
+      return false;
+
+    for (std::size_t i = 0; i < nr_points; ++i) {
+      const auto source_index = indices_src[i];
+      if (!isValidTransformationEstimation2DCloudIndex(cloud_src, source_index))
+        return false;
+      if (!pcl::isFinite(cloud_src.points[static_cast<std::size_t>(source_index)]) ||
+          !pcl::isFinite(cloud_tgt.points[i]))
+        return false;
+    }
+
+    TransformationEstimation2DAccumulation acc;
+    const std::size_t vlmax = __riscv_vsetvlmax_e32m2();
+    const vfloat32m2_t zero = __riscv_vfmv_v_f_f32m2(0.0f, vlmax);
+    vfloat32m2_t source_sum_x = zero, source_sum_y = zero;
+    vfloat32m2_t target_sum_x = zero, target_sum_y = zero;
+    const auto* source_base =
+        reinterpret_cast<const std::uint8_t*>(cloud_src.points.data());
+    const auto* target_base =
+        reinterpret_cast<const std::uint8_t*>(cloud_tgt.points.data());
+    const auto* indices_i32 = reinterpret_cast<const std::int32_t*>(indices_src.data());
+
+    std::size_t i = 0;
+    while (i < nr_points) {
+      const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
+      const vint32m2_t source_indices = __riscv_vle32_v_i32m2(indices_i32 + i, vl);
+      const vuint32m2_t source_offsets =
+          pcl::rvv_load::byte_offsets_u32m2<SourcePod>(
+              __riscv_vreinterpret_v_i32m2_u32m2(source_indices), vl);
+      vfloat32m2_t sx, sy, sz, tx, ty, tz;
+      pcl::rvv_load::indexed_load3_f32m2<SourcePod,
+                                         SourceLayout::kX,
+                                         SourceLayout::kY,
+                                         SourceLayout::kZ>(
+          source_base, source_offsets, vl, sx, sy, sz);
+      pcl::rvv_load::strided_load3_f32m2<sizeof(PointTarget),
+                                         TargetLayout::kX,
+                                         TargetLayout::kY,
+                                         TargetLayout::kZ>(
+          target_base + i * sizeof(PointTarget), vl, tx, ty, tz);
+      source_sum_x =
+          __riscv_vfadd_vv_f32m2_tu(source_sum_x, source_sum_x, sx, vl);
+      source_sum_y =
+          __riscv_vfadd_vv_f32m2_tu(source_sum_y, source_sum_y, sy, vl);
+      target_sum_x =
+          __riscv_vfadd_vv_f32m2_tu(target_sum_x, target_sum_x, tx, vl);
+      target_sum_y =
+          __riscv_vfadd_vv_f32m2_tu(target_sum_y, target_sum_y, ty, vl);
+      i += vl;
+    }
+
+    const float inv_n = 1.0f / static_cast<float>(nr_points);
+    acc.source_centroid[0] =
+        reduceTransformationEstimation2DF32M2(source_sum_x, vlmax) * inv_n;
+    acc.source_centroid[1] =
+        reduceTransformationEstimation2DF32M2(source_sum_y, vlmax) * inv_n;
+    acc.target_centroid[0] =
+        reduceTransformationEstimation2DF32M2(target_sum_x, vlmax) * inv_n;
+    acc.target_centroid[1] =
+        reduceTransformationEstimation2DF32M2(target_sum_y, vlmax) * inv_n;
+
+    vfloat32m2_t source_x_target_x = zero, source_x_target_y = zero;
+    vfloat32m2_t source_y_target_x = zero, source_y_target_y = zero;
+    i = 0;
+    while (i < nr_points) {
+      const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
+      const vint32m2_t source_indices = __riscv_vle32_v_i32m2(indices_i32 + i, vl);
+      const vuint32m2_t source_offsets =
+          pcl::rvv_load::byte_offsets_u32m2<SourcePod>(
+              __riscv_vreinterpret_v_i32m2_u32m2(source_indices), vl);
+      vfloat32m2_t sx, sy, sz, tx, ty, tz;
+      pcl::rvv_load::indexed_load3_f32m2<SourcePod,
+                                         SourceLayout::kX,
+                                         SourceLayout::kY,
+                                         SourceLayout::kZ>(
+          source_base, source_offsets, vl, sx, sy, sz);
+      pcl::rvv_load::strided_load3_f32m2<sizeof(PointTarget),
+                                         TargetLayout::kX,
+                                         TargetLayout::kY,
+                                         TargetLayout::kZ>(
+          target_base + i * sizeof(PointTarget), vl, tx, ty, tz);
+      const vfloat32m2_t centered_source_x =
+          __riscv_vfsub_vf_f32m2(sx, acc.source_centroid[0], vl);
+      const vfloat32m2_t centered_source_y =
+          __riscv_vfsub_vf_f32m2(sy, acc.source_centroid[1], vl);
+      const vfloat32m2_t centered_target_x =
+          __riscv_vfsub_vf_f32m2(tx, acc.target_centroid[0], vl);
+      const vfloat32m2_t centered_target_y =
+          __riscv_vfsub_vf_f32m2(ty, acc.target_centroid[1], vl);
+      source_x_target_x = __riscv_vfmacc_vv_f32m2_tu(
+          source_x_target_x, centered_source_x, centered_target_x, vl);
+      source_x_target_y = __riscv_vfmacc_vv_f32m2_tu(
+          source_x_target_y, centered_source_x, centered_target_y, vl);
+      source_y_target_x = __riscv_vfmacc_vv_f32m2_tu(
+          source_y_target_x, centered_source_y, centered_target_x, vl);
+      source_y_target_y = __riscv_vfmacc_vv_f32m2_tu(
+          source_y_target_y, centered_source_y, centered_target_y, vl);
+      i += vl;
+    }
+
+    acc.correlation[0] =
+        reduceTransformationEstimation2DF32M2(source_x_target_x, vlmax);
+    acc.correlation[1] =
+        reduceTransformationEstimation2DF32M2(source_x_target_y, vlmax);
+    acc.correlation[2] =
+        reduceTransformationEstimation2DF32M2(source_y_target_x, vlmax);
+    acc.correlation[3] =
+        reduceTransformationEstimation2DF32M2(source_y_target_y, vlmax);
+
+    const float angle =
+        std::atan2(acc.correlation[1] - acc.correlation[2],
+                   acc.correlation[0] + acc.correlation[3]);
+    const float c = std::cos(angle);
+    const float s = std::sin(angle);
+    transformation_matrix.setIdentity();
+    transformation_matrix(0, 0) = c;
+    transformation_matrix(0, 1) = -s;
+    transformation_matrix(1, 0) = s;
+    transformation_matrix(1, 1) = c;
+    transformation_matrix(0, 3) =
+        acc.target_centroid[0] -
+        (c * acc.source_centroid[0] - s * acc.source_centroid[1]);
+    transformation_matrix(1, 3) =
+        acc.target_centroid[1] -
+        (s * acc.source_centroid[0] + c * acc.source_centroid[1]);
+    transformation_matrix(2, 3) = 0.0f;
+    return true;
+  }
+}
+
+template <typename PointSource, typename PointTarget, typename Scalar>
+inline bool
+tryTransformationEstimation2DDualIndexedCloudPairRVV(
+    const pcl::PointCloud<PointSource>& cloud_src,
+    const pcl::Indices& indices_src,
+    const pcl::PointCloud<PointTarget>& cloud_tgt,
+    const pcl::Indices& indices_tgt,
+    Eigen::Matrix<Scalar, 4, 4>& transformation_matrix)
+{
+  using SourceLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointSource>;
+  using TargetLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointTarget>;
+  if constexpr (!std::is_same_v<PointSource, pcl::PointXYZ> ||
+                !std::is_same_v<PointTarget, pcl::PointXYZ> ||
+                !std::is_same_v<Scalar, float> || !SourceLayout::value ||
+                !TargetLayout::value) {
+    return false;
+  }
+  else {
+    using SourcePod = typename SourceLayout::Pod;
+    using TargetPod = typename TargetLayout::Pod;
+    static_assert(sizeof(pcl::index_t) == sizeof(std::int32_t),
+                  "RVV dual-indexed TransformationEstimation2D expects 32-bit "
+                  "PCL indices");
+
+    const std::size_t nr_points = indices_src.size();
+    if (nr_points < 16 || indices_tgt.size() != nr_points || !cloud_src.is_dense ||
+        !cloud_tgt.is_dense ||
+        cloud_src.size() > pcl::rvv::rvvMaxU32ByteOffsetElements<PointSource>() ||
+        cloud_tgt.size() > pcl::rvv::rvvMaxU32ByteOffsetElements<PointTarget>())
+      return false;
+
+    for (std::size_t i = 0; i < nr_points; ++i) {
+      const auto source_index = indices_src[i];
+      const auto target_index = indices_tgt[i];
+      if (!isValidTransformationEstimation2DCloudIndex(cloud_src, source_index) ||
+          !isValidTransformationEstimation2DCloudIndex(cloud_tgt, target_index))
+        return false;
+      if (!pcl::isFinite(cloud_src.points[static_cast<std::size_t>(source_index)]) ||
+          !pcl::isFinite(cloud_tgt.points[static_cast<std::size_t>(target_index)]))
+        return false;
+    }
+
+    TransformationEstimation2DAccumulation acc;
+    const std::size_t vlmax = __riscv_vsetvlmax_e32m2();
+    const vfloat32m2_t zero = __riscv_vfmv_v_f_f32m2(0.0f, vlmax);
+    vfloat32m2_t source_sum_x = zero, source_sum_y = zero;
+    vfloat32m2_t target_sum_x = zero, target_sum_y = zero;
+    const auto* source_base =
+        reinterpret_cast<const std::uint8_t*>(cloud_src.points.data());
+    const auto* target_base =
+        reinterpret_cast<const std::uint8_t*>(cloud_tgt.points.data());
+    const auto* source_indices_i32 =
+        reinterpret_cast<const std::int32_t*>(indices_src.data());
+    const auto* target_indices_i32 =
+        reinterpret_cast<const std::int32_t*>(indices_tgt.data());
+
+    std::size_t i = 0;
+    while (i < nr_points) {
+      const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
+      const vint32m2_t source_indices =
+          __riscv_vle32_v_i32m2(source_indices_i32 + i, vl);
+      const vint32m2_t target_indices =
+          __riscv_vle32_v_i32m2(target_indices_i32 + i, vl);
+      const vuint32m2_t source_offsets =
+          pcl::rvv_load::byte_offsets_u32m2<SourcePod>(
+              __riscv_vreinterpret_v_i32m2_u32m2(source_indices), vl);
+      const vuint32m2_t target_offsets =
+          pcl::rvv_load::byte_offsets_u32m2<TargetPod>(
+              __riscv_vreinterpret_v_i32m2_u32m2(target_indices), vl);
+      vfloat32m2_t sx, sy, sz, tx, ty, tz;
+      pcl::rvv_load::indexed_load3_f32m2<SourcePod,
+                                         SourceLayout::kX,
+                                         SourceLayout::kY,
+                                         SourceLayout::kZ>(
+          source_base, source_offsets, vl, sx, sy, sz);
+      pcl::rvv_load::indexed_load3_f32m2<TargetPod,
+                                         TargetLayout::kX,
+                                         TargetLayout::kY,
+                                         TargetLayout::kZ>(
+          target_base, target_offsets, vl, tx, ty, tz);
+      source_sum_x =
+          __riscv_vfadd_vv_f32m2_tu(source_sum_x, source_sum_x, sx, vl);
+      source_sum_y =
+          __riscv_vfadd_vv_f32m2_tu(source_sum_y, source_sum_y, sy, vl);
+      target_sum_x =
+          __riscv_vfadd_vv_f32m2_tu(target_sum_x, target_sum_x, tx, vl);
+      target_sum_y =
+          __riscv_vfadd_vv_f32m2_tu(target_sum_y, target_sum_y, ty, vl);
+      i += vl;
+    }
+
+    const float inv_n = 1.0f / static_cast<float>(nr_points);
+    acc.source_centroid[0] =
+        reduceTransformationEstimation2DF32M2(source_sum_x, vlmax) * inv_n;
+    acc.source_centroid[1] =
+        reduceTransformationEstimation2DF32M2(source_sum_y, vlmax) * inv_n;
+    acc.target_centroid[0] =
+        reduceTransformationEstimation2DF32M2(target_sum_x, vlmax) * inv_n;
+    acc.target_centroid[1] =
+        reduceTransformationEstimation2DF32M2(target_sum_y, vlmax) * inv_n;
+
+    vfloat32m2_t source_x_target_x = zero, source_x_target_y = zero;
+    vfloat32m2_t source_y_target_x = zero, source_y_target_y = zero;
+    i = 0;
+    while (i < nr_points) {
+      const std::size_t vl = __riscv_vsetvl_e32m2(nr_points - i);
+      const vint32m2_t source_indices =
+          __riscv_vle32_v_i32m2(source_indices_i32 + i, vl);
+      const vint32m2_t target_indices =
+          __riscv_vle32_v_i32m2(target_indices_i32 + i, vl);
+      const vuint32m2_t source_offsets =
+          pcl::rvv_load::byte_offsets_u32m2<SourcePod>(
+              __riscv_vreinterpret_v_i32m2_u32m2(source_indices), vl);
+      const vuint32m2_t target_offsets =
+          pcl::rvv_load::byte_offsets_u32m2<TargetPod>(
+              __riscv_vreinterpret_v_i32m2_u32m2(target_indices), vl);
+      vfloat32m2_t sx, sy, sz, tx, ty, tz;
+      pcl::rvv_load::indexed_load3_f32m2<SourcePod,
+                                         SourceLayout::kX,
+                                         SourceLayout::kY,
+                                         SourceLayout::kZ>(
+          source_base, source_offsets, vl, sx, sy, sz);
+      pcl::rvv_load::indexed_load3_f32m2<TargetPod,
+                                         TargetLayout::kX,
+                                         TargetLayout::kY,
+                                         TargetLayout::kZ>(
+          target_base, target_offsets, vl, tx, ty, tz);
+      const vfloat32m2_t centered_source_x =
+          __riscv_vfsub_vf_f32m2(sx, acc.source_centroid[0], vl);
+      const vfloat32m2_t centered_source_y =
+          __riscv_vfsub_vf_f32m2(sy, acc.source_centroid[1], vl);
+      const vfloat32m2_t centered_target_x =
+          __riscv_vfsub_vf_f32m2(tx, acc.target_centroid[0], vl);
+      const vfloat32m2_t centered_target_y =
+          __riscv_vfsub_vf_f32m2(ty, acc.target_centroid[1], vl);
+      source_x_target_x = __riscv_vfmacc_vv_f32m2_tu(
+          source_x_target_x, centered_source_x, centered_target_x, vl);
+      source_x_target_y = __riscv_vfmacc_vv_f32m2_tu(
+          source_x_target_y, centered_source_x, centered_target_y, vl);
+      source_y_target_x = __riscv_vfmacc_vv_f32m2_tu(
+          source_y_target_x, centered_source_y, centered_target_x, vl);
+      source_y_target_y = __riscv_vfmacc_vv_f32m2_tu(
+          source_y_target_y, centered_source_y, centered_target_y, vl);
+      i += vl;
+    }
+
+    acc.correlation[0] =
+        reduceTransformationEstimation2DF32M2(source_x_target_x, vlmax);
+    acc.correlation[1] =
+        reduceTransformationEstimation2DF32M2(source_x_target_y, vlmax);
+    acc.correlation[2] =
+        reduceTransformationEstimation2DF32M2(source_y_target_x, vlmax);
+    acc.correlation[3] =
+        reduceTransformationEstimation2DF32M2(source_y_target_y, vlmax);
+
+    const float angle =
+        std::atan2(acc.correlation[1] - acc.correlation[2],
+                   acc.correlation[0] + acc.correlation[3]);
+    const float c = std::cos(angle);
+    const float s = std::sin(angle);
+    transformation_matrix.setIdentity();
+    transformation_matrix(0, 0) = c;
+    transformation_matrix(0, 1) = -s;
+    transformation_matrix(1, 0) = s;
+    transformation_matrix(1, 1) = c;
+    transformation_matrix(0, 3) =
+        acc.target_centroid[0] -
+        (c * acc.source_centroid[0] - s * acc.source_centroid[1]);
+    transformation_matrix(1, 3) =
+        acc.target_centroid[1] -
+        (s * acc.source_centroid[0] + c * acc.source_centroid[1]);
+    transformation_matrix(2, 3) = 0.0f;
+    return true;
+  }
+}
+
 } // namespace detail
 #endif
 
@@ -245,6 +587,12 @@ TransformationEstimation2D<PointSource, PointTarget, Scalar>::
     return;
   }
 
+#ifdef __RVV10__
+  if (detail::tryTransformationEstimation2DSourceIndexedCloudPairRVV(
+          cloud_src, indices_src, cloud_tgt, transformation_matrix))
+    return;
+#endif
+
   ConstCloudIterator<PointSource> source_it(cloud_src, indices_src);
   ConstCloudIterator<PointTarget> target_it(cloud_tgt);
   estimateRigidTransformation(source_it, target_it, transformation_matrix);
@@ -266,6 +614,12 @@ TransformationEstimation2D<PointSource, PointTarget, Scalar>::
               indices_tgt.size());
     return;
   }
+
+#ifdef __RVV10__
+  if (detail::tryTransformationEstimation2DDualIndexedCloudPairRVV(
+          cloud_src, indices_src, cloud_tgt, indices_tgt, transformation_matrix))
+    return;
+#endif
 
   ConstCloudIterator<PointSource> source_it(cloud_src, indices_src);
   ConstCloudIterator<PointTarget> target_it(cloud_tgt, indices_tgt);
