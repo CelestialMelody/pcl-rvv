@@ -8,6 +8,7 @@
 - `artifact_layout.screening_root_template` 解析出的筛选总入口。
 - `artifact_layout.screening_root_template` 解析出的模块索引或同类文档。
 - 目标模块源码、上游 test/benchmark 入口和已完成同类 RVV 主题文档。
+- 重做第一轮时，既有同路径文件候选筛选文档只作为 previous baseline 和覆盖检查参考，不作为当前判断的充分依据。
 
 ## 输出
 
@@ -26,6 +27,8 @@ artifact_layout.module_file_candidate_screening_doc_template
 - 运算、访存、分支/状态、依赖和输出语义风险。
 - 是否存在测试、benchmark、profile 或已完成主题证据。
 
+循环数量、数学项数量或关键词命中只能作为扫描线索，不能单独支撑 `high` / `mid`。`high` / `mid` 候选必须能定位到可复核的入口、loop/helper、trip count、RVV 适配点和主要风险；无法压实到这些字段时降级或写成待确认问题。
+
 `high/mid` 是函数评估队列必查基线，不是最终实施全集。`low` 不是永久排除；函数评估队列发现明确漏判时可以补入，并说明源码证据。
 
 ## 文档结构
@@ -41,9 +44,10 @@ artifact_layout.module_file_candidate_screening_doc_template
 ## 格式要求
 
 - 全量覆盖表必须一文件一行，不静默遗漏目标源码范围内的文件。
+- `high` / `mid` 候选表至少使用这些列：`文件`、`关键入口 / loop`、`trip count 来源`、`RVV 适配点`、`主要风险`、`第一轮判定理由`。
 - 候选表和覆盖表中的文件路径优先使用省略模块公共前缀后的短路径，例如 `impl/foo.hpp`、`foo.h`、`src/bar.cpp`。
 - 在“输入依据与范围”说明省略的公共前缀；短路径有歧义时使用 repo-relative 路径。
-- 判断依据写源码事实，例如循环规模、数学项、声明/薄 wrapper、调度、search/map/solver 主导等。
+- 判断依据写源码事实，例如公开入口、loop/helper、trip count 来源、运算和访存形态、声明/薄 wrapper、调度、search/map/solver 主导等；不要只写“循环多”“数学密集”或“建议优先”。
 - 不把文件候选筛选 high/mid 写成“建议优化”或“实施队列”；这些结论留给函数评估队列。
 
 ## 限制
