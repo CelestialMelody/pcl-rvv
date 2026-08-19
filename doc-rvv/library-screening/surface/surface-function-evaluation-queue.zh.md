@@ -41,8 +41,8 @@
 
 | 文件 | 公开入口 / 函数族 | 主成本覆盖类型 | 测试 / bench 可行性 | 去向理由 |
 | --- | --- | --- | --- | --- |
-| `impl/organized_fast_mesh.hpp` | `performReconstruction`、`reconstructPolygons`、`make*Mesh` | `direct-main-path` | `test/surface/test_organized_fast_mesh.cpp` | organized 行列扫描、valid / shadow mask 和可变 polygon 输出都在本文件内，入口直接、规则性最好。 |
-| `impl/bilateral_upsampling.hpp` | `process`、`performProcessing`、`computeDistances` | `direct-main-path` | `tools/bilateral_upsampling.cpp` | organized 像素网格 + 有界窗口累加，算术密度高，边界和 NaN fallback 都可局部验证。 |
+| `impl/organized_fast_mesh.hpp` | `performReconstruction`、`reconstructPolygons`、`make*Mesh` | `direct-main-path` | `test/surface/test_organized_fast_mesh.cpp` | organized 行列扫描、valid / shadow mask 和可变 polygon 输出都在本文件内，入口直接、规则性最好；production public probe 已做且不建议接入，生产补丁已回滚。 |
+| `impl/bilateral_upsampling.hpp` | `process`、`performProcessing`、`computeDistances` | `direct-main-path` | `tools/bilateral_upsampling.cpp` | organized 像素网格 + 有界窗口累加，算术密度高，边界和 NaN fallback 都可局部验证；phase 020 已完成 production public probe，当前公开入口不建议接入，等待 PI5 用户确认是否回滚。 |
 | `impl/marching_cubes.hpp` | `performReconstruction`、`createSurface` | `direct-main-path` | `test/surface/test_marching_cubes.cpp`、`tools/marching_cubes_reconstruction.cpp` | 3D voxel 扫描、edge table / tri table 插值和输出生成是标准 batch 路径。 |
 | `on_nurbs/triangulation.cpp` | `createIndices`、`createVertices`、`convertSurface2PolygonMesh`、`convertSurface2Vertices` | `direct-main-path` | `test/surface/test_on_nurbs.cpp`、`examples/surface/example_nurbs_fitting_surface.cpp` | 规则网格生成和 `Evaluate` 扫描很清楚，和 surface on_nurbs 示例 / 测试直接对得上。 |
 
@@ -89,8 +89,8 @@
 
 | 顺序 | 主题 | 主文件 | 当前状态 | 当前结论 / 下一步条件 |
 | ---: | --- | --- | --- | --- |
-| 1 | organized mesh reconstruction | `impl/organized_fast_mesh.hpp` | 建议进入函数级评估 | 先评估 organized 行列遍历和 shadow mask。 |
-| 2 | bilateral upsampling | `impl/bilateral_upsampling.hpp` | 建议进入函数级评估 | 先评估 window 累加和 NaN fallback。 |
+| 1 | organized mesh reconstruction | `impl/organized_fast_mesh.hpp` | 已完成 production public probe，topic no-production 收口 | diagnostic 曾正向，但 public path 的 production evidence 负向；生产补丁已回滚，当前不建议继续扩大接入。 |
+| 2 | bilateral upsampling | `impl/bilateral_upsampling.hpp` | 已完成函数级评估和 production public probe，等待用户确认是否回滚生产补丁 | staged-window-reduction 诊断为负向（`0.91x/0.94x/0.91x`）且不建议接入；phase 010 direct-depth 诊断为 `1.04x/1.17x/1.30x`、Evidence Doctor `Errors=0`；phase 020 production public 结果为 `0.97x/0.89x/0.95x`、Evidence Doctor `Errors=3`，当前不建议接入。 |
 | 3 | marching cubes | `impl/marching_cubes.hpp` | 建议进入函数级评估 | 先评估 voxel 扫描和 edge/tri table 路径。 |
 | 4 | on_nurbs triangulation | `on_nurbs/triangulation.cpp` | 建议进入函数级评估 | 先评估 grid 生成和 `Evaluate` 扫描。 |
 
