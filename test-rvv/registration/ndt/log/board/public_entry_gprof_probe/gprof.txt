@@ -1,0 +1,819 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 52.63      0.40     0.40   263745     0.00     0.00  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::updateDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 3, 0, 3, 3> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6> const&, Eigen::Matrix<double, 18, 6, 0, 18, 6> const*) const
+ 27.63      0.61     0.21   105647     0.00     0.00  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::updateHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 3, 0, 3, 3> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6> const&, Eigen::Matrix<double, 18, 6, 0, 18, 6> const&) const
+  6.58      0.66     0.05    86052     0.00     0.00  (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+  5.26      0.70     0.04   369392     0.00     0.00  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computePointDerivatives(Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6>&, Eigen::Matrix<double, 18, 6, 0, 18, 6>*) const
+  2.63      0.72     0.02        6     3.33    43.09  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&)
+  1.32      0.73     0.01    87265     0.00     0.00  Eigen::internal::aligned_malloc(unsigned long)
+  1.32      0.74     0.01    32768     0.00     0.00  flann::KNNSimpleResultSet<float>::addPoint(float, unsigned long)
+  1.32      0.75     0.01       15     0.67    32.09  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool)
+  1.32      0.76     0.01        2     5.00     5.00  flann::KDTreeSingleIndex<flann::L2_Simple<float> >::divideTree(int, int, std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >&)
+  0.00      0.76     0.00    40960     0.00     0.00  flann::KNNSimpleResultSet<float>::worstDist() const
+  0.00      0.76     0.00    28672     0.00     0.00  flann::anyimpl::big_any_policy<flann::SearchParams>::print(std::ostream&, void* const*)
+  0.00      0.76     0.00     9514     0.00     0.00  flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long)
+  0.00      0.76     0.00     8194     0.00     0.00  std::vector<int, std::allocator<int> >::resize(unsigned long)
+  0.00      0.76     0.00     5470     0.00     0.00  frame_dummy
+  0.00      0.76     0.00     4096     0.00     0.00  pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::nearestKSearch(pcl::PointXYZ const&, unsigned int, std::vector<int, std::allocator<int> >&, std::vector<float, std::allocator<float> >&) const
+  0.00      0.76     0.00     4096     0.00     0.00  void flann::KDTreeSingleIndex<flann::L2_Simple<float> >::searchLevel<false>(flann::ResultSet<float>&, float const*, flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node*, float, std::vector<float, std::allocator<float> >&, float) const
+  0.00      0.76     0.00     4096     0.00     0.00  flann::KDTreeSingleIndex<flann::L2_Simple<float> >::findNeighbors(flann::ResultSet<float>&, float const*, flann::SearchParams const&) const
+  0.00      0.76     0.00     4096     0.00     0.00  flann::NNIndex<flann::L2_Simple<float> >::knnSearch(flann::Matrix<float> const&, flann::Matrix<unsigned long>&, flann::Matrix<float>&, unsigned long, flann::SearchParams const&) const
+  0.00      0.76     0.00     2965     0.00     0.00  void Eigen::internal::tridiagonal_qr_step<double, double, long>(double*, double*, long, long, double*, long)
+  0.00      0.76     0.00     2916     0.00     0.00  std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_get_deleter(std::type_info const&)
+  0.00      0.76     0.00     1150     0.00     0.00  flann::PooledAllocator::allocateMemory(int)
+  0.00      0.76     0.00      535     0.00     0.00  void Eigen::internal::real_2x2_jacobi_svd<Eigen::Matrix<double, 6, 6, 0, 6, 6>, double, long>(Eigen::Matrix<double, 6, 6, 0, 6, 6> const&, long, long, Eigen::JacobiRotation<double>*, Eigen::JacobiRotation<double>*)
+  0.00      0.76     0.00       66     0.00     0.00  Eigen::AngleAxis<float>::toRotationMatrix() const
+  0.00      0.76     0.00       51     0.00     0.00  flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node::~Node()
+  0.00      0.76     0.00       50     0.00     0.00  bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6> >(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, bool, bool, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar&)
+  0.00      0.76     0.00       31     0.00     0.00  std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release()
+  0.00      0.76     0.00       22     0.00     0.00  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::convertTransform(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Transform<float, 3, 2, 0>&)
+  0.00      0.76     0.00       22     0.00     0.00  void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long)
+  0.00      0.76     0.00       18     0.00     0.00  std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::reserve(unsigned long)
+  0.00      0.76     0.00       15     0.00     0.00  void pcl::transformPointCloud<pcl::PointXYZ, float>(pcl::PointCloud<pcl::PointXYZ> const&, pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&, bool)
+  0.00      0.76     0.00       15     0.00     0.00  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeAngleDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool)
+  0.00      0.76     0.00        8     0.00    88.47  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&)
+  0.00      0.76     0.00        8     0.00     0.00  void Eigen::SVDBase<Eigen::JacobiSVD<Eigen::Matrix<double, 6, 6, 0, 6, 6>, 0> >::_solve_impl<Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, Eigen::Matrix<double, 6, 1, 0, 6, 1> const>, Eigen::Matrix<double, 6, 1, 0, 6, 1> >(Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, Eigen::Matrix<double, 6, 1, 0, 6, 1> const> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&) const
+  0.00      0.76     0.00        7     0.00     0.00  bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*)
+  0.00      0.76     0.00        6     0.00     0.00  flann::anyimpl::big_any_policy<flann::anyimpl::empty_any>::static_delete(void**)
+  0.00      0.76     0.00        6     0.00     0.00  flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::static_delete(void**)
+  0.00      0.76     0.00        6     0.00     0.00  flann::anyimpl::small_any_policy<bool>::static_delete(void**)
+  0.00      0.76     0.00        6     0.00     0.00  flann::anyimpl::small_any_policy<int>::static_delete(void**)
+  0.00      0.76     0.00        6     0.00     0.00  std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > >::operator[](std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&)
+  0.00      0.76     0.00        6     0.00     0.00  void std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::_M_realloc_append<pcl::PCLPointField const&>(pcl::PCLPointField const&)
+  0.00      0.76     0.00        5     0.00     0.00  std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_add_ref_copy()
+  0.00      0.76     0.00        4     0.00     0.00  flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::clone(void* const*, void**)
+  0.00      0.76     0.00        4     0.00     0.00  flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::get_value(void* const*)
+  0.00      0.76     0.00        4     0.00     0.00  flann::anyimpl::small_any_policy<bool>::clone(void* const*, void**)
+  0.00      0.76     0.00        4     0.00     0.00  flann::anyimpl::small_any_policy<int>::clone(void* const*, void**)
+  0.00      0.76     0.00        4     0.00     0.00  flann::anyimpl::typed_base_any_policy<flann::flann_algorithm_t>::type()
+  0.00      0.76     0.00        4     0.00     0.00  flann::flann_algorithm_t flann::get_param<flann::flann_algorithm_t>(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+  0.00      0.76     0.00        4     0.00     0.00  std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        4     0.00     0.00  std::vector<int, std::allocator<int> >::_M_default_append(unsigned long)
+  0.00      0.76     0.00        3     0.00     0.00  pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::KdTreeFLANN(bool)
+  0.00      0.76     0.00        3     0.00     0.00  pcl::DefaultPointRepresentation<pcl::PointXYZ>::~DefaultPointRepresentation()
+  0.00      0.76     0.00        3     0.00     0.00  pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::KdTree(bool)
+  0.00      0.76     0.00        3     0.00     0.00  void pcl::console::print<>(pcl::console::VERBOSITY_LEVEL, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+  0.00      0.76     0.00        3     0.00     0.00  std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        3     0.00     0.00  std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        3     0.00     0.00  std::_Sp_counted_ptr<pcl::DefaultPointRepresentation<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        3     0.00     0.00  std::_Sp_counted_ptr<pcl::DefaultPointRepresentation<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        3     0.00     0.00  std::vector<int, std::allocator<int> >::reserve(unsigned long)
+  0.00      0.76     0.00        2     0.00     0.01  pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&)
+  0.00      0.76     0.00        2     0.00     0.00  pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::convertCloudToArray(pcl::PointCloud<pcl::PointXYZ> const&)
+  0.00      0.76     0.00        2     0.00     0.00  int pcl::getFieldIndex<pcl::PointXYZ>(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >&)
+  0.00      0.76     0.00        2     0.00     5.01  pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&)
+  0.00      0.76     0.00        2     0.00     0.00  float Eigen::internal::positive_real_hypot<float>(float const&, float const&)
+  0.00      0.76     0.00        2     0.00     5.00  flann::KDTreeSingleIndex<flann::L2_Simple<float> >::buildIndexImpl()
+  0.00      0.76     0.00        2     0.00     0.00  flann::KDTreeSingleIndex<flann::L2_Simple<float> >::freeIndex()
+  0.00      0.76     0.00        2     0.00     0.00  flann::KDTreeSingleIndex<flann::L2_Simple<float> >::~KDTreeSingleIndex()
+  0.00      0.76     0.00        2     0.00     5.00  flann::NNIndex<flann::L2_Simple<float> >::buildIndex()
+  0.00      0.76     0.00        2     0.00     0.00  flann::NNIndex<flann::L2_Simple<float> >::setDataset(flann::Matrix<float> const&)
+  0.00      0.76     0.00        2     0.00     0.00  flann::NNIndex<flann::L2_Simple<float> >::NNIndex(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, flann::L2_Simple<float>)
+  0.00      0.76     0.00        2     0.00     0.00  flann::NNIndex<flann::L2_Simple<float> >::~NNIndex()
+  0.00      0.76     0.00        2     0.00     0.00  flann::anyimpl::small_any_policy<bool>::get_value(void* const*)
+  0.00      0.76     0.00        2     0.00     0.00  flann::anyimpl::small_any_policy<int>::get_value(void* const*)
+  0.00      0.76     0.00        2     0.00     0.00  flann::anyimpl::typed_base_any_policy<bool>::type()
+  0.00      0.76     0.00        2     0.00     0.00  flann::anyimpl::typed_base_any_policy<int>::type()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_ptr_inplace<pcl::PointCloud<pcl::PointXYZ>, Eigen::aligned_allocator<pcl::PointCloud<pcl::PointXYZ> >, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        2     0.00     0.00  std::_Sp_counted_ptr_inplace<pcl::PointCloud<pcl::PointXYZ>, Eigen::aligned_allocator<pcl::PointCloud<pcl::PointXYZ> >, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        2     0.00     0.00  std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >::_M_default_append(unsigned long)
+  0.00      0.76     0.00        2     0.00     0.00  std::vector<float*, std::allocator<float*> >::_M_default_append(unsigned long)
+  0.00      0.76     0.00        1     0.00   760.00  (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long)
+  0.00      0.76     0.00        1     0.00     0.00  pcl::Registration<pcl::PointXYZ, pcl::PointXYZ, float>::~Registration()
+  0.00      0.76     0.00        1     0.00     0.14  pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&)
+  0.00      0.76     0.00        1     0.00     0.01  pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance()
+  0.00      0.76     0.00        1     0.00   739.84  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&)
+  0.00      0.76     0.00        1     0.00     5.15  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init()
+  0.00      0.76     0.00        1     0.00     0.00  pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::~KdTree()
+  0.00      0.76     0.00        1     0.00     0.00  pcl::PCLBase<pcl::PointXYZ>::initCompute()
+  0.00      0.76     0.00        1     0.00     0.00  bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<float, 3, 3, 0, 3, 3>, Eigen::Matrix<float, 3, 3, 0, 3, 3>, Eigen::Matrix<float, 3, 3, 0, 3, 3> >(Eigen::Matrix<float, 3, 3, 0, 3, 3>&, Eigen::Matrix<float, 3, 3, 0, 3, 3>&, Eigen::Matrix<float, 3, 3, 0, 3, 3>&, bool, bool, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar&)
+  0.00      0.76     0.00        1     0.00     0.00  Eigen::JacobiSVD<Eigen::Matrix<float, 3, 3, 0, 3, 3>, 20>::blocked_sweep(float, float, float&)
+  0.00      0.76     0.00        1     0.00     0.00  std::_Sp_counted_ptr<pcl::PointCloud<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        1     0.00     0.00  std::_Sp_counted_ptr<pcl::PointCloud<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        1     0.00     0.00  std::_Sp_counted_ptr<pcl::search::Search<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        1     0.00     0.00  std::_Sp_counted_ptr<pcl::search::Search<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        1     0.00     0.00  std::_Sp_counted_ptr<std::vector<pcl::Correspondence, Eigen::aligned_allocator<pcl::Correspondence> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  0.00      0.76     0.00        1     0.00     0.00  std::_Sp_counted_ptr<std::vector<pcl::Correspondence, Eigen::aligned_allocator<pcl::Correspondence> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  0.00      0.76     0.00        1     0.00     0.00  std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::~vector()
+  0.00      0.76     0.00        1     0.00     0.00  std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::_M_default_append(unsigned long)
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2024 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 1.32% of 0.76 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]    100.0    0.00    0.76                 main [1]
+                0.00    0.76       1/1           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+                0.00    0.00       3/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       4/17          std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00       2/87265       Eigen::internal::aligned_malloc(unsigned long) [13]
+                0.00    0.00       2/18          std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::reserve(unsigned long) [33]
+                0.00    0.00      11/5470        frame_dummy [36]
+                0.00    0.00       3/7           bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) [58]
+                0.00    0.00       2/2           std::_Sp_counted_ptr_inplace<pcl::PointCloud<pcl::PointXYZ>, Eigen::aligned_allocator<pcl::PointCloud<pcl::PointXYZ> >, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [98]
+                0.00    0.00       2/5           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_add_ref_copy() [64]
+                0.00    0.00       1/22          void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long) [55]
+-----------------------------------------------
+                0.00    0.76       1/1           main [1]
+[2]    100.0    0.00    0.76       1         (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+                0.00    0.74       1/1           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+                0.00    0.01    4096/4096        pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::nearestKSearch(pcl::PointXYZ const&, unsigned int, std::vector<int, std::allocator<int> >&, std::vector<float, std::allocator<float> >&) const [15]
+                0.00    0.01       1/1           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+                0.00    0.01       1/2           pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [12]
+                0.00    0.00       1/1           pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance() [25]
+                0.00    0.00       2/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       1/1           pcl::Registration<pcl::PointXYZ, pcl::PointXYZ, float>::~Registration() [34]
+                0.00    0.00       2/17          std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00       1/15          void pcl::transformPointCloud<pcl::PointXYZ, float>(pcl::PointCloud<pcl::PointXYZ> const&, pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&, bool) [28]
+                0.00    0.00       1/1           std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::_M_default_append(unsigned long) [35]
+                0.00    0.00       4/7           bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) [58]
+                0.00    0.00       2/3           pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::KdTree(bool) [73]
+                0.00    0.00       1/1           pcl::PCLBase<pcl::PointXYZ>::initCompute() [103]
+-----------------------------------------------
+                0.00    0.74       1/1           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[3]     97.3    0.00    0.74       1         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+                0.00    0.71       8/8           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&) [4]
+                0.00    0.03       1/15          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [5]
+                0.00    0.00       1/17          std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00      50/50          bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6> >(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, bool, bool, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar&) [53]
+                0.00    0.00       8/8           void Eigen::SVDBase<Eigen::JacobiSVD<Eigen::Matrix<double, 6, 6, 0, 6, 6>, 0> >::_solve_impl<Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, Eigen::Matrix<double, 6, 1, 0, 6, 1> const>, Eigen::Matrix<double, 6, 1, 0, 6, 1> >(Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, Eigen::Matrix<double, 6, 1, 0, 6, 1> const> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&) const [57]
+                0.00    0.00       8/22          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::convertTransform(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Transform<float, 3, 2, 0>&) [54]
+                0.00    0.00       5/9514        flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long) [45]
+                0.00    0.00       2/2           float Eigen::internal::positive_real_hypot<float>(float const&, float const&) [82]
+                0.00    0.00       1/5           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_add_ref_copy() [64]
+                0.00    0.00       1/1           Eigen::JacobiSVD<Eigen::Matrix<float, 3, 3, 0, 3, 3>, 20>::blocked_sweep(float, float, float&) [105]
+-----------------------------------------------
+                0.00    0.71       8/8           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+[4]     93.1    0.00    0.71       8         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&) [4]
+                0.01    0.44      14/15          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [5]
+                0.02    0.24       6/6           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&) [7]
+                0.00    0.00      14/15          void pcl::transformPointCloud<pcl::PointXYZ, float>(pcl::PointCloud<pcl::PointXYZ> const&, pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&, bool) [28]
+                0.00    0.00      14/22          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::convertTransform(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Transform<float, 3, 2, 0>&) [54]
+                0.00    0.00       6/9514        flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long) [45]
+-----------------------------------------------
+                0.00    0.03       1/15          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+                0.01    0.44      14/15          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&) [4]
+[5]     63.3    0.01    0.47      15         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [5]
+                0.40    0.00  263745/263745      pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::updateDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 3, 0, 3, 3> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6> const&, Eigen::Matrix<double, 18, 6, 0, 18, 6> const*) const [6]
+                0.04    0.01   61440/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.03    0.00  263745/369392      pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computePointDerivatives(Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6>&, Eigen::Matrix<double, 18, 6, 0, 18, 6>*) const [11]
+                0.00    0.00      15/15          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeAngleDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [56]
+-----------------------------------------------
+                0.40    0.00  263745/263745      pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [5]
+[6]     52.6    0.40    0.00  263745         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::updateDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 3, 0, 3, 3> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6> const&, Eigen::Matrix<double, 18, 6, 0, 18, 6> const*) const [6]
+-----------------------------------------------
+                0.02    0.24       6/6           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&) [4]
+[7]     34.0    0.02    0.24       6         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&) [7]
+                0.21    0.00  105647/105647      pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::updateHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 3, 0, 3, 3> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6> const&, Eigen::Matrix<double, 18, 6, 0, 18, 6> const&) const [8]
+                0.01    0.00   24576/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.01    0.00  105647/369392      pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computePointDerivatives(Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6>&, Eigen::Matrix<double, 18, 6, 0, 18, 6>*) const [11]
+-----------------------------------------------
+                0.21    0.00  105647/105647      pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&) [7]
+[8]     27.6    0.21    0.00  105647         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::updateHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 3, 0, 3, 3> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6> const&, Eigen::Matrix<double, 18, 6, 0, 18, 6> const&) const [8]
+-----------------------------------------------
+[9]      7.9    0.05    0.01   86050+4       <cycle 1 as a whole> [9]
+                0.05    0.01   86052+86091       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       2             flann::NNIndex<flann::L2_Simple<float> >::NNIndex(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, flann::L2_Simple<float>) <cycle 1> [85]
+-----------------------------------------------
+                               86091             (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                                   2             flann::NNIndex<flann::L2_Simple<float> >::NNIndex(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, flann::L2_Simple<float>) <cycle 1> [85]
+                0.00    0.00       1/86050       pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.00    0.00       1/86050       pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+                0.00    0.00       2/86050       (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+                0.00    0.00       2/86050       std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [27]
+                0.00    0.00       2/86050       flann::KDTreeSingleIndex<flann::L2_Simple<float> >::~KDTreeSingleIndex() [32]
+                0.00    0.00       3/86050       main [1]
+                0.00    0.00       4/86050       flann::flann_algorithm_t flann::get_param<flann::flann_algorithm_t>(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [26]
+                0.00    0.00       9/86050       pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance() [25]
+                0.00    0.00      10/86050       pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [24]
+                0.01    0.00   24576/86050       pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&) [7]
+                0.04    0.01   61440/86050       pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [5]
+[10]     7.9    0.05    0.01   86052+86091   (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.01    0.00   86016/87265       Eigen::internal::aligned_malloc(unsigned long) [13]
+                0.00    0.00      12/22          void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long) [55]
+                0.00    0.00       6/6           flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::static_delete(void**) [60]
+                0.00    0.00       6/6           flann::anyimpl::small_any_policy<int>::static_delete(void**) [62]
+                0.00    0.00       6/6           flann::anyimpl::small_any_policy<bool>::static_delete(void**) [61]
+                0.00    0.00       6/5470        frame_dummy [36]
+                0.00    0.00       4/4           flann::anyimpl::small_any_policy<bool>::clone(void* const*, void**) [67]
+                0.00    0.00       4/4           flann::anyimpl::small_any_policy<int>::clone(void* const*, void**) [68]
+                0.00    0.00       4/4           flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::clone(void* const*, void**) [65]
+                0.00    0.00       2/2           flann::anyimpl::typed_base_any_policy<int>::type() [90]
+                0.00    0.00       2/2           flann::anyimpl::small_any_policy<int>::get_value(void* const*) [88]
+                0.00    0.00       2/2           flann::anyimpl::typed_base_any_policy<bool>::type() [89]
+                0.00    0.00       2/2           flann::anyimpl::small_any_policy<bool>::get_value(void* const*) [87]
+                0.00    0.00       2/2           flann::NNIndex<flann::L2_Simple<float> >::setDataset(flann::Matrix<float> const&) [84]
+                                   2             flann::NNIndex<flann::L2_Simple<float> >::NNIndex(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, flann::L2_Simple<float>) <cycle 1> [85]
+                               86091             (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+-----------------------------------------------
+                0.01    0.00  105647/369392      pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&) [7]
+                0.03    0.00  263745/369392      pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [5]
+[11]     5.3    0.04    0.00  369392         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computePointDerivatives(Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6>&, Eigen::Matrix<double, 18, 6, 0, 18, 6>*) const [11]
+-----------------------------------------------
+                0.00    0.01       1/2           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+                0.00    0.01       1/2           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+[12]     1.3    0.00    0.01       2         pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [12]
+                0.00    0.01       2/2           flann::NNIndex<flann::L2_Simple<float> >::buildIndex() [21]
+                0.00    0.00       2/2           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [24]
+-----------------------------------------------
+                0.00    0.00       1/87265       std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::_M_default_append(unsigned long) [35]
+                0.00    0.00       2/87265       main [1]
+                0.00    0.00       4/87265       std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::reserve(unsigned long) [33]
+                0.00    0.00      15/87265       void pcl::transformPointCloud<pcl::PointXYZ, float>(pcl::PointCloud<pcl::PointXYZ> const&, pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&, bool) [28]
+                0.00    0.00    1227/87265       pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.01    0.00   86016/87265       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[13]     1.3    0.01    0.00   87265         Eigen::internal::aligned_malloc(unsigned long) [13]
+-----------------------------------------------
+                0.01    0.00   32768/32768       void flann::KDTreeSingleIndex<flann::L2_Simple<float> >::searchLevel<false>(flann::ResultSet<float>&, float const*, flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node*, float, std::vector<float, std::allocator<float> >&, float) const [16]
+[14]     1.3    0.01    0.00   32768         flann::KNNSimpleResultSet<float>::addPoint(float, unsigned long) [14]
+-----------------------------------------------
+                0.00    0.01    4096/4096        (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[15]     1.3    0.00    0.01    4096         pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::nearestKSearch(pcl::PointXYZ const&, unsigned int, std::vector<int, std::allocator<int> >&, std::vector<float, std::allocator<float> >&) const [15]
+                0.00    0.01    4096/4096        flann::NNIndex<flann::L2_Simple<float> >::knnSearch(flann::Matrix<float> const&, flann::Matrix<unsigned long>&, flann::Matrix<float>&, unsigned long, flann::SearchParams const&) const [18]
+                0.00    0.00    8192/8194        std::vector<int, std::allocator<int> >::resize(unsigned long) [46]
+-----------------------------------------------
+                               36864             void flann::KDTreeSingleIndex<flann::L2_Simple<float> >::searchLevel<false>(flann::ResultSet<float>&, float const*, flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node*, float, std::vector<float, std::allocator<float> >&, float) const [16]
+                0.00    0.01    4096/4096        flann::KDTreeSingleIndex<flann::L2_Simple<float> >::findNeighbors(flann::ResultSet<float>&, float const*, flann::SearchParams const&) const [17]
+[16]     1.3    0.00    0.01    4096+36864   void flann::KDTreeSingleIndex<flann::L2_Simple<float> >::searchLevel<false>(flann::ResultSet<float>&, float const*, flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node*, float, std::vector<float, std::allocator<float> >&, float) const [16]
+                0.01    0.00   32768/32768       flann::KNNSimpleResultSet<float>::addPoint(float, unsigned long) [14]
+                0.00    0.00   40960/40960       flann::KNNSimpleResultSet<float>::worstDist() const [43]
+                               36864             void flann::KDTreeSingleIndex<flann::L2_Simple<float> >::searchLevel<false>(flann::ResultSet<float>&, float const*, flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node*, float, std::vector<float, std::allocator<float> >&, float) const [16]
+-----------------------------------------------
+                0.00    0.01    4096/4096        flann::NNIndex<flann::L2_Simple<float> >::knnSearch(flann::Matrix<float> const&, flann::Matrix<unsigned long>&, flann::Matrix<float>&, unsigned long, flann::SearchParams const&) const [18]
+[17]     1.3    0.00    0.01    4096         flann::KDTreeSingleIndex<flann::L2_Simple<float> >::findNeighbors(flann::ResultSet<float>&, float const*, flann::SearchParams const&) const [17]
+                0.00    0.01    4096/4096        void flann::KDTreeSingleIndex<flann::L2_Simple<float> >::searchLevel<false>(flann::ResultSet<float>&, float const*, flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node*, float, std::vector<float, std::allocator<float> >&, float) const [16]
+-----------------------------------------------
+                0.00    0.01    4096/4096        pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::nearestKSearch(pcl::PointXYZ const&, unsigned int, std::vector<int, std::allocator<int> >&, std::vector<float, std::allocator<float> >&) const [15]
+[18]     1.3    0.00    0.01    4096         flann::NNIndex<flann::L2_Simple<float> >::knnSearch(flann::Matrix<float> const&, flann::Matrix<unsigned long>&, flann::Matrix<float>&, unsigned long, flann::SearchParams const&) const [18]
+                0.00    0.01    4096/4096        flann::KDTreeSingleIndex<flann::L2_Simple<float> >::findNeighbors(flann::ResultSet<float>&, float const*, flann::SearchParams const&) const [17]
+-----------------------------------------------
+                                1148             flann::KDTreeSingleIndex<flann::L2_Simple<float> >::divideTree(int, int, std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >&) [19]
+                0.01    0.00       2/2           flann::KDTreeSingleIndex<flann::L2_Simple<float> >::buildIndexImpl() [20]
+[19]     1.3    0.01    0.00       2+1148    flann::KDTreeSingleIndex<flann::L2_Simple<float> >::divideTree(int, int, std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >&) [19]
+                0.00    0.00    1150/1150        flann::PooledAllocator::allocateMemory(int) [49]
+                                1148             flann::KDTreeSingleIndex<flann::L2_Simple<float> >::divideTree(int, int, std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >&) [19]
+-----------------------------------------------
+                0.00    0.01       2/2           flann::NNIndex<flann::L2_Simple<float> >::buildIndex() [21]
+[20]     1.3    0.00    0.01       2         flann::KDTreeSingleIndex<flann::L2_Simple<float> >::buildIndexImpl() [20]
+                0.01    0.00       2/2           flann::KDTreeSingleIndex<flann::L2_Simple<float> >::divideTree(int, int, std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >&) [19]
+                0.00    0.00       2/2           std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >::_M_default_append(unsigned long) [100]
+                0.00    0.00       2/4           std::vector<int, std::allocator<int> >::_M_default_append(unsigned long) [70]
+-----------------------------------------------
+                0.00    0.01       2/2           pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [12]
+[21]     1.3    0.00    0.01       2         flann::NNIndex<flann::L2_Simple<float> >::buildIndex() [21]
+                0.00    0.01       2/2           flann::KDTreeSingleIndex<flann::L2_Simple<float> >::buildIndexImpl() [20]
+                0.00    0.00       2/2           flann::KDTreeSingleIndex<flann::L2_Simple<float> >::freeIndex() [83]
+-----------------------------------------------
+                0.00    0.01       1/1           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[22]     0.7    0.00    0.01       1         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+                0.00    0.01       1/2           pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [12]
+                0.00    0.00       1/1           pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.00    0.00       1/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       2/17          std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00       2/5           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_add_ref_copy() [64]
+                0.00    0.00       1/5470        frame_dummy [36]
+                0.00    0.00       1/3           pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::KdTree(bool) [73]
+-----------------------------------------------
+                0.00    0.00       1/1           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+[23]     0.0    0.00    0.00       1         pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.00    0.00    1227/87265       Eigen::internal::aligned_malloc(unsigned long) [13]
+                0.00    0.00       1/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       1/18          std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::reserve(unsigned long) [33]
+                0.00    0.00   28672/28672       flann::anyimpl::big_any_policy<flann::SearchParams>::print(std::ostream&, void* const*) [44]
+                0.00    0.00    9495/9514        flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long) [45]
+                0.00    0.00    2965/2965        void Eigen::internal::tridiagonal_qr_step<double, double, long>(double*, double*, long, long, double*, long) [47]
+                0.00    0.00    2916/2916        std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_get_deleter(std::type_info const&) [48]
+                0.00    0.00     671/5470        frame_dummy [36]
+                0.00    0.00       2/2           int pcl::getFieldIndex<pcl::PointXYZ>(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >&) [81]
+                0.00    0.00       1/1           std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::~vector() [112]
+                0.00    0.00       1/3           std::vector<int, std::allocator<int> >::reserve(unsigned long) [79]
+                0.00    0.00       1/4           std::vector<int, std::allocator<int> >::_M_default_append(unsigned long) [70]
+                0.00    0.00       1/8194        std::vector<int, std::allocator<int> >::resize(unsigned long) [46]
+-----------------------------------------------
+                0.00    0.00       2/2           pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [12]
+[24]     0.0    0.00    0.00       2         pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [24]
+                0.00    0.00      10/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       4/4           flann::flann_algorithm_t flann::get_param<flann::flann_algorithm_t>(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [26]
+                0.00    0.00       6/6           std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > >::operator[](std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&) [31]
+                0.00    0.00      10/5470        frame_dummy [36]
+                0.00    0.00       6/6           flann::anyimpl::big_any_policy<flann::anyimpl::empty_any>::static_delete(void**) [59]
+                0.00    0.00       2/2           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::convertCloudToArray(pcl::PointCloud<pcl::PointXYZ> const&) [80]
+-----------------------------------------------
+                0.00    0.00       1/1           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[25]     0.0    0.00    0.00       1         pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance() [25]
+                0.00    0.00       9/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       3/17          std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00       1/1           std::_Sp_counted_ptr<pcl::search::Search<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [108]
+                0.00    0.00       1/1           std::_Sp_counted_ptr<pcl::PointCloud<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [106]
+                0.00    0.00       1/2           std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [94]
+-----------------------------------------------
+                0.00    0.00       4/4           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [24]
+[26]     0.0    0.00    0.00       4         flann::flann_algorithm_t flann::get_param<flann::flann_algorithm_t>(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [26]
+                0.00    0.00       4/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       4/4           flann::anyimpl::typed_base_any_policy<flann::flann_algorithm_t>::type() [69]
+                0.00    0.00       4/4           flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::get_value(void* const*) [66]
+-----------------------------------------------
+                0.00    0.00       2/4           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00       2/4           std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > >::operator[](std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&) [31]
+[27]     0.0    0.00    0.00       4         std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [27]
+                0.00    0.00       2/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00       2/2           flann::KDTreeSingleIndex<flann::L2_Simple<float> >::~KDTreeSingleIndex() [32]
+-----------------------------------------------
+                0.00    0.00       1/15          (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+                0.00    0.00      14/15          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&) [4]
+[28]     0.0    0.00    0.00      15         void pcl::transformPointCloud<pcl::PointXYZ, float>(pcl::PointCloud<pcl::PointXYZ> const&, pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&, bool) [28]
+                0.00    0.00      15/87265       Eigen::internal::aligned_malloc(unsigned long) [13]
+                0.00    0.00      15/18          std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::reserve(unsigned long) [33]
+-----------------------------------------------
+[29]     0.0    0.00    0.00      17+20      <cycle 2 as a whole> [29]
+                0.00    0.00      31             std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00       3             std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [76]
+                0.00    0.00       2             std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [92]
+                0.00    0.00       1             pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::~KdTree() <cycle 2> [102]
+-----------------------------------------------
+                                   2             pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::~KdTree() <cycle 2> [102]
+                                   3             std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [92]
+                                   9             std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [76]
+                0.00    0.00       1/17          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+                0.00    0.00       2/17          (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+                0.00    0.00       2/17          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+                0.00    0.00       3/17          pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance() [25]
+                0.00    0.00       4/17          main [1]
+                0.00    0.00       5/17          pcl::Registration<pcl::PointXYZ, pcl::PointXYZ, float>::~Registration() [34]
+[30]     0.0    0.00    0.00      31         std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00       2/4           std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [27]
+                0.00    0.00       3/3           pcl::DefaultPointRepresentation<pcl::PointXYZ>::~DefaultPointRepresentation() [72]
+                0.00    0.00       3/3           std::_Sp_counted_ptr<pcl::DefaultPointRepresentation<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [78]
+                0.00    0.00       2/2           std::_Sp_counted_ptr_inplace<pcl::PointCloud<pcl::PointXYZ>, Eigen::aligned_allocator<pcl::PointCloud<pcl::PointXYZ> >, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [99]
+                0.00    0.00       2/2           std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [95]
+                0.00    0.00       2/2           std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [97]
+                0.00    0.00       1/1           std::_Sp_counted_ptr<std::vector<pcl::Correspondence, Eigen::aligned_allocator<pcl::Correspondence> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [111]
+                0.00    0.00       1/1           std::_Sp_counted_ptr<pcl::PointCloud<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [107]
+                0.00    0.00       1/1           std::_Sp_counted_ptr<pcl::search::Search<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [109]
+                                   3             std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [76]
+                                   2             std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [92]
+                                   1             pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::~KdTree() <cycle 2> [102]
+-----------------------------------------------
+                0.00    0.00       6/6           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [24]
+[31]     0.0    0.00    0.00       6         std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > >::operator[](std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&) [31]
+                0.00    0.00       2/4           std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [27]
+                0.00    0.00       8/9514        flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long) [45]
+-----------------------------------------------
+                0.00    0.00       2/2           std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [27]
+[32]     0.0    0.00    0.00       2         flann::KDTreeSingleIndex<flann::L2_Simple<float> >::~KDTreeSingleIndex() [32]
+                0.00    0.00       2/86050       (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00      51/51          flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node::~Node() [52]
+                0.00    0.00       2/2           flann::NNIndex<flann::L2_Simple<float> >::~NNIndex() [86]
+-----------------------------------------------
+                0.00    0.00       1/18          pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.00    0.00       2/18          main [1]
+                0.00    0.00      15/18          void pcl::transformPointCloud<pcl::PointXYZ, float>(pcl::PointCloud<pcl::PointXYZ> const&, pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&, bool) [28]
+[33]     0.0    0.00    0.00      18         std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::reserve(unsigned long) [33]
+                0.00    0.00       4/87265       Eigen::internal::aligned_malloc(unsigned long) [13]
+-----------------------------------------------
+                0.00    0.00       1/1           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[34]     0.0    0.00    0.00       1         pcl::Registration<pcl::PointXYZ, pcl::PointXYZ, float>::~Registration() [34]
+                0.00    0.00       5/17          std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+                0.00    0.00       2/2           std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [91]
+                0.00    0.00       1/1           std::_Sp_counted_ptr<std::vector<pcl::Correspondence, Eigen::aligned_allocator<pcl::Correspondence> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [110]
+                0.00    0.00       1/2           std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [94]
+-----------------------------------------------
+                0.00    0.00       1/1           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[35]     0.0    0.00    0.00       1         std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::_M_default_append(unsigned long) [35]
+                0.00    0.00       1/87265       Eigen::internal::aligned_malloc(unsigned long) [13]
+-----------------------------------------------
+                0.00    0.00       1/5470        pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+                0.00    0.00       3/5470        pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::KdTreeFLANN(bool) [71]
+                0.00    0.00       3/5470        pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::KdTree(bool) [73]
+                0.00    0.00       6/5470        (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+                0.00    0.00      10/5470        pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [24]
+                0.00    0.00      11/5470        main [1]
+                0.00    0.00     671/5470        pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.00    0.00    4765/5470        pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::convertCloudToArray(pcl::PointCloud<pcl::PointXYZ> const&) [80]
+[36]     0.0    0.00    0.00    5470         frame_dummy [36]
+-----------------------------------------------
+                0.00    0.00   40960/40960       void flann::KDTreeSingleIndex<flann::L2_Simple<float> >::searchLevel<false>(flann::ResultSet<float>&, float const*, flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node*, float, std::vector<float, std::allocator<float> >&, float) const [16]
+[43]     0.0    0.00    0.00   40960         flann::KNNSimpleResultSet<float>::worstDist() const [43]
+-----------------------------------------------
+                0.00    0.00   28672/28672       pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+[44]     0.0    0.00    0.00   28672         flann::anyimpl::big_any_policy<flann::SearchParams>::print(std::ostream&, void* const*) [44]
+-----------------------------------------------
+                                   1             flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long) [45]
+                0.00    0.00       5/9514        pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+                0.00    0.00       6/9514        pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&) [4]
+                0.00    0.00       8/9514        std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > >::operator[](std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&) [31]
+                0.00    0.00    9495/9514        pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+[45]     0.0    0.00    0.00    9514+1       flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long) [45]
+                                   1             flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long) [45]
+-----------------------------------------------
+                0.00    0.00       1/8194        pcl::PCLBase<pcl::PointXYZ>::initCompute() [103]
+                0.00    0.00       1/8194        pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.00    0.00    8192/8194        pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::nearestKSearch(pcl::PointXYZ const&, unsigned int, std::vector<int, std::allocator<int> >&, std::vector<float, std::allocator<float> >&) const [15]
+[46]     0.0    0.00    0.00    8194         std::vector<int, std::allocator<int> >::resize(unsigned long) [46]
+-----------------------------------------------
+                0.00    0.00    2965/2965        pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+[47]     0.0    0.00    0.00    2965         void Eigen::internal::tridiagonal_qr_step<double, double, long>(double*, double*, long, long, double*, long) [47]
+-----------------------------------------------
+                0.00    0.00    2916/2916        pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+[48]     0.0    0.00    0.00    2916         std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_get_deleter(std::type_info const&) [48]
+-----------------------------------------------
+                0.00    0.00    1150/1150        flann::KDTreeSingleIndex<flann::L2_Simple<float> >::divideTree(int, int, std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >&) [19]
+[49]     0.0    0.00    0.00    1150         flann::PooledAllocator::allocateMemory(int) [49]
+-----------------------------------------------
+                0.00    0.00     535/535         bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6> >(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, bool, bool, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar&) [53]
+[50]     0.0    0.00    0.00     535         void Eigen::internal::real_2x2_jacobi_svd<Eigen::Matrix<double, 6, 6, 0, 6, 6>, double, long>(Eigen::Matrix<double, 6, 6, 0, 6, 6> const&, long, long, Eigen::JacobiRotation<double>*, Eigen::JacobiRotation<double>*) [50]
+-----------------------------------------------
+                0.00    0.00      66/66          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::convertTransform(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Transform<float, 3, 2, 0>&) [54]
+[51]     0.0    0.00    0.00      66         Eigen::AngleAxis<float>::toRotationMatrix() const [51]
+-----------------------------------------------
+                0.00    0.00      51/51          flann::KDTreeSingleIndex<flann::L2_Simple<float> >::~KDTreeSingleIndex() [32]
+[52]     0.0    0.00    0.00      51         flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node::~Node() [52]
+-----------------------------------------------
+                0.00    0.00      50/50          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+[53]     0.0    0.00    0.00      50         bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6> >(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, bool, bool, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar&) [53]
+                0.00    0.00     535/535         void Eigen::internal::real_2x2_jacobi_svd<Eigen::Matrix<double, 6, 6, 0, 6, 6>, double, long>(Eigen::Matrix<double, 6, 6, 0, 6, 6> const&, long, long, Eigen::JacobiRotation<double>*, Eigen::JacobiRotation<double>*) [50]
+-----------------------------------------------
+                0.00    0.00       8/22          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+                0.00    0.00      14/22          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&) [4]
+[54]     0.0    0.00    0.00      22         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::convertTransform(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Transform<float, 3, 2, 0>&) [54]
+                0.00    0.00      66/66          Eigen::AngleAxis<float>::toRotationMatrix() const [51]
+-----------------------------------------------
+                0.00    0.00       1/22          main [1]
+                0.00    0.00       3/22          pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::KdTree(bool) [73]
+                0.00    0.00       6/22          void std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::_M_realloc_append<pcl::PCLPointField const&>(pcl::PCLPointField const&) [63]
+                0.00    0.00      12/22          (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[55]     0.0    0.00    0.00      22         void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long) [55]
+-----------------------------------------------
+                0.00    0.00      15/15          pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [5]
+[56]     0.0    0.00    0.00      15         pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeAngleDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [56]
+-----------------------------------------------
+                0.00    0.00       8/8           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+[57]     0.0    0.00    0.00       8         void Eigen::SVDBase<Eigen::JacobiSVD<Eigen::Matrix<double, 6, 6, 0, 6, 6>, 0> >::_solve_impl<Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, Eigen::Matrix<double, 6, 1, 0, 6, 1> const>, Eigen::Matrix<double, 6, 1, 0, 6, 1> >(Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, Eigen::Matrix<double, 6, 1, 0, 6, 1> const> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&) const [57]
+-----------------------------------------------
+                0.00    0.00       3/7           main [1]
+                0.00    0.00       4/7           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[58]     0.0    0.00    0.00       7         bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) [58]
+-----------------------------------------------
+                0.00    0.00       6/6           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [24]
+[59]     0.0    0.00    0.00       6         flann::anyimpl::big_any_policy<flann::anyimpl::empty_any>::static_delete(void**) [59]
+-----------------------------------------------
+                0.00    0.00       6/6           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[60]     0.0    0.00    0.00       6         flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::static_delete(void**) [60]
+-----------------------------------------------
+                0.00    0.00       6/6           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[61]     0.0    0.00    0.00       6         flann::anyimpl::small_any_policy<bool>::static_delete(void**) [61]
+-----------------------------------------------
+                0.00    0.00       6/6           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[62]     0.0    0.00    0.00       6         flann::anyimpl::small_any_policy<int>::static_delete(void**) [62]
+-----------------------------------------------
+                0.00    0.00       6/6           int pcl::getFieldIndex<pcl::PointXYZ>(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >&) [81]
+[63]     0.0    0.00    0.00       6         void std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::_M_realloc_append<pcl::PCLPointField const&>(pcl::PCLPointField const&) [63]
+                0.00    0.00       6/22          void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long) [55]
+-----------------------------------------------
+                0.00    0.00       1/5           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+                0.00    0.00       2/5           main [1]
+                0.00    0.00       2/5           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+[64]     0.0    0.00    0.00       5         std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_add_ref_copy() [64]
+-----------------------------------------------
+                0.00    0.00       4/4           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[65]     0.0    0.00    0.00       4         flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::clone(void* const*, void**) [65]
+-----------------------------------------------
+                0.00    0.00       4/4           flann::flann_algorithm_t flann::get_param<flann::flann_algorithm_t>(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [26]
+[66]     0.0    0.00    0.00       4         flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::get_value(void* const*) [66]
+-----------------------------------------------
+                0.00    0.00       4/4           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[67]     0.0    0.00    0.00       4         flann::anyimpl::small_any_policy<bool>::clone(void* const*, void**) [67]
+-----------------------------------------------
+                0.00    0.00       4/4           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[68]     0.0    0.00    0.00       4         flann::anyimpl::small_any_policy<int>::clone(void* const*, void**) [68]
+-----------------------------------------------
+                0.00    0.00       4/4           flann::flann_algorithm_t flann::get_param<flann::flann_algorithm_t>(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [26]
+[69]     0.0    0.00    0.00       4         flann::anyimpl::typed_base_any_policy<flann::flann_algorithm_t>::type() [69]
+-----------------------------------------------
+                0.00    0.00       1/4           pcl::PCLBase<pcl::PointXYZ>::initCompute() [103]
+                0.00    0.00       1/4           pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.00    0.00       2/4           flann::KDTreeSingleIndex<flann::L2_Simple<float> >::buildIndexImpl() [20]
+[70]     0.0    0.00    0.00       4         std::vector<int, std::allocator<int> >::_M_default_append(unsigned long) [70]
+-----------------------------------------------
+                0.00    0.00       3/3           pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::KdTree(bool) [73]
+[71]     0.0    0.00    0.00       3         pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::KdTreeFLANN(bool) [71]
+                0.00    0.00       3/5470        frame_dummy [36]
+                0.00    0.00       3/3           void pcl::console::print<>(pcl::console::VERBOSITY_LEVEL, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [74]
+-----------------------------------------------
+                0.00    0.00       3/3           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[72]     0.0    0.00    0.00       3         pcl::DefaultPointRepresentation<pcl::PointXYZ>::~DefaultPointRepresentation() [72]
+-----------------------------------------------
+                0.00    0.00       1/3           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [22]
+                0.00    0.00       2/3           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[73]     0.0    0.00    0.00       3         pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::KdTree(bool) [73]
+                0.00    0.00       3/5470        frame_dummy [36]
+                0.00    0.00       3/22          void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long) [55]
+                0.00    0.00       3/3           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::KdTreeFLANN(bool) [71]
+-----------------------------------------------
+                0.00    0.00       3/3           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::KdTreeFLANN(bool) [71]
+[74]     0.0    0.00    0.00       3         void pcl::console::print<>(pcl::console::VERBOSITY_LEVEL, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [74]
+-----------------------------------------------
+                0.00    0.00       1/3           pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::~KdTree() <cycle 2> [102]
+                0.00    0.00       2/3           std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [92]
+[75]     0.0    0.00    0.00       3         std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [75]
+-----------------------------------------------
+                                   3             std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[76]     0.0    0.00    0.00       3         std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [76]
+                0.00    0.00       3/3           std::_Sp_counted_ptr<pcl::DefaultPointRepresentation<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [77]
+                0.00    0.00       2/2           std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [93]
+                0.00    0.00       2/2           std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [96]
+                                   9             std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+-----------------------------------------------
+                0.00    0.00       3/3           std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [76]
+[77]     0.0    0.00    0.00       3         std::_Sp_counted_ptr<pcl::DefaultPointRepresentation<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [77]
+-----------------------------------------------
+                0.00    0.00       3/3           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[78]     0.0    0.00    0.00       3         std::_Sp_counted_ptr<pcl::DefaultPointRepresentation<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [78]
+-----------------------------------------------
+                0.00    0.00       1/3           pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+                0.00    0.00       2/3           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::convertCloudToArray(pcl::PointCloud<pcl::PointXYZ> const&) [80]
+[79]     0.0    0.00    0.00       3         std::vector<int, std::allocator<int> >::reserve(unsigned long) [79]
+-----------------------------------------------
+                0.00    0.00       2/2           pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [24]
+[80]     0.0    0.00    0.00       2         pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::convertCloudToArray(pcl::PointCloud<pcl::PointXYZ> const&) [80]
+                0.00    0.00    4765/5470        frame_dummy [36]
+                0.00    0.00       2/3           std::vector<int, std::allocator<int> >::reserve(unsigned long) [79]
+-----------------------------------------------
+                0.00    0.00       2/2           pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+[81]     0.0    0.00    0.00       2         int pcl::getFieldIndex<pcl::PointXYZ>(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >&) [81]
+                0.00    0.00       6/6           void std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::_M_realloc_append<pcl::PCLPointField const&>(pcl::PCLPointField const&) [63]
+-----------------------------------------------
+                0.00    0.00       2/2           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+[82]     0.0    0.00    0.00       2         float Eigen::internal::positive_real_hypot<float>(float const&, float const&) [82]
+-----------------------------------------------
+                0.00    0.00       2/2           flann::NNIndex<flann::L2_Simple<float> >::buildIndex() [21]
+[83]     0.0    0.00    0.00       2         flann::KDTreeSingleIndex<flann::L2_Simple<float> >::freeIndex() [83]
+-----------------------------------------------
+                0.00    0.00       2/2           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[84]     0.0    0.00    0.00       2         flann::NNIndex<flann::L2_Simple<float> >::setDataset(flann::Matrix<float> const&) [84]
+                0.00    0.00       2/2           std::vector<float*, std::allocator<float*> >::_M_default_append(unsigned long) [101]
+-----------------------------------------------
+                                   2             (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[85]     0.0    0.00    0.00       2         flann::NNIndex<flann::L2_Simple<float> >::NNIndex(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, flann::L2_Simple<float>) <cycle 1> [85]
+                                   2             (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+-----------------------------------------------
+                0.00    0.00       2/2           flann::KDTreeSingleIndex<flann::L2_Simple<float> >::~KDTreeSingleIndex() [32]
+[86]     0.0    0.00    0.00       2         flann::NNIndex<flann::L2_Simple<float> >::~NNIndex() [86]
+-----------------------------------------------
+                0.00    0.00       2/2           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[87]     0.0    0.00    0.00       2         flann::anyimpl::small_any_policy<bool>::get_value(void* const*) [87]
+-----------------------------------------------
+                0.00    0.00       2/2           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[88]     0.0    0.00    0.00       2         flann::anyimpl::small_any_policy<int>::get_value(void* const*) [88]
+-----------------------------------------------
+                0.00    0.00       2/2           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[89]     0.0    0.00    0.00       2         flann::anyimpl::typed_base_any_policy<bool>::type() [89]
+-----------------------------------------------
+                0.00    0.00       2/2           (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) <cycle 1> [10]
+[90]     0.0    0.00    0.00       2         flann::anyimpl::typed_base_any_policy<int>::type() [90]
+-----------------------------------------------
+                0.00    0.00       2/2           pcl::Registration<pcl::PointXYZ, pcl::PointXYZ, float>::~Registration() [34]
+[91]     0.0    0.00    0.00       2         std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [91]
+-----------------------------------------------
+                                   2             std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[92]     0.0    0.00    0.00       2         std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [92]
+                0.00    0.00       2/3           std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [75]
+                                   3             std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+-----------------------------------------------
+                0.00    0.00       2/2           std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [76]
+[93]     0.0    0.00    0.00       2         std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [93]
+-----------------------------------------------
+                0.00    0.00       1/2           pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance() [25]
+                0.00    0.00       1/2           pcl::Registration<pcl::PointXYZ, pcl::PointXYZ, float>::~Registration() [34]
+[94]     0.0    0.00    0.00       2         std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [94]
+-----------------------------------------------
+                0.00    0.00       2/2           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[95]     0.0    0.00    0.00       2         std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [95]
+-----------------------------------------------
+                0.00    0.00       2/2           std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() <cycle 2> [76]
+[96]     0.0    0.00    0.00       2         std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [96]
+-----------------------------------------------
+                0.00    0.00       2/2           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[97]     0.0    0.00    0.00       2         std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [97]
+-----------------------------------------------
+                0.00    0.00       2/2           main [1]
+[98]     0.0    0.00    0.00       2         std::_Sp_counted_ptr_inplace<pcl::PointCloud<pcl::PointXYZ>, Eigen::aligned_allocator<pcl::PointCloud<pcl::PointXYZ> >, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [98]
+-----------------------------------------------
+                0.00    0.00       2/2           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[99]     0.0    0.00    0.00       2         std::_Sp_counted_ptr_inplace<pcl::PointCloud<pcl::PointXYZ>, Eigen::aligned_allocator<pcl::PointCloud<pcl::PointXYZ> >, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [99]
+-----------------------------------------------
+                0.00    0.00       2/2           flann::KDTreeSingleIndex<flann::L2_Simple<float> >::buildIndexImpl() [20]
+[100]    0.0    0.00    0.00       2         std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >::_M_default_append(unsigned long) [100]
+-----------------------------------------------
+                0.00    0.00       2/2           flann::NNIndex<flann::L2_Simple<float> >::setDataset(flann::Matrix<float> const&) [84]
+[101]    0.0    0.00    0.00       2         std::vector<float*, std::allocator<float*> >::_M_default_append(unsigned long) [101]
+-----------------------------------------------
+                                   1             std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[102]    0.0    0.00    0.00       1         pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::~KdTree() <cycle 2> [102]
+                0.00    0.00       1/3           std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [75]
+                                   2             std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+-----------------------------------------------
+                0.00    0.00       1/1           (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) [2]
+[103]    0.0    0.00    0.00       1         pcl::PCLBase<pcl::PointXYZ>::initCompute() [103]
+                0.00    0.00       1/4           std::vector<int, std::allocator<int> >::_M_default_append(unsigned long) [70]
+                0.00    0.00       1/8194        std::vector<int, std::allocator<int> >::resize(unsigned long) [46]
+-----------------------------------------------
+                0.00    0.00       1/1           Eigen::JacobiSVD<Eigen::Matrix<float, 3, 3, 0, 3, 3>, 20>::blocked_sweep(float, float, float&) [105]
+[104]    0.0    0.00    0.00       1         bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<float, 3, 3, 0, 3, 3>, Eigen::Matrix<float, 3, 3, 0, 3, 3>, Eigen::Matrix<float, 3, 3, 0, 3, 3> >(Eigen::Matrix<float, 3, 3, 0, 3, 3>&, Eigen::Matrix<float, 3, 3, 0, 3, 3>&, Eigen::Matrix<float, 3, 3, 0, 3, 3>&, bool, bool, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar&) [104]
+-----------------------------------------------
+                0.00    0.00       1/1           pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [3]
+[105]    0.0    0.00    0.00       1         Eigen::JacobiSVD<Eigen::Matrix<float, 3, 3, 0, 3, 3>, 20>::blocked_sweep(float, float, float&) [105]
+                0.00    0.00       1/1           bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<float, 3, 3, 0, 3, 3>, Eigen::Matrix<float, 3, 3, 0, 3, 3>, Eigen::Matrix<float, 3, 3, 0, 3, 3> >(Eigen::Matrix<float, 3, 3, 0, 3, 3>&, Eigen::Matrix<float, 3, 3, 0, 3, 3>&, Eigen::Matrix<float, 3, 3, 0, 3, 3>&, bool, bool, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar&) [104]
+-----------------------------------------------
+                0.00    0.00       1/1           pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance() [25]
+[106]    0.0    0.00    0.00       1         std::_Sp_counted_ptr<pcl::PointCloud<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [106]
+-----------------------------------------------
+                0.00    0.00       1/1           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[107]    0.0    0.00    0.00       1         std::_Sp_counted_ptr<pcl::PointCloud<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [107]
+-----------------------------------------------
+                0.00    0.00       1/1           pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance() [25]
+[108]    0.0    0.00    0.00       1         std::_Sp_counted_ptr<pcl::search::Search<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [108]
+-----------------------------------------------
+                0.00    0.00       1/1           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[109]    0.0    0.00    0.00       1         std::_Sp_counted_ptr<pcl::search::Search<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [109]
+-----------------------------------------------
+                0.00    0.00       1/1           pcl::Registration<pcl::PointXYZ, pcl::PointXYZ, float>::~Registration() [34]
+[110]    0.0    0.00    0.00       1         std::_Sp_counted_ptr<std::vector<pcl::Correspondence, Eigen::aligned_allocator<pcl::Correspondence> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [110]
+-----------------------------------------------
+                0.00    0.00       1/1           std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release() <cycle 2> [30]
+[111]    0.0    0.00    0.00       1         std::_Sp_counted_ptr<std::vector<pcl::Correspondence, Eigen::aligned_allocator<pcl::Correspondence> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [111]
+-----------------------------------------------
+                0.00    0.00       1/1           pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [23]
+[112]    0.0    0.00    0.00       1         std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::~vector() [112]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2024 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+  [10] (anonymous namespace)::matches_filter(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (bench_ndt.cpp) [32] flann::KDTreeSingleIndex<flann::L2_Simple<float> >::~KDTreeSingleIndex() [76] std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+   [2] (anonymous namespace)::run_public_align_case(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, (anonymous namespace)::Options const&, unsigned long) (bench_ndt.cpp) [14] flann::KNNSimpleResultSet<float>::addPoint(float, unsigned long) [77] std::_Sp_counted_ptr<pcl::DefaultPointRepresentation<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  [24] pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [45] flann::KNNUniqueResultSet<float>::addPoint(float, unsigned long) [78] std::_Sp_counted_ptr<pcl::DefaultPointRepresentation<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  [80] pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::convertCloudToArray(pcl::PointCloud<pcl::PointXYZ> const&) [21] flann::NNIndex<flann::L2_Simple<float> >::buildIndex() [91] std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  [71] pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::KdTreeFLANN(bool) [84] flann::NNIndex<flann::L2_Simple<float> >::setDataset(flann::Matrix<float> const&) [92] std::_Sp_counted_ptr<pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  [34] pcl::Registration<pcl::PointXYZ, pcl::PointXYZ, float>::~Registration() [85] flann::NNIndex<flann::L2_Simple<float> >::NNIndex(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, flann::L2_Simple<float>) [108] std::_Sp_counted_ptr<pcl::search::Search<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  [81] int pcl::getFieldIndex<pcl::PointXYZ>(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >&) [86] flann::NNIndex<flann::L2_Simple<float> >::~NNIndex() [109] std::_Sp_counted_ptr<pcl::search::Search<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  [23] pcl::VoxelGridCovariance<pcl::PointXYZ>::applyFilter(pcl::PointCloud<pcl::PointXYZ>&) [59] flann::anyimpl::big_any_policy<flann::anyimpl::empty_any>::static_delete(void**) [93] std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  [25] pcl::VoxelGridCovariance<pcl::PointXYZ>::~VoxelGridCovariance() [44] flann::anyimpl::big_any_policy<flann::SearchParams>::print(std::ostream&, void* const*) [27] std::_Sp_counted_ptr<flann::Index<flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  [28] void pcl::transformPointCloud<pcl::PointXYZ, float>(pcl::PointCloud<pcl::PointXYZ> const&, pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&, bool) [60] flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::static_delete(void**) [110] std::_Sp_counted_ptr<std::vector<pcl::Correspondence, Eigen::aligned_allocator<pcl::Correspondence> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  [72] pcl::DefaultPointRepresentation<pcl::PointXYZ>::~DefaultPointRepresentation() [65] flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::clone(void* const*, void**) [111] std::_Sp_counted_ptr<std::vector<pcl::Correspondence, Eigen::aligned_allocator<pcl::Correspondence> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+   [7] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&) [66] flann::anyimpl::small_any_policy<flann::flann_algorithm_t>::get_value(void* const*) [94] std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  [54] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::convertTransform(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Transform<float, 3, 2, 0>&) [61] flann::anyimpl::small_any_policy<bool>::static_delete(void**) [95] std::_Sp_counted_ptr<std::vector<int, std::allocator<int> >*, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+   [5] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [67] flann::anyimpl::small_any_policy<bool>::clone(void* const*, void**) [30] std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_release()
+   [4] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeStepLengthMT(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, double, double, double, double&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, pcl::PointCloud<pcl::PointXYZ>&) [87] flann::anyimpl::small_any_policy<bool>::get_value(void* const*) [64] std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)1>::_M_add_ref_copy()
+   [3] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeTransformation(pcl::PointCloud<pcl::PointXYZ>&, Eigen::Matrix<float, 4, 4, 0, 4, 4> const&) [62] flann::anyimpl::small_any_policy<int>::static_delete(void**) [96] std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  [56] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computeAngleDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1> const&, bool) [68] flann::anyimpl::small_any_policy<int>::clone(void* const*, void**) [97] std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+  [22] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::init() [88] flann::anyimpl::small_any_policy<int>::get_value(void* const*) [48] std::_Sp_counted_deleter<float*, std::default_delete<float []>, std::allocator<void>, (__gnu_cxx::_Lock_policy)1>::_M_get_deleter(std::type_info const&)
+  [12] pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::setInputCloud(std::shared_ptr<pcl::PointCloud<pcl::PointXYZ> const> const&, std::shared_ptr<std::vector<int, std::allocator<int> > const> const&) [69] flann::anyimpl::typed_base_any_policy<flann::flann_algorithm_t>::type() [98] std::_Sp_counted_ptr_inplace<pcl::PointCloud<pcl::PointXYZ>, Eigen::aligned_allocator<pcl::PointCloud<pcl::PointXYZ> >, (__gnu_cxx::_Lock_policy)1>::_M_destroy()
+  [73] pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::KdTree(bool) [89] flann::anyimpl::typed_base_any_policy<bool>::type() [99] std::_Sp_counted_ptr_inplace<pcl::PointCloud<pcl::PointXYZ>, Eigen::aligned_allocator<pcl::PointCloud<pcl::PointXYZ> >, (__gnu_cxx::_Lock_policy)1>::_M_dispose()
+ [102] pcl::search::KdTree<pcl::PointXYZ, pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> > >::~KdTree() [90] flann::anyimpl::typed_base_any_policy<int>::type() [31] std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > >::operator[](std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&&)
+ [103] pcl::PCLBase<pcl::PointXYZ>::initCompute() [26] flann::flann_algorithm_t flann::get_param<flann::flann_algorithm_t>(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, flann::any, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, flann::any> > > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [63] void std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::_M_realloc_append<pcl::PCLPointField const&>(pcl::PCLPointField const&)
+  [74] void pcl::console::print<>(pcl::console::VERBOSITY_LEVEL, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) [15] pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >::nearestKSearch(pcl::PointXYZ const&, unsigned int, std::vector<int, std::allocator<int> >&, std::vector<float, std::allocator<float> >&) const [112] std::vector<pcl::PCLPointField, std::allocator<pcl::PCLPointField> >::~vector()
+  [13] Eigen::internal::aligned_malloc(unsigned long) [8] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::updateHessian(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 3, 0, 3, 3> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6> const&, Eigen::Matrix<double, 18, 6, 0, 18, 6> const&) const [35] std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::_M_default_append(unsigned long)
+  [82] float Eigen::internal::positive_real_hypot<float>(float const&, float const&) [6] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::updateDerivatives(Eigen::Matrix<double, 6, 1, 0, 6, 1>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 3, 0, 3, 3> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6> const&, Eigen::Matrix<double, 18, 6, 0, 18, 6> const*) const [33] std::vector<pcl::PointXYZ, Eigen::aligned_allocator<pcl::PointXYZ> >::reserve(unsigned long)
+  [50] void Eigen::internal::real_2x2_jacobi_svd<Eigen::Matrix<double, 6, 6, 0, 6, 6>, double, long>(Eigen::Matrix<double, 6, 6, 0, 6, 6> const&, long, long, Eigen::JacobiRotation<double>*, Eigen::JacobiRotation<double>*) [11] pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ, float>::computePointDerivatives(Eigen::Matrix<double, 3, 1, 0, 3, 1> const&, Eigen::Matrix<double, 3, 6, 0, 3, 6>&, Eigen::Matrix<double, 18, 6, 0, 18, 6>*) const [100] std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >::_M_default_append(unsigned long)
+  [53] bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6>, Eigen::Matrix<double, 6, 6, 0, 6, 6> >(Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, Eigen::Matrix<double, 6, 6, 0, 6, 6>&, bool, bool, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar, Eigen::Matrix<double, 6, 6, 0, 6, 6>::RealScalar&) [57] void Eigen::SVDBase<Eigen::JacobiSVD<Eigen::Matrix<double, 6, 6, 0, 6, 6>, 0> >::_solve_impl<Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, Eigen::Matrix<double, 6, 1, 0, 6, 1> const>, Eigen::Matrix<double, 6, 1, 0, 6, 1> >(Eigen::CwiseUnaryOp<Eigen::internal::scalar_opposite_op<double>, Eigen::Matrix<double, 6, 1, 0, 6, 1> const> const&, Eigen::Matrix<double, 6, 1, 0, 6, 1>&) const [101] std::vector<float*, std::allocator<float*> >::_M_default_append(unsigned long)
+ [104] bool Eigen::internal::jacobi_svd_nonblocking_sweep<Eigen::Matrix<float, 3, 3, 0, 3, 3>, Eigen::Matrix<float, 3, 3, 0, 3, 3>, Eigen::Matrix<float, 3, 3, 0, 3, 3> >(Eigen::Matrix<float, 3, 3, 0, 3, 3>&, Eigen::Matrix<float, 3, 3, 0, 3, 3>&, Eigen::Matrix<float, 3, 3, 0, 3, 3>&, bool, bool, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar, Eigen::Matrix<float, 3, 3, 0, 3, 3>::RealScalar&) [51] Eigen::AngleAxis<float>::toRotationMatrix() const [70] std::vector<int, std::allocator<int> >::_M_default_append(unsigned long)
+  [47] void Eigen::internal::tridiagonal_qr_step<double, double, long>(double*, double*, long, long, double*, long) (SelfAdjointEigenSolver.h) [16] void flann::KDTreeSingleIndex<flann::L2_Simple<float> >::searchLevel<false>(flann::ResultSet<float>&, float const*, flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node*, float, std::vector<float, std::allocator<float> >&, float) const [46] std::vector<int, std::allocator<int> >::resize(unsigned long)
+ [105] Eigen::JacobiSVD<Eigen::Matrix<float, 3, 3, 0, 3, 3>, 20>::blocked_sweep(float, float, float&) [17] flann::KDTreeSingleIndex<flann::L2_Simple<float> >::findNeighbors(flann::ResultSet<float>&, float const*, flann::SearchParams const&) const [79] std::vector<int, std::allocator<int> >::reserve(unsigned long)
+  [49] flann::PooledAllocator::allocateMemory(int) [43] flann::KNNSimpleResultSet<float>::worstDist() const [55] void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long)
+  [19] flann::KDTreeSingleIndex<flann::L2_Simple<float> >::divideTree(int, int, std::vector<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval, std::allocator<flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Interval> >&) [18] flann::NNIndex<flann::L2_Simple<float> >::knnSearch(flann::Matrix<float> const&, flann::Matrix<unsigned long>&, flann::Matrix<float>&, unsigned long, flann::SearchParams const&) const [58] bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*)
+  [20] flann::KDTreeSingleIndex<flann::L2_Simple<float> >::buildIndexImpl() [106] std::_Sp_counted_ptr<pcl::PointCloud<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [36] frame_dummy
+  [52] flann::KDTreeSingleIndex<flann::L2_Simple<float> >::Node::~Node() [107] std::_Sp_counted_ptr<pcl::PointCloud<pcl::PointXYZ>*, (__gnu_cxx::_Lock_policy)1>::_M_dispose() [9] <cycle 1>
+  [83] flann::KDTreeSingleIndex<flann::L2_Simple<float> >::freeIndex() [75] std::_Sp_counted_ptr<pcl::KdTreeFLANN<pcl::PointXYZ, flann::L2_Simple<float> >*, (__gnu_cxx::_Lock_policy)1>::_M_destroy() [29] <cycle 2>
