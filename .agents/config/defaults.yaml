@@ -97,11 +97,13 @@ agent_assets:
 
 # 测试支撑结构策略：控制 test/bench/helper 如何拆分到稳定聚合入口和内部实现。
 test_support:
+  # helper_split_primary_axis：测试支撑拆分的首要轴；responsibility 表示先按职责拆分。
+  helper_split_primary_axis: responsibility
   # helper_split_soft_line_limit：超过该行数时应评估拆分。
   helper_split_soft_line_limit: 800
   # helper_split_hard_line_limit：超过该行数时必须优先拆分或写 deferred reason。
   helper_split_hard_line_limit: 1000
-  # helper_split_responsibility_threshold：混合多少类职责时触发拆分审计。
+  # helper_split_responsibility_threshold：单个 helper 混合多少类职责时必须拆出职责边界。
   helper_split_responsibility_threshold: 3
   # aggregator_directory：测试支撑聚合头默认目录，位于 topic 测试目录内。
   aggregator_directory: include

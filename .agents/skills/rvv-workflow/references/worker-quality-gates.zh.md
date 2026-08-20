@@ -193,12 +193,15 @@ no-production closeout 至少要在 topic-local 文档中包含：
 
 详细规则见 `rvv-workflow/references/reviewability-and-language.zh.md`。
 
-如果单个测试支撑 helper header 超过 `.agents/config/defaults.yaml` 中
-`test_support.helper_split_soft_line_limit` / `helper_split_hard_line_limit` 配置的约 800-1000 行，
-或同时包含 reference、row source、RVV math、reduction candidate、bench wrapper、component ablation
-中不少于 `test_support.helper_split_responsibility_threshold` 类职责，worker 必须优先按
-`test_support` 配置拆分，或在 Handoff Packet 中写清 `deferred reason`。拆分本身不应扩大算法范围；
-若暂缓拆分，必须说明暂缓是否影响 reviewer 可读性、后续测试维护和当前证据复核。
+测试支撑拆分采用 responsibility-first（职责优先）规则。worker 先按 `.agents/config/defaults.yaml`
+中的 `test_support.helper_split_primary_axis` 审计职责边界；当单个 helper header、源文件或等价支撑代码
+同时包含 reference、fixtures、row source、RVV math、reduction candidate、bench wrapper、
+component ablation、assertion 或 script-facing registry 等不少于
+`test_support.helper_split_responsibility_threshold` 类职责时，必须优先拆出职责边界，或在 Handoff
+Packet 中写清 `deferred reason`。`test_support.helper_split_soft_line_limit` /
+`helper_split_hard_line_limit` 配置的约 800-1000 行只是二次拆分触发条件：用于判断单一职责文件
+是否还需要继续按子职责、证据层或 case registry 细分，不能作为跳过职责拆分的理由。
+拆分本身不应扩大算法范围；若暂缓拆分，必须说明暂缓是否影响 reviewer 可读性、后续测试维护和当前证据复核。
 这里的“测试支撑 helper”是职责概念，不是固定目录名。worker 应先扫描当前 topic 的真实文件形态：
 根目录长 `test_*.cpp` / `bench_*.cpp`、单个大聚合头、旧 `test_support/` 目录、已有 `include/` /
 `include/impl/`、script、bench case registry 或其它等价支撑代码都可能命中拆分条件。只有当前确实存在

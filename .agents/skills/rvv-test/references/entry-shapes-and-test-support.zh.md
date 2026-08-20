@@ -61,11 +61,13 @@ bench case registry、Makefile / board target、topic-local docs、`doc-rvv` lon
 `turn_stop_deferred`。如果当前 topic 已有旧 `test_support/`，默认动作是按 `test_support.internal_directory`
 解析出的内部目录迁移或拆分；只有外部依赖、用户兼容要求、dirty isolation 风险或同轮无法更新引用时才临时保留。
 
-- 默认偏好来自 `.agents/config/defaults.yaml` 的 `test_support` 配置：helper header 超过
-  `helper_split_soft_line_limit`（默认约 800 行）时应评估拆分；超过
-  `helper_split_hard_line_limit`（默认约 1000 行），或同时包含不少于
-  `helper_split_responsibility_threshold`（默认 3）类职责时，worker 必须优先拆到
-  配置指定的内部目录，或在 Handoff Packet 中写清 deferred reason（暂缓理由）。
+- 默认偏好来自 `.agents/config/defaults.yaml` 的 `test_support` 配置：先按
+  `helper_split_primary_axis` 做 responsibility-first（职责优先）拆分审计。helper header、源文件或等价支撑代码
+  同时包含不少于 `helper_split_responsibility_threshold`（默认 3）类职责时，worker 必须优先拆到
+  配置指定的内部目录，或在 Handoff Packet 中写清 deferred reason（暂缓理由）。`helper_split_soft_line_limit`
+  （默认约 800 行）和 `helper_split_hard_line_limit`（默认约 1000 行）只作为二次拆分触发条件：
+  用于判断已经职责单一的文件是否还要继续按子职责、证据层、case registry 或数据族细分；不能用“未超过行数阈值”
+  关闭多职责 helper 的拆分审计。
 - 外部 include 入口保持当前 topic 的稳定命名。每个 topic 必须先确定一个稳定的 topic token（主题短标识）。
   短 topic 默认直接使用完整 topic 名；只有完整 topic 名过长、会让 `src` / `include` 文件名明显难读时，
   才使用清晰、唯一、可追溯的 abbreviation（缩写）。使用缩写时，应在 README 或 handoff 中说明
