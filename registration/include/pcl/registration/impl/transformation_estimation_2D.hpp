@@ -219,8 +219,12 @@ tryTransformationEstimation2DSourceIndexedCloudPairRVV(
 {
   using SourceLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointSource>;
   using TargetLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointTarget>;
-  if constexpr (!std::is_same_v<PointSource, pcl::PointXYZ> ||
-                !std::is_same_v<PointTarget, pcl::PointXYZ> ||
+  constexpr bool supported_exact_pair =
+      (std::is_same_v<PointSource, pcl::PointXYZ> &&
+       std::is_same_v<PointTarget, pcl::PointXYZ>) ||
+      (std::is_same_v<PointSource, pcl::PointXYZI> &&
+       std::is_same_v<PointTarget, pcl::PointXYZI>);
+  if constexpr (!supported_exact_pair ||
                 !std::is_same_v<Scalar, float> || !SourceLayout::value ||
                 !TargetLayout::value) {
     return false;

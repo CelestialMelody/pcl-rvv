@@ -2,7 +2,7 @@
 
 ## 本文职责
 
-本文记录 `transformation_estimation_2D` 的 bench（性能测试）入口、case-filter（用例过滤参数）、计时边界、QEMU / board 证据分层、asm attribution（反汇编归因）口径和提交边界。当前 adopted production patch 保留在 traits-gated ordered-cloud-pair public overload；Phase 091 另有用户已采纳的 source-indexed `PointXYZ -> PointXYZ` narrow production dispatch。Phase 099 已完成 source-indexed generic PointXYZ-like diagnostic，结果为 mixed-negative，不修改 production dispatch。Phase 103/104 把 source-indexed generic widening 放到真实 public boundary 后仍是 guarded；Phase 106 独立 20-run public variance 为 12 positive、1 weak_positive、3 negative，board Doctor `1/27/0`，不支持 clean-adopt。Phase 100 已完成 dual-indexed generic PointXYZ-like diagnostic，结果为 negative，同样不修改 production dispatch。Phase 101 已完成 correspondence generic PointXYZ-like diagnostic，结果为 negative，同样不修改 production dispatch。Phase 093 已完成 dual-indexed `PointXYZ -> PointXYZ` production-detail family A/B，结论为 positive / pending user confirmation。Phase 094 已完成 correspondence `PointXYZ -> PointXYZ` public probe 和 same-boundary family A/B；public probe positive，但 family A/B 在 256K 有退化频率 Error，不能 clean-adopt。Phase 095 staged-dual profile、Phase 096 locality/order profile、Phase 097 component ablation 和 Phase 098 chunked xyz staging 均为 negative / profile-only，不支持 correspondence production dispatch switch。Phase 030 / 090 的 row-source bench 仍作为 test-only materialize-to-ordered 或 direct gather 诊断保留；Phase 070 generic diagnostic、Phase 080 generic public bench、Phase 099 source-indexed generic bench、Phase 100 dual-indexed generic bench、Phase 101 correspondence generic bench 和 Phase 106 source-indexed generic public variance 分开记录。
+本文记录 `transformation_estimation_2D` 的 bench（性能测试）入口、case-filter（用例过滤参数）、计时边界、QEMU / board 证据分层、asm attribution（反汇编归因）口径和提交边界。当前 adopted production patch 保留 traits-gated ordered-cloud-pair public overload、Phase 091 用户已采纳的 source-indexed `PointXYZ -> PointXYZ` narrow production dispatch、Phase 112 用户已采纳的 source-indexed exact `PointXYZI -> PointXYZI` dispatch，以及 Phase 107/109 保留的 dual-indexed `PointXYZ -> PointXYZ` exact dispatch。Phase 099 已完成 source-indexed generic PointXYZ-like diagnostic，结果为 mixed-negative，不修改 production dispatch。Phase 103/104 把 source-indexed generic widening 放到真实 public boundary 后仍是 guarded；Phase 106 独立 20-run public variance 为 12 positive、1 weak_positive、3 negative，board Doctor `1/27/0`，不支持 clean-adopt。Phase 100 已完成 dual-indexed generic PointXYZ-like diagnostic，结果为 negative，同样不修改 production dispatch。Phase 101 已完成 correspondence generic PointXYZ-like diagnostic，结果为 negative，同样不修改 production dispatch。Phase 094 已完成 correspondence `PointXYZ -> PointXYZ` public probe 和 same-boundary family A/B；public probe positive，但 Phase 107 family A/B 在 256K 有退化频率，production dispatch 已退回。Phase 095 staged-dual profile、Phase 096 locality/order profile、Phase 097 component ablation 和 Phase 098 chunked xyz staging 均为 negative / profile-only，不支持 correspondence production dispatch switch。Phase 030 / 090 的 row-source bench 仍作为 test-only materialize-to-ordered 或 direct gather 诊断保留；Phase 070 generic diagnostic、Phase 080 generic public bench、Phase 099 source-indexed generic bench、Phase 100 dual-indexed generic bench、Phase 101 correspondence generic bench 和 Phase 106 source-indexed generic public variance 分开记录。
 
 ## Bench 输出格式
 
@@ -32,6 +32,7 @@
 | `source-indexed-family-ab` | `family source-indexed direct public RVV`、`family source-indexed materialized ordered public RVV`，各 4K/64K/256K | Phase 092 同一 source-indexed production boundary 内的 RVV-vs-RVV family A/B；materialize selected source rows 的成本计入 timer。 |
 | `source-indexed-generic-xyz-point-types` | `source-indexed generic 2D <PointSource>-><PointTarget>`，四类 same-type 各 4K/64K/256K，加四组 64K mixed pair | Phase 099 test-rvv generic direct-gather diagnostic；source/target 各自使用 traits layout，QEMU/board 不直接导出 production 结论。 |
 | `source-indexed-generic-xyz-point-types-public-variance` | `public source-indexed generic 2D <PointSource>-><PointTarget>`，四类 same-type 各 4K/64K/256K，加四组 64K mixed pair | Phase 106 真实 public source-indexed generic guarded probe 的独立 20-run variance 证据；不覆盖 Phase 103/104，不能自动 adopted。 |
+| `source-indexed-pointxyzi-public` | `public source-indexed generic 2D PointXYZI->PointXYZI`，4K/64K/256K | Phase 110/112 真实 public source-indexed exact evidence；只支持 exact gate adoption，不支持 generic widening。 |
 | `dual-indexed-family-ab` | `family dual-indexed direct public RVV`、`family dual-indexed materialized ordered public RVV`，各 4K/64K/256K | Phase 093 同一 dual-indexed production boundary 内的 RVV-vs-RVV family A/B；materialize selected source/target rows 的成本计入 timer。 |
 | `dual-indexed-generic-xyz-point-types` | `dual-indexed generic 2D <PointSource>-><PointTarget>`，四类 same-type 各 4K/64K/256K，加四组 64K mixed pair | Phase 100 test-rvv generic direct-gather diagnostic；source/target 两侧各自使用 traits layout 和 index stream，QEMU/board 不直接导出 production 结论。 |
 | `correspondence-generic-xyz-point-types` | `correspondence generic 2D <PointSource>-><PointTarget>`，四类 same-type 各 4K/64K/256K，加四组 64K mixed pair | Phase 101 test-rvv generic direct-gather diagnostic；query/source 与 match/target 两侧各自使用 traits layout 和 correspondence index stream，QEMU/board 不直接导出 production 结论。 |
@@ -57,6 +58,7 @@
 | `run_bench_source_indexed_family_ab_smoke` | 只运行 RVV bench 的 source-indexed family A/B 小规模 smoke。 | QEMU production-detail A/B log shape only；不证明性能。 |
 | `run_bench_source_indexed_generic_xyz_point_types_smoke` | 只运行 RVV bench 的 source-indexed generic point-type smoke，共 16 个 case。 | QEMU source-indexed generic diagnostic log shape only；不证明性能。 |
 | `run_bench_source_indexed_generic_xyz_point_types_public_variance_smoke` | 只运行 RVV bench 的 source-indexed generic public variance smoke，共 16 个 case。 | QEMU source-indexed generic public variance log shape only；不证明性能。 |
+| `run_bench_source_indexed_pointxyzi_public_smoke` | 只运行 RVV bench 的 source-indexed exact `PointXYZI -> PointXYZI` public smoke，共 3 个 case。 | QEMU source-indexed PointXYZI public log shape only；不证明性能。 |
 | `run_bench_dual_indexed_family_ab_smoke` | 只运行 RVV bench 的 dual-indexed family A/B 小规模 smoke。 | QEMU production-detail A/B log shape only；不证明性能。 |
 | `run_bench_dual_indexed_generic_xyz_point_types_smoke` | 只运行 RVV bench 的 dual-indexed generic point-type smoke，共 16 个 case。 | QEMU dual-indexed generic diagnostic log shape only；不证明性能。 |
 | `run_bench_correspondence_generic_xyz_point_types_smoke` | 只运行 RVV bench 的 correspondence generic point-type smoke，共 16 个 case。 | QEMU correspondence generic diagnostic log shape only；不证明性能。 |
@@ -76,6 +78,7 @@
 | `generate_source_indexed_family_ab_asm_attribution_summary` | 生成 source-indexed family A/B asm summary。 | materialize-family wrapper 路径归属；不替代 production source-indexed boundary。 |
 | `generate_source_indexed_generic_asm_attribution_summary` | 生成 source-indexed generic point-type asm summary。 | 聚焦 `source_indexed_generic_candidate_lambda_boundary`；不替代 production source-indexed boundary。 |
 | `generate_source_indexed_generic_public_variance_asm_attribution_summary` | 生成 Phase 106 source-indexed generic public variance asm summary。 | 聚焦 `production_public_source_indexed_generic_boundary`；不证明 board 性能或 clean adoption。 |
+| `generate_source_indexed_pointxyzi_public_asm_attribution_summary` | 生成 Phase 110/112 source-indexed PointXYZI exact public asm summary。 | 聚焦 `production_public_source_indexed_generic_boundary`，用于 exact gate 路径归属。 |
 | `generate_dual_indexed_family_ab_asm_attribution_summary` | 生成 dual-indexed family A/B asm summary。 | materialize-family wrapper 路径归属；不替代 production dual-indexed boundary。 |
 | `generate_dual_indexed_generic_asm_attribution_summary` | 生成 dual-indexed generic point-type asm summary。 | 聚焦 `dual_indexed_generic_candidate_lambda_boundary`；不替代 production dual-indexed boundary。 |
 | `generate_correspondence_generic_asm_attribution_summary` | 生成 correspondence generic point-type asm summary。 | 聚焦 `correspondence_generic_candidate_lambda_boundary`；不替代 production correspondence boundary。 |
@@ -93,6 +96,7 @@
 | `run_qemu_source_indexed_family_ab_evidence_doctor` | 生成 QEMU source-indexed family A/B manifest 并运行 Evidence Doctor。 | QEMU production-detail A/B 合同检查；不证明性能。 |
 | `run_qemu_source_indexed_generic_evidence_doctor` | 生成 QEMU source-indexed generic point-type manifest 并运行 Evidence Doctor。 | QEMU generic row-source diagnostic 合同检查；不证明性能。 |
 | `run_qemu_source_indexed_generic_public_variance_evidence_doctor` | 生成 QEMU source-indexed generic public variance manifest 并运行 Evidence Doctor。 | Phase 106 QEMU 合同检查；不证明性能。 |
+| `run_qemu_source_indexed_pointxyzi_public_evidence_doctor` | 生成 QEMU source-indexed PointXYZI exact public manifest 并运行 Evidence Doctor。 | Phase 110/112 exact gate QEMU 合同检查；不证明性能。 |
 | `run_qemu_dual_indexed_family_ab_evidence_doctor` | 生成 QEMU dual-indexed family A/B manifest 并运行 Evidence Doctor。 | QEMU production-detail A/B 合同检查；不证明性能。 |
 | `run_qemu_dual_indexed_generic_evidence_doctor` | 生成 QEMU dual-indexed generic point-type manifest 并运行 Evidence Doctor。 | QEMU generic row-source diagnostic 合同检查；不证明性能。 |
 | `run_qemu_correspondence_generic_evidence_doctor` | 生成 QEMU correspondence generic point-type manifest 并运行 Evidence Doctor。 | QEMU generic row-source diagnostic 合同检查；不证明性能。 |
@@ -112,7 +116,8 @@
 | `run_board_bench_source_indexed_family_ab_repeated` | 部署 RVV bench 到板卡并按同一预算运行 source-indexed direct-vs-materialize family A/B。 | Phase 092 production-detail family selection evidence；当前弱正向保留 direct gather。 |
 | `run_board_bench_source_indexed_generic_xyz_point_types_repeated` | 部署 Std/RVV bench 到板卡并运行 source-indexed generic point-type representative cases。 | Phase 099 diagnostic evidence；当前 mixed-negative，不接 production dispatch。 |
 | `run_board_bench_source_indexed_generic_xyz_point_types_public_variance_repeated` | 部署 Std/RVV bench 到板卡并按 20-run 预算运行 source-indexed generic public representative variance。 | Phase 106 production-public variance evidence；当前 negative for full widening，不 clean-adopt。 |
-| `run_board_bench_dual_indexed_family_ab_repeated` | 部署 RVV bench 到板卡并按同一预算运行 dual-indexed direct-vs-materialize family A/B。 | Phase 093 production-detail family selection evidence；当前 positive / pending user confirmation。 |
+| `run_board_bench_source_indexed_pointxyzi_public_phase110_repeated` | 部署 Std/RVV bench 到板卡并按 20-run 预算运行 source-indexed exact `PointXYZI -> PointXYZI` public path。 | Phase 110/112 production-public evidence；当前 adopted exact gate，不扩大 generic widening。 |
+| `run_board_bench_dual_indexed_family_ab_repeated` | 部署 RVV bench 到板卡并按同一预算运行 dual-indexed direct-vs-materialize family A/B。 | Phase 109 production-detail variance evidence；当前 retained exact dispatch，保留 4K caveat。 |
 | `run_board_bench_dual_indexed_generic_xyz_point_types_repeated` | 部署 Std/RVV bench 到板卡并运行 dual-indexed generic point-type representative cases。 | Phase 100 diagnostic evidence；当前 negative，不接 production dispatch。 |
 | `run_board_bench_correspondence_generic_xyz_point_types_repeated` | 部署 Std/RVV bench 到板卡并运行 correspondence generic point-type representative cases。 | Phase 101 diagnostic evidence；当前 negative，不接 production dispatch。 |
 | `run_board_bench_correspondence_public_repeated` | 部署 Std/RVV bench 到板卡并按同一预算运行 correspondence public probe。 | Phase 094 production-public evidence；当前 public positive。 |
@@ -568,10 +573,9 @@ Dual-indexed family A/B board repeated：
 - `test-rvv/registration/transformation_estimation_2D/log/board/dual_indexed_family_ab_repeated/evidence_manifest.json`
 - `test-rvv/registration/transformation_estimation_2D/log/board/dual_indexed_family_ab_repeated/evidence_doctor.md`
 
-该 evidence role 是 Phase 093 `production_detail`。64K / 256K 是本阶段主决策规模，overall
-bucket 为 `positive`；4K 有一轮 `0.854x` 负向长尾，Doctor 给出 3 个 Warning 和 1 个
-Suggestion。该证据支持 exact dual-indexed direct gather family，但等待用户确认前不能写成
-adopted，也不覆盖 correspondence 或泛型点型。
+该 evidence role 已由 Phase 109 独立 20-run variance 刷新。64K / 256K 是主决策规模，overall
+bucket 为 `positive`；4K 仍有 `1/20` below-1 和长尾 Warning。该证据支持保留 exact
+dual-indexed direct gather family 和 4K caveat，但不覆盖 correspondence 或泛型点型。
 
 Dual-indexed generic point-type board repeated：
 
@@ -752,6 +756,7 @@ Correspondence chunked xyz staging board repeated：
 | source-indexed family A/B QEMU manifest | 0 | 0 | 0 | 只作为 Phase 092 production-detail A/B smoke contract。 |
 | source-indexed generic QEMU manifest | 0 | 0 | 0 | 只作为 Phase 099 source-indexed generic diagnostic smoke contract。 |
 | source-indexed generic public variance QEMU manifest | 0 | 0 | 0 | 只作为 Phase 106 source-indexed generic public variance smoke contract；QEMU timing 不作性能结论。 |
+| source-indexed PointXYZI exact QEMU manifest | 0 | 0 | 0 | 只作为 Phase 110/112 exact `PointXYZI -> PointXYZI` public path smoke contract；QEMU timing 不作性能结论。 |
 | dual-indexed family A/B QEMU manifest | 0 | 0 | 0 | 只作为 Phase 093 production-detail A/B smoke contract。 |
 | row-source QEMU manifest | 0 | 0 | 0 | 只作为 9-case QEMU smoke contract。 |
 | generic QEMU manifest | 0 | 0 | 0 | 只作为 16-case generic QEMU smoke contract。 |
@@ -761,7 +766,8 @@ Correspondence chunked xyz staging board repeated：
 | source-indexed family A/B board manifest | 0 | 0 | 2 | 64K / 256K near-threshold；只支持 weak-positive family retention。 |
 | source-indexed generic board manifest | 5 | 10 | 1 | mixed-negative；阻止把 Phase 091 exact gate 直接扩大为泛型 production dispatch。 |
 | source-indexed generic public variance board manifest | 1 | 27 | 0 | Phase 106 独立 20-run public variance；12 positive、1 weak_positive、3 negative，`PointNormal->PointNormal 256K` 为 `7/20` below-1，阻止 full source-indexed generic clean adoption。 |
-| dual-indexed family A/B board manifest | 0 | 3 | 1 | 4K 有退化频率、长尾和组内离群；64K / 256K 支持 positive 主决策，但等待用户确认。 |
+| source-indexed PointXYZI exact board manifest | 0 | 3 | 0 | Phase 110/112 独立 20-run public evidence；4K/64K/256K 均 positive 且 `B/A<1=0/20`，支持 exact gate adoption。 |
+| dual-indexed family A/B board manifest | 0 | 3 | 0 | Phase 109 20-run variance；64K / 256K 支持 positive 主决策，4K 保留 `1/20` below-1 caveat。 |
 | dual-indexed generic QEMU manifest | 0 | 0 | 0 | 只作为 Phase 100 dual-indexed generic diagnostic smoke contract。 |
 | dual-indexed generic board manifest | 13 | 17 | 1 | same-type 大规模和 mixed pair 多数 negative；阻止把 Phase 093 exact gate 扩大为泛型 production dispatch。 |
 | correspondence generic QEMU manifest | 0 | 0 | 0 | 只作为 Phase 101 correspondence generic diagnostic smoke contract。 |

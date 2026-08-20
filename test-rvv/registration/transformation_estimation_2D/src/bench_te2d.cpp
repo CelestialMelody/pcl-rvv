@@ -1034,6 +1034,8 @@ main(int argc, char** argv)
       caseEnabled(argc, argv, "source-indexed-generic-xyz-point-types-public-variance");
   const bool source_indexed_generic_pointnormal_256k_public_mode =
       caseSelectedOnly(argc, argv, "source-indexed-generic-pointnormal-256k-public");
+  const bool source_indexed_pointxyzi_public_mode =
+      caseSelectedOnly(argc, argv, "source-indexed-pointxyzi-public");
   const bool source_indexed_public_mode =
       caseEnabled(argc, argv, "source-indexed-public");
   const bool source_indexed_family_ab_mode =
@@ -1126,7 +1128,9 @@ main(int argc, char** argv)
   const bool row_source_mode = caseEnabled(argc, argv, "row-source-fused");
   const bool row_source_direct_mode = caseEnabled(argc, argv, "row-source-direct-gather");
   const bool public_mode = caseEnabled(argc, argv, "ordered-cloud-pair-public");
-  const char* dataset_label = source_indexed_generic_pointnormal_256k_public_mode
+  const char* dataset_label = source_indexed_pointxyzi_public_mode
+                                  ? "synthetic dense PointXYZI source-indexed exact public probe"
+                              : source_indexed_generic_pointnormal_256k_public_mode
                                   ? "synthetic dense PointNormal source-indexed generic public 256K long-tail"
                                   : generic_public_mode
                                   ? "synthetic dense PointXYZ-like generic public ordered-cloud pairs"
@@ -1499,6 +1503,33 @@ main(int argc, char** argv)
         262144,
         17.0f,
         -17.0f,
+        transform,
+        iterations,
+        warmup_iterations);
+  }
+
+  if (source_indexed_pointxyzi_public_mode) {
+    runGeneratedPublicSourceIndexedGenericCase<pcl::PointXYZI, pcl::PointXYZI>(
+        "public source-indexed generic 2D PointXYZI->PointXYZI 4K",
+        4096,
+        13.0f,
+        -13.0f,
+        transform,
+        iterations,
+        warmup_iterations);
+    runGeneratedPublicSourceIndexedGenericCase<pcl::PointXYZI, pcl::PointXYZI>(
+        "public source-indexed generic 2D PointXYZI->PointXYZI 64K",
+        65536,
+        13.0f,
+        -13.0f,
+        transform,
+        iterations,
+        warmup_iterations);
+    runGeneratedPublicSourceIndexedGenericCase<pcl::PointXYZI, pcl::PointXYZI>(
+        "public source-indexed generic 2D PointXYZI->PointXYZI 256K",
+        262144,
+        13.0f,
+        -13.0f,
         transform,
         iterations,
         warmup_iterations);

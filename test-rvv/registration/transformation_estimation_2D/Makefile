@@ -46,6 +46,7 @@ TE2D_QEMU_SOURCE_INDEXED_GENERIC_SMOKE_ARGS ?= --case-filter source-indexed-gene
 TE2D_QEMU_SOURCE_INDEXED_GENERIC_PUBLIC_SMOKE_ARGS ?= --case-filter source-indexed-generic-xyz-point-types-public --iterations 2 --warmup-iterations 1
 TE2D_QEMU_SOURCE_INDEXED_GENERIC_PUBLIC_VARIANCE_SMOKE_ARGS ?= --case-filter source-indexed-generic-xyz-point-types-public-variance --iterations 2 --warmup-iterations 1
 TE2D_QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_SMOKE_ARGS ?= --case-filter source-indexed-generic-pointnormal-256k-public --iterations 2 --warmup-iterations 1
+TE2D_QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_SMOKE_ARGS ?= --case-filter source-indexed-pointxyzi-public --iterations 2 --warmup-iterations 1
 TE2D_QEMU_DUAL_INDEXED_FAMILY_AB_SMOKE_ARGS ?= --case-filter dual-indexed-family-ab --iterations 2 --warmup-iterations 1
 TE2D_QEMU_DUAL_INDEXED_GENERIC_SMOKE_ARGS ?= --case-filter dual-indexed-generic-xyz-point-types --iterations 2 --warmup-iterations 1
 TE2D_QEMU_CORRESPONDENCE_GENERIC_SMOKE_ARGS ?= --case-filter correspondence-generic-xyz-point-types --iterations 2 --warmup-iterations 1
@@ -108,6 +109,12 @@ QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_EVIDENCE_MANIFEST := $(QEMU_
 QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_EVIDENCE_DOCTOR_MD := $(QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_DIR)/evidence_doctor.md
 QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_ASM_ATTRIBUTION_MD := $(QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_DIR)/asm_attribution.md
 QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_ASM_ATTRIBUTION_JSON := $(QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_DIR)/asm_attribution.json
+QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR := $(OUTPUT_DIR_QEMU)/source_indexed_pointxyzi_public
+QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_BENCH_LOG := $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR)/run_bench_source_indexed_pointxyzi_public_rvv.log
+QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_MANIFEST := $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR)/evidence_manifest.json
+QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_DOCTOR_MD := $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR)/evidence_doctor.md
+QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_ASM_ATTRIBUTION_MD := $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR)/asm_attribution.md
+QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_ASM_ATTRIBUTION_JSON := $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR)/asm_attribution.json
 QEMU_DUAL_INDEXED_FAMILY_AB_DIR := $(OUTPUT_DIR_QEMU)/dual_indexed_family_ab
 QEMU_DUAL_INDEXED_FAMILY_AB_BENCH_LOG := $(QEMU_DUAL_INDEXED_FAMILY_AB_DIR)/run_bench_dual_indexed_family_ab_rvv.log
 QEMU_DUAL_INDEXED_FAMILY_AB_EVIDENCE_MANIFEST := $(QEMU_DUAL_INDEXED_FAMILY_AB_DIR)/evidence_manifest.json
@@ -232,6 +239,11 @@ TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_REPEATED_DIR ?= $(OUTP
 TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_SUMMARY := $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_REPEATED_DIR)/summary.md
 TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_EVIDENCE_MANIFEST := $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_REPEATED_DIR)/evidence_manifest.json
 TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_EVIDENCE_DOCTOR_MD := $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_REPEATED_DIR)/evidence_doctor.md
+TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_RUN_LABEL ?= source_indexed_pointxyzi_public_phase110_repeated
+TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR ?= $(OUTPUT_DIR_BOARD)/$(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_RUN_LABEL)
+TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_SUMMARY := $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR)/summary.md
+TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_MANIFEST := $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR)/evidence_manifest.json
+TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_DOCTOR_MD := $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR)/evidence_doctor.md
 TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_RUN_LABEL ?= dual_indexed_family_ab_repeated
 TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_REPEATED_DIR ?= $(OUTPUT_DIR_BOARD)/$(TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_RUN_LABEL)
 TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_SUMMARY := $(TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_REPEATED_DIR)/summary.md
@@ -299,7 +311,7 @@ TE2D_BOARD_GENERIC_PUBLIC_SUMMARY := $(TE2D_BOARD_GENERIC_PUBLIC_REPEATED_DIR)/s
 TE2D_BOARD_GENERIC_PUBLIC_EVIDENCE_MANIFEST := $(TE2D_BOARD_GENERIC_PUBLIC_REPEATED_DIR)/evidence_manifest.json
 TE2D_BOARD_GENERIC_PUBLIC_EVIDENCE_DOCTOR_MD := $(TE2D_BOARD_GENERIC_PUBLIC_REPEATED_DIR)/evidence_doctor.md
 
-$(TE2D_BOARD_REPEATED_DIR) $(TE2D_BOARD_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_FAMILY_AB_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_PUBLIC_VARIANCE_REPEATED_DIR) $(TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_FAMILY_AB_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_STAGING_PROFILE_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_LOCALITY_ORDER_PROFILE_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_COMPONENT_ABLATION_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_CHUNKED_XYZ_STAGING_REPEATED_DIR) $(TE2D_BOARD_ROW_SOURCE_REPEATED_DIR) $(TE2D_BOARD_ROW_SOURCE_DIRECT_REPEATED_DIR) $(TE2D_BOARD_GENERIC_REPEATED_DIR) $(TE2D_BOARD_GENERIC_PUBLIC_REPEATED_DIR) $(OUTPUT_DIR_BOARD)/test_smoke $(QEMU_PRODUCTION_PUBLIC_DIR) $(QEMU_SOURCE_INDEXED_PUBLIC_DIR) $(QEMU_SOURCE_INDEXED_FAMILY_AB_DIR) $(QEMU_SOURCE_INDEXED_GENERIC_DIR) $(QEMU_SOURCE_INDEXED_GENERIC_PUBLIC_DIR) $(QEMU_SOURCE_INDEXED_GENERIC_PUBLIC_VARIANCE_DIR) $(QEMU_DUAL_INDEXED_FAMILY_AB_DIR) $(QEMU_CORRESPONDENCE_PUBLIC_DIR) $(QEMU_CORRESPONDENCE_FAMILY_AB_DIR) $(QEMU_CORRESPONDENCE_STAGING_PROFILE_DIR) $(QEMU_CORRESPONDENCE_LOCALITY_ORDER_PROFILE_DIR) $(QEMU_CORRESPONDENCE_COMPONENT_ABLATION_DIR) $(QEMU_CORRESPONDENCE_CHUNKED_XYZ_STAGING_DIR) $(QEMU_ROW_SOURCE_DIR) $(QEMU_ROW_SOURCE_DIRECT_DIR) $(QEMU_GENERIC_DIR) $(QEMU_GENERIC_PUBLIC_DIR):
+$(TE2D_BOARD_REPEATED_DIR) $(TE2D_BOARD_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_FAMILY_AB_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_PUBLIC_VARIANCE_REPEATED_DIR) $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_PUBLIC_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_FAMILY_AB_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_STAGING_PROFILE_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_LOCALITY_ORDER_PROFILE_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_COMPONENT_ABLATION_REPEATED_DIR) $(TE2D_BOARD_CORRESPONDENCE_CHUNKED_XYZ_STAGING_REPEATED_DIR) $(TE2D_BOARD_ROW_SOURCE_REPEATED_DIR) $(TE2D_BOARD_ROW_SOURCE_DIRECT_REPEATED_DIR) $(TE2D_BOARD_GENERIC_REPEATED_DIR) $(TE2D_BOARD_GENERIC_PUBLIC_REPEATED_DIR) $(OUTPUT_DIR_BOARD)/test_smoke $(QEMU_PRODUCTION_PUBLIC_DIR) $(QEMU_SOURCE_INDEXED_PUBLIC_DIR) $(QEMU_SOURCE_INDEXED_FAMILY_AB_DIR) $(QEMU_SOURCE_INDEXED_GENERIC_DIR) $(QEMU_SOURCE_INDEXED_GENERIC_PUBLIC_DIR) $(QEMU_SOURCE_INDEXED_GENERIC_PUBLIC_VARIANCE_DIR) $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR) $(QEMU_DUAL_INDEXED_FAMILY_AB_DIR) $(QEMU_CORRESPONDENCE_PUBLIC_DIR) $(QEMU_CORRESPONDENCE_FAMILY_AB_DIR) $(QEMU_CORRESPONDENCE_STAGING_PROFILE_DIR) $(QEMU_CORRESPONDENCE_LOCALITY_ORDER_PROFILE_DIR) $(QEMU_CORRESPONDENCE_COMPONENT_ABLATION_DIR) $(QEMU_CORRESPONDENCE_CHUNKED_XYZ_STAGING_DIR) $(QEMU_ROW_SOURCE_DIR) $(QEMU_ROW_SOURCE_DIRECT_DIR) $(QEMU_GENERIC_DIR) $(QEMU_GENERIC_PUBLIC_DIR):
 	mkdir -p $@
 
 $(TE2D_BOARD_DUAL_INDEXED_GENERIC_REPEATED_DIR) $(QEMU_DUAL_INDEXED_GENERIC_DIR):
@@ -340,6 +352,9 @@ run_bench_source_indexed_generic_xyz_point_types_public_variance_smoke: | $(QEMU
 
 run_bench_source_indexed_generic_pointnormal_256k_public_smoke: | $(QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_DIR)
 	@$(MAKE) -C $(CURDIR) run_bench_rvv BENCH_ARGS="$(TE2D_QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_SMOKE_ARGS)" BENCH_RVV_OUTPUT_FILE=$(QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_BENCH_LOG)
+
+run_bench_source_indexed_pointxyzi_public_smoke: | $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR)
+	@$(MAKE) -C $(CURDIR) run_bench_rvv BENCH_ARGS="$(TE2D_QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_SMOKE_ARGS)" BENCH_RVV_OUTPUT_FILE=$(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_BENCH_LOG)
 
 run_bench_dual_indexed_family_ab_smoke: | $(QEMU_DUAL_INDEXED_FAMILY_AB_DIR)
 	@$(MAKE) -C $(CURDIR) run_bench_rvv BENCH_ARGS="$(TE2D_QEMU_DUAL_INDEXED_FAMILY_AB_SMOKE_ARGS)" BENCH_RVV_OUTPUT_FILE=$(QEMU_DUAL_INDEXED_FAMILY_AB_BENCH_LOG)
@@ -454,6 +469,15 @@ generate_source_indexed_generic_pointnormal_256k_public_asm_attribution_summary:
 		--rvv-filtered-asm $(ASM_DIR)/$(ARCH)/$(TARGET_BENCH_RVV).asm \
 		--output $(QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_ASM_ATTRIBUTION_MD) \
 		--json-output $(QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_ASM_ATTRIBUTION_JSON) \
+		--focus-category production_public_source_indexed_generic_boundary
+
+generate_source_indexed_pointxyzi_public_asm_attribution_summary: dump_bench_std dump_bench_rvv | $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_DIR)
+	$(PYTHON) script/generate_te2d_asm_summary.py \
+		--std-full-asm $(ASM_DIR)/$(ARCH)/$(TARGET_BENCH_STD).full.asm \
+		--rvv-full-asm $(ASM_DIR)/$(ARCH)/$(TARGET_BENCH_RVV).full.asm \
+		--rvv-filtered-asm $(ASM_DIR)/$(ARCH)/$(TARGET_BENCH_RVV).asm \
+		--output $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_ASM_ATTRIBUTION_MD) \
+		--json-output $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_ASM_ATTRIBUTION_JSON) \
 		--focus-category production_public_source_indexed_generic_boundary
 
 generate_dual_indexed_family_ab_asm_attribution_summary: dump_bench_std dump_bench_rvv | $(QEMU_DUAL_INDEXED_FAMILY_AB_DIR)
@@ -686,6 +710,21 @@ generate_qemu_source_indexed_generic_pointnormal_256k_public_evidence_manifest: 
 		--case-filter source-indexed-generic-pointnormal-256k-public \
 		--row-source auto \
 		--group te2d_qemu_source_indexed_generic_pointnormal_256k_public_smoke \
+		--asm-category production_public_source_indexed_generic_combined
+
+generate_qemu_source_indexed_pointxyzi_public_evidence_manifest: run_bench_source_indexed_pointxyzi_public_smoke generate_source_indexed_pointxyzi_public_asm_attribution_summary
+	$(PYTHON) script/generate_te2d_qemu_evidence_manifest.py \
+		--rvv-log $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_BENCH_LOG) \
+		--asm-summary $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_ASM_ATTRIBUTION_JSON) \
+		--output $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_MANIFEST) \
+		--title "transformation_estimation_2D source-indexed PointXYZI exact production public QEMU smoke" \
+		--label "source-indexed PointXYZI exact production public QEMU smoke; no performance conclusion" \
+		--summary-evidence-role qemu_smoke_only \
+		--comparison-evidence-role qemu_smoke_only \
+		--case-kind qemu_smoke_only \
+		--case-filter source-indexed-pointxyzi-public \
+		--row-source auto \
+		--group te2d_qemu_source_indexed_pointxyzi_public_smoke \
 		--asm-category production_public_source_indexed_generic_combined
 
 generate_qemu_dual_indexed_family_ab_evidence_manifest: run_bench_dual_indexed_family_ab_smoke generate_dual_indexed_family_ab_asm_attribution_summary
@@ -924,6 +963,12 @@ run_qemu_source_indexed_generic_pointnormal_256k_public_evidence_doctor: generat
 		--output $(QEMU_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_EVIDENCE_DOCTOR_MD) \
 		--fail-on never
 
+run_qemu_source_indexed_pointxyzi_public_evidence_doctor: generate_qemu_source_indexed_pointxyzi_public_evidence_manifest
+	$(PYTHON) ../../script/evidence_doctor.py \
+		--manifest $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_MANIFEST) \
+		--output $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_DOCTOR_MD) \
+		--fail-on never
+
 run_qemu_dual_indexed_family_ab_evidence_doctor: generate_qemu_dual_indexed_family_ab_evidence_manifest
 	$(PYTHON) ../../script/evidence_doctor.py \
 		--manifest $(QEMU_DUAL_INDEXED_FAMILY_AB_EVIDENCE_MANIFEST) \
@@ -1045,7 +1090,9 @@ record_qemu_correctness_state: run_test_compare
 		--doc-ref doc/phases/101-correspondence-generic-xyz-point-type-expansion/result.zh.md \
 		--doc-ref doc/phases/102-production-decision-package/plan.zh.md \
 		--doc-ref doc/phases/102-production-decision-package/result.zh.md \
-		--doc-ref doc/phases/107-production-adoption-and-regression-loop/result.zh.md
+		--doc-ref doc/phases/107-production-adoption-and-regression-loop/result.zh.md \
+		--doc-ref doc/phases/112-source-indexed-pointxyzi-adoption-closeout/plan.zh.md \
+		--doc-ref doc/phases/112-source-indexed-pointxyzi-adoption-closeout/result.zh.md
 
 record_qemu_smoke_evidence_state: run_qemu_smoke_evidence_doctor
 	$(PYTHON) ../../script/evidence_registry.py record \
@@ -1221,6 +1268,30 @@ record_qemu_source_indexed_generic_pointnormal_256k_public_state: run_qemu_sourc
 		--doc-ref doc/phases/104-source-indexed-generic-pointnormal-256k-long-tail-diagnostic/plan.zh.md \
 		--doc-ref doc/phases/104-source-indexed-generic-pointnormal-256k-long-tail-diagnostic/result.zh.md
 
+record_qemu_source_indexed_pointxyzi_public_state: run_qemu_source_indexed_pointxyzi_public_evidence_doctor
+	$(PYTHON) ../../script/evidence_registry.py record \
+		--registry $(EVIDENCE_REGISTRY) \
+		--path $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_BENCH_LOG) \
+		--path $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_ASM_ATTRIBUTION_JSON) \
+		--summary $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_ASM_ATTRIBUTION_MD) \
+		--manifest $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_MANIFEST) \
+		--doctor $(QEMU_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_DOCTOR_MD) \
+		--target run_bench_source_indexed_pointxyzi_public_smoke \
+		--backend qemu \
+		--run-label qemu-te2d-source-indexed-pointxyzi-public-smoke-phase110 \
+		--case-filter source-indexed-pointxyzi-public \
+		--evidence-role qemu_smoke_only \
+		--doc-ref README.zh.md \
+		--doc-ref doc/benchmark-and-evidence.zh.md \
+		--doc-ref doc/optimization-evidence.zh.md \
+		--doc-ref doc/correctness-tests.zh.md \
+		--doc-ref doc/test-support-code-map.zh.md \
+		--doc-ref doc/transformation_estimation_2D-evaluation.zh.md \
+		--doc-ref doc/phases/110-source-indexed-pointxyzi-exact-public-probe/plan.zh.md \
+		--doc-ref doc/phases/110-source-indexed-pointxyzi-exact-public-probe/result.zh.md \
+		--doc-ref doc/phases/112-source-indexed-pointxyzi-adoption-closeout/plan.zh.md \
+		--doc-ref doc/phases/112-source-indexed-pointxyzi-adoption-closeout/result.zh.md
+
 record_qemu_dual_indexed_generic_state: run_qemu_dual_indexed_generic_evidence_doctor
 	$(PYTHON) ../../script/evidence_registry.py record \
 		--registry $(EVIDENCE_REGISTRY) \
@@ -1286,6 +1357,28 @@ record_qemu_dual_indexed_family_ab_state: run_qemu_dual_indexed_family_ab_eviden
 		--doc-ref doc/transformation_estimation_2D-evaluation.zh.md \
 		--doc-ref doc/phases/093-dual-indexed-family-ab/plan.zh.md \
 		--doc-ref doc/phases/093-dual-indexed-family-ab/result.zh.md
+
+record_qemu_dual_indexed_family_ab_phase109_state: run_qemu_dual_indexed_family_ab_evidence_doctor
+	$(PYTHON) ../../script/evidence_registry.py record \
+		--registry $(EVIDENCE_REGISTRY) \
+		--path $(QEMU_DUAL_INDEXED_FAMILY_AB_BENCH_LOG) \
+		--path $(QEMU_DUAL_INDEXED_FAMILY_AB_ASM_ATTRIBUTION_JSON) \
+		--summary $(QEMU_DUAL_INDEXED_FAMILY_AB_ASM_ATTRIBUTION_MD) \
+		--manifest $(QEMU_DUAL_INDEXED_FAMILY_AB_EVIDENCE_MANIFEST) \
+		--doctor $(QEMU_DUAL_INDEXED_FAMILY_AB_EVIDENCE_DOCTOR_MD) \
+		--target run_bench_dual_indexed_family_ab_smoke \
+		--backend qemu \
+		--run-label qemu-te2d-dual-indexed-family-ab-smoke-phase109 \
+		--case-filter dual-indexed-family-ab \
+		--evidence-role qemu_smoke_only \
+		--doc-ref README.zh.md \
+		--doc-ref doc/benchmark-and-evidence.zh.md \
+		--doc-ref doc/optimization-evidence.zh.md \
+		--doc-ref doc/correctness-tests.zh.md \
+		--doc-ref doc/test-support-code-map.zh.md \
+		--doc-ref doc/transformation_estimation_2D-evaluation.zh.md \
+		--doc-ref doc/phases/109-dual-indexed-exact-public-variance/plan.zh.md \
+		--doc-ref doc/phases/109-dual-indexed-exact-public-variance/result.zh.md
 
 record_qemu_correspondence_public_state: run_qemu_correspondence_public_evidence_doctor
 	$(PYTHON) ../../script/evidence_registry.py record \
@@ -2133,6 +2226,28 @@ record_board_source_indexed_generic_pointnormal_256k_public_state: run_board_evi
 		--doc-ref doc/phases/104-source-indexed-generic-pointnormal-256k-long-tail-diagnostic/plan.zh.md \
 		--doc-ref doc/phases/104-source-indexed-generic-pointnormal-256k-long-tail-diagnostic/result.zh.md
 
+record_board_source_indexed_pointxyzi_public_state: run_board_evidence_doctor_source_indexed_pointxyzi_public
+	$(PYTHON) ../../script/evidence_registry.py record \
+		--registry $(EVIDENCE_REGISTRY) \
+		--summary $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_SUMMARY) \
+		--manifest $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_MANIFEST) \
+		--doctor $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_DOCTOR_MD) \
+		--target collect_board_bench_source_indexed_pointxyzi_public_repeated \
+		--backend board \
+		--run-label board-te2d-source-indexed-pointxyzi-public-repeated-phase110 \
+		--case-filter source-indexed-pointxyzi-public \
+		--evidence-role post_production_performance_bounded_probe \
+		--doc-ref README.zh.md \
+		--doc-ref doc/benchmark-and-evidence.zh.md \
+		--doc-ref doc/optimization-evidence.zh.md \
+		--doc-ref doc/correctness-tests.zh.md \
+		--doc-ref doc/test-support-code-map.zh.md \
+		--doc-ref doc/transformation_estimation_2D-evaluation.zh.md \
+		--doc-ref doc/phases/110-source-indexed-pointxyzi-exact-public-probe/plan.zh.md \
+		--doc-ref doc/phases/110-source-indexed-pointxyzi-exact-public-probe/result.zh.md \
+		--doc-ref doc/phases/112-source-indexed-pointxyzi-adoption-closeout/plan.zh.md \
+		--doc-ref doc/phases/112-source-indexed-pointxyzi-adoption-closeout/result.zh.md
+
 record_board_dual_indexed_family_ab_state: run_board_evidence_doctor_dual_indexed_family_ab
 	$(PYTHON) ../../script/evidence_registry.py record \
 		--registry $(EVIDENCE_REGISTRY) \
@@ -2152,6 +2267,26 @@ record_board_dual_indexed_family_ab_state: run_board_evidence_doctor_dual_indexe
 		--doc-ref doc/transformation_estimation_2D-evaluation.zh.md \
 		--doc-ref doc/phases/093-dual-indexed-family-ab/plan.zh.md \
 		--doc-ref doc/phases/093-dual-indexed-family-ab/result.zh.md
+
+record_board_dual_indexed_family_ab_phase109_state: run_board_evidence_doctor_dual_indexed_family_ab
+	$(PYTHON) ../../script/evidence_registry.py record \
+		--registry $(EVIDENCE_REGISTRY) \
+		--summary $(TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_SUMMARY) \
+		--manifest $(TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_EVIDENCE_MANIFEST) \
+		--doctor $(TE2D_BOARD_DUAL_INDEXED_FAMILY_AB_EVIDENCE_DOCTOR_MD) \
+		--target collect_board_bench_dual_indexed_family_ab_repeated \
+		--backend board \
+		--run-label board-te2d-dual-indexed-family-ab-repeated-phase109-variance \
+		--case-filter dual-indexed-family-ab \
+		--evidence-role production_detail_variance \
+		--doc-ref README.zh.md \
+		--doc-ref doc/benchmark-and-evidence.zh.md \
+		--doc-ref doc/optimization-evidence.zh.md \
+		--doc-ref doc/correctness-tests.zh.md \
+		--doc-ref doc/test-support-code-map.zh.md \
+		--doc-ref doc/transformation_estimation_2D-evaluation.zh.md \
+		--doc-ref doc/phases/109-dual-indexed-exact-public-variance/plan.zh.md \
+		--doc-ref doc/phases/109-dual-indexed-exact-public-variance/result.zh.md
 
 record_board_dual_indexed_generic_xyz_point_types_state: run_board_evidence_doctor_dual_indexed_generic_xyz_point_types
 	$(PYTHON) ../../script/evidence_registry.py record \
@@ -2354,7 +2489,9 @@ run_board_bench_source_indexed_generic_xyz_point_types_repeated: collect_board_b
 run_board_bench_source_indexed_generic_xyz_point_types_public_repeated: collect_board_bench_source_indexed_generic_xyz_point_types_public_repeated record_board_source_indexed_generic_xyz_point_types_public_state
 run_board_bench_source_indexed_generic_xyz_point_types_public_variance_repeated: collect_board_bench_source_indexed_generic_xyz_point_types_public_variance_repeated record_board_source_indexed_generic_xyz_point_types_public_variance_state
 run_board_bench_source_indexed_generic_pointnormal_256k_public_repeated: collect_board_bench_source_indexed_generic_pointnormal_256k_public_repeated record_board_source_indexed_generic_pointnormal_256k_public_state
+run_board_bench_source_indexed_pointxyzi_public_phase110_repeated: collect_board_bench_source_indexed_pointxyzi_public_repeated record_board_source_indexed_pointxyzi_public_state
 run_board_bench_dual_indexed_family_ab_repeated: collect_board_bench_dual_indexed_family_ab_repeated record_board_dual_indexed_family_ab_state
+run_board_bench_dual_indexed_family_ab_phase109_repeated: collect_board_bench_dual_indexed_family_ab_repeated record_board_dual_indexed_family_ab_phase109_state
 run_board_bench_dual_indexed_generic_xyz_point_types_repeated: collect_board_bench_dual_indexed_generic_xyz_point_types_repeated record_board_dual_indexed_generic_xyz_point_types_state
 run_board_bench_correspondence_generic_xyz_point_types_repeated: collect_board_bench_correspondence_generic_xyz_point_types_repeated record_board_correspondence_generic_xyz_point_types_state
 run_board_bench_correspondence_public_repeated: collect_board_bench_correspondence_public_repeated record_board_correspondence_public_state
@@ -2410,6 +2547,18 @@ collect_board_bench_source_indexed_generic_pointnormal_256k_public_repeated: dep
 		mkdir -p "$$local_dir"; \
 		echo "[BOARD] source_indexed_generic_pointnormal_256k_public repeated run $$run_id/$(TE2D_BOARD_REPEATED_RUNS)"; \
 		$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_bench_compare REMOTE_OUTPUT_DIR='$$remote_dir' BENCH_COMPARE_SAVE='$$remote_dir/analyze_bench_compare.log' BOARD_LABEL='$(BOARD_LABEL)' REMOTE_BENCH_ARGS='--case-filter source-indexed-generic-pointnormal-256k-public --iterations $(TE2D_BOARD_BENCH_ITERATIONS) --warmup-iterations $(TE2D_BOARD_BENCH_WARMUP_ITERATIONS)'"; \
+		rsync -e "$(RSYNC_SSH)" -avzP $(REMOTE_USER)@$(REMOTE_IP):$$remote_dir/ "$$local_dir/"; \
+	done
+
+collect_board_bench_source_indexed_pointxyzi_public_repeated: deploy_board | $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR)
+	@rm -rf "$(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR)"/run-*
+	@for run in $$(seq 1 $(TE2D_BOARD_REPEATED_RUNS)); do \
+		run_id=$$(printf "%02d" "$$run"); \
+		remote_dir="$(REMOTE_DIR)/log/board/$(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_RUN_LABEL)/run-$$run_id"; \
+		local_dir="$(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR)/run-$$run_id"; \
+		mkdir -p "$$local_dir"; \
+		echo "[BOARD] source_indexed_pointxyzi_public repeated run $$run_id/$(TE2D_BOARD_REPEATED_RUNS)"; \
+		$(SSH_CMD) $(REMOTE_USER)@$(REMOTE_IP) "cd $(REMOTE_DIR) && $(MAKE) run_bench_compare REMOTE_OUTPUT_DIR='$$remote_dir' BENCH_COMPARE_SAVE='$$remote_dir/analyze_bench_compare.log' BOARD_LABEL='$(BOARD_LABEL)' REMOTE_BENCH_ARGS='--case-filter source-indexed-pointxyzi-public --iterations $(TE2D_BOARD_BENCH_ITERATIONS) --warmup-iterations $(TE2D_BOARD_BENCH_WARMUP_ITERATIONS)'"; \
 		rsync -e "$(RSYNC_SSH)" -avzP $(REMOTE_USER)@$(REMOTE_IP):$$remote_dir/ "$$local_dir/"; \
 	done
 
@@ -2512,6 +2661,18 @@ generate_board_evidence_manifest_source_indexed_generic_pointnormal_256k_public:
 		--device-label "$(BOARD_LABEL)" \
 		--vlen-desc "see SoC / ELF (board)"
 
+generate_board_evidence_manifest_source_indexed_pointxyzi_public:
+	$(PYTHON) script/generate_te2d_board_repeated_summary.py \
+		--input-dir $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR) \
+		--output-dir $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_REPEATED_DIR) \
+		--run-label $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_RUN_LABEL) \
+		--case-filter source-indexed-pointxyzi-public \
+		--expected-runs $(TE2D_BOARD_REPEATED_RUNS) \
+		--std-bin $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_STD) \
+		--rvv-bin $(BUILD_DIR)/$(ARCH)/$(TARGET_BENCH_RVV) \
+		--device-label "$(BOARD_LABEL)" \
+		--vlen-desc "see SoC / ELF (board)"
+
 run_board_evidence_doctor_generic_xyz_point_types_public: generate_board_evidence_manifest_generic_xyz_point_types_public
 	$(PYTHON) ../../script/evidence_doctor.py \
 		--manifest $(TE2D_BOARD_GENERIC_PUBLIC_EVIDENCE_MANIFEST) \
@@ -2534,6 +2695,12 @@ run_board_evidence_doctor_source_indexed_generic_pointnormal_256k_public: genera
 	$(PYTHON) ../../script/evidence_doctor.py \
 		--manifest $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_EVIDENCE_MANIFEST) \
 		--output $(TE2D_BOARD_SOURCE_INDEXED_GENERIC_POINTNORMAL_256K_PUBLIC_EVIDENCE_DOCTOR_MD) \
+		--fail-on never
+
+run_board_evidence_doctor_source_indexed_pointxyzi_public: generate_board_evidence_manifest_source_indexed_pointxyzi_public
+	$(PYTHON) ../../script/evidence_doctor.py \
+		--manifest $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_MANIFEST) \
+		--output $(TE2D_BOARD_SOURCE_INDEXED_POINTXYZI_PUBLIC_EVIDENCE_DOCTOR_MD) \
 		--fail-on never
 
 record_board_generic_xyz_point_types_public_state: run_board_evidence_doctor_generic_xyz_point_types_public
@@ -2559,8 +2726,8 @@ record_board_generic_xyz_point_types_public_state: run_board_evidence_doctor_gen
 run_board_bench_generic_xyz_point_types_public_repeated: collect_board_bench_generic_xyz_point_types_public_repeated record_board_generic_xyz_point_types_public_state
 run_board_bench_repeated: run_board_bench_ordered_cloud_pair_repeated
 
-run_evidence_doctor: run_qemu_smoke_evidence_doctor run_qemu_production_public_evidence_doctor run_qemu_source_indexed_public_evidence_doctor run_qemu_source_indexed_family_ab_evidence_doctor run_qemu_source_indexed_generic_evidence_doctor run_qemu_source_indexed_generic_public_evidence_doctor run_qemu_source_indexed_generic_public_variance_evidence_doctor run_qemu_source_indexed_generic_pointnormal_256k_public_evidence_doctor run_qemu_dual_indexed_family_ab_evidence_doctor run_qemu_dual_indexed_generic_evidence_doctor run_qemu_correspondence_generic_evidence_doctor run_qemu_correspondence_public_evidence_doctor run_qemu_correspondence_family_ab_evidence_doctor run_qemu_correspondence_staging_profile_evidence_doctor run_qemu_correspondence_locality_order_profile_evidence_doctor run_qemu_correspondence_component_ablation_evidence_doctor run_qemu_correspondence_chunked_xyz_staging_evidence_doctor run_qemu_row_source_evidence_doctor run_qemu_row_source_direct_gather_evidence_doctor run_qemu_generic_evidence_doctor run_qemu_generic_public_evidence_doctor
-generate_evidence_manifest: generate_qemu_smoke_evidence_manifest generate_qemu_production_public_evidence_manifest generate_qemu_source_indexed_public_evidence_manifest generate_qemu_source_indexed_family_ab_evidence_manifest generate_qemu_source_indexed_generic_evidence_manifest generate_qemu_source_indexed_generic_public_evidence_manifest generate_qemu_source_indexed_generic_public_variance_evidence_manifest generate_qemu_source_indexed_generic_pointnormal_256k_public_evidence_manifest generate_qemu_dual_indexed_family_ab_evidence_manifest generate_qemu_dual_indexed_generic_evidence_manifest generate_qemu_correspondence_generic_evidence_manifest generate_qemu_correspondence_public_evidence_manifest generate_qemu_correspondence_family_ab_evidence_manifest generate_qemu_correspondence_staging_profile_evidence_manifest generate_qemu_correspondence_locality_order_profile_evidence_manifest generate_qemu_correspondence_component_ablation_evidence_manifest generate_qemu_correspondence_chunked_xyz_staging_evidence_manifest generate_qemu_row_source_evidence_manifest generate_qemu_row_source_direct_gather_evidence_manifest generate_qemu_generic_evidence_manifest generate_qemu_generic_public_evidence_manifest
+run_evidence_doctor: run_qemu_smoke_evidence_doctor run_qemu_production_public_evidence_doctor run_qemu_source_indexed_public_evidence_doctor run_qemu_source_indexed_family_ab_evidence_doctor run_qemu_source_indexed_generic_evidence_doctor run_qemu_source_indexed_generic_public_evidence_doctor run_qemu_source_indexed_generic_public_variance_evidence_doctor run_qemu_source_indexed_generic_pointnormal_256k_public_evidence_doctor run_qemu_source_indexed_pointxyzi_public_evidence_doctor run_qemu_dual_indexed_family_ab_evidence_doctor run_qemu_dual_indexed_generic_evidence_doctor run_qemu_correspondence_generic_evidence_doctor run_qemu_correspondence_public_evidence_doctor run_qemu_correspondence_family_ab_evidence_doctor run_qemu_correspondence_staging_profile_evidence_doctor run_qemu_correspondence_locality_order_profile_evidence_doctor run_qemu_correspondence_component_ablation_evidence_doctor run_qemu_correspondence_chunked_xyz_staging_evidence_doctor run_qemu_row_source_evidence_doctor run_qemu_row_source_direct_gather_evidence_doctor run_qemu_generic_evidence_doctor run_qemu_generic_public_evidence_doctor
+generate_evidence_manifest: generate_qemu_smoke_evidence_manifest generate_qemu_production_public_evidence_manifest generate_qemu_source_indexed_public_evidence_manifest generate_qemu_source_indexed_family_ab_evidence_manifest generate_qemu_source_indexed_generic_evidence_manifest generate_qemu_source_indexed_generic_public_evidence_manifest generate_qemu_source_indexed_generic_public_variance_evidence_manifest generate_qemu_source_indexed_generic_pointnormal_256k_public_evidence_manifest generate_qemu_source_indexed_pointxyzi_public_evidence_manifest generate_qemu_dual_indexed_family_ab_evidence_manifest generate_qemu_dual_indexed_generic_evidence_manifest generate_qemu_correspondence_generic_evidence_manifest generate_qemu_correspondence_public_evidence_manifest generate_qemu_correspondence_family_ab_evidence_manifest generate_qemu_correspondence_staging_profile_evidence_manifest generate_qemu_correspondence_locality_order_profile_evidence_manifest generate_qemu_correspondence_component_ablation_evidence_manifest generate_qemu_correspondence_chunked_xyz_staging_evidence_manifest generate_qemu_row_source_evidence_manifest generate_qemu_row_source_direct_gather_evidence_manifest generate_qemu_generic_evidence_manifest generate_qemu_generic_public_evidence_manifest
 
 evidence_status:
 	$(PYTHON) ../../script/evidence_registry.py check \
@@ -2574,6 +2741,7 @@ evidence_status:
 		--scan-glob 'test-rvv/registration/transformation_estimation_2D/log/board/**/summary.md' \
 		--scan-glob 'test-rvv/registration/transformation_estimation_2D/log/board/**/evidence_doctor.md' \
 		--scan-glob 'test-rvv/registration/transformation_estimation_2D/log/board/**/evidence_manifest.json' \
+		--exclude-glob 'test-rvv/registration/transformation_estimation_2D/log/**/*_usercheck_*/*' \
 		--doc test-rvv/registration/transformation_estimation_2D/README.zh.md \
 		--doc test-rvv/registration/transformation_estimation_2D/doc/testing-overview.zh.md \
 		--doc test-rvv/registration/transformation_estimation_2D/doc/correctness-tests.zh.md \
@@ -2589,11 +2757,20 @@ evidence_status:
 		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/107-production-adoption-and-regression-loop/result.zh.md \
 		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/108-phase-doc-compaction/plan.zh.md \
 		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/108-phase-doc-compaction/result.zh.md \
-			--require-doc-ref \
-			--fail-on never
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/109-dual-indexed-exact-public-variance/plan.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/109-dual-indexed-exact-public-variance/result.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/110-source-indexed-pointxyzi-exact-public-probe/plan.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/110-source-indexed-pointxyzi-exact-public-probe/result.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/111-source-indexed-normal-negative-case-investigation/plan.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/111-source-indexed-normal-negative-case-investigation/result.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/112-source-indexed-pointxyzi-adoption-closeout/plan.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/112-source-indexed-pointxyzi-adoption-closeout/result.zh.md \
+		--require-doc-ref \
+		--fail-on never
 
 .PHONY: run_test_public_semantics run_test_candidates run_bench_ordered_cloud_pair_smoke run_bench_ordered_cloud_pair_public_smoke run_bench_source_indexed_public_smoke run_bench_source_indexed_family_ab_smoke run_bench_source_indexed_generic_xyz_point_types_smoke run_bench_source_indexed_generic_xyz_point_types_public_smoke run_bench_dual_indexed_family_ab_smoke run_bench_dual_indexed_generic_xyz_point_types_smoke run_bench_correspondence_public_smoke run_bench_correspondence_family_ab_smoke run_bench_correspondence_staging_profile_smoke run_bench_correspondence_locality_order_profile_smoke run_bench_correspondence_component_ablation_smoke run_bench_correspondence_chunked_xyz_staging_smoke run_bench_correspondence_generic_xyz_point_types_smoke run_bench_row_source_smoke run_bench_row_source_direct_gather_smoke run_bench_generic_xyz_point_types_smoke run_bench_generic_xyz_point_types_public_smoke dump_bench_std generate_asm_attribution_summary generate_production_public_asm_attribution_summary generate_source_indexed_public_asm_attribution_summary generate_source_indexed_family_ab_asm_attribution_summary generate_source_indexed_generic_asm_attribution_summary generate_source_indexed_generic_public_asm_attribution_summary generate_dual_indexed_family_ab_asm_attribution_summary generate_dual_indexed_generic_asm_attribution_summary generate_correspondence_public_asm_attribution_summary generate_correspondence_family_ab_asm_attribution_summary generate_correspondence_staging_profile_asm_attribution_summary generate_correspondence_locality_order_profile_asm_attribution_summary generate_correspondence_component_ablation_asm_attribution_summary generate_correspondence_chunked_xyz_staging_asm_attribution_summary generate_correspondence_generic_asm_attribution_summary generate_row_source_asm_attribution_summary generate_row_source_direct_gather_asm_attribution_summary generate_generic_asm_attribution_summary generate_generic_public_asm_attribution_summary generate_qemu_smoke_evidence_manifest run_qemu_smoke_evidence_doctor generate_qemu_production_public_evidence_manifest run_qemu_production_public_evidence_doctor generate_qemu_source_indexed_public_evidence_manifest run_qemu_source_indexed_public_evidence_doctor generate_qemu_source_indexed_family_ab_evidence_manifest run_qemu_source_indexed_family_ab_evidence_doctor generate_qemu_source_indexed_generic_evidence_manifest run_qemu_source_indexed_generic_evidence_doctor generate_qemu_source_indexed_generic_public_evidence_manifest run_qemu_source_indexed_generic_public_evidence_doctor generate_qemu_dual_indexed_family_ab_evidence_manifest run_qemu_dual_indexed_family_ab_evidence_doctor generate_qemu_dual_indexed_generic_evidence_manifest run_qemu_dual_indexed_generic_evidence_doctor generate_qemu_correspondence_public_evidence_manifest run_qemu_correspondence_public_evidence_doctor generate_qemu_correspondence_family_ab_evidence_manifest run_qemu_correspondence_family_ab_evidence_doctor generate_qemu_correspondence_staging_profile_evidence_manifest run_qemu_correspondence_staging_profile_evidence_doctor generate_qemu_correspondence_locality_order_profile_evidence_manifest run_qemu_correspondence_locality_order_profile_evidence_doctor generate_qemu_correspondence_component_ablation_evidence_manifest run_qemu_correspondence_component_ablation_evidence_doctor generate_qemu_correspondence_chunked_xyz_staging_evidence_manifest run_qemu_correspondence_chunked_xyz_staging_evidence_doctor generate_qemu_correspondence_generic_evidence_manifest run_qemu_correspondence_generic_evidence_doctor generate_qemu_row_source_evidence_manifest run_qemu_row_source_evidence_doctor generate_qemu_row_source_direct_gather_evidence_manifest run_qemu_row_source_direct_gather_evidence_doctor generate_qemu_generic_evidence_manifest run_qemu_generic_evidence_doctor generate_qemu_generic_public_evidence_manifest run_qemu_generic_public_evidence_doctor record_qemu_correctness_state record_qemu_smoke_evidence_state record_qemu_bench_smoke_state record_qemu_production_public_state record_qemu_source_indexed_public_state record_qemu_source_indexed_family_ab_state record_qemu_source_indexed_generic_state record_qemu_source_indexed_generic_public_state record_qemu_dual_indexed_family_ab_state record_qemu_dual_indexed_generic_state record_qemu_correspondence_public_state record_qemu_correspondence_family_ab_state record_qemu_correspondence_staging_profile_state record_qemu_correspondence_locality_order_profile_state record_qemu_correspondence_component_ablation_state record_qemu_correspondence_chunked_xyz_staging_state record_qemu_correspondence_generic_state record_qemu_row_source_state record_qemu_row_source_direct_gather_state record_qemu_generic_state record_qemu_generic_public_state run_board_test_smoke collect_board_bench_ordered_cloud_pair_repeated collect_board_bench_ordered_cloud_pair_public_repeated collect_board_bench_source_indexed_public_repeated collect_board_bench_source_indexed_family_ab_repeated collect_board_bench_source_indexed_generic_xyz_point_types_repeated collect_board_bench_source_indexed_generic_xyz_point_types_public_repeated collect_board_bench_dual_indexed_family_ab_repeated collect_board_bench_dual_indexed_generic_xyz_point_types_repeated collect_board_bench_correspondence_public_repeated collect_board_bench_correspondence_family_ab_repeated collect_board_bench_correspondence_staging_profile_repeated collect_board_bench_correspondence_locality_order_profile_repeated collect_board_bench_correspondence_component_ablation_repeated collect_board_bench_correspondence_chunked_xyz_staging_repeated collect_board_bench_correspondence_generic_xyz_point_types_repeated collect_board_bench_row_source_repeated collect_board_bench_row_source_direct_gather_repeated collect_board_bench_generic_xyz_point_types_repeated collect_board_bench_generic_xyz_point_types_public_repeated generate_board_evidence_manifest_ordered_cloud_pair generate_board_evidence_manifest_ordered_cloud_pair_public generate_board_evidence_manifest_source_indexed_public generate_board_evidence_manifest_source_indexed_family_ab generate_board_evidence_manifest_source_indexed_generic_xyz_point_types generate_board_evidence_manifest_source_indexed_generic_xyz_point_types_public generate_board_evidence_manifest_dual_indexed_family_ab generate_board_evidence_manifest_dual_indexed_generic_xyz_point_types generate_board_evidence_manifest_correspondence_public generate_board_evidence_manifest_correspondence_family_ab generate_board_evidence_manifest_correspondence_staging_profile generate_board_evidence_manifest_correspondence_locality_order_profile generate_board_evidence_manifest_correspondence_component_ablation generate_board_evidence_manifest_correspondence_chunked_xyz_staging generate_board_evidence_manifest_correspondence_generic_xyz_point_types generate_board_evidence_manifest_row_source generate_board_evidence_manifest_row_source_direct_gather generate_board_evidence_manifest_generic_xyz_point_types generate_board_evidence_manifest_generic_xyz_point_types_public run_board_evidence_doctor_ordered_cloud_pair run_board_evidence_doctor_ordered_cloud_pair_public run_board_evidence_doctor_source_indexed_public run_board_evidence_doctor_source_indexed_family_ab run_board_evidence_doctor_source_indexed_generic_xyz_point_types run_board_evidence_doctor_source_indexed_generic_xyz_point_types_public run_board_evidence_doctor_dual_indexed_family_ab run_board_evidence_doctor_dual_indexed_generic_xyz_point_types run_board_evidence_doctor_correspondence_public run_board_evidence_doctor_correspondence_family_ab run_board_evidence_doctor_correspondence_staging_profile run_board_evidence_doctor_correspondence_locality_order_profile run_board_evidence_doctor_correspondence_component_ablation run_board_evidence_doctor_correspondence_chunked_xyz_staging run_board_evidence_doctor_correspondence_generic_xyz_point_types run_board_evidence_doctor_row_source run_board_evidence_doctor_row_source_direct_gather run_board_evidence_doctor_generic_xyz_point_types run_board_evidence_doctor_generic_xyz_point_types_public record_board_ordered_cloud_pair_state record_board_ordered_cloud_pair_public_state record_board_source_indexed_public_state record_board_source_indexed_family_ab_state record_board_source_indexed_generic_xyz_point_types_state record_board_source_indexed_generic_xyz_point_types_public_state record_board_dual_indexed_family_ab_state record_board_dual_indexed_generic_xyz_point_types_state record_board_correspondence_public_state record_board_correspondence_family_ab_state record_board_correspondence_staging_profile_state record_board_correspondence_locality_order_profile_state record_board_correspondence_component_ablation_state record_board_correspondence_chunked_xyz_staging_state record_board_correspondence_generic_xyz_point_types_state record_board_row_source_state record_board_row_source_direct_gather_state record_board_generic_xyz_point_types_state record_board_generic_xyz_point_types_public_state run_board_bench_ordered_cloud_pair_repeated run_board_bench_ordered_cloud_pair_public_repeated run_board_bench_source_indexed_public_repeated run_board_bench_source_indexed_family_ab_repeated run_board_bench_source_indexed_generic_xyz_point_types_repeated run_board_bench_source_indexed_generic_xyz_point_types_public_repeated run_board_bench_dual_indexed_family_ab_repeated run_board_bench_dual_indexed_generic_xyz_point_types_repeated run_board_bench_correspondence_public_repeated run_board_bench_correspondence_family_ab_repeated run_board_bench_correspondence_staging_profile_repeated run_board_bench_correspondence_locality_order_profile_repeated run_board_bench_correspondence_component_ablation_repeated run_board_bench_correspondence_chunked_xyz_staging_repeated run_board_bench_correspondence_generic_xyz_point_types_repeated run_board_bench_row_source_repeated run_board_bench_row_source_direct_gather_repeated run_board_bench_generic_xyz_point_types_repeated run_board_bench_generic_xyz_point_types_public_repeated run_board_bench_repeated run_evidence_doctor generate_evidence_manifest evidence_status
 .PHONY: run_bench_dual_indexed_generic_xyz_point_types_smoke generate_dual_indexed_generic_asm_attribution_summary generate_qemu_dual_indexed_generic_evidence_manifest run_qemu_dual_indexed_generic_evidence_doctor record_qemu_dual_indexed_generic_state collect_board_bench_dual_indexed_generic_xyz_point_types_repeated generate_board_evidence_manifest_dual_indexed_generic_xyz_point_types run_board_evidence_doctor_dual_indexed_generic_xyz_point_types record_board_dual_indexed_generic_xyz_point_types_state run_board_bench_dual_indexed_generic_xyz_point_types_repeated
 .PHONY: run_bench_correspondence_generic_xyz_point_types_smoke generate_correspondence_generic_asm_attribution_summary generate_qemu_correspondence_generic_evidence_manifest run_qemu_correspondence_generic_evidence_doctor record_qemu_correspondence_generic_state collect_board_bench_correspondence_generic_xyz_point_types_repeated generate_board_evidence_manifest_correspondence_generic_xyz_point_types run_board_evidence_doctor_correspondence_generic_xyz_point_types record_board_correspondence_generic_xyz_point_types_state run_board_bench_correspondence_generic_xyz_point_types_repeated
 .PHONY: run_bench_source_indexed_generic_pointnormal_256k_public_smoke generate_source_indexed_generic_pointnormal_256k_public_asm_attribution_summary generate_qemu_source_indexed_generic_pointnormal_256k_public_evidence_manifest run_qemu_source_indexed_generic_pointnormal_256k_public_evidence_doctor record_qemu_source_indexed_generic_pointnormal_256k_public_state collect_board_bench_source_indexed_generic_pointnormal_256k_public_repeated generate_board_evidence_manifest_source_indexed_generic_pointnormal_256k_public run_board_evidence_doctor_source_indexed_generic_pointnormal_256k_public record_board_source_indexed_generic_pointnormal_256k_public_state run_board_bench_source_indexed_generic_pointnormal_256k_public_repeated
 .PHONY: run_bench_source_indexed_generic_xyz_point_types_public_variance_smoke generate_source_indexed_generic_public_variance_asm_attribution_summary generate_qemu_source_indexed_generic_public_variance_evidence_manifest run_qemu_source_indexed_generic_public_variance_evidence_doctor record_qemu_source_indexed_generic_public_variance_state collect_board_bench_source_indexed_generic_xyz_point_types_public_variance_repeated generate_board_evidence_manifest_source_indexed_generic_xyz_point_types_public_variance run_board_evidence_doctor_source_indexed_generic_xyz_point_types_public_variance record_board_source_indexed_generic_xyz_point_types_public_variance_state run_board_bench_source_indexed_generic_xyz_point_types_public_variance_repeated
+.PHONY: run_bench_source_indexed_pointxyzi_public_smoke generate_source_indexed_pointxyzi_public_asm_attribution_summary generate_qemu_source_indexed_pointxyzi_public_evidence_manifest run_qemu_source_indexed_pointxyzi_public_evidence_doctor record_qemu_source_indexed_pointxyzi_public_state collect_board_bench_source_indexed_pointxyzi_public_repeated generate_board_evidence_manifest_source_indexed_pointxyzi_public run_board_evidence_doctor_source_indexed_pointxyzi_public record_board_source_indexed_pointxyzi_public_state run_board_bench_source_indexed_pointxyzi_public_phase110_repeated

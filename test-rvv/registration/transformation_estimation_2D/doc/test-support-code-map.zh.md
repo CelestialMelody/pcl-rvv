@@ -199,12 +199,14 @@ src/bench_te2d.cpp
 | `log/board/source_indexed_generic_xyz_point_types_repeated/evidence_manifest.json` / `evidence_doctor.md` | source-indexed generic board manifest / report；Doctor 5/10/1。 | summary-only 证据指针。 |
 | `log/board/source_indexed_generic_xyz_point_types_public_variance_repeated/summary.md` | source-indexed generic public representative variance board summary；20 runs，12 positive、1 weak_positive、3 negative。 | summary-only 证据指针；Phase 106 public variance evidence，不支持 clean-adopt。 |
 | `log/board/source_indexed_generic_xyz_point_types_public_variance_repeated/evidence_manifest.json` / `evidence_doctor.md` | source-indexed generic public variance board manifest / report；Doctor 1/27/0。 | summary-only 证据指针；`PointNormal->PointNormal 256K` 的 `7/20` below-1 阻止 full widening adoption。 |
+| `log/board/source_indexed_pointxyzi_public_phase110_repeated/summary.md` | source-indexed exact `PointXYZI -> PointXYZI` public board summary；20 runs，4K/64K/256K 为 3.979x / 3.547x / 3.602x，`B/A<1=0/20`。 | summary-only 证据指针；Phase 110/112 adopted exact production evidence，不支持 generic widening。 |
+| `log/board/source_indexed_pointxyzi_public_phase110_repeated/evidence_manifest.json` / `evidence_doctor.md` | source-indexed exact `PointXYZI -> PointXYZI` board manifest / report；Doctor 0/3/0。 | summary-only 证据指针；Warning 保留为长尾 / 方差 caveat。 |
 | `log/board/dual_indexed_generic_xyz_point_types_repeated/summary.md` | dual-indexed generic point-type board repeated summary；16 cases，negative，多数 same-type 大规模和 mixed pair 为 negative。 | summary-only 证据指针；Phase 100 diagnostic evidence，不接 production。 |
 | `log/board/dual_indexed_generic_xyz_point_types_repeated/evidence_manifest.json` / `evidence_doctor.md` | dual-indexed generic board manifest / report；Doctor 13/17/1。 | summary-only 证据指针。 |
 | `log/board/correspondence_generic_xyz_point_types_repeated/summary.md` | correspondence generic point-type board repeated summary；16 cases，negative，多数 same-type 64K/256K 和 mixed pair 为 negative。 | summary-only 证据指针；Phase 101 diagnostic evidence，不接 production。 |
 | `log/board/correspondence_generic_xyz_point_types_repeated/evidence_manifest.json` / `evidence_doctor.md` | correspondence generic board manifest / report；Doctor 11/19/2。 | summary-only 证据指针。 |
-| `log/board/dual_indexed_family_ab_repeated/summary.md` | dual-indexed family A/B board repeated summary；direct 相对 materialize 为 1.018x / 1.671x / 1.554x。 | summary-only 证据指针；Phase 093 positive production-detail evidence，等待用户确认。 |
-| `log/board/dual_indexed_family_ab_repeated/evidence_manifest.json` / `evidence_doctor.md` | dual-indexed family A/B board manifest / report；Doctor 0/3/1，Warning 全在 4K。 | summary-only 证据指针。 |
+| `log/board/dual_indexed_family_ab_phase109_variance_repeated/summary.md` | dual-indexed family A/B 20-run variance summary；direct 相对 materialize 为 1.080x / 1.661x / 1.646x。 | summary-only 证据指针；Phase 109 retained exact production evidence，保留 4K caveat。 |
+| `log/board/dual_indexed_family_ab_phase109_variance_repeated/evidence_manifest.json` / `evidence_doctor.md` | dual-indexed family A/B Phase 109 board manifest / report；Doctor 0/3/0，Warning 全在 4K。 | summary-only 证据指针。 |
 | `log/board/correspondence_public_repeated/summary.md` | correspondence production-public board repeated summary；public Std/RVV 为 4.517x / 3.705x / 3.149x。 | summary-only 证据指针；Phase 094 public probe positive，不等于 family clean-adopt。 |
 | `log/board/correspondence_public_repeated/evidence_manifest.json` / `evidence_doctor.md` | correspondence production-public board manifest / report；Doctor 0/2/0。 | summary-only 证据指针。 |
 | `log/board/correspondence_family_ab_repeated/summary.md` | correspondence family A/B board repeated summary；direct 相对 materialize median 为 1.081x / 1.639x / 1.406x，但 256K 有 5/20 低于 1。 | summary-only 证据指针；Phase 094 guarded candidate，不 clean-adopt。 |
@@ -246,11 +248,15 @@ Phase 100 只为 dual-indexed generic PointXYZ-like test-rvv candidate 补 diagn
 结果 negative，不修改 production dispatch。
 Phase 101 只为 correspondence generic PointXYZ-like test-rvv candidate 补 diagnostic evidence，
 结果 negative，不修改 production dispatch。
-Phase 093 只为 dual-indexed `PointXYZ -> PointXYZ` production boundary 补 direct-vs-materialize
-family A/B，当前为 positive / pending user confirmation；仍不能覆盖 correspondence 或 generic row-source。
-Phase 094 只为 correspondence `PointXYZ -> PointXYZ` production boundary 补 public probe 和
-direct-vs-materialize family A/B；public Std/RVV positive，但 256K family A/B 退化频率触发
-Evidence Doctor Error，因此当前只能写 guarded candidate / pending user decision，不能 clean-adopt。
+Phase 110/112 只为 source-indexed exact `PointXYZI -> PointXYZI` production boundary 补
+public Std/RVV、QEMU/asm、20-run board 和 Doctor，并已按用户确认采纳；仍不能覆盖 Normal、
+mixed pair 或 generic row-source。
+Phase 093/107/109 只为 dual-indexed `PointXYZ -> PointXYZ` production boundary 补
+direct-vs-materialize family A/B，当前为 retained / positive with 4K caveat；仍不能覆盖
+correspondence 或 generic row-source。
+Phase 094/107 只为 correspondence `PointXYZ -> PointXYZ` production boundary 补 public probe 和
+direct-vs-materialize family A/B；public Std/RVV positive，但 256K family A/B 退化频率阻止
+production adoption，因此当前是 rolled back / not adopted，不能 clean-adopt。
 Phase 095 / 096 分别完成 staged-dual profile 和 locality/order profile，结论均为 negative，
 只阻止 staged-dual switch，不自动回滚 Phase 094 guarded patch。
 

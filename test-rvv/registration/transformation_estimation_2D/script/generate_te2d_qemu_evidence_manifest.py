@@ -105,6 +105,7 @@ def point_types_for_case(name: str, case_filter: str) -> dict[str, str]:
         "source-indexed-generic-xyz-point-types-public",
         "source-indexed-generic-xyz-point-types-public-variance",
         "source-indexed-generic-pointnormal-256k-public",
+        "source-indexed-pointxyzi-public",
         "dual-indexed-generic-xyz-point-types",
         "correspondence-generic-xyz-point-types",
     ):
@@ -113,6 +114,7 @@ def point_types_for_case(name: str, case_filter: str) -> dict[str, str]:
             "source-indexed-generic-xyz-point-types-public",
             "source-indexed-generic-xyz-point-types-public-variance",
             "source-indexed-generic-pointnormal-256k-public",
+            "source-indexed-pointxyzi-public",
         ):
             match = SOURCE_INDEXED_GENERIC_CASE_RE.match(name)
         elif case_filter == "dual-indexed-generic-xyz-point-types":

@@ -167,6 +167,7 @@ def point_types_for_label(label: str, case_filter: str) -> dict[str, str]:
         "source-indexed-generic-xyz-point-types-public",
         "source-indexed-generic-xyz-point-types-public-variance",
         "source-indexed-generic-pointnormal-256k-public",
+        "source-indexed-pointxyzi-public",
         "dual-indexed-generic-xyz-point-types",
         "correspondence-generic-xyz-point-types",
     ):
@@ -175,6 +176,7 @@ def point_types_for_label(label: str, case_filter: str) -> dict[str, str]:
             "source-indexed-generic-xyz-point-types-public",
             "source-indexed-generic-xyz-point-types-public-variance",
             "source-indexed-generic-pointnormal-256k-public",
+            "source-indexed-pointxyzi-public",
         ):
             match = SOURCE_INDEXED_GENERIC_CASE_RE.match(label)
         elif case_filter == "dual-indexed-generic-xyz-point-types":
@@ -207,6 +209,7 @@ def case_specs(case_filter: str, first_names: list[str]) -> list[dict[str, Any]]
                         "source-indexed-generic-xyz-point-types-public",
                         "source-indexed-generic-xyz-point-types-public-variance",
                         "source-indexed-generic-pointnormal-256k-public",
+                        "source-indexed-pointxyzi-public",
         "dual-indexed-generic-xyz-point-types",
         "correspondence-generic-xyz-point-types",
     ):
@@ -230,6 +233,7 @@ def case_specs(case_filter: str, first_names: list[str]) -> list[dict[str, Any]]
                             "source-indexed-generic-xyz-point-types-public",
                             "source-indexed-generic-xyz-point-types-public-variance",
                             "source-indexed-generic-pointnormal-256k-public",
+                            "source-indexed-pointxyzi-public",
                         )
                         else "ordered_cloud_pair"
                     ),
@@ -302,6 +306,8 @@ def case_group(case_filter: str) -> str:
         return "te2d_source_indexed_generic_xyz_point_types_public_variance"
     if case_filter == "source-indexed-generic-pointnormal-256k-public":
         return "te2d_source_indexed_generic_pointnormal_256k_public"
+    if case_filter == "source-indexed-pointxyzi-public":
+        return "te2d_source_indexed_pointxyzi_public"
     if case_filter == "dual-indexed-generic-xyz-point-types":
         return "te2d_dual_indexed_generic_xyz_point_types"
     if case_filter == "correspondence-generic-xyz-point-types":
@@ -332,6 +338,8 @@ def case_kind(case_filter: str) -> str:
         return "board_production_public_source_indexed_generic_xyz_point_types_variance_same_boundary"
     if case_filter == "source-indexed-generic-pointnormal-256k-public":
         return "board_production_public_source_indexed_generic_pointnormal_256k_same_boundary"
+    if case_filter == "source-indexed-pointxyzi-public":
+        return "board_production_public_source_indexed_pointxyzi_same_boundary"
     if case_filter == "dual-indexed-generic-xyz-point-types":
         return "board_diagnostic_dual_indexed_generic_xyz_point_types_same_boundary"
     if case_filter == "correspondence-generic-xyz-point-types":
@@ -362,6 +370,8 @@ def summary_title(case_filter: str) -> str:
         return "transformation_estimation_2D source-indexed generic XYZ-like point-type production public variance repeated board"
     if case_filter == "source-indexed-generic-pointnormal-256k-public":
         return "transformation_estimation_2D source-indexed generic PointNormal 256K production public repeated board"
+    if case_filter == "source-indexed-pointxyzi-public":
+        return "transformation_estimation_2D source-indexed PointXYZI exact production public repeated board"
     if case_filter == "dual-indexed-generic-xyz-point-types":
         return "transformation_estimation_2D dual-indexed generic XYZ-like point-type repeated board diagnostic"
     if case_filter == "correspondence-generic-xyz-point-types":
@@ -392,6 +402,8 @@ def summary_label(case_filter: str) -> str:
         return "source-indexed generic XYZ-like point-type production public variance evidence"
     if case_filter == "source-indexed-generic-pointnormal-256k-public":
         return "source-indexed generic PointNormal 256K production public dispatch evidence"
+    if case_filter == "source-indexed-pointxyzi-public":
+        return "source-indexed PointXYZI exact production public dispatch evidence"
     if case_filter == "dual-indexed-generic-xyz-point-types":
         return "dual-indexed generic XYZ-like point-type candidate; no production dispatch"
     if case_filter == "correspondence-generic-xyz-point-types":
@@ -528,6 +540,7 @@ def side(label: str,
         "source-indexed-generic-xyz-point-types-public",
         "source-indexed-generic-xyz-point-types-public-variance",
         "source-indexed-generic-pointnormal-256k-public",
+        "source-indexed-pointxyzi-public",
     ):
         boundary = "production_public_source_indexed_generic_xyz_point_type_overload"
         timer_boundary = "public_source_indexed_generic_xyz_point_type_estimate_plus_2d_solve"
@@ -584,6 +597,7 @@ def candidate_reduction_for_filter(case_filter: str) -> str:
         "source-indexed-generic-xyz-point-types-public",
         "source-indexed-generic-xyz-point-types-public-variance",
         "source-indexed-generic-pointnormal-256k-public",
+        "source-indexed-pointxyzi-public",
     ):
         return "rvv_production_source_indexed_generic_direct_gather_two_pass_centered_sum_tree"
     if case_filter == "dual-indexed-generic-xyz-point-types":
@@ -614,6 +628,7 @@ def candidate_asm_boundary_for_filter(case_filter: str) -> str:
         "source-indexed-generic-xyz-point-types-public",
         "source-indexed-generic-xyz-point-types-public-variance",
         "source-indexed-generic-pointnormal-256k-public",
+        "source-indexed-pointxyzi-public",
     ):
         return "runPublicSourceIndexedGenericCase_lambda_production_public_boundary"
     if case_filter == "dual-indexed-generic-xyz-point-types":
@@ -665,6 +680,7 @@ def build_manifest(runs: list[dict[str, Any]],
         elif args.case_filter in (
             "source-indexed-generic-xyz-point-types-public",
             "source-indexed-generic-pointnormal-256k-public",
+            "source-indexed-pointxyzi-public",
         ):
             baseline_label = "Std build public source-indexed generic point-type"
             candidate_label = "RVV build public source-indexed generic point-type"
@@ -830,6 +846,8 @@ def render_summary(case_metrics: dict[str, dict[str, Any]], args: argparse.Names
         evidence_role = "generic point-type production public dispatch（泛型点类型生产公开入口证据）"
     elif args.case_filter == "source-indexed-generic-pointnormal-256k-public":
         evidence_role = "source-indexed generic PointNormal 256K production public dispatch（源索引泛型 PointNormal 256K 生产公开入口证据）"
+    elif args.case_filter == "source-indexed-pointxyzi-public":
+        evidence_role = "source-indexed PointXYZI exact production public dispatch（源索引 PointXYZI 具体点型生产公开入口证据）"
     elif args.case_filter == "source-indexed-generic-xyz-point-types-public-variance":
         evidence_role = "source-indexed generic production public variance（源索引泛型生产公开入口方差证据）"
     elif args.case_filter == "generic-xyz-point-types":
@@ -865,6 +883,8 @@ def render_summary(case_metrics: dict[str, dict[str, Any]], args: argparse.Names
         lines.append("本摘要覆盖 source-indexed 代表性 PointXYZ-like 点型和 mixed source/target 组合；不证明 production dispatch。")
     elif args.case_filter == "source-indexed-generic-pointnormal-256k-public":
         lines.append("本摘要只覆盖 source-indexed public generic `PointNormal -> PointNormal 256K` 单例，用于隔离 Phase 103 的长尾；它不能单独证明泛型生产扩宽可采纳。")
+    elif args.case_filter == "source-indexed-pointxyzi-public":
+        lines.append("本摘要只覆盖 source-indexed public exact `PointXYZI -> PointXYZI` 三个规模，用于 Phase 110 bounded production probe；它不能证明 source-indexed generic widening。")
     elif args.case_filter == "source-indexed-generic-xyz-point-types-public-variance":
         lines.append("本摘要用于 Phase 106 source-indexed generic public representative variance；它使用独立 evidence dir，不覆盖 Phase 103/104，且不能自动写成 adopted。")
     elif args.case_filter == "dual-indexed-generic-xyz-point-types":
