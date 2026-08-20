@@ -8,9 +8,18 @@
 
 ## 当前恢复入口
 
-当前最新完成阶段是 `112-source-indexed-pointxyzi-adoption-closeout`。该阶段按用户确认把
+当前正在执行阶段是 `113-doc-rvv-closeout-and-log-hygiene`。该阶段不修改 production source，
+只补齐 production `doc-rvv` closeout gate（生产长期文档收尾门禁），并把已被 Git 跟踪的
+topic generated logs（生成日志）从索引中移除，保留本地 evidence files（证据文件），由
+`test-rvv/.gitignore` 接管。这个阶段用于修复 Phase 112 后提交前 closeout 中暴露的问题：
+长期主题文档不能只做 freshness sync（新鲜度同步），必须完整说明当前采用的优化方式、
+正确性与高效性证据链、Traceability Map（可追踪性地图）、fallback 矩阵、未采纳方向和日志提交边界。
+
+上一阶段 `112-source-indexed-pointxyzi-adoption-closeout` 已完成。该阶段按用户确认把
 Phase 110 source-indexed exact `PointXYZI -> PointXYZI` positive production probe 写成
-adopted / retained，并完成接入后文档、registry 和提交边界同步。
+adopted / retained。对应生产源码已提交为
+`d40e67467 registration: adopt RVV 2D source-indexed PointXYZI path`，不要自动 amend（修补提交）、
+回滚或把 Phase 103/104 guarded probe 写成 adopted。
 
 上一阶段 `111-source-indexed-normal-negative-case-investigation` 只审计
 Phase 106 的 source-indexed generic Normal 类负向 case，不修改 production gate。结论为：
@@ -59,6 +68,7 @@ Evidence Doctor（证据体检）、registry（证据登记表）和长期 `doc-
 | 当前生产补丁范围和证据链 | `../transformation_estimation_2D-evaluation.zh.md`、`../../../../doc-rvv/registration/transformation_estimation_2D-RVV.zh.md` |
 | 当前 Phase 110 PointXYZI probe 结果 | [`110-source-indexed-pointxyzi-exact-public-probe/result.zh.md`](110-source-indexed-pointxyzi-exact-public-probe/result.zh.md) |
 | Phase 112 PointXYZI 采纳收尾 | [`112-source-indexed-pointxyzi-adoption-closeout/result.zh.md`](112-source-indexed-pointxyzi-adoption-closeout/result.zh.md) |
+| Phase 113 production doc closeout / log hygiene | [`113-doc-rvv-closeout-and-log-hygiene/plan.zh.md`](113-doc-rvv-closeout-and-log-hygiene/plan.zh.md) |
 | Phase 111 Normal 类负向样本审计 | [`111-source-indexed-normal-negative-case-investigation/result.zh.md`](111-source-indexed-normal-negative-case-investigation/result.zh.md) |
 | Phase 109 dual-indexed 20-run variance 结果 | [`109-dual-indexed-exact-public-variance/result.zh.md`](109-dual-indexed-exact-public-variance/result.zh.md) |
 | 阶段历史为什么这么多 | [`history.zh.md`](history.zh.md) |
@@ -69,27 +79,30 @@ Evidence Doctor（证据体检）、registry（证据登记表）和长期 `doc-
 
 ## 当前提交状态
 
-提交前已再次确认：
+`d40e67467` 已提交 production `PointXYZI` exact gate。当前 Phase 113 仍需在完成后再次确认：
 
 ```bash
 make -C test-rvv/registration/transformation_estimation_2D evidence_status
 git diff --check -- registration/include/pcl/registration/impl/transformation_estimation_2D.hpp test-rvv/registration/transformation_estimation_2D tmp/rvv-work-logs/registration/transformation_estimation_2D doc-rvv/registration/transformation_estimation_2D-RVV.zh.md
 ```
 
-当前已知结果：Phase 110 接入后 correctness Std/RVV `84/84` pass，
-source-indexed PointXYZI public QEMU Doctor `0/0/0`，board Doctor `0/3/0`，`evidence_status`
-fresh。Phase 110 board 20-run summary 路径为
+当前已知基线：Phase 110 接入后 correctness Std/RVV `84/84` pass，
+source-indexed PointXYZI public QEMU Doctor `0/0/0`，board Doctor `0/3/0`。Phase 113
+完成前必须刷新 `evidence_status`，并确认 generated logs 已不再作为 tracked modifications
+阻塞 topic commit。Phase 110 board 20-run summary 路径为
 `log/board/source_indexed_pointxyzi_public_phase110_repeated/summary.md`。
 
 ## 提交边界
 
-本次提交采用 topic-only（仅主题）策略：
+Phase 113 follow-up commit 采用 topic-only（仅主题）策略：
 
-- 提交 production patch、测试调整、topic-local docs、压缩后的 phase index / history /
-  optimization matrix、必要关键 phase 文档和长期 `doc-rvv`。
+- 提交长期 `doc-rvv` closeout、Phase 113 plan/result、phase index、roadmap、optimization matrix
+  和 tracked-log index 删除。
+- 不提交新的 production patch；`d40e67467` 已保留 adopted source-indexed exact `PointXYZI` gate。
 - 不默认提交所有未跟踪 phase `plan/result` 详文；历史事实以 `history.zh.md`、matrix、roadmap、
   evaluation 和 `doc-rvv` 保持可恢复，确需保留单个 phase 详文时再显式加入提交候选。
-- 本次不提交 `log/**`；文档只保留 run label、summary / manifest / Evidence Doctor 路径和 registry
+- 本次不提交 `log/**`；已 tracked 的 TE2D generated logs 用 `git rm --cached` 从版本库删除，
+  本地文件保留。文档只保留 run label、target、summary / manifest / Evidence Doctor 路径和 registry
   freshness 结果，后续需要 evidence logs 时再单独审计脱敏和提交边界。
 - 不提交本地 build 输出、私有 `config.mk`、raw board logs、私有地址或未被文档引用的临时日志。
 - 不自动回滚 Phase 091 adopted patch，不把 Phase 103/104 guarded probe 写成 adopted；
@@ -97,8 +110,8 @@ fresh。Phase 110 board 20-run summary 路径为
 
 ## 停止规则
 
-当前 topic 已完成 Phase 112 adoption closeout。Phase 110 exact `PointXYZI -> PointXYZI`
-已按用户确认采纳；generic / Normal / correspondence 方向仍不接入。
+当前 topic 正在完成 Phase 113 doc/log closeout。Phase 110 exact `PointXYZI -> PointXYZI`
+已按用户确认采纳并由 `d40e67467` 保留；generic / Normal / correspondence 方向仍不接入。
 
 如继续优化，默认再考虑：
 

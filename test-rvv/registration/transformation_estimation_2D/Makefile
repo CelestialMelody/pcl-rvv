@@ -2765,6 +2765,8 @@ evidence_status:
 		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/111-source-indexed-normal-negative-case-investigation/result.zh.md \
 		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/112-source-indexed-pointxyzi-adoption-closeout/plan.zh.md \
 		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/112-source-indexed-pointxyzi-adoption-closeout/result.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/113-doc-rvv-closeout-and-log-hygiene/plan.zh.md \
+		--doc test-rvv/registration/transformation_estimation_2D/doc/phases/113-doc-rvv-closeout-and-log-hygiene/result.zh.md \
 		--require-doc-ref \
 		--fail-on never
 

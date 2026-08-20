@@ -43,6 +43,13 @@ Doctor Error 为主证据。因此 Normal 类 source-indexed generic widening �
 specialization、selected `x/y` materialization 和 chunk/profile ablation 仅作为未推进候选记录，
 不再列为默认恢复队列。
 
+Phase 113 是 production doc closeout（生产长期文档收尾）和 generated log hygiene（生成日志卫生）
+阶段，不改变 RVV 算法或 production gate。该阶段修复 Phase 112 后暴露的 closeout process gap：
+长期 `doc-rvv` 不能只做 freshness sync，必须按 Production Doc Closeout Gate 补齐当前采用的优化方式、
+正确性与高效性证据链、Traceability Map、fallback 矩阵、未采纳方向和 log policy。Phase 113
+同时把早先被 Git 跟踪的 TE2D `log/**` generated files 从索引中移除，保留本地文件，由
+`test-rvv/.gitignore` 接管；后续若需要提交 evidence logs，必须另开 evidence-log phase 做脱敏和提交边界审计。
+
 当前 topic 边界：
 
 - 目标入口为 `TransformationEstimation2D` 四个 `estimateRigidTransformation` overload。
@@ -81,6 +88,7 @@ specialization、selected `x/y` materialization 和 chunk/profile ablation 仅�
 | source-indexed generic PointXYZ-like diagnostic | Phase 099 证据 | source-indexed row source 下四类代表性点型和四组 mixed pair；`Scalar=float` | test-rvv generic direct gather candidate；source indexed gather 与 target prefix strided load 分别走 traits gate。 | `PointXYZ->PointXYZ` 三个规模均为 negative，且 `PointXYZI` / `PointNormal` 256K negative；mixed 64K 多数正向但不能覆盖负向 same-type。 | correctness/fallback、QEMU smoke、asm、5-run board、Doctor、registry 已完成。 | attempted / mixed-negative / no production change | completed; do not widen Phase 091 |
 | source-indexed generic public representative variance | 用户继续技术证据化；Phase 103/104 guarded probe | source-indexed public overload；`PointXYZ`、`PointXYZI`、`PointNormal`、`PointXYZINormal` same-type 和四组 mixed pair；`Scalar=float` | 使用真实 public source-indexed generic probe 的同一边界，以独立 board label / evidence dir 做 20-run variance 复核。 | Phase 106 出现 3 个 negative bucket；`PointNormal->PointNormal 256K` 有 `7/20` below-1 并触发 Doctor Error，不能 clean-adopt。 | current 84/84 correctness、QEMU smoke、production-symbol asm、QEMU Doctor、20-run board repeated、board Doctor 和 registry 已完成；board Doctor `1/27/0`。 | completed / negative for full generic public variance / guarded | user decision: keep guarded narrow/probe, investigate negative cases, or request rollback |
 | source-indexed Normal load-shape mitigation | Phase 111 负向归因 | possible exact `PointNormal` / `PointXYZINormal`, `Scalar=float`, source-indexed row source | 可能通过 2D-only load2、exact Normal specialization、selected `x/y` materialization 或 chunk/profile ablation 降低 48B AoS stride + gather/stride 的访存压力。 | 目前只是原因假设和候选形态，没有同边界 correctness、asm、board repeated 或 Doctor；用户已决定不继续推进。 | 若未来重新打开，必须新建独立 phase、独立 board label / evidence dir，并从 correctness、QEMU/asm、20-run board 和 Evidence Doctor 重新闭环。 | not_planned / user-declined further Normal optimization | none; do not resume by default |
+| production doc closeout and generated log hygiene | Phase 113 / 用户反馈 | `doc-rvv`、phase index、roadmap、matrix、Handoff、TE2D generated logs | 让 production closeout 不再降格成 freshness sync；让 tracked generated logs 不再因复跑污染提交边界。 | 不改变 RVV 算法；`log/**` 删除是从 Git 索引删除而非本地 evidence 删除；需要验证 registry 仍 fresh。 | Production Doc Closeout Gate 审计、`git rm --cached` tracked logs、artifact tracking scan、`evidence_status`、YAML parse、`git diff --check`。 | in_progress / closeout hygiene | complete Phase 113, then follow-up topic-only commit |
 | dual-indexed generic PointXYZ-like diagnostic | Phase 100 证据 | dual-indexed row source 下四类代表性点型和四组 mixed pair；`Scalar=float` | test-rvv generic direct gather candidate；source / target 两侧 indexed gather 分别走 traits gate。 | `PointXYZ` 仅 4K weak-positive，64K/256K negative；`PointXYZI` 全规模 negative；`PointNormal` / `PointXYZINormal` 大规模 negative；mixed 64K 全部 negative。 | correctness/fallback、QEMU smoke、asm、5-run board、Doctor、registry 已完成。 | attempted / negative / no production change | completed; do not widen Phase 093 |
 | correspondence generic PointXYZ-like diagnostic | Phase 101 证据 | correspondence row source 下四类代表性点型和四组 mixed pair；`Scalar=float` | test-rvv generic direct gather candidate；source/query 与 target/match 两侧 indexed gather 分别走 traits gate。 | 4K same-type 多为 weak-positive，但多数 64K/256K same-type 与 mixed pair 为 negative。 | correctness/fallback、QEMU smoke、asm、5-run board、Doctor、registry 已完成。 | attempted / negative / no production change | completed; do not restore Phase 107 rolled-back correspondence dispatch |
 | dual-indexed production-detail family A/B | Phase 093 / 107 / 109 证据 | dual-indexed `PointXYZ -> PointXYZ`、`Scalar=float`、valid source/target indices、dense finite | 真实 dual-indexed public direct gather RVV 与 materialize+ordered public RVV 在同一 RVV binary 内比较。 | Phase 109 64K / 256K positive，4K median positive 但有 `1/20` below-1；当前只能支撑 exact narrow boundary。 | Phase 107 correctness/fallback、QEMU、production-symbol asm、board repeated、Doctor、registry 已完成；Phase 109 独立 20-run variance 已完成。 | retained / positive with 4K caveat | no gate change; next bounded candidate only |
@@ -135,6 +143,7 @@ specialization、selected `x/y` materialization 和 chunk/profile ablation 仅�
 | 111-source-indexed-normal-negative-case-investigation | Phase 106 full generic negative 需要和 Phase 110 PointXYZI exact positive 拆清 | Normal 类 48B stride case 中，`PointNormal->PointNormal 256K` `7/20` below-1，另有两个 Normal 类 case 出现 `1/20` below-1；Doctor `1/27/0` 仍有效。 | Normal 类 source-indexed generic widening 不接入；若未来继续，必须另开独立 exact Normal probe 或 profiling phase。 | high completed / rejected for current gate |
 | 111-source-indexed-normal-negative-case-investigation | 用户不再推进 Normal 类后续优化 | 可能的 load2、exact Normal specialization、selected `x/y` materialization 和 chunk/profile ablation 只解释“还有可尝试的形态”，不再进入默认 phase loop。 | 保留在 roadmap 和 matrix 作为 not-planned 候选；除非用户明确重开，否则不创建新的 Normal probe。 | completed / not planned |
 | 112-source-indexed-pointxyzi-adoption-closeout | 用户确认采纳 Phase 110 exact PointXYZI 正向 probe，需要把 probe 状态转为 production truth | Phase 110 correctness/QEMU/asm/board evidence 全部闭合；Phase 112 只做 adoption closeout 和提交前验证。 | adopted 只覆盖 exact `PointXYZI -> PointXYZI`，Phase 103/104/106 generic 和 Phase 111 Normal 仍不采纳。 | high completed / adoption closeout |
+| 113-doc-rvv-closeout-and-log-hygiene | 用户指出 production `doc-rvv` closeout 被执行成小型 freshness sync，且 tracked logs 复跑后继续脏工作区 | `doc-rvv` 必须重构为长期生产维护文档；tracked generated logs 需要从 Git 索引移除并由 ignore 规则接管。 | 不改 production source；验证 `evidence_status`、YAML parse、artifact scan 和 `git diff --check` 后创建 follow-up topic-only commit。 | high in_progress / closeout hygiene |
 
 ## 暂缓 / 拒绝路线
 
@@ -157,13 +166,14 @@ specialization、selected `x/y` materialization 和 chunk/profile ablation 仅�
 
 `roadmap_default_recovery_queue`：
 
-1. `topic-commit-closeout`：Phase 112 adoption closeout 后默认准备 topic-only commit，不提交 logs 或无关 dirty files。
-2. `source-indexed-normal-exact-probe-or-profiling-only-by-user-request`：Phase 111 已关闭当前 Normal 类负向审计；没有新授权时不继续接入 Normal。若用户明确要求继续，需新建独立 exact Normal probe 或 profiling phase。
-3. `correspondence-new-bounded-candidate-only`：correspondence direct/staged/component/chunked/generic 现有证据均不支持接入；只有新的同边界 candidate、独立 phase plan 和完整 correctness/QEMU/asm/board/Doctor 后才恢复。
-4. `point-type-inventory-expansion`：如需把未逐类型上板的 traits-allowed 内建点型或自定义点型写成已覆盖范围，必须另建点型 inventory / bench phase。
-5. `post-phase109-closeout`：Phase 109 已完成并同步为 positive with retained 4K caveat；无需再恢复 board。
-6. `row-source-production-integration-plan`：只有具体 row source 的 production probe 或 policy-specific candidate 在 correctness、fallback、asm、board repeated 和 Doctor 上成立，才进入 PI1-PI5；不能 clean-adopt 未做 family comparison 的新实现族。
-7. `dual-indexed-generic-production-probe-deferred`：Phase 100 negative 阻止默认 production widening；只有另开生产接入阶段并重新补接入后 correctness、性能、asm 和 Evidence Doctor 才能改变 dispatch。
-8. `correspondence-generic-production-probe-deferred`：Phase 101 negative 阻止默认 production widening；只有另开生产接入阶段并重新补接入后 correctness、性能、asm 和 Evidence Doctor 才能改变 dispatch。
+1. `phase-113-doc-rvv-closeout-and-log-hygiene`：补齐 production `doc-rvv` closeout gate，停止跟踪 TE2D generated logs，验证 freshness / artifact scan / diff check。
+2. `topic-commit-closeout`：Phase 113 通过后创建 follow-up topic-only commit，不提交 logs 或无关 dirty files，不 amend `d40e67467`。
+3. `source-indexed-normal-exact-probe-or-profiling-only-by-user-request`：Phase 111 已关闭当前 Normal 类负向审计；没有新授权时不继续接入 Normal。若用户明确要求继续，需新建独立 exact Normal probe 或 profiling phase。
+4. `correspondence-new-bounded-candidate-only`：correspondence direct/staged/component/chunked/generic 现有证据均不支持接入；只有新的同边界 candidate、独立 phase plan 和完整 correctness/QEMU/asm/board/Doctor 后才恢复。
+5. `point-type-inventory-expansion`：如需把未逐类型上板的 traits-allowed 内建点型或自定义点型写成已覆盖范围，必须另建点型 inventory / bench phase。
+6. `post-phase109-closeout`：Phase 109 已完成并同步为 positive with retained 4K caveat；无需再恢复 board。
+7. `row-source-production-integration-plan`：只有具体 row source 的 production probe 或 policy-specific candidate 在 correctness、fallback、asm、board repeated 和 Doctor 上成立，才进入 PI1-PI5；不能 clean-adopt 未做 family comparison 的新实现族。
+8. `dual-indexed-generic-production-probe-deferred`：Phase 100 negative 阻止默认 production widening；只有另开生产接入阶段并重新补接入后 correctness、性能、asm 和 Evidence Doctor 才能改变 dispatch。
+9. `correspondence-generic-production-probe-deferred`：Phase 101 negative 阻止默认 production widening；只有另开生产接入阶段并重新补接入后 correctness、性能、asm 和 Evidence Doctor 才能改变 dispatch。
 
 QEMU timing 始终不能替代板卡性能结论。
