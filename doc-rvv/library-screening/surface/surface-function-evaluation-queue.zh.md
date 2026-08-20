@@ -92,7 +92,7 @@
 | 1 | organized mesh reconstruction | `impl/organized_fast_mesh.hpp` | 已完成 / no-production / 已提交 | diagnostic 曾正向，但 public path 的 production evidence 负向；生产补丁已回滚，当前不建议继续扩大接入；topic 资产提交为 `7bfead613`。 |
 | 2 | bilateral upsampling | `impl/bilateral_upsampling.hpp` | 已完成函数级评估和 production public probe，等待用户确认是否回滚生产补丁 | staged-window-reduction 诊断为负向（`0.91x/0.94x/0.91x`）且不建议接入；phase 010 direct-depth 诊断为 `1.04x/1.17x/1.30x`、Evidence Doctor `Errors=0`；phase 020 production public 结果为 `0.97x/0.89x/0.95x`、Evidence Doctor `Errors=3`，当前不建议接入。 |
 | 3 | marching cubes | `impl/marching_cubes.hpp` | 建议进入函数级评估 | 先评估 voxel 扫描和 edge/tri table 路径。 |
-| 4 | on_nurbs triangulation | `on_nurbs/triangulation.cpp` | 建议进入函数级评估 | 先评估 grid 生成和 `Evaluate` 扫描。 |
+| 4 | on_nurbs triangulation | `on_nurbs/triangulation.cpp` | 函数级评估已建档；当前 candidate 不进入 production；按当前指令暂停继续推进 | `test-rvv/surface/triangulation` 已完成 `param_grid_rvv_store` 接入前诊断：QEMU / board correctness 和 asm 通过；5-run board repeated 为 `tri_param_grid_512` median `0.978x`、`tri_surface_eval_256` median `0.999x`，两者均 3/5 退化，Evidence Doctor 均 `Errors=1`。用户已说明忽略 on_nurbs 依赖相关方向；剩余不依赖该符号链的 `createIndices` 输出构造只适合非 RVV 标量消融，不建议作为 RVV next phase。 |
 
 ### 4.2 保留实施的候选文件
 

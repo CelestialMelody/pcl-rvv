@@ -1,0 +1,1584 @@
+{
+  "files": {
+    "test-rvv/surface/triangulation/build/asm/riscv/bench_triangulation_rvv.asm": {
+      "backend": "qemu",
+      "case_filter": "param-grid",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/test-support-code-map.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "asm_attribution",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204398,
+      "related": {},
+      "run_label": "qemu-triangulation-asm-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787204330752822896,
+        "path": "test-rvv/surface/triangulation/build/asm/riscv/bench_triangulation_rvv.asm",
+        "sha256": "sha256:ed1f2df5a644b097c58b879b78a46a15e3fee2eacb2b7e07e95c2367001a81ef",
+        "size": 6956
+      },
+      "target": "dump_bench_rvv"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/summary.md"
+      },
+      "run_label": "board-triangulation-param-grid-512-repeated-20260820",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206573195035277,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_doctor.md",
+        "sha256": "sha256:9da6b5871bd94ea70266cca0461b333903f096c3b8dd2e3a91b44e72b3068795",
+        "size": 1552
+      },
+      "target": "run_board_bench_param_grid_repeated_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/summary.md"
+      },
+      "run_label": "board-triangulation-param-grid-512-repeated-20260820",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206573168035732,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_manifest.json",
+        "sha256": "sha256:28d036e342c4030f87d946b6509a68078d67935d7e84b98f237ec90a69f88e1a",
+        "size": 3749
+      },
+      "target": "run_board_bench_param_grid_repeated_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206342867853378,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/analyze_bench_compare.log",
+        "sha256": "sha256:9b85b87a8925b76114fe2f482799db6b570f3dc466b3e109c0826ee479782be1",
+        "size": 1201
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206342867853378,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/run_bench_rvv.log",
+        "sha256": "sha256:79978a6c68905ec8b8c1a43e6f8c3774e0667c0bc87a68595425b97f3fcc8a67",
+        "size": 364
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206342867853378,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/run_bench_std.log",
+        "sha256": "sha256:7dc2aa32fd0ac06687b7e0f1c2b42cd6b48eb787ce04b3df3db4dc92d71ef5e4",
+        "size": 358
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206356214897135,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/analyze_bench_compare.log",
+        "sha256": "sha256:2291fe03745b2b3816768ae7778034276fb64aaa21afaffc753c616a41611bfa",
+        "size": 1201
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206356214897135,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/run_bench_rvv.log",
+        "sha256": "sha256:06c14731ed9b1a5b4d90e57f8268daf4e6e3e327e62e35eceee5c9a997b99719",
+        "size": 364
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206356214897135,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/run_bench_std.log",
+        "sha256": "sha256:c0223a9b3af0e666dba4f6d4feb2d01f684516af9a06d3ae87c2cb7005913a45",
+        "size": 358
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206369333917283,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/analyze_bench_compare.log",
+        "sha256": "sha256:ab6d0c78efd585efb94f8b1b0f2da1d36f7d1814e6765aee65f72eecbac51e25",
+        "size": 1201
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206369333917283,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/run_bench_rvv.log",
+        "sha256": "sha256:caf0ae29dd9f5f744216e31baddb3e3d3af0d84c2738684fefdcb8c71b822338",
+        "size": 364
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206369333917283,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/run_bench_std.log",
+        "sha256": "sha256:e1ca0cf921a3f9075add583b6928ae15790a39654503885e702db4e917beb87d",
+        "size": 358
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206382623915772,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/analyze_bench_compare.log",
+        "sha256": "sha256:f30ca405595d1624f82d5c2988b8f48a90367b76aea3dc1f051754987b2d03ca",
+        "size": 1201
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206382623915772,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/run_bench_rvv.log",
+        "sha256": "sha256:ea8d4bff43594da5d012f55680a050047494dc6c99598075d8ed3657f699d2cc",
+        "size": 364
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206382623915772,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/run_bench_std.log",
+        "sha256": "sha256:3bf2b745ff5b4fa068a28512cc000f72afaa942fe078ff1b171feaeb000bef22",
+        "size": 358
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206395678893865,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/analyze_bench_compare.log",
+        "sha256": "sha256:db1f85134b6684b4ecbfa2753a2c01307f2c4761df7dc7788cebb58c9236a0cc",
+        "size": 1201
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206395678893865,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/run_bench_rvv.log",
+        "sha256": "sha256:09f746893b5c9e72674f33971f2c55d3d4edd6cfa52f4822e21f9dc3682b27b7",
+        "size": 364
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {},
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206395678893865,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/run_bench_std.log",
+        "sha256": "sha256:400994d5bc197cbe24042e951cb207060fb12eb6fc44d60ec392d4c1aa398b2b",
+        "size": 358
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/summary.md": {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/summary.md"
+      },
+      "run_label": "board-triangulation-param-grid-512-repeated-20260820",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206573168035732,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/summary.md",
+        "sha256": "sha256:6336626d3ed9e0078be07c1d797f45d315c6e74a0ad8e2d2498d980353ba6b14",
+        "size": 469
+      },
+      "target": "run_board_bench_param_grid_repeated_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204953,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/analyze_bench_compare.log"
+      },
+      "run_label": "board-triangulation-param-grid-512-smoke-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787145051195094568,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/analyze_bench_compare.log",
+        "sha256": "sha256:54e730df76ba00d9095ee373e887e65fa45dd3ea7d22edb51b6334cec03f2660",
+        "size": 1201
+      },
+      "target": "run_board_bench_param_grid"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204953,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/analyze_bench_compare.log"
+      },
+      "run_label": "board-triangulation-param-grid-512-smoke-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787204937275846304,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_doctor.md",
+        "sha256": "sha256:c40471ae831ad9f26da7b79d1a1ec54472ec9c74633317c4d29bce581e04905b",
+        "size": 2084
+      },
+      "target": "run_board_bench_param_grid"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204953,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/analyze_bench_compare.log"
+      },
+      "run_label": "board-triangulation-param-grid-512-smoke-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787204937227840275,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_manifest.json",
+        "sha256": "sha256:9e253db2f0711a924ccb0927161368ff3f79a68961bd15ff1634d7755f13e878",
+        "size": 3017
+      },
+      "target": "run_board_bench_param_grid"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204649,
+      "related": {},
+      "run_label": "board-triangulation-param-grid-512-smoke-raw-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787145051195094568,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/run_bench_rvv.log",
+        "sha256": "sha256:0b37a4fa65d50395bc1af8d1a7df915d342c4056f44c070418fb658b8fb27262",
+        "size": 364
+      },
+      "target": "run_board_bench_param_grid"
+    },
+    "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204649,
+      "related": {},
+      "run_label": "board-triangulation-param-grid-512-smoke-raw-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787145051195094568,
+        "path": "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/run_bench_std.log",
+        "sha256": "sha256:30b9f6eefc7b8c389ef610e65a62363d25c43a0877e7dfc076142fc61fac47bc",
+        "size": 358
+      },
+      "target": "run_board_bench_param_grid"
+    },
+    "test-rvv/surface/triangulation/log/board/run_test.log": {
+      "backend": "board",
+      "case_filter": "all",
+      "doc_refs": [
+        "doc/correctness-tests.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "board_correctness",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "board-triangulation-correctness-20260820",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206600218827110,
+        "path": "test-rvv/surface/triangulation/log/board/run_test.log",
+        "sha256": "sha256:b3ef8db11217f2b7e01c683e84e752286c0a8b3e1112e62664954597234792f8",
+        "size": 615
+      },
+      "target": "run_board_test"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/summary.md"
+      },
+      "run_label": "board-triangulation-surface-eval-256-repeated-20260820",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206573192035327,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_doctor.md",
+        "sha256": "sha256:f4fc477af8d0737356d26dc2ec4ad015127ca75974a9963f92063befbdbbb312",
+        "size": 1555
+      },
+      "target": "run_board_bench_surface_eval_repeated_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/summary.md"
+      },
+      "run_label": "board-triangulation-surface-eval-256-repeated-20260820",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206573164035800,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_manifest.json",
+        "sha256": "sha256:a6cd433a014510de8b44172e943c33dba121041279a292d270c6174458e8948f",
+        "size": 3837
+      },
+      "target": "run_board_bench_surface_eval_repeated_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206425515773158,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/analyze_bench_compare.log",
+        "sha256": "sha256:5626ab5c419c279deabbabc043b6c4e25114c79cd179566199a92703186510d7",
+        "size": 1199
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206425515773158,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/run_bench_rvv.log",
+        "sha256": "sha256:9346e15a7c02dd4cdb597862e3b7bfeaea4233ff3a402686eb3ba1bbcf943ecf",
+        "size": 369
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206425515773158,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/run_bench_std.log",
+        "sha256": "sha256:215dcfbd6cc8aa88c7fd55be50cfc9ec83e0cb7aea67ee2893b80a8fbba851e3",
+        "size": 363
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206439559684764,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/analyze_bench_compare.log",
+        "sha256": "sha256:0e27d4ebd4b66c9f5015569cf1cc27e257cefb4a2fa2c2303af84c343cf09cbb",
+        "size": 1199
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206439559684764,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/run_bench_rvv.log",
+        "sha256": "sha256:99843a16fe84f9851ae7001c592b00292e2bdd57e3312bb16a716d32dc235f87",
+        "size": 369
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206439559684764,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/run_bench_std.log",
+        "sha256": "sha256:c05b493c2966ccc94c8c64f6fa8afe56c7b642ce77fae398f0f0f1439bbbb6f1",
+        "size": 363
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206456033557283,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/analyze_bench_compare.log",
+        "sha256": "sha256:5d8d22a3810ee5ae9a3e556720892e0eada1edb95dda00e059f77fe58b2a4c16",
+        "size": 1199
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206456033557283,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/run_bench_rvv.log",
+        "sha256": "sha256:88fbd1b3c77a3137fa67318ca8782fe4161613a711988f1cb6e2970c44594a79",
+        "size": 369
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206456033557283,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/run_bench_std.log",
+        "sha256": "sha256:2e4b8ebcb4ac4ed49c04b4aaf052355e2842b14c5b2d5240a41a80b54c629760",
+        "size": 363
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206470232427938,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/analyze_bench_compare.log",
+        "sha256": "sha256:d2feabdc625d19da8ab660e52821daa8823cc2fbb5b5cb8320ab67506826c5b0",
+        "size": 1199
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206470232427938,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/run_bench_rvv.log",
+        "sha256": "sha256:648c2e62222ce40195be979976aab42b736ff5db9fdfbf9fa41bf1521869f9e9",
+        "size": 369
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206470232427938,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/run_bench_std.log",
+        "sha256": "sha256:b131de35e4554aa15284e48ebb36eeb97dd593173c015197f8eb46ad3d87b4be",
+        "size": 363
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206484571280090,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/analyze_bench_compare.log",
+        "sha256": "sha256:ef7864bdfe73b8b220bec88d0f6ffcfbfa68fde7186cb88adf6046bfeee26f7d",
+        "size": 1199
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206484571280090,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/run_bench_rvv.log",
+        "sha256": "sha256:6bd0e0471583ae6077fc5a3ac948c1169e13079497ffcf48b27a34ab14b2c0c3",
+        "size": 369
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206624,
+      "related": {},
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206484571280090,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/run_bench_std.log",
+        "sha256": "sha256:567fe444ee4652939cba013e646cb1e67af08e943285ad5e5919aebe4124ec15",
+        "size": 363
+      },
+      "target": "repeated_board_raw_archive_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/summary.md": {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787206623,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/summary.md"
+      },
+      "run_label": "board-triangulation-surface-eval-256-repeated-20260820",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787206573164035800,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/summary.md",
+        "sha256": "sha256:f25907018c7b6fbed8e19a665d2f53f772e56e1d1e95a86fd941c3fd45d61104",
+        "size": 474
+      },
+      "target": "run_board_bench_surface_eval_repeated_manual"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/analyze_bench_compare.log": {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204953,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/analyze_bench_compare.log"
+      },
+      "run_label": "board-triangulation-surface-eval-256-smoke-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787145024616966448,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/analyze_bench_compare.log",
+        "sha256": "sha256:c7678a09adb082e19a8152138690442770c39f79dd5fe20f0d7ec1549ae2081e",
+        "size": 1199
+      },
+      "target": "run_board_bench_surface_eval"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204953,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/analyze_bench_compare.log"
+      },
+      "run_label": "board-triangulation-surface-eval-256-smoke-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787204937305850072,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_doctor.md",
+        "sha256": "sha256:3ad0ac7d8631c29400a393f81cdb30c4ab94d09b3e80d11b591f65e737f444be",
+        "size": 1933
+      },
+      "target": "run_board_bench_surface_eval"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md",
+        "doc/optimization-evidence.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204953,
+      "related": {
+        "doctor_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_doctor.md",
+        "manifest_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_manifest.json",
+        "summary_path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/analyze_bench_compare.log"
+      },
+      "run_label": "board-triangulation-surface-eval-256-smoke-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787204937245842536,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_manifest.json",
+        "sha256": "sha256:0bb6d783bf5953510d1eb2fdaa459d4c950d483e920e0d499e9296cc94708f77",
+        "size": 3100
+      },
+      "target": "run_board_bench_surface_eval"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/run_bench_rvv.log": {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204649,
+      "related": {},
+      "run_label": "board-triangulation-surface-eval-256-smoke-raw-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787145024616966448,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/run_bench_rvv.log",
+        "sha256": "sha256:6c94e024b5bb1e34d6ecab4a09bbd1778384a45d8e5ed85104d24a7da731c0f2",
+        "size": 369
+      },
+      "target": "run_board_bench_surface_eval"
+    },
+    "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/run_bench_std.log": {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "doc_refs": [
+        "doc/benchmark-and-evidence.zh.md"
+      ],
+      "evidence_role": "diagnostic_raw_support",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204649,
+      "related": {},
+      "run_label": "board-triangulation-surface-eval-256-smoke-raw-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787145024616966448,
+        "path": "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/run_bench_std.log",
+        "sha256": "sha256:0055a5777c7e6e0f55dfd6e618f25fc6ccd93e31a339885ce6e6dd8baa330c2c",
+        "size": 363
+      },
+      "target": "run_board_bench_surface_eval"
+    },
+    "test-rvv/surface/triangulation/log/qemu/run_test_rvv.log": {
+      "backend": "qemu",
+      "case_filter": "all",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/testing-overview.zh.md",
+        "doc/correctness-tests.zh.md",
+        "doc/triangulation-evaluation.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "qemu_correctness",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204398,
+      "related": {},
+      "run_label": "qemu-triangulation-correctness-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787204336037678530,
+        "path": "test-rvv/surface/triangulation/log/qemu/run_test_rvv.log",
+        "sha256": "sha256:b22b13ea6a258f81c7d040fd399b710eabb781946478acee4fde714db12eb56b",
+        "size": 616
+      },
+      "target": "run_test_compare"
+    },
+    "test-rvv/surface/triangulation/log/qemu/run_test_std.log": {
+      "backend": "qemu",
+      "case_filter": "all",
+      "doc_refs": [
+        "README.zh.md",
+        "doc/testing-overview.zh.md",
+        "doc/correctness-tests.zh.md",
+        "doc/triangulation-evaluation.zh.md",
+        "doc/phases/000-current-state-and-grid-sampling-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "qemu_correctness",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787204398,
+      "related": {},
+      "run_label": "qemu-triangulation-correctness-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787204333370246374,
+        "path": "test-rvv/surface/triangulation/log/qemu/run_test_std.log",
+        "sha256": "sha256:069ac81ed258c90a79768dd2117e6bd55fd3c6527ba01c76ba91e0fb4e5f57b9",
+        "size": 616
+      },
+      "target": "run_test_compare"
+    }
+  },
+  "runs": [
+    {
+      "backend": "qemu",
+      "case_filter": "all",
+      "evidence_role": "qemu_correctness",
+      "files": [
+        "test-rvv/surface/triangulation/log/qemu/run_test_rvv.log",
+        "test-rvv/surface/triangulation/log/qemu/run_test_std.log"
+      ],
+      "recorded_at_epoch": 1787204398,
+      "run_label": "qemu-triangulation-correctness-phase000",
+      "target": "run_test_compare"
+    },
+    {
+      "backend": "qemu",
+      "case_filter": "param-grid",
+      "evidence_role": "asm_attribution",
+      "files": [
+        "test-rvv/surface/triangulation/build/asm/riscv/bench_triangulation_rvv.asm"
+      ],
+      "recorded_at_epoch": 1787204398,
+      "run_label": "qemu-triangulation-asm-phase000",
+      "target": "dump_bench_rvv"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/analyze_bench_compare.log",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_doctor.md",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1787204398,
+      "run_label": "board-triangulation-param-grid-512-smoke-phase000",
+      "target": "run_board_bench_param_grid"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/analyze_bench_compare.log",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_doctor.md",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1787204398,
+      "run_label": "board-triangulation-surface-eval-256-smoke-phase000",
+      "target": "run_board_bench_surface_eval"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/analyze_bench_compare.log",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_doctor.md",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1787204593,
+      "run_label": "board-triangulation-param-grid-512-smoke-phase000",
+      "target": "run_board_bench_param_grid"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/analyze_bench_compare.log",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_doctor.md",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1787204593,
+      "run_label": "board-triangulation-surface-eval-256-smoke-phase000",
+      "target": "run_board_bench_surface_eval"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/run_bench_rvv.log",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787204649,
+      "run_label": "board-triangulation-param-grid-512-smoke-raw-phase000",
+      "target": "run_board_bench_param_grid"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/run_bench_rvv.log",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787204649,
+      "run_label": "board-triangulation-surface-eval-256-smoke-raw-phase000",
+      "target": "run_board_bench_surface_eval"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/analyze_bench_compare.log",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_doctor.md",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_smoke/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1787204953,
+      "run_label": "board-triangulation-param-grid-512-smoke-phase000",
+      "target": "run_board_bench_param_grid"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/analyze_bench_compare.log",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_doctor.md",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_smoke/evidence_manifest.json"
+      ],
+      "recorded_at_epoch": 1787204953,
+      "run_label": "board-triangulation-surface-eval-256-smoke-phase000",
+      "target": "run_board_bench_surface_eval"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_param_grid_512",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_doctor.md",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/evidence_manifest.json",
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/summary.md"
+      ],
+      "recorded_at_epoch": 1787206623,
+      "run_label": "board-triangulation-param-grid-512-repeated-20260820",
+      "target": "run_board_bench_param_grid_repeated_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "tri_surface_eval_256",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_doctor.md",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/evidence_manifest.json",
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/summary.md"
+      ],
+      "recorded_at_epoch": 1787206623,
+      "run_label": "board-triangulation-surface-eval-256-repeated-20260820",
+      "target": "run_board_bench_surface_eval_repeated_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206623,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206623,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206623,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206623,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206623,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_1/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_2/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_3/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_4/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "param_grid_512_repeated_20260820_141209",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/param_grid_512_repeated_20260820_141209/run_5/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "param_grid_512_repeated_20260820_141209-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/run_bench_std.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/run_bench_rvv.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_1/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_2/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_3/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_4/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "surface_eval_256_repeated_20260820_141331",
+      "evidence_role": "diagnostic_raw_support",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/surface_eval_256_repeated_20260820_141331/run_5/analyze_bench_compare.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "surface_eval_256_repeated_20260820_141331-raw",
+      "target": "repeated_board_raw_archive_manual"
+    },
+    {
+      "backend": "board",
+      "case_filter": "all",
+      "evidence_role": "board_correctness",
+      "files": [
+        "test-rvv/surface/triangulation/log/board/run_test.log"
+      ],
+      "recorded_at_epoch": 1787206624,
+      "run_label": "board-triangulation-correctness-20260820",
+      "target": "run_board_test"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787206624
+}

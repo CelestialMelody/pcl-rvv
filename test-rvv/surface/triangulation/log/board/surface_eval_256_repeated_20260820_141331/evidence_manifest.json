@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "triangulation tri_surface_eval_256 repeated board diagnostic",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/surface_eval_256_repeated_20260820_141331/summary.md",
+    "label": "diagnostic repeated board summary",
+    "analysis_script": "test-rvv/script/evidence_doctor.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "tri_surface_eval_256",
+      "group": "triangulation-grid-sampling",
+      "evidence_role": "diagnostic",
+      "case_kind": "pre-production diagnostic",
+      "point_type": "PointXYZ",
+      "size": 256,
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 58.0532,
+      "rvv_ms": 58.4475,
+      "ba_values": [
+        0.9855479440412042,
+        0.9992682128897843,
+        1.0362975319731385,
+        1.0001343775734166,
+        0.9851329435146656
+      ],
+      "baseline": {
+        "label": "scalar triangulation reference",
+        "boundary": "test_helper",
+        "wrapper": "bench_triangulation",
+        "row_source": "regular_uv_grid",
+        "solve": false,
+        "checksum_policy": "mesh_stats_checksum",
+        "checksum": "13840304595866503300",
+        "timer_boundary": "param_grid_plus_evaluate_like_sink",
+        "gate": "scalar_reference",
+        "mask": "not_applicable",
+        "reduction": "not_applicable",
+        "asm_boundary": "test-rvv/surface/triangulation/include/triangulation.h::createParamGridReference",
+        "rvv_instr_count": 0,
+        "std_ms": 58.0532
+      },
+      "candidate": {
+        "label": "RVV param-grid candidate (__RVV10__)",
+        "boundary": "test_helper",
+        "wrapper": "bench_triangulation",
+        "row_source": "regular_uv_grid",
+        "solve": false,
+        "checksum_policy": "mesh_stats_checksum",
+        "checksum": "13840304595866503300",
+        "timer_boundary": "param_grid_plus_evaluate_like_sink",
+        "gate": "__RVV10__",
+        "mask": "not_applicable",
+        "reduction": "not_applicable",
+        "asm_boundary": "test-rvv/surface/triangulation/include/triangulation.h::createParamGridCandidate",
+        "rvv_instr_count": 5,
+        "rvv_ms": 58.4475
+      },
+      "metrics": {
+        "std_ms_values": [
+          57.9788,
+          58.0345,
+          60.569,
+          58.0532,
+          58.192
+        ],
+        "rvv_ms_values": [
+          58.829,
+          58.077,
+          58.4475,
+          58.0454,
+          59.0702
+        ],
+        "speedup_std_over_rvv_values": [
+          0.9855479440412042,
+          0.9992682128897843,
+          1.0362975319731385,
+          1.0001343775734166,
+          0.9851329435146656
+        ],
+        "speedup_median": 0.9992682128897843,
+        "speedup_min": 0.9851329435146656,
+        "speedup_max": 1.0362975319731385,
+        "points": 66049,
+        "polygons": 131072,
+        "runs": [
+          "run_1",
+          "run_2",
+          "run_3",
+          "run_4",
+          "run_5"
+        ]
+      },
+      "notes": [
+        "测试专用 Evaluate-like scalar sink；不能替代真实 ON_NurbsSurface::Evaluate direct 证据。",
+        "B/A 口径为 Std 平均耗时 / RVV 平均耗时，只用于接入前方向判断。"
+      ]
+    }
+  ]
+}
