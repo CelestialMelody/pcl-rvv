@@ -498,6 +498,20 @@ namespace pcl
       getNeighborList1D (std::vector<float> &leaf,
                          Eigen::Vector3i &index3d);
 
+      /** \brief Extract the surface from the already voxelized grid with the scalar cell scan. */
+      void
+      reconstructSurfaceStd (pcl::PointCloud<PointNT> &cloud);
+
+#if defined(__RVV10__)
+      /** \brief Extract the surface from the already voxelized grid with an RVV active-cell prepass. */
+      void
+      reconstructSurfaceRVV (pcl::PointCloud<PointNT> &cloud);
+
+      /** \brief Collect active z cells for one x/y column. */
+      void
+      getActiveVoxelsZRVV (int x, int y, std::vector<int> &active_z) const;
+#endif
+
       /** \brief Class get name method. */
       std::string getClassName () const override { return ("MarchingCubes"); }
 

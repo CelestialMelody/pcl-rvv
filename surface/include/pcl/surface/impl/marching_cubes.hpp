@@ -38,8 +38,16 @@
 
 #include <pcl/surface/marching_cubes.h>
 #include <pcl/common/common.h>
+#include <pcl/rvv_point_traits.h>
 #include <pcl/common/vector_average.h>
 #include <pcl/Vertices.h>
+
+#include <cstdint>
+#include <algorithm>
+
+#if defined(__RVV10__)
+#include <riscv_vector.h>
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT>
@@ -203,6 +211,127 @@ pcl::MarchingCubes<PointNT>::getGridValue (Eigen::Vector3i pos)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT> void
+pcl::MarchingCubes<PointNT>::reconstructSurfaceStd (pcl::PointCloud<PointNT> &cloud)
+{
+  for (int x = 1; x < res_x_-1; ++x)
+    for (int y = 1; y < res_y_-1; ++y)
+      for (int z = 1; z < res_z_-1; ++z)
+      {
+        Eigen::Vector3i index_3d (x, y, z);
+        std::vector<float> leaf_node;
+        getNeighborList1D (leaf_node, index_3d);
+        if (!leaf_node.empty ())
+          createSurface (leaf_node, index_3d, cloud);
+      }
+}
+
+
+#if defined(__RVV10__)
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointNT> void
+pcl::MarchingCubes<PointNT>::getActiveVoxelsZRVV (int x, int y, std::vector<int> &active_z) const
+{
+  alignas(64) std::uint32_t cube_indices[256];
+  alignas(64) std::uint32_t finite_flags[256];
+
+  const float* g000 = grid_.data () + x * res_y_ * res_z_ + y * res_z_ + 1;
+  const float* g100 = grid_.data () + (x + 1) * res_y_ * res_z_ + y * res_z_ + 1;
+  const float* g010 = grid_.data () + x * res_y_ * res_z_ + (y + 1) * res_z_ + 1;
+  const float* g110 = grid_.data () + (x + 1) * res_y_ * res_z_ + (y + 1) * res_z_ + 1;
+  const int z_count = res_z_ - 2;
+  int z_offset = 0;
+  while (z_offset < z_count)
+  {
+    const std::size_t chunk =
+        std::min<std::size_t> (static_cast<std::size_t> (z_count - z_offset),
+                               sizeof (cube_indices) / sizeof (cube_indices[0]));
+    std::size_t consumed = 0;
+    while (consumed < chunk)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m1 (chunk - consumed);
+      const float* p000 = g000 + z_offset + consumed;
+      const float* p100 = g100 + z_offset + consumed;
+      const float* p010 = g010 + z_offset + consumed;
+      const float* p110 = g110 + z_offset + consumed;
+
+      const vfloat32m1_t v0 = __riscv_vle32_v_f32m1 (p000, vl);
+      const vfloat32m1_t v1 = __riscv_vle32_v_f32m1 (p100, vl);
+      const vfloat32m1_t v2 = __riscv_vle32_v_f32m1 (p100 + 1, vl);
+      const vfloat32m1_t v3 = __riscv_vle32_v_f32m1 (p000 + 1, vl);
+      const vfloat32m1_t v4 = __riscv_vle32_v_f32m1 (p010, vl);
+      const vfloat32m1_t v5 = __riscv_vle32_v_f32m1 (p110, vl);
+      const vfloat32m1_t v6 = __riscv_vle32_v_f32m1 (p110 + 1, vl);
+      const vfloat32m1_t v7 = __riscv_vle32_v_f32m1 (p010 + 1, vl);
+
+      vuint32m1_t cube = __riscv_vmv_v_x_u32m1 (0, vl);
+      auto add_bit = [this, vl] (vuint32m1_t current, const vfloat32m1_t values, const std::uint32_t bit) {
+        const vbool32_t below = __riscv_vmflt_vf_f32m1_b32 (values, iso_level_, vl);
+        const vuint32m1_t with_bit = __riscv_vor_vx_u32m1 (current, bit, vl);
+        return __riscv_vmerge_vvm_u32m1 (current, with_bit, below, vl);
+      };
+      cube = add_bit (cube, v0, 1);
+      cube = add_bit (cube, v1, 2);
+      cube = add_bit (cube, v2, 4);
+      cube = add_bit (cube, v3, 8);
+      cube = add_bit (cube, v4, 16);
+      cube = add_bit (cube, v5, 32);
+      cube = add_bit (cube, v6, 64);
+      cube = add_bit (cube, v7, 128);
+
+      vbool32_t finite = __riscv_vmfeq_vv_f32m1_b32 (v0, v0, vl);
+      finite = __riscv_vmand_mm_b32 (finite, __riscv_vmfeq_vv_f32m1_b32 (v1, v1, vl), vl);
+      finite = __riscv_vmand_mm_b32 (finite, __riscv_vmfeq_vv_f32m1_b32 (v2, v2, vl), vl);
+      finite = __riscv_vmand_mm_b32 (finite, __riscv_vmfeq_vv_f32m1_b32 (v3, v3, vl), vl);
+      finite = __riscv_vmand_mm_b32 (finite, __riscv_vmfeq_vv_f32m1_b32 (v4, v4, vl), vl);
+      finite = __riscv_vmand_mm_b32 (finite, __riscv_vmfeq_vv_f32m1_b32 (v5, v5, vl), vl);
+      finite = __riscv_vmand_mm_b32 (finite, __riscv_vmfeq_vv_f32m1_b32 (v6, v6, vl), vl);
+      finite = __riscv_vmand_mm_b32 (finite, __riscv_vmfeq_vv_f32m1_b32 (v7, v7, vl), vl);
+
+      const vuint32m1_t one = __riscv_vmv_v_x_u32m1 (1, vl);
+      const vuint32m1_t zero = __riscv_vmv_v_x_u32m1 (0, vl);
+      const vuint32m1_t valid = __riscv_vmerge_vvm_u32m1 (zero, one, finite, vl);
+      __riscv_vse32_v_u32m1 (cube_indices + consumed, cube, vl);
+      __riscv_vse32_v_u32m1 (finite_flags + consumed, valid, vl);
+      consumed += vl;
+    }
+
+    for (std::size_t lane = 0; lane < chunk; ++lane)
+    {
+      if (finite_flags[lane] != 0 && edgeTable[cube_indices[lane]] != 0)
+        active_z.push_back (1 + z_offset + static_cast<int> (lane));
+    }
+    z_offset += static_cast<int> (chunk);
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointNT> void
+pcl::MarchingCubes<PointNT>::reconstructSurfaceRVV (pcl::PointCloud<PointNT> &cloud)
+{
+  std::vector<int> active_z;
+  active_z.reserve (static_cast<std::size_t> (res_z_));
+
+  for (int x = 1; x < res_x_-1; ++x)
+    for (int y = 1; y < res_y_-1; ++y)
+    {
+      active_z.clear ();
+      getActiveVoxelsZRVV (x, y, active_z);
+      for (const int z : active_z)
+      {
+        Eigen::Vector3i index_3d (x, y, z);
+        std::vector<float> leaf_node;
+        getNeighborList1D (leaf_node, index_3d);
+        if (!leaf_node.empty ())
+          createSurface (leaf_node, index_3d, cloud);
+      }
+    }
+}
+#endif
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointNT> void
 pcl::MarchingCubes<PointNT>::performReconstruction (pcl::PolygonMesh &output)
 {
   pcl::PointCloud<PointNT> points;
@@ -247,16 +376,14 @@ pcl::MarchingCubes<PointNT>::performReconstruction (pcl::PointCloud<PointNT> &po
       2.0 * 6.0 * static_cast<double>(res_y_*res_z_ + res_x_*res_z_ + res_x_*res_y_));
   intermediate_cloud.reserve (static_cast<std::size_t>(size_reserve));
 
-  for (int x = 1; x < res_x_-1; ++x)
-    for (int y = 1; y < res_y_-1; ++y)
-      for (int z = 1; z < res_z_-1; ++z)
-      {
-        Eigen::Vector3i index_3d (x, y, z);
-        std::vector<float> leaf_node;
-        getNeighborList1D (leaf_node, index_3d);
-        if (!leaf_node.empty ())
-          createSurface (leaf_node, index_3d, intermediate_cloud);
-      }
+#if defined(__RVV10__)
+  if constexpr (pcl::rvv::RVVXYZAoSFloatLayout<PointNT>::value)
+    reconstructSurfaceRVV (intermediate_cloud);
+  else
+    reconstructSurfaceStd (intermediate_cloud);
+#else
+  reconstructSurfaceStd (intermediate_cloud);
+#endif
 
   points.swap (intermediate_cloud);
 
@@ -274,4 +401,3 @@ pcl::MarchingCubes<PointNT>::performReconstruction (pcl::PointCloud<PointNT> &po
 #define PCL_INSTANTIATE_MarchingCubes(T) template class PCL_EXPORTS pcl::MarchingCubes<T>;
 
 #endif    // PCL_SURFACE_IMPL_MARCHING_CUBES_H_
-
