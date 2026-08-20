@@ -13,14 +13,14 @@ registration/include/pcl/registration/impl/transformation_estimation_2D.hpp
 
 ## 当前结论
 
-当前 production patch 保留三条 RVV 路径，并按用户“有收益的实现可以接入、先整理后提交”的
-授权纳入 topic-only commit：
+当前 production patch 保留四条 RVV 路径。Phase 114 只整理测试支撑结构，不修改 production
+source（生产源码）或扩大既有 gate：
 
 | row source | 当前状态 | 生产 gate / fallback |
 | --- | --- | --- |
 | ordered-cloud-pair | adopted / retained | `Scalar=float`；source/target 分别满足 `RVVXYZAoSFloatLayout<PointT>`；dense、finite、size >= 16；失败回退现有 iterator scalar path。 |
 | source-indexed-cloud-pair | adopted / retained | exact `PointXYZ -> PointXYZ`；`Scalar=float`；source indices 有效；dense、finite、size >= 16；失败回退 source-indexed iterator scalar path。 |
-| dual-indexed-cloud-pair | adopted for current topic-only commit | exact `PointXYZ -> PointXYZ`；`Scalar=float`；source/target indices 有效；dense、finite、size >= 16；失败回退 dual-indexed iterator scalar path。 |
+| dual-indexed-cloud-pair | adopted / retained | exact `PointXYZ -> PointXYZ`；`Scalar=float`；source/target indices 有效；dense、finite、size >= 16；失败回退 dual-indexed iterator scalar path。 |
 | correspondence-pair | not adopted / rolled back | Phase 107 试接入后 family A/B 为 negative；当前 header 没有 correspondence RVV production dispatch。 |
 
 仍不能写成 adopted 的范围：
@@ -69,8 +69,18 @@ target hardware repeated benchmark（板卡或目标硬件重复性能测试）�
 | `Makefile`、`board.mk` | topic-local build、QEMU、board、Evidence Doctor 和 evidence registry 入口。 |
 | `src/test_te2d.cpp` | public semantics、fallback、row source 和 production direct correctness。 |
 | `src/bench_te2d.cpp` | QEMU smoke、board repeated、family A/B 和 historical guarded probe bench 入口。 |
-| `include/te2d.h` | 稳定聚合入口。 |
-| `include/impl/te2d_candidates.hpp` | fixtures、reference、candidate、production-facing test helper 和 checksum helper。 |
+| `include/te2d.h` | 稳定聚合入口；测试和 bench 只 include 这个文件。 |
+| `include/impl/te2d_core_types.hpp` | 共享 include、`CandidateStats` 和 `Fused2DAccumulation`。 |
+| `include/impl/te2d_fixtures.hpp` | fixtures、代表性点型样本和二维刚体变换构造。 |
+| `include/impl/te2d_layout_helpers.hpp` | layout gate、finite/dense 检查和 stats 填充。 |
+| `include/impl/te2d_row_sources.hpp` | source-indexed、dual-indexed、correspondence 的索引统计、合法性检查和物化。 |
+| `include/impl/te2d_public_wrappers.hpp` | 真实 public overload 的 test-only wrapper。 |
+| `include/impl/te2d_family_ab.hpp` | production-detail family A/B 对照 wrapper。 |
+| `include/impl/te2d_ordered_candidates.hpp` | ordered-cloud-pair 标量 / RVV fused candidate。 |
+| `include/impl/te2d_source_indexed_candidates.hpp` | source-indexed materialize 和 direct-gather test candidates。 |
+| `include/impl/te2d_dual_indexed_candidates.hpp` | dual-indexed materialize 和 direct-gather test candidates。 |
+| `include/impl/te2d_correspondence_candidates.hpp` | correspondence direct-gather、chunked staging 和 materialize candidates。 |
+| `include/impl/te2d_checksums.hpp` | matrix diff 和 checksum helper。 |
 | `script/**` | topic-local summary、manifest、asm attribution、registry 和 board repeated 解析脚本。 |
 | `doc/*.zh.md` | topic-local doc suite（主题本地文档套件）。 |
 | `doc/phases/README.zh.md` | 当前 phase loop 恢复入口和提交前导航。 |
@@ -100,15 +110,15 @@ make -C test-rvv/registration/transformation_estimation_2D evidence_status
 
 ## 本次提交边界
 
-本次提交采用 topic-only（仅主题）策略：
+Phase 114 提交采用 topic-only（仅主题）策略：
 
 | 产物 | 提交边界 |
 | --- | --- |
-| production patch | 提交 `registration/include/pcl/registration/impl/transformation_estimation_2D.hpp` 中已证据化的 ordered generic、source-indexed exact 和 dual-indexed exact RVV dispatch。 |
-| topic test assets | 提交 `Makefile`、`board.mk`、`include/**`、`src/**`、`script/**` 中支撑 correctness、QEMU、board、summary 和 registry 的变更。 |
-| topic docs | 提交 `README.zh.md`、`doc/*.zh.md`、`doc/phases/README.zh.md`、`doc/phases/history.zh.md`、`doc/phases/optimization-matrix.zh.md` 和关键 Phase 106/107/108 plan/result。 |
-| long-term doc | 提交 `doc-rvv/registration/transformation_estimation_2D-RVV.zh.md`，只记录当前 production 行为和未覆盖边界。 |
-| evidence summaries | 本次不提交 `log/**`；文档保留 run label 和 summary / manifest / Evidence Doctor 路径，作为本机 freshness 和后续复核入口。 |
+| production patch | 不提交 production source；Phase 114 没有生产源码变更。 |
+| topic test assets | 提交 `include/te2d.h`、新增 `include/impl/te2d_*.hpp` 和历史单一实现入口删除。 |
+| topic docs | 提交 `README.zh.md`、`doc/*.zh.md`、`doc/phases/README.zh.md`、`doc/phases/optimization-matrix.zh.md`、`doc/optimization-roadmap.zh.md`、Phase 114 plan/result。 |
+| long-term doc | 只在需要同步测试支撑地图或旧引用时更新；不改变 production 结论。 |
+| evidence summaries | 本次不提交 `log/**`；`run_test_compare` 和 QEMU smoke 只刷新本地 generated logs。 |
 | local recovery | `tmp/rvv-work-logs/**` 默认 local-only；如本次需要保留交接包，可作为独立审查对象，不和 raw logs 混在一起。 |
 
 默认不提交：`log/**`、`build/`、raw QEMU logs、raw board logs、本机 `config.mk`、私有部署路径、聊天记录、
@@ -116,9 +126,6 @@ make -C test-rvv/registration/transformation_estimation_2D evidence_status
 
 ## 当前恢复动作
 
-Phase 108 已完成提交前 phase doc compaction（阶段文档压缩），并已按 topic-only 策略完成提交。
-提交后如继续优化，优先另开独立 phase：
-
-1. dual-indexed exact 20-run variance：更严格复核 4K caveat。
-2. correspondence new bounded candidate：只在有新同边界候选时恢复。
-3. source-indexed generic negative-case investigation：只追查 Phase 106 negative case，不扩大生产 gate。
+Phase 114 当前负责测试支撑职责拆分和文档同步：历史单一实现入口已删除，`include/te2d.h`
+作为稳定聚合入口保留。完成后默认恢复动作是 reviewer 检查 Commit B；不创建新的 Normal、
+correspondence 或 generic widening 优化 phase。

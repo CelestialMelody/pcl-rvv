@@ -9,27 +9,34 @@
 ```text
 src/test_te2d.cpp
   -> include/te2d.h
-    -> include/impl/te2d_candidates.hpp
+    -> include/impl/te2d_core_types.hpp
+    -> include/impl/te2d_fixtures.hpp
+    -> include/impl/te2d_layout_helpers.hpp
+    -> include/impl/te2d_row_sources.hpp
+    -> include/impl/te2d_public_wrappers.hpp
       -> estimatePublic2D()
       -> estimatePublicSourceIndexed2D()
-	      -> estimatePublicSourceIndexedMaterializedOrdered2D()
-	      -> estimatePublicDualIndexed2D()
-	      -> estimatePublicDualIndexedMaterializedOrdered2D()
-	      -> estimatePublicCorrespondence2D()
-	      -> estimatePublicCorrespondenceMaterializedOrdered2D()
-	      -> estimatePublicCorrespondenceStagedDualIndexed2D()
-	      -> estimateFused2DStd()
-	      -> estimateFused2DCandidate()
-	      -> estimateFused2DSourceIndexedCandidate()
-	      -> estimateFused2DDualIndexedCandidate()
-	      -> estimateFused2DCorrespondenceCandidate()
-	      -> estimateFused2DSourceIndexedDirectGatherCandidate()
-	      -> estimateFused2DDualIndexedDirectGatherCandidate()
-	      -> estimateFused2DCorrespondenceDirectGatherCandidate()
-	      -> estimateFused2DCandidate<PointSource,PointTarget>()
-	      -> estimateFused2DSourceIndexedDirectGatherCandidate<PointSource,PointTarget>()
-	      -> estimateFused2DDualIndexedDirectGatherCandidate<PointSource,PointTarget>()
-	      -> estimateFused2DCorrespondenceDirectGatherCandidate<PointSource,PointTarget>()
+      -> estimatePublicDualIndexed2D()
+      -> estimatePublicCorrespondence2D()
+    -> include/impl/te2d_family_ab.hpp
+      -> estimatePublicSourceIndexedMaterializedOrdered2D()
+      -> estimatePublicDualIndexedMaterializedOrdered2D()
+      -> estimatePublicCorrespondenceMaterializedOrdered2D()
+      -> estimatePublicCorrespondenceStagedDualIndexed2D()
+    -> include/impl/te2d_ordered_candidates.hpp
+      -> estimateFused2DStd()
+      -> estimateFused2DCandidate()
+    -> include/impl/te2d_source_indexed_candidates.hpp
+      -> estimateFused2DSourceIndexedCandidate()
+      -> estimateFused2DSourceIndexedDirectGatherCandidate()
+    -> include/impl/te2d_dual_indexed_candidates.hpp
+      -> estimateFused2DDualIndexedCandidate()
+      -> estimateFused2DDualIndexedDirectGatherCandidate()
+    -> include/impl/te2d_correspondence_candidates.hpp
+      -> estimateFused2DCorrespondenceCandidate()
+      -> estimateFused2DCorrespondenceDirectGatherCandidate()
+      -> estimateFused2DCorrespondenceChunkedXYZStagingCandidate()
+    -> include/impl/te2d_checksums.hpp
 
 src/bench_te2d.cpp
   -> include/te2d.h
@@ -56,6 +63,22 @@ src/bench_te2d.cpp
 | 文件 | 作用 | 边界 |
 | --- | --- | --- |
 | `include/te2d.h` | 测试和 bench 的唯一稳定 include 入口。 | 不暴露给 production，不承载候选实现正文。 |
+
+## 内部职责文件索引
+
+| 文件 | 职责 | 主要消费者 |
+| --- | --- | --- |
+| `include/impl/te2d_core_types.hpp` | 公共 include、`CandidateStats`、`Fused2DAccumulation`。 | 所有内部头。 |
+| `include/impl/te2d_fixtures.hpp` | `make*Cloud`、代表性点型样本、二维刚体变换构造。 | gtest、bench case registry。 |
+| `include/impl/te2d_layout_helpers.hpp` | layout gate、finite/dense 检查、selected-row 统计和 `CandidateStats` 填充。 | ordered/source-indexed/dual-indexed/correspondence candidates。 |
+| `include/impl/te2d_row_sources.hpp` | source-indexed、dual-indexed、correspondence 的索引合法性、物化和 staged index 展开。 | row-source candidates、family A/B wrapper。 |
+| `include/impl/te2d_public_wrappers.hpp` | 真实 `TransformationEstimation2D` public overload 的 test-only wrapper。 | correctness、family A/B、bench anchors。 |
+| `include/impl/te2d_family_ab.hpp` | materialize-to-ordered 和 staged-dual public wrapper。 | Phase 092/093/094/095 correctness 和 bench。 |
+| `include/impl/te2d_ordered_candidates.hpp` | ordered-cloud-pair 标量 reference、RVV accumulation 和 `estimateFused2DCandidate`。 | ordered candidate、row-source materialize candidates。 |
+| `include/impl/te2d_source_indexed_candidates.hpp` | source-indexed materialize 和 direct-gather candidate。 | Phase 090/099 source-indexed tests/bench。 |
+| `include/impl/te2d_dual_indexed_candidates.hpp` | dual-indexed materialize 和 direct-gather candidate。 | Phase 090/100 dual-indexed tests/bench。 |
+| `include/impl/te2d_correspondence_candidates.hpp` | correspondence materialize、direct-gather 和 chunked staging candidate。 | Phase 090/098/101 correspondence tests/bench。 |
+| `include/impl/te2d_checksums.hpp` | matrix diff 和 checksum helper。 | correctness family A/B 和 bench smoke。 |
 
 ## Fixtures 与输入构造
 
@@ -268,7 +291,7 @@ Phase 095 / 096 分别完成 staged-dual profile 和 locality/order profile，�
 | root bench source | no | not_present | none | none | not_applicable with evidence | none |
 | `src/` source | yes | `src/test_te2d.cpp`、`src/bench_te2d.cpp` | gtest、bench thin entry、row-source case registry | 当前规模可审查。 | adopted | board evidence 完成后复审 case 统计。 |
 | aggregator header | yes | `include/te2d.h` | stable include | none | adopted | none |
-| internal helpers | yes | `include/impl/te2d_candidates.hpp` | fixtures、reference、traits gate、generic candidate、row-source materialize/direct candidate、assertions-adjacent helper | 仍低于 soft limit；generic gate 已使用公共 traits，direct gather gate 已按 selected rows 计数。 | adopted | 若 PI2-PI5 或 row-source production probe 后继续增长，再拆 fixtures、references、candidates。 |
+| internal helpers | yes | `include/impl/te2d_core_types.hpp`、`te2d_fixtures.hpp`、`te2d_layout_helpers.hpp`、`te2d_row_sources.hpp`、`te2d_public_wrappers.hpp`、`te2d_family_ab.hpp`、`te2d_ordered_candidates.hpp`、`te2d_source_indexed_candidates.hpp`、`te2d_dual_indexed_candidates.hpp`、`te2d_correspondence_candidates.hpp`、`te2d_checksums.hpp` | core types、fixtures、layout gate、row source、public wrappers、family A/B、ordered/source-indexed/dual-indexed/correspondence candidates、checksum | 历史单文件混合 10 类职责，reviewer 难以按证据边界定位。 | adopted in Phase 114 | 历史单一实现入口删除；后续新增 candidate 继续按职责落到对应内部头。 |
 | legacy `test_support/` directory | no | not_present | none | none | not_applicable with evidence | none |
 | topic-local script | yes | `script/generate_te2d_asm_summary.py`、`script/generate_te2d_qemu_evidence_manifest.py`、`script/generate_te2d_board_repeated_summary.py`、`script/generate_te2d_source_indexed_family_ab_summary.py`、`script/generate_te2d_dual_indexed_family_ab_summary.py`、`script/generate_te2d_correspondence_staging_profile_summary.py`、`script/generate_te2d_correspondence_locality_order_profile_summary.py`、`script/generate_te2d_correspondence_component_ablation_summary.py`、`script/generate_te2d_correspondence_chunked_xyz_staging_summary.py` | asm attribution、QEMU manifest、board repeated summary、source-indexed / dual-indexed / correspondence generic summary、source-indexed / dual-indexed / correspondence family A/B summary、staging/locality profile summary、component ablation summary 和 chunked staging summary | 已覆盖 row-source label、row-source boundary、source-indexed generic label、dual-indexed generic label、correspondence generic label、family A/B boundary、profile/component/chunked-staging boundary 和 manifest 字段。 | adopted | 若下一 phase 增加新的 bounded candidate，再复审 parser。 |
 | bench case registry | structured | `src/bench_te2d.cpp` | 包含 generic point type / source / target labels、source-indexed public、source-indexed family A/B、source-indexed generic point-type、dual-indexed family A/B、dual-indexed generic point-type、correspondence generic point-type、correspondence public、correspondence family A/B、correspondence staging/profile、locality/order、component ablation 和 chunked staging labels | 当前足够区分 diagnostic、production-public、production-detail family A/B、source-indexed generic、dual-indexed generic、correspondence generic、staging/profile、locality/order、component ablation、chunked staging、row-source 和 generic candidate；generic cloud 只在专用 filter 下构造。 | adopted | 若下一 phase 增加新的 bounded candidate，再复审是否拆 internal bench cases。 |

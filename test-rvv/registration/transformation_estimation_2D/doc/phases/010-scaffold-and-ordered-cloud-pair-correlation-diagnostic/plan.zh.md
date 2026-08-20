@@ -70,7 +70,7 @@ tmp/rvv-work-logs/registration/transformation_estimation_2D/**
 | --- | --- | --- | --- |
 | A1 | 写 topic scaffold。 | `Makefile`、`board.mk`、`include/te2d.h`、`include/impl/*.hpp`、`src/test_te2d.cpp`、`src/bench_te2d.cpp` | `make -n` 能解析 target；源码职责拆分符合 `include/impl` 布局。 |
 | A2 | 实现 public semantics tests。 | `run_test_public_semantics` 或 `run_test_compare TEST_ARGS=...` | 覆盖 size mismatch、empty input、non-finite x/y/z、索引入口的安全边界说明。 |
-| A3 | 实现 scalar reference 与 fused candidate。 | `include/impl/te2d_candidates.hpp` | dense finite ordered-cloud-pair 下矩阵与当前 public path 在预算内一致。 |
+| A3 | 实现 scalar reference 与 fused candidate。 | `include/te2d.h` 和 TE2D 测试支撑内部头 | dense finite ordered-cloud-pair 下矩阵与当前 public path 在预算内一致。 |
 | A4 | 实现 bench smoke。 | `run_bench_ordered_cloud_pair_smoke`、`dump_bench_rvv` | 输出 label、iterations、warmup、checksum、build 标记；不默认运行 QEMU compare。 |
 | A5 | 补 topic-local doc suite。 | `doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` | 文档能定位 target、helper、证据边界和未覆盖范围。 |
 | A6 | 更新 phase result、roadmap、matrix、README 和 phase index。 | 当前 phase `result.zh.md` 与现有索引文档 | 所有新增路径、旧术语 rename、继续 / 停止条件可恢复。 |

@@ -15,7 +15,7 @@ Phase 050 已完成 production-public probe（生产公开入口探针）。QEMU
 | 优化方式 | 代码路径 | target | 当前证据 | 决策 |
 | --- | --- | --- | --- | --- |
 | scalar public baseline | `registration/include/pcl/registration/impl/transformation_estimation_2D.hpp` | `run_test_compare` | public ordered-cloud-pair、source-indexed、dual-indexed、correspondence valid scalar-boundary、generic fallback、source-indexed generic fallback、dual-indexed generic fallback、correspondence generic fallback、direct-gather fallback、source-indexed / dual-indexed / correspondence public fallback、Phase 092 / 093 / 094 materialize family equivalence、Phase 095 staged-dual equivalence 和 Phase 096 locality/order equivalence 通过；Phase 097 component no-solve 只做 checksum smoke；Std/RVV 84/84。 | current scalar truth |
-| two-pass centered fused 2D correlation | `include/impl/te2d_candidates.hpp` | `run_test_candidates`、`run_board_bench_ordered_cloud_pair_repeated` | diagnostic correctness 通过；near-cancellation 样本通过；diagnostic board 5-run 为 `weak_positive`。 | retained diagnostic |
+| two-pass centered fused 2D correlation | `include/impl/te2d_ordered_candidates.hpp` | `run_test_candidates`、`run_board_bench_ordered_cloud_pair_repeated` | diagnostic correctness 通过；near-cancellation 样本通过；diagnostic board 5-run 为 `weak_positive`。 | retained diagnostic |
 | production-public fused probe | historical exact narrow patch | `run_qemu_production_public_evidence_doctor`、`run_board_bench_ordered_cloud_pair_public_repeated` | QEMU Doctor 0/0/0；asm public boundary present；最新 board public repeated 为 4.222x / 5.310x / 4.947x，Doctor 0/0/0。 | historical production evidence |
 | raw sums fused formula | 无保留实现 | 首次 RVV run 暴露 | near-cancellation 样本曾出现大误差，已改为中心化结构。 | rejected for Phase 010 |
 | dense finite gate | `estimateFused2DCandidate` | `run_test_compare` | z 非有限输入触发 fallback，x/y 非有限 public 行为被记录。 | adopted in test-only diagnostic |
@@ -58,6 +58,7 @@ Phase 050 已完成 production-public probe（生产公开入口探针）。QEMU
 | --- | --- | --- |
 | `estimatePublic2D` | public semantic anchor（公开语义锚点） | 调用真实 `TransformationEstimation2D`。 |
 | `estimateFused2DStd` | same-chain scalar reference（同构标量参考链路） | 两遍中心化累加，不使用 RVV。 |
+| `include/te2d.h` | stable test support aggregator（稳定测试支撑聚合入口） | Phase 114 后测试和 bench 继续只 include 该入口，内部实现按职责拆分。 |
 | `estimateFused2DCandidate` | test-only RVV candidate | RVV 构建且 dense finite、规模不少于 16 时尝试 RVV。 |
 | `estimateFused2DSourceIndexedDirectGatherCandidate` | test-only row-source RVV candidate | source 侧按 index 生成 byte offset 并 gather x/y/z，target 顺序 strided load；不物化整点云。 |
 | `tryTransformationEstimation2DSourceIndexedCloudPairRVV` | adopted narrow production dispatch | Phase 091 真实 source-indexed public overload helper；只覆盖 `PointXYZ -> PointXYZ`、`Scalar=float`、valid indices、dense finite、size >= 16。 |

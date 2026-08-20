@@ -33,7 +33,7 @@ ordered-cloud-pair 结论。只有本阶段的 generic evidence bundle 闭合并
 | --- | --- |
 | production patch | `transformation_estimation_2D.hpp` 当前仍是 exact `PointXYZ -> PointXYZ`、`Scalar=float`、dense finite ordered-cloud-pair gate |
 | Phase 060 | 已完成恢复审阅；窄范围 patch 保留，generic point type 仍未批准 |
-| 现有 candidate | `include/impl/te2d_candidates.hpp` 已有两遍中心化 RVV math，但旧 gate 仍以 legacy member gate 为主 |
+| 现有 candidate | `include/te2d.h` 和 TE2D 测试支撑内部头已有两遍中心化 RVV math，但旧 gate 仍以 legacy member gate 为主 |
 | 公共 traits | `common/include/pcl/rvv_point_traits.h` 提供 `RVVXYZAoSFloatLayout<PointT>`、字段 datatype、POD、sizeof、offset 和 alignment gate |
 | 公共 load | `pcl::rvv_load::strided_load3_f32m2` 支持按当前点类型 stride 和 x/y/z offset 加载 |
 | 现有 board | 板卡可用性已由 Phase 050/060 的 `Milkv-Jupiter` repeated 复核；本阶段必须执行有界 representative point-type bench |
@@ -79,8 +79,8 @@ source 和 target 不能共享 offset、stride 或 `sizeof` 假设：
 
 | id | 动作 | 产物 | 完成判据 |
 | --- | --- | --- | --- |
-| G1 | traits gate probe | `include/impl/te2d_candidates.hpp`、`src/test_te2d.cpp` | 四类代表点型的 `RVVXYZAoSFloatLayout` 结果可打印、可断言；source/target 使用各自 offset 和 sizeof；不引入本地重复 traits gate |
-| G2 | generic test-only candidate | `include/impl/te2d_candidates.hpp` | ordered-cloud-pair generic candidate 在 RVV build 下使用 traits offset，非 RVV / 不满足 gate / 小规模 / 非 dense / 非有限输入回退标量；不改 production |
+| G1 | traits gate probe | `include/te2d.h` 和 TE2D 测试支撑内部头、`src/test_te2d.cpp` | 四类代表点型的 `RVVXYZAoSFloatLayout` 结果可打印、可断言；source/target 使用各自 offset 和 sizeof；不引入本地重复 traits gate |
+| G2 | generic test-only candidate | `include/te2d.h` 和 TE2D 测试支撑内部头 | ordered-cloud-pair generic candidate 在 RVV build 下使用 traits offset，非 RVV / 不满足 gate / 小规模 / 非 dense / 非有限输入回退标量；不改 production |
 | G3 | representative correctness | `src/test_te2d.cpp` | exact 四类点型、source/target mixed pair、额外字段不影响矩阵、near-cancellation、small/non-dense/non-finite fallback、current production generic public scalar boundary 全部通过 |
 | G4 | QEMU generic smoke | `Makefile`、`src/bench_te2d.cpp`、topic-local manifest | generic case-filter 至少覆盖代表点型和 mixed pair；QEMU 只报告路径、日志形状、checksum 和 asm 输入，不写性能结论 |
 | G5 | asm attribution | `script/generate_te2d_asm_summary.py` 或等价 topic-local wrapper | generic candidate 的 RVV 指令归属到 generic bench lambda / test-support fixture；不能误写成 production symbol |

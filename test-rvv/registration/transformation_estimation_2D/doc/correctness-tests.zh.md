@@ -10,7 +10,7 @@
 | --- | --- |
 | `src/test_te2d.cpp` | gtest 主入口，列出 public semantics、row-source scalar boundary、generic gate/fallback、materialize row-source 和 direct gather case。 |
 | `include/te2d.h` | 稳定聚合入口。 |
-| `include/impl/te2d_candidates.hpp` | fixtures、公开入口 wrapper、row-source materialization helper、标量 reference、RVV candidate 和 checksum helper。 |
+| `include/impl/te2d_*.hpp` | 按职责拆分 fixtures、公开入口 wrapper、row-source helper、标量/RVV candidate、family A/B 和 checksum helper。 |
 
 ## 共同输入和断言
 

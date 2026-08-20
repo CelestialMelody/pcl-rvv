@@ -14,7 +14,7 @@
 
 | 动作 | 状态 | 命令 / 产物 | 结论 |
 | --- | --- | --- | --- |
-| A1 row-source materialization helpers | done | `include/impl/te2d_candidates.hpp` | 合法索引 / correspondence 物化失败时回退；生产路径不变。 |
+| A1 row-source materialization helpers | done | `include/te2d.h` 和 TE2D 测试支撑内部头 | 合法索引 / correspondence 物化失败时回退；生产路径不变。 |
 | A2 correctness tests | done | `make -C test-rvv/registration/transformation_estimation_2D run_test_compare` | Std 16/16、RVV 16/16；三类 candidate 与真实 public scalar overload 对拍通过。 |
 | A3 row-source bench case-filter | done | `run_bench_row_source_smoke` | 3 种 row source × 4K/64K/256K，共 9 个 case。 |
 | A4 QEMU correctness / smoke | done | `record_qemu_row_source_state` | QEMU 只证明可运行、日志形状和路径归属；Doctor 0/0/0。 |

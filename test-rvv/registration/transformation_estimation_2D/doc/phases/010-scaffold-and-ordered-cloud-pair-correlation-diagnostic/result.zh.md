@@ -8,9 +8,9 @@
 
 | id | 动作 | 状态 | 证据路径 / 命令 | 结论 |
 | --- | --- | --- | --- | --- |
-| A1 | 写 topic scaffold | done | `Makefile`、`board.mk`、`include/te2d.h`、`include/impl/te2d_candidates.hpp`、`src/test_te2d.cpp`、`src/bench_te2d.cpp` | 已采用 `src/`、`include/`、`include/impl/` 布局，topic token 为 `te2d`。 |
+| A1 | 写 topic scaffold | done | `Makefile`、`board.mk`、`include/te2d.h`、TE2D 测试支撑内部头、`src/test_te2d.cpp`、`src/bench_te2d.cpp` | 已采用 `src/`、`include/`、`include/impl/` 布局，topic token 为 `te2d`。 |
 | A2 | public semantics tests | done | `make -C test-rvv/registration/transformation_estimation_2D run_test_compare` | Std / RVV 各 10 个 gtest 全通过；覆盖 size mismatch、非有限 x/y/z 和基础 ordered-cloud-pair。 |
-| A3 | scalar reference 与 fused candidate | done | `include/impl/te2d_candidates.hpp`、`src/test_te2d.cpp` | 初版 raw sums 在近抵消样本上失败，已改为两遍中心化 correlation；当前 correctness 通过。 |
+| A3 | scalar reference 与 fused candidate | done | `include/te2d.h` 和 TE2D 测试支撑内部头、`src/test_te2d.cpp` | 初版 raw sums 在近抵消样本上失败，已改为两遍中心化 correlation；当前 correctness 通过。 |
 | A4 | bench smoke 和 asm dump | done | `run_bench_ordered_cloud_pair_smoke`、`dump_bench_rvv` | QEMU smoke 可运行并输出 checksum；asm dump 有 vector 指令，但热点归属未完全闭合。 |
 | A5 | topic-local doc suite | done | `doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md` | 文档能定位 target、helper、证据边界和未覆盖范围。 |
 | A6 | 更新索引和矩阵 | done | `README.zh.md`、`doc/optimization-roadmap.zh.md`、`doc/phases/README.zh.md`、`doc/phases/optimization-matrix.zh.md` | 旧 `full-cloud` 恢复入口同步为 `ordered-cloud-pair`；下一阶段为 `020-board-and-asm-evidence`。 |

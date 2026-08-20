@@ -18,9 +18,9 @@
 | --- | --- | --- |
 | production source | Phase 050 narrow patch 保留；本阶段不修改。 | `registration/include/pcl/registration/impl/transformation_estimation_2D.hpp` |
 | ordered-cloud-pair diagnostic | correctness、QEMU smoke、asm 和 board diagnostic 已有证据；最新 production-public board 为 `positive`。 | `doc/phases/050-pi2-production-patch-and-direct-evidence/result.zh.md` |
-| source-indexed public / candidate | public scalar boundary 和 materialize-to-ordered candidate correctness 已通过。 | `src/test_te2d.cpp`、`include/impl/te2d_candidates.hpp` |
-| dual-indexed public / candidate | public scalar boundary 和 materialize-to-ordered candidate correctness 已通过。 | `src/test_te2d.cpp`、`include/impl/te2d_candidates.hpp` |
-| correspondence public / candidate | public scalar boundary 和 materialize-to-ordered candidate correctness 已通过。 | `src/test_te2d.cpp`、`include/impl/te2d_candidates.hpp` |
+| source-indexed public / candidate | public scalar boundary 和 materialize-to-ordered candidate correctness 已通过。 | `src/test_te2d.cpp`、`include/te2d.h` 和 TE2D 测试支撑内部头 |
+| dual-indexed public / candidate | public scalar boundary 和 materialize-to-ordered candidate correctness 已通过。 | `src/test_te2d.cpp`、`include/te2d.h` 和 TE2D 测试支撑内部头 |
+| correspondence public / candidate | public scalar boundary 和 materialize-to-ordered candidate correctness 已通过。 | `src/test_te2d.cpp`、`include/te2d.h` 和 TE2D 测试支撑内部头 |
 | bench | 已增加 `row-source-fused`，覆盖三种 policy × 4K/64K/256K。 | `src/bench_te2d.cpp`、`Makefile` |
 | QEMU evidence | row-source manifest / ASM / Doctor 已生成并登记，Doctor 为 0/0/0。 | `log/qemu/row_source/`、`log/evidence_registry.json` |
 | board evidence | done；使用 `test-rvv/config.mk`、`REMOTE_USER`、`REMOTE_IP`、`BOARD_LABEL=Milkv-Jupiter` 完成 5-run repeated。 | `log/board/row_source_fused_repeated/` |
@@ -47,7 +47,7 @@
 
 | action | 产物 | 完成判据 |
 | --- | --- | --- |
-| A1 row-source materialization helpers | `include/impl/te2d_candidates.hpp` | done：materialize 成本明确纳入 candidate bench 计时；不修改 production。 |
+| A1 row-source materialization helpers | `include/te2d.h` 和 TE2D 测试支撑内部头 | done：materialize 成本明确纳入 candidate bench 计时；不修改 production。 |
 | A2 correctness tests | `src/test_te2d.cpp` | done：Std/RVV 各 16/16，通过三类 candidate 对拍。 |
 | A3 bench case-filter | `src/bench_te2d.cpp`、`Makefile` | done：`row-source-fused` 覆盖 9 个 label，banner 和 ASM 边界可区分。 |
 | A4 QEMU correctness / smoke | `log/qemu/*` | done：correctness 16/16；row-source smoke 生成 9-case 日志。 |

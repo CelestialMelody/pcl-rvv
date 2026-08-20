@@ -39,8 +39,8 @@ ordered-cloud-pair 的证据。
 
 | id | 状态 | 证据 | 结论 |
 | --- | --- | --- | --- |
-| G1 | done | `include/impl/te2d_candidates.hpp`、`src/test_te2d.cpp`、`GenericXYZTraitsGateCoversRepresentativePointTypes` | source / target 分别使用 `pcl::rvv::RVVXYZAoSFloatLayout<PointT>`；四类代表性点型的 traits、POD、sizeof、offset 和对齐门控通过。 |
-| G2 | done | `include/impl/te2d_candidates.hpp`、`run_test_compare` | generic candidate 使用 source / target 各自 stride 与 x/y/z offset；Std 构建走标量 fallback，RVV 构建只在 gate 命中时尝试 RVV。 |
+| G1 | done | `include/te2d.h` 和 TE2D 测试支撑内部头、`src/test_te2d.cpp`、`GenericXYZTraitsGateCoversRepresentativePointTypes` | source / target 分别使用 `pcl::rvv::RVVXYZAoSFloatLayout<PointT>`；四类代表性点型的 traits、POD、sizeof、offset 和对齐门控通过。 |
+| G2 | done | `include/te2d.h` 和 TE2D 测试支撑内部头、`run_test_compare` | generic candidate 使用 source / target 各自 stride 与 x/y/z offset；Std 构建走标量 fallback，RVV 构建只在 gate 命中时尝试 RVV。 |
 | G3 | done | `log/qemu/run_test_std.log`、`log/qemu/run_test_rvv.log` | Std / RVV 各 24/24；same-type、mixed pair、额外字段、small/non-dense/non-finite fallback 和 `Scalar=double` scalar boundary 均通过。 |
 | G4 | done | `log/qemu/generic_xyz_point_types/run_bench_generic_xyz_point_types_rvv.log`、manifest、Doctor | QEMU generic smoke 覆盖 16 cases；只作为路径、日志形状、checksum 和 metadata 证据；Doctor `0/0/0`。 |
 | G5 | done | `log/qemu/generic_xyz_point_types/asm_attribution.md/json` | `generic_candidate_lambda_boundary` 有 540 条 RVV 指令归属，含 `vlsseg3e32.v`、`vfmacc`、`vfredosum`；归属保持 test-support generic lambda，不冒充 production symbol。 |
@@ -166,7 +166,7 @@ topic-local test support 继续保持：
 
 - `src/` 中 test/bench thin entry；
 - `include/te2d.h` 稳定聚合入口；
-- `include/impl/te2d_candidates.hpp` 内部 fixtures/reference/candidate；
+- `include/te2d.h` 和 TE2D 测试支撑内部头中的 fixtures/reference/candidate；
 - `script/` 中 asm、QEMU manifest 和 board summary；
 - `log/` 仅本地证据输出。
 
