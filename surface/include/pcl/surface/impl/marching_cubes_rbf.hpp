@@ -40,6 +40,268 @@
 #define PCL_SURFACE_IMPL_MARCHING_CUBES_RBF_H_
 
 #include <pcl/surface/marching_cubes_rbf.h>
+#include <pcl/point_types.h>
+#include <pcl/rvv_point_traits.h>
+
+#include <cmath>
+#include <type_traits>
+#include <vector>
+
+#if defined(__RVV10__)
+#include <riscv_vector.h>
+#endif
+
+namespace pcl::detail
+{
+  struct MarchingCubesRBFCenters
+  {
+    std::vector<double> x;
+    std::vector<double> y;
+    std::vector<double> z;
+  };
+
+  inline double
+  marchingCubesRBFCubicKernel (const double cx, const double cy, const double cz,
+                               const double px, const double py, const double pz)
+  {
+    const double dx = px - cx;
+    const double dy = py - cy;
+    const double dz = pz - cz;
+    const double r2 = dx * dx + dy * dy + dz * dz;
+    return r2 * std::sqrt (r2);
+  }
+
+  template <typename PointNT> void
+  marchingCubesRBFBuildCenters (const pcl::PointCloud<PointNT> &input,
+                                const double off_surface_epsilon,
+                                MarchingCubesRBFCenters &centers)
+  {
+    const auto n = input.size ();
+    centers.x.resize (2 * n);
+    centers.y.resize (2 * n);
+    centers.z.resize (2 * n);
+
+    for (std::size_t i = 0; i < n; ++i)
+    {
+      const Eigen::Vector3d point =
+          Eigen::Vector3f (input[i].getVector3fMap ()).cast<double> ();
+      const Eigen::Vector3d normal =
+          Eigen::Vector3f (input[i].getNormalVector3fMap ()).cast<double> ();
+      centers.x[i] = point.x ();
+      centers.y[i] = point.y ();
+      centers.z[i] = point.z ();
+      centers.x[i + n] = point.x () + normal.x () * off_surface_epsilon;
+      centers.y[i + n] = point.y () + normal.y () * off_surface_epsilon;
+      centers.z[i + n] = point.z () + normal.z () * off_surface_epsilon;
+    }
+  }
+
+  inline void
+  marchingCubesRBFFillMatrixStandard (const MarchingCubesRBFCenters &centers,
+                                      Eigen::MatrixXd &matrix)
+  {
+    const auto count = static_cast<Eigen::Index> (centers.x.size ());
+    matrix.resize (count, count);
+    for (Eigen::Index col = 0; col < count; ++col)
+    {
+      const double cx = centers.x[static_cast<std::size_t> (col)];
+      const double cy = centers.y[static_cast<std::size_t> (col)];
+      const double cz = centers.z[static_cast<std::size_t> (col)];
+      for (Eigen::Index row = 0; row < count; ++row)
+        matrix (row, col) =
+            marchingCubesRBFCubicKernel (cx, cy, cz,
+                                         centers.x[static_cast<std::size_t> (row)],
+                                         centers.y[static_cast<std::size_t> (row)],
+                                         centers.z[static_cast<std::size_t> (row)]);
+    }
+  }
+
+  inline Eigen::MatrixXd
+  marchingCubesRBFMakeRhs (const std::size_t point_count,
+                           const double off_surface_epsilon)
+  {
+    Eigen::MatrixXd rhs (static_cast<Eigen::Index> (2 * point_count), 1);
+    for (std::size_t row = 0; row < 2 * point_count; ++row)
+      rhs (static_cast<Eigen::Index> (row), 0) =
+          row >= point_count ? off_surface_epsilon : 0.0;
+    return rhs;
+  }
+
+  inline std::vector<double>
+  marchingCubesRBFMakeWeights (const Eigen::MatrixXd &solution)
+  {
+    std::vector<double> weights (static_cast<std::size_t> (solution.rows ()));
+    for (Eigen::Index i = 0; i < solution.rows (); ++i)
+      weights[static_cast<std::size_t> (i)] = solution (i, 0);
+    return weights;
+  }
+
+  inline void
+  marchingCubesRBFEvaluateGridStandard (const MarchingCubesRBFCenters &centers,
+                                        const std::vector<double> &weights,
+                                        std::vector<float> &grid,
+                                        const int res_x,
+                                        const int res_y,
+                                        const int res_z,
+                                        const Eigen::Array3f &size_voxel,
+                                        const Eigen::Array3f &lower_boundary)
+  {
+    for (int x = 0; x < res_x; ++x)
+      for (int y = 0; y < res_y; ++y)
+        for (int z = 0; z < res_z; ++z)
+        {
+          const Eigen::Vector3d point =
+              (size_voxel * Eigen::Array3f (x, y, z) + lower_boundary).matrix ().cast<double> ();
+
+          double f = 0.0;
+          for (std::size_t i = 0; i < centers.x.size (); ++i)
+            f += weights[i] *
+                 marchingCubesRBFCubicKernel (centers.x[i], centers.y[i], centers.z[i],
+                                              point.x (), point.y (), point.z ());
+
+          grid[x * res_y * res_z + y * res_z + z] = static_cast<float> (f);
+        }
+  }
+
+  template <typename PointNT> void
+  marchingCubesRBFVoxelizeDataStandard (const pcl::PointCloud<PointNT> &input,
+                                        const double off_surface_epsilon,
+                                        std::vector<float> &grid,
+                                        const int res_x,
+                                        const int res_y,
+                                        const int res_z,
+                                        const Eigen::Array3f &size_voxel,
+                                        const Eigen::Array3f &lower_boundary)
+  {
+    MarchingCubesRBFCenters centers;
+    marchingCubesRBFBuildCenters (input, off_surface_epsilon, centers);
+
+    Eigen::MatrixXd matrix;
+    marchingCubesRBFFillMatrixStandard (centers, matrix);
+    const Eigen::MatrixXd rhs =
+        marchingCubesRBFMakeRhs (input.size (), off_surface_epsilon);
+    const std::vector<double> weights =
+        marchingCubesRBFMakeWeights (matrix.fullPivLu ().solve (rhs));
+
+    marchingCubesRBFEvaluateGridStandard (centers, weights, grid, res_x, res_y, res_z,
+                                          size_voxel, lower_boundary);
+  }
+
+#if defined(__RVV10__)
+  inline void
+  marchingCubesRBFFillMatrixRVV (const MarchingCubesRBFCenters &centers,
+                                 Eigen::MatrixXd &matrix)
+  {
+    const auto count = centers.x.size ();
+    matrix.resize (static_cast<Eigen::Index> (count), static_cast<Eigen::Index> (count));
+    for (std::size_t col = 0; col < count; ++col)
+    {
+      const double cx = centers.x[col];
+      const double cy = centers.y[col];
+      const double cz = centers.z[col];
+      std::size_t row = 0;
+      while (row < count)
+      {
+        const std::size_t vl = __riscv_vsetvl_e64m1 (count - row);
+        const vfloat64m1_t px = __riscv_vle64_v_f64m1 (centers.x.data () + row, vl);
+        const vfloat64m1_t py = __riscv_vle64_v_f64m1 (centers.y.data () + row, vl);
+        const vfloat64m1_t pz = __riscv_vle64_v_f64m1 (centers.z.data () + row, vl);
+        const vfloat64m1_t dx = __riscv_vfsub_vf_f64m1 (px, cx, vl);
+        const vfloat64m1_t dy = __riscv_vfsub_vf_f64m1 (py, cy, vl);
+        const vfloat64m1_t dz = __riscv_vfsub_vf_f64m1 (pz, cz, vl);
+        vfloat64m1_t r2 = __riscv_vfmul_vv_f64m1 (dx, dx, vl);
+        r2 = __riscv_vfmacc_vv_f64m1 (r2, dy, dy, vl);
+        r2 = __riscv_vfmacc_vv_f64m1 (r2, dz, dz, vl);
+        const vfloat64m1_t out = __riscv_vfmul_vv_f64m1 (r2, __riscv_vfsqrt_v_f64m1 (r2, vl), vl);
+        __riscv_vse64_v_f64m1 (&matrix (static_cast<Eigen::Index> (row),
+                                        static_cast<Eigen::Index> (col)),
+                               out, vl);
+        row += vl;
+      }
+    }
+  }
+
+  inline void
+  marchingCubesRBFEvaluateGridRVV (const MarchingCubesRBFCenters &centers,
+                                   const std::vector<double> &weights,
+                                   std::vector<float> &grid,
+                                   const int res_x,
+                                   const int res_y,
+                                   const int res_z,
+                                   const Eigen::Array3f &size_voxel,
+                                   const Eigen::Array3f &lower_boundary)
+  {
+    for (int x = 0; x < res_x; ++x)
+      for (int y = 0; y < res_y; ++y)
+        for (int z = 0; z < res_z; ++z)
+        {
+          const Eigen::Vector3d point =
+              (size_voxel * Eigen::Array3f (x, y, z) + lower_boundary).matrix ().cast<double> ();
+
+          double f = 0.0;
+          std::size_t i = 0;
+          while (i < centers.x.size ())
+          {
+            const std::size_t vl = __riscv_vsetvl_e64m1 (centers.x.size () - i);
+            const vfloat64m1_t cx = __riscv_vle64_v_f64m1 (centers.x.data () + i, vl);
+            const vfloat64m1_t cy = __riscv_vle64_v_f64m1 (centers.y.data () + i, vl);
+            const vfloat64m1_t cz = __riscv_vle64_v_f64m1 (centers.z.data () + i, vl);
+            const vfloat64m1_t weight = __riscv_vle64_v_f64m1 (weights.data () + i, vl);
+            const vfloat64m1_t dx = __riscv_vfsub_vf_f64m1 (cx, point.x (), vl);
+            const vfloat64m1_t dy = __riscv_vfsub_vf_f64m1 (cy, point.y (), vl);
+            const vfloat64m1_t dz = __riscv_vfsub_vf_f64m1 (cz, point.z (), vl);
+            vfloat64m1_t r2 = __riscv_vfmul_vv_f64m1 (dx, dx, vl);
+            r2 = __riscv_vfmacc_vv_f64m1 (r2, dy, dy, vl);
+            r2 = __riscv_vfmacc_vv_f64m1 (r2, dz, dz, vl);
+            const vfloat64m1_t weighted =
+                __riscv_vfmul_vv_f64m1 (weight,
+                                        __riscv_vfmul_vv_f64m1 (r2,
+                                                               __riscv_vfsqrt_v_f64m1 (r2, vl),
+                                                               vl),
+                                        vl);
+            const vfloat64m1_t zero = __riscv_vfmv_v_f_f64m1 (0.0, vl);
+            const vfloat64m1_t reduced =
+                __riscv_vfredusum_vs_f64m1_f64m1 (weighted, zero, vl);
+            f += __riscv_vfmv_f_s_f64m1_f64 (reduced);
+            i += vl;
+          }
+
+          grid[x * res_y * res_z + y * res_z + z] = static_cast<float> (f);
+        }
+  }
+
+  template <typename PointNT> bool
+  marchingCubesRBFVoxelizeDataRVV (const pcl::PointCloud<PointNT> &input,
+                                   const double off_surface_epsilon,
+                                   std::vector<float> &grid,
+                                   const int res_x,
+                                   const int res_y,
+                                   const int res_z,
+                                   const Eigen::Array3f &size_voxel,
+                                    const Eigen::Array3f &lower_boundary)
+  {
+    if constexpr (!pcl::rvv::RVVXYZNormalFloatLayout<PointNT>::value)
+      return false;
+
+    if (input.size () < 16)
+      return false;
+
+    MarchingCubesRBFCenters centers;
+    marchingCubesRBFBuildCenters (input, off_surface_epsilon, centers);
+
+    Eigen::MatrixXd matrix;
+    marchingCubesRBFFillMatrixRVV (centers, matrix);
+    const Eigen::MatrixXd rhs =
+        marchingCubesRBFMakeRhs (input.size (), off_surface_epsilon);
+    const std::vector<double> weights =
+        marchingCubesRBFMakeWeights (matrix.fullPivLu ().solve (rhs));
+
+    marchingCubesRBFEvaluateGridRVV (centers, weights, grid, res_x, res_y, res_z,
+                                     size_voxel, lower_boundary);
+    return true;
+  }
+#endif
+} // namespace pcl::detail
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointNT>
@@ -49,58 +311,17 @@ pcl::MarchingCubesRBF<PointNT>::~MarchingCubesRBF () = default;
 template <typename PointNT> void
 pcl::MarchingCubesRBF<PointNT>::voxelizeData ()
 {
-  // Initialize data structures
-  const auto N = static_cast<unsigned int> (input_->size ());
-  Eigen::MatrixXd M (2*N, 2*N),
-                  d (2*N, 1);
+#if defined(__RVV10__)
+  // Only traits-proved xyz+normal AoS point types enter the RVV path.
+  if (pcl::detail::marchingCubesRBFVoxelizeDataRVV<PointNT> (
+          *input_, off_surface_epsilon_, grid_, res_x_, res_y_, res_z_,
+          size_voxel_, lower_boundary_))
+    return;
+#endif
 
-  for (unsigned int row_i = 0; row_i < 2*N; ++row_i)
-  {
-    // boolean variable to determine whether we are in the off_surface domain for the rows
-    bool row_off = (row_i >= N);
-    for (unsigned int col_i = 0; col_i < 2*N; ++col_i)
-    {
-      // boolean variable to determine whether we are in the off_surface domain for the columns
-      bool col_off = (col_i >= N);
-      M (row_i, col_i) = kernel (Eigen::Vector3f ((*input_)[col_i%N].getVector3fMap ()).cast<double> () + Eigen::Vector3f ((*input_)[col_i%N].getNormalVector3fMap ()).cast<double> () * col_off * off_surface_epsilon_,
-                                 Eigen::Vector3f ((*input_)[row_i%N].getVector3fMap ()).cast<double> () + Eigen::Vector3f ((*input_)[row_i%N].getNormalVector3fMap ()).cast<double> () * row_off * off_surface_epsilon_);
-    }
-
-    d (row_i, 0) = row_off * off_surface_epsilon_;
-  }
-
-  // Solve for the weights
-  Eigen::MatrixXd w (2*N, 1);
-
-  // Solve_linear_system (M, d, w);
-  w = M.fullPivLu ().solve (d);
-
-  std::vector<double> weights (2*N);
-  std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > centers (2*N);
-  for (unsigned int i = 0; i < N; ++i)
-  {
-    centers[i] = Eigen::Vector3f ((*input_)[i].getVector3fMap ()).cast<double> ();
-    centers[i + N] = Eigen::Vector3f ((*input_)[i].getVector3fMap ()).cast<double> () + Eigen::Vector3f ((*input_)[i].getNormalVector3fMap ()).cast<double> () * off_surface_epsilon_;
-    weights[i] = w (i, 0);
-    weights[i + N] = w (i + N, 0);
-  }
-
-  for (int x = 0; x < res_x_; ++x)
-    for (int y = 0; y < res_y_; ++y)
-      for (int z = 0; z < res_z_; ++z)
-      {
-        const Eigen::Vector3f point_f = (size_voxel_ * Eigen::Array3f (x, y, z) 
-            + lower_boundary_).matrix ();
-        const Eigen::Vector3d point = point_f.cast<double> ();
-
-        double f = 0.0;
-        auto w_it (weights.cbegin());
-        for (auto c_it = centers.cbegin ();
-             c_it != centers.cend (); ++c_it, ++w_it)
-          f += *w_it * kernel (*c_it, point);
-
-        grid_[x * res_y_*res_z_ + y * res_z_ + z] = static_cast<float>(f);
-      }
+  pcl::detail::marchingCubesRBFVoxelizeDataStandard (
+      *input_, off_surface_epsilon_, grid_, res_x_, res_y_, res_z_,
+      size_voxel_, lower_boundary_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,4 +335,3 @@ pcl::MarchingCubesRBF<PointNT>::kernel (Eigen::Vector3d c, Eigen::Vector3d x)
 #define PCL_INSTANTIATE_MarchingCubesRBF(T) template class PCL_EXPORTS pcl::MarchingCubesRBF<T>;
 
 #endif    // PCL_SURFACE_IMPL_MARCHING_CUBES_HOPPE_H_
-
