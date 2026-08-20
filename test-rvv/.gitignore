@@ -21,6 +21,11 @@
 **/log/filtered_*.log
 **/log/analyze_*.log
 
+# TE2D uses summary-only evidence by default.  Keep local generated logs out of
+# topic commits unless a later evidence-logs phase force-adds selected summaries.
+registration/transformation_estimation_2D/log/**
+!registration/transformation_estimation_2D/log/
+
 # TEPTPL evidence registry; documented digest state only.
 !registration/transformation_estimation_point_to_plane_lls/log/evidence_registry.json
 

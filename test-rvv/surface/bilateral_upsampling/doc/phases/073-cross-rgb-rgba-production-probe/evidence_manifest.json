@@ -1,0 +1,431 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "surface/bilateral_upsampling cross RGB/RGBA production probe",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/surface/bilateral_upsampling/log/board/analyze_bench_compare.log",
+    "label": "single board smoke Std/RVV cross RGB/RGBA production probe",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 5,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": true,
+    "thresholds": {
+      "min_repeated_runs": 1,
+      "ba_degrade_threshold": 1,
+      "near_threshold_margin": 0.05
+    }
+  },
+  "comparisons": [
+    {
+      "name": "bilateral upsampling production public PointXYZRGB 80x60 w3 dense",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production public probe",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 4800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "same_type_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 6.2335
+      },
+      "candidate": {
+        "label": "color-gather production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "same_type_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 5.0848
+      },
+      "ba_values": [
+        1.23
+      ]
+    },
+    {
+      "name": "bilateral upsampling production public PointXYZRGB 120x90 w4 holes",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production public probe",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "same_type_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 25.5946
+      },
+      "candidate": {
+        "label": "color-gather production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "same_type_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 23.401
+      },
+      "ba_values": [
+        1.09
+      ]
+    },
+    {
+      "name": "bilateral upsampling production public PointXYZRGBA 180x120 w5 dense",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production public probe",
+      "point_type": "pcl::PointXYZRGBA -> pcl::PointXYZRGBA",
+      "size": 21600,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 74.7805
+      },
+      "candidate": {
+        "label": "color-gather production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 66.1979
+      },
+      "ba_values": [
+        1.13
+      ]
+    },
+    {
+      "name": "bilateral upsampling production public PointXYZRGB to PointXYZRGBA 120x90 w4 holes",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production public probe",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGBA",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 25.7701
+      },
+      "candidate": {
+        "label": "color-gather production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 23.3797
+      },
+      "ba_values": [
+        1.1
+      ]
+    },
+    {
+      "name": "bilateral upsampling production public PointXYZRGBA to PointXYZRGB 120x90 w4 dense",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production public probe",
+      "point_type": "pcl::PointXYZRGBA -> pcl::PointXYZRGB",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 25.8729
+      },
+      "candidate": {
+        "label": "color-gather production public",
+        "boundary": "production public",
+        "wrapper": "public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 23.4927
+      },
+      "ba_values": [
+        1.1
+      ]
+    },
+    {
+      "name": "bilateral upsampling production steady public PointXYZRGB 80x60 w3 dense",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production steady public probe",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 4800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "same_type_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 6.6024
+      },
+      "candidate": {
+        "label": "color-gather production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "same_type_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 5.4519
+      },
+      "ba_values": [
+        1.21
+      ]
+    },
+    {
+      "name": "bilateral upsampling production steady public PointXYZRGB 120x90 w4 holes",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production steady public probe",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "same_type_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 26.0561
+      },
+      "candidate": {
+        "label": "color-gather production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "same_type_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 23.8677
+      },
+      "ba_values": [
+        1.09
+      ]
+    },
+    {
+      "name": "bilateral upsampling production steady public PointXYZRGBA 180x120 w5 dense",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production steady public probe",
+      "point_type": "pcl::PointXYZRGBA -> pcl::PointXYZRGBA",
+      "size": 21600,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 77.4845
+      },
+      "candidate": {
+        "label": "color-gather production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 66.8512
+      },
+      "ba_values": [
+        1.16
+      ]
+    },
+    {
+      "name": "bilateral upsampling production steady public PointXYZRGB to PointXYZRGBA 120x90 w4 holes",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production steady public probe",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGBA",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 26.0141
+      },
+      "candidate": {
+        "label": "color-gather production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 23.8979
+      },
+      "ba_values": [
+        1.09
+      ]
+    },
+    {
+      "name": "bilateral upsampling production steady public PointXYZRGBA to PointXYZRGB 120x90 w4 dense",
+      "group": "cross-rgb-rgba-production-probe",
+      "evidence_role": "production-direct",
+      "case_kind": "production steady public probe",
+      "point_type": "pcl::PointXYZRGBA -> pcl::PointXYZRGB",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "scalar baseline public path",
+        "std_ms": 26.1494
+      },
+      "candidate": {
+        "label": "color-gather production steady public",
+        "boundary": "production public",
+        "wrapper": "steady-state public entry",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "board checksum aligned within build family",
+        "timer_boundary": "steady-state public process() path",
+        "gate": "cross_RGB_RGBA_public_entry",
+        "mask": "finite_depth_skip_isfinite_contract",
+        "reduction": "sum_norm_sum_output_contract",
+        "asm_boundary": "production helper symbol contains vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum",
+        "rvv_ms": 23.7843
+      },
+      "ba_values": [
+        1.1
+      ]
+    }
+  ]
+}

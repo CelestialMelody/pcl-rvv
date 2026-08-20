@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "surface/bilateral_upsampling staged-window-reduction board diagnostic",
+    "evidence_role": "diagnostic",
+    "summary_path": "test-rvv/surface/bilateral_upsampling/log/board/analyze_bench_compare.log",
+    "label": "single board smoke Std/RVV diagnostic",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 5,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 1,
+      "ba_degrade_threshold": 1.0
+    }
+  },
+  "comparisons": [
+    {
+      "name": "bilateral upsampling table window 80x60 w3 dense",
+      "group": "staged-window-reduction",
+      "evidence_role": "diagnostic",
+      "case_kind": "pre-production diagnostic",
+      "point_type": "test-local RgbPoint",
+      "size": 4800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar table reference",
+        "boundary": "test helper",
+        "wrapper": "processScalar",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 4.9110
+      },
+      "candidate": {
+        "label": "rvv staged-window-reduction",
+        "boundary": "test helper",
+        "wrapper": "processCandidate",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_staging_rvv_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "bench lambda contains vle32/vfmul/vfredusum",
+        "rvv_ms": 5.4789
+      },
+      "ba_values": [0.90]
+    },
+    {
+      "name": "bilateral upsampling table window 120x90 w4 holes",
+      "group": "staged-window-reduction",
+      "evidence_role": "diagnostic",
+      "case_kind": "pre-production diagnostic",
+      "point_type": "test-local RgbPoint",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar table reference",
+        "boundary": "test helper",
+        "wrapper": "processScalar",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 18.9948
+      },
+      "candidate": {
+        "label": "rvv staged-window-reduction",
+        "boundary": "test helper",
+        "wrapper": "processCandidate",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_staging_rvv_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "bench lambda contains vle32/vfmul/vfredusum",
+        "rvv_ms": 20.9199
+      },
+      "ba_values": [0.91]
+    },
+    {
+      "name": "bilateral upsampling table window 180x120 w5 dense",
+      "group": "staged-window-reduction",
+      "evidence_role": "diagnostic",
+      "case_kind": "pre-production diagnostic",
+      "point_type": "test-local RgbPoint",
+      "size": 21600,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar table reference",
+        "boundary": "test helper",
+        "wrapper": "processScalar",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 61.9880
+      },
+      "candidate": {
+        "label": "rvv staged-window-reduction",
+        "boundary": "test helper",
+        "wrapper": "processCandidate",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_staging_rvv_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "bench lambda contains vle32/vfmul/vfredusum",
+        "rvv_ms": 68.7636
+      },
+      "ba_values": [0.90]
+    }
+  ]
+}

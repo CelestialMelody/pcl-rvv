@@ -42,8 +42,8 @@
 | 文件 | 公开入口 / 函数族 | 主成本覆盖类型 | 测试 / bench 可行性 | 去向理由 |
 | --- | --- | --- | --- | --- |
 | `impl/organized_fast_mesh.hpp` | `performReconstruction`、`reconstructPolygons`、`make*Mesh` | `direct-main-path` | `test/surface/test_organized_fast_mesh.cpp` | organized 行列扫描、valid / shadow mask 和可变 polygon 输出都在本文件内，入口直接、规则性最好；production public probe 已做且不建议接入，生产补丁已回滚。 |
-| `impl/bilateral_upsampling.hpp` | `process`、`performProcessing`、`computeDistances` | `direct-main-path` | `tools/bilateral_upsampling.cpp` | organized 像素网格 + 有界窗口累加，算术密度高，边界和 NaN fallback 都可局部验证；phase 020 已完成 production public probe，当前公开入口不建议接入，等待 PI5 用户确认是否回滚。 |
-| `impl/marching_cubes.hpp` | `performReconstruction`、`createSurface` | `direct-main-path` | `test/surface/test_marching_cubes.cpp`、`tools/marching_cubes_reconstruction.cpp` | 3D voxel 扫描、edge table / tri table 插值和输出生成是标准 batch 路径。 |
+| `impl/bilateral_upsampling.hpp` | `process`、`performProcessing`、`computeDistances` | `direct-main-path` | `tools/bilateral_upsampling.cpp` | organized 像素网格 + 有界窗口累加，算术密度高，边界和 NaN / infinity fallback 都可局部验证；phase 060/070 color-gather family 已把 production public / steady board 转正，并已被用户确认保留；phase 071 补齐 finite mask correctness，phase 072 收窄 same-type gate，phase 073 又扩展 cross RGB/RGBA 并刷新当前二进制 board，public 为 `1.23x/1.09x/1.13x/1.10x/1.10x`，steady 为 `1.21x/1.09x/1.16x/1.09x/1.10x`。 |
+| `impl/marching_cubes.hpp` | `performReconstruction`、`createSurface` | `direct-main-path` | `test/surface/test_marching_cubes.cpp`、`tools/marching_cubes_reconstruction.cpp` | 已完成函数级评估和 generic production adoption；RVV active-cell prepass 已按 `RVVXYZAoSFloatLayout<PointNT>` 接入，edge interpolation RVV 不接入；Phase 060 finite-collapse single-buffer 为 neutral，不改变 production truth。 |
 | `on_nurbs/triangulation.cpp` | `createIndices`、`createVertices`、`convertSurface2PolygonMesh`、`convertSurface2Vertices` | `direct-main-path` | `test/surface/test_on_nurbs.cpp`、`examples/surface/example_nurbs_fitting_surface.cpp` | 规则网格生成和 `Evaluate` 扫描很清楚，和 surface on_nurbs 示例 / 测试直接对得上。 |
 
 ### 3.2 保留实施的候选文件
@@ -90,9 +90,9 @@
 | 顺序 | 主题 | 主文件 | 当前状态 | 当前结论 / 下一步条件 |
 | ---: | --- | --- | --- | --- |
 | 1 | organized mesh reconstruction | `impl/organized_fast_mesh.hpp` | 已完成 / no-production / 已提交 | diagnostic 曾正向，但 public path 的 production evidence 负向；生产补丁已回滚，当前不建议继续扩大接入；topic 资产提交为 `7bfead613`。 |
-| 2 | bilateral upsampling | `impl/bilateral_upsampling.hpp` | 已完成函数级评估和 production public probe，等待用户确认是否回滚生产补丁 | staged-window-reduction 诊断为负向（`0.91x/0.94x/0.91x`）且不建议接入；phase 010 direct-depth 诊断为 `1.04x/1.17x/1.30x`、Evidence Doctor `Errors=0`；phase 020 production public 结果为 `0.97x/0.89x/0.95x`、Evidence Doctor `Errors=3`，当前不建议接入。 |
-| 3 | marching cubes | `impl/marching_cubes.hpp` | 建议进入函数级评估 | 先评估 voxel 扫描和 edge/tri table 路径。 |
-| 4 | on_nurbs triangulation | `on_nurbs/triangulation.cpp` | 函数级评估已建档；当前 candidate 不进入 production；按当前指令暂停继续推进 | `test-rvv/surface/triangulation` 已完成 `param_grid_rvv_store` 接入前诊断：QEMU / board correctness 和 asm 通过；5-run board repeated 为 `tri_param_grid_512` median `0.978x`、`tri_surface_eval_256` median `0.999x`，两者均 3/5 退化，Evidence Doctor 均 `Errors=1`。用户已说明忽略 on_nurbs 依赖相关方向；剩余不依赖该符号链的 `createIndices` 输出构造只适合非 RVV 标量消融，不建议作为 RVV next phase。 |
+| 2 | bilateral upsampling | `impl/bilateral_upsampling.hpp` | 已完成函数级评估、production public probe、helper-only / mask-chunk 消融、color-gather production probe 和 cross RGB/RGBA production probe，已采纳 / 当前二进制已刷新 | staged-window-reduction 和旧 exact-gate family 为历史负向；phase 073 RGB/RGBA exact-family color-gather production public 为 `1.23x/1.09x/1.13x/1.10x/1.10x`，steady public 为 `1.21x/1.09x/1.16x/1.09x/1.10x`，Evidence Doctor `Errors=0`、`Warnings=0`、`Suggestions=0`；phase 071 已补 finite mask infinity correctness，phase 073 QEMU Std/RVV 13/13，当前 production patch 已被用户确认保留 / 允许有收益先接入。 |
+| 3 | marching cubes | `impl/marching_cubes.hpp` | 已完成函数级评估、production direct probe，已采纳 generic gate | 当前 production gate 为 `RVVXYZAoSFloatLayout<PointNT>`；QEMU Std/RVV 各 6 tests passed；generic representative 5-run board 为 `PointXYZ=3.873x`、`PointXYZI=3.618x`、`PointXYZRGB=3.601x`、`PointXYZRGBA=3.639x`，Evidence Doctor 均 `Errors=0`、`Warnings=0`、`Suggestions=0`；`PointNormal` 5-run historical anchor 为 `5.330x/6.386x/8.824x`；Phase 060 active-z finite-collapse RVV-vs-RVV median `1.007x`，不接入。 |
+| 4 | on_nurbs triangulation | `on_nurbs/triangulation.cpp` | 已完成 / no-production / 已提交 | `test-rvv/surface/triangulation` 已完成 `param_grid_rvv_store` 接入前诊断并提交为 `0e9320d06`：QEMU / board correctness 和 asm 通过；5-run board repeated 为 `tri_param_grid_512` median `0.978x`、`tri_surface_eval_256` median `0.999x`，两者均 3/5 退化，Evidence Doctor 均 `Errors=1`。用户已说明忽略 on_nurbs 依赖相关方向；剩余不依赖该符号链的 `createIndices` 输出构造只适合非 RVV 标量消融，不建议作为 RVV next phase。 |
 
 ### 4.2 保留实施的候选文件
 

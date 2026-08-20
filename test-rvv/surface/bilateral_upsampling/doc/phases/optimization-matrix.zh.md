@@ -1,0 +1,35 @@
+# bilateral_upsampling 优化矩阵
+
+| candidate family | row source policy | point type / Scalar / layout | scope and entry | correctness / fallback target | bench / ablation target | board evidence | asm boundary | Evidence Doctor | decision | unblocked next action |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| staged-window-reduction | organized RGBD grid | test-local `RgbPoint`, float xyz/depth, uint8 RGB | `performProcessing` 的窗口累加形态；未接 production | `run_test_compare` passed | `board_smoke`：0.90x / 0.91x / 0.90x | negative on Milkv-Jupiter | `dump_bench_rvv` confirms `vle32/vfmul/vfredusum` near bench lambda | `Errors=3` degradation frequency; handled by no-production decision | rejected | 不接 production；如要继续探索，另开更少 staging 的候选。 |
+| column-stride-depth-direct | organized RGBD grid, fixed window column | test-local `RgbPoint`, float xyz/depth, uint8 RGB | direct-depth helper；未接 production | `run_test_compare` passed | phase 010 diagnostic board：1.04x / 1.16x / 1.28x | weak-positive to positive on Milkv-Jupiter | `dump_bench_rvv` confirms `vlse32/vmfeq/vmerge/vfmul/vfredusum` near direct-depth path | phase 010 doctor `Errors=0`、`Warnings=12`、`Suggestions=1` | partial-production-candidate / production family attempted | 仅作为新候选启发；不能支撑当前 production patch。 |
+| production PointXYZRGB / PointXYZRGBA exact gate | organized RGBD grid + public overload | `pcl::PointXYZRGB` / `pcl::PointXYZRGBA`, `RVVXYZAoSFloatLayout` | `BilateralUpsampling::process` / `performProcessing` 真实公开入口 | `run_test_compare` + public-entry tests passed | historical public probe：0.93x / 0.90x / 0.97x | historical negative on Milkv-Jupiter | old production helper symbol contains `vlse32/vmfeq/vmerge/vfmul/vfredusum` | phase 020/050 evidence 不支持 old family adoption | rejected / superseded by color-gather | 保留作历史对照。 |
+| production public steady-state shell ablation | organized RGBD grid + public overload | `pcl::PointXYZRGB` / `pcl::PointXYZRGBA`, `RVVXYZAoSFloatLayout` | `BilateralUpsampling::process` steady-state，setup outside timer，stdout silenced | `run_test_compare` passed, std/RVV 9/9 | phase 030 steady-state：0.93x / 0.91x / 0.97x | attempted / negative | production helper symbol still contains `vlse32/vmfeq/vmerge/vfmul/vfredusum` | steady-state shell 不能解释负向 | attempted / negative | 已进入 helper-only 和 mask/chunk 消融；仍不支持采纳。 |
+| production detail helper-only | organized RGBD grid + production detail helper | `pcl::PointXYZRGB` / `pcl::PointXYZRGBA`, `RVVXYZAoSFloatLayout` | 预计算 tables/unprojection，直接调用 production helper | `run_test_compare` passed, std/RVV 9/9 | phase 040 bounded run 方向冲突；helper-only 复跑为 0.91x / 0.91x / 0.95x | unstable-negative | production helper symbol contains `vlse32/vmfeq/vmerge/vfmul/vfredusum` | `Errors=3` degradation frequency | attempted / unstable-negative | 不建议继续同一 helper family；phase 050 已做 mask/chunk 消融。 |
+| production detail local nan-mask k64 | organized RGBD grid + production detail helper | `pcl::PointXYZRGB` / `pcl::PointXYZRGBA`, production AoS layout | 测试专用 direct helper；NaN-only mask + k64 | `run_test_compare` passed, QEMU smoke label visible | board：0.98x / 0.92x / 1.01x | negative / near-threshold | local helper has `vlse32/vmfeq/vmerge/vfmul/vfredusum` | `Errors=2`、`Warnings=4`、`Suggestions=1` | attempted / negative | 历史对照；已被 color-gather family 取代。 |
+| production detail color-gather | organized RGBD grid + production detail helper | RGB/RGBA exact family, production AoS layout | bench-local precursor + production helper | phase 070 `run_test_compare` 9/9；phase 071/072 11/11；phase 073 13/13 | phase 073 board：1.26x / 1.21x / 1.18x / 1.23x / 1.22x（public），1.31x / 1.21x / 1.25x / 1.21x / 1.21x（steady） | positive on Milkv-Jupiter after finite-mask refresh, same-type alignment and cross RGB/RGBA expansion | production helper symbol contains `vlse8/vzext/vmaxu/vminu/vluxei16/vfabs/vmflt/vfredusum` | phase 073 `Errors=0`、`Warnings=0`、`Suggestions=0` | adopted / refreshed | current adopted family；后续扩其它点型另开 phase |
+| production finite-mask correctness refresh | organized RGBD grid + production public | same-type `pcl::PointXYZRGB` / `pcl::PointXYZRGBA`, production AoS layout | adopted color-gather helper finite-depth mask | phase 071/072 `run_test_compare` passed, std/RVV 11/11；phase 073 13/13 | phase 073 board refreshed | positive | production helper still contains color-gather instructions and now also `vfabs/vmflt` finite mask | phase 073 doctor clean | adopted correctness refresh | 完成。 |
+| production same-type gate alignment | organized RGBD grid + production public | same-type `pcl::PointXYZRGB` / `pcl::PointXYZRGBA`, production AoS layout | `kBilateralUpsamplingRVVCompatible` 收窄到 `std::is_same_v<PointInT, PointOutT>` | phase 072 `run_test_compare` 11/11 | phase 072 board refreshed | positive | production helper contains color-gather and finite mask instructions | phase 072 `Errors=0`、`Warnings=0`、`Suggestions=0` | historical scope alignment / superseded by phase 073 | 已由 phase 073 交叉 RGB/RGBA 扩展接续。 |
+| cross RGB/RGBA production probe | organized RGBD grid + production public | `PointXYZRGB -> PointXYZRGBA` / `PointXYZRGBA -> PointXYZRGB`, production AoS layout | `kBilateralUpsamplingRVVCompatible` 扩展到 RGB/RGBA exact family | phase 073 `run_test_compare` 13/13 | phase 073 board cross public 1.23x / 1.22x，steady 1.21x / 1.21x | positive | production helper contains color-gather and finite mask instructions | phase 073 `Errors=0`、`Warnings=0`、`Suggestions=0` | adopted scope expansion / refreshed | 后续其它点型、layout 或 `Scalar` 另开 phase。 |
+
+## 阶段反思新增路线
+
+| phase | new idea | why now | evidence needed | priority |
+| --- | --- | --- | --- | --- |
+| 020 | production-public-overhead-ablation | phase 020 负向，但 diagnostic direct-depth 仍说明 RVV kernel 本身有收益，公开入口开销可能吞掉收益 | 拆分对象构造、stdout、fallback、RVV helper 和 unprojection 的独立计时 | high |
+| 030 | public-shell-overhead-negative-confirmation | steady-state public shell bench 已完成，但结果仍负向 | board_smoke、phase 030 manifest、Evidence Doctor | high until user confirms rollback |
+| 040 | production-detail-helper-only | public shell 消融后仍负向，需要判断 helper 本体是否稳定正向 | helper-only board、Evidence Doctor | completed / negative |
+| 050 | production-detail-mask-chunk-ablation | helper-only 不稳定，尝试拆 strict finite mask 和 chunk 形态 | local nan-mask k64 board、Evidence Doctor | completed / negative |
+
+## 暂缓 / 拒绝路线
+
+| candidate family | reason | resume condition |
+| --- | --- | --- |
+| staged-window-reduction | board repeated 负向，且已被 direct-depth 形态取代 | 只有在更少 staging 的候选中重新出现正向证据时再看。 |
+| current production public exact-gate patch | 旧 exact-gate family 已被 color-gather family 取代为当前 truth；历史上 public 为 `0.93x/0.90x/0.97x`，helper-only 为 `0.91x/0.91x/0.95x`，local nan-mask k64 为 `0.98x/0.92x/1.01x`。 | 当前不再作为主线候选；保留作历史对照。 |
+| production detail color-gather | 当前 public/steady board 已转正；070 manifest 已通过 Evidence Doctor，仅有 near-threshold Suggestion。 | 当前已用户确认保留，进入 adopted closeout。 |
+
+## 当前恢复动作
+
+默认恢复动作是维护 phase 073 当前二进制证据和 production closeout。若后续要扩大到其它点型、`Scalar` 或 layout，再另起 point-type / layout expansion phase。

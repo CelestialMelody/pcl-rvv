@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "surface/bilateral_upsampling column-stride-depth production public probe",
+    "evidence_role": "production-public",
+    "summary_path": "test-rvv/surface/bilateral_upsampling/log/board/analyze_bench_compare.log",
+    "label": "single board smoke Std/RVV production public probe",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 5,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 1,
+      "ba_degrade_threshold": 1.0,
+      "near_threshold_margin": 0.05
+    }
+  },
+  "comparisons": [
+    {
+      "name": "bilateral upsampling production public PointXYZRGB 80x60 w3 dense",
+      "group": "column-stride-depth-production-public",
+      "evidence_role": "production-public",
+      "case_kind": "production public probe",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 4800,
+      "run_count": 1,
+      "baseline": {
+        "label": "production scalar performProcessing Std fallback",
+        "boundary": "public overload",
+        "wrapper": "BilateralUpsampling::process",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed",
+        "timer_boundary": "public_process_object_setup_projection_inverse_computeDistances_performProcessing_unprojection_existing_stdout",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 6.8092
+      },
+      "candidate": {
+        "label": "production RVV column-stride-depth dispatch",
+        "boundary": "public overload",
+        "wrapper": "BilateralUpsampling::process",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed",
+        "timer_boundary": "public_process_object_setup_projection_inverse_computeDistances_performProcessing_unprojection_existing_stdout",
+        "gate": "same_input_PointXYZRGB_exact_gate_RVVXYZAoSFloatLayout",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 7.0564
+      },
+      "ba_values": [
+        0.96
+      ]
+    },
+    {
+      "name": "bilateral upsampling production public PointXYZRGB 120x90 w4 holes",
+      "group": "column-stride-depth-production-public",
+      "evidence_role": "production-public",
+      "case_kind": "production public probe",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "production scalar performProcessing Std fallback",
+        "boundary": "public overload",
+        "wrapper": "BilateralUpsampling::process",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed",
+        "timer_boundary": "public_process_object_setup_projection_inverse_computeDistances_performProcessing_unprojection_existing_stdout",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 27.1604
+      },
+      "candidate": {
+        "label": "production RVV column-stride-depth dispatch",
+        "boundary": "public overload",
+        "wrapper": "BilateralUpsampling::process",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed",
+        "timer_boundary": "public_process_object_setup_projection_inverse_computeDistances_performProcessing_unprojection_existing_stdout",
+        "gate": "same_input_PointXYZRGB_exact_gate_RVVXYZAoSFloatLayout",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 30.5335
+      },
+      "ba_values": [
+        0.89
+      ]
+    },
+    {
+      "name": "bilateral upsampling production public PointXYZRGBA 180x120 w5 dense",
+      "group": "column-stride-depth-production-public",
+      "evidence_role": "production-public",
+      "case_kind": "production public probe",
+      "point_type": "pcl::PointXYZRGBA -> pcl::PointXYZRGBA",
+      "size": 21600,
+      "run_count": 1,
+      "baseline": {
+        "label": "production scalar performProcessing Std fallback",
+        "boundary": "public overload",
+        "wrapper": "BilateralUpsampling::process",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed",
+        "timer_boundary": "public_process_object_setup_projection_inverse_computeDistances_performProcessing_unprojection_existing_stdout",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 80.2801
+      },
+      "candidate": {
+        "label": "production RVV column-stride-depth dispatch",
+        "boundary": "public overload",
+        "wrapper": "BilateralUpsampling::process",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed",
+        "timer_boundary": "public_process_object_setup_projection_inverse_computeDistances_performProcessing_unprojection_existing_stdout",
+        "gate": "same_input_PointXYZRGBA_exact_gate_RVVXYZAoSFloatLayout",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 84.7961
+      },
+      "ba_values": [
+        0.95
+      ]
+    }
+  ]
+}

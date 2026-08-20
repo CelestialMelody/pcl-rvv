@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "surface/bilateral_upsampling column-stride-depth-direct board diagnostic",
+    "evidence_role": "diagnostic",
+    "summary_path": "test-rvv/surface/bilateral_upsampling/log/board/analyze_bench_compare.log",
+    "label": "single board smoke Std/RVV diagnostic",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 5,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 1,
+      "ba_degrade_threshold": 1.0,
+      "near_threshold_margin": 0.05
+    }
+  },
+  "comparisons": [
+    {
+      "name": "bilateral upsampling direct-depth 80x60 w3 dense",
+      "group": "column-stride-depth-direct",
+      "evidence_role": "diagnostic",
+      "case_kind": "pre-production diagnostic",
+      "point_type": "test-local RgbPoint",
+      "size": 4800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar table reference",
+        "boundary": "test helper",
+        "wrapper": "processScalar",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 4.8879
+      },
+      "candidate": {
+        "label": "rvv column-stride-depth-direct",
+        "boundary": "test helper",
+        "wrapper": "processDirectDepthCandidate",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_weight_staging_strided_depth_load_rvv_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "bench lambda contains vlse32/vmerge/vfmul/vfredusum",
+        "rvv_ms": 4.8537
+      },
+      "ba_values": [
+        1.01
+      ]
+    },
+    {
+      "name": "bilateral upsampling direct-depth 120x90 w4 holes",
+      "group": "column-stride-depth-direct",
+      "evidence_role": "diagnostic",
+      "case_kind": "pre-production diagnostic",
+      "point_type": "test-local RgbPoint",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar table reference",
+        "boundary": "test helper",
+        "wrapper": "processScalar",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 19.0473
+      },
+      "candidate": {
+        "label": "rvv column-stride-depth-direct",
+        "boundary": "test helper",
+        "wrapper": "processDirectDepthCandidate",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_weight_staging_strided_depth_load_rvv_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "bench lambda contains vlse32/vmerge/vfmul/vfredusum",
+        "rvv_ms": 17.0909
+      },
+      "ba_values": [
+        1.11
+      ]
+    },
+    {
+      "name": "bilateral upsampling direct-depth 180x120 w5 dense",
+      "group": "column-stride-depth-direct",
+      "evidence_role": "diagnostic",
+      "case_kind": "pre-production diagnostic",
+      "point_type": "test-local RgbPoint",
+      "size": 21600,
+      "run_count": 1,
+      "baseline": {
+        "label": "scalar table reference",
+        "boundary": "test helper",
+        "wrapper": "processScalar",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 62.0909
+      },
+      "candidate": {
+        "label": "rvv column-stride-depth-direct",
+        "boundary": "test helper",
+        "wrapper": "processDirectDepthCandidate",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "error-budget",
+        "timer_boundary": "window_scan_table_lookup_weight_staging_strided_depth_load_rvv_reduction_unprojection",
+        "gate": "same_input",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "bench lambda contains vlse32/vmerge/vfmul/vfredusum",
+        "rvv_ms": 49.2475
+      },
+      "ba_values": [
+        1.26
+      ]
+    }
+  ]
+}

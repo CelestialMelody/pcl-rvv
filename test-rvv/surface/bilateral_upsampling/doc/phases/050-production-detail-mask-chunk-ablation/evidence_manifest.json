@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "surface/bilateral_upsampling production detail mask/chunk ablation",
+    "evidence_role": "production-detail-ablation",
+    "summary_path": "test-rvv/surface/bilateral_upsampling/log/board/analyze_bench_compare.log",
+    "label": "single board smoke Std/RVV production detail mask/chunk ablation",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 5,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 1,
+      "ba_degrade_threshold": 1.0,
+      "near_threshold_margin": 0.05
+    }
+  },
+  "comparisons": [
+    {
+      "name": "bilateral upsampling production detail local nan-mask k64 PointXYZRGB 80x60 w3 dense",
+      "group": "production-detail-mask-chunk-ablation",
+      "evidence_role": "production-detail-ablation",
+      "case_kind": "production detail mask/chunk ablation",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 4800,
+      "run_count": 1,
+      "baseline": {
+        "label": "production detail helper current",
+        "boundary": "production detail helper",
+        "wrapper": "direct helper call",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "precomputed_tables_unprojection_direct_performProcessing_helper_only",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "std_ms": 6.5328
+      },
+      "candidate": {
+        "label": "production detail local nan-mask k64",
+        "boundary": "production detail helper",
+        "wrapper": "direct helper call",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "precomputed_tables_unprojection_direct_performProcessing_helper_only",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_nan_only_k64",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "local helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 6.7130
+      },
+      "ba_values": [
+        0.98
+      ]
+    },
+    {
+      "name": "bilateral upsampling production detail local nan-mask k64 PointXYZRGB 120x90 w4 holes",
+      "group": "production-detail-mask-chunk-ablation",
+      "evidence_role": "production-detail-ablation",
+      "case_kind": "production detail mask/chunk ablation",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "production detail helper current",
+        "boundary": "production detail helper",
+        "wrapper": "direct helper call",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "precomputed_tables_unprojection_direct_performProcessing_helper_only",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "std_ms": 27.2432
+      },
+      "candidate": {
+        "label": "production detail local nan-mask k64",
+        "boundary": "production detail helper",
+        "wrapper": "direct helper call",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "precomputed_tables_unprojection_direct_performProcessing_helper_only",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_nan_only_k64",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "local helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 29.6387
+      },
+      "ba_values": [
+        0.92
+      ]
+    },
+    {
+      "name": "bilateral upsampling production detail local nan-mask k64 PointXYZRGBA 180x120 w5 dense",
+      "group": "production-detail-mask-chunk-ablation",
+      "evidence_role": "production-detail-ablation",
+      "case_kind": "production detail mask/chunk ablation",
+      "point_type": "pcl::PointXYZRGBA -> pcl::PointXYZRGBA",
+      "size": 21600,
+      "run_count": 1,
+      "baseline": {
+        "label": "production detail helper current",
+        "boundary": "production detail helper",
+        "wrapper": "direct helper call",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "precomputed_tables_unprojection_direct_performProcessing_helper_only",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "std_ms": 79.9518
+      },
+      "candidate": {
+        "label": "production detail local nan-mask k64",
+        "boundary": "production detail helper",
+        "wrapper": "direct helper call",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "precomputed_tables_unprojection_direct_performProcessing_helper_only",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_nan_only_k64",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "local helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 79.4233
+      },
+      "ba_values": [
+        1.01
+      ]
+    }
+  ]
+}

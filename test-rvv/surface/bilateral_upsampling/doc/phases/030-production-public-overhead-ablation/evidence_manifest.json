@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "surface/bilateral_upsampling production public steady-state shell ablation",
+    "evidence_role": "production-public-ablation",
+    "summary_path": "test-rvv/surface/bilateral_upsampling/log/board/analyze_bench_compare.log",
+    "label": "single board smoke Std/RVV steady-state public shell ablation",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 5,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 1,
+      "ba_degrade_threshold": 1.0,
+      "near_threshold_margin": 0.05
+    }
+  },
+  "comparisons": [
+    {
+      "name": "bilateral upsampling production steady public PointXYZRGB 80x60 w3 dense",
+      "group": "production-public-steady-state-shell-ablation",
+      "evidence_role": "production-public-ablation",
+      "case_kind": "production public shell ablation",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 4800,
+      "run_count": 1,
+      "baseline": {
+        "label": "production scalar steady public process",
+        "boundary": "public overload steady-state ablation",
+        "wrapper": "BilateralUpsampling::process steady-state stdout-silenced",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "public_process_reused_object_stdout_silenced_computeDistances_performProcessing_unprojection",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 7.308
+      },
+      "candidate": {
+        "label": "production RVV steady public process",
+        "boundary": "public overload steady-state ablation",
+        "wrapper": "BilateralUpsampling::process steady-state stdout-silenced",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "public_process_reused_object_stdout_silenced_computeDistances_performProcessing_unprojection",
+        "gate": "same_input_PointXYZRGB_exact_gate_RVVXYZAoSFloatLayout",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 7.4799
+      },
+      "ba_values": [
+        0.98
+      ]
+    },
+    {
+      "name": "bilateral upsampling production steady public PointXYZRGB 120x90 w4 holes",
+      "group": "production-public-steady-state-shell-ablation",
+      "evidence_role": "production-public-ablation",
+      "case_kind": "production public shell ablation",
+      "point_type": "pcl::PointXYZRGB -> pcl::PointXYZRGB",
+      "size": 10800,
+      "run_count": 1,
+      "baseline": {
+        "label": "production scalar steady public process",
+        "boundary": "public overload steady-state ablation",
+        "wrapper": "BilateralUpsampling::process steady-state stdout-silenced",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "public_process_reused_object_stdout_silenced_computeDistances_performProcessing_unprojection",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 27.415
+      },
+      "candidate": {
+        "label": "production RVV steady public process",
+        "boundary": "public overload steady-state ablation",
+        "wrapper": "BilateralUpsampling::process steady-state stdout-silenced",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "public_process_reused_object_stdout_silenced_computeDistances_performProcessing_unprojection",
+        "gate": "same_input_PointXYZRGB_exact_gate_RVVXYZAoSFloatLayout",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 30.2814
+      },
+      "ba_values": [
+        0.91
+      ]
+    },
+    {
+      "name": "bilateral upsampling production steady public PointXYZRGBA 180x120 w5 dense",
+      "group": "production-public-steady-state-shell-ablation",
+      "evidence_role": "production-public-ablation",
+      "case_kind": "production public shell ablation",
+      "point_type": "pcl::PointXYZRGBA -> pcl::PointXYZRGBA",
+      "size": 21600,
+      "run_count": 1,
+      "baseline": {
+        "label": "production scalar steady public process",
+        "boundary": "public overload steady-state ablation",
+        "wrapper": "BilateralUpsampling::process steady-state stdout-silenced",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "public_process_reused_object_stdout_silenced_computeDistances_performProcessing_unprojection",
+        "gate": "same_input_same_point_type_non_rvv_build",
+        "mask": "finite_depth_skip",
+        "reduction": "scalar_ordered_float_sum",
+        "asm_boundary": "not_applicable",
+        "std_ms": 81.1577
+      },
+      "candidate": {
+        "label": "production RVV steady public process",
+        "boundary": "public overload steady-state ablation",
+        "wrapper": "BilateralUpsampling::process steady-state stdout-silenced",
+        "row_source": "organized_grid",
+        "solve": false,
+        "checksum_policy": "gtest error-budget already passed; bench checksum aligned within build family",
+        "timer_boundary": "public_process_reused_object_stdout_silenced_computeDistances_performProcessing_unprojection",
+        "gate": "same_input_PointXYZRGBA_exact_gate_RVVXYZAoSFloatLayout",
+        "mask": "finite_depth_skip_with_vmfeq_merge",
+        "reduction": "vfredusum_chunk_sum",
+        "asm_boundary": "production helper symbol contains vlse32/vmfeq/vmerge/vfmul/vfredusum",
+        "rvv_ms": 82.5887
+      },
+      "ba_values": [
+        0.98
+      ]
+    }
+  ]
+}
