@@ -45,6 +45,7 @@
 
 #include <pcl/compression/libpng_wrapper.h>
 #include <pcl/compression/organized_pointcloud_conversion.h>
+#include <pcl/compression/impl/organized_pointcloud_compression_analysis.hpp>
 
 #include <vector>
 #include <cassert>
@@ -401,46 +402,10 @@ namespace pcl
                                                                    float& maxDepth_arg,
                                                                    float& focalLength_arg) const
     {
-      std::size_t width = cloud_arg->width;
-      std::size_t height = cloud_arg->height;
-
-      // Center of organized point cloud
-      int centerX = static_cast<int> (width / 2);
-      int centerY = static_cast<int> (height / 2);
-
-      // Ensure we have an organized point cloud
-      assert((width>1) && (height>1));
-      assert(width*height == cloud_arg->size());
-
-      float maxDepth = 0;
-      float focalLength = 0;
-
-      std::size_t it = 0;
-      for (int y = -centerY; y < centerY; ++y )
-        for (int x = -centerX; x < centerX; ++x )
-        {
-          const PointT& point = (*cloud_arg)[it++];
-
-          if (pcl::isFinite (point))
-          {
-            if (maxDepth < point.z)
-            {
-              // Update maximum depth
-              maxDepth = point.z;
-
-              // Calculate focal length
-              focalLength = 2.0f / (point.x / (static_cast<float> (x) * point.z) + point.y / (static_cast<float> (y) * point.z));
-            }
-          }
-        }
-
-      // Update return values
-      maxDepth_arg = maxDepth;
-      focalLength_arg = focalLength;
+      organized_compression_detail::analyzeOrganizedCloud (*cloud_arg, maxDepth_arg, focalLength_arg);
     }
 
   }
 }
 
 #endif
-

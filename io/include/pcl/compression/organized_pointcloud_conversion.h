@@ -42,6 +42,12 @@
 #include <pcl/pcl_macros.h>
 #include <pcl/point_cloud.h>
 #include <pcl/common/point_tests.h> // for pcl::isFinite
+#include <pcl/rvv_point_traits.h>
+
+#ifdef __RVV10__
+#include <pcl/rvv_point_load.h>
+#include <riscv_vector.h>
+#endif
 
 #include <vector>
 #include <limits>
@@ -78,6 +84,262 @@ struct CompressionPointTraits<PointXYZRGBA>
 template <typename PointT, bool enableColor = CompressionPointTraits<PointT>::hasColor >
 struct OrganizedConversion;
 
+template<typename PointT>
+inline void
+convertCloudToDisparityStd(const pcl::PointCloud<PointT>& cloud_arg,
+                           float focalLength_arg,
+                           float disparityShift_arg,
+                           float disparityScale_arg,
+                           typename std::vector<std::uint16_t>& disparityData_arg)
+{
+  const auto cloud_size = cloud_arg.size ();
+
+  disparityData_arg.clear ();
+  disparityData_arg.reserve (cloud_size);
+
+  for (std::size_t i = 0; i < cloud_size; ++i)
+  {
+    const PointT& point = cloud_arg[i];
+
+    if (pcl::isFinite (point))
+    {
+      auto disparity = static_cast<std::uint16_t> ( focalLength_arg / (disparityScale_arg * point.z) + disparityShift_arg / disparityScale_arg);
+      disparityData_arg.push_back (disparity);
+    }
+    else
+    {
+      disparityData_arg.push_back (0);
+    }
+  }
+}
+
+template<typename PointT>
+inline void
+convertCloudToDisparityColorStd(const pcl::PointCloud<PointT>& cloud_arg,
+                                float focalLength_arg,
+                                float disparityShift_arg,
+                                float disparityScale_arg,
+                                bool convertToMono,
+                                typename std::vector<std::uint16_t>& disparityData_arg,
+                                typename std::vector<std::uint8_t>& rgbData_arg)
+{
+  const auto cloud_size = cloud_arg.size ();
+
+  disparityData_arg.clear ();
+  rgbData_arg.clear ();
+
+  disparityData_arg.reserve (cloud_size);
+  if (convertToMono)
+  {
+    rgbData_arg.reserve (cloud_size);
+  } else
+  {
+    rgbData_arg.reserve (cloud_size * 3);
+  }
+
+  for (std::size_t i = 0; i < cloud_size; ++i)
+  {
+    const PointT& point = cloud_arg[i];
+
+    if (pcl::isFinite (point))
+    {
+      if (convertToMono)
+      {
+        auto grayvalue = static_cast<std::uint8_t>(0.2989 * point.r
+                                                  + 0.5870 * point.g
+                                                  + 0.1140 * point.b);
+
+        rgbData_arg.push_back (grayvalue);
+      } else
+      {
+        rgbData_arg.push_back (point.r);
+        rgbData_arg.push_back (point.g);
+        rgbData_arg.push_back (point.b);
+      }
+
+      auto disparity = static_cast<std::uint16_t> (focalLength_arg / (disparityScale_arg * point.z) + disparityShift_arg / disparityScale_arg);
+      disparityData_arg.push_back (disparity);
+    }
+    else
+    {
+      if (convertToMono)
+      {
+        rgbData_arg.push_back (0);
+      } else
+      {
+        rgbData_arg.push_back (0);
+        rgbData_arg.push_back (0);
+        rgbData_arg.push_back (0);
+      }
+
+      disparityData_arg.push_back (0);
+    }
+  }
+}
+
+#ifdef __RVV10__
+inline bool
+rvvOrganizedConversionClassIsFinite(const std::uint32_t cls)
+{
+  constexpr std::uint32_t not_finite_bits =
+      (1u << 0u) | (1u << 7u) | (1u << 8u) | (1u << 9u);
+  return (cls & not_finite_bits) == 0u;
+}
+
+template<typename PointT>
+inline bool
+convertCloudToDisparityRVV(const pcl::PointCloud<PointT>& cloud_arg,
+                           float focalLength_arg,
+                           float disparityShift_arg,
+                           float disparityScale_arg,
+                           typename std::vector<std::uint16_t>& disparityData_arg)
+{
+  if constexpr (!pcl::rvv::kRVVXYZAoSPointCompatible<PointT>)
+  {
+    return false;
+  }
+  else
+  {
+    const auto cloud_size = cloud_arg.size ();
+    if (cloud_size < 64)
+      return false;
+
+    disparityData_arg.assign (cloud_size, 0);
+
+    const std::size_t vlmax = __riscv_vsetvlmax_e32m2 ();
+    std::vector<float> computed (vlmax, 0.0f);
+    std::vector<std::uint32_t> class_x (vlmax, 0);
+    std::vector<std::uint32_t> class_y (vlmax, 0);
+    std::vector<std::uint32_t> class_z (vlmax, 0);
+
+    const auto* base = reinterpret_cast<const std::uint8_t*> (cloud_arg.points.data ());
+    const float shift_over_scale = disparityShift_arg / disparityScale_arg;
+
+    std::size_t i = 0;
+    while (i < cloud_size)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (cloud_size - i);
+      vfloat32m2_t x;
+      vfloat32m2_t y;
+      vfloat32m2_t z;
+      pcl::rvv_load::strided_load3_f32m2<sizeof(PointT),
+                                         pcl::rvv::RVVXYZAoSFloatLayout<PointT>::kX,
+                                         pcl::rvv::RVVXYZAoSFloatLayout<PointT>::kY,
+                                         pcl::rvv::RVVXYZAoSFloatLayout<PointT>::kZ>(
+          base + i * sizeof(PointT), vl, x, y, z);
+
+      const vfloat32m2_t scaled_z = __riscv_vfmul_vf_f32m2 (z, disparityScale_arg, vl);
+      const vfloat32m2_t quotient = __riscv_vfrdiv_vf_f32m2 (scaled_z, focalLength_arg, vl);
+      const vfloat32m2_t disp = __riscv_vfadd_vf_f32m2 (quotient, shift_over_scale, vl);
+
+      __riscv_vse32_v_f32m2 (computed.data (), disp, vl);
+      __riscv_vse32_v_u32m2 (class_x.data (), __riscv_vfclass_v_u32m2 (x, vl), vl);
+      __riscv_vse32_v_u32m2 (class_y.data (), __riscv_vfclass_v_u32m2 (y, vl), vl);
+      __riscv_vse32_v_u32m2 (class_z.data (), __riscv_vfclass_v_u32m2 (z, vl), vl);
+
+      for (std::size_t lane = 0; lane < vl; ++lane)
+      {
+        if (rvvOrganizedConversionClassIsFinite (class_x[lane]) &&
+            rvvOrganizedConversionClassIsFinite (class_y[lane]) &&
+            rvvOrganizedConversionClassIsFinite (class_z[lane]))
+        {
+          disparityData_arg[i + lane] = static_cast<std::uint16_t> (computed[lane]);
+        }
+      }
+      i += vl;
+    }
+
+    return true;
+  }
+}
+
+template<typename PointT>
+inline bool
+convertCloudToDisparityColorRVV(const pcl::PointCloud<PointT>& cloud_arg,
+                                float focalLength_arg,
+                                float disparityShift_arg,
+                                float disparityScale_arg,
+                                bool convertToMono,
+                                typename std::vector<std::uint16_t>& disparityData_arg,
+                                typename std::vector<std::uint8_t>& rgbData_arg)
+{
+  if constexpr (!pcl::rvv::kRVVXYZAoSPointCompatible<PointT>)
+  {
+    return false;
+  }
+  else
+  {
+    const auto cloud_size = cloud_arg.size ();
+    if (cloud_size < 64)
+      return false;
+
+    disparityData_arg.assign (cloud_size, 0);
+    rgbData_arg.assign (convertToMono ? cloud_size : cloud_size * 3, 0);
+
+    const std::size_t vlmax = __riscv_vsetvlmax_e32m2 ();
+    std::vector<float> computed (vlmax, 0.0f);
+    std::vector<std::uint32_t> class_x (vlmax, 0);
+    std::vector<std::uint32_t> class_y (vlmax, 0);
+    std::vector<std::uint32_t> class_z (vlmax, 0);
+
+    const auto* base = reinterpret_cast<const std::uint8_t*> (cloud_arg.points.data ());
+    const float shift_over_scale = disparityShift_arg / disparityScale_arg;
+
+    std::size_t i = 0;
+    while (i < cloud_size)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (cloud_size - i);
+      vfloat32m2_t x;
+      vfloat32m2_t y;
+      vfloat32m2_t z;
+      pcl::rvv_load::strided_load3_f32m2<sizeof(PointT),
+                                         pcl::rvv::RVVXYZAoSFloatLayout<PointT>::kX,
+                                         pcl::rvv::RVVXYZAoSFloatLayout<PointT>::kY,
+                                         pcl::rvv::RVVXYZAoSFloatLayout<PointT>::kZ>(
+          base + i * sizeof(PointT), vl, x, y, z);
+
+      const vfloat32m2_t scaled_z = __riscv_vfmul_vf_f32m2 (z, disparityScale_arg, vl);
+      const vfloat32m2_t quotient = __riscv_vfrdiv_vf_f32m2 (scaled_z, focalLength_arg, vl);
+      const vfloat32m2_t disp = __riscv_vfadd_vf_f32m2 (quotient, shift_over_scale, vl);
+
+      __riscv_vse32_v_f32m2 (computed.data (), disp, vl);
+      __riscv_vse32_v_u32m2 (class_x.data (), __riscv_vfclass_v_u32m2 (x, vl), vl);
+      __riscv_vse32_v_u32m2 (class_y.data (), __riscv_vfclass_v_u32m2 (y, vl), vl);
+      __riscv_vse32_v_u32m2 (class_z.data (), __riscv_vfclass_v_u32m2 (z, vl), vl);
+
+      for (std::size_t lane = 0; lane < vl; ++lane)
+      {
+        const std::size_t index = i + lane;
+        if (!rvvOrganizedConversionClassIsFinite (class_x[lane]) ||
+            !rvvOrganizedConversionClassIsFinite (class_y[lane]) ||
+            !rvvOrganizedConversionClassIsFinite (class_z[lane]))
+        {
+          continue;
+        }
+
+        const PointT& point = cloud_arg[index];
+        disparityData_arg[index] = static_cast<std::uint16_t> (computed[lane]);
+        if (convertToMono)
+        {
+          rgbData_arg[index] = static_cast<std::uint8_t>(0.2989 * point.r
+                                                        + 0.5870 * point.g
+                                                        + 0.1140 * point.b);
+        } else
+        {
+          const std::size_t color_index = index * 3;
+          rgbData_arg[color_index + 0] = point.r;
+          rgbData_arg[color_index + 1] = point.g;
+          rgbData_arg[color_index + 2] = point.b;
+        }
+      }
+      i += vl;
+    }
+
+    return true;
+  }
+}
+#endif
+
 // Uncolored point cloud specialization
 template<typename PointT>
 struct OrganizedConversion<PointT, false>
@@ -98,30 +360,19 @@ struct OrganizedConversion<PointT, false>
                       typename std::vector<std::uint16_t>& disparityData_arg,
                       typename std::vector<std::uint8_t>&)
   {
-    const auto cloud_size = cloud_arg.size ();
-
-    // Clear image data
-    disparityData_arg.clear ();
-
-    disparityData_arg.reserve (cloud_size);
-
-    for (std::size_t i = 0; i < cloud_size; ++i)
-    {
-      // Get point from cloud
-      const PointT& point = cloud_arg[i];
-
-      if (pcl::isFinite (point))
-      {
-        // Inverse depth quantization
-        auto disparity = static_cast<std::uint16_t> ( focalLength_arg / (disparityScale_arg * point.z) + disparityShift_arg / disparityScale_arg);
-        disparityData_arg.push_back (disparity);
-      }
-      else
-      {
-        // Non-valid points are encoded with zeros
-        disparityData_arg.push_back (0);
-      }
-    }
+#ifdef __RVV10__
+    if (convertCloudToDisparityRVV<PointT> (cloud_arg,
+                                            focalLength_arg,
+                                            disparityShift_arg,
+                                            disparityScale_arg,
+                                            disparityData_arg))
+      return;
+#endif
+    convertCloudToDisparityStd<PointT> (cloud_arg,
+                                        focalLength_arg,
+                                        disparityShift_arg,
+                                        disparityScale_arg,
+                                        disparityData_arg);
   }
 
   /** \brief Convert disparity image to point cloud
@@ -278,67 +529,23 @@ struct OrganizedConversion<PointT, true>
                       typename std::vector<std::uint16_t>& disparityData_arg,
                       typename std::vector<std::uint8_t>& rgbData_arg)
   {
-    const auto cloud_size = cloud_arg.size ();
-
-    // Reset output vectors
-    disparityData_arg.clear ();
-    rgbData_arg.clear ();
-
-    // Allocate memory
-    disparityData_arg.reserve (cloud_size);
-    if (convertToMono)
-    {
-      rgbData_arg.reserve (cloud_size);
-    } else
-    {
-      rgbData_arg.reserve (cloud_size * 3);
-    }
-
-    for (std::size_t i = 0; i < cloud_size; ++i)
-    {
-      const PointT& point = cloud_arg[i];
-
-      if (pcl::isFinite (point))
-      {
-        if (convertToMono)
-        {
-          // Encode point color
-          auto grayvalue = static_cast<std::uint8_t>(0.2989 * point.r
-                                                    + 0.5870 * point.g
-                                                    + 0.1140 * point.b);
-
-          rgbData_arg.push_back (grayvalue);
-        } else
-        {
-          // Encode point color
-          rgbData_arg.push_back (point.r);
-          rgbData_arg.push_back (point.g);
-          rgbData_arg.push_back (point.b);
-        }
-
-        // Inverse depth quantization
-        auto disparity = static_cast<std::uint16_t> (focalLength_arg / (disparityScale_arg * point.z) + disparityShift_arg / disparityScale_arg);
-
-        // Encode disparity
-        disparityData_arg.push_back (disparity);
-      }
-      else
-      {
-        // Encode black point
-        if (convertToMono)
-        {
-          rgbData_arg.push_back (0);
-        } else
-        {
-          rgbData_arg.push_back (0);
-          rgbData_arg.push_back (0);
-          rgbData_arg.push_back (0);
-        }
-
-        // Encode bad point
-        disparityData_arg.push_back (0);
-      }
-    }
+#ifdef __RVV10__
+    if (convertCloudToDisparityColorRVV<PointT> (cloud_arg,
+                                                 focalLength_arg,
+                                                 disparityShift_arg,
+                                                 disparityScale_arg,
+                                                 convertToMono,
+                                                 disparityData_arg,
+                                                 rgbData_arg))
+      return;
+#endif
+    convertCloudToDisparityColorStd<PointT> (cloud_arg,
+                                             focalLength_arg,
+                                             disparityShift_arg,
+                                             disparityScale_arg,
+                                             convertToMono,
+                                             disparityData_arg,
+                                             rgbData_arg);
   }
 
   /** \brief Convert disparity image to point cloud
@@ -550,4 +757,3 @@ struct OrganizedConversion<PointT, true>
 
 } // namespace io
 } // namespace pcl
-
