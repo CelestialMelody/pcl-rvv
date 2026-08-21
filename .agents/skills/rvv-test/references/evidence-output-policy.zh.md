@@ -20,6 +20,8 @@
 
 配置解析出的 test root（测试根目录）共享 ignore 文件只维护 generated-output pattern（生成物模式）；具体模式以该文件自身为准，workflow reference（工作流参考）不复制规则清单。topic-specific evidence（主题特定证据）不通过共享 ignore 文件暴露。
 
+topic-local 或 module-local `.gitignore` 只用于忽略该 topic / module 自己的额外生成物，例如临时抓取目录、中间分析缓存或本地工具输出。它不承载 evidence allowlist（证据放行列表）：不要在 topic-local 或 module-local `.gitignore` 中反忽略配置解析出的 evidence output subdir（证据输出子目录）里的 summary、doctor、manifest、registry 或 raw log，让这些文件重新出现在普通 `git status` 中。
+
 summary artifact、Evidence Doctor report（证据体检报告）、manifest（清单）和 topic-local registry（主题本地登记表）默认仍按生成物策略留在本机工作区。需要提交少量摘要证据时，worker 必须先按本文的文档引用、脱敏和 evidence freshness（证据新鲜度）规则确认它们是提交候选，再在 evidence commit（证据提交）中用 `git add -f <specific files>` 精确选择。文档可以引用 ignored evidence output（被忽略的证据输出）作为可复现路径；被引用不代表该文件已经或应该自动进入普通提交。
 
 ## Evidence Freshness（证据新鲜度）
