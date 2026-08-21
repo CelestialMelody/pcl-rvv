@@ -42,7 +42,7 @@
 | 文件 | 公开入口 / 函数族 | 主成本覆盖类型 | 测试 / bench 可行性 | 去向理由 |
 | --- | --- | --- | --- | --- |
 | `impl/organized_fast_mesh.hpp` | `performReconstruction`、`reconstructPolygons`、`make*Mesh` | `direct-main-path` | `test/surface/test_organized_fast_mesh.cpp` | organized 行列扫描、valid / shadow mask 和可变 polygon 输出都在本文件内，入口直接、规则性最好；production public probe 已做且不建议接入，生产补丁已回滚。 |
-| `impl/bilateral_upsampling.hpp` | `process`、`performProcessing`、`computeDistances` | `direct-main-path` | `tools/bilateral_upsampling.cpp` | organized 像素网格 + 有界窗口累加，算术密度高，边界和 NaN / infinity fallback 都可局部验证；phase 060/070 color-gather family 已把 production public / steady board 转正，并已被用户确认保留；phase 071 补齐 finite mask correctness，phase 072 收窄 same-type gate，phase 073 又扩展 cross RGB/RGBA 并刷新当前二进制 board，public 为 `1.23x/1.09x/1.13x/1.10x/1.10x`，steady 为 `1.21x/1.09x/1.16x/1.09x/1.10x`。 |
+| `impl/bilateral_upsampling.hpp` | `process`、`performProcessing`、`computeDistances` | `direct-main-path` | `tools/bilateral_upsampling.cpp` | organized 像素网格 + 有界窗口累加，算术密度高，边界和 NaN / infinity fallback 都可局部验证；phase 060/070 color-gather family 已把 production public / steady board 转正，并已被用户确认保留；phase 071 补齐 finite mask correctness，phase 072 收窄 same-type gate，phase 073 又扩展 cross RGB/RGBA 并刷新当前二进制 board，public 为 `1.26x/1.21x/1.18x/1.23x/1.22x`，steady 为 `1.31x/1.21x/1.25x/1.21x/1.21x`。 |
 | `impl/marching_cubes.hpp` | `performReconstruction`、`createSurface` | `direct-main-path` | `test/surface/test_marching_cubes.cpp`、`tools/marching_cubes_reconstruction.cpp` | 已完成函数级评估和 generic production adoption；RVV active-cell prepass 已按 `RVVXYZAoSFloatLayout<PointNT>` 接入，edge interpolation RVV 不接入；Phase 060 finite-collapse single-buffer 为 neutral，不改变 production truth。 |
 | `on_nurbs/triangulation.cpp` | `createIndices`、`createVertices`、`convertSurface2PolygonMesh`、`convertSurface2Vertices` | `direct-main-path` | `test/surface/test_on_nurbs.cpp`、`examples/surface/example_nurbs_fitting_surface.cpp` | 规则网格生成和 `Evaluate` 扫描很清楚，和 surface on_nurbs 示例 / 测试直接对得上。 |
 
@@ -50,7 +50,7 @@
 
 | 文件 | 公开入口 / 函数族 | 主成本覆盖类型 | 测试 / bench 可行性 | 去向理由 |
 | --- | --- | --- | --- | --- |
-| `impl/marching_cubes_rbf.hpp` | `voxelizeData`、`kernel` | `partial-preprocess` | `test/surface/test_marching_cubes.cpp`、`tools/marching_cubes_reconstruction.cpp` | `2N x 2N` matrix fill 和 voxel eval 规整，但 `fullPivLu` solve 仍是大块标量成本，先保留。 |
+| `impl/marching_cubes_rbf.hpp` | `voxelizeData`、`kernel` | `partial-preprocess` -> adopted production behavior | `test/surface/test_marching_cubes.cpp`、`tools/marching_cubes_reconstruction.cpp`；`test-rvv/surface/marching_cubes_rbf` | 已完成函数级评估、component ablation、PointNormal production integration 和 generic normal point type 扩展；当前采用 traits-gated normal AoS RVV 路径，Eigen `fullPivLu` solve 和 surface emission 仍保持标量 / 基类路径。 |
 | `impl/marching_cubes_hoppe.hpp` | `voxelizeData` | `diagnostic` | `test/surface/test_marching_cubes.cpp`、`tools/marching_cubes_reconstruction.cpp` | 每个 voxel 都要 `nearestKSearch`，search 稀释了 RVV 片段，先等诊断或消融结果。 |
 | `impl/mls.hpp` | `performProcessing`、`computeMLSPointNormal`、`performUpsampling`、`computeMLSSurface` | `diagnostic` | `test/surface/test_moving_least_squares.cpp`、`tools/mls_smoothing.cpp` | 逐点批量工作很真，但邻域搜索、迭代投影和 OpenMP 合并都要先拆开看。 |
 | `impl/gp3.hpp` | `reconstructPolygons`、`closeTriangle`、`connectPoint` | `diagnostic` | `test/surface/test_gp3.cpp`、`tools/gp3_surface.cpp` | KNN、状态机、fringe queue 和 erase / sort 太重，RVV 片段存在但不够独立。 |
@@ -90,13 +90,17 @@
 | 顺序 | 主题 | 主文件 | 当前状态 | 当前结论 / 下一步条件 |
 | ---: | --- | --- | --- | --- |
 | 1 | organized mesh reconstruction | `impl/organized_fast_mesh.hpp` | 已完成 / no-production / 已提交 | diagnostic 曾正向，但 public path 的 production evidence 负向；生产补丁已回滚，当前不建议继续扩大接入；topic 资产提交为 `7bfead613`。 |
-| 2 | bilateral upsampling | `impl/bilateral_upsampling.hpp` | 已完成函数级评估、production public probe、helper-only / mask-chunk 消融、color-gather production probe 和 cross RGB/RGBA production probe，已采纳 / 当前二进制已刷新 | staged-window-reduction 和旧 exact-gate family 为历史负向；phase 073 RGB/RGBA exact-family color-gather production public 为 `1.23x/1.09x/1.13x/1.10x/1.10x`，steady public 为 `1.21x/1.09x/1.16x/1.09x/1.10x`，Evidence Doctor `Errors=0`、`Warnings=0`、`Suggestions=0`；phase 071 已补 finite mask infinity correctness，phase 073 QEMU Std/RVV 13/13，当前 production patch 已被用户确认保留 / 允许有收益先接入。 |
+| 2 | bilateral upsampling | `impl/bilateral_upsampling.hpp` | 已完成函数级评估、production public probe、helper-only / mask-chunk 消融、color-gather production probe 和 cross RGB/RGBA production probe，已采纳 / 已提交 | staged-window-reduction 和旧 exact-gate family 为历史负向；phase 073 RGB/RGBA exact-family color-gather production public 为 `1.26x/1.21x/1.18x/1.23x/1.22x`，steady public 为 `1.31x/1.21x/1.25x/1.21x/1.21x`，Evidence Doctor `Errors=0`、`Warnings=0`、`Suggestions=0`；phase 071 已补 finite mask infinity correctness，phase 073 QEMU Std/RVV 13/13；生产补丁已被用户确认保留并提交为 `957d99a29`。提交前复验 `run_test_compare` 为 Std/RVV 13/13，`board_smoke` 保持正向决策桶。 |
 | 3 | marching cubes | `impl/marching_cubes.hpp` | 已完成函数级评估、production direct probe，已采纳 generic gate | 当前 production gate 为 `RVVXYZAoSFloatLayout<PointNT>`；QEMU Std/RVV 各 6 tests passed；generic representative 5-run board 为 `PointXYZ=3.873x`、`PointXYZI=3.618x`、`PointXYZRGB=3.601x`、`PointXYZRGBA=3.639x`，Evidence Doctor 均 `Errors=0`、`Warnings=0`、`Suggestions=0`；`PointNormal` 5-run historical anchor 为 `5.330x/6.386x/8.824x`；Phase 060 active-z finite-collapse RVV-vs-RVV median `1.007x`，不接入。 |
 | 4 | on_nurbs triangulation | `on_nurbs/triangulation.cpp` | 已完成 / no-production / 已提交 | `test-rvv/surface/triangulation` 已完成 `param_grid_rvv_store` 接入前诊断并提交为 `0e9320d06`：QEMU / board correctness 和 asm 通过；5-run board repeated 为 `tri_param_grid_512` median `0.978x`、`tri_surface_eval_256` median `0.999x`，两者均 3/5 退化，Evidence Doctor 均 `Errors=1`。用户已说明忽略 on_nurbs 依赖相关方向；剩余不依赖该符号链的 `createIndices` 输出构造只适合非 RVV 标量消融，不建议作为 RVV next phase。 |
 
 ### 4.2 保留实施的候选文件
 
 这些文件保留后续函数级评估路径，但本轮不进建议队列。后续要回答的第一组问题是：RVV 片段到底占不占主成本，还是只是前置装配、诊断或辅助算子。
+
+| 顺序 | 主题 | 主文件 | 当前状态 | 当前结论 / 下一步条件 |
+| ---: | --- | --- | --- | --- |
+| 1 | marching cubes RBF | `impl/marching_cubes_rbf.hpp` | 已完成函数级评估、production integration、generic normal point type expansion，已采纳 / 已提交 | 当前 production gate 为 `__RVV10__ && pcl::rvv::RVVXYZNormalFloatLayout<PointNT>::value && input_->size() >= 16`；覆盖 `PointNormal`、`PointXYZINormal`、`PointXYZRGBNormal` 三个代表点型的 traits-gated normal AoS path。QEMU Std/RVV 各 7/7，板卡 RVV gtest 7/7；board production direct 为 `PointNormal=1.08x/1.07x/1.06x`、`PointXYZINormal=1.08x/1.06x`、`PointXYZRGBNormal=1.08x/1.07x`，Evidence Doctor `Errors=0`、`Warnings=12`、`Suggestions=0`，warning 均为 `low_run_count`。结论是 weak-positive adopted production behavior，提交为 `42c78cac2`；当前不建议继续同 topic 源码优化，后续只在 reviewer 需要更强 repeated evidence 或用户指定自定义 normal-like 点型时另开扩展 phase。 |
 
 ### 4.3 暂缓或不推荐考虑 RVV 优化的文件
 
