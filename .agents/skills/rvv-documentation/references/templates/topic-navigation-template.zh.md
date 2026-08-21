@@ -4,7 +4,7 @@
 
 - `role`: topic_navigation
 - `applies_when`: topic 有 README、当前状态入口、常用命令或提交边界需要给下一轮 worker / reviewer 快速恢复时。
-- `default_path_source`: `artifact_layout.topic_test_dir_template` 解析出的 topic 根目录；入口文件名由 `.agents/config/defaults.yaml`、当前 topic role/path index 或已有 README 链接决定。
+- `default_path_source`: `artifact_layout.topic_navigation_doc_template`；当前 topic 已有稳定 README 路径时可保留，并写入 `doc_suite_role_inventory`。
 - `may_omit_or_merge_when`: topic 还停在 S0/S1 草稿且没有可复用测试资产、bench、phase 或 evaluation；此时 Handoff 必须说明暂未形成 topic-local suite。
 - `must_not_claim`: 不能把 diagnostic speedup 写成 production adoption；不能把不存在的细粒度 target、board repeated evidence 或 `artifact_layout.topic_doc_template` 解析出的 production 长期主题文档写成已存在。
 

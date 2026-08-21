@@ -111,7 +111,7 @@ worker 可用：
 ```
 
 这句短 prompt 默认自动展开为：先执行 S0 偏好 / 配置读取、phase plan、当前源码 shape scan、
-mature sibling parity audit（存在成熟相邻主题或用户点名质量参照时作为 optional calibration）、
+mature sibling parity audit（存在成熟相邻主题或用户点名质量参照时作为补充校准）、
 以及 canonical doc-suite quality bar 审计；若本轮进入 production integration、production closeout、
 production-ready、done 或 stop-for-review，必须同步补齐 topic-local doc suite、evaluation、
 phase result、optimization matrix / roadmap，以及适用的长期 `doc-rvv`。README、evaluation、

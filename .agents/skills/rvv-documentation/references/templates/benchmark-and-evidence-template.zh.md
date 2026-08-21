@@ -4,7 +4,7 @@
 
 - `role`: benchmark_and_evidence
 - `applies_when`: topic 有 bench executable、case-filter、QEMU smoke、board run、summary / manifest、Evidence Doctor、asm attribution 或 registry 证据时。
-- `default_path_source`: `artifact_layout.topic_test_dir_template` 和 `artifact_layout.evaluation_doc_subdir` 解析范围；具体文件名由配置或当前 topic role/path index 决定。
+- `default_path_source`: `artifact_layout.benchmark_and_evidence_doc_template`；当前 topic 已有稳定 role 文档路径时可保留，并写入 `doc_suite_role_inventory`。
 - `may_omit_or_merge_when`: topic 没有 bench、board、summary、doctor 或 registry，且 evaluation 已说明为什么只能做 correctness closeout。
 - `must_not_claim`: 不把 QEMU timing 写成性能结论；不把单次 board smoke 写成 repeated evidence；不把 raw log 当成默认提交产物。
 

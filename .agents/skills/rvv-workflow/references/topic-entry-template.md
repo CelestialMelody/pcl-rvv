@@ -44,7 +44,7 @@
 文档、注释、bench 和证据门槛。
 
 短 prompt 开启新 topic 时，worker 不要求用户额外写长条件。该入口已经默认包含 S0 偏好 /
-配置读取、phase plan、当前源码 shape scan、成熟 sibling optional calibration、canonical
+配置读取、phase plan、当前源码 shape scan、成熟 sibling 补充校准、canonical
 doc-suite quality bar 审计、QEMU bench compare 禁止规则，以及 production / closeout 时的
 topic-local doc suite、evaluation、phase result、optimization matrix / roadmap、适用 `doc-rvv`
 和新增文档 artifact tracking / commit boundary 同步要求。

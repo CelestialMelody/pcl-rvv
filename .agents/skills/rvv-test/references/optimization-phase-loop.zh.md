@@ -143,18 +143,18 @@ phase scope（阶段范围）必须显式小于或等于 topic scope（主题范
 phase，直到 adopted、rejected with evidence、not_applicable with evidence 或
 turn_stop_deferred with stop_condition_hit。
 
-成熟度审计还必须检查 topic-local doc suite（主题本地文档套件）是否达到当前 topic 复杂度需要。默认 quality bar 来自 `rvv-documentation/references/doc-suite-quality-bar.zh.md`，而不是某个具体 sibling topic。worker 应按该规范审计 `README.zh.md`、`doc/testing-overview.zh.md`、`doc/correctness-tests.zh.md`、`doc/benchmark-and-evidence.zh.md`、`doc/optimization-evidence.zh.md`、`doc/test-support-code-map.zh.md`、`doc/<topic>-evaluation.zh.md`、phase index 和 `doc-rvv` 适用性。具体内容可以按当前 topic 裁剪，但结构、读者路径、证据白名单和代码地图必须做 `adopted / rejected with evidence / not_applicable with evidence / turn_stop_deferred with stop_condition_hit` 决策。evaluation 仍在 topic 根目录、缺少 README、缺少测试/bench/代码地图或长期 `doc-rvv` 与 topic-local docs 互相挤压时，都是可继续推进的 unblocked doc-suite action。
-若用户 / reviewer 明确指出某个成熟 topic 作为质量参照，它只能作为 optional calibration（可选校准样例）：不复制算法、数值、phase 名、文件名或 production 结论，只补充检查本文 quality bar 是否漏掉了读者路径、证据白名单或代码地图问题。doc-suite parity 不能只写在 roadmap、Handoff 或最终回复里。worker 必须在当前 phase result 中完成审计，或新建明确的 `structure-parity-doc-suite` phase 并产出 `plan.zh.md` / `result.zh.md`。若缺口只涉及 topic-local docs、长期 `doc-rvv` 分工、evaluation、README 导航或 evidence path 对齐，且没有用户限定、dirty isolation、工具失败或真实外部依赖阻塞，则默认下一 phase 必须先补文档套件，不能声明 `ready_for_review`。
+成熟度审计还必须检查 topic-local doc suite（主题本地文档套件）是否达到当前 topic 复杂度需要。默认 quality bar 来自 `rvv-documentation/references/doc-suite-quality-bar.zh.md` 和 `.agents/config/defaults.yaml` 的 `artifact_layout` role path key，而不是某个具体 sibling topic。phase 恢复和新建 `000-current-state-and-gaps` 时必须执行 `doc_suite_role_inventory`：逐项审计 topic_navigation、testing_overview、correctness_tests、benchmark_and_evidence、optimization_evidence、optimization_roadmap、test_support_code_map、phase_index、evaluation 和 production_topic_doc，状态只能是 `standalone:<path>`、`merged:<path#section>`、`not_applicable with evidence`、`phase_deferred + unblocked` 或 `turn_stop_deferred with stop_condition_hit`。evaluation 仍在 topic 根目录、缺少 README、缺少测试/bench/代码地图或长期 `doc-rvv` 与 topic-local docs 互相挤压时，都是可继续推进的 unblocked doc-suite action。
+若用户 / reviewer 明确指出某个成熟 topic 作为质量参照，它只能补充校准读者路径和结构完整度：不复制算法、数值、phase 名、文件名或 production 结论，也不能覆盖 `artifact_layout` 的默认 role 路径。doc-suite parity 不能只写在 roadmap、Handoff 或最终回复里。worker 必须在当前 phase result 中完成审计，或新建明确的 `structure-parity-doc-suite` phase 并产出 `plan.zh.md` / `result.zh.md`。若缺口只涉及 topic-local docs、长期 `doc-rvv` 分工、evaluation、README 导航或 evidence path 对齐，且没有用户限定、dirty isolation、工具失败或真实外部依赖阻塞，则默认下一 phase 必须先补文档套件，不能声明 `ready_for_review`。
 文档迁移默认不保留 legacy pointer（旧路径指针）、compatibility alias（兼容别名）或重复正文。只有存在明确外部依赖、用户限定必须兼容、跨 topic 脚本暂时无法同轮更新，或 dirty isolation 会误删用户改动时，才可以临时保留；保留时必须在 phase result / Handoff 写出依赖证据、删除条件和下一阶段删除动作。缺少证据的“避免旧引用断开”不是充分理由。
 
 ### Doc Suite Parity Closeout Gate
 
-当当前 topic 命中复杂 topic 条件、存在 production direct 结论、board / Evidence Doctor 证据链，或用户 / reviewer 要求审计文档结构时，production closeout / production-ready / done / stop-for-review 声明必须先满足本门禁。成熟 sibling doc suite 被点名时，只作为 optional calibration；默认规范仍是 `doc-suite-quality-bar.zh.md`。
+当当前 topic 命中复杂 topic 条件、存在 production direct 结论、board / Evidence Doctor 证据链，或用户 / reviewer 要求审计文档结构时，production closeout / production-ready / done / stop-for-review 声明必须先满足本门禁。成熟 sibling doc suite 被点名时，只能补充校准；默认规范仍是 `doc-suite-quality-bar.zh.md` 和 `artifact_layout` role path key。
 
 最小审计表必须覆盖以下文档 area，并使用与 structure-parity phase 相同的列：
 
 ```text
-| area | current shape scan | quality bar / optional calibration | decision | blocker / evidence | next action |
+| area | current shape scan | quality bar / supplemental calibration | decision | blocker / evidence | next action |
 ```
 
 `area` 至少包含：
@@ -180,12 +180,12 @@ turn_stop_deferred with stop_condition_hit。
 
 ### Structure Parity Completion Contract
 
-若当前 topic 存在测试支撑布局、topic-local doc suite、evaluation 主路径、`doc-rvv` 分工或 legacy 清理缺口，worker 必须先按 `artifact_layout`、`test_support` 配置和 `doc-suite-quality-bar.zh.md` 执行 structure parity（结构对齐）审计，而不是只把它写入 roadmap。若当前 topic 与同模块成熟 sibling 有相似复杂度、相似数据流或相似 reviewer 负担，成熟 sibling 只能提供 optional calibration（可选校准样例）；它不能成为唯一参考对象，也不能固定算法、文件名或性能结论。
+若当前 topic 存在测试支撑布局、topic-local doc suite、evaluation 主路径、`doc-rvv` 分工或 legacy 清理缺口，worker 必须先按 `artifact_layout`、`test_support` 配置和 `doc-suite-quality-bar.zh.md` 执行 structure parity（结构对齐）审计，而不是只把它写入 roadmap。若当前 topic 与同模块成熟 sibling 有相似复杂度、相似数据流或相似 reviewer 负担，成熟 sibling 只能补充校准结构完整度；它不能成为唯一参考对象，也不能固定算法、文件名或性能结论。
 
 structure-parity phase 的最小审计表必须覆盖：
 
 ```text
-| area | current shape scan | config / quality bar / optional calibration | decision | blocker / evidence | next action |
+| area | current shape scan | config / quality bar / supplemental calibration | decision | blocker / evidence | next action |
 ```
 
 `area` 至少包含：
@@ -298,7 +298,7 @@ worker 按下列步骤循环，直到命中停止条件：
 6. **解释证据**：把实际结果、输入口径、A/B 边界、checksum、长尾、异常频率、decision bucket、rerun budget、asm attribution、目标硬件和不能证明的范围写入 `result.zh.md`，并更新矩阵状态。
 7. **阶段反思**：用本阶段证据反推是否出现新的 candidate family、消融需求、ILP / LMUL 取舍、文档结构缺口或测试输入缺口；把它们更新到 roadmap，并标注优先级、证据需求和恢复条件。
 8. **更新计划**：将剩余动作按 `blocked` / `unblocked` 标记；为下一阶段写默认目标或创建下一阶段 plan。计划变更必须保留原因，不得把未执行动作直接勾成完成。
-9. **继续 / 停止决策**：如果 roadmap 或矩阵中存在授权且未阻塞的下一动作，默认继续同轮推进；只有命中明确 stop condition 才输出 Handoff 并停止。若本阶段只是建立 roadmap、迁移单份 evaluation、补一个指针或完成一个局部 layout 子任务，而结构 parity / doc suite / legacy 清理仍未闭合，不能把 `next_phase_default` 写成 `ready_for_review`。如果最近 Handoff 或 phase README 已经写了 `ready_for_review`，但恢复扫描发现 roadmap / matrix / mature sibling parity 仍有 `phase_deferred + unblocked`，worker 必须把该 `ready_for_review` 降级为 stale stop decision（过期停止决策），并恢复到第一个未阻塞 phase。
+9. **继续 / 停止决策**：如果 roadmap 或矩阵中存在授权且未阻塞的下一动作，默认继续同轮推进；只有命中明确 stop condition 才输出 Handoff 并停止。若本阶段只是建立 roadmap、迁移单份 evaluation、补一个指针或完成一个局部 layout 子任务，而结构 parity / doc suite / legacy 清理仍未闭合，不能把 `next_phase_default` 写成 `ready_for_review`。如果 `doc_suite_role_inventory` 中仍有只涉及 topic-local docs 且无真实 blocker 的 `phase_deferred + unblocked`，下一 phase 默认是 `structure-parity-doc-suite` 或等价文档补齐 phase。若最近 Handoff 或 phase README 已经写了 `ready_for_review`，但恢复扫描发现 roadmap / matrix / mature sibling parity / doc_suite_role_inventory 仍有 `phase_deferred + unblocked`，worker 必须把该 `ready_for_review` 降级为 stale stop decision（过期停止决策），并恢复到第一个未阻塞 phase。
    若 roadmap 的“默认恢复动作”列出多个候选，worker 不能只复述该列表后停止；必须执行或计划执行
    队列中的未阻塞项。`ready_for_review_validity_checked` 是检查结果标签，不是 stop condition。
 

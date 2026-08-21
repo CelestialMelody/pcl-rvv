@@ -4,7 +4,7 @@
 
 - `role`: correctness_tests
 - `applies_when`: topic 有 gtest、reference path、candidate correctness、fallback correctness、production direct correctness 或随机 / 边界样本需要解释时。
-- `default_path_source`: `artifact_layout.topic_test_dir_template` 和 `artifact_layout.evaluation_doc_subdir` 解析范围；具体文件名由配置或当前 topic role/path index 决定。
+- `default_path_source`: `artifact_layout.correctness_tests_doc_template`；当前 topic 已有稳定 role 文档路径时可保留，并写入 `doc_suite_role_inventory`。
 - `may_omit_or_merge_when`: correctness 只有一个小型 smoke，且 testing overview 或 evaluation 已写清输入、断言和证明范围。
 - `must_not_claim`: 不把 helper-level pass 写成 public semantics pass；不把 checksum 一致写成性能或 asm attribution 证据。
 

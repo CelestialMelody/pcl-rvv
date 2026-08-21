@@ -4,7 +4,7 @@
 
 - `role`: test_support_code_map
 - `applies_when`: topic 的 test support 代码包含三类以上角色，或 reviewer 难以定位 fixture、reference、candidate、bench wrapper、script 和 production 对照关系时。
-- `default_path_source`: `artifact_layout.topic_test_dir_template` 和 `artifact_layout.evaluation_doc_subdir` 解析范围；具体文件名由配置或当前 topic role/path index 决定。
+- `default_path_source`: `artifact_layout.test_support_code_map_doc_template`；当前 topic 已有稳定 role 文档路径时可保留，并写入 `doc_suite_role_inventory`。
 - `may_omit_or_merge_when`: 测试支撑只有一个短 test source，且 evaluation / correctness role 已能完整说明调用关系。
 - `must_not_claim`: 不把 test-only helper 写成 production helper；不把 bench wrapper 写成 public API；不把当前拆分方式写成所有 topic 的必然模板。
 

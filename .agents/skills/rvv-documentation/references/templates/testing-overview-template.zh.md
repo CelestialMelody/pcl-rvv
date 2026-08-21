@@ -4,7 +4,7 @@
 
 - `role`: testing_overview
 - `applies_when`: topic 有多个 test target、QEMU / board target、bench entry、Evidence Doctor 或 reviewer 需要快速判断测试覆盖边界时。
-- `default_path_source`: `artifact_layout.topic_test_dir_template` 和 `artifact_layout.evaluation_doc_subdir` 解析范围；具体文件名由配置或当前 topic role/path index 决定。
+- `default_path_source`: `artifact_layout.testing_overview_doc_template`；当前 topic 已有稳定 role 文档路径时可保留，并写入 `doc_suite_role_inventory`。
 - `may_omit_or_merge_when`: 只有一个 correctness target、没有 bench / board / Evidence Doctor，且 evaluation 已完整列出运行入口和证据边界。
 - `must_not_claim`: QEMU timing 不是性能证据；aggregate target 不能冒充 production direct、fallback 或 board repeated 覆盖。
 

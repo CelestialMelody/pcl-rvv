@@ -4,7 +4,7 @@
 
 - `role`: optimization_evidence
 - `applies_when`: topic 有多个 RVV candidate、attempted / rejected / deferred 优化方式、component ablation、RVV-vs-RVV A/B 或 production integration decision 需要索引时。
-- `default_path_source`: `artifact_layout.topic_test_dir_template` 和 `artifact_layout.evaluation_doc_subdir` 解析范围；具体文件名由配置或当前 topic role/path index 决定。
+- `default_path_source`: `artifact_layout.optimization_evidence_doc_template`；当前 topic 已有稳定 role 文档路径时可保留，并写入 `doc_suite_role_inventory`。
 - `may_omit_or_merge_when`: 只有一个候选、没有替代方案，且 evaluation 的实现方式审计已足够支撑 closeout。
 - `must_not_claim`: 不把尝试过但未采用的 candidate 写成当前 production 行为；不把诊断相对收益写成 production direct speedup。
 

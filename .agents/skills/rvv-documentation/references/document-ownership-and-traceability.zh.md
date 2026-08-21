@@ -42,8 +42,8 @@
 复杂 topic 可以把测试和证据说明拆成多份 topic-local 文档。推荐分工：
 
 这些分工是 role（职责），不是固定文件名。具体路径先从 `.agents/config/defaults.yaml` 的 `artifact_layout`
-解析；如果某个 role 还没有精确路径 key，则使用当前 topic 已确认的 role/path index 或既有链接，并在需要跨
-topic 稳定复用时先补配置，不在模板正文里写死命名。role-based templates 见
+解析；当前 topic 已有稳定 role 路径时可保留，并写入 `doc_suite_role_inventory`；需要跨
+topic 稳定复用的新 role 先补配置，不在模板正文里写死命名。role-based templates 见
 `templates/template-index.zh.md`。
 
 - `topic_navigation`：入口导航、当前结论、阅读路径、常用命令、证据白名单和 production_topic_doc 适用性。
@@ -69,13 +69,13 @@ phase；不要把“只有 reviewer 需要才补”写成合法 closeout。
 production closeout、production-ready、done 或 stop-for-review 声明前，若当前 topic 命中上述 doc-suite
 quality bar 条件，worker 必须产出一个 doc-suite parity 审计结果。该结果可以写在当前 phase `result.zh.md`，
 也可以新建 `structure-parity-doc-suite` phase，但不能只出现在 roadmap、最终回复或 Handoff。成熟 sibling topic
-只能作为 optional calibration（可选校准样例）：用户 / reviewer 点名时可用来补充 quality bar，但不能成为唯一规范源。
+只能作为补充校准：用户 / reviewer 点名时可用来补充 quality bar，但不能成为唯一规范源。
 审计表必须使用以下列，并覆盖 topic_navigation、testing_overview、correctness_tests、benchmark_and_evidence、
 optimization_evidence、optimization_roadmap、test_support_code_map、evaluation、production_topic_doc、phase suite 和 artifact tracking。
 审计表可以在 `area` 中同时写 role 和当前 topic 实际路径，但不能把模板名当成路径规范：
 
 ```text
-| area | current shape scan | quality bar / optional calibration | decision | blocker / evidence | next action |
+| area | current shape scan | quality bar / supplemental calibration | decision | blocker / evidence | next action |
 ```
 
 审计完成后还必须检查文档引用的 artifact tracking（产物跟踪状态）：README、evaluation、roadmap、

@@ -88,7 +88,7 @@ production closeout（收尾）或 production-candidate（生产候选）文档�
 该 gate 的目标不是把 topic-local phase 流水搬进长期文档，而是把长期维护者需要复核的生产事实写完整。
 worker 应从当前 production diff、PI5 result、evaluation、optimization evidence、board summary、
 Evidence Doctor 和 topic-local docs 中抽取长期事实，并用当前源码复核。成熟 sibling topic
-（同模块相邻主题）可以作为 optional calibration（可选校准样例），用来校准结构完整度和读者路径；
+（同模块相邻主题）可以作为补充校准，用来校准结构完整度和读者路径；
 不能复制 sibling 的算法、数值、phase 名、文件名或 production 结论，也不能把某个 sibling 写成规范源。
 
 production `doc-rvv` closeout gate 至少检查并补齐这些 area：

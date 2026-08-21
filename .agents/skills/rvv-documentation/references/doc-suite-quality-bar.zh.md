@@ -1,13 +1,27 @@
 # Topic-local Doc Suite Quality Bar
 
-本文定义复杂 RVV topic（主题）的 topic-local doc suite（主题本地文档套件）质量门槛。它是默认规范源，不依赖任何具体 sibling topic（同模块相邻主题）。成熟 sibling 可以作为校准样例，但只能补充审计，不能替代本文的规范、模板和裁剪规则。
+本文定义复杂 RVV topic（主题）的 topic-local doc suite（主题本地文档套件）质量门槛。它是默认规范源，不依赖任何具体 sibling topic（同模块相邻主题）。成熟 sibling 只能补充校准读者路径和结构完整度，不能替代本文、`templates/template-index.zh.md` 和 `.agents/config/defaults.yaml` 中的 role path key。
 
 ## 何时读取
 
 - 新建或重排 `artifact_layout.topic_test_dir_template` 解析目录下的 topic_navigation、testing/evidence、phase suite、roadmap 或 evaluation role 文档时读取。
 - closeout、production-ready、done、stop-for-review 或 `ready_for_review` 前，当前 topic 命中复杂 topic 条件、存在 production direct（真实生产路径证据）、board summary（板卡摘要）、Evidence Doctor（证据体检）或多阶段 phase loop（阶段循环）时读取。
-- 用户或 reviewer 要求“文档对齐”“可审查性”“文档结构是否像成熟 topic”时读取。若用户点名某个成熟 sibling，只把它作为 `optional calibration`，不要复制 topic-specific（当前主题特有）的算法、数值、phase 名或结论。
+- 用户或 reviewer 要求“文档对齐”“可审查性”“文档结构是否像成熟 topic”时读取。若用户点名某个成熟 sibling，只把它作为补充校准，不要复制 topic-specific（当前主题特有）的算法、数值、phase 名、文件名或结论。
 - 用户已经表达“同意接入 / 可以提交 / 可以保留当前 patch”或 worker 准备停在“是否提交或取消接入”的判断点时，如果当前 topic 有 production patch 或 adopted production behavior，必须同时读取 `topic-doc-structure.md` 的 Production Doc Closeout Gate。此时 `artifact_layout.topic_doc_template` 解析出的长期生产文档质量属于 closeout 本身，不是 `git commit` 前才做的机械检查。
+
+## Doc Suite Role Inventory
+
+恢复 phase loop、新建 `000-current-state-and-gaps`、新建 / 重排 topic-local docs、或准备 closeout / ready-for-review 前，worker 必须写出 `doc_suite_role_inventory`。inventory 逐一覆盖 topic_navigation、testing_overview、correctness_tests、benchmark_and_evidence、optimization_evidence、optimization_roadmap、test_support_code_map、phase_index、evaluation_diagnostic / evaluation_production 和 production_topic_doc。
+
+每个 role 只能使用下列状态：
+
+- `standalone:<path>`：使用 `artifact_layout` 精确 role key 解析出的默认路径，或当前 topic 已有稳定路径；路径必须可从 README、phase index、evaluation 或 Handoff 找到。
+- `merged:<path#section>`：role 合并进现有文档的稳定章节；必须说明 closeout checks 如何被覆盖。
+- `not_applicable with evidence`：当前 topic 确实没有对应测试、bench、script、row source、candidate、production 行为或证据职责。
+- `phase_deferred + unblocked`：仍在当前 topic 授权范围内且没有真实 blocker；下一 phase 默认指向 `structure-parity-doc-suite` 或等价文档补齐 phase。
+- `turn_stop_deferred with stop_condition_hit`：本轮合法停止，必须命中用户限定、dirty isolation、工具 / 板卡不可用、扩大到未授权 production / public API / 其它 topic，或真实外部依赖。
+
+复杂 topic 应优先拆出独立 role 文档，而不是继续把职责塞进 evaluation 或 phase result。复杂度触发包括：多个 test / bench target、board summary 或 Evidence Doctor、多个 candidate family、多个 public entry / row source / 点型 / `Scalar` / layout 组合、测试支撑代码多职责、evaluation 已承担 bench 字典、证据白名单或测试支撑代码地图。未拆出时，inventory 必须写 `merged:<path#section>` 或 `phase_deferred + unblocked`，不能只写“topic 较小”或“内容够看”。
 
 ## 质量目标
 
@@ -21,9 +35,9 @@ topic-local doc suite 应让下一轮 worker 或 reviewer 不依赖聊天上下�
 
 ## Role-based 文档套件
 
-复杂 topic 默认维护一组文档 role（职责），而不是固定文件清单。role-based templates（基于职责的模板）见 [templates/template-index.zh.md](templates/template-index.zh.md)。模板只定义文档职责、内容结构、裁剪规则和 closeout checks；最终文件路径和命名优先服从 `.agents/config/defaults.yaml` 的 `artifact_layout`。
+复杂 topic 默认维护一组文档 role（职责），而不是固定文件清单。role-based templates（基于职责的模板）见 [templates/template-index.zh.md](templates/template-index.zh.md)。模板只定义文档职责、内容结构、裁剪规则和 closeout checks；最终文件路径和命名优先服从 `.agents/config/defaults.yaml` 的 `artifact_layout` 精确 role path key。
 
-当前 topic 确实没有对应职责时，可以裁剪，但必须写 `not_applicable with evidence`，列出不存在的测试、bench、script、row source 或 production 行为。若某个 role 需要跨 topic 稳定落到新文件名，先更新 `artifact_layout` 或配置中的 role/path 解析规则；不要在模板正文里把文件名写成规范。
+当前 topic 确实没有对应职责时，可以裁剪，但必须写 `not_applicable with evidence`，列出不存在的测试、bench、script、row source 或 production 行为。若某个 role 需要跨 topic 稳定落到新文件名，先更新 `artifact_layout` 的 role path key；不要在模板正文或某个 sibling topic 中把文件名写成规范。
 
 | role | 主职责 | 模板 |
 | --- | --- | --- |
@@ -75,18 +89,18 @@ role template 不是可直接复制的固定骨架。使用时先读取 [templat
 
 写文档时遵守：
 
-- 先解析 `artifact_layout`，再决定 role 的实际文件路径。
+- 先解析 `artifact_layout` 精确 role path key，再决定 role 的实际文件路径。
 - 先判断当前 topic 是 diagnostic、partial-production-candidate、production integration 还是 adopted production behavior，再选择 evaluation 模板。
 - 当前 topic 已有成熟 role 文档时，可以保留既有文件名，只按模板补职责缺口。
-- 当前 topic 没有某个 role 时，必须在 phase result 或 Handoff 中用 `not_applicable with evidence`、`rejected with evidence`、`phase_deferred + unblocked` 或 `turn_stop_deferred with stop_condition_hit` 说明。
+- 当前 topic 没有某个 role 时，必须在 `doc_suite_role_inventory`、phase result 或 Handoff 中用 `merged:<path#section>`、`not_applicable with evidence`、`phase_deferred + unblocked` 或 `turn_stop_deferred with stop_condition_hit` 说明。
 - 模板章节可以合并、改名或裁剪，但 closeout checks 覆盖的问题不能消失。
 
 ## 审计表
 
-doc-suite quality bar 审计表使用以下列。`quality bar / optional calibration` 先写本文规范；只有用户、reviewer 或本地历史明确点名成熟 sibling 时，才在同一格补充 sibling calibration（成熟样例校准）。
+doc-suite quality bar 审计表使用以下列。`quality bar / supplemental calibration` 先写本文规范；只有用户、reviewer 或本地历史明确点名成熟 sibling 时，才在同一格补充 sibling calibration（成熟样例校准）。
 
 ```text
-| area | current shape scan | quality bar / optional calibration | decision | blocker / evidence | next action |
+| area | current shape scan | quality bar / supplemental calibration | decision | blocker / evidence | next action |
 ```
 
 `decision` 只使用：
