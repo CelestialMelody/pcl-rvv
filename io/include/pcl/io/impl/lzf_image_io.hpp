@@ -46,7 +46,13 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
+
+#if defined(__RVV10__)
+#include <riscv_vector.h>
+#endif
 
 #define CLIP_CHAR(c) static_cast<unsigned char> ((c)>255?255:(c)<0?0:(c))
 
@@ -56,6 +62,201 @@ namespace pcl
 
 namespace io
 {
+
+namespace detail
+{
+
+template <typename, typename = void>
+struct HasByteRgbFields : std::false_type {};
+
+template <typename PointT>
+struct HasByteRgbFields<PointT,
+                        std::void_t<decltype (std::declval<PointT&> ().r),
+                                    decltype (std::declval<PointT&> ().g),
+                                    decltype (std::declval<PointT&> ().b)>>
+    : std::bool_constant<std::is_standard_layout<PointT>::value &&
+                         std::is_same<std::remove_cv_t<std::remove_reference_t<decltype (std::declval<PointT&> ().r)>>, std::uint8_t>::value &&
+                         std::is_same<std::remove_cv_t<std::remove_reference_t<decltype (std::declval<PointT&> ().g)>>, std::uint8_t>::value &&
+                         std::is_same<std::remove_cv_t<std::remove_reference_t<decltype (std::declval<PointT&> ().b)>>, std::uint8_t>::value> {};
+
+template <typename PointT> inline void
+convertPlanarYuv422ToPointCloudStd (const std::uint8_t* yuv,
+                                    const unsigned width,
+                                    const unsigned height,
+                                    PointT* cloud)
+{
+  const auto pixels = static_cast<std::size_t> (width) * height;
+  const auto pairs = pixels / 2;
+  const auto *color_u = yuv;
+  const auto *color_y = yuv + pairs;
+  const auto *color_v = yuv + pairs + pixels;
+
+  std::size_t y_idx = 0;
+  for (std::size_t i = 0; i < pairs; ++i, y_idx += 2)
+  {
+    const int v = color_v[i] - 128;
+    const int u = color_u[i] - 128;
+
+    PointT &pt1 = cloud[y_idx + 0];
+    pt1.r =  CLIP_CHAR (color_y[y_idx + 0] + ((v * 18678 + 8192 ) >> 14));
+    pt1.g =  CLIP_CHAR (color_y[y_idx + 0] + ((v * -9519 - u * 6472 + 8192) >> 14));
+    pt1.b =  CLIP_CHAR (color_y[y_idx + 0] + ((u * 33292 + 8192 ) >> 14));
+
+    PointT &pt2 = cloud[y_idx + 1];
+    pt2.r =  CLIP_CHAR (color_y[y_idx + 1] + ((v * 18678 + 8192 ) >> 14));
+    pt2.g =  CLIP_CHAR (color_y[y_idx + 1] + ((v * -9519 - u * 6472 + 8192) >> 14));
+    pt2.b =  CLIP_CHAR (color_y[y_idx + 1] + ((u * 33292 + 8192 ) >> 14));
+  }
+}
+
+template <typename PointT> inline void
+convertPlanarYuv422ToPointCloudStdOMP (const std::uint8_t* yuv,
+                                       const unsigned width,
+                                       const unsigned height,
+                                       PointT* cloud,
+                                       unsigned int num_threads)
+{
+  const auto pixels = static_cast<std::size_t> (width) * height;
+  const auto pairs = pixels / 2;
+  const auto *color_u = yuv;
+  const auto *color_y = yuv + pairs;
+  const auto *color_v = yuv + pairs + pixels;
+
+#ifdef _OPENMP
+#pragma omp parallel for                          \
+  default(none)                                   \
+  shared(cloud, color_u, color_v, color_y, pairs) \
+  num_threads(num_threads)
+#else
+  pcl::utils::ignore(num_threads); //suppress warning if OMP is not present
+#endif//_OPENMP
+  for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t> (pairs); ++i)
+  {
+    const std::size_t y_idx = static_cast<std::size_t> (2 * i);
+    const int v = color_v[i] - 128;
+    const int u = color_u[i] - 128;
+
+    PointT &pt1 = cloud[y_idx + 0];
+    pt1.r =  CLIP_CHAR (color_y[y_idx + 0] + ((v * 18678 + 8192 ) >> 14));
+    pt1.g =  CLIP_CHAR (color_y[y_idx + 0] + ((v * -9519 - u * 6472 + 8192) >> 14));
+    pt1.b =  CLIP_CHAR (color_y[y_idx + 0] + ((u * 33292 + 8192 ) >> 14));
+
+    PointT &pt2 = cloud[y_idx + 1];
+    pt2.r =  CLIP_CHAR (color_y[y_idx + 1] + ((v * 18678 + 8192 ) >> 14));
+    pt2.g =  CLIP_CHAR (color_y[y_idx + 1] + ((v * -9519 - u * 6472 + 8192) >> 14));
+    pt2.b =  CLIP_CHAR (color_y[y_idx + 1] + ((u * 33292 + 8192 ) >> 14));
+  }
+}
+
+#if defined(__RVV10__)
+inline vint32m2_t
+lzfU8ToI32 (const vuint8mf2_t value, const std::size_t vl)
+{
+  const vuint16m1_t widened = __riscv_vzext_vf2_u16m1 (value, vl);
+  return __riscv_vwadd_vx_i32m2 (__riscv_vreinterpret_v_u16m1_i16m1 (widened), 0, vl);
+}
+
+inline vint32m2_t
+lzfU8OffsetToI32 (const vuint8mf2_t value, const int offset, const std::size_t vl)
+{
+  const vuint16m1_t widened = __riscv_vzext_vf2_u16m1 (value, vl);
+  const vuint16m1_t shifted = __riscv_vsub_vx_u16m1 (widened, offset, vl);
+  return __riscv_vwadd_vx_i32m2 (__riscv_vreinterpret_v_u16m1_i16m1 (shifted), 0, vl);
+}
+
+inline vuint8mf2_t
+lzfClipI32ToU8 (vint32m2_t value, const std::size_t vl)
+{
+  value = __riscv_vmax_vx_i32m2 (value, 0, vl);
+  value = __riscv_vmin_vx_i32m2 (value, 255, vl);
+  const vuint32m2_t value_u32 = __riscv_vreinterpret_v_i32m2_u32m2 (value);
+  const vuint16m1_t value_u16 = __riscv_vncvt_x_x_w_u16m1 (value_u32, vl);
+  return __riscv_vncvt_x_x_w_u8mf2 (value_u16, vl);
+}
+
+inline vuint8mf2_t
+lzfRgbChannel (const vint32m2_t y, vint32m2_t delta, const std::size_t vl)
+{
+  delta = __riscv_vadd_vx_i32m2 (delta, 8192, vl);
+  delta = __riscv_vsra_vx_i32m2 (delta, 14, vl);
+  return lzfClipI32ToU8 (__riscv_vadd_vv_i32m2 (y, delta, vl), vl);
+}
+
+template <typename PointT> inline void
+lzfStoreRgbFields (PointT* points,
+                   const std::ptrdiff_t point_stride,
+                   const vuint8mf2_t r,
+                   const vuint8mf2_t g,
+                   const vuint8mf2_t b,
+                   const std::size_t vl)
+{
+  __riscv_vsse8_v_u8mf2 (&points->r, point_stride, r, vl);
+  __riscv_vsse8_v_u8mf2 (&points->g, point_stride, g, vl);
+  __riscv_vsse8_v_u8mf2 (&points->b, point_stride, b, vl);
+}
+
+template <typename PointT> inline bool
+convertPlanarYuv422ToPointCloudRVV (const std::uint8_t* yuv,
+                                    const unsigned width,
+                                    const unsigned height,
+                                    PointT* cloud)
+{
+  if constexpr (!HasByteRgbFields<PointT>::value)
+  {
+    return (false);
+  }
+  else
+  {
+    const auto pixels = static_cast<std::size_t> (width) * height;
+    if ((pixels & 1u) != 0u)
+      return (false);
+
+    const auto pairs = pixels / 2;
+    const auto *color_u = yuv;
+    const auto *color_y = yuv + pairs;
+    const auto *color_v = yuv + pairs + pixels;
+    // PCLZF YUV422 stores U and V once per two Y samples; each lane writes two RGB points.
+    const auto point_stride = static_cast<std::ptrdiff_t> (sizeof (PointT) * 2);
+
+    for (std::size_t pair = 0; pair < pairs;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8mf2 (pairs - pair);
+      const vuint8mf2_t u8 = __riscv_vle8_v_u8mf2 (color_u + pair, vl);
+      const vuint8mf2_t v8 = __riscv_vle8_v_u8mf2 (color_v + pair, vl);
+      const vuint8mf2_t y1_8 = __riscv_vlse8_v_u8mf2 (color_y + pair * 2, 2, vl);
+      const vuint8mf2_t y2_8 = __riscv_vlse8_v_u8mf2 (color_y + pair * 2 + 1, 2, vl);
+
+      const vint32m2_t u = lzfU8OffsetToI32 (u8, 128, vl);
+      const vint32m2_t v = lzfU8OffsetToI32 (v8, 128, vl);
+      const vint32m2_t y1 = lzfU8ToI32 (y1_8, vl);
+      const vint32m2_t y2 = lzfU8ToI32 (y2_8, vl);
+
+      const vint32m2_t r_delta = __riscv_vmul_vx_i32m2 (v, 18678, vl);
+      vint32m2_t g_delta = __riscv_vmul_vx_i32m2 (v, -9519, vl);
+      g_delta = __riscv_vsub_vv_i32m2 (g_delta, __riscv_vmul_vx_i32m2 (u, 6472, vl), vl);
+      const vint32m2_t b_delta = __riscv_vmul_vx_i32m2 (u, 33292, vl);
+
+      lzfStoreRgbFields (cloud + pair * 2,
+                         point_stride,
+                         lzfRgbChannel (y1, r_delta, vl),
+                         lzfRgbChannel (y1, g_delta, vl),
+                         lzfRgbChannel (y1, b_delta, vl),
+                         vl);
+      lzfStoreRgbFields (cloud + pair * 2 + 1,
+                         point_stride,
+                         lzfRgbChannel (y2, r_delta, vl),
+                         lzfRgbChannel (y2, g_delta, vl),
+                         lzfRgbChannel (y2, b_delta, vl),
+                         vl);
+
+      pair += vl;
+    }
+    return (true);
+  }
+}
+#endif
+
+} // namespace detail
 
 template <typename PointT> bool
 LZFDepth16ImageReader::read (
@@ -339,28 +540,12 @@ LZFYUV422ImageReader::read (
   cloud.width  = getWidth ();
   cloud.height = getHeight ();
   cloud.resize (getWidth () * getHeight ());
-
-  int wh2 = getWidth () * getHeight () / 2;
-  auto *color_u = reinterpret_cast<unsigned char*> (uncompressed_data.data());
-  auto *color_y = reinterpret_cast<unsigned char*> (&uncompressed_data[wh2]);
-  auto *color_v = reinterpret_cast<unsigned char*> (&uncompressed_data[wh2 + getWidth () * getHeight ()]);
-
-  int y_idx = 0;
-  for (int i = 0; i < wh2; ++i, y_idx += 2)
-  {
-    int v = color_v[i] - 128;
-    int u = color_u[i] - 128;
-
-    PointT &pt1 = cloud[y_idx + 0];
-    pt1.r =  CLIP_CHAR (color_y[y_idx + 0] + ((v * 18678 + 8192 ) >> 14));
-    pt1.g =  CLIP_CHAR (color_y[y_idx + 0] + ((v * -9519 - u * 6472 + 8192) >> 14));
-    pt1.b =  CLIP_CHAR (color_y[y_idx + 0] + ((u * 33292 + 8192 ) >> 14));
-
-    PointT &pt2 = cloud[y_idx + 1];
-    pt2.r =  CLIP_CHAR (color_y[y_idx + 1] + ((v * 18678 + 8192 ) >> 14));
-    pt2.g =  CLIP_CHAR (color_y[y_idx + 1] + ((v * -9519 - u * 6472 + 8192) >> 14));
-    pt2.b =  CLIP_CHAR (color_y[y_idx + 1] + ((u * 33292 + 8192 ) >> 14));
-  }
+  const auto *yuv = reinterpret_cast<const std::uint8_t*> (uncompressed_data.data ());
+#if defined(__RVV10__)
+  if (detail::convertPlanarYuv422ToPointCloudRVV (yuv, getWidth (), getHeight (), cloud.data ()))
+    return (true);
+#endif
+  detail::convertPlanarYuv422ToPointCloudStd (yuv, getWidth (), getHeight (), cloud.data ());
 
   return (true);
 }
@@ -397,36 +582,12 @@ LZFYUV422ImageReader::readOMP (
   cloud.width  = getWidth ();
   cloud.height = getHeight ();
   cloud.resize (getWidth () * getHeight ());
-
-  int wh2 = getWidth () * getHeight () / 2;
-  auto *color_u = reinterpret_cast<unsigned char*> (uncompressed_data.data());
-  auto *color_y = reinterpret_cast<unsigned char*> (&uncompressed_data[wh2]);
-  auto *color_v = reinterpret_cast<unsigned char*> (&uncompressed_data[wh2 + getWidth () * getHeight ()]);
-
-#ifdef _OPENMP
-#pragma omp parallel for                        \
-  default(none)                                 \
-  shared(cloud, color_u, color_v, color_y, wh2) \
-  num_threads(num_threads)
-#else
-  pcl::utils::ignore(num_threads); //suppress warning if OMP is not present
-#endif//_OPENMP
-  for (int i = 0; i < wh2; ++i)
-  {
-    int y_idx = 2*i;
-    int v = color_v[i] - 128;
-    int u = color_u[i] - 128;
-
-    PointT &pt1 = cloud[y_idx + 0];
-    pt1.r =  CLIP_CHAR (color_y[y_idx + 0] + ((v * 18678 + 8192 ) >> 14));
-    pt1.g =  CLIP_CHAR (color_y[y_idx + 0] + ((v * -9519 - u * 6472 + 8192) >> 14));
-    pt1.b =  CLIP_CHAR (color_y[y_idx + 0] + ((u * 33292 + 8192 ) >> 14));
-
-    PointT &pt2 = cloud[y_idx + 1];
-    pt2.r =  CLIP_CHAR (color_y[y_idx + 1] + ((v * 18678 + 8192 ) >> 14));
-    pt2.g =  CLIP_CHAR (color_y[y_idx + 1] + ((v * -9519 - u * 6472 + 8192) >> 14));
-    pt2.b =  CLIP_CHAR (color_y[y_idx + 1] + ((u * 33292 + 8192 ) >> 14));
-  }
+  const auto *yuv = reinterpret_cast<const std::uint8_t*> (uncompressed_data.data ());
+#if defined(__RVV10__)
+  if (detail::convertPlanarYuv422ToPointCloudRVV (yuv, getWidth (), getHeight (), cloud.data ()))
+    return (true);
+#endif
+  detail::convertPlanarYuv422ToPointCloudStdOMP (yuv, getWidth (), getHeight (), cloud.data (), num_threads);
 
   return (true);
 }
@@ -541,4 +702,3 @@ LZFBayer8ImageReader::readOMP (
 } // namespace pcl
 
 #endif  //#ifndef PCL_LZF_IMAGE_IO_HPP_
-
