@@ -71,6 +71,8 @@ worker 到达阶段边界、准备进入生产接入闭环或遇到 blocked（�
 
 提交 evidence logs 前必须优先运行 topic 目录提供的 `make sanitize_output_logs` 和 `make check_output_logs_sanitized`，或直接运行 `artifact_layout.sanitize_logs_script_template` 解析出的脚本并传入 `--check <logs>`；如果 topic 未接入公共 Makefile，再说明等效检查方式。提交前列出将加入的文件、排除的文件、是否仍包含本机路径 / 远端路径 / 用户名 / 私有地址，以及脱敏是否改变 benchmark（性能测试）数值、checksum（校验和）或命令参数。不要把 `build/` 二进制、临时编译日志、`config.mk`、私有地址或聊天记录混入 topic commit。agent instruction patch 应单独提交，不和 topic 内容混在同一 commit，除非用户明确要求。
 
+summary artifact（摘要证据产物）或 Evidence Doctor report（证据体检报告）需要提交时，必须作为单独 evidence commit 或明确分组的 evidence commit，并用 `git add -f <specific files>` 精确选择；不要为单个 topic 在配置解析出的 test root 共享 ignore 文件中添加 evidence allowlist（证据放行列表）。
+
 ## 普通主题入口
 
 从模块函数评估队列或保留候选复筛状态表按推荐顺序选择第一条未完成主题。不要重新做模块级候选选择，除非文档与当前源码存在明确冲突。

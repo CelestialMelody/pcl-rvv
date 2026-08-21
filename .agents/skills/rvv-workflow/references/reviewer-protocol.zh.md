@@ -138,6 +138,7 @@ reviewer 应至少检查：
 - reviewer 应检查 legacy pointer、compatibility alias、旧路径 wrapper 或重复正文。默认应更新引用并删除旧入口；若 worker 保留，只写“避免旧引用断开”而没有具体外部依赖、用户要求、dirty isolation 风险和删除阶段，应作为可审查性缺口。
 - 负向性能结论是否有受证据约束的归因；不能把未验证猜测写成事实，也不能只写“不接生产”而不解释为什么慢。
 - 是否存在不该提交的 build（构建）产物、日志、本机路径、私有地址或 `config.mk`。
+- commit review（提交审查）时必须检查 `git diff --cached --name-only`。如果 staged set（暂存集合）包含配置解析出的 evidence output subdir（证据输出子目录）中的文件，reviewer 必须确认用户明确要求提交 evidence summary（证据摘要）或日志，并确认该文件是通过 `git add -f <specific files>` 精确选择的 evidence commit（证据提交），不是共享 ignore 文件自动暴露出的 topic log。
 - Handoff Packet 是否字段完整，`instruction_trace` 是否真实反映读取并使用过的 instruction sources（指令来源）。
 - Handoff Packet 是否包含 `dirty_isolation`，并明确区分本轮 topic diff、无关 topic diff、instruction diff、raw logs、build 输出和提交边界。缺失时应视为 commit-boundary 风险。
 - Handoff Packet 是否包含 `implementation_review`，并能让 reviewer 复核 public entry / `*_Std` / `*_RVV` 或 diagnostic helper 分层、fallback、gate、公共 API 边界、维护风险和本轮是否只限 diagnostic。

@@ -16,6 +16,12 @@
 - summary artifact（摘要产物）可以临时记录本机 raw archive（原始归档）位置用于当轮溯源，但长期文档和可提交摘要优先使用
   `<local-raw-archive>/...`、`<board-output>/...` 或 env var（环境变量）名等占位符，不把绝对 `/tmp/...`、个人 home（主目录）路径或私有远端路径写成稳定证据入口。
 
+## 共享 ignore 与显式选择
+
+配置解析出的 test root（测试根目录）共享 ignore 文件只维护 generated-output pattern（生成物模式）；具体模式以该文件自身为准，workflow reference（工作流参考）不复制规则清单。topic-specific evidence（主题特定证据）不通过共享 ignore 文件暴露。
+
+summary artifact、Evidence Doctor report（证据体检报告）、manifest（清单）和 topic-local registry（主题本地登记表）默认仍按生成物策略留在本机工作区。需要提交少量摘要证据时，worker 必须先按本文的文档引用、脱敏和 evidence freshness（证据新鲜度）规则确认它们是提交候选，再在 evidence commit（证据提交）中用 `git add -f <specific files>` 精确选择。文档可以引用 ignored evidence output（被忽略的证据输出）作为可复现路径；被引用不代表该文件已经或应该自动进入普通提交。
+
 ## Evidence Freshness（证据新鲜度）
 
 bench、board summary、Evidence Doctor 或 checksum summary 一旦被重新运行，worker 必须判断新 run 是否改变了已经写入 phase result、evaluation、topic 文档、README 或 Handoff Packet 的数值结论。
@@ -72,8 +78,8 @@ bench 类 target 的性能结论默认只来自 board（板卡）或 target hard
 - 被文档引用的 correctness / unit test run log 可以进入提交候选，例如 QEMU `run_test_std.log` / `run_test_rvv.log`、board `run_test.log`，或 topic 明确采用的等价 correctness log。若文档只写 `run_test_compare` 命令而不写具体日志路径，可以改为提交小型 correctness summary，或在文档中补充被保留的具体日志路径。
 - 被文档引用的 bench analyze log 可以进入提交候选，例如 `analyze_bench_compare.log`、repeated benchmark `summary.md`、Evidence Doctor report（证据体检报告）、trace summary 或 topic-local analyzer 生成的性能摘要。原始 `run_bench_*.log` 仍按 raw log 处理，只有文档明确引用且满足脱敏 / 用户授权时才提交。
 - 被文档引用的 raw log（原始日志）仍需满足脱敏检查，或由用户明确要求保留原始文本并确认无私有信息风险。
-- 未被文档引用的 raw run log、board env log（板卡环境日志）、collection manifest（采集清单）、临时 analyzer 输出和空表格摘要不提交；必要时在文档中先补证据角色和路径，再调整 `.gitignore` 或 staging allowlist。
-- `.gitignore` 只应放开文档实际引用的文件或窄模式，不要因为 `log/board` 或 `log/qemu` 目录存在就整体放开。
+- 未被文档引用的 raw run log、board env log（板卡环境日志）、collection manifest（采集清单）、临时 analyzer 输出和空表格摘要不提交；必要时在文档中先补证据角色和路径，再调整 staging selection（暂存选择清单）。
+- 共享 ignore 文件不承载 topic-specific evidence allowlist（主题特定证据放行列表）。需要提交的少量 evidence summary（证据摘要）用 `git add -f <specific files>` 进入 staging selection。
 
 默认 compare 输出是易覆盖产物。`log/board/analyze_bench_compare.log`、`log/qemu/analyze_bench_compare.log`、`log/board/run_bench_*.log` 和 `log/qemu/run_bench_*.log` 可能被下一次不同 `case-filter` 覆盖。长期文档不能只引用这类裸路径。若需要保留 bench analyze 结果，应写入 run-labelled 目录、target-specific output 或 repeated summary，例如 `log/board/run_board_bench_<alias>/analyze_bench_compare.log`、`log/qemu/analyze_bench_compare_<alias>.log` 或 `log/board/<evidence-label>/summary.md`。文档同时写明 target、case-filter、run label 和证据角色。
 
