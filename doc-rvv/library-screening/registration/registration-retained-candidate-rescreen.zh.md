@@ -25,18 +25,18 @@ production integration 证据闭环。
 | 统计项 | 数量 / 结论 |
 | --- | ---: |
 | 3.2 保留实施候选输入总数 | 22 |
-| 建议启动函数级评估 | 3 |
+| 建议启动函数级评估 | 1 |
+| 已完成函数级评估 / no-production | 2 |
 | 暂缓 / 不单独实施 | 19 |
 | 重新纳入 3.2 之外候选 | 0 |
 | 合并、删除或源码冲突项 | 0 |
 
-`建议启动函数级评估` 的默认评估路径分布：
+当前建议启动和已完成路径分布：
 
 | 默认评估路径 | 数量 | 说明 |
 | --- | ---: | --- |
 | `production-value evaluation` | 1 | `transformation_estimation_svd_scale`，直接复用 SVD-family 已验证的 row-source 累加模式。 |
-| `profile prerequisite` | 1 | `gicp`，先证明 residual / covariance component 接近 GICP 入口主成本。 |
-| `component ablation` | 1 | `ndt`，先隔离 `computeDerivatives` / `updateDerivatives` 与 search / solver 的成本边界。 |
+| `completed no-production` | 2 | `gicp` 已回退生产补丁并提交 topic closeout；`ndt` 已完成函数级评估且不建议接入 production。 |
 
 ## 3. 已完成主题经验总结
 
@@ -96,8 +96,8 @@ production integration 证据闭环。
 4. 对 RANSAC、FPCS、sample consensus 和 correspondence rejector 降级：随机采样、feature KNN、model estimation、candidate sorting、histogram / output flow
    会稀释局部 residual 或 inlier scan。
 5. 对简单 field extraction、小固定规模公式和 graph orchestration 降级：`correspondence_types` 和 `bfgs` 已显示语义清楚不等于硬件收益。
-6. `diagnostic`、`production-shaped diagnostic`、`component ablation` 和 `profile prerequisite` 只作为后续 topic 内的首阶段证据路径，
-   本复筛输出仍只分为 `建议启动函数级评估` 与 `暂缓 / 不单独实施`。
+6. `diagnostic`、`production-shaped diagnostic`、`component ablation` 和 `profile prerequisite` 只作为后续 topic 内的首阶段证据路径；
+   已完成 topic 单独归入 `已完成函数级评估 / no-production`，未启动项仍分为 `建议启动函数级评估` 与 `暂缓 / 不单独实施`。
 
 ## 6. 保留实施候选逐项复筛
 
@@ -106,8 +106,13 @@ production integration 证据闭环。
 | 主题 | 关键入口 | 主成本覆盖类型 | 默认评估路径 / 首阶段证据问题 | 匹配的已验证模式 | 主要风险 | 推荐理由 | 证据来源 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `transformation_estimation_svd_scale` | `TransformationEstimationSVDScale::getTransformationFromCorrelation`；后续可扩到 SVD-scale public overload | `partial-preprocess` -> 可验证为 production-value | `production-value evaluation`：能否把 scale 所需 `sum_ss/sum_tt` 与 SVD 已验证的 source / target sum、cross-sum 统一累加，避免 `R4 * cloud_src_demean` 和额外动态矩阵 pass，并保持 scale 数值语义 | SVD 四 row-source fused accumulation 强正向；row-source legal-index / dense / layout gate 可复用 | scale 分母为 0、`float scale` 与 `double sum` 语义、3x3 SVD tail、`use_umeyama_` / dense gate 差异 | 与普通 SVD 数据流同源，是 retained 队列中最明确的下一未完成主题；首 topic 可以快速回答是否继承 SVD production 价值 | `transformation_estimation_svd_scale.hpp`；`transformation_estimation_svd-RVV.zh.md` |
-| `gicp` | `computeCovariances`；`OptimizationFunctorWithIndices::{operator(),df,fdf,dfddf}`；`estimateRigidTransformationBFGS/Newton` | `partial-preprocess` | `profile prerequisite`：先证明 covariance 的 KNN 后协方差局部循环，或 residual / Mahalanobis functor 在 GICP public entry 中有足够占比；若没有占比则 topic 在 S2 关闭 | residual / normal-equation 累加在 LLS / dual quaternion 中成立；但 search dilution 和 BFGS negative 已给硬边界 | covariance 每点先 `nearestKSearch` 再 3x3 SVD；BFGS 6 维 direction update 已板卡负向；Newton / Eigen eigensolver 和 line search 控制流强 | GICP 是 high 候选且源码存在大规模 correspondence residual 累加；但必须先以 profile / component audit 证明局部片段不是被 search / optimizer 吃掉 | `gicp.hpp`；`bfgs-evaluation.zh.md`；`transformation_validation_euclidean-RVV.zh.md` |
-| `ndt` | `NormalDistributionsTransform::computeDerivatives` / `updateDerivatives` / `computeHessian` | `partial-preprocess` | `component ablation`：隔离 per-point neighborhood derivative accumulation，量化 `radiusSearch` / direct voxel lookup、OpenMP reduction、6x6 SVD / Newton step 的稀释比例 | normal-equation / derivative accumulation 是可表达模式；TVE search dilution 提醒必须分段归因 | `radiusSearch` / voxel neighborhood、`std::exp`、Eigen 3x6 / 6x6 小矩阵、OpenMP private reduction 和 Newton line search 混杂 | NDT 公开入口价值高，`updateDerivatives` 对每个 point-neighborhood 重复执行；但只能作为有界消融主题，不能预设 production | `ndt.hpp`；`transformation_validation_euclidean-RVV.zh.md`；LLS-family production docs |
+
+### 6.1A 已完成函数级评估 / no-production
+
+| 主题 | 已尝试入口 | 目标硬件结论 | 当前状态 | 后续恢复条件 | 证据来源 |
+| --- | --- | --- | --- | --- | --- |
+| `gicp` | residual / Mahalanobis diagnostic、covariance post-KNN、`OptimizationFunctorWithIndices::operator()` cost-only production probe、`OptimizationFunctorWithIndices::dfddf()` / `dfddfLoopRVV()` production probe、Phase 004 gather-width 微调 | cost-only public median `1.019x/1.011x` 为 neutral；clean `dfddfLoopRVV()` public median `1.080x/1.058x` 为 weak-positive；gather32 median `1.073x` 未改善 | rollback / no-production；生产源码零 diff，topic closeout 已提交 `4638abfd3` | 只有出现新的高收益候选、或 profile 证明 residual / covariance 能明显穿透完整 public entry 维护成本时才重开 | `test-rvv/registration/gicp/README.zh.md`；`test-rvv/registration/gicp/doc/gicp-evaluation.zh.md` |
+| `ndt` | `computeDerivatives` / `updateDerivatives` per-point neighborhood accumulation | NDT phase 000/010/020 evidence；double `exp` 消融负向 | 已完成函数级评估；no-production | 只能从 fused formula / 减少 staging 的新形态开始，并重新上板卡 | `test-rvv/registration/ndt` |
 
 ### 6.2 暂缓 / 不单独实施
 
@@ -138,8 +143,8 @@ production integration 证据闭环。
 | 顺序 | 主题 | 主文件 | 推荐入口 / 第一 RVV 目标 | 依据模式 / 证据来源 | 状态 | 当前结论 / 下一步条件 |
 | ---: | --- | --- | --- | --- | --- | --- |
 | 1 | `transformation_estimation_svd_scale` | `registration/include/pcl/registration/impl/transformation_estimation_svd_scale.hpp` | `getTransformationFromCorrelation` 中 scale-aware fused accumulation；先覆盖 ordered / dense / `Scalar=float` | SVD production-ready 四 row-source；源码中 `sum_ss/sum_tt` 和 `R4 * cloud_src_demean` 可被同源累加问题验证 | 建议启动函数级评估 | 第一条建议启动的未完成主题。S2 首问：scale 项能否与 SVD fused sums 合并并给出 correctness / numerical budget。 |
-| 2 | `gicp` | `registration/include/pcl/registration/impl/gicp.hpp` | residual / Mahalanobis functor 或 covariance post-KNN accumulation | LLS / dual quaternion 累加模式；TVE search dilution；BFGS negative | 建议启动函数级评估，需 profile prerequisite | S2 首问：GICP public entry 中 residual / covariance component 占比是否足够；若 search / optimizer 主导，则 no-production closeout。 |
-| 3 | `ndt` | `registration/include/pcl/registration/impl/ndt.hpp` | `computeDerivatives` / `updateDerivatives` per-point neighborhood accumulation | LLS-family derivative accumulation模式；NDT 源码中的 search / solver 混合风险 | 建议启动函数级评估，需 component ablation | S2 首问：隔离 derivative accumulation 与 `radiusSearch` / voxel lookup / 6x6 solve / OpenMP reduction 的真实成本。 |
+| 2 | `gicp` | `registration/include/pcl/registration/impl/gicp.hpp` | 已尝试 residual / Mahalanobis diagnostic、covariance post-KNN、`dfddfLoopRVV()` production probe 和 gather-width 微调 | topic-local GICP evidence；cost-only public median `1.019x/1.011x` neutral；clean `dfddfLoopRVV()` public median `1.080x/1.058x` weak-positive；Phase 004 gather32 `1.073x` no-improvement | 已完成函数级评估；rollback / no-production | 不建议接入 production。生产源码已回到零 diff，topic closeout 已提交为 `4638abfd3`；若未来重开，需新的高收益候选或 profile 证明收益能覆盖维护成本。 |
+| 3 | `ndt` | `registration/include/pcl/registration/impl/ndt.hpp` | `computeDerivatives` / `updateDerivatives` per-point neighborhood accumulation | NDT phase 000/010/020 evidence；double `exp` 消融负向 | 已完成函数级评估；no-production | 不建议接入 production；若未来重开，只能从 fused formula / 减少 staging 的新形态开始，并重新上板卡。 |
 | 4 | retained remainder | 其余 19 个 3.2 文件 | 无默认独立 topic | search / RANSAC / LM / graph / small-loop failure boundaries | 暂缓 / 不单独实施 | 等 profile、dataset、子主题完成或用户明确要求恢复。 |
 
 本轮发现两条可补充到 agent 指令的通用规则：
