@@ -38,8 +38,174 @@
 #pragma once
 #include <pcl/common/eigen.h> // for eigen33
 #include <pcl/features/integral_image_normal.h>
+#include <pcl/rvv_point_traits.h>
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+
+#if defined(__RVV10__)
+#include <riscv_vector.h>
+#endif
+
+namespace pcl::detail::integral_image_normal {
+
+template <typename PointInT> inline void
+initializeMapPrepStd (const PointInT* points,
+                      const std::size_t width,
+                      const std::size_t height,
+                      const float max_depth_change_factor,
+                      unsigned char* depth_change_map,
+                      float* distance_map)
+{
+  const std::size_t count = width * height;
+  std::fill_n (depth_change_map, count, 255);
+
+  for (std::size_t ri = 0; ri + 1 < height; ++ri)
+  {
+    for (std::size_t ci = 0; ci + 1 < width; ++ci)
+    {
+      const std::size_t index = ri * width + ci;
+
+      const float depth  = points [index].z;
+      const float depthR = points [index + 1].z;
+      const float depthD = points [index + width].z;
+      const float depthDependendDepthChange = (max_depth_change_factor * (std::abs (depth) + 1.0f) * 2.0f);
+
+      if (std::fabs (depth - depthR) > depthDependendDepthChange
+        || !std::isfinite (depth) || !std::isfinite (depthR))
+      {
+        depth_change_map[index] = 0;
+        depth_change_map[index+1] = 0;
+      }
+      if (std::fabs (depth - depthD) > depthDependendDepthChange
+        || !std::isfinite (depth) || !std::isfinite (depthD))
+      {
+        depth_change_map[index] = 0;
+        depth_change_map[index + width] = 0;
+      }
+    }
+  }
+
+  const float far_distance = static_cast<float> (width + height);
+  for (std::size_t index = 0; index < count; ++index)
+    distance_map[index] = depth_change_map[index] == 0 ? 0.0f : far_distance;
+}
+
+#if defined(__RVV10__)
+inline vbool32_t
+finiteF32Mask (const vfloat32m1_t value, const std::size_t vl)
+{
+  return __riscv_vmfle_vf_f32m1_b32 (__riscv_vfabs_v_f32m1 (value, vl),
+                                     std::numeric_limits<float>::max (),
+                                     vl);
+}
+
+template <typename PointInT> inline bool
+tryInitializeMapPrepRVV (const PointInT* points,
+                         const std::size_t width,
+                         const std::size_t height,
+                         const float max_depth_change_factor,
+                         unsigned char* depth_change_map,
+                         float* distance_map)
+{
+  if constexpr (!pcl::rvv::RVVXYZAoSFloatLayout<PointInT>::value)
+  {
+    return false;
+  }
+  else
+  {
+    using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointInT>;
+    constexpr std::size_t kStrideBytes = sizeof (PointInT);
+    constexpr std::size_t kZOffset = Layout::kZ;
+
+    const std::size_t count = width * height;
+    std::fill_n (depth_change_map, count, 255);
+
+    const auto* base = reinterpret_cast<const std::uint8_t*> (points);
+    const float threshold_scale = max_depth_change_factor * 2.0f;
+    for (std::size_t ri = 0; ri + 1 < height; ++ri)
+    {
+      std::size_t ci = 0;
+      while (ci + 1 < width)
+      {
+        const std::size_t remaining = width - 1 - ci;
+        const std::size_t vl = __riscv_vsetvl_e32m1 (remaining);
+        const std::size_t index = ri * width + ci;
+        const auto* current = base + index * kStrideBytes + kZOffset;
+        const auto* right = base + (index + 1) * kStrideBytes + kZOffset;
+        const auto* down = base + (index + width) * kStrideBytes + kZOffset;
+
+        const vfloat32m1_t depth =
+            __riscv_vlse32_v_f32m1 (reinterpret_cast<const float*> (current),
+                                    static_cast<std::ptrdiff_t> (kStrideBytes),
+                                    vl);
+        const vfloat32m1_t depthR =
+            __riscv_vlse32_v_f32m1 (reinterpret_cast<const float*> (right),
+                                    static_cast<std::ptrdiff_t> (kStrideBytes),
+                                    vl);
+        const vfloat32m1_t depthD =
+            __riscv_vlse32_v_f32m1 (reinterpret_cast<const float*> (down),
+                                    static_cast<std::ptrdiff_t> (kStrideBytes),
+                                    vl);
+        const vfloat32m1_t threshold =
+            __riscv_vfmul_vf_f32m1 (
+                __riscv_vfadd_vf_f32m1 (__riscv_vfabs_v_f32m1 (depth, vl), 1.0f, vl),
+                threshold_scale,
+                vl);
+
+        const vbool32_t finite_depth = finiteF32Mask (depth, vl);
+        const vbool32_t invalid_r =
+            __riscv_vmnot_m_b32 (__riscv_vmand_mm_b32 (finite_depth, finiteF32Mask (depthR, vl), vl), vl);
+        const vbool32_t invalid_d =
+            __riscv_vmnot_m_b32 (__riscv_vmand_mm_b32 (finite_depth, finiteF32Mask (depthD, vl), vl), vl);
+        const vbool32_t edge_r =
+            __riscv_vmor_mm_b32 (
+                __riscv_vmfgt_vv_f32m1_b32 (
+                    __riscv_vfabs_v_f32m1 (__riscv_vfsub_vv_f32m1 (depth, depthR, vl), vl),
+                    threshold,
+                    vl),
+                invalid_r,
+                vl);
+        const vbool32_t edge_d =
+            __riscv_vmor_mm_b32 (
+                __riscv_vmfgt_vv_f32m1_b32 (
+                    __riscv_vfabs_v_f32m1 (__riscv_vfsub_vv_f32m1 (depth, depthD, vl), vl),
+                    threshold,
+                    vl),
+                invalid_d,
+                vl);
+        const vbool32_t edge_any = __riscv_vmor_mm_b32 (edge_r, edge_d, vl);
+        const vuint8mf4_t zero_u8 = __riscv_vmv_v_x_u8mf4 (0, vl);
+
+        __riscv_vse8_v_u8mf4_m (edge_any, depth_change_map + index, zero_u8, vl);
+        __riscv_vse8_v_u8mf4_m (edge_r, depth_change_map + index + 1, zero_u8, vl);
+        __riscv_vse8_v_u8mf4_m (edge_d, depth_change_map + index + width, zero_u8, vl);
+
+        ci += vl;
+      }
+    }
+
+    const float far_distance = static_cast<float> (width + height);
+    for (std::size_t i = 0; i < count;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8mf4 (count - i);
+      const vuint8mf4_t map = __riscv_vle8_v_u8mf4 (depth_change_map + i, vl);
+      const vbool32_t is_zero = __riscv_vmseq_vx_u8mf4_b32 (map, 0, vl);
+      const vfloat32m1_t far_values = __riscv_vfmv_v_f_f32m1 (far_distance, vl);
+      const vfloat32m1_t zero_values = __riscv_vfmv_v_f_f32m1 (0.0f, vl);
+      __riscv_vse32_v_f32m1 (distance_map + i,
+                             __riscv_vmerge_vvm_f32m1 (far_values, zero_values, is_zero, vl),
+                             vl);
+      i += vl;
+    }
+
+    return true;
+  }
+}
+#endif
+
+} // namespace pcl::detail::integral_image_normal
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT, typename PointOutT>
@@ -735,49 +901,28 @@ pcl::IntegralImageNormalEstimation<PointInT, PointOutT>::computeFeature (PointCl
 
   // compute depth-change map
   auto depthChangeMap = new unsigned char[input_->size ()];
-  std::fill_n(depthChangeMap, input_->size(), 255);
-
-  unsigned index = 0;
-  for (unsigned int ri = 0; ri < input_->height-1; ++ri)
-  {
-    for (unsigned int ci = 0; ci < input_->width-1; ++ci, ++index)
-    {
-      index = ri * input_->width + ci;
-
-      const float depth  = input_->points [index].z;
-      const float depthR = input_->points [index + 1].z;
-      const float depthD = input_->points [index + input_->width].z;
-
-      //const float depthDependendDepthChange = (max_depth_change_factor_ * (std::abs(depth)+1.0f))/(500.0f*0.001f);
-      const float depthDependendDepthChange = (max_depth_change_factor_ * (std::abs (depth) + 1.0f) * 2.0f);
-
-      if (std::fabs (depth - depthR) > depthDependendDepthChange
-        || !std::isfinite (depth) || !std::isfinite (depthR))
-      {
-        depthChangeMap[index] = 0;
-        depthChangeMap[index+1] = 0;
-      }
-      if (std::fabs (depth - depthD) > depthDependendDepthChange
-        || !std::isfinite (depth) || !std::isfinite (depthD))
-      {
-        depthChangeMap[index] = 0;
-        depthChangeMap[index + input_->width] = 0;
-      }
-    }
-  }
 
   // compute distance map
   //float *distanceMap = new float[input_->size ()];
   delete[] distance_map_;
   distance_map_ = new float[input_->size ()];
   float *distanceMap = distance_map_;
-  for (std::size_t index = 0; index < input_->size (); ++index)
-  {
-    if (depthChangeMap[index] == 0)
-      distanceMap[index] = 0.0f;
-    else
-      distanceMap[index] = static_cast<float> (input_->width + input_->height);
-  }
+#if defined(__RVV10__)
+  if (!pcl::detail::integral_image_normal::tryInitializeMapPrepRVV (
+          input_->points.data (),
+          input_->width,
+          input_->height,
+          max_depth_change_factor_,
+          depthChangeMap,
+          distanceMap))
+#endif
+    pcl::detail::integral_image_normal::initializeMapPrepStd (
+        input_->points.data (),
+        input_->width,
+        input_->height,
+        max_depth_change_factor_,
+        depthChangeMap,
+        distanceMap);
 
   // first pass
   float* previous_row = distanceMap;
@@ -1198,4 +1343,3 @@ pcl::IntegralImageNormalEstimation<PointInT, PointOutT>::initCompute ()
 }
 
 #define PCL_INSTANTIATE_IntegralImageNormalEstimation(T,NT) template class PCL_EXPORTS pcl::IntegralImageNormalEstimation<T,NT>;
-
