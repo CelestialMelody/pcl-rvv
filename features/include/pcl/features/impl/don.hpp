@@ -43,6 +43,12 @@
 template <typename PointInT, typename PointNT, typename PointOutT> bool
 pcl::DifferenceOfNormalsEstimation<PointInT, PointNT, PointOutT>::initCompute ()
 {
+  if (!PCLBase<PointInT>::initCompute ())
+  {
+    PCL_ERROR ("[pcl::%s::initCompute] Init failed.\n", getClassName ().c_str ());
+    return (false);
+  }
+
   // Check if input normals are set
   if (!input_normals_small_)
   {
