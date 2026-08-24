@@ -35,18 +35,272 @@
  */
 
 #include <pcl/pcl_config.h>
+
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+
+#include <pcl/point_types.h>
+
+#if defined(__RVV10__)
+#include <riscv_vector.h>
+#endif
+
+namespace
+{
+  enum class ONIGrabberXYZPathHook
+  {
+    None = 0,
+    Scalar = 1,
+    Rvv = 2,
+  };
+
+#if defined(PCL_RVV_ONI_GRABBER_TEST_HOOK)
+  int g_oni_grabber_last_hook = static_cast<int> (ONIGrabberXYZPathHook::None);
+
+  extern "C" void
+  pcl_rvv_oni_grabber_reset_test_hook ()
+  {
+    g_oni_grabber_last_hook = static_cast<int> (ONIGrabberXYZPathHook::None);
+  }
+
+  extern "C" int
+  pcl_rvv_oni_grabber_last_test_hook ()
+  {
+    return g_oni_grabber_last_hook;
+  }
+#endif
+
+  void
+  recordONIGrabberXYZPath (ONIGrabberXYZPathHook path)
+  {
+#if defined(PCL_RVV_ONI_GRABBER_TEST_HOOK)
+    g_oni_grabber_last_hook = static_cast<int> (path);
+#else
+    (void)path;
+#endif
+  }
+
+  bool
+  oniGrabberFitsU16Compare (std::uint64_t value)
+  {
+    return value <= std::numeric_limits<std::uint16_t>::max ();
+  }
+
+  void
+  fillXYZPointCloudStd (const std::uint16_t* depth_map,
+                        unsigned width,
+                        unsigned height,
+                        float constant,
+                        int center_x,
+                        int center_y,
+                        std::uint64_t no_sample_value,
+                        std::uint64_t shadow_value,
+                        pcl::PointXYZ* points)
+  {
+    (void)width;
+    (void)height;
+    recordONIGrabberXYZPath (ONIGrabberXYZPathHook::Scalar);
+    const float bad_point = std::numeric_limits<float>::quiet_NaN ();
+    unsigned depth_idx = 0;
+    for (int v = -center_y; v < center_y; ++v)
+    {
+      for (int u = -center_x; u < center_x; ++u, ++depth_idx)
+      {
+        pcl::PointXYZ& pt = points[depth_idx];
+        const std::uint16_t pixel = depth_map[depth_idx];
+        if (pixel == 0 || pixel == no_sample_value || pixel == shadow_value)
+        {
+          pt.x = pt.y = pt.z = bad_point;
+          continue;
+        }
+        pt.z = pixel * 0.001f;
+        pt.x = static_cast<float> (u) * pt.z * constant;
+        pt.y = static_cast<float> (v) * pt.z * constant;
+      }
+    }
+  }
+
+#if defined(__RVV10__)
+  vbool8_t
+  makeInvalidDepthMask (vuint16m2_t pixels,
+                        std::uint64_t no_sample_value,
+                        std::uint64_t shadow_value,
+                        std::size_t vl)
+  {
+    vbool8_t invalid = __riscv_vmseq_vx_u16m2_b8 (pixels, 0, vl);
+    if (oniGrabberFitsU16Compare (no_sample_value))
+      invalid = __riscv_vmor_mm_b8 (
+          invalid,
+          __riscv_vmseq_vx_u16m2_b8 (pixels, static_cast<std::uint16_t> (no_sample_value), vl),
+          vl);
+    if (oniGrabberFitsU16Compare (shadow_value))
+      invalid = __riscv_vmor_mm_b8 (
+          invalid,
+          __riscv_vmseq_vx_u16m2_b8 (pixels, static_cast<std::uint16_t> (shadow_value), vl),
+          vl);
+    return invalid;
+  }
+
+  void
+  fillXYZPointCloudRVV (const std::uint16_t* depth_map,
+                        unsigned width,
+                        unsigned height,
+                        float constant,
+                        int center_x,
+                        int center_y,
+                        std::uint64_t no_sample_value,
+                        std::uint64_t shadow_value,
+                        pcl::PointXYZ* points)
+  {
+    (void)height;
+    recordONIGrabberXYZPath (ONIGrabberXYZPathHook::Rvv);
+    const float bad_point = std::numeric_limits<float>::quiet_NaN ();
+    auto* point_bytes = reinterpret_cast<unsigned char*> (points);
+    const auto point_stride = static_cast<std::ptrdiff_t> (sizeof (pcl::PointXYZ));
+
+    for (int v = -center_y; v < center_y; ++v)
+    {
+      const unsigned row = static_cast<unsigned> (v + center_y);
+      const std::size_t row_offset = static_cast<std::size_t> (row) * width;
+      for (unsigned u = 0; u < width;)
+      {
+        const std::size_t vl = __riscv_vsetvl_e16m2 (width - u);
+        const vuint16m2_t pixels = __riscv_vle16_v_u16m2 (depth_map + row_offset + u, vl);
+        const vbool8_t invalid = makeInvalidDepthMask (pixels, no_sample_value, shadow_value, vl);
+        const vbool8_t valid = __riscv_vmnot_m_b8 (invalid, vl);
+        const vuint32m4_t widened = __riscv_vwaddu_vx_u32m4 (pixels, 0, vl);
+        const vfloat32m4_t z =
+            __riscv_vfmul_vf_f32m4 (__riscv_vfcvt_f_xu_v_f32m4 (widened, vl), 0.001f, vl);
+
+        vuint32m4_t lane_u = __riscv_vid_v_u32m4 (vl);
+        lane_u = __riscv_vadd_vx_u32m4 (lane_u, u, vl);
+        const vfloat32m4_t uf = __riscv_vfcvt_f_xu_v_f32m4 (lane_u, vl);
+        const vfloat32m4_t x = __riscv_vfmul_vf_f32m4 (
+            __riscv_vfmul_vv_f32m4 (
+                __riscv_vfsub_vf_f32m4 (uf, static_cast<float> (center_x), vl), z, vl),
+            constant,
+            vl);
+        const vfloat32m4_t y = __riscv_vfmul_vf_f32m4 (
+            __riscv_vfmul_vv_f32m4 (__riscv_vfmv_v_f_f32m4 (static_cast<float> (v), vl), z, vl),
+            constant,
+            vl);
+        const vfloat32m4_t bad = __riscv_vfmv_v_f_f32m4 (bad_point, vl);
+
+        const std::size_t point_index = row_offset + u;
+        auto* x_ptr = reinterpret_cast<float*> (
+            point_bytes + point_index * sizeof (pcl::PointXYZ) + offsetof (pcl::PointXYZ, x));
+        auto* y_ptr = reinterpret_cast<float*> (
+            point_bytes + point_index * sizeof (pcl::PointXYZ) + offsetof (pcl::PointXYZ, y));
+        auto* z_ptr = reinterpret_cast<float*> (
+            point_bytes + point_index * sizeof (pcl::PointXYZ) + offsetof (pcl::PointXYZ, z));
+
+        __riscv_vsse32_v_f32m4 (x_ptr, point_stride, bad, vl);
+        __riscv_vsse32_v_f32m4 (y_ptr, point_stride, bad, vl);
+        __riscv_vsse32_v_f32m4 (z_ptr, point_stride, bad, vl);
+        __riscv_vsse32_v_f32m4_m (valid, x_ptr, point_stride, x, vl);
+        __riscv_vsse32_v_f32m4_m (valid, y_ptr, point_stride, y, vl);
+        __riscv_vsse32_v_f32m4_m (valid, z_ptr, point_stride, z, vl);
+        u += static_cast<unsigned> (vl);
+      }
+    }
+  }
+#endif
+
+  void
+  fillXYZPointCloudCandidate (const std::uint16_t* depth_map,
+                              unsigned width,
+                              unsigned height,
+                              float constant,
+                              int center_x,
+                              int center_y,
+                              std::uint64_t no_sample_value,
+                              std::uint64_t shadow_value,
+                              pcl::PointXYZ* points)
+  {
+#if defined(__RVV10__)
+    if (width == static_cast<unsigned> (center_x * 2) &&
+        height == static_cast<unsigned> (center_y * 2))
+    {
+      fillXYZPointCloudRVV (depth_map,
+                            width,
+                            height,
+                            constant,
+                            center_x,
+                            center_y,
+                            no_sample_value,
+                            shadow_value,
+                            points);
+      return;
+    }
+#endif
+    fillXYZPointCloudStd (depth_map,
+                          width,
+                          height,
+                          constant,
+                          center_x,
+                          center_y,
+                          no_sample_value,
+                          shadow_value,
+                          points);
+  }
+
+#if defined(PCL_RVV_ONI_GRABBER_TEST_HOOK)
+  extern "C" void
+  pcl_rvv_oni_grabber_fill_xyz_std_test_hook (const std::uint16_t* depth,
+                                              unsigned width,
+                                              unsigned height,
+                                              float constant,
+                                              int center_x,
+                                              int center_y,
+                                              std::uint64_t no_sample_value,
+                                              std::uint64_t shadow_value,
+                                              pcl::PointXYZ* cloud)
+  {
+    fillXYZPointCloudStd (depth,
+                          width,
+                          height,
+                          constant,
+                          center_x,
+                          center_y,
+                          no_sample_value,
+                          shadow_value,
+                          cloud);
+  }
+
+  extern "C" void
+  pcl_rvv_oni_grabber_fill_xyz_candidate_test_hook (const std::uint16_t* depth,
+                                                    unsigned width,
+                                                    unsigned height,
+                                                    float constant,
+                                                    int center_x,
+                                                    int center_y,
+                                                    std::uint64_t no_sample_value,
+                                                    std::uint64_t shadow_value,
+                                                    pcl::PointXYZ* cloud)
+  {
+    fillXYZPointCloudCandidate (depth,
+                                width,
+                                height,
+                                constant,
+                                center_x,
+                                center_y,
+                                no_sample_value,
+                                shadow_value,
+                                cloud);
+  }
+#endif
+}
+
 #ifdef HAVE_OPENNI
 
 #include <pcl/io/oni_grabber.h>
 #include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pcl/common/time.h>
 #include <pcl/console/print.h>
 #include <boost/shared_array.hpp> // for boost::shared_array
 #include <pcl/memory.h>  // for dynamic_pointer_cast
 #include <pcl/exceptions.h>
-
-#include <iostream>
 
 namespace
 {
@@ -354,8 +608,6 @@ ONIGrabber::convertToXYZPointCloud(const openni_wrapper::DepthImage::Ptr& depth_
   int centerX = (cloud->width >> 1);
   int centerY = (cloud->height >> 1);
 
-  float bad_point = std::numeric_limits<float>::quiet_NaN ();
-
   // we have to use Data, since operator[] uses assert -> Debug-mode very slow!
   const unsigned short* depth_map = depth_image->getDepthMetaData ().Data ();
   if (depth_image->getWidth () != depth_width_ || depth_image->getHeight () != depth_height_)
@@ -372,26 +624,15 @@ ONIGrabber::convertToXYZPointCloud(const openni_wrapper::DepthImage::Ptr& depth_
     depth_map = depth_buffer.get ();
   }
 
-  int depth_idx = 0;
-  for (int v = -centerY; v < centerY; ++v)
-  {
-    for (int u = -centerX; u < centerX; ++u, ++depth_idx)
-    {
-      pcl::PointXYZ& pt = (*cloud)[depth_idx];
-      // Check for invalid measurements
-      if (depth_map[depth_idx] == 0 ||
-          depth_map[depth_idx] == depth_image->getNoSampleValue () ||
-          depth_map[depth_idx] == depth_image->getShadowValue ())
-      {
-        // not valid
-        pt.x = pt.y = pt.z = bad_point;
-        continue;
-      }
-      pt.z = depth_map[depth_idx] * 0.001f;
-      pt.x = static_cast<float> (u) * pt.z * constant;
-      pt.y = static_cast<float> (v) * pt.z * constant;
-    }
-  }
+  fillXYZPointCloudCandidate (depth_map,
+                              cloud->width,
+                              cloud->height,
+                              constant,
+                              centerX,
+                              centerY,
+                              depth_image->getNoSampleValue (),
+                              depth_image->getShadowValue (),
+                              cloud->points.data ());
   return (cloud);
 }
 
@@ -635,4 +876,3 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr ONIGrabber::convertToXYZIPointCloud(const o
 
 }
 #endif // HAVE_OPENNI
-
