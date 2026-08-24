@@ -66,11 +66,61 @@ public:
   using Matrix4 =
       typename TransformationEstimationSVD<PointSource, PointTarget, Scalar>::Matrix4;
 
+  using TransformationEstimationSVD<PointSource, PointTarget, Scalar>::
+      estimateRigidTransformation;
+
   /** \brief Inherits from TransformationEstimationSVD, but forces it to not use the
    * Umeyama method */
   TransformationEstimationSVDScale()
   : TransformationEstimationSVD<PointSource, PointTarget, Scalar>(false)
   {}
+
+  /** \brief Estimate a similarity transformation between ordered source and target
+   * point clouds. \param[in] cloud_src the source point cloud dataset \param[in]
+   * cloud_tgt the target point cloud dataset \param[out] transformation_matrix the
+   * resultant transformation matrix
+   */
+  inline void
+  estimateRigidTransformation(const pcl::PointCloud<PointSource>& cloud_src,
+                              const pcl::PointCloud<PointTarget>& cloud_tgt,
+                              Matrix4& transformation_matrix) const override;
+
+  /** \brief Estimate a similarity transformation between indexed source points and
+   * ordered target points. \param[in] cloud_src the source point cloud dataset
+   * \param[in] indices_src the source indices \param[in] cloud_tgt the target point
+   * cloud dataset \param[out] transformation_matrix the resultant transformation
+   * matrix
+   */
+  inline void
+  estimateRigidTransformation(const pcl::PointCloud<PointSource>& cloud_src,
+                              const pcl::Indices& indices_src,
+                              const pcl::PointCloud<PointTarget>& cloud_tgt,
+                              Matrix4& transformation_matrix) const override;
+
+  /** \brief Estimate a similarity transformation between indexed source and target
+   * points. \param[in] cloud_src the source point cloud dataset \param[in] indices_src
+   * the source indices \param[in] cloud_tgt the target point cloud dataset
+   * \param[in] indices_tgt the target indices \param[out] transformation_matrix the
+   * resultant transformation matrix
+   */
+  inline void
+  estimateRigidTransformation(const pcl::PointCloud<PointSource>& cloud_src,
+                              const pcl::Indices& indices_src,
+                              const pcl::PointCloud<PointTarget>& cloud_tgt,
+                              const pcl::Indices& indices_tgt,
+                              Matrix4& transformation_matrix) const override;
+
+  /** \brief Estimate a similarity transformation from explicit correspondences.
+   * \param[in] cloud_src the source point cloud dataset \param[in] cloud_tgt the
+   * target point cloud dataset \param[in] correspondences source/target
+   * correspondences \param[out] transformation_matrix the resultant transformation
+   * matrix
+   */
+  void
+  estimateRigidTransformation(const pcl::PointCloud<PointSource>& cloud_src,
+                              const pcl::PointCloud<PointTarget>& cloud_tgt,
+                              const pcl::Correspondences& correspondences,
+                              Matrix4& transformation_matrix) const override;
 
 protected:
   /** \brief Obtain a 4x4 rigid transformation matrix from a correlation matrix H = src
