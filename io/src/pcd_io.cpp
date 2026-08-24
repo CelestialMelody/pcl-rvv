@@ -41,6 +41,7 @@
 #include <fcntl.h>
 #include <string>
 #include <cstdlib>
+#include <cstdint>
 #include <pcl/common/utils.h> // pcl::utils::ignore
 #include <pcl/common/io.h>
 #include <pcl/common/pcl_filesystem.h>
@@ -52,6 +53,220 @@
 
 #include <cstring>
 #include <cerrno>
+
+#if defined(__RVV10__) && defined(__riscv_vector)
+#include <riscv_vector.h>
+#endif
+
+#if defined(PCL_PCD_IO_RVV_TEST_HOOKS)
+namespace pcl::io::pcd_io_rvv_test
+{
+enum class WriterCompressedPath
+{
+  None,
+  Std,
+  Rvv,
+};
+
+void
+resetWriterCompressedPath ();
+
+void
+recordWriterCompressedPath (WriterCompressedPath path);
+
+WriterCompressedPath
+lastWriterCompressedPath ();
+} // namespace pcl::io::pcd_io_rvv_test
+#endif
+
+namespace
+{
+
+#if defined(PCL_PCD_IO_RVV_TEST_HOOKS)
+namespace pcd_io_test = pcl::io::pcd_io_rvv_test;
+#endif
+
+using PCDFieldSizes = std::vector<int>;
+
+bool
+canUseRvvCompressedWriterPack (const pcl::PCLPointCloud2 &cloud,
+                               const std::vector<pcl::PCLPointField> &fields,
+                               const PCDFieldSizes &fields_sizes,
+                               const std::size_t point_count)
+{
+  if (point_count == 0 || fields.empty () || cloud.point_step % sizeof (std::uint32_t) != 0)
+    return false;
+
+  for (std::size_t i = 0; i < fields.size (); ++i)
+  {
+    if (fields_sizes[i] != static_cast<int> (sizeof (std::uint32_t)) ||
+        fields[i].offset % sizeof (std::uint32_t) != 0)
+      return false;
+  }
+  return true;
+}
+
+void
+packCompressedWriterFieldsStd (const pcl::PCLPointCloud2 &cloud,
+                               const std::vector<pcl::PCLPointField> &fields,
+                               const PCDFieldSizes &fields_sizes,
+                               std::vector<char> &only_valid_data)
+{
+  std::vector<char*> pters (fields.size ());
+  std::size_t toff = 0;
+  const std::size_t point_count = cloud.width * cloud.height;
+  for (std::size_t i = 0; i < pters.size (); ++i)
+  {
+    pters[i] = &only_valid_data[toff];
+    toff += fields_sizes[i] * point_count;
+  }
+
+  for (pcl::uindex_t i = 0; i < point_count; ++i)
+  {
+    for (std::size_t j = 0; j < pters.size (); ++j)
+    {
+      memcpy (pters[j],
+              &cloud.data[i * cloud.point_step + fields[j].offset],
+              fields_sizes[j]);
+      pters[j] += fields_sizes[j];
+    }
+  }
+}
+
+#if defined(__RVV10__) && defined(__riscv_vector)
+bool
+packCompressedWriterFieldsRVV (const pcl::PCLPointCloud2 &cloud,
+                               const std::vector<pcl::PCLPointField> &fields,
+                               const PCDFieldSizes &fields_sizes,
+                               std::vector<char> &only_valid_data)
+{
+  const std::size_t point_count = cloud.width * cloud.height;
+  if (!canUseRvvCompressedWriterPack (cloud, fields, fields_sizes, point_count))
+    return false;
+
+  const auto stride_bytes = static_cast<std::ptrdiff_t> (cloud.point_step);
+  std::size_t packed_offset = 0;
+  for (std::size_t field_index = 0; field_index < fields.size (); ++field_index)
+  {
+    auto *dst = reinterpret_cast<std::uint32_t*> (only_valid_data.data () + packed_offset);
+    const auto *src =
+        reinterpret_cast<const std::uint32_t*> (cloud.data.data () + fields[field_index].offset);
+    for (std::size_t point = 0; point < point_count;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m4 (point_count - point);
+      const vuint32m4_t values =
+          __riscv_vlse32_v_u32m4 (src + point * (cloud.point_step / sizeof (std::uint32_t)),
+                                  stride_bytes,
+                                  vl);
+      __riscv_vse32_v_u32m4 (dst + point, values, vl);
+      point += vl;
+    }
+    packed_offset += static_cast<std::size_t> (fields_sizes[field_index]) * point_count;
+  }
+  return true;
+}
+#endif
+
+int
+writeBinaryCompressedPayloadStd (const pcl::PCLPointCloud2 &cloud,
+                                 const std::vector<pcl::PCLPointField> &fields,
+                                 const PCDFieldSizes &fields_sizes,
+                                 const std::size_t data_size,
+                                 std::vector<char> &temp_buf)
+{
+  if (data_size != 0)
+  {
+    std::vector<char> only_valid_data (data_size);
+    packCompressedWriterFieldsStd (cloud, fields, fields_sizes, only_valid_data);
+
+    unsigned int compressed_size = pcl::lzfCompress (&only_valid_data.front (),
+                                                     static_cast<unsigned int> (data_size),
+                                                     &temp_buf[8],
+                                                     data_size * 3 / 2);
+    if (compressed_size == 0)
+      return (-1);
+
+    memcpy (temp_buf.data (), &compressed_size, 4);
+    memcpy (&temp_buf[4], &data_size, 4);
+    temp_buf.resize (compressed_size + 8);
+  }
+  else
+  {
+    auto *header = reinterpret_cast<std::uint32_t*> (temp_buf.data ());
+    header[0] = 0;
+    header[1] = 0;
+  }
+#if defined(PCL_PCD_IO_RVV_TEST_HOOKS)
+  pcd_io_test::recordWriterCompressedPath (pcd_io_test::WriterCompressedPath::Std);
+#endif
+  return (0);
+}
+
+#if defined(__RVV10__) && defined(__riscv_vector)
+int
+tryWriteBinaryCompressedPayloadRVV (const pcl::PCLPointCloud2 &cloud,
+                                    const std::vector<pcl::PCLPointField> &fields,
+                                    const PCDFieldSizes &fields_sizes,
+                                    const std::size_t data_size,
+                                    std::vector<char> &temp_buf)
+{
+  if (data_size == 0)
+    return (-1);
+
+  std::vector<char> only_valid_data (data_size);
+  if (!packCompressedWriterFieldsRVV (cloud, fields, fields_sizes, only_valid_data))
+    return (-1);
+
+  unsigned int compressed_size = pcl::lzfCompress (&only_valid_data.front (),
+                                                   static_cast<unsigned int> (data_size),
+                                                   &temp_buf[8],
+                                                   data_size * 3 / 2);
+  if (compressed_size == 0)
+    return (-1);
+
+  memcpy (temp_buf.data (), &compressed_size, 4);
+  memcpy (&temp_buf[4], &data_size, 4);
+  temp_buf.resize (compressed_size + 8);
+#if defined(PCL_PCD_IO_RVV_TEST_HOOKS)
+  pcd_io_test::recordWriterCompressedPath (pcd_io_test::WriterCompressedPath::Rvv);
+#endif
+  return (0);
+}
+#endif
+
+} // namespace
+
+#if defined(PCL_PCD_IO_RVV_TEST_HOOKS)
+namespace pcl::io::pcd_io_rvv_test
+{
+
+WriterCompressedPath&
+writerCompressedPathStorage ()
+{
+  static WriterCompressedPath path = WriterCompressedPath::None;
+  return path;
+}
+
+void
+resetWriterCompressedPath ()
+{
+  writerCompressedPathStorage () = WriterCompressedPath::None;
+}
+
+void
+recordWriterCompressedPath (const WriterCompressedPath path)
+{
+  writerCompressedPathStorage () = path;
+}
+
+WriterCompressedPath
+lastWriterCompressedPath ()
+{
+  return writerCompressedPathStorage ();
+}
+
+} // namespace pcl::io::pcd_io_rvv_test
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -1405,59 +1620,12 @@ pcl::PCDWriter::writeBinaryCompressed (std::ostream &os, const pcl::PCLPointClou
   }
 
   std::vector<char> temp_buf (data_size * 3 / 2 + 8);
-  if (data_size != 0) {
-
-    //////////////////////////////////////////////////////////////////////
-    // Empty array holding only the valid data
-    // data_size = nr_points * point_size
-    //           = nr_points * (sizeof_field_1 + sizeof_field_2 + ... sizeof_field_n)
-    //           = sizeof_field_1 * nr_points + sizeof_field_2 * nr_points + ...
-    //           sizeof_field_n * nr_points
-    std::vector<char> only_valid_data(data_size);
-
-    // Convert the XYZRGBXYZRGB structure to XXYYZZRGBRGB to aid compression. For
-    // this, we need a vector of fields.size () (4 in this case), which points to
-    // each individual plane:
-    //   pters[0] = &only_valid_data[offset_of_plane_x];
-    //   pters[1] = &only_valid_data[offset_of_plane_y];
-    //   pters[2] = &only_valid_data[offset_of_plane_z];
-    //   pters[3] = &only_valid_data[offset_of_plane_RGB];
-    //
-    std::vector<char*> pters(fields.size());
-    std::size_t toff = 0;
-    for (std::size_t i = 0; i < pters.size(); ++i) {
-      pters[i] = &only_valid_data[toff];
-      toff += fields_sizes[i] * cloud.width * cloud.height;
-    }
-
-    // Go over all the points, and copy the data in the appropriate places
-    for (uindex_t i = 0; i < cloud.width * cloud.height; ++i) {
-      for (std::size_t j = 0; j < pters.size(); ++j) {
-        memcpy(pters[j],
-               &cloud.data[i * cloud.point_step + fields[j].offset],
-               fields_sizes[j]);
-        // Increment the pointer
-        pters[j] += fields_sizes[j];
-      }
-    }
-
-    // Compress the valid data
-    unsigned int compressed_size = pcl::lzfCompress (&only_valid_data.front (),
-                                                    static_cast<unsigned int> (data_size),
-                                                    &temp_buf[8],
-                                                    data_size * 3 / 2);
-    // Was the compression successful?
-    if (compressed_size == 0)
-    {
+#if defined(__RVV10__) && defined(__riscv_vector)
+  if (tryWriteBinaryCompressedPayloadRVV (cloud, fields, fields_sizes, data_size, temp_buf) != 0)
+#endif
+  {
+    if (writeBinaryCompressedPayloadStd (cloud, fields, fields_sizes, data_size, temp_buf) != 0)
       return (-1);
-    }
-    memcpy (temp_buf.data(), &compressed_size, 4);
-    memcpy (&temp_buf[4], &data_size, 4);
-    temp_buf.resize (compressed_size + 8);
-  } else {
-    auto *header = reinterpret_cast<std::uint32_t*>(temp_buf.data());
-    header[0] = 0; // compressed_size is 0
-    header[1] = 0; // data_size is 0
   }
 
   os.imbue (std::locale::classic ());
@@ -1575,4 +1743,3 @@ pcl::PCDWriter::writeBinaryCompressed (const std::string &file_name, const pcl::
 
   return (0);
 }
-
