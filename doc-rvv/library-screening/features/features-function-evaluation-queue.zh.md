@@ -119,7 +119,7 @@
 | 顺序 | 主题 | 主文件 | 推荐入口 / 第一 RVV 目标 | 状态 | 当前结论 / 下一步条件 |
 | ----: | ---- | ------ | ------------------------ | ---- | -------------------- |
 | 1 | DON pointwise normal difference | `impl/don.hpp` | `computeFeature` 的 normal 差与输出写回 | 未启动 | 可直接建立函数级 correctness + QEMU 评估；确认前置 normal 成本稀释边界 |
-| 2 | NormalEstimation covariance helper | `impl/normal_3d.hpp` | `computePointNormal` 中邻域 centroid/covariance 累加 | 未启动 | 复用 `normal_3d` benchmark，先隔离 search/Eigen 与 helper 成本 |
+| 2 | NormalEstimation covariance helper | `impl/normal_3d.hpp` | `computePointNormal` 中邻域 centroid/covariance 累加 | 已完成（诊断，不接 production） | `test-rvv/features/normal_3d` Phase 000 已证明 common covariance RVV component median `1.43x`，public `NormalEstimation` median `1.02x` 且 Doctor 标记 near-threshold；当前不建议修改 `normal_3d.hpp` |
 | 3 | Integral image normal organized output | `impl/integral_image_normal.hpp` | depth/distance maps 与 `computeFeatureFull/Part` 输出 loops | 未启动 | 先做 organized synthetic correctness；`integral_image2D` 作为伴随保留 |
 | 4 | SHOT descriptor | `impl/shot.hpp` | `computePointSHOT` descriptor bin/normalize/copy | 进行中 | 已建立 `test-rvv/features/shot` Phase 000 诊断计划和自包含测试 / bench scaffold；OMP 文件仅作对照，不单独实施 |
 | 5 | FPFH descriptor | `impl/fpfh.hpp` | SPFH/FPFH pair histogram 与 weighted SPFH | 未启动 | 先建立 caller-shaped `src/pfh.cpp` helper ablation |
