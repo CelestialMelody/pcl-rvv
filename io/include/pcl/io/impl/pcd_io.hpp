@@ -41,16 +41,301 @@
 #define PCL_IO_PCD_IO_IMPL_H_
 
 #include <boost/algorithm/string/trim.hpp> // for trim
+#include <cstdint>
 #include <fstream>
 #include <fcntl.h>
 #include <string>
 #include <cstdlib>
+#include <vector>
 #include <pcl/common/io.h> // for getFields, ...
 #include <pcl/console/print.h>
 #include <pcl/io/low_level_io.h>
 #include <pcl/io/pcd_io.h>
 
 #include <pcl/io/lzf.h>
+
+#if defined(__RVV10__) && defined(__riscv_vector)
+#include <riscv_vector.h>
+#endif
+
+namespace pcl::io::detail
+{
+  enum class PCDWriterCompressedPathHook
+  {
+    None = 0,
+    Scalar = 1,
+    Rvv = 2,
+  };
+
+  enum class PCDWriterBinaryPathHook
+  {
+    None = 0,
+    Scalar = 1,
+    Memcpy = 2,
+    Rvv = 3,
+  };
+
+#if defined(PCL_RVV_PCD_WRITER_TEST_HOOK)
+  inline int&
+  pcdWriterCompressedLastTestHook ()
+  {
+    static int last_hook = static_cast<int> (PCDWriterCompressedPathHook::None);
+    return (last_hook);
+  }
+
+  extern "C" inline void
+  pcl_rvv_pcd_writer_compressed_reset_test_hook ()
+  {
+    pcdWriterCompressedLastTestHook () =
+        static_cast<int> (PCDWriterCompressedPathHook::None);
+  }
+
+  extern "C" inline int
+  pcl_rvv_pcd_writer_compressed_last_test_hook ()
+  {
+    return (pcdWriterCompressedLastTestHook ());
+  }
+
+  inline int&
+  pcdWriterBinaryLastTestHook ()
+  {
+    static int last_hook = static_cast<int> (PCDWriterBinaryPathHook::None);
+    return (last_hook);
+  }
+
+  extern "C" inline void
+  pcl_rvv_pcd_writer_binary_reset_test_hook ()
+  {
+    pcdWriterBinaryLastTestHook () =
+        static_cast<int> (PCDWriterBinaryPathHook::None);
+  }
+
+  extern "C" inline int
+  pcl_rvv_pcd_writer_binary_last_test_hook ()
+  {
+    return (pcdWriterBinaryLastTestHook ());
+  }
+#endif
+
+  inline void
+  recordPCDWriterCompressedPath (const PCDWriterCompressedPathHook path)
+  {
+#if defined(PCL_RVV_PCD_WRITER_TEST_HOOK)
+    pcdWriterCompressedLastTestHook () = static_cast<int> (path);
+#else
+    (void)path;
+#endif
+  }
+
+  inline void
+  recordPCDWriterBinaryPath (const PCDWriterBinaryPathHook path)
+  {
+#if defined(PCL_RVV_PCD_WRITER_TEST_HOOK)
+    pcdWriterBinaryLastTestHook () = static_cast<int> (path);
+#else
+    (void)path;
+#endif
+  }
+
+  inline void
+  packBinaryFieldsStd (const char* point_data,
+                       const std::size_t point_count,
+                       const std::size_t point_step,
+                       const std::vector<pcl::PCLPointField>& fields,
+                       const std::vector<int>& fields_sizes,
+                       char* out)
+  {
+    recordPCDWriterBinaryPath (PCDWriterBinaryPathHook::Scalar);
+    for (std::size_t point = 0; point < point_count; ++point)
+    {
+      const char* point_ptr = point_data + point * point_step;
+      for (std::size_t field_index = 0; field_index < fields.size (); ++field_index)
+      {
+        memcpy (out, point_ptr + fields[field_index].offset, fields_sizes[field_index]);
+        out += fields_sizes[field_index];
+      }
+    }
+  }
+
+  inline bool
+  binaryFieldsSupportTuple4BytePack (const char* point_data,
+                                     const std::size_t point_count,
+                                     const std::size_t point_step,
+                                     const std::vector<pcl::PCLPointField>& fields,
+                                     const std::vector<int>& fields_sizes)
+  {
+    if (point_count == 0 || fields.size () != 4 || fields_sizes.size () != 4 ||
+        point_step % sizeof (std::uint32_t) != 0)
+      return (false);
+
+    if (reinterpret_cast<std::uintptr_t> (point_data) % alignof (std::uint32_t) != 0)
+      return (false);
+
+    for (std::size_t i = 0; i < fields.size (); ++i)
+    {
+      if (fields_sizes[i] != static_cast<int> (sizeof (std::uint32_t)) ||
+          fields[i].offset != i * sizeof (std::uint32_t))
+        return (false);
+    }
+    return (point_step >= fields.size () * sizeof (std::uint32_t));
+  }
+
+  inline void
+  packBinaryCompressedFieldsStd (const char* point_data,
+                                 const std::size_t point_count,
+                                 const std::size_t point_step,
+                                 const std::vector<pcl::PCLPointField>& fields,
+                                 const std::vector<int>& fields_sizes,
+                                 char* only_valid_data)
+  {
+    std::vector<char*> pters (fields.size ());
+    std::size_t toff = 0;
+    for (std::size_t i = 0; i < pters.size (); ++i)
+    {
+      pters[i] = &only_valid_data[toff];
+      toff += static_cast<std::size_t> (fields_sizes[i]) * point_count;
+    }
+
+    recordPCDWriterCompressedPath (PCDWriterCompressedPathHook::Scalar);
+    for (std::size_t point = 0; point < point_count; ++point)
+    {
+      const char* point_ptr = point_data + point * point_step;
+      for (std::size_t j = 0; j < fields.size (); ++j)
+      {
+        memcpy (pters[j], point_ptr + fields[j].offset, fields_sizes[j]);
+        pters[j] += fields_sizes[j];
+      }
+    }
+  }
+
+  inline bool
+  compressedFieldsSupportRvv4BytePack (const char* point_data,
+                                       const char* only_valid_data,
+                                       const std::size_t point_count,
+                                       const std::size_t point_step,
+                                       const std::vector<pcl::PCLPointField>& fields,
+                                       const std::vector<int>& fields_sizes)
+  {
+    if (point_count == 0 || fields.empty () || point_step % sizeof (std::uint32_t) != 0)
+      return (false);
+
+    if (reinterpret_cast<std::uintptr_t> (point_data) % alignof (std::uint32_t) != 0 ||
+        reinterpret_cast<std::uintptr_t> (only_valid_data) % alignof (std::uint32_t) != 0)
+      return (false);
+
+    for (std::size_t i = 0; i < fields.size (); ++i)
+    {
+      if (fields_sizes[i] != static_cast<int> (sizeof (std::uint32_t)) ||
+          fields[i].offset % sizeof (std::uint32_t) != 0)
+        return (false);
+    }
+    return (true);
+  }
+
+#if defined(__RVV10__) && defined(__riscv_vector)
+  inline bool
+  packBinaryFieldsTupleRVV (const char* point_data,
+                            const std::size_t point_count,
+                            const std::size_t point_step,
+                            const std::vector<pcl::PCLPointField>& fields,
+                            const std::vector<int>& fields_sizes,
+                            char* out)
+  {
+    if (!binaryFieldsSupportTuple4BytePack (
+            point_data, point_count, point_step, fields, fields_sizes))
+      return (false);
+
+    constexpr std::size_t packed_point_step = 4 * sizeof (std::uint32_t);
+    const std::size_t packed_size = point_count * packed_point_step;
+    if (point_step == packed_point_step)
+    {
+      memcpy (out, point_data, packed_size);
+      recordPCDWriterBinaryPath (PCDWriterBinaryPathHook::Memcpy);
+      return (true);
+    }
+
+    std::vector<char> staging;
+    char* packed_out = out;
+    if (reinterpret_cast<std::uintptr_t> (packed_out) % alignof (std::uint32_t) != 0)
+    {
+      staging.resize (packed_size);
+      packed_out = staging.data ();
+      if (reinterpret_cast<std::uintptr_t> (packed_out) % alignof (std::uint32_t) != 0)
+        return (false);
+    }
+
+    const auto stride_bytes = static_cast<std::ptrdiff_t> (point_step);
+    const std::size_t stride_words = point_step / sizeof (std::uint32_t);
+    const auto* src0 = reinterpret_cast<const std::uint32_t*> (point_data);
+    const auto* src1 = reinterpret_cast<const std::uint32_t*> (point_data + sizeof (std::uint32_t));
+    const auto* src2 = reinterpret_cast<const std::uint32_t*> (point_data + 2 * sizeof (std::uint32_t));
+    const auto* src3 = reinterpret_cast<const std::uint32_t*> (point_data + 3 * sizeof (std::uint32_t));
+    auto* dst = reinterpret_cast<std::uint32_t*> (packed_out);
+
+    for (std::size_t point = 0; point < point_count;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (point_count - point);
+      const vuint32m2_t v0 =
+          __riscv_vlse32_v_u32m2 (src0 + point * stride_words, stride_bytes, vl);
+      const vuint32m2_t v1 =
+          __riscv_vlse32_v_u32m2 (src1 + point * stride_words, stride_bytes, vl);
+      const vuint32m2_t v2 =
+          __riscv_vlse32_v_u32m2 (src2 + point * stride_words, stride_bytes, vl);
+      const vuint32m2_t v3 =
+          __riscv_vlse32_v_u32m2 (src3 + point * stride_words, stride_bytes, vl);
+      vuint32m2x4_t tuple =
+          __riscv_vset_v_u32m2_u32m2x4 (__riscv_vundefined_u32m2x4 (), 0, v0);
+      tuple = __riscv_vset_v_u32m2_u32m2x4 (tuple, 1, v1);
+      tuple = __riscv_vset_v_u32m2_u32m2x4 (tuple, 2, v2);
+      tuple = __riscv_vset_v_u32m2_u32m2x4 (tuple, 3, v3);
+      __riscv_vsseg4e32_v_u32m2x4 (dst + point * 4, tuple, vl);
+      point += vl;
+    }
+
+    if (!staging.empty ())
+      memcpy (out, staging.data (), packed_size);
+
+    recordPCDWriterBinaryPath (PCDWriterBinaryPathHook::Rvv);
+    return (true);
+  }
+
+  inline bool
+  packBinaryCompressedFieldsRVV (const char* point_data,
+                                 const std::size_t point_count,
+                                 const std::size_t point_step,
+                                 const std::vector<pcl::PCLPointField>& fields,
+                                 const std::vector<int>& fields_sizes,
+                                 char* only_valid_data)
+  {
+    if (!compressedFieldsSupportRvv4BytePack (
+            point_data, only_valid_data, point_count, point_step, fields, fields_sizes))
+      return (false);
+
+    const auto stride_bytes = static_cast<std::ptrdiff_t> (point_step);
+    const std::size_t stride_words = point_step / sizeof (std::uint32_t);
+    recordPCDWriterCompressedPath (PCDWriterCompressedPathHook::Rvv);
+
+    std::size_t plane_offset = 0;
+    for (const auto& field : fields)
+    {
+      const auto* src =
+          reinterpret_cast<const std::uint32_t*> (point_data + field.offset);
+      auto* dst = reinterpret_cast<std::uint32_t*> (only_valid_data + plane_offset);
+      for (std::size_t point = 0; point < point_count;)
+      {
+        const std::size_t vl = __riscv_vsetvl_e32m4 (point_count - point);
+        const vuint32m4_t values =
+            __riscv_vlse32_v_u32m4 (src + point * stride_words, stride_bytes, vl);
+        __riscv_vse32_v_u32m4 (dst + point, values, vl);
+        point += vl;
+      }
+      plane_offset += sizeof (std::uint32_t) * point_count;
+    }
+    return (true);
+  }
+
+#endif
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> std::string
@@ -199,14 +484,14 @@ pcl::PCDWriter::writeBinary (const std::string &file_name,
 
   // Copy the data
   char *out = &map[0] + data_idx;
-  for (const auto& point: cloud)
+  const auto* point_data = reinterpret_cast<const char*> (cloud.points.data ());
+#if defined(__RVV10__) && defined(__riscv_vector)
+  if (!pcl::io::detail::packBinaryFieldsTupleRVV (
+          point_data, cloud.size (), sizeof (PointT), fields, fields_sizes, out))
+#endif
   {
-    int nrj = 0;
-    for (const auto &field : fields)
-    {
-      memcpy (out, reinterpret_cast<const char*> (&point) + field.offset, fields_sizes[nrj]);
-      out += fields_sizes[nrj++];
-    }
+    pcl::io::detail::packBinaryFieldsStd (
+        point_data, cloud.size (), sizeof (PointT), fields, fields_sizes, out);
   }
 
   // If the user set the synchronization flag on, call msync
@@ -306,31 +591,14 @@ pcl::PCDWriter::writeBinaryCompressed (const std::string &file_name,
   //           = sizeof_field_1 * nr_points + sizeof_field_2 * nr_points + ... sizeof_field_n * nr_points
   char *only_valid_data = static_cast<char*> (malloc (data_size));
 
-  // Convert the XYZRGBXYZRGB structure to XXYYZZRGBRGB to aid compression. For
-  // this, we need a vector of fields.size () (4 in this case), which points to
-  // each individual plane:
-  //   pters[0] = &only_valid_data[offset_of_plane_x];
-  //   pters[1] = &only_valid_data[offset_of_plane_y];
-  //   pters[2] = &only_valid_data[offset_of_plane_z];
-  //   pters[3] = &only_valid_data[offset_of_plane_RGB];
-  //
-  std::vector<char*> pters (fields.size ());
-  std::size_t toff = 0;
-  for (std::size_t i = 0; i < pters.size (); ++i)
+  const auto* point_data = reinterpret_cast<const char*> (cloud.points.data ());
+#if defined(__RVV10__) && defined(__riscv_vector)
+  if (!pcl::io::detail::packBinaryCompressedFieldsRVV (
+          point_data, cloud.size (), sizeof (PointT), fields, fields_sizes, only_valid_data))
+#endif
   {
-    pters[i] = &only_valid_data[toff];
-    toff += static_cast<std::size_t>(fields_sizes[i]) * cloud.size();
-  }
-  
-  // Go over all the points, and copy the data in the appropriate places
-  for (const auto& point: cloud)
-  {
-    for (std::size_t j = 0; j < fields.size (); ++j)
-    {
-      memcpy (pters[j], reinterpret_cast<const char*> (&point) + fields[j].offset, fields_sizes[j]);
-      // Increment the pointer
-      pters[j] += fields_sizes[j];
-    }
+    pcl::io::detail::packBinaryCompressedFieldsStd (
+        point_data, cloud.size (), sizeof (PointT), fields, fields_sizes, only_valid_data);
   }
 
   char* temp_buf = static_cast<char*> (malloc (static_cast<std::size_t> (static_cast<float> (data_size) * 1.5f + 8.0f)));
