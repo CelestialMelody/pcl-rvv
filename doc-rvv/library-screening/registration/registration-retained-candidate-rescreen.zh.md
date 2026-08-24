@@ -25,7 +25,8 @@ production integration 证据闭环。
 | 统计项 | 数量 / 结论 |
 | --- | ---: |
 | 3.2 保留实施候选输入总数 | 22 |
-| 建议启动函数级评估 | 1 |
+| 建议启动函数级评估 | 0 |
+| 已完成函数级评估 / production-adopted | 1 |
 | 已完成函数级评估 / no-production | 2 |
 | 暂缓 / 不单独实施 | 19 |
 | 重新纳入 3.2 之外候选 | 0 |
@@ -35,8 +36,9 @@ production integration 证据闭环。
 
 | 默认评估路径 | 数量 | 说明 |
 | --- | ---: | --- |
-| `production-value evaluation` | 1 | `transformation_estimation_svd_scale`，直接复用 SVD-family 已验证的 row-source 累加模式。 |
+| `production-adopted` | 1 | `transformation_estimation_svd_scale` 已完成 production direct 接入、文档收口和拆分提交。 |
 | `completed no-production` | 2 | `gicp` 已回退生产补丁并提交 topic closeout；`ndt` 已完成函数级评估且不建议接入 production。 |
+| `ready-to-start retained topic` | 0 | 当前 3.2 保留候选里没有默认建议立即启动的新函数级评估；后续只能按 profile、dataset 或用户指定恢复。 |
 
 ## 3. 已完成主题经验总结
 
@@ -53,6 +55,7 @@ production integration 证据闭环。
 | `correspondence_types` | `correspondence_types.hpp` | query / match index extraction、distance stats | diagnostic + 临时 production probe | diagnostic medians `0.959/0.960/0.987`；production probe `0.983/0.966/0.877`，均 negative | QEMU / board correctness 8 tests | bench 级 asm；production attribution 未抵消负向 | rollback / no-production | 语义清楚的 strided field extraction 仍太小 / memory-bound，分流成本高于收益。 |
 | `correspondence_rejection_poly` | `correspondence_rejection_poly.hpp` | polygon edge predicate / acceptance | production-shaped diagnostic + production direct replay | edge gather staging historical weak-positive；production direct 2048 `0.904x`、8192 `0.977x`，两组 5/5 degradation | QEMU / board 8 tests | replay full asm 可见 Standard / RVV helper | rollback / no-production | random sampling、histogram / Otsu、输出过滤和完整入口控制流稀释局部 edge formula。 |
 | `transformation_estimation_svd` | `transformation_estimation_svd.hpp` | Umeyama / SVD row-source | ordered、source-indexed、dual-indices、correspondence 四条 public overload | ordered `14.372x/24.471x/23.841x`；source-indexed `9.634x/12.217x/11.558x`；dual `6.805x/6.404x/5.964x`；correspondence `8.649x/8.644x/7.872x` | QEMU Std/RVV 22/22；board RVV 22/22 | 四条 public overload 均有 load/gather/FMA/reduction 归属 | production-ready / adopted | 只覆盖 `Scalar=float`、dense、layout-gated xyz AoS、`use_umeyama_==true` 和合法 row source。 |
+| `transformation_estimation_svd_scale` | `transformation_estimation_svd_scale.hpp` | SVD scale-aware fused accumulation | ordered、source-indexed、dual-indexed、correspondence public overload；float / common xyz AoS / bounded double；affine contiguous fast path；custom layout double sampled | ordered float production median B/A `26.123x/33.860x/33.066x`；row-source float 9/9 positive；row-source generic double 9/9 positive，median B/A `11.309x`-`17.433x`；custom layout double sampling positive with warnings | final QEMU Std/RVV 38/38；production fallback / semantic tests 覆盖 dense、size、variance、point type、row source 和 double 分支 | phase 结果与 bench dump 记录 public overload 内 load/gather/FMA/reduction 归属 | production-adopted；support commit `994395eb2`，docs commit `074507833` | custom layout 全集、non-dense、小规模、非法 index / correspondence、stride / reverse / shuffle affine 和 sorted-copy double family 不外推。 |
 | `transformation_estimation_dual_quaternion` | `transformation_estimation_dual_quaternion.hpp` | dual quaternion C1/C2 | ordered、source-indexed、dual-indexed production；correspondence scalar | ordered `3.232x/3.644x/3.656x`；source-indexed `2.540x/2.631x/2.586x`；dual `2.015x/1.808x/2.021x`；correspondence probe negative | QEMU Std 28/28，RVV 32/32 | retained bench binary 中 load/gather/widen/reduction 指令 | production-adopted for three row sources | correspondence 64K / 256K negative，已移除 production dispatch。 |
 | `bfgs` | `bfgs.h` | optimizer direction update | test-only diagnostic | direction-update vector6 `0.648x`，vector128 `0.740x`，均 negative | QEMU Std/RVV 6 tests | bench binary filtered asm；无 production hotspot 归属 | diagnostic stop / no-production | GICP 6 维状态太小，line search / functor 回调 / 控制流主导。 |
 
@@ -60,7 +63,7 @@ production integration 证据闭环。
 
 | 模式标签 | 来自哪些已完成主题 | 成立条件 | 失败 / 回退边界 | 对后续候选的影响 |
 | --- | --- | --- | --- | --- |
-| `row-source fused accumulation` | SVD、dual quaternion、LLS、weighted LLS、symmetric LLS | public overload 主成本是按点对 / row source 扫描，RVV 能替代动态矩阵填充、sum/cross-sum、C1/C2 或 normal-equation 构造 | `Scalar=double`、非 dense、未验证点型、非法 index、solver tail 单独小规模 | 直接提升 SVD-family 的 `transformation_estimation_svd_scale`。 |
+| `row-source fused accumulation` | SVD、SVD-scale、dual quaternion、LLS、weighted LLS、symmetric LLS | public overload 主成本是按点对 / row source 扫描，RVV 能替代动态矩阵填充、sum/cross-sum、scale sum、C1/C2 或 normal-equation 构造 | 非 dense、未验证点型、非法 index、solver tail 单独小规模；`Scalar=double` 需要独立数值预算和同边界证据 | 已完成 SVD-scale production-adopted；后续候选仍必须按 row source / point type / Scalar 独立闭合。 |
 | `organized projection direct pipeline` | CEOP | 避免 KdTree，projection / predicate / mask / compress 形成连续生产链，append 标量边界清晰 | 可变输出结构体 scatter、stored distance bit pattern、target append 顺序 | 只支持 organized projection 类候选；不能提升普通 KNN correspondence。 |
 | `isolated transform full scan` | ICP `transformCloud` | 公开 helper 主成本就是大规模 4x4 transform / normal rotation，AoS offset gate 清晰 | end-to-end ICP 仍可能由 correspondence/search/estimator 主导 | 支持把 transformCloud 当独立已完成能力，不再用它升级 search-dominated 候选。 |
 | `search dilution` | transformation validation euclidean、普通 correspondence、GICP / NDT 源码审计 | RVV 只覆盖 search 前后少量 staging 或 threshold tail | KdTree / voxel search / radius search / tree setup 占入口主成本 | 普通 KNN correspondence、GICP、NDT 默认不能写成 production 优化；需 profile 或 component ablation。 |
@@ -88,8 +91,8 @@ production integration 证据闭环。
 
 本轮对 3.2 保留候选作如下口径修正：
 
-1. 对 SVD-family row-source 累加候选上调：普通 SVD 已证明 fused sum / cross-sum 可以替代动态矩阵填充并覆盖四类 public row source，
-   `transformation_estimation_svd_scale` 是当前 retained 队列中最直接的可复用项。
+1. 对 SVD-family row-source 累加候选的复筛结论已经落地：普通 SVD 的 fused sum / cross-sum 经验已在
+   `transformation_estimation_svd_scale` 中完成 production direct 采纳；该主题不再是待启动候选。
 2. 对 search-dominated 候选降级：只覆盖 KdTree / radiusSearch 前后处理、K 个候选内小公式或 threshold append 的文件，
    不再默认作为独立生产价值主题；只有真实 profile 或 component ablation 显示局部片段接近主成本时才恢复。
 3. 对 optimizer / solver 主导候选降级：BFGS direction-update 在板卡负向，LM / numerical diff / Eigen solver 控制流仍未显示可被局部 residual RVV 覆盖。
@@ -103,11 +106,15 @@ production integration 证据闭环。
 
 ### 6.1 建议启动函数级评估
 
-| 主题 | 关键入口 | 主成本覆盖类型 | 默认评估路径 / 首阶段证据问题 | 匹配的已验证模式 | 主要风险 | 推荐理由 | 证据来源 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `transformation_estimation_svd_scale` | `TransformationEstimationSVDScale::getTransformationFromCorrelation`；后续可扩到 SVD-scale public overload | `partial-preprocess` -> 可验证为 production-value | `production-value evaluation`：能否把 scale 所需 `sum_ss/sum_tt` 与 SVD 已验证的 source / target sum、cross-sum 统一累加，避免 `R4 * cloud_src_demean` 和额外动态矩阵 pass，并保持 scale 数值语义 | SVD 四 row-source fused accumulation 强正向；row-source legal-index / dense / layout gate 可复用 | scale 分母为 0、`float scale` 与 `double sum` 语义、3x3 SVD tail、`use_umeyama_` / dense gate 差异 | 与普通 SVD 数据流同源，是 retained 队列中最明确的下一未完成主题；首 topic 可以快速回答是否继承 SVD production 价值 | `transformation_estimation_svd_scale.hpp`；`transformation_estimation_svd-RVV.zh.md` |
+当前无默认建议立即启动的新函数级评估。保留候选 remainder 需要 profile、dataset、子主题完成或用户明确指定后再恢复。
 
-### 6.1A 已完成函数级评估 / no-production
+### 6.1A 已完成函数级评估 / production-adopted
+
+| 主题 | 已采纳入口 | 目标硬件结论 | 当前状态 | 后续恢复条件 | 证据来源 |
+| --- | --- | --- | --- | --- | --- |
+| `transformation_estimation_svd_scale` | ordered、source-indexed、dual-indexed、correspondence public overload；float / common xyz AoS / bounded double；affine contiguous fast path；custom layout double sampling | ordered float production median B/A `26.123x/33.860x/33.066x`；row-source float 9/9 positive；row-source generic double 9/9 positive，median B/A `11.309x`-`17.433x`；custom layout double sampled slices positive with warnings | production-adopted；topic closeout 已拆成 support commit `994395eb2` 与 docs commit `074507833` | 只有新的输入分布、profile、point type / layout 全集需求或 sorted-copy double family-selection 新证据出现时才重开 | `doc-rvv/registration/transformation_estimation_svd_scale-RVV.zh.md`；`test-rvv/registration/transformation_estimation_svd_scale/README.zh.md`；`test-rvv/registration/transformation_estimation_svd_scale/doc/transformation_estimation_svd_scale-evaluation.zh.md` |
+
+### 6.1B 已完成函数级评估 / no-production
 
 | 主题 | 已尝试入口 | 目标硬件结论 | 当前状态 | 后续恢复条件 | 证据来源 |
 | --- | --- | --- | --- | --- | --- |
@@ -142,7 +149,7 @@ production integration 证据闭环。
 
 | 顺序 | 主题 | 主文件 | 推荐入口 / 第一 RVV 目标 | 依据模式 / 证据来源 | 状态 | 当前结论 / 下一步条件 |
 | ---: | --- | --- | --- | --- | --- | --- |
-| 1 | `transformation_estimation_svd_scale` | `registration/include/pcl/registration/impl/transformation_estimation_svd_scale.hpp` | `getTransformationFromCorrelation` 中 scale-aware fused accumulation；先覆盖 ordered / dense / `Scalar=float` | SVD production-ready 四 row-source；源码中 `sum_ss/sum_tt` 和 `R4 * cloud_src_demean` 可被同源累加问题验证 | 建议启动函数级评估 | 第一条建议启动的未完成主题。S2 首问：scale 项能否与 SVD fused sums 合并并给出 correctness / numerical budget。 |
+| 1 | `transformation_estimation_svd_scale` | `registration/include/pcl/registration/impl/transformation_estimation_svd_scale.hpp` | scale-aware fused accumulation 已覆盖 ordered、row-source、bounded double、affine contiguous fast path 和 custom layout sampling | SVD-family row-source fused accumulation 已在本 topic 验证并接入 production；正式文档和 phase suite 已提交 | 已完成函数级评估；production-adopted | 当前 topic 已结束。后续只在出现新的输入分布、profile 或更大 point type / layout scope 需求时重开。 |
 | 2 | `gicp` | `registration/include/pcl/registration/impl/gicp.hpp` | 已尝试 residual / Mahalanobis diagnostic、covariance post-KNN、`dfddfLoopRVV()` production probe 和 gather-width 微调 | topic-local GICP evidence；cost-only public median `1.019x/1.011x` neutral；clean `dfddfLoopRVV()` public median `1.080x/1.058x` weak-positive；Phase 004 gather32 `1.073x` no-improvement | 已完成函数级评估；rollback / no-production | 不建议接入 production。生产源码已回到零 diff，topic closeout 已提交为 `4638abfd3`；若未来重开，需新的高收益候选或 profile 证明收益能覆盖维护成本。 |
 | 3 | `ndt` | `registration/include/pcl/registration/impl/ndt.hpp` | `computeDerivatives` / `updateDerivatives` per-point neighborhood accumulation | NDT phase 000/010/020 evidence；double `exp` 消融负向 | 已完成函数级评估；no-production | 不建议接入 production；若未来重开，只能从 fused formula / 减少 staging 的新形态开始，并重新上板卡。 |
 | 4 | retained remainder | 其余 19 个 3.2 文件 | 无默认独立 topic | search / RANSAC / LM / graph / small-loop failure boundaries | 暂缓 / 不单独实施 | 等 profile、dataset、子主题完成或用户明确要求恢复。 |
