@@ -1,0 +1,78 @@
+{
+  "checks": {
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "allowed_contract_mismatches": [],
+      "ba_values": [
+        1.31,
+        1.3,
+        1.31,
+        1.31,
+        1.3
+      ],
+      "baseline": {
+        "boundary": "test_helper_production_shaped",
+        "build": "std_no_rvv_macro",
+        "checksum_policy": "bench_printed_checksum_verified_by_matching_std_rvv_logs",
+        "gate": "rvv_macro_or_std_build",
+        "label": "std_no_rvv_macro",
+        "mask": "finite_xyz_mask_for_initial_ground_and_grid_z_min",
+        "ms_max": 108.298,
+        "ms_median": 108.231,
+        "ms_min": 108.08,
+        "reduction": "window_min_max_and_threshold_tail",
+        "row_source": "full_cloud_plus_current_ground",
+        "solve": false,
+        "timer_boundary": "apmf full pipeline diagnostic",
+        "wrapper": "bench_apmf"
+      },
+      "candidate": {
+        "boundary": "test_helper_production_shaped",
+        "build": "rvv_macro",
+        "checksum_policy": "bench_printed_checksum_verified_by_matching_std_rvv_logs",
+        "gate": "rvv_macro_or_std_build",
+        "label": "rvv_macro",
+        "mask": "finite_xyz_mask_for_initial_ground_and_grid_z_min",
+        "ms_max": 83.331,
+        "ms_median": 82.9287,
+        "ms_min": 82.6496,
+        "reduction": "window_min_max_and_threshold_tail",
+        "row_source": "full_cloud_plus_current_ground",
+        "solve": false,
+        "timer_boundary": "apmf full pipeline diagnostic",
+        "wrapper": "bench_apmf"
+      },
+      "case_kind": "production_shaped_diagnostic",
+      "decision_bucket": "positive",
+      "evidence_role": "production-shaped diagnostic",
+      "group": "apmf_full_pipeline_repeated_board",
+      "iterations": 8,
+      "name": "apmf full pipeline diagnostic",
+      "notes": "APMF diagnostic evidence. This is not production direct evidence; it can only support a bounded production probe if production scope and fallback are planned separately.",
+      "point_type": "PointXYZ",
+      "run_count": 5,
+      "size": 262144,
+      "warmup_iterations": 2
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "evidence_role": "production-shaped diagnostic",
+    "metadata": {
+      "binary_hash": "dc6889a6ede3384d5de61a3c2d24325317bd6bf318e70a535cefa556b7241d54",
+      "device": "Milkv-Jupiter",
+      "freq": "not_recorded",
+      "governor": "not_recorded",
+      "iterations": 8,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "temperature": "not_recorded",
+      "vlen": "not_recorded",
+      "warmup_iterations": 2
+    },
+    "summary_path": "log/board/full-pipeline-repeated/summary.md",
+    "title": "APMF full-pipeline repeated board diagnostic"
+  }
+}

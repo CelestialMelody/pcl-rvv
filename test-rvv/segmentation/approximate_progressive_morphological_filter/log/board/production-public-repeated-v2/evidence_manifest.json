@@ -1,0 +1,131 @@
+{
+  "checks": {
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "allowed_contract_mismatches": [],
+      "ba_values": [
+        1.59,
+        1.6,
+        1.67,
+        1.6,
+        1.61
+      ],
+      "baseline": {
+        "boundary": "public_overload",
+        "build": "std_no_rvv_macro",
+        "checksum_policy": "bench_printed_checksum_verified_by_matching_std_rvv_logs",
+        "gate": "rvv_macro_or_std_build",
+        "label": "std_no_rvv_macro",
+        "mask": "finite_xyz_mask_for_grid_z_min_and_initial_ground",
+        "ms_max": 100.659,
+        "ms_median": 96.5598,
+        "ms_min": 95.9583,
+        "reduction": "window_min_max_scalar_with_rvv_grid_and_tail_when_available",
+        "row_source": "full_cloud_public_extract",
+        "solve": false,
+        "timer_boundary": "apmf production public dense",
+        "wrapper": "bench_apmf_production"
+      },
+      "candidate": {
+        "boundary": "public_overload",
+        "build": "rvv_macro",
+        "checksum_policy": "bench_printed_checksum_verified_by_matching_std_rvv_logs",
+        "gate": "rvv_macro_or_std_build",
+        "label": "rvv_macro",
+        "mask": "finite_xyz_mask_for_grid_z_min_and_initial_ground",
+        "ms_max": 60.286,
+        "ms_median": 60.2522,
+        "ms_min": 60.1503,
+        "reduction": "window_min_max_scalar_with_rvv_grid_and_tail_when_available",
+        "row_source": "full_cloud_public_extract",
+        "solve": false,
+        "timer_boundary": "apmf production public dense",
+        "wrapper": "bench_apmf_production"
+      },
+      "case_kind": "production_public",
+      "decision_bucket": "positive",
+      "evidence_role": "production-public",
+      "group": "apmf_production_public_repeated_board",
+      "iterations": 8,
+      "name": "apmf production public dense",
+      "notes": "APMF production public evidence. Std and RVV builds are compared through ApproximateProgressiveMorphologicalFilter::extract, so this evidence supports the PI5 production retention decision for the covered public overload and point type.",
+      "point_type": "PointXYZ",
+      "run_count": 5,
+      "size": 262144,
+      "warmup_iterations": 2
+    },
+    {
+      "allowed_contract_mismatches": [],
+      "ba_values": [
+        1.35,
+        1.35,
+        1.39,
+        1.35,
+        1.36
+      ],
+      "baseline": {
+        "boundary": "public_overload",
+        "build": "std_no_rvv_macro",
+        "checksum_policy": "bench_printed_checksum_verified_by_matching_std_rvv_logs",
+        "gate": "rvv_macro_or_std_build",
+        "label": "std_no_rvv_macro",
+        "mask": "finite_xyz_mask_for_grid_z_min_and_initial_ground",
+        "ms_max": 116.64,
+        "ms_median": 113.306,
+        "ms_min": 112.669,
+        "reduction": "window_min_max_scalar_with_rvv_grid_and_tail_when_available",
+        "row_source": "full_cloud_public_extract",
+        "solve": false,
+        "timer_boundary": "apmf production public non-dense",
+        "wrapper": "bench_apmf_production"
+      },
+      "candidate": {
+        "boundary": "public_overload",
+        "build": "rvv_macro",
+        "checksum_policy": "bench_printed_checksum_verified_by_matching_std_rvv_logs",
+        "gate": "rvv_macro_or_std_build",
+        "label": "rvv_macro",
+        "mask": "finite_xyz_mask_for_grid_z_min_and_initial_ground",
+        "ms_max": 83.8216,
+        "ms_median": 83.7085,
+        "ms_min": 83.6489,
+        "reduction": "window_min_max_scalar_with_rvv_grid_and_tail_when_available",
+        "row_source": "full_cloud_public_extract",
+        "solve": false,
+        "timer_boundary": "apmf production public non-dense",
+        "wrapper": "bench_apmf_production"
+      },
+      "case_kind": "production_public",
+      "decision_bucket": "positive",
+      "evidence_role": "production-public",
+      "group": "apmf_production_public_repeated_board",
+      "iterations": 8,
+      "name": "apmf production public non-dense",
+      "notes": "APMF production public evidence. Std and RVV builds are compared through ApproximateProgressiveMorphologicalFilter::extract, so this evidence supports the PI5 production retention decision for the covered public overload and point type.",
+      "point_type": "PointXYZ",
+      "run_count": 5,
+      "size": 262144,
+      "warmup_iterations": 2
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "evidence_role": "production-public",
+    "metadata": {
+      "binary_hash": "9523e778647393927874e530965ac058aeb9d1327d41ceba064afd4f0356c21c",
+      "device": "Milkv-Jupiter",
+      "freq": "not_recorded",
+      "governor": "not_recorded",
+      "iterations": 8,
+      "run_count": 5,
+      "taskset": "not_pinned",
+      "temperature": "not_recorded",
+      "vlen": "not_recorded",
+      "warmup_iterations": 2
+    },
+    "summary_path": "log/board/production-public-repeated-v2/summary.md",
+    "title": "APMF production public repeated board"
+  }
+}
