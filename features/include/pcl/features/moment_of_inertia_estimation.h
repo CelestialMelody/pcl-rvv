@@ -246,6 +246,11 @@ namespace pcl
       void
       computeCovarianceMatrix (PointCloudConstPtr cloud, Eigen::Matrix <float, 3, 3>& covariance_matrix) const;
 
+#ifdef __RVV10__
+      bool
+      computeProjectedCovarianceRVV (const Eigen::Vector3f& normal_vector, Eigen::Matrix <float, 3, 3>& covariance_matrix) const;
+#endif
+
       /** \brief This method calculates the eigen values and eigen vectors
         * for the given covariance matrix. Note that it returns normalized eigen
         * vectors that always form the right-handed coordinate system.

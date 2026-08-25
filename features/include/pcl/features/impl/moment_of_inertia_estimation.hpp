@@ -44,16 +44,21 @@
 
 #include <pcl/features/moment_of_inertia_estimation.h>
 #include <pcl/features/feature.h>
+#ifdef __RVV10__
+#include <pcl/rvv_point_load.h>
+#endif
+
+#include <cstdint>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT>
 pcl::MomentOfInertiaEstimation<PointT>::MomentOfInertiaEstimation () :
-  
+
   mean_value_ (0.0f, 0.0f, 0.0f),
   major_axis_ (0.0f, 0.0f, 0.0f),
   middle_axis_ (0.0f, 0.0f, 0.0f),
   minor_axis_ (0.0f, 0.0f, 0.0f),
-  
+
   aabb_min_point_ (),
   aabb_max_point_ (),
   obb_min_point_ (),
@@ -170,12 +175,17 @@ pcl::MomentOfInertiaEstimation<PointT>::compute ()
       moment_of_inertia_.push_back (current_moment_of_inertia);
 
       //compute eccentricity for the current plane
-      typename pcl::PointCloud<PointT>::Ptr projected_cloud (new pcl::PointCloud<PointT> ());
-      getProjectedCloud (current_axis, mean_value_, projected_cloud);
       Eigen::Matrix <float, 3, 3> covariance_matrix;
       covariance_matrix.setZero ();
-      computeCovarianceMatrix (projected_cloud, covariance_matrix);
-      projected_cloud.reset ();
+#ifdef __RVV10__
+      if (!computeProjectedCovarianceRVV (current_axis, covariance_matrix))
+#endif
+      {
+        typename pcl::PointCloud<PointT>::Ptr projected_cloud (new pcl::PointCloud<PointT> ());
+        getProjectedCloud (current_axis, mean_value_, projected_cloud);
+        computeCovarianceMatrix (projected_cloud, covariance_matrix);
+        projected_cloud.reset ();
+      }
       float current_eccentricity = computeEccentricity (covariance_matrix, current_axis);
       eccentricity_.push_back (current_eccentricity);
 
@@ -392,6 +402,92 @@ pcl::MomentOfInertiaEstimation<PointT>::computeCovarianceMatrix (PointCloudConst
 
   covariance_matrix *= factor;
 }
+
+#ifdef __RVV10__
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointT> bool
+pcl::MomentOfInertiaEstimation<PointT>::computeProjectedCovarianceRVV (const Eigen::Vector3f& normal_vector,
+                                                                       Eigen::Matrix <float, 3, 3>& covariance_matrix) const
+{
+  using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+
+  if constexpr (!Layout::value)
+    return (false);
+  else
+  {
+    if (!input_ || !indices_ || indices_->empty ())
+      return (false);
+
+    if (input_->size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+      return (false);
+
+    float xx = 0.0f;
+    float xy = 0.0f;
+    float xz = 0.0f;
+    float yy = 0.0f;
+    float yz = 0.0f;
+    float zz = 0.0f;
+
+    const auto number_of_points = static_cast <unsigned int> (indices_->size ());
+    const auto* base = reinterpret_cast <const std::uint8_t*> (input_->points.data ());
+    const int* indices = indices_->data ();
+    using Pod = typename pcl::traits::POD<PointT>::type;
+
+    auto reduce_sum = [] (const vfloat32m2_t values, const std::size_t vl) {
+      const vfloat32m1_t init = __riscv_vfmv_s_f_f32m1 (0.0f, 1);
+      const vfloat32m1_t reduced = __riscv_vfredusum_vs_f32m2_f32m1 (values, init, vl);
+      return (__riscv_vfmv_f_s_f32m1_f32 (reduced));
+    };
+
+    for (unsigned int i_point = 0; i_point < number_of_points;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (number_of_points - i_point);
+      const vint32m2_t indices_i32 = __riscv_vle32_v_i32m2 (indices + i_point, vl);
+      const vuint32m2_t offsets =
+          pcl::rvv_load::byte_offsets_u32m2<Pod> (__riscv_vreinterpret_v_i32m2_u32m2 (indices_i32), vl);
+      vfloat32m2_t x;
+      vfloat32m2_t y;
+      vfloat32m2_t z;
+      pcl::rvv_load::indexed_load3_f32m2<Pod, Layout::kX, Layout::kY, Layout::kZ> (base, offsets, vl, x, y, z);
+
+      const vfloat32m2_t dx = __riscv_vfsub_vf_f32m2 (x, mean_value_ (0), vl);
+      const vfloat32m2_t dy = __riscv_vfsub_vf_f32m2 (y, mean_value_ (1), vl);
+      const vfloat32m2_t dz = __riscv_vfsub_vf_f32m2 (z, mean_value_ (2), vl);
+
+      vfloat32m2_t dot = __riscv_vfmul_vf_f32m2 (dx, normal_vector (0), vl);
+      dot = __riscv_vfmacc_vf_f32m2 (dot, normal_vector (1), dy, vl);
+      dot = __riscv_vfmacc_vf_f32m2 (dot, normal_vector (2), dz, vl);
+
+      const vfloat32m2_t projected_x = __riscv_vfnmsac_vf_f32m2 (dx, normal_vector (0), dot, vl);
+      const vfloat32m2_t projected_y = __riscv_vfnmsac_vf_f32m2 (dy, normal_vector (1), dot, vl);
+      const vfloat32m2_t projected_z = __riscv_vfnmsac_vf_f32m2 (dz, normal_vector (2), dot, vl);
+
+      xx += reduce_sum (__riscv_vfmul_vv_f32m2 (projected_x, projected_x, vl), vl);
+      xy += reduce_sum (__riscv_vfmul_vv_f32m2 (projected_x, projected_y, vl), vl);
+      xz += reduce_sum (__riscv_vfmul_vv_f32m2 (projected_x, projected_z, vl), vl);
+      yy += reduce_sum (__riscv_vfmul_vv_f32m2 (projected_y, projected_y, vl), vl);
+      yz += reduce_sum (__riscv_vfmul_vv_f32m2 (projected_y, projected_z, vl), vl);
+      zz += reduce_sum (__riscv_vfmul_vv_f32m2 (projected_z, projected_z, vl), vl);
+
+      i_point += vl;
+    }
+
+    const float factor =
+        1.0f / static_cast <float> (((number_of_points - 1) > 0) ? (number_of_points - 1) : 1);
+    covariance_matrix (0, 0) = xx * factor;
+    covariance_matrix (0, 1) = xy * factor;
+    covariance_matrix (0, 2) = xz * factor;
+    covariance_matrix (1, 0) = covariance_matrix (0, 1);
+    covariance_matrix (1, 1) = yy * factor;
+    covariance_matrix (1, 2) = yz * factor;
+    covariance_matrix (2, 0) = covariance_matrix (0, 2);
+    covariance_matrix (2, 1) = covariance_matrix (1, 2);
+    covariance_matrix (2, 2) = zz * factor;
+
+    return (true);
+  }
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
