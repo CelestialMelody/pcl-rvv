@@ -69,7 +69,7 @@ namespace pcl
       /** \brief Constructor that sets default values for member variables. */
       ApproximateProgressiveMorphologicalFilter ();
 
-      
+
       ~ApproximateProgressiveMorphologicalFilter () override;
 
       /** \brief Get the maximum window size to be used in filtering ground returns.
@@ -95,7 +95,7 @@ namespace pcl
       /** \brief Get the maximum height above the parameterized ground surface to be considered a ground return. */
       inline float
       getMaxDistance () const { return (max_distance_); }
-      
+
       /** \brief Set the maximum height above the parameterized ground surface to be considered a ground return. */
       inline void
       setMaxDistance (float max_distance) { max_distance_ = max_distance; }
@@ -111,7 +111,7 @@ namespace pcl
       /** \brief Get the cell size. */
       inline float
       getCellSize () const { return (cell_size_); }
-      
+
       /** \brief Set the cell size. */
       inline void
       setCellSize (float cell_size) { cell_size_ = cell_size; }
@@ -147,6 +147,16 @@ namespace pcl
 
     protected:
 
+      /** \brief Scalar implementation used by extract() and RVV fallback. */
+      void
+      extractStd (Indices& ground);
+
+#ifdef __RVV10__
+      /** \brief RVV implementation for xyz AoS point types; returns false to fall back. */
+      bool
+      apmfExtractRVV (Indices& ground);
+#endif
+
       /** \brief Maximum window size to be used in filtering ground returns, in
         * number of grid cells. */
       int max_window_size_{33};
@@ -170,7 +180,7 @@ namespace pcl
       bool exponential_{true};
 
       /** \brief Number of threads to be used. */
-      unsigned int threads_{0};      
+      unsigned int threads_{0};
   };
 }
 
