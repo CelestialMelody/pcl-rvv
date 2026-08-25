@@ -43,6 +43,257 @@
 
 #include <pcl/common/point_tests.h> // for pcl::isFinite
 
+#include <cmath>
+
+#if defined(__RVV10__)
+#include <pcl/common/impl/rvv_math.hpp>
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_traits.h>
+
+#include <riscv_vector.h>
+
+#include <cstdint>
+#include <type_traits>
+#include <vector>
+#endif
+
+#if defined(__RVV10__)
+namespace pcl::detail
+{
+template <typename PointT, bool HasNormal = pcl::traits::has_normal<PointT>::value>
+struct PFHNormalAoSFloatLayout : std::false_type {};
+
+template <typename PointT>
+struct PFHNormalAoSFloatLayout<PointT, true> {
+  using Pod = typename pcl::traits::POD<PointT>::type;
+
+  static constexpr std::size_t kNX = pcl::rvv::RVVNormalFloatLayout<PointT>::kNormalX;
+  static constexpr std::size_t kNY = pcl::rvv::RVVNormalFloatLayout<PointT>::kNormalY;
+  static constexpr std::size_t kNZ = pcl::rvv::RVVNormalFloatLayout<PointT>::kNormalZ;
+
+  static constexpr bool value =
+      pcl::rvv::RVVNormalFloatLayout<PointT>::value &&
+      std::is_standard_layout_v<Pod> && sizeof(PointT) == sizeof(Pod) &&
+      sizeof(PointT) % alignof(float) == 0 && kNX % alignof(float) == 0 &&
+      kNY % alignof(float) == 0 && kNZ % alignof(float) == 0;
+};
+
+template <typename PointInT, typename PointNT>
+inline constexpr bool kPFHDirectAoSRVVSupportedPointTypes =
+    (std::is_same_v<PointInT, pcl::PointNormal> &&
+     std::is_same_v<PointNT, pcl::PointNormal>) ||
+    (std::is_same_v<PointInT, pcl::PointXYZ> &&
+     std::is_same_v<PointNT, pcl::Normal>);
+
+inline int
+pfhRVVBinAngularFeature (const float value, const int bins)
+{
+  const float scaled = static_cast<float> (bins) *
+                       ((value + static_cast<float> (M_PI)) *
+                        (1.0f / (2.0f * static_cast<float> (M_PI))));
+  int bin = static_cast<int> (std::floor (scaled));
+  if (bin < 0) return 0;
+  if (bin >= bins) return bins - 1;
+  return bin;
+}
+
+inline int
+pfhRVVBinUnitFeature (const float value, const int bins)
+{
+  int bin = static_cast<int> (std::floor (static_cast<float> (bins) *
+                                          ((value + 1.0f) * 0.5f)));
+  if (bin < 0) return 0;
+  if (bin >= bins) return bins - 1;
+  return bin;
+}
+
+template <typename PointInT, typename PointNT> bool
+computePointPFHSignatureDirectAoSRVV (const pcl::PointCloud<PointInT> &cloud,
+                                      const pcl::PointCloud<PointNT> &normals,
+                                      const pcl::Indices &indices,
+                                      const int nr_split,
+                                      Eigen::VectorXf &pfh_histogram)
+{
+  if constexpr (!kPFHDirectAoSRVVSupportedPointTypes<PointInT, PointNT> ||
+                !pcl::rvv::RVVXYZAoSFloatLayout<PointInT>::value ||
+                !PFHNormalAoSFloatLayout<PointNT>::value)
+    return false;
+  else
+  {
+    if (nr_split != 5 || indices.size () < 4 ||
+        cloud.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointInT> () ||
+        normals.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointNT> ())
+      return false;
+
+    std::vector<std::uint32_t> p1_offsets;
+    std::vector<std::uint32_t> p2_offsets;
+    std::vector<std::uint32_t> n1_offsets;
+    std::vector<std::uint32_t> n2_offsets;
+    const std::size_t pair_capacity = indices.size () * (indices.size () - 1) / 2;
+    p1_offsets.reserve (pair_capacity);
+    p2_offsets.reserve (pair_capacity);
+    n1_offsets.reserve (pair_capacity);
+    n2_offsets.reserve (pair_capacity);
+
+    for (std::size_t i_idx = 0; i_idx < indices.size (); ++i_idx)
+    {
+      for (std::size_t j_idx = 0; j_idx < i_idx; ++j_idx)
+      {
+        const auto i_index = indices[i_idx];
+        const auto j_index = indices[j_idx];
+        if (i_index < 0 || j_index < 0)
+          return false;
+
+        const auto i = static_cast<std::size_t> (i_index);
+        const auto j = static_cast<std::size_t> (j_index);
+        if (i >= cloud.size () || j >= cloud.size () ||
+            i >= normals.size () || j >= normals.size ())
+          return false;
+
+        if (!isFinite (cloud[i]) || !isFinite (cloud[j]))
+          continue;
+
+        p1_offsets.push_back (static_cast<std::uint32_t> (i * sizeof (PointInT)));
+        p2_offsets.push_back (static_cast<std::uint32_t> (j * sizeof (PointInT)));
+        n1_offsets.push_back (static_cast<std::uint32_t> (i * sizeof (PointNT)));
+        n2_offsets.push_back (static_cast<std::uint32_t> (j * sizeof (PointNT)));
+      }
+    }
+
+    pfh_histogram.setZero (nr_split * nr_split * nr_split);
+    const float hist_incr =
+        100.0f / static_cast<float> (indices.size () * (indices.size () - 1) / 2);
+
+    std::vector<float> f1 (p1_offsets.size ());
+    std::vector<float> f2 (p1_offsets.size ());
+    std::vector<float> f3 (p1_offsets.size ());
+    std::vector<std::int32_t> valid (p1_offsets.size ());
+
+    using PointLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointInT>;
+    using NormalLayout = PFHNormalAoSFloatLayout<PointNT>;
+    const auto* point_base = reinterpret_cast<const std::uint8_t*> (cloud.points.data ());
+    const auto* normal_base = reinterpret_cast<const std::uint8_t*> (normals.points.data ());
+    for (std::size_t offset = 0; offset < p1_offsets.size ();)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (p1_offsets.size () - offset);
+      const vuint32m2_t p1 =
+          __riscv_vle32_v_u32m2 (p1_offsets.data () + offset, vl);
+      const vuint32m2_t p2 =
+          __riscv_vle32_v_u32m2 (p2_offsets.data () + offset, vl);
+      const vuint32m2_t n1 =
+          __riscv_vle32_v_u32m2 (n1_offsets.data () + offset, vl);
+      const vuint32m2_t n2 =
+          __riscv_vle32_v_u32m2 (n2_offsets.data () + offset, vl);
+
+      vfloat32m2_t p1x, p1y, p1z, p2x, p2y, p2z;
+      vfloat32m2_t n1x, n1y, n1z, n2x, n2y, n2z;
+      pcl::rvv_load::indexed_load3_fields_f32m2<PointInT, PointLayout::kX, PointLayout::kY, PointLayout::kZ> (
+          point_base, p1, vl, p1x, p1y, p1z);
+      pcl::rvv_load::indexed_load3_fields_f32m2<PointInT, PointLayout::kX, PointLayout::kY, PointLayout::kZ> (
+          point_base, p2, vl, p2x, p2y, p2z);
+      pcl::rvv_load::indexed_load3_fields_f32m2<PointNT, NormalLayout::kNX, NormalLayout::kNY, NormalLayout::kNZ> (
+          normal_base, n1, vl, n1x, n1y, n1z);
+      pcl::rvv_load::indexed_load3_fields_f32m2<PointNT, NormalLayout::kNX, NormalLayout::kNY, NormalLayout::kNZ> (
+          normal_base, n2, vl, n2x, n2y, n2z);
+
+      vfloat32m2_t dx = __riscv_vfsub_vv_f32m2 (p2x, p1x, vl);
+      vfloat32m2_t dy = __riscv_vfsub_vv_f32m2 (p2y, p1y, vl);
+      vfloat32m2_t dz = __riscv_vfsub_vv_f32m2 (p2z, p1z, vl);
+      vfloat32m2_t dist2 = __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (dx, dx, vl), dy, dy, vl);
+      dist2 = __riscv_vfmacc_vv_f32m2 (dist2, dz, dz, vl);
+      const vfloat32m2_t dist = __riscv_vfsqrt_v_f32m2 (dist2, vl);
+      vbool16_t lane_valid = __riscv_vmfne_vf_f32m2_b16 (dist, 0.0f, vl);
+
+      const vfloat32m2_t n1_dot_delta = __riscv_vfmacc_vv_f32m2 (
+          __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (n1x, dx, vl), n1y, dy, vl), n1z, dz, vl);
+      const vfloat32m2_t n2_dot_delta = __riscv_vfmacc_vv_f32m2 (
+          __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (n2x, dx, vl), n2y, dy, vl), n2z, dz, vl);
+      const vfloat32m2_t angle1 = __riscv_vfdiv_vv_f32m2 (n1_dot_delta, dist, vl);
+      const vfloat32m2_t angle2 = __riscv_vfdiv_vv_f32m2 (n2_dot_delta, dist, vl);
+      const vfloat32m2_t abs_angle1 = __riscv_vfsgnjx_vv_f32m2 (angle1, angle1, vl);
+      const vfloat32m2_t abs_angle2 = __riscv_vfsgnjx_vv_f32m2 (angle2, angle2, vl);
+      const vbool16_t swap = __riscv_vmflt_vv_f32m2_b16 (abs_angle1, abs_angle2, vl);
+
+      dx = __riscv_vmerge_vvm_f32m2 (dx, __riscv_vfneg_v_f32m2 (dx, vl), swap, vl);
+      dy = __riscv_vmerge_vvm_f32m2 (dy, __riscv_vfneg_v_f32m2 (dy, vl), swap, vl);
+      dz = __riscv_vmerge_vvm_f32m2 (dz, __riscv_vfneg_v_f32m2 (dz, vl), swap, vl);
+
+      const vfloat32m2_t ux = __riscv_vmerge_vvm_f32m2 (n1x, n2x, swap, vl);
+      const vfloat32m2_t uy = __riscv_vmerge_vvm_f32m2 (n1y, n2y, swap, vl);
+      const vfloat32m2_t uz = __riscv_vmerge_vvm_f32m2 (n1z, n2z, swap, vl);
+      const vfloat32m2_t target_nx = __riscv_vmerge_vvm_f32m2 (n2x, n1x, swap, vl);
+      const vfloat32m2_t target_ny = __riscv_vmerge_vvm_f32m2 (n2y, n1y, swap, vl);
+      const vfloat32m2_t target_nz = __riscv_vmerge_vvm_f32m2 (n2z, n1z, swap, vl);
+      const vfloat32m2_t vf3 = __riscv_vmerge_vvm_f32m2 (angle1, __riscv_vfneg_v_f32m2 (angle2, vl), swap, vl);
+
+      vfloat32m2_t vx = __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vv_f32m2 (dy, uz, vl),
+                                               __riscv_vfmul_vv_f32m2 (dz, uy, vl),
+                                               vl);
+      vfloat32m2_t vy = __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vv_f32m2 (dz, ux, vl),
+                                               __riscv_vfmul_vv_f32m2 (dx, uz, vl),
+                                               vl);
+      vfloat32m2_t vz = __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vv_f32m2 (dx, uy, vl),
+                                               __riscv_vfmul_vv_f32m2 (dy, ux, vl),
+                                               vl);
+      vfloat32m2_t vnorm2 = __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (vx, vx, vl), vy, vy, vl);
+      vnorm2 = __riscv_vfmacc_vv_f32m2 (vnorm2, vz, vz, vl);
+      const vfloat32m2_t vnorm = __riscv_vfsqrt_v_f32m2 (vnorm2, vl);
+      lane_valid = __riscv_vmand_mm_b16 (lane_valid, __riscv_vmfne_vf_f32m2_b16 (vnorm, 0.0f, vl), vl);
+      vx = __riscv_vfdiv_vv_f32m2 (vx, vnorm, vl);
+      vy = __riscv_vfdiv_vv_f32m2 (vy, vnorm, vl);
+      vz = __riscv_vfdiv_vv_f32m2 (vz, vnorm, vl);
+
+      const vfloat32m2_t wx = __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vv_f32m2 (uy, vz, vl),
+                                                     __riscv_vfmul_vv_f32m2 (uz, vy, vl),
+                                                     vl);
+      const vfloat32m2_t wy = __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vv_f32m2 (uz, vx, vl),
+                                                     __riscv_vfmul_vv_f32m2 (ux, vz, vl),
+                                                     vl);
+      const vfloat32m2_t wz = __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vv_f32m2 (ux, vy, vl),
+                                                     __riscv_vfmul_vv_f32m2 (uy, vx, vl),
+                                                     vl);
+      const vfloat32m2_t vf2 = __riscv_vfmacc_vv_f32m2 (
+          __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (vx, target_nx, vl), vy, target_ny, vl),
+          vz,
+          target_nz,
+          vl);
+      const vfloat32m2_t atan_y = __riscv_vfmacc_vv_f32m2 (
+          __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (wx, target_nx, vl), wy, target_ny, vl),
+          wz,
+          target_nz,
+          vl);
+      const vfloat32m2_t atan_x = __riscv_vfmacc_vv_f32m2 (
+          __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (ux, target_nx, vl), uy, target_ny, vl),
+          uz,
+          target_nz,
+          vl);
+      const vfloat32m2_t vf1 = pcl::atan2_RVV_f32m2 (atan_y, atan_x, vl);
+
+      __riscv_vse32_v_f32m2 (f1.data () + offset, vf1, vl);
+      __riscv_vse32_v_f32m2 (f2.data () + offset, vf2, vl);
+      __riscv_vse32_v_f32m2 (f3.data () + offset, vf3, vl);
+      const vint32m2_t zero = __riscv_vmv_v_x_i32m2 (0, vl);
+      const vint32m2_t vvalid = __riscv_vmerge_vxm_i32m2 (zero, 1, lane_valid, vl);
+      __riscv_vse32_v_i32m2 (valid.data () + offset, vvalid, vl);
+      offset += vl;
+    }
+
+    for (std::size_t i = 0; i < valid.size (); ++i)
+    {
+      if (valid[i] == 0)
+        continue;
+      const int b1 = pfhRVVBinAngularFeature (f1[i], nr_split);
+      const int b2 = pfhRVVBinUnitFeature (f2[i], nr_split);
+      const int b3 = pfhRVVBinUnitFeature (f3[i], nr_split);
+      pfh_histogram[b1 + nr_split * b2 + nr_split * nr_split * b3] += hist_incr;
+    }
+
+    return true;
+  }
+}
+} // namespace pcl::detail
+#endif
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT, typename PointNT, typename PointOutT> bool
@@ -69,6 +320,12 @@ pcl::PFHEstimation<PointInT, PointNT, PointOutT>::computePointPFHSignature (
 
   // Factorization constant
   float hist_incr = 100.0f / static_cast<float> (indices.size () * (indices.size () - 1) / 2);
+
+#if defined(__RVV10__)
+  if (!use_cache_ &&
+      pcl::detail::computePointPFHSignatureDirectAoSRVV (cloud, normals, indices, nr_split, pfh_histogram))
+    return;
+#endif
 
   std::pair<int, int> key;
   bool key_found = false;
@@ -228,4 +485,3 @@ pcl::PFHEstimation<PointInT, PointNT, PointOutT>::computeFeature (PointCloudOut 
 }
 
 #define PCL_INSTANTIATE_PFHEstimation(T,NT,OutT) template class PCL_EXPORTS pcl::PFHEstimation<T,NT,OutT>;
-
