@@ -42,6 +42,11 @@
 #include <pcl/sample_consensus/sac_model_plane.h> // for SampleConsensusModelPlane
 #include <pcl/common/centroid.h>
 #include <pcl/common/eigen.h>
+#ifdef __RVV10__
+#include <pcl/rvv_point_load.h>
+#endif
+
+#include <cstdint>
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
@@ -147,6 +152,275 @@ pcl::isXYPointIn2DXYPolygon (const PointT &point, const pcl::PointCloud<PointT> 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
 pcl::ExtractPolygonalPrismData<PointT>::segment (pcl::PointIndices &output)
+{
+#ifdef __RVV10__
+  if (segmentRvv (output))
+    return;
+#endif
+  segmentStd (output);
+}
+
+#ifdef __RVV10__
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> bool
+pcl::ExtractPolygonalPrismData<PointT>::segmentRvv (pcl::PointIndices &output)
+{
+  if (!input_ || !planar_hull_)
+    return (false);
+
+  if constexpr (!pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value)
+  {
+    return (false);
+  }
+  else
+  {
+    using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+    using Pod = typename Layout::Pod;
+    static_assert(sizeof (int) == sizeof (std::uint32_t),
+                  "RVV indexed scan expects 32-bit PCL indices.");
+
+    // Large AoS strides were unstable on board in Phase 060; keep them on the scalar fallback.
+    if constexpr (sizeof (PointT) > 32)
+      return (false);
+
+    output.header = input_->header;
+
+    if (!initCompute ())
+    {
+      output.indices.clear ();
+      return (true);
+    }
+
+    const auto fallback = [this] {
+      deinitCompute ();
+      return false;
+    };
+
+    if (static_cast<int> (planar_hull_->size ()) < min_pts_hull_ ||
+        indices_->size () < 32 ||
+        input_->size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT>())
+      return (fallback ());
+
+    bool dense_ordered = true;
+    for (std::size_t i = 0; i < indices_->size (); ++i)
+    {
+      const int index = (*indices_)[i];
+      if (index < 0 || static_cast<std::size_t> (index) >= input_->size ())
+        return (fallback ());
+      if (index != static_cast<int> (i))
+        dense_ordered = false;
+    }
+
+    // Compute the plane coefficients
+    Eigen::Vector4f model_coefficients;
+    EIGEN_ALIGN16 Eigen::Matrix3f covariance_matrix;
+    Eigen::Vector4f xyz_centroid;
+
+    computeMeanAndCovarianceMatrix (*planar_hull_, covariance_matrix, xyz_centroid);
+
+    // Compute the model coefficients
+    EIGEN_ALIGN16 Eigen::Vector3f::Scalar eigen_value;
+    EIGEN_ALIGN16 Eigen::Vector3f eigen_vector;
+    eigen33 (covariance_matrix, eigen_value, eigen_vector);
+
+    model_coefficients[0] = eigen_vector [0];
+    model_coefficients[1] = eigen_vector [1];
+    model_coefficients[2] = eigen_vector [2];
+    model_coefficients[3] = 0;
+
+    // Hessian form (D = nc . p_plane (centroid here) + p)
+    model_coefficients[3] = -1 * model_coefficients.dot (xyz_centroid);
+
+    // Need to flip the plane normal towards the viewpoint
+    Eigen::Vector4f vp (vpx_, vpy_, vpz_, 0);
+    // See if we need to flip any plane normals
+    vp -= (*planar_hull_)[0].getVector4fMap ();
+    vp[3] = 0;
+    // Dot product between the (viewpoint - point) and the plane normal
+    float cos_theta = vp.dot (model_coefficients);
+    // Flip the plane normal
+    if (cos_theta < 0)
+    {
+      model_coefficients *= -1;
+      model_coefficients[3] = 0;
+      // Hessian form (D = nc . p_plane (centroid here) + p)
+      model_coefficients[3] = -1 * (model_coefficients.dot ((*planar_hull_)[0].getVector4fMap ()));
+    }
+
+    // Project all points
+    PointCloud projected_points;
+    SampleConsensusModelPlane<PointT> sacmodel (input_);
+    sacmodel.projectPoints (*indices_, model_coefficients, projected_points, false);
+    if (projected_points.size () != indices_->size ())
+      return (fallback ());
+
+    // Create a X-Y projected representation for within bounds polygonal checking
+    int k0, k1, k2;
+    // Determine the best plane to project points onto
+    k0 = (std::abs (model_coefficients[0] ) > std::abs (model_coefficients[1])) ? 0  : 1;
+    k0 = (std::abs (model_coefficients[k0]) > std::abs (model_coefficients[2])) ? k0 : 2;
+    k1 = (k0 + 1) % 3;
+    k2 = (k0 + 2) % 3;
+    // Project the convex hull
+    pcl::PointCloud<PointT> polygon;
+    polygon.resize (planar_hull_->size ());
+    for (std::size_t i = 0; i < planar_hull_->size (); ++i)
+    {
+      Eigen::Vector4f pt ((*planar_hull_)[i].x, (*planar_hull_)[i].y, (*planar_hull_)[i].z, 0);
+      polygon[i].x = pt[k1];
+      polygon[i].y = pt[k2];
+      polygon[i].z = 0;
+    }
+
+    std::vector<pcl::PointCloud<PointT>> active_polygons;
+    if (polygons_.empty ())
+    {
+      active_polygons.push_back (polygon);
+    }
+    else
+    {
+      active_polygons.resize (polygons_.size ());
+      for (std::size_t polygon_index = 0; polygon_index < polygons_.size (); ++polygon_index)
+      {
+        const auto& polygon_i = polygons_[polygon_index];
+        auto& active_polygon = active_polygons[polygon_index];
+        active_polygon.reserve (polygon_i.vertices.size ());
+        for (const auto& pointIdx : polygon_i.vertices)
+        {
+          if (pointIdx >= polygon.size ())
+            return (fallback ());
+          active_polygon.points.push_back (polygon[pointIdx]);
+        }
+      }
+    }
+    for (const auto& active_polygon : active_polygons)
+      if (active_polygon.size () < 3)
+        return (fallback ());
+
+    output.indices.resize (indices_->size ());
+    int l = 0;
+    const auto* input_base =
+        reinterpret_cast<const std::uint8_t*> (input_->points.data ());
+    const auto* projected_base =
+        reinterpret_cast<const std::uint8_t*> (projected_points.points.data ());
+    const std::size_t vlmax = __riscv_vsetvlmax_e32m2 ();
+    std::vector<std::uint32_t> packed (vlmax);
+
+    const auto load_projected_axis = [] (const std::uint8_t* base,
+                                         int axis,
+                                         std::size_t vl) -> vfloat32m2_t {
+      switch (axis)
+      {
+        case 0:
+          return pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::x> (base, vl);
+        case 1:
+          return pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::y> (base, vl);
+        default:
+          return pcl::rvv_load::strided_load_field_f32m2<PointT, pcl::fields::z> (base, vl);
+      }
+    };
+
+    for (std::size_t i = 0; i < indices_->size ();)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (indices_->size () - i);
+
+      vuint32m2_t source =
+          __riscv_vadd_vx_u32m2 (__riscv_vid_v_u32m2 (vl), static_cast<std::uint32_t> (i), vl);
+      vfloat32m2_t px;
+      vfloat32m2_t py;
+      vfloat32m2_t pz;
+      if (dense_ordered)
+      {
+        pcl::rvv_load::strided_load3_f32m2<sizeof (PointT), Layout::kX, Layout::kY, Layout::kZ> (
+            input_base + i * sizeof (PointT), vl, px, py, pz);
+      }
+      else
+      {
+        const vint32m2_t source_i32 = __riscv_vle32_v_i32m2 (indices_->data () + i, vl);
+        source = __riscv_vreinterpret_v_i32m2_u32m2 (source_i32);
+        const vuint32m2_t point_offsets = pcl::rvv_load::byte_offsets_u32m2<Pod> (source, vl);
+        pcl::rvv_load::indexed_load3_f32m2<Pod, Layout::kX, Layout::kY, Layout::kZ> (
+            input_base, point_offsets, vl, px, py, pz);
+      }
+
+      vfloat32m2_t distance =
+          __riscv_vfmul_vf_f32m2 (px, model_coefficients[0], vl);
+      distance = __riscv_vfmacc_vf_f32m2 (distance, model_coefficients[1], py, vl);
+      distance = __riscv_vfmacc_vf_f32m2 (distance, model_coefficients[2], pz, vl);
+      distance = __riscv_vfadd_vf_f32m2 (distance, model_coefficients[3], vl);
+
+      vbool16_t height = __riscv_vmfge_vf_f32m2_b16 (
+          distance, static_cast<float> (height_limit_min_), vl);
+      height = __riscv_vmand_mm_b16 (
+          height,
+          __riscv_vmfle_vf_f32m2_b16 (distance, static_cast<float> (height_limit_max_), vl),
+          vl);
+
+      const auto* projected_chunk = projected_base + i * sizeof (PointT);
+      const vfloat32m2_t vx = load_projected_axis (projected_chunk, k1, vl);
+      const vfloat32m2_t vy = load_projected_axis (projected_chunk, k2, vl);
+
+      vbool16_t in_any_polygon = __riscv_vmclr_m_b16 (vl);
+      for (const auto& active_polygon : active_polygons)
+      {
+        vbool16_t in_poly = __riscv_vmclr_m_b16 (vl);
+        double xold = active_polygon.back ().x;
+        double yold = active_polygon.back ().y;
+        for (const auto& vertex : active_polygon)
+        {
+          const double xnew = vertex.x;
+          const double ynew = vertex.y;
+          const bool new_greater = xnew > xold;
+          const float x1 = static_cast<float> (new_greater ? xold : xnew);
+          const float x2 = static_cast<float> (new_greater ? xnew : xold);
+          const float y1 = static_cast<float> (new_greater ? yold : ynew);
+          const float y2 = static_cast<float> (new_greater ? ynew : yold);
+
+          const vbool16_t left =
+              __riscv_vmfgt_vf_f32m2_b16 (vx, static_cast<float> (xnew), vl);
+          const vbool16_t right =
+              __riscv_vmfle_vf_f32m2_b16 (vx, static_cast<float> (xold), vl);
+          const vbool16_t same_side =
+              __riscv_vmnot_m_b16 (__riscv_vmxor_mm_b16 (left, right, vl), vl);
+
+          vfloat32m2_t lhs = __riscv_vfsub_vf_f32m2 (vy, y1, vl);
+          lhs = __riscv_vfmul_vf_f32m2 (lhs, x2 - x1, vl);
+          vfloat32m2_t rhs = __riscv_vfsub_vf_f32m2 (vx, x1, vl);
+          rhs = __riscv_vfmul_vf_f32m2 (rhs, y2 - y1, vl);
+          const vbool16_t below = __riscv_vmflt_vv_f32m2_b16 (lhs, rhs, vl);
+          const vbool16_t crosses = __riscv_vmand_mm_b16 (same_side, below, vl);
+
+          in_poly = __riscv_vmxor_mm_b16 (in_poly, crosses, vl);
+          xold = xnew;
+          yold = ynew;
+        }
+        in_any_polygon = __riscv_vmxor_mm_b16 (in_any_polygon, in_poly, vl);
+      }
+
+      const vbool16_t keep = __riscv_vmand_mm_b16 (height, in_any_polygon, vl);
+      const std::size_t kept = __riscv_vcpop_m_b16 (keep, vl);
+      if (kept != 0)
+      {
+        const vuint32m2_t compact = __riscv_vcompress_vm_u32m2 (source, keep, vl);
+        const std::size_t vl_store = __riscv_vsetvl_e32m2 (kept);
+        __riscv_vse32_v_u32m2 (packed.data (), compact, vl_store);
+        for (std::size_t lane = 0; lane < kept; ++lane)
+          output.indices[l++] = static_cast<int> (packed[lane]);
+      }
+
+      i += vl;
+    }
+
+    output.indices.resize (l);
+    deinitCompute ();
+    return (true);
+  }
+}
+#endif
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::ExtractPolygonalPrismData<PointT>::segmentStd (pcl::PointIndices &output)
 {
   output.header = input_->header;
 
@@ -278,4 +552,3 @@ pcl::ExtractPolygonalPrismData<PointT>::segment (pcl::PointIndices &output)
 #define PCL_INSTANTIATE_isXYPointIn2DXYPolygon(T) template bool PCL_EXPORTS pcl::isXYPointIn2DXYPolygon<T>(const T &, const pcl::PointCloud<T> &);
 
 #endif    // PCL_SEGMENTATION_IMPL_EXTRACT_POLYGONAL_PRISM_DATA_H_
-

@@ -193,6 +193,16 @@ namespace pcl
       segment (PointIndices &output);
 
     protected:
+      /** \brief Scalar implementation used as the fallback for segment. */
+      void
+      segmentStd (PointIndices &output);
+
+#ifdef __RVV10__
+      /** \brief RVV implementation for the polygonal prism scan stage. */
+      bool
+      segmentRvv (PointIndices &output);
+#endif
+
       /** \brief A pointer to the input planar hull dataset. */
       PointCloudConstPtr planar_hull_{nullptr};
 
