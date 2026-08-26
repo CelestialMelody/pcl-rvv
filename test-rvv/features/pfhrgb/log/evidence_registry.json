@@ -1,0 +1,62 @@
+{
+  "topic": "pfhrgb",
+  "module": "features",
+  "policy": "summary-only",
+  "current_summary": "log/board/repeated/evidence_manifest.json",
+  "entries": [
+    {
+      "path": "log/board/repeated/evidence_manifest.json",
+      "role": "board-repeated-manifest",
+      "status": "fresh",
+      "referenced_by": [
+        "doc/phases/000-current-state-and-scaffold/result.zh.md",
+        "doc/phases/010-public-with-candidate-diagnostic/result.zh.md",
+        "doc/phases/030-staging-reuse-ablation/result.zh.md",
+        "doc/phases/040-structure-parity-doc-suite/result.zh.md",
+        "doc/phases/020-pi1-production-integration-plan/result.zh.md",
+        "doc/phases/optimization-matrix.zh.md",
+        "doc/pfhrgb-evaluation.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "../../../doc-rvv/features/pfhrgb-RVV.zh.md"
+      ]
+    },
+    {
+      "path": "log/board/repeated/evidence_doctor.md",
+      "role": "evidence-doctor-report",
+      "status": "fresh",
+      "referenced_by": [
+        "doc/phases/000-current-state-and-scaffold/result.zh.md",
+        "doc/phases/010-public-with-candidate-diagnostic/result.zh.md",
+        "doc/phases/030-staging-reuse-ablation/result.zh.md",
+        "doc/phases/040-structure-parity-doc-suite/result.zh.md",
+        "doc/phases/020-pi1-production-integration-plan/result.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "../../../doc-rvv/features/pfhrgb-RVV.zh.md"
+      ]
+    },
+    {
+      "path": "log/board/repeated/evidence_doctor.json",
+      "role": "evidence-doctor-json",
+      "status": "fresh",
+      "referenced_by": [
+        "doc/phases/000-current-state-and-scaffold/result.zh.md",
+        "doc/phases/010-public-with-candidate-diagnostic/result.zh.md",
+        "doc/phases/030-staging-reuse-ablation/result.zh.md",
+        "doc/phases/040-structure-parity-doc-suite/result.zh.md",
+        "doc/phases/020-pi1-production-integration-plan/result.zh.md",
+        "doc/benchmark-and-evidence.zh.md",
+        "../../../doc-rvv/features/pfhrgb-RVV.zh.md"
+      ]
+    }
+  ],
+  "local_only_raw_logs": [
+    "log/board/repeated/run_*/run_bench_std.log",
+    "log/board/repeated/run_*/run_bench_rvv.log",
+    "log/board/run_bench_std.log",
+    "log/board/run_bench_rvv.log",
+    "log/qemu/run_test_std.log",
+    "log/qemu/run_test_rvv.log",
+    "log/qemu/run_bench_std_reuse_smoke.log",
+    "log/qemu/run_bench_rvv_reuse_smoke.log"
+  ]
+}

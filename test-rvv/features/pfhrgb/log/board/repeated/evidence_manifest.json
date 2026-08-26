@@ -1,0 +1,421 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "pfhrgb board Std/RVV compare",
+    "evidence_role": "mixed_diagnostic_and_public_like",
+    "summary_path": "log/board/repeated",
+    "summary_paths": [
+      "log/board/repeated/run_01/analyze_bench_compare.log",
+      "log/board/repeated/run_02/analyze_bench_compare.log",
+      "log/board/repeated/run_03/analyze_bench_compare.log",
+      "log/board/repeated/run_04/analyze_bench_compare.log",
+      "log/board/repeated/run_05/analyze_bench_compare.log"
+    ],
+    "label": "pfhrgb board repeated compare",
+    "analysis_script": "test-rvv/features/pfhrgb/script/generate_pfhrgb_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "dataset": "synthetic pfhrgb rgb-normal grid side=32 points=1024 k=32",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "binary_hash": "bench_std=sha256:b268f1de17e8c979ad8fcf429c7798ac4b34d08da7d49eb16d9954650a3fd0d9; bench_rvv=sha256:51296f3b454eca52a988af90bdf3d8fc4b30bfcbfadb890e4ec38ce04bef1f38"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "allowed_contract_mismatches": [
+      "Std build candidate case uses scalar reference fallback while RVV build uses RVV intrinsics.",
+      "Topic-local public-shaped candidate cases are diagnostic wrappers; production adoption uses public_pfhrgb_k after pfhrgb.hpp dispatch is present."
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "candidate_pfhrgb_pair_batch_rvv",
+      "group": "pfhrgb-color-pair-batch-rvv",
+      "evidence_role": "diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "PointXYZRGBNormal -> PFHRGBSignature250",
+      "size": "side/k from dataset line",
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 68.40256,
+      "rvv_ms": 69.84938,
+      "ba_values": [
+        0.98,
+        0.97,
+        0.99,
+        0.98,
+        0.97
+      ],
+      "std_ms_values": [
+        68.5846,
+        68.5371,
+        68.7478,
+        68.3886,
+        67.7547
+      ],
+      "rvv_ms_values": [
+        69.7995,
+        70.4035,
+        69.5669,
+        69.6354,
+        69.8416
+      ],
+      "run_paths": [
+        "log/board/repeated/run_01/analyze_bench_compare.log",
+        "log/board/repeated/run_02/analyze_bench_compare.log",
+        "log/board/repeated/run_03/analyze_bench_compare.log",
+        "log/board/repeated/run_04/analyze_bench_compare.log",
+        "log/board/repeated/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "std_ms": 68.40256,
+        "rvv_ms": 68.40256,
+        "boundary": "test helper",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "fixed wrapped neighborhood indices",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "computePointPFHRGBSignaturePairBatchRVV repeated 128x, including SoA staging and scalar histogram scatter",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "RVV geometry and RGB ratio tuple math with scalar ordered histogram scatter",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "candidate": {
+        "label": "RVV build",
+        "std_ms": 68.40256,
+        "rvv_ms": 69.84938,
+        "boundary": "test helper",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "fixed wrapped neighborhood indices",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "computePointPFHRGBSignaturePairBatchRVV repeated 128x, including SoA staging and scalar histogram scatter",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "RVV geometry and RGB ratio tuple math with scalar ordered histogram scatter",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "notes": "Phase 000 test-only pair-batch RVV candidate. It can screen candidate value but does not prove production dispatch."
+    },
+    {
+      "name": "component_pfhrgb_signature",
+      "group": "pfhrgb-component",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "PointXYZRGBNormal -> PFHRGBSignature250",
+      "size": "side/k from dataset line",
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 68.59208,
+      "rvv_ms": 68.21192,
+      "ba_values": [
+        1.0,
+        1.0,
+        1.02,
+        1.01,
+        0.99
+      ],
+      "std_ms_values": [
+        68.7393,
+        68.8194,
+        68.9486,
+        68.5561,
+        67.897
+      ],
+      "rvv_ms_values": [
+        68.4256,
+        68.6915,
+        67.7842,
+        67.7422,
+        68.4161
+      ],
+      "run_paths": [
+        "log/board/repeated/run_01/analyze_bench_compare.log",
+        "log/board/repeated/run_02/analyze_bench_compare.log",
+        "log/board/repeated/run_03/analyze_bench_compare.log",
+        "log/board/repeated/run_04/analyze_bench_compare.log",
+        "log/board/repeated/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "std_ms": 68.59208,
+        "rvv_ms": 68.59208,
+        "boundary": "production-shaped helper",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "fixed wrapped neighborhood indices",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "computePointPFHRGBReference repeated 128x",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "all-pairs geometry and RGB ratio math plus 250-bin histogram scatter",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "candidate": {
+        "label": "RVV build",
+        "std_ms": 68.59208,
+        "rvv_ms": 68.21192,
+        "boundary": "production-shaped helper",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "fixed wrapped neighborhood indices",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "computePointPFHRGBReference repeated 128x",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "all-pairs geometry and RGB ratio math plus 250-bin histogram scatter",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "notes": "Component scalar baseline for pfhrgb.hpp::computePointPFHRGBSignature. It does not prove production dispatch."
+    },
+    {
+      "name": "public_pfhrgb_k",
+      "group": "pfhrgb-public-estimation",
+      "evidence_role": "production_public",
+      "case_kind": "production-public",
+      "point_type": "PointXYZRGBNormal -> PFHRGBSignature250",
+      "size": "side/k from dataset line",
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 583.0767999999999,
+      "rvv_ms": 458.258,
+      "ba_values": [
+        1.28,
+        1.27,
+        1.28,
+        1.27,
+        1.27
+      ],
+      "std_ms_values": [
+        583.789,
+        583.991,
+        584.512,
+        581.938,
+        581.154
+      ],
+      "rvv_ms_values": [
+        457.562,
+        460.616,
+        457.502,
+        458.456,
+        457.154
+      ],
+      "run_paths": [
+        "log/board/repeated/run_01/analyze_bench_compare.log",
+        "log/board/repeated/run_02/analyze_bench_compare.log",
+        "log/board/repeated/run_03/analyze_bench_compare.log",
+        "log/board/repeated/run_04/analyze_bench_compare.log",
+        "log/board/repeated/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "std_ms": 583.0767999999999,
+        "rvv_ms": 583.0767999999999,
+        "boundary": "public overload",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "public KSearch neighborhood",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "PFHRGBEstimation::compute with KdTree neighbor search",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "all-pairs PFHRGB histogram scatter plus output copy",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "candidate": {
+        "label": "RVV build",
+        "std_ms": 583.0767999999999,
+        "rvv_ms": 458.258,
+        "boundary": "public overload",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "public KSearch neighborhood",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "PFHRGBEstimation::compute with KdTree neighbor search",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "all-pairs PFHRGB histogram scatter plus output copy",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "notes": "Production-public evidence after pfhrgb.hpp gained an exact-gated RVV dispatch. It proves the current public RVV path against the current public scalar path for this narrow point-type and KSearch boundary."
+    },
+    {
+      "name": "public_pfhrgb_k_with_candidate",
+      "group": "pfhrgb-public-with-candidate",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "public-with-candidate-diagnostic",
+      "point_type": "PointXYZRGBNormal -> PFHRGBSignature250",
+      "size": "side/k from dataset line",
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 567.5496,
+      "rvv_ms": 467.317,
+      "ba_values": [
+        1.21,
+        1.21,
+        1.22,
+        1.22,
+        1.21
+      ],
+      "std_ms_values": [
+        566.439,
+        568.779,
+        569.19,
+        566.379,
+        566.961
+      ],
+      "rvv_ms_values": [
+        467.847,
+        471.167,
+        465.036,
+        465.349,
+        467.186
+      ],
+      "run_paths": [
+        "log/board/repeated/run_01/analyze_bench_compare.log",
+        "log/board/repeated/run_02/analyze_bench_compare.log",
+        "log/board/repeated/run_03/analyze_bench_compare.log",
+        "log/board/repeated/run_04/analyze_bench_compare.log",
+        "log/board/repeated/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "std_ms": 567.5496,
+        "rvv_ms": 567.5496,
+        "boundary": "public-shaped wrapper",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "public KSearch neighborhood",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "topic-local KdTree nearestKSearch loop plus computePointPFHRGBSignaturePairBatchRVV per point",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "public-shaped outer loop with RVV geometry/RGB tuple math and scalar ordered histogram scatter",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "candidate": {
+        "label": "RVV build",
+        "std_ms": 567.5496,
+        "rvv_ms": 467.317,
+        "boundary": "public-shaped wrapper",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "public KSearch neighborhood",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "topic-local KdTree nearestKSearch loop plus computePointPFHRGBSignaturePairBatchRVV per point",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "public-shaped outer loop with RVV geometry/RGB tuple math and scalar ordered histogram scatter",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "notes": "Phase 010 public-shaped diagnostic. It remains a topic-local wrapper and is kept only as implementation-shape context after production dispatch was added."
+    },
+    {
+      "name": "public_pfhrgb_k_with_candidate_reuse",
+      "group": "pfhrgb-staging-reuse",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "allocation-staging-ablation",
+      "point_type": "PointXYZRGBNormal -> PFHRGBSignature250",
+      "size": "side/k from dataset line",
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 565.2896,
+      "rvv_ms": 456.2476,
+      "ba_values": [
+        1.23,
+        1.23,
+        1.25,
+        1.25,
+        1.24
+      ],
+      "std_ms_values": [
+        563.327,
+        566.564,
+        566.198,
+        565.792,
+        564.567
+      ],
+      "rvv_ms_values": [
+        458.692,
+        459.285,
+        453.268,
+        453.19,
+        456.803
+      ],
+      "run_paths": [
+        "log/board/repeated/run_01/analyze_bench_compare.log",
+        "log/board/repeated/run_02/analyze_bench_compare.log",
+        "log/board/repeated/run_03/analyze_bench_compare.log",
+        "log/board/repeated/run_04/analyze_bench_compare.log",
+        "log/board/repeated/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "std_ms": 565.2896,
+        "rvv_ms": 565.2896,
+        "boundary": "public-shaped wrapper",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "public KSearch neighborhood",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "topic-local KdTree nearestKSearch loop plus reusable PairBatchWorkspace across points",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "public-shaped outer loop with reusable staging, RVV geometry/RGB tuple math, and scalar ordered histogram scatter",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "candidate": {
+        "label": "RVV build",
+        "std_ms": 565.2896,
+        "rvv_ms": 456.2476,
+        "boundary": "public-shaped wrapper",
+        "wrapper": "test-rvv/features/pfhrgb/src/bench_pfhrgb.cpp",
+        "row_source": "public KSearch neighborhood",
+        "solve": false,
+        "checksum_policy": "PFHRGB descriptor checksum line",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "topic-local KdTree nearestKSearch loop plus reusable PairBatchWorkspace across points",
+        "gate": "PointXYZRGBNormal dense finite input, k>=4, nr_split=5",
+        "mask": "zero-distance and zero-cross fallback follow computeRGBPairFeatures; public case follows PFHRGBEstimation::compute",
+        "reduction": "public-shaped outer loop with reusable staging, RVV geometry/RGB tuple math, and scalar ordered histogram scatter",
+        "asm_boundary": "computePointPFHRGBSignaturePairBatchRVV or inlined helper for candidate case"
+      },
+      "notes": "Phase 030 allocation/staging reuse diagnostic. It compares implementation shape inside the topic-local wrapper and does not prove production dispatch."
+    }
+  ]
+}
