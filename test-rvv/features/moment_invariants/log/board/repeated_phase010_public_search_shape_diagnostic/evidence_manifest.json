@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Moment invariants public-search-shaped diagnostic repeated board summary",
+    "run_label": "moment_invariants_public_search_shape_diagnostic_phase010",
+    "evidence_role": "production_shaped_diagnostic",
+    "device": "board via Makefile config",
+    "iterations": 8,
+    "warmup_iterations": 2,
+    "run_count": 5,
+    "decision_bucket": "weak_positive",
+    "expected_runs": 5
+  },
+  "comparisons": [
+    {
+      "name": "mi_public_search_shape",
+      "group": "moment-invariants-public-search-shape-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production-shaped-diagnostic",
+      "point_type": "PointXYZ",
+      "size": 4096,
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 10.962084339999999,
+      "rvv_ms": 10.6327073,
+      "ba_values": [
+        1.0310450397292437,
+        1.0271366872524743,
+        1.0344500948628257,
+        1.0366909365489148,
+        1.0255772069722442
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "production_shaped_helper",
+        "wrapper": "test-rvv/features/moment_invariants/src/bench_moment_invariants.cpp",
+        "row_source": "kd_tree_k_neighbor_query",
+        "solve": false,
+        "checksum_policy": "qemu_gtest_numerical_tolerance_gate",
+        "timer_boundary": "kd_tree_search_plus_moment_accumulation_helper_replacement",
+        "gate": "PointXYZ KdTree nearestKSearch plus test-only helper replacement",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "six central moment sums and j1/j2/j3 formula",
+        "asm_boundary": "computeMomentSummaryRVV inlined into bench_moment_invariants",
+        "rvv_instr_count": 379
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "production_shaped_helper",
+        "wrapper": "test-rvv/features/moment_invariants/src/bench_moment_invariants.cpp",
+        "row_source": "kd_tree_k_neighbor_query",
+        "solve": false,
+        "checksum_policy": "qemu_gtest_numerical_tolerance_gate",
+        "timer_boundary": "kd_tree_search_plus_moment_accumulation_helper_replacement",
+        "gate": "PointXYZ KdTree nearestKSearch plus test-only helper replacement",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "six central moment sums and j1/j2/j3 formula",
+        "asm_boundary": "computeMomentSummaryRVV inlined into bench_moment_invariants",
+        "rvv_instr_count": 379
+      }
+    }
+  ]
+}

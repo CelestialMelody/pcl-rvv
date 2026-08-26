@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Moment invariants production computeFeature repeated board summary",
+    "run_label": "moment_invariants_production_compute_feature_phase030",
+    "evidence_role": "production-public",
+    "device": "board via Makefile config",
+    "iterations": 8,
+    "warmup_iterations": 2,
+    "run_count": 5,
+    "decision_bucket": "weak_positive",
+    "expected_runs": 5
+  },
+  "comparisons": [
+    {
+      "name": "mi_production_compute_feature",
+      "group": "moment-invariants-production-compute-feature",
+      "evidence_role": "production-public",
+      "case_kind": "production-direct",
+      "point_type": "PointXYZ",
+      "size": 4096,
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 8.12218542,
+      "rvv_ms": 7.6506031000000005,
+      "ba_values": [
+        1.0716148527637506,
+        1.0234385456446808,
+        1.0849617846648711,
+        1.0624206707036568,
+        1.067193698200501
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "test-rvv/features/moment_invariants/src/bench_moment_invariants.cpp",
+        "row_source": "kd_tree_k_neighbor_query",
+        "solve": false,
+        "checksum_policy": "qemu_gtest_numerical_tolerance_gate",
+        "timer_boundary": "public_compute_feature_with_kdtree_search_and_output_write",
+        "gate": "__RVV10__ + exact PointXYZ + exact MomentInvariants output + k-neighbor indexed moment accumulation",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "six central moment sums and j1/j2/j3 formula",
+        "asm_boundary": "momentInvariantsIndexedMomentsRVV / computePointMomentInvariants production symbols",
+        "rvv_instr_count": 576
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "test-rvv/features/moment_invariants/src/bench_moment_invariants.cpp",
+        "row_source": "kd_tree_k_neighbor_query",
+        "solve": false,
+        "checksum_policy": "qemu_gtest_numerical_tolerance_gate",
+        "timer_boundary": "public_compute_feature_with_kdtree_search_and_output_write",
+        "gate": "__RVV10__ + exact PointXYZ + exact MomentInvariants output + k-neighbor indexed moment accumulation",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "six central moment sums and j1/j2/j3 formula",
+        "asm_boundary": "momentInvariantsIndexedMomentsRVV / computePointMomentInvariants production symbols",
+        "rvv_instr_count": 576
+      }
+    }
+  ]
+}

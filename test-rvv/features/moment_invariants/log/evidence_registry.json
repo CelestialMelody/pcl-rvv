@@ -1,0 +1,614 @@
+{
+  "files": {
+    "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "mi_accumulation_indexed",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/000-current-state-and-diagnostic-plan/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787721756,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md"
+      },
+      "run_label": "board-mi-accumulation-diagnostic-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787721756835437048,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "sha256": "sha256:eca3f3f0b315ba9b885585ef265b566c3aaa8cc39ee0c0153d593e61f7309a70",
+        "size": 2111
+      },
+      "target": "collect_board_mi_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "mi_accumulation_indexed",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/000-current-state-and-diagnostic-plan/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787721756,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md"
+      },
+      "run_label": "board-mi-accumulation-diagnostic-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787721756793437275,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "sha256": "sha256:b54c90c4cebc36a9d14499304310e10b03b9fac4439eaa784b1acaca33c82d88",
+        "size": 2384
+      },
+      "target": "collect_board_mi_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md": {
+      "backend": "board",
+      "case_filter": "mi_accumulation_indexed",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/000-current-state-and-diagnostic-plan/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787721756,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md"
+      },
+      "run_label": "board-mi-accumulation-diagnostic-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787721756792437280,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md",
+        "sha256": "sha256:ceb6d44a8910b4060c6081ddbc4a8991d321ddcfb29847140593e51036348cfa",
+        "size": 2013
+      },
+      "target": "collect_board_mi_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "mi_public_search_shape",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/010-public-search-dilution-check/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787721756,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/summary.md"
+      },
+      "run_label": "board-mi-public-search-shape-diagnostic-phase010",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787721756849436972,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_doctor.md",
+        "sha256": "sha256:0a3426f32d720d8f9f285dde010ae94c1777d720595b74c7f006fa52d97bb5f8",
+        "size": 2787
+      },
+      "target": "collect_board_mi_phase010_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "mi_public_search_shape",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/010-public-search-dilution-check/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787721756,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/summary.md"
+      },
+      "run_label": "board-mi-public-search-shape-diagnostic-phase010",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787721756810437183,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_manifest.json",
+        "sha256": "sha256:1b502e974a254862a0cf2c529aceadfc160cb206b4cefda3fe8a543382db68aa",
+        "size": 2592
+      },
+      "target": "collect_board_mi_phase010_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/summary.md": {
+      "backend": "board",
+      "case_filter": "mi_public_search_shape",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/010-public-search-dilution-check/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787721756,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/summary.md"
+      },
+      "run_label": "board-mi-public-search-shape-diagnostic-phase010",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787721756810437183,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/summary.md",
+        "sha256": "sha256:6c2e1739b64d4297b5c84ef594b7f1f6f7d697db44e26664cff560f3caf2c053",
+        "size": 2178
+      },
+      "target": "collect_board_mi_phase010_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/030-production-integration-probe/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787726048,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-compute-feature-phase030",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787726048447302563,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_doctor.md",
+        "sha256": "sha256:535ebfa8ebaf364a1249b7f66fef20c2a727481fd50e2c1a437000b3a25d5641",
+        "size": 2132
+      },
+      "target": "collect_board_mi_production_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/030-production-integration-probe/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787726048,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-compute-feature-phase030",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787726048410303518,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_manifest.json",
+        "sha256": "sha256:38b7c3beca0a9cc9edc4779be46a7505950d2222eefb724305c51c380e8f120c",
+        "size": 2649
+      },
+      "target": "collect_board_mi_production_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/summary.md": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/030-production-integration-probe/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787726048,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-compute-feature-phase030",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787726048410303518,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/summary.md",
+        "sha256": "sha256:fa4b9582e1c14f31f24afe25414afba489e53f528ebfa4480318c15ab1c85b3d",
+        "size": 2119
+      },
+      "target": "collect_board_mi_production_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzi",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727715,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzi-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727715735579023,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_doctor.md",
+        "sha256": "sha256:1cc63891d93e9e55fde3e1a2c9db83c3f54b6076ce5778d58e70937a9186d74e",
+        "size": 2162
+      },
+      "target": "collect_board_mi_production_pointxyzi_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzi",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727715,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzi-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727715699578903,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_manifest.json",
+        "sha256": "sha256:6e47a09c1d03a0cd7962e0fab7bec25122c18a57e9319efe8e1d80e866db1462",
+        "size": 2738
+      },
+      "target": "collect_board_mi_production_pointxyzi_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/summary.md": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzi",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727715,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzi-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727715699578903,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/summary.md",
+        "sha256": "sha256:583f3b082a574ff327489f9aa81d13dfc23f08282fa3bd33111491a35254bf42",
+        "size": 2150
+      },
+      "target": "collect_board_mi_production_pointxyzi_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzrgb",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727841,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzrgb-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727841731757045,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_doctor.md",
+        "sha256": "sha256:8a3601d25860936c087a172a38aca861651b19ea989cb15c8c609c173f6c8019",
+        "size": 2168
+      },
+      "target": "collect_board_mi_production_pointxyzrgb_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzrgb",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727841,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzrgb-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727841689757060,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_manifest.json",
+        "sha256": "sha256:b9c246928018b0541f7a143756353cd91de7d11098b398f6f91da8b477efac5d",
+        "size": 2763
+      },
+      "target": "collect_board_mi_production_pointxyzrgb_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/summary.md": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzrgb",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727841,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzrgb-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727841689757060,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/summary.md",
+        "sha256": "sha256:8393d3ef1756000fdfb0feab9a0d72bb64e04e36a0321895665c1e7100fb41f8",
+        "size": 2158
+      },
+      "target": "collect_board_mi_production_pointxyzrgb_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzrgba",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727964,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzrgba-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727964835532099,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_doctor.md",
+        "sha256": "sha256:c33bccd057a72a9ea541603f98a6ee90a3896898edbc7bf2d528d0fa7bce56d7",
+        "size": 2171
+      },
+      "target": "collect_board_mi_production_pointxyzrgba_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzrgba",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727964,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzrgba-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727964791532238,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_manifest.json",
+        "sha256": "sha256:d291f76f18a412d841e6124611efbcf45ac577a51a55feaff50bb366dfef3eac",
+        "size": 2763
+      },
+      "target": "collect_board_mi_production_pointxyzrgba_repeated"
+    },
+    "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/summary.md": {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzrgba",
+      "doc_refs": [
+        "test-rvv/features/moment_invariants/doc/phases/040-pointxyz-like-production-expansion/result.zh.md",
+        "test-rvv/features/moment_invariants/doc/moment_invariants-evaluation.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787727964,
+      "related": {
+        "doctor_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_doctor.md",
+        "manifest_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_manifest.json",
+        "summary_path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/summary.md"
+      },
+      "run_label": "board-mi-production-pointxyzrgba-compute-feature-phase040",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787727964791532238,
+        "path": "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/summary.md",
+        "sha256": "sha256:d487e3d7876f4036eb0100c129fa6e78b3e6058d8eb2677299b9a18412de71b2",
+        "size": 2162
+      },
+      "target": "collect_board_mi_production_pointxyzrgba_repeated"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "mi_accumulation_indexed",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787720348,
+      "run_label": "board-mi-accumulation-diagnostic-phase000",
+      "target": "collect_board_mi_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_accumulation_indexed",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787720524,
+      "run_label": "board-mi-accumulation-diagnostic-phase000",
+      "target": "collect_board_mi_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_accumulation_indexed",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787720542,
+      "run_label": "board-mi-accumulation-diagnostic-phase000",
+      "target": "collect_board_mi_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_public_search_shape",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787721113,
+      "run_label": "board-mi-public-search-shape-diagnostic-phase010",
+      "target": "collect_board_mi_phase010_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_accumulation_indexed",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787721148,
+      "run_label": "board-mi-accumulation-diagnostic-phase000",
+      "target": "collect_board_mi_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_accumulation_indexed",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase000_moment_accumulation_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787721756,
+      "run_label": "board-mi-accumulation-diagnostic-phase000",
+      "target": "collect_board_mi_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_public_search_shape",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase010_public_search_shape_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787721756,
+      "run_label": "board-mi-public-search-shape-diagnostic-phase010",
+      "target": "collect_board_mi_phase010_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/summary.md"
+      ],
+      "recorded_at_epoch": 1787725898,
+      "run_label": "board-mi-production-compute-feature-phase030",
+      "target": "collect_board_mi_production_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase030_production_compute_feature/summary.md"
+      ],
+      "recorded_at_epoch": 1787726048,
+      "run_label": "board-mi-production-compute-feature-phase030",
+      "target": "collect_board_mi_production_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzi",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzi_compute_feature/summary.md"
+      ],
+      "recorded_at_epoch": 1787727715,
+      "run_label": "board-mi-production-pointxyzi-compute-feature-phase040",
+      "target": "collect_board_mi_production_pointxyzi_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzrgb",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgb_compute_feature/summary.md"
+      ],
+      "recorded_at_epoch": 1787727841,
+      "run_label": "board-mi-production-pointxyzrgb-compute-feature-phase040",
+      "target": "collect_board_mi_production_pointxyzrgb_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mi_production_compute_feature_pointxyzrgba",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_doctor.md",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/evidence_manifest.json",
+        "test-rvv/features/moment_invariants/log/board/repeated_phase040_production_pointxyzrgba_compute_feature/summary.md"
+      ],
+      "recorded_at_epoch": 1787727964,
+      "run_label": "board-mi-production-pointxyzrgba-compute-feature-phase040",
+      "target": "collect_board_mi_production_pointxyzrgba_repeated"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787727964
+}

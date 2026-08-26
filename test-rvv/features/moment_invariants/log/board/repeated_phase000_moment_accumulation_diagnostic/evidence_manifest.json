@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Moment invariants accumulation diagnostic repeated board summary",
+    "run_label": "moment_invariants_accumulation_diagnostic_phase000",
+    "evidence_role": "diagnostic",
+    "device": "board via Makefile config",
+    "iterations": 30,
+    "warmup_iterations": 4,
+    "run_count": 5,
+    "decision_bucket": "weak_positive",
+    "expected_runs": 5
+  },
+  "comparisons": [
+    {
+      "name": "mi_accumulation_indexed",
+      "group": "moment-invariants-accumulation-diagnostic",
+      "evidence_role": "diagnostic",
+      "case_kind": "component-candidate",
+      "point_type": "PointXYZ",
+      "size": 262144,
+      "run_count": 5,
+      "iterations": 30,
+      "warmup_iterations": 4,
+      "build_comparison": true,
+      "std_ms": 9.26651474,
+      "rvv_ms": 8.11535778,
+      "ba_values": [
+        1.1107069152763223,
+        1.2056384708298773,
+        1.1410872429706849,
+        1.1643147255995083,
+        1.0945461111612365
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/moment_invariants/src/bench_moment_invariants.cpp",
+        "row_source": "indexed_cloud",
+        "solve": false,
+        "checksum_policy": "qemu_gtest_numerical_tolerance_gate",
+        "timer_boundary": "helper_only_moment_accumulation_after_centroid",
+        "gate": "PointXYZ indexed AoS diagnostic",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "six central moment sums and j1/j2/j3 formula",
+        "asm_boundary": "computeMomentSummaryRVV inlined into bench_moment_invariants",
+        "rvv_instr_count": 379
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/moment_invariants/src/bench_moment_invariants.cpp",
+        "row_source": "indexed_cloud",
+        "solve": false,
+        "checksum_policy": "qemu_gtest_numerical_tolerance_gate",
+        "timer_boundary": "helper_only_moment_accumulation_after_centroid",
+        "gate": "PointXYZ indexed AoS diagnostic",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "six central moment sums and j1/j2/j3 formula",
+        "asm_boundary": "computeMomentSummaryRVV inlined into bench_moment_invariants",
+        "rvv_instr_count": 379
+      }
+    }
+  ]
+}
