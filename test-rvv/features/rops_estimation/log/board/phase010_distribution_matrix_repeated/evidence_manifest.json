@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "ROPS distribution matrix diagnostic repeated board summary",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/phase010_distribution_matrix_repeated/summary.md",
+    "label": "phase010_distribution_matrix_repeated",
+    "analysis_script": "test-rvv/features/rops_estimation/script/generate_rops_repeated_summary.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "decision_bucket": "positive",
+      "expected_runs": 5
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "rops_distribution_matrix_binning,points=65536,bins=5",
+      "group": "rops-distribution-matrix-diagnostic",
+      "evidence_role": "diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 71.41316502,
+      "rvv_ms": 49.69600754,
+      "ba_values": [
+        1.44,
+        1.44,
+        1.42,
+        1.46,
+        1.42
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/rops_estimation/src/bench_rops_estimation.cpp",
+        "row_source": "rotated_local_cloud_synthetic",
+        "solve": false,
+        "checksum_policy": "distribution_matrix_quantized_checksum",
+        "checksum": "12235178519548195669",
+        "timer_boundary": "distribution_matrix_binning_with_row_col_staging_and_scalar_scatter",
+        "gate": "PointXYZ finite dense synthetic cloud, XY/XZ/YZ projections, fixed bins",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "not_applicable; scalar scatter accumulation after vector row/col staging",
+        "asm_boundary": "getDistributionMatrixRVV in bench_rops_estimation_rvv",
+        "rvv_instr_count": 55
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/rops_estimation/src/bench_rops_estimation.cpp",
+        "row_source": "rotated_local_cloud_synthetic",
+        "solve": false,
+        "checksum_policy": "distribution_matrix_quantized_checksum",
+        "checksum": "12235178519548195669",
+        "timer_boundary": "distribution_matrix_binning_with_row_col_staging_and_scalar_scatter",
+        "gate": "PointXYZ finite dense synthetic cloud, XY/XZ/YZ projections, fixed bins",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "not_applicable; scalar scatter accumulation after vector row/col staging",
+        "asm_boundary": "getDistributionMatrixRVV in bench_rops_estimation_rvv",
+        "rvv_instr_count": 55
+      }
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "ROPS PointXYZI production rotate + distribution detail repeated board summary",
+    "evidence_role": "production_detail",
+    "summary_path": "log/board/phase050_pointxyzi_production_detail_repeated/summary.md",
+    "label": "phase050_pointxyzi_production_detail_repeated",
+    "analysis_script": "test-rvv/features/rops_estimation/script/generate_rops_repeated_summary.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "decision_bucket": "positive",
+      "expected_runs": 5
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "rops_production_pointxyzi_rotate_distribution_pipeline,points=65536,repeat=8",
+      "group": "rops-production-pointxyzi-rotate-distribution-detail",
+      "evidence_role": "production_detail",
+      "case_kind": "production-detail",
+      "point_type": "PointXYZI",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 471.09825106,
+      "rvv_ms": 310.26830436,
+      "ba_values": [
+        1.57,
+        1.52,
+        1.47,
+        1.57,
+        1.47
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "production_private_helper",
+        "wrapper": "test-rvv/features/rops_estimation/src/bench_rops_estimation.cpp",
+        "row_source": "synthetic_PointXYZI_transformed_local_cloud_to_production_rotated_cloud_to_bins",
+        "solve": false,
+        "checksum_policy": "production_rotated_cloud_aabb_and_distribution_matrix_aggregate_checksum",
+        "checksum": "1640563552301658368",
+        "timer_boundary": "production_rotate_cloud_aabb_then_three_distribution_matrices",
+        "gate": "PointXYZI finite dense synthetic cloud, RVVXYZAoSFloatLayout traits gate, production private helper dispatch, X/Y/Z and tilted axis rotations, XY/XZ/YZ projections",
+        "mask": "no finite mask; dense synthetic input and production gate fallback outside this boundary",
+        "reduction": "production RVV vector min/max reduction for rotated xyz AABB; scalar scatter after vector row/col staging",
+        "asm_boundary": "pcl::ROPSEstimation<PointXYZI, Histogram<135>>::rotateCloud/getDistributionMatrix via bench_rops_estimation_rvv",
+        "rvv_instr_count": 628
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "production_private_helper",
+        "wrapper": "test-rvv/features/rops_estimation/src/bench_rops_estimation.cpp",
+        "row_source": "synthetic_PointXYZI_transformed_local_cloud_to_production_rotated_cloud_to_bins",
+        "solve": false,
+        "checksum_policy": "production_rotated_cloud_aabb_and_distribution_matrix_aggregate_checksum",
+        "checksum": "1640563552301658368",
+        "timer_boundary": "production_rotate_cloud_aabb_then_three_distribution_matrices",
+        "gate": "PointXYZI finite dense synthetic cloud, RVVXYZAoSFloatLayout traits gate, production private helper dispatch, X/Y/Z and tilted axis rotations, XY/XZ/YZ projections",
+        "mask": "no finite mask; dense synthetic input and production gate fallback outside this boundary",
+        "reduction": "production RVV vector min/max reduction for rotated xyz AABB; scalar scatter after vector row/col staging",
+        "asm_boundary": "pcl::ROPSEstimation<PointXYZI, Histogram<135>>::rotateCloud/getDistributionMatrix via bench_rops_estimation_rvv",
+        "rvv_instr_count": 628
+      }
+    }
+  ]
+}

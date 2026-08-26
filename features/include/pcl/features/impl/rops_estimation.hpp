@@ -42,14 +42,249 @@
 
 #include <pcl/features/rops_estimation.h>
 
+#ifdef __RVV10__
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_store.h>
+#endif
+
 #include <array>
-#include <numeric> // for accumulate
 #include <Eigen/Eigenvalues> // for EigenSolver
+#include <algorithm>
+#include <cstdint>
+#include <limits>
+#include <numeric> // for accumulate
+#include <type_traits>
+#include <vector>
+
+#ifdef __RVV10__
+#include <riscv_vector.h>
+#endif
+
+#if defined(__RVV10__) && defined(PCL_RVV_ROPS_ENABLE_TEST_TRACE)
+#include <cstddef>
+extern "C" std::size_t pcl_rvv_rops_rotate_cloud_trace_hits;
+extern "C" std::size_t pcl_rvv_rops_distribution_matrix_trace_hits;
+#endif
+
+#ifdef __RVV10__
+namespace pcl::detail::rops
+{
+  constexpr std::size_t kRopsRVVMinPoints = 16;
+
+  inline float
+  reduceMinF32m2 (const vfloat32m2_t values, const std::size_t vl)
+  {
+    const vfloat32m1_t seed =
+        __riscv_vfmv_s_f_f32m1 (std::numeric_limits<float>::max (), 1);
+    const vfloat32m1_t reduced =
+        __riscv_vfredmin_vs_f32m2_f32m1 (values, seed, vl);
+    return (__riscv_vfmv_f_s_f32m1_f32 (reduced));
+  }
+
+  inline float
+  reduceMaxF32m2 (const vfloat32m2_t values, const std::size_t vl)
+  {
+    const vfloat32m1_t seed =
+        __riscv_vfmv_s_f_f32m1 (-std::numeric_limits<float>::max (), 1);
+    const vfloat32m1_t reduced =
+        __riscv_vfredmax_vs_f32m2_f32m1 (values, seed, vl);
+    return (__riscv_vfmv_f_s_f32m1_f32 (reduced));
+  }
+
+  template <typename PointT> bool
+  rotateCloudRVV (const PointT& axis,
+                  const float angle,
+                  const pcl::PointCloud<PointT>& cloud,
+                  pcl::PointCloud<PointT>& rotated_cloud,
+                  Eigen::Vector3f& min,
+                  Eigen::Vector3f& max)
+  {
+    using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+    if constexpr (!Layout::value)
+      return (false);
+    else
+    {
+      const std::size_t number_of_points = cloud.size ();
+      if (number_of_points < kRopsRVVMinPoints || !cloud.is_dense)
+        return (false);
+
+      const float x = axis.x;
+      const float y = axis.y;
+      const float z = axis.z;
+      const float rad = M_PI / 180.0f;
+      const float cosine = std::cos (angle * rad);
+      const float sine = std::sin (angle * rad);
+      const float one_minus_cosine = 1.0f - cosine;
+      const float r00 = cosine + one_minus_cosine * x * x;
+      const float r01 = one_minus_cosine * x * y - sine * z;
+      const float r02 = one_minus_cosine * x * z + sine * y;
+      const float r10 = one_minus_cosine * y * x + sine * z;
+      const float r11 = cosine + one_minus_cosine * y * y;
+      const float r12 = one_minus_cosine * y * z - sine * x;
+      const float r20 = one_minus_cosine * z * x - sine * y;
+      const float r21 = one_minus_cosine * z * y + sine * x;
+      const float r22 = cosine + one_minus_cosine * z * z;
+
+      rotated_cloud.header = cloud.header;
+      rotated_cloud.width = static_cast<std::uint32_t> (number_of_points);
+      rotated_cloud.height = 1;
+      rotated_cloud.is_dense = cloud.is_dense;
+      rotated_cloud.clear ();
+      rotated_cloud.resize (number_of_points);
+
+      const std::size_t vlmax = __riscv_vsetvl_e32m2 (static_cast<std::size_t> (-1));
+      const float init_min = std::numeric_limits<float>::max ();
+      const float init_max = -std::numeric_limits<float>::max ();
+      vfloat32m2_t v_min_x = __riscv_vfmv_v_f_f32m2 (init_min, vlmax);
+      vfloat32m2_t v_min_y = __riscv_vfmv_v_f_f32m2 (init_min, vlmax);
+      vfloat32m2_t v_min_z = __riscv_vfmv_v_f_f32m2 (init_min, vlmax);
+      vfloat32m2_t v_max_x = __riscv_vfmv_v_f_f32m2 (init_max, vlmax);
+      vfloat32m2_t v_max_y = __riscv_vfmv_v_f_f32m2 (init_max, vlmax);
+      vfloat32m2_t v_max_z = __riscv_vfmv_v_f_f32m2 (init_max, vlmax);
+
+      const auto* input_base =
+          reinterpret_cast<const std::uint8_t*> (cloud.points.data ());
+      auto* output_base =
+          reinterpret_cast<std::uint8_t*> (rotated_cloud.points.data ());
+
+      for (std::size_t i = 0; i < number_of_points;)
+      {
+        const std::size_t vl = __riscv_vsetvl_e32m2 (number_of_points - i);
+        vfloat32m2_t vx;
+        vfloat32m2_t vy;
+        vfloat32m2_t vz;
+        pcl::rvv_load::strided_load3_f32m2<sizeof (PointT), Layout::kX, Layout::kY, Layout::kZ> (
+            input_base + i * sizeof (PointT), vl, vx, vy, vz);
+
+        vfloat32m2_t rx = __riscv_vfmul_vf_f32m2 (vx, r00, vl);
+        rx = __riscv_vfmacc_vf_f32m2 (rx, r01, vy, vl);
+        rx = __riscv_vfmacc_vf_f32m2 (rx, r02, vz, vl);
+        vfloat32m2_t ry = __riscv_vfmul_vf_f32m2 (vx, r10, vl);
+        ry = __riscv_vfmacc_vf_f32m2 (ry, r11, vy, vl);
+        ry = __riscv_vfmacc_vf_f32m2 (ry, r12, vz, vl);
+        vfloat32m2_t rz = __riscv_vfmul_vf_f32m2 (vx, r20, vl);
+        rz = __riscv_vfmacc_vf_f32m2 (rz, r21, vy, vl);
+        rz = __riscv_vfmacc_vf_f32m2 (rz, r22, vz, vl);
+
+        pcl::rvv_store::strided_store3_f32m2<sizeof (PointT), Layout::kX, Layout::kY, Layout::kZ> (
+            output_base + i * sizeof (PointT), vl, rx, ry, rz);
+
+        v_min_x = __riscv_vfmin_vv_f32m2_tu (v_min_x, v_min_x, rx, vl);
+        v_min_y = __riscv_vfmin_vv_f32m2_tu (v_min_y, v_min_y, ry, vl);
+        v_min_z = __riscv_vfmin_vv_f32m2_tu (v_min_z, v_min_z, rz, vl);
+        v_max_x = __riscv_vfmax_vv_f32m2_tu (v_max_x, v_max_x, rx, vl);
+        v_max_y = __riscv_vfmax_vv_f32m2_tu (v_max_y, v_max_y, ry, vl);
+        v_max_z = __riscv_vfmax_vv_f32m2_tu (v_max_z, v_max_z, rz, vl);
+
+        i += vl;
+      }
+
+      min (0) = reduceMinF32m2 (v_min_x, vlmax);
+      min (1) = reduceMinF32m2 (v_min_y, vlmax);
+      min (2) = reduceMinF32m2 (v_min_z, vlmax);
+      max (0) = reduceMaxF32m2 (v_max_x, vlmax);
+      max (1) = reduceMaxF32m2 (v_max_y, vlmax);
+      max (2) = reduceMaxF32m2 (v_max_z, vlmax);
+
+#if defined(PCL_RVV_ROPS_ENABLE_TEST_TRACE)
+      pcl_rvv_rops_rotate_cloud_trace_hits += number_of_points;
+#endif
+      return (true);
+    }
+  }
+
+  template <typename PointT> bool
+  getDistributionMatrixRVV (const unsigned int projection,
+                            const Eigen::Vector3f& min,
+                            const Eigen::Vector3f& max,
+                            const pcl::PointCloud<PointT>& cloud,
+                            const unsigned int number_of_bins,
+                            Eigen::MatrixXf& matrix)
+  {
+    using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+    if constexpr (!Layout::value)
+      return (false);
+    else
+    {
+      const std::size_t count = cloud.size ();
+      if (count < kRopsRVVMinPoints || !cloud.is_dense || number_of_bins == 0 ||
+          projection >= 3)
+        return (false);
+
+      const unsigned int coord[3][2] = {
+        {0, 1},
+        {0, 2},
+        {1, 2}};
+      const float u_min = min[coord[projection][0]];
+      const float v_min = min[coord[projection][1]];
+      const float u_extent = max (coord[projection][0]) - u_min;
+      const float v_extent = max (coord[projection][1]) - v_min;
+      if (u_extent <= std::numeric_limits<float>::epsilon () ||
+          v_extent <= std::numeric_limits<float>::epsilon ())
+        return (false);
+
+      matrix.setZero ();
+      const float inv_u_bin_length = static_cast<float> (number_of_bins) / u_extent;
+      const float inv_v_bin_length = static_cast<float> (number_of_bins) / v_extent;
+      std::vector<std::uint32_t> rows (count);
+      std::vector<std::uint32_t> cols (count);
+      const auto* base = reinterpret_cast<const std::uint8_t*> (cloud.points.data ());
+
+      for (std::size_t i = 0; i < count;)
+      {
+        const std::size_t vl = __riscv_vsetvl_e32m2 (count - i);
+        vfloat32m2_t vx;
+        vfloat32m2_t vy;
+        vfloat32m2_t vz;
+        pcl::rvv_load::strided_load3_f32m2<sizeof (PointT), Layout::kX, Layout::kY, Layout::kZ> (
+            base + i * sizeof (PointT), vl, vx, vy, vz);
+
+        vfloat32m2_t v_u = vx;
+        vfloat32m2_t v_v = vy;
+        if (projection == 1)
+          v_v = vz;
+        else if (projection == 2)
+        {
+          v_u = vy;
+          v_v = vz;
+        }
+
+        v_u = __riscv_vfmul_vf_f32m2 (
+            __riscv_vfsub_vf_f32m2 (v_u, u_min, vl), inv_u_bin_length, vl);
+        v_v = __riscv_vfmul_vf_f32m2 (
+            __riscv_vfsub_vf_f32m2 (v_v, v_min, vl), inv_v_bin_length, vl);
+        vuint32m2_t v_row = __riscv_vfcvt_rtz_xu_f_v_u32m2 (v_u, vl);
+        vuint32m2_t v_col = __riscv_vfcvt_rtz_xu_f_v_u32m2 (v_v, vl);
+        const vuint32m2_t v_last_bin = __riscv_vmv_v_x_u32m2 (number_of_bins - 1, vl);
+        const vuint32m2_t v_bins = __riscv_vmv_v_x_u32m2 (number_of_bins, vl);
+        v_row = __riscv_vminu_vv_u32m2 (v_row, v_last_bin, vl);
+        v_col = __riscv_vminu_vv_u32m2 (v_col, v_last_bin, vl);
+        v_row = __riscv_vmerge_vvm_u32m2 (
+            v_row, v_last_bin, __riscv_vmsgeu_vv_u32m2_b16 (v_row, v_bins, vl), vl);
+        v_col = __riscv_vmerge_vvm_u32m2 (
+            v_col, v_last_bin, __riscv_vmsgeu_vv_u32m2_b16 (v_col, v_bins, vl), vl);
+        __riscv_vse32_v_u32m2 (rows.data () + i, v_row, vl);
+        __riscv_vse32_v_u32m2 (cols.data () + i, v_col, vl);
+        i += vl;
+      }
+
+      for (std::size_t i = 0; i < count; ++i)
+        matrix (rows[i], cols[i]) += 1.0f;
+      matrix /= std::max<float> (1.0f, static_cast<float> (count));
+
+#if defined(PCL_RVV_ROPS_ENABLE_TEST_TRACE)
+      pcl_rvv_rops_distribution_matrix_trace_hits += count;
+#endif
+      return (true);
+    }
+  }
+} // namespace pcl::detail::rops
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT, typename PointOutT>
 pcl::ROPSEstimation <PointInT, PointOutT>::ROPSEstimation () :
-  
+
   triangles_ (0),
   triangles_of_the_point_ (0)
 {
@@ -385,6 +620,7 @@ pcl::ROPSEstimation <PointInT, PointOutT>::transformCloud (const PointInT& point
 {
   const auto number_of_points = local_points.size ();
   transformed_cloud.clear ();
+  transformed_cloud.is_dense = surface_->is_dense;
   transformed_cloud.reserve (number_of_points);
 
   for (const auto& idx: local_points)
@@ -407,6 +643,11 @@ pcl::ROPSEstimation <PointInT, PointOutT>::transformCloud (const PointInT& point
 template <typename PointInT, typename PointOutT> void
 pcl::ROPSEstimation <PointInT, PointOutT>::rotateCloud (const PointInT& axis, const float angle, const PointCloudIn& cloud, PointCloudIn& rotated_cloud, Eigen::Vector3f& min, Eigen::Vector3f& max) const
 {
+#ifdef __RVV10__
+  if (pcl::detail::rops::rotateCloudRVV (axis, angle, cloud, rotated_cloud, min, max))
+    return;
+#endif
+
   Eigen::Matrix3f rotation_matrix;
   const float x = axis.x;
   const float y = axis.y;
@@ -423,6 +664,7 @@ pcl::ROPSEstimation <PointInT, PointOutT>::rotateCloud (const PointInT& axis, co
   rotated_cloud.header = cloud.header;
   rotated_cloud.width = number_of_points;
   rotated_cloud.height = 1;
+  rotated_cloud.is_dense = cloud.is_dense;
   rotated_cloud.clear ();
   rotated_cloud.reserve (number_of_points);
 
@@ -456,6 +698,11 @@ pcl::ROPSEstimation <PointInT, PointOutT>::rotateCloud (const PointInT& axis, co
 template <typename PointInT, typename PointOutT> void
 pcl::ROPSEstimation <PointInT, PointOutT>::getDistributionMatrix (const unsigned int projection, const Eigen::Vector3f& min, const Eigen::Vector3f& max, const PointCloudIn& cloud, Eigen::MatrixXf& matrix) const
 {
+#ifdef __RVV10__
+  if (pcl::detail::rops::getDistributionMatrixRVV (projection, min, max, cloud, number_of_bins_, matrix))
+    return;
+#endif
+
   matrix.setZero ();
 
   const unsigned int coord[3][2] = {

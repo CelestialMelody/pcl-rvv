@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "ROPS rotateCloud + AABB diagnostic repeated board summary",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/phase020_rotate_cloud_repeated/summary.md",
+    "label": "phase020_rotate_cloud_repeated",
+    "analysis_script": "test-rvv/features/rops_estimation/script/generate_rops_repeated_summary.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "decision_bucket": "positive",
+      "expected_runs": 5
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "rops_rotate_cloud_aabb,points=65536,repeat=8",
+      "group": "rops-rotate-cloud-aabb-diagnostic",
+      "evidence_role": "diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 117.3392688,
+      "rvv_ms": 96.39731169999999,
+      "ba_values": [
+        1.22,
+        1.22,
+        1.2,
+        1.22,
+        1.22
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/rops_estimation/src/bench_rops_estimation.cpp",
+        "row_source": "synthetic_transformed_local_cloud",
+        "solve": false,
+        "checksum_policy": "rotated_cloud_and_aabb_quantized_checksum",
+        "checksum": "12941223208220633077",
+        "timer_boundary": "rotate_cloud_aos_3x3_store_and_aabb_reduction",
+        "gate": "PointXYZ finite dense synthetic cloud, X/Y/Z and tilted axis rotations",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "vector min/max reduction for rotated xyz AABB",
+        "asm_boundary": "rotateCloudRVV in bench_rops_estimation_rvv",
+        "rvv_instr_count": 30
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/rops_estimation/src/bench_rops_estimation.cpp",
+        "row_source": "synthetic_transformed_local_cloud",
+        "solve": false,
+        "checksum_policy": "rotated_cloud_and_aabb_quantized_checksum",
+        "checksum": "12941223208220633077",
+        "timer_boundary": "rotate_cloud_aos_3x3_store_and_aabb_reduction",
+        "gate": "PointXYZ finite dense synthetic cloud, X/Y/Z and tilted axis rotations",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "vector min/max reduction for rotated xyz AABB",
+        "asm_boundary": "rotateCloudRVV in bench_rops_estimation_rvv",
+        "rvv_instr_count": 30
+      }
+    }
+  ]
+}

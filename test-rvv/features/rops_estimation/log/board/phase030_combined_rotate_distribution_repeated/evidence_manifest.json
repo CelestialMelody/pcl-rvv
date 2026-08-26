@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "ROPS combined rotate + distribution diagnostic repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "log/board/phase030_combined_rotate_distribution_repeated/summary.md",
+    "label": "phase030_combined_rotate_distribution_repeated",
+    "analysis_script": "test-rvv/features/rops_estimation/script/generate_rops_repeated_summary.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "decision_bucket": "positive",
+      "expected_runs": 5
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "rops_rotate_distribution_pipeline,points=65536,repeat=8",
+      "group": "rops-combined-rotate-distribution-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production-shaped-diagnostic",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 418.83376312,
+      "rvv_ms": 256.15193346,
+      "ba_values": [
+        1.63,
+        1.64,
+        1.64,
+        1.63,
+        1.63
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/rops_estimation/src/bench_rops_estimation.cpp",
+        "row_source": "synthetic_transformed_local_cloud_to_rotated_cloud_to_bins",
+        "solve": false,
+        "checksum_policy": "rotated_cloud_aabb_and_distribution_matrix_aggregate_checksum",
+        "checksum": "1640563552301658368",
+        "timer_boundary": "rotate_cloud_aabb_then_three_distribution_matrices",
+        "gate": "PointXYZ finite dense synthetic cloud, X/Y/Z and tilted axis rotations, XY/XZ/YZ projections",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "vector min/max reduction for rotated xyz AABB; scalar scatter after vector row/col staging",
+        "asm_boundary": "rotateCloudAndDistributionMatricesRVV in bench_rops_estimation_rvv",
+        "rvv_instr_count": 100
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/rops_estimation/src/bench_rops_estimation.cpp",
+        "row_source": "synthetic_transformed_local_cloud_to_rotated_cloud_to_bins",
+        "solve": false,
+        "checksum_policy": "rotated_cloud_aabb_and_distribution_matrix_aggregate_checksum",
+        "checksum": "1640563552301658368",
+        "timer_boundary": "rotate_cloud_aabb_then_three_distribution_matrices",
+        "gate": "PointXYZ finite dense synthetic cloud, X/Y/Z and tilted axis rotations, XY/XZ/YZ projections",
+        "mask": "no finite mask; synthetic finite input",
+        "reduction": "vector min/max reduction for rotated xyz AABB; scalar scatter after vector row/col staging",
+        "asm_boundary": "rotateCloudAndDistributionMatricesRVV in bench_rops_estimation_rvv",
+        "rvv_instr_count": 100
+      }
+    }
+  ]
+}
