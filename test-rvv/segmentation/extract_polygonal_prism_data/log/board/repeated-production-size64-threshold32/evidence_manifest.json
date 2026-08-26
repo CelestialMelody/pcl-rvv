@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "EPPD full-scan single-polygon repeated board (production_public, dense_ordered_indices)",
+    "evidence_role": "production_public",
+    "summary_path": "log/board/repeated-production-size64-threshold32/summary.md",
+    "label": "eppd single-polygon PointXYZ full-scan repeated board summary",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 32,
+      "warmup_iterations": 4,
+      "run_count": 3,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "binary_hash": "a3ffb59a5c7a41ca4971b858cd1e6a7a2d847ba8eb481db2f9d2ec185c289336"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "long_tail_ratio": 1.25
+    }
+  },
+  "comparisons": [
+    {
+      "name": "eppd single polygon full-scan production indices=dense",
+      "group": "eppd_full_scan_single_polygon_pointxyz_repeated_board",
+      "evidence_role": "production_public",
+      "case_kind": "full_scan_single_polygon",
+      "point_type": "PointXYZ",
+      "size": 64,
+      "run_count": 3,
+      "iterations": 32,
+      "warmup_iterations": 4,
+      "baseline": {
+        "label": "scalar reference",
+        "boundary": "public_overload",
+        "wrapper": "bench_eppd",
+        "row_source": "dense_ordered_indices",
+        "solve": false,
+        "checksum_policy": "fnv_indices",
+        "checksum": "see run_bench_std.log and run_bench_rvv.log; all fetched compare runs matched",
+        "timer_boundary": "public_segment_including_plane_setup_project_points_and_scan",
+        "gate": "plane_distance_and_single_polygon",
+        "mask": "height_and_polygon_xor_parity",
+        "reduction": "none_output_compress",
+        "std_ms": 0.0216
+      },
+      "candidate": {
+        "label": "rvv full-scan edge parity candidate",
+        "boundary": "public_overload",
+        "wrapper": "bench_eppd",
+        "row_source": "dense_ordered_indices",
+        "solve": false,
+        "checksum_policy": "fnv_indices",
+        "checksum": "see run_bench_std.log and run_bench_rvv.log; all fetched compare runs matched",
+        "timer_boundary": "public_segment_including_plane_setup_project_points_and_scan",
+        "gate": "plane_distance_and_single_polygon",
+        "mask": "height_and_polygon_xor_parity",
+        "reduction": "none_output_compress",
+        "asm_boundary": "ExtractPolygonalPrismData<PointT>::segmentRvv",
+        "rvv_instr_count": "see build/asm/riscv/bench_eppd_rvv.asm",
+        "rvv_ms": 0.0161
+      },
+      "ba_values": [
+        1.3416149068322982,
+        1.3416149068322982,
+        1.3416149068322982
+      ]
+    }
+  ]
+}

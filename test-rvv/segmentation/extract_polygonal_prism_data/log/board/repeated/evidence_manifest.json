@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "EPPD full-scan single-polygon repeated board diagnostic (dense_ordered_indices)",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "log/board/repeated/summary.md",
+    "label": "eppd single-polygon full-scan repeated board summary",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "binary_hash": "4ffc8e6256ac4955e241ffe8764b66b31dbca925c59869aa59893c142850eebe"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "long_tail_ratio": 1.25
+    }
+  },
+  "comparisons": [
+    {
+      "name": "eppd single polygon full-scan diagnostic",
+      "group": "eppd_full_scan_single_polygon_repeated_board",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "full_scan_single_polygon",
+      "point_type": "PointXYZ",
+      "size": 262144,
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "baseline": {
+        "label": "scalar reference",
+        "boundary": "test_support_full_scan",
+        "wrapper": "bench_eppd",
+        "row_source": "dense_ordered_indices",
+        "solve": false,
+        "checksum_policy": "fnv_indices",
+        "checksum": "see run_bench_std.log and run_bench_rvv.log; all fetched compare runs matched",
+        "timer_boundary": "full_scan_after_projection_setup",
+        "gate": "plane_distance_and_single_polygon",
+        "mask": "height_and_polygon_parity",
+        "reduction": "none_output_compress",
+        "std_ms": 23.9507
+      },
+      "candidate": {
+        "label": "rvv full-scan edge parity candidate",
+        "boundary": "test_support_full_scan",
+        "wrapper": "bench_eppd",
+        "row_source": "dense_ordered_indices",
+        "solve": false,
+        "checksum_policy": "fnv_indices",
+        "checksum": "see run_bench_std.log and run_bench_rvv.log; all fetched compare runs matched",
+        "timer_boundary": "full_scan_after_projection_setup",
+        "gate": "plane_distance_and_single_polygon",
+        "mask": "height_and_polygon_parity",
+        "reduction": "none_output_compress",
+        "asm_boundary": "segmentPolygonalPrismRvvFullScanCandidate",
+        "rvv_instr_count": "see build/asm/riscv/bench_eppd_rvv.asm",
+        "rvv_ms": 12.0289
+      },
+      "ba_values": [
+        1.813873294699988,
+        1.7741500952607763,
+        1.9925707154742098,
+        1.9812617945115514,
+        2.1602370689655173
+      ]
+    }
+  ]
+}

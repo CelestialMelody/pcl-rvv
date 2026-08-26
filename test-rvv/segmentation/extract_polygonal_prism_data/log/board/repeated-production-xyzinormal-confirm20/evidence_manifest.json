@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "EPPD full-scan single-polygon repeated board (production_public, dense_ordered_indices)",
+    "evidence_role": "production_public",
+    "summary_path": "log/board/repeated-production-xyzinormal-confirm20/summary.md",
+    "label": "eppd single-polygon PointXYZINormal full-scan repeated board summary",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 20,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "binary_hash": "84f7a6b72525c5878f9ed088b8ba7eb0209c4685c3abf999d5a87046165808db"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "long_tail_ratio": 1.25
+    }
+  },
+  "comparisons": [
+    {
+      "name": "eppd single polygon full-scan production indices=dense point-type=xyzinormal",
+      "group": "eppd_full_scan_single_polygon_pointxyzinormal_repeated_board",
+      "evidence_role": "production_public",
+      "case_kind": "full_scan_single_polygon",
+      "point_type": "PointXYZINormal",
+      "size": 262144,
+      "run_count": 20,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "baseline": {
+        "label": "scalar reference",
+        "boundary": "public_overload",
+        "wrapper": "bench_eppd",
+        "row_source": "dense_ordered_indices",
+        "solve": false,
+        "checksum_policy": "fnv_indices",
+        "checksum": "see run_bench_std.log and run_bench_rvv.log; all fetched compare runs matched",
+        "timer_boundary": "public_segment_including_plane_setup_project_points_and_scan",
+        "gate": "plane_distance_and_single_polygon",
+        "mask": "height_and_polygon_xor_parity",
+        "reduction": "none_output_compress",
+        "std_ms": 60.150549999999996
+      },
+      "candidate": {
+        "label": "rvv full-scan edge parity candidate",
+        "boundary": "public_overload",
+        "wrapper": "bench_eppd",
+        "row_source": "dense_ordered_indices",
+        "solve": false,
+        "checksum_policy": "fnv_indices",
+        "checksum": "see run_bench_std.log and run_bench_rvv.log; all fetched compare runs matched",
+        "timer_boundary": "public_segment_including_plane_setup_project_points_and_scan",
+        "gate": "plane_distance_and_single_polygon",
+        "mask": "height_and_polygon_xor_parity",
+        "reduction": "none_output_compress",
+        "asm_boundary": "ExtractPolygonalPrismData<PointT>::segmentRvv",
+        "rvv_instr_count": "see build/asm/riscv/bench_eppd_rvv.asm",
+        "rvv_ms": 54.013149999999996
+      },
+      "ba_values": [
+        1.0838379360307953,
+        1.4699732790062785,
+        1.0891902918430811,
+        1.1069096643919407,
+        1.4642622774854421,
+        0.8850161531840638,
+        1.0636787469893094,
+        0.8896163740371629,
+        1.1649246482518745,
+        1.1658948621351595,
+        1.3131927351585797,
+        1.0591253983064275,
+        1.5411671073913378,
+        0.9270663929957543,
+        1.19549454543288,
+        1.1246020833992265,
+        1.337969460258617,
+        0.8791080968328832,
+        0.9580287728081993,
+        1.4377678529006508
+      ]
+    }
+  ]
+}
