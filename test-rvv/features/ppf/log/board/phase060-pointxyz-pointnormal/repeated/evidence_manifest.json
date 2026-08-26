@@ -1,0 +1,116 @@
+{
+  "checks": {
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "ba_values": [
+        1.33,
+        1.33,
+        1.31,
+        1.33,
+        1.35
+      ],
+      "baseline": {
+        "asm_boundary": "computePPFPairFeatureBatchRVV / computePairFeaturesRVV or inlined helper",
+        "boundary": "public overload",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "checksum_policy": "PPF descriptor checksum line",
+        "gate": "RVV build dispatches traits-gated PointXYZ source plus PointNormal normals to alpha_m RVV; non-RVV builds and unsupported types use scalar fallback",
+        "label": "Std build",
+        "mask": "identity pairs are NaN; candidate valid mask covers zero-distance failures",
+        "reduction": "all-pairs output, scalar pair features, RVV alpha_m and output write",
+        "row_source": "ordered index_i x full input",
+        "rvv_ms": 412.42580000000004,
+        "solve": false,
+        "std_ms": 412.42580000000004,
+        "timer_boundary": "PPFEstimation::compute with explicit indices",
+        "wrapper": "test-rvv/features/ppf/src/bench_ppf.cpp"
+      },
+      "build_comparison": true,
+      "candidate": {
+        "asm_boundary": "computePPFPairFeatureBatchRVV / computePairFeaturesRVV or inlined helper",
+        "boundary": "public overload",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "checksum_policy": "PPF descriptor checksum line",
+        "gate": "RVV build dispatches traits-gated PointXYZ source plus PointNormal normals to alpha_m RVV; non-RVV builds and unsupported types use scalar fallback",
+        "label": "RVV build",
+        "mask": "identity pairs are NaN; candidate valid mask covers zero-distance failures",
+        "reduction": "all-pairs output, scalar pair features, RVV alpha_m and output write",
+        "row_source": "ordered index_i x full input",
+        "rvv_ms": 310.2756,
+        "solve": false,
+        "std_ms": 412.42580000000004,
+        "timer_boundary": "PPFEstimation::compute with explicit indices",
+        "wrapper": "test-rvv/features/ppf/src/bench_ppf.cpp"
+      },
+      "case_kind": "production-public",
+      "evidence_role": "production-public",
+      "group": "ppf-point-type-expansion",
+      "iterations": 8,
+      "name": "public_ppf_compute_pointxyz_pointnormal",
+      "notes": "Production-public evidence for Phase 060 normal point-type expansion. It proves a normal AoS layout that differs from exact Normal.",
+      "point_type": "PointXYZ + PointNormal -> PPFSignature",
+      "run_count": 5,
+      "run_paths": [
+        "log/board/phase060-pointxyz-pointnormal/repeated/run_01/analyze_bench_compare.log",
+        "log/board/phase060-pointxyz-pointnormal/repeated/run_02/analyze_bench_compare.log",
+        "log/board/phase060-pointxyz-pointnormal/repeated/run_03/analyze_bench_compare.log",
+        "log/board/phase060-pointxyz-pointnormal/repeated/run_04/analyze_bench_compare.log",
+        "log/board/phase060-pointxyz-pointnormal/repeated/run_05/analyze_bench_compare.log"
+      ],
+      "rvv_ms": 310.2756,
+      "rvv_ms_values": [
+        308.818,
+        310.287,
+        311.958,
+        309.951,
+        310.364
+      ],
+      "size": "side/index-count from dataset line",
+      "std_ms": 412.42580000000004,
+      "std_ms_values": [
+        411.535,
+        411.882,
+        408.98,
+        412.259,
+        417.473
+      ],
+      "warmup_iterations": 2
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "analysis_script": "test-rvv/features/ppf/script/generate_ppf_evidence_manifest.py",
+    "evidence_role": "production-public",
+    "label": "ppf board repeated compare",
+    "metadata": {
+      "dataset": "synthetic ppf grid side=28 points=784 indices=64 repeat=8",
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "run_count": 5,
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": 2
+    },
+    "summary_path": "log/board/phase060-pointxyz-pointnormal/repeated",
+    "summary_paths": [
+      "log/board/phase060-pointxyz-pointnormal/repeated/run_01/analyze_bench_compare.log",
+      "log/board/phase060-pointxyz-pointnormal/repeated/run_02/analyze_bench_compare.log",
+      "log/board/phase060-pointxyz-pointnormal/repeated/run_03/analyze_bench_compare.log",
+      "log/board/phase060-pointxyz-pointnormal/repeated/run_04/analyze_bench_compare.log",
+      "log/board/phase060-pointxyz-pointnormal/repeated/run_05/analyze_bench_compare.log"
+    ],
+    "title": "ppf board Std/RVV compare"
+  }
+}

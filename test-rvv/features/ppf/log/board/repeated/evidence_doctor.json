@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "analysis_script": "test-rvv/features/ppf/script/generate_ppf_evidence_manifest.py",
+    "evidence_role": "production-public",
+    "label": "ppf board repeated compare",
+    "metadata": {
+      "dataset": "synthetic ppf grid side=28 points=784 indices=64 repeat=8",
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "run_count": 5,
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": 2
+    },
+    "summary_path": "log/board/repeated",
+    "summary_paths": [
+      "log/board/repeated/run_01/analyze_bench_compare.log",
+      "log/board/repeated/run_02/analyze_bench_compare.log",
+      "log/board/repeated/run_03/analyze_bench_compare.log",
+      "log/board/repeated/run_04/analyze_bench_compare.log",
+      "log/board/repeated/run_05/analyze_bench_compare.log"
+    ],
+    "title": "ppf board Std/RVV compare"
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 0,
+    "suggestions": 2
+  },
+  "issues": [
+    {
+      "severity": "SUGGESTION",
+      "signal": "environment_metadata_missing",
+      "case": "public_ppf_compute",
+      "observed_pattern": "缺少环境字段：taskset, governor, freq, temperature",
+      "why_suspicious": "环境字段缺失不会必然推翻结果，但会削弱对长尾、run-to-run 反转和异常值的解释能力。",
+      "possible_non_bug_explanations": "可能当前板卡环境固定，worker 没有重复记录。",
+      "possible_bug_or_evidence_issues": "也可能温度、governor、频率或绑核变化影响了异常点。",
+      "recommended_checks": "下次采集记录 taskset、governor、freq、temperature、device / VLEN；必要时把环境摘要写入 board summary。",
+      "conclusion_policy": "若没有其它异常，可继续，但 Handoff 应说明环境 metadata 边界。"
+    },
+    {
+      "severity": "SUGGESTION",
+      "signal": "binary_identity_missing",
+      "case": "public_ppf_compute",
+      "observed_pattern": "缺少 binary_hash 或等价二进制身份字段。",
+      "why_suspicious": "没有二进制身份时，难以排除旧 binary、旧日志或不同编译选项混入。",
+      "possible_non_bug_explanations": "可能当前 summary 的命令已经足够复现。",
+      "possible_bug_or_evidence_issues": "也可能 raw log 来自不同 build，尤其是多轮远端板卡采集。",
+      "recommended_checks": "在 repeated board summary 或 manifest 中记录 binary hash / git tree / build label；发现冲突时清理旧日志后重跑。",
+      "conclusion_policy": "不是单独阻塞项，但遇到方向反转或长尾时应优先补齐。"
+    }
+  ]
+}

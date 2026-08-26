@@ -1,0 +1,116 @@
+{
+  "checks": {
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "ba_values": [
+        1.35,
+        1.35,
+        1.37,
+        1.39,
+        1.38
+      ],
+      "baseline": {
+        "asm_boundary": "computePPFPairFeatureBatchRVV / computePairFeaturesRVV or inlined helper",
+        "boundary": "public overload",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "checksum_policy": "PPF descriptor checksum line",
+        "gate": "RVV build dispatches exact PointXYZ + Normal + PPFSignature to alpha_m RVV; all other builds/types use scalar fallback",
+        "label": "Std build",
+        "mask": "identity pairs are NaN; candidate valid mask covers zero-distance failures",
+        "reduction": "all-pairs output, scalar pair features, RVV alpha_m and output write",
+        "row_source": "ordered index_i x full input",
+        "rvv_ms": 390.0784,
+        "solve": false,
+        "std_ms": 390.0784,
+        "timer_boundary": "PPFEstimation::compute with explicit indices",
+        "wrapper": "test-rvv/features/ppf/src/bench_ppf.cpp"
+      },
+      "build_comparison": true,
+      "candidate": {
+        "asm_boundary": "computePPFPairFeatureBatchRVV / computePairFeaturesRVV or inlined helper",
+        "boundary": "public overload",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "checksum_policy": "PPF descriptor checksum line",
+        "gate": "RVV build dispatches exact PointXYZ + Normal + PPFSignature to alpha_m RVV; all other builds/types use scalar fallback",
+        "label": "RVV build",
+        "mask": "identity pairs are NaN; candidate valid mask covers zero-distance failures",
+        "reduction": "all-pairs output, scalar pair features, RVV alpha_m and output write",
+        "row_source": "ordered index_i x full input",
+        "rvv_ms": 284.9594,
+        "solve": false,
+        "std_ms": 390.0784,
+        "timer_boundary": "PPFEstimation::compute with explicit indices",
+        "wrapper": "test-rvv/features/ppf/src/bench_ppf.cpp"
+      },
+      "case_kind": "production-public",
+      "evidence_role": "production-public",
+      "group": "ppf-public-estimation",
+      "iterations": 8,
+      "name": "public_ppf_compute",
+      "notes": "Production-public evidence for Phase 040. It proves the patched public RVV build against the public scalar build within the exact point-type gate.",
+      "point_type": "PointXYZ + Normal -> PPFSignature",
+      "run_count": 5,
+      "run_paths": [
+        "log/board/repeated/run_01/analyze_bench_compare.log",
+        "log/board/repeated/run_02/analyze_bench_compare.log",
+        "log/board/repeated/run_03/analyze_bench_compare.log",
+        "log/board/repeated/run_04/analyze_bench_compare.log",
+        "log/board/repeated/run_05/analyze_bench_compare.log"
+      ],
+      "rvv_ms": 284.9594,
+      "rvv_ms_values": [
+        287.598,
+        288.814,
+        284.099,
+        281.526,
+        282.76
+      ],
+      "size": "side/index-count from dataset line",
+      "std_ms": 390.0784,
+      "std_ms_values": [
+        388.39,
+        390.743,
+        390.243,
+        390.334,
+        390.682
+      ],
+      "warmup_iterations": 2
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "analysis_script": "test-rvv/features/ppf/script/generate_ppf_evidence_manifest.py",
+    "evidence_role": "production-public",
+    "label": "ppf board repeated compare",
+    "metadata": {
+      "dataset": "synthetic ppf grid side=28 points=784 indices=64 repeat=8",
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "run_count": 5,
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": 2
+    },
+    "summary_path": "log/board/repeated",
+    "summary_paths": [
+      "log/board/repeated/run_01/analyze_bench_compare.log",
+      "log/board/repeated/run_02/analyze_bench_compare.log",
+      "log/board/repeated/run_03/analyze_bench_compare.log",
+      "log/board/repeated/run_04/analyze_bench_compare.log",
+      "log/board/repeated/run_05/analyze_bench_compare.log"
+    ],
+    "title": "ppf board Std/RVV compare"
+  }
+}
