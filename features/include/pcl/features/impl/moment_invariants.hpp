@@ -44,6 +44,161 @@
 #include <pcl/features/moment_invariants.h>
 #include <pcl/common/centroid.h>
 
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <type_traits>
+
+#if defined(__RVV10__)
+#include <pcl/rvv_point_load.h>
+#include <pcl/rvv_point_traits.h>
+#include <riscv_vector.h>
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+#define PCL_MOMENT_INVARIANTS_RVV_NOINLINE __attribute__((noinline))
+#else
+#define PCL_MOMENT_INVARIANTS_RVV_NOINLINE
+#endif
+
+namespace pcl
+{
+namespace detail
+{
+  inline void
+  momentInvariantsFinalize (const float mu200, const float mu020, const float mu002,
+                            const float mu110, const float mu101, const float mu011,
+                            float& j1, float& j2, float& j3)
+  {
+    j1 = mu200             + mu020               + mu002;
+    j2 = mu200*mu020       + mu200*mu002         + mu020*mu002       - mu110*mu110       - mu101*mu101       - mu011*mu011;
+    j3 = mu200*mu020*mu002 + 2*mu110*mu101*mu011 - mu002*mu110*mu110 - mu020*mu101*mu101 - mu200*mu011*mu011;
+  }
+
+  template <typename PointT> void
+  momentInvariantsIndexedMomentsStd (const pcl::PointCloud<PointT>& cloud,
+                                     const pcl::Indices& indices,
+                                     const Eigen::Vector4f& centroid,
+                                     float& j1, float& j2, float& j3)
+  {
+    float mu200 = 0, mu020 = 0, mu002 = 0, mu110 = 0, mu101 = 0, mu011  = 0;
+
+    for (const auto &index : indices)
+    {
+      const float dx = cloud[index].x - centroid[0];
+      const float dy = cloud[index].y - centroid[1];
+      const float dz = cloud[index].z - centroid[2];
+
+      mu200 += dx * dx;
+      mu020 += dy * dy;
+      mu002 += dz * dz;
+      mu110 += dx * dy;
+      mu101 += dx * dz;
+      mu011 += dy * dz;
+    }
+
+    momentInvariantsFinalize (mu200, mu020, mu002, mu110, mu101, mu011, j1, j2, j3);
+  }
+
+  template <typename PointT> void
+  momentInvariantsFullMomentsStd (const pcl::PointCloud<PointT>& cloud,
+                                  const Eigen::Vector4f& centroid,
+                                  float& j1, float& j2, float& j3)
+  {
+    float mu200 = 0, mu020 = 0, mu002 = 0, mu110 = 0, mu101 = 0, mu011  = 0;
+
+    for (const auto& point: cloud.points)
+    {
+      const float dx = point.x - centroid[0];
+      const float dy = point.y - centroid[1];
+      const float dz = point.z - centroid[2];
+
+      mu200 += dx * dx;
+      mu020 += dy * dy;
+      mu002 += dz * dz;
+      mu110 += dx * dy;
+      mu101 += dx * dz;
+      mu011 += dy * dz;
+    }
+
+    momentInvariantsFinalize (mu200, mu020, mu002, mu110, mu101, mu011, j1, j2, j3);
+  }
+
+#if defined(__RVV10__)
+  inline constexpr std::size_t kMomentInvariantsMinRVVPoints = 16;
+
+  inline float
+  momentInvariantsReduceSumF32m2 (const vfloat32m2_t values, const std::size_t vl)
+  {
+    const vfloat32m1_t init = __riscv_vfmv_s_f_f32m1 (0.0f, 1);
+    const vfloat32m1_t reduced = __riscv_vfredusum_vs_f32m2_f32m1 (values, init, vl);
+    return __riscv_vfmv_f_s_f32m1_f32 (reduced);
+  }
+
+  template <typename PointT>
+  PCL_MOMENT_INVARIANTS_RVV_NOINLINE bool
+  momentInvariantsIndexedMomentsRVV (const pcl::PointCloud<PointT>& cloud,
+                                     const pcl::Indices& indices,
+                                     const Eigen::Vector4f& centroid,
+                                     float& j1, float& j2, float& j3)
+  {
+    if constexpr (!pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value)
+    {
+      return false;
+    }
+    else
+    {
+      if (indices.size () < kMomentInvariantsMinRVVPoints ||
+          !cloud.is_dense ||
+          cloud.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+        return false;
+
+      using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+      using Pod = typename Layout::Pod;
+
+      float mu200 = 0, mu020 = 0, mu002 = 0, mu110 = 0, mu101 = 0, mu011  = 0;
+      const auto* base = reinterpret_cast<const std::uint8_t*> (cloud.points.data ());
+
+      std::size_t offset = 0;
+      while (offset < indices.size ())
+      {
+        const std::size_t vl = __riscv_vsetvl_e32m2 (indices.size () - offset);
+        const vuint32m2_t v_index =
+            __riscv_vreinterpret_v_i32m2_u32m2 (__riscv_vle32_v_i32m2 (indices.data () + offset, vl));
+        const vuint32m2_t v_byte_offset = pcl::rvv_load::byte_offsets_u32m2<Pod> (v_index, vl);
+
+        vfloat32m2_t vx;
+        vfloat32m2_t vy;
+        vfloat32m2_t vz;
+        pcl::rvv_load::indexed_load3_f32m2<Pod, Layout::kX, Layout::kY, Layout::kZ> (
+            base, v_byte_offset, vl, vx, vy, vz);
+
+        const vfloat32m2_t cx = __riscv_vfmv_v_f_f32m2 (centroid[0], vl);
+        const vfloat32m2_t cy = __riscv_vfmv_v_f_f32m2 (centroid[1], vl);
+        const vfloat32m2_t cz = __riscv_vfmv_v_f_f32m2 (centroid[2], vl);
+        const vfloat32m2_t dx = __riscv_vfsub_vv_f32m2 (vx, cx, vl);
+        const vfloat32m2_t dy = __riscv_vfsub_vv_f32m2 (vy, cy, vl);
+        const vfloat32m2_t dz = __riscv_vfsub_vv_f32m2 (vz, cz, vl);
+
+        mu200 += momentInvariantsReduceSumF32m2 (__riscv_vfmul_vv_f32m2 (dx, dx, vl), vl);
+        mu020 += momentInvariantsReduceSumF32m2 (__riscv_vfmul_vv_f32m2 (dy, dy, vl), vl);
+        mu002 += momentInvariantsReduceSumF32m2 (__riscv_vfmul_vv_f32m2 (dz, dz, vl), vl);
+        mu110 += momentInvariantsReduceSumF32m2 (__riscv_vfmul_vv_f32m2 (dx, dy, vl), vl);
+        mu101 += momentInvariantsReduceSumF32m2 (__riscv_vfmul_vv_f32m2 (dx, dz, vl), vl);
+        mu011 += momentInvariantsReduceSumF32m2 (__riscv_vfmul_vv_f32m2 (dy, dz, vl), vl);
+
+        offset += vl;
+      }
+
+      momentInvariantsFinalize (mu200, mu020, mu002, mu110, mu101, mu011, j1, j2, j3);
+      return true;
+    }
+  }
+#endif
+
+} // namespace detail
+} // namespace pcl
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT, typename PointOutT> void
 pcl::MomentInvariantsEstimation<PointInT, PointOutT>::computePointMomentInvariants (
@@ -53,29 +208,17 @@ pcl::MomentInvariantsEstimation<PointInT, PointOutT>::computePointMomentInvarian
   // Estimate the XYZ centroid
   compute3DCentroid (cloud, indices, xyz_centroid_);
 
-  // Initialize the centralized moments
-  float mu200 = 0, mu020 = 0, mu002 = 0, mu110 = 0, mu101 = 0, mu011  = 0;
-
-  // Iterate over the nearest neighbors set
-  for (const auto &index : indices)
+#if defined(__RVV10__)
+  // Only xyz single-float AoS point types with MomentInvariants output enter
+  // this indexed RVV accumulation; all other template instances keep scalar.
+  if constexpr (std::is_same_v<PointOutT, pcl::MomentInvariants>)
   {
-    // Demean the points
-    temp_pt_[0] = cloud[index].x - xyz_centroid_[0];
-    temp_pt_[1] = cloud[index].y - xyz_centroid_[1];
-    temp_pt_[2] = cloud[index].z - xyz_centroid_[2];
-
-    mu200 += temp_pt_[0] * temp_pt_[0];
-    mu020 += temp_pt_[1] * temp_pt_[1];
-    mu002 += temp_pt_[2] * temp_pt_[2];
-    mu110 += temp_pt_[0] * temp_pt_[1];
-    mu101 += temp_pt_[0] * temp_pt_[2];
-    mu011 += temp_pt_[1] * temp_pt_[2];
+    if (pcl::detail::momentInvariantsIndexedMomentsRVV (cloud, indices, xyz_centroid_, j1, j2, j3))
+      return;
   }
+#endif
 
-  // Save the moment invariants
-  j1 = mu200             + mu020               + mu002;
-  j2 = mu200*mu020       + mu200*mu002         + mu020*mu002       - mu110*mu110       - mu101*mu101       - mu011*mu011;
-  j3 = mu200*mu020*mu002 + 2*mu110*mu101*mu011 - mu002*mu110*mu110 - mu020*mu101*mu101 - mu200*mu011*mu011;
+  pcl::detail::momentInvariantsIndexedMomentsStd (cloud, indices, xyz_centroid_, j1, j2, j3);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,29 +229,7 @@ pcl::MomentInvariantsEstimation<PointInT, PointOutT>::computePointMomentInvarian
   // Estimate the XYZ centroid
   compute3DCentroid (cloud, xyz_centroid_);
 
-  // Initialize the centralized moments
-  float mu200 = 0, mu020 = 0, mu002 = 0, mu110 = 0, mu101 = 0, mu011  = 0;
-
-  // Iterate over the nearest neighbors set
-  for (const auto& point: cloud.points)
-  {
-    // Demean the points
-    temp_pt_[0] = point.x - xyz_centroid_[0];
-    temp_pt_[1] = point.y - xyz_centroid_[1];
-    temp_pt_[2] = point.z - xyz_centroid_[2];
-
-    mu200 += temp_pt_[0] * temp_pt_[0];
-    mu020 += temp_pt_[1] * temp_pt_[1];
-    mu002 += temp_pt_[2] * temp_pt_[2];
-    mu110 += temp_pt_[0] * temp_pt_[1];
-    mu101 += temp_pt_[0] * temp_pt_[2];
-    mu011 += temp_pt_[1] * temp_pt_[2];
-  }
-
-  // Save the moment invariants
-  j1 = mu200             + mu020               + mu002;
-  j2 = mu200*mu020       + mu200*mu002         + mu020*mu002       - mu110*mu110       - mu101*mu101       - mu011*mu011;
-  j3 = mu200*mu020*mu002 + 2*mu110*mu101*mu011 - mu002*mu110*mu110 - mu020*mu101*mu101 - mu200*mu011*mu011;
+  pcl::detail::momentInvariantsFullMomentsStd (cloud, xyz_centroid_, j1, j2, j3);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,4 +281,3 @@ pcl::MomentInvariantsEstimation<PointInT, PointOutT>::computeFeature (PointCloud
 #define PCL_INSTANTIATE_MomentInvariantsEstimation(T,NT) template class PCL_EXPORTS pcl::MomentInvariantsEstimation<T,NT>;
 
 #endif    // PCL_FEATURES_IMPL_MOMENT_INVARIANTS_H_ 
-
