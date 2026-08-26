@@ -227,6 +227,16 @@ namespace pcl
       void
       computeFeature (PointCloudOut &output) override;
 
+      /** \brief Standard implementation used as the fallback for all non-RVV paths. */
+      void
+      computeFeatureStandard (PointCloudOut &output);
+
+#if defined (__RVV10__)
+      /** \brief Try the bounded RVV implementation for the default VFH production path. */
+      bool
+      computeFeatureRVV (PointCloudOut &output);
+#endif
+
     protected:
       /** \brief This method should get called before starting the actual computation. */
       bool
