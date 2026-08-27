@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut repeated board evidence manifest",
+    "evidence_role": "diagnostic",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation repeated board evidence case=learn_gmm_assignment",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded",
+      "repeated_dir": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "learn_gmm_assignment",
+      "case_kind": "component_ablation",
+      "evidence_role": "diagnostic",
+      "point_type": "PointXYZRGB_like_float_color",
+      "row_source": "organized_image_grid_with_foreground_background_mask",
+      "size": "96x72",
+      "group": "grabcut_component",
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "std_ms": 3.847615,
+      "rvv_ms": 1.092302,
+      "ba_values": [
+        3.564149063833533,
+        3.5118776508331484,
+        3.5283025597736266,
+        3.613924495648595,
+        3.5224827932201896
+      ],
+      "baseline": {
+        "label": "reference",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "organized_image_grid_with_foreground_background_mask",
+        "solve": false,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "7343836954147025114"
+        ],
+        "timer_boundary": "learnGMMs_component_assignment_only_no_gaussian_fitter_relearn",
+        "gate": "finite_bgr_positive_covariance_inverse_and_nonempty_foreground_background_groups",
+        "mask": "foreground_background_hard_segmentation_mask",
+        "reduction": "k5_per_pixel_max_component_selection_with_test_only_staging",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": 3.847615,
+        "rvv_ms": null,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run01_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run02_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run03_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run04_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run05_std.log"
+        ]
+      },
+      "candidate": {
+        "label": "rvv_candidate",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "organized_image_grid_with_foreground_background_mask",
+        "solve": false,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "7343836954147025114"
+        ],
+        "timer_boundary": "learnGMMs_component_assignment_only_no_gaussian_fitter_relearn",
+        "gate": "finite_bgr_positive_covariance_inverse_and_nonempty_foreground_background_groups",
+        "mask": "foreground_background_hard_segmentation_mask",
+        "reduction": "k5_per_pixel_max_component_selection_with_test_only_staging",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": null,
+        "rvv_ms": 1.092302,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run01_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run02_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run03_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run04_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-board-20260827-clean-96x72/run05_rvv.log"
+        ]
+      },
+      "metadata": {
+        "width": 96,
+        "height": 72,
+        "decision_hint": "learn_gmm_assignment_probe",
+        "notes": "该 case 只覆盖 `learnGMMs()` 第一段 component assignment（分量归属选择）：每个像素根据当前 hard segmentation（硬分割状态）选择 foreground 或 background GMM，再从 K=5 Gaussian 中选概率最大的 component。它不包含 GaussianFitter 重新累加、GMM 参数更新、initGraph 或 max-flow 求解。",
+        "std_values_ms": [
+          3.846198,
+          3.844463,
+          3.857906,
+          3.854854,
+          3.847615
+        ],
+        "rvv_values_ms": [
+          1.079135,
+          1.094703,
+          1.093417,
+          1.066667,
+          1.092302
+        ],
+        "max_abs_error": 0.0,
+        "max_rel_error": 0.0,
+        "max_budget_ratio": 0.0
+      },
+      "requires_board_context": true
+    }
+  ]
+}

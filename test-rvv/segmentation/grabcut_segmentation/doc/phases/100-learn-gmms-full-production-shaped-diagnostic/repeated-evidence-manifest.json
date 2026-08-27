@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut repeated board evidence manifest",
+    "evidence_role": "production-shaped diagnostic",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation repeated board evidence case=learn_gmms_full",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded",
+      "repeated_dir": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "learn_gmms_full",
+      "case_kind": "production_shaped_diagnostic",
+      "evidence_role": "production-shaped diagnostic",
+      "point_type": "PointXYZRGB_like_float_color",
+      "row_source": "organized_image_grid_with_foreground_background_mask",
+      "size": "96x72",
+      "group": "grabcut_component",
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "std_ms": 4.078463,
+      "rvv_ms": 1.337755,
+      "ba_values": [
+        3.07849231282847,
+        3.048585129564083,
+        3.033852853268349,
+        3.0887731122144895,
+        3.0416907336512415
+      ],
+      "baseline": {
+        "label": "reference",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "organized_image_grid_with_foreground_background_mask",
+        "solve": false,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "2296873087520052250"
+        ],
+        "timer_boundary": "learnGMMs_assignment_plus_gaussian_fitter_relearn_no_initgraph_no_solve",
+        "gate": "finite_bgr_positive_covariance_inverse_and_nonempty_foreground_background_groups",
+        "mask": "foreground_background_hard_segmentation_mask",
+        "reduction": "k5_per_pixel_max_component_selection_then_scalar_bucket_accumulation",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": 4.075896,
+        "rvv_ms": null,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run01_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run02_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run03_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run04_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run05_std.log"
+        ]
+      },
+      "candidate": {
+        "label": "rvv_candidate",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "organized_image_grid_with_foreground_background_mask",
+        "solve": false,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "2296873087520052250"
+        ],
+        "timer_boundary": "learnGMMs_assignment_plus_gaussian_fitter_relearn_no_initgraph_no_solve",
+        "gate": "finite_bgr_positive_covariance_inverse_and_nonempty_foreground_background_groups",
+        "mask": "foreground_background_hard_segmentation_mask",
+        "reduction": "k5_per_pixel_max_component_selection_then_scalar_bucket_accumulation",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": null,
+        "rvv_ms": 1.34001,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run01_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run02_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run03_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run04_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72/run05_rvv.log"
+        ]
+      },
+      "metadata": {
+        "width": 96,
+        "height": 72,
+        "decision_hint": "full_learn_gmms_probe",
+        "notes": "该 case 覆盖完整 `learnGMMs()` 局部函数形态：先执行 component assignment（分量归属选择），再按 component vector 重新累加 foreground/background GaussianFitter 并更新 GMM 参数。它不包含 initGraph、max-flow 或 public `extract()` wall time；若结果为 positive，仍只能作为后续 production integration loop 的前置证据。",
+        "std_values_ms": [
+          4.112641,
+          4.07826,
+          4.078463,
+          4.088958,
+          4.075896
+        ],
+        "rvv_values_ms": [
+          1.335927,
+          1.337755,
+          1.344318,
+          1.323813,
+          1.34001
+        ],
+        "max_abs_error": 0.0,
+        "max_rel_error": 0.0,
+        "max_budget_ratio": 0.0
+      },
+      "requires_board_context": true
+    }
+  ]
+}

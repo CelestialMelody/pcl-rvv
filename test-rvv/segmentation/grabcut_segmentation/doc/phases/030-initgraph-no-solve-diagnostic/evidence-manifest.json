@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut component diagnostic board manifest",
+    "evidence_role": "diagnostic",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation board component diagnostic case=initgraph_no_solve",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "initgraph_no_solve",
+      "case_kind": "production_shaped_diagnostic",
+      "evidence_role": "diagnostic",
+      "point_type": "bgr_float_sample",
+      "row_source": "synthetic_pixel_samples",
+      "size": "640x480",
+      "group": "grabcut_component",
+      "run_count": 1,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "std_ms": 257.771146,
+      "rvv_ms": 167.505047,
+      "ba_values": [
+        1.5388858462276662
+      ],
+      "baseline": {
+        "label": "reference",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "synthetic_pixel_samples",
+        "solve": false,
+        "checksum_policy": "input_fingerprint_error_budget",
+        "checksum": "17010230185081472886",
+        "timer_boundary": "terminal_weight_loop_plus_terminal_write_sink_no_graph_solve",
+        "gate": "finite_bgr_positive_covariance_inverse_positive_mixture_probability_and_nonempty_sink",
+        "mask": "finite_domain_exp_input",
+        "reduction": "k5_pi_weighted_mixture_scalar_sum_plus_scalar_log_plus_terminal_write_sink",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": 257.771146,
+        "rvv_ms": null,
+        "source_log": "test-rvv/segmentation/grabcut_segmentation/log/board/run_bench_std.log"
+      },
+      "candidate": {
+        "label": "rvv_candidate",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "synthetic_pixel_samples",
+        "solve": false,
+        "checksum_policy": "input_fingerprint_error_budget",
+        "checksum": "17010230185081472886",
+        "timer_boundary": "terminal_weight_loop_plus_terminal_write_sink_no_graph_solve",
+        "gate": "finite_bgr_positive_covariance_inverse_positive_mixture_probability_and_nonempty_sink",
+        "mask": "finite_domain_exp_input",
+        "reduction": "k5_pi_weighted_mixture_scalar_sum_plus_scalar_log_plus_terminal_write_sink",
+        "asm_boundary": "inlined grabcut_diag::computeInitGraphNoSolveCandidate via computeTerminalWeightsCandidate/computeGMMProbabilityCandidate",
+        "std_ms": null,
+        "rvv_ms": 167.505047,
+        "source_log": "test-rvv/segmentation/grabcut_segmentation/log/board/run_bench_rvv.log"
+      },
+      "metadata": {
+        "width": 640,
+        "height": 480,
+        "decision_hint": "initgraph_no_solve_probe",
+        "notes": "该 case 在 terminal_weights 的 K=5 GMM mixture（混合概率）和 terminal -log 之后，追加轻量 terminal write sink（端点权重写入消耗点），用于观察收益在更接近 initGraph no-solve（不含求解）边界时是否被稀释；它仍不包含真实 graph edge mutation、trimap 固定标签分支或 max-flow 求解。",
+        "max_abs_error": 128.0,
+        "max_rel_error": 0.003508725,
+        "error_budget_abs": 5e-05,
+        "error_budget_rel": 0.0003,
+        "max_budget_ratio": 0.004656613
+      },
+      "requires_board_context": true
+    }
+  ]
+}

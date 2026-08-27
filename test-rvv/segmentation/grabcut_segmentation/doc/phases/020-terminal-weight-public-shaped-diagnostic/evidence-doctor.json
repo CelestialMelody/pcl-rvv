@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut component diagnostic board manifest",
+    "evidence_role": "diagnostic",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/020-terminal-weight-public-shaped-diagnostic/evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation board component diagnostic case=terminal_weights",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 1,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "terminal_weights",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut repeated board evidence manifest",
+    "evidence_role": "production-detail",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation repeated board evidence case=production_learn_gmms",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded",
+      "repeated_dir": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "production_learn_gmms",
+      "case_kind": "production_direct",
+      "evidence_role": "production-detail",
+      "point_type": "PointXYZRGB_via_Image_Color",
+      "row_source": "ordered_indices_over_Image_Color",
+      "size": "96x72",
+      "group": "grabcut_component",
+      "run_count": 5,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "std_ms": 4.887261,
+      "rvv_ms": 1.774198,
+      "ba_values": [
+        2.6769330219367755,
+        2.755009584534693,
+        2.7825297081568743,
+        2.743740877141766,
+        2.838160115161893
+      ],
+      "baseline": {
+        "label": "reference",
+        "boundary": "production_free_function",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "ordered_indices_over_Image_Color",
+        "solve": false,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "6156654766199696906"
+        ],
+        "timer_boundary": "real_learnGMMs_assignment_plus_gaussian_fitter_relearn_no_initgraph_no_solve",
+        "gate": "rvv_build_indices_size_at_least_two",
+        "mask": "foreground_background_hard_segmentation_mask",
+        "reduction": "k5_per_pixel_max_component_selection_then_scalar_bucket_accumulation",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": 5.035458,
+        "rvv_ms": null,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run01_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run02_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run03_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run04_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run05_std.log"
+        ]
+      },
+      "candidate": {
+        "label": "rvv_candidate",
+        "boundary": "production_free_function",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "ordered_indices_over_Image_Color",
+        "solve": false,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "6156654766199696906"
+        ],
+        "timer_boundary": "real_learnGMMs_assignment_plus_gaussian_fitter_relearn_no_initgraph_no_solve",
+        "gate": "rvv_build_indices_size_at_least_two",
+        "mask": "foreground_background_hard_segmentation_mask",
+        "reduction": "k5_per_pixel_max_component_selection_then_scalar_bucket_accumulation",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": null,
+        "rvv_ms": 1.774198,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run01_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run02_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run03_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run04_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-board-20260827-clean-96x72/run05_rvv.log"
+        ]
+      },
+      "metadata": {
+        "width": 96,
+        "height": 72,
+        "decision_hint": "production_learn_gmms_probe",
+        "notes": "该 case 直接调用 production `pcl::segmentation::grabcut::learnGMMs()`，覆盖真实 production dispatch（生产分流）和小规模以外的 RVV assignment path。它不包含 initGraph、max-flow 或 public `extract()` wall time；若结果为 positive，仍需 PI5 用户确认后才能视为 adopted production behavior（已采用生产行为）。",
+        "std_values_ms": [
+          4.87825,
+          4.880786,
+          4.902745,
+          4.887261,
+          5.035458
+        ],
+        "rvv_values_ms": [
+          1.822328,
+          1.771604,
+          1.761974,
+          1.78124,
+          1.774198
+        ],
+        "max_abs_error": 0.0,
+        "max_rel_error": 0.0,
+        "max_budget_ratio": 0.0
+      },
+      "requires_board_context": true
+    }
+  ]
+}

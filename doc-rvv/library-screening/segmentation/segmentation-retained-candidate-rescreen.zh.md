@@ -6,8 +6,10 @@
 
 本复筛文档的初始结论是不直接修改 production 源码；后续 GrabCut worker 已基于本执行清单建立
 `test-rvv/segmentation/grabcut_segmentation/` topic，并把窄范围 `initGraph()` unknown trimap terminal
-weight（未知 trimap 端点权重）RVV patch 推进到 PI5 用户确认点。本文件只同步队列状态，不作为 production
-closeout（生产收尾）文档。
+weight（未知 trimap 端点权重）RVV patch 和 `learnGMMs()` component assignment（分量归属选择）RVV patch
+推进到 adopted production behavior（已采用生产行为）。Phase 120 接入后 profile（剖析）已确认当前
+topic 内没有默认继续的高价值 RVV 方向。本文件只同步队列状态；生产 closeout（生产收尾）文档见
+`doc-rvv/segmentation/grabcut_segmentation-RVV.zh.md`。
 
 ## 1. 输入依据与复筛原因
 
@@ -56,9 +58,9 @@ closeout（生产收尾）文档。
 | --- | ---: | --- |
 | 保留实施候选输入文件 | 13 | 完整覆盖函数评估队列第 7.2 节。 |
 | 复筛主题数 | 12 | `impl/grabcut_segmentation.hpp` 与 `src/grabcut_segmentation.cpp` 合并为同一个 GrabCut 函数级评估主题。 |
-| 当前仍建议启动函数级评估的主题 | 0 | GrabCut staging / n-link / GMM 已建立 topic 并推进到 PI5 用户确认点。 |
+| 当前仍建议启动函数级评估的主题 | 0 | GrabCut staging / n-link / GMM 已建立 topic，并完成采纳后的 production closeout 与 Phase 120 stop profile。 |
 | 当前仍建议启动函数级评估覆盖文件 | 0 | GrabCut 头文件与源文件已由同一个函数级评估主题覆盖。 |
-| 当前等待用户生产确认的主题 | 1 | GrabCut production-detail evidence 已通过，等待确认保留 / 采纳 production patch。 |
+| 当前等待用户生产确认的主题 | 0 | GrabCut production patch 已由用户确认保留 / 采纳。 |
 | 已完成 no-production closeout 的建议主题 | 2 | min-cut potentials；organized multi-plane prepass / projection。 |
 | 暂缓 / 不单独实施的主题 | 9 | tail-only、search/solver-only、graph/state-heavy、tool/profile prerequisite 类保留项降级。 |
 | 暂缓 / 不单独实施覆盖文件 | 9 | 每个文件独立交代暂缓条件。 |
@@ -72,7 +74,7 @@ closeout（生产收尾）文档。
 | --- | ---: | --- |
 | `component ablation` | 0 | min-cut potentials 和 organized multi-plane 已完成 no-production closeout |
 | `production-shaped diagnostic` | 0 | GrabCut 已从 diagnostic 推进到 production-detail evidence。 |
-| `production-value evaluation` | 1 | GrabCut `initGraph()` unknown terminal batch 已完成 production-detail 5-run repeated 和 Evidence Doctor，PI5 待用户确认。 |
+| `production-value evaluation` | 1 | GrabCut `initGraph()` unknown terminal batch 和 `learnGMMs()` component assignment 已完成 production-detail 与 production-public 5-run repeated，Evidence Doctor 均为 0 finding，当前已采纳；Phase 120 profile 不支持继续自动扩展。 |
 | `profile prerequisite` | 0 | profile prerequisite 项本轮全部暂缓，不作为下一批自动 topic。 |
 | `no-production confirmation` | 0 | random walker 等 no-production diagnostic 价值不足以优先启动。 |
 
@@ -99,7 +101,7 @@ closeout（生产收尾）文档。
 
 ## 4. 筛选口径修正 / 复筛变化理由
 
-1. 原 7.2 顺序中的下一项是 GrabCut。后续 GrabCut topic 已按该建议从 production-shaped diagnostic 推进到 production-detail evidence，并停在 PI5 用户确认点；它不再属于“待启动函数级评估”。
+1. 原 7.2 顺序中的下一项是 GrabCut。后续 GrabCut topic 已按该建议从 production-shaped diagnostic 推进到 production-detail evidence，并在用户确认后完成 production-public 补证据、长期 `doc-rvv` closeout 和接入后 stop profile；它不再属于“待启动函数级评估”。
 2. min-cut 已完成 no-production closeout。它曾从原保留队列提升为建议启动主题，原因不是“graph 算法数学多”，而是 `test/segmentation/test_segmentation.cpp` 已有 `MinCutSegmentationTest`，`buildGraph` 中 unary potential 是明确的 `indices_ x foreground_points_` 距离 min reduction，binary potential 是 KNN 后的三维距离和 `exp`，可以在一个 topic 内先回答 solver/search 稀释比例。
 3. organized multi-plane 已完成 no-production closeout。`plane_d[i] = input dot normal` 与 boundary projection loop 匹配已验证的 bulk xyz / dot 模式；但 Phase 010 的 production-shaped boundary/projection 诊断稳定退化，因此当前不建议继续接 production。
 4. progressive PMF tail 与 segment differences tail 明确降级。APMF 050 已证明对已优化后剩余 compare / compress 的进一步 RVV 化为 neutral；segment differences 还叠加 `nearestKSearch` 主导，不应单独启动。
@@ -113,7 +115,7 @@ closeout（生产收尾）文档。
 | 主题 | 主文件 | 关键入口 | 主成本覆盖类型 | 默认评估路径 / 首阶段证据问题 | 匹配的已验证模式 | 主要风险 | 推荐理由 | 证据来源 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | min-cut potentials | `impl/min_cut_segmentation.hpp` | `MinCutSegmentation<PointT>::extract`、`buildGraph`、`calculateUnaryPotential`、`calculateBinaryPotential` | `diagnostic` | completed no-production：已完成 component ablation 和 production-shaped timing | APMF 的 reduction/staging 模式；polygonal prism 的 indexed row source + 算术密度模式；已完成主题对 graph/search 稀释的降级规则 | buildGraph-shaped repeated benchmark 只有 neutral，Evidence Doctor 报退化频率 Error | 当前不建议接 production | `test-rvv/segmentation/min_cut_segmentation/` |
-| GrabCut staging / n-link / GMM | `impl/grabcut_segmentation.hpp` | `GrabCut<PointT>::initCompute`、`fitGMMs`、`refineOnce`、`initGraph`、`computeBetaOrganized`、`computeNLinksOrganized`、`computeBetaNonOrganized`、`computeNLinksNonOrganized`；伴随 `src/grabcut_segmentation.cpp` 的 `buildGMMs`、`learnGMMs`、`GMM::probabilityDensity` | `partial-production` | completed production-detail / PI5 pending：topic-local Phase 010/020/030 证明 GMM / terminal 路线为正向，Phase 060 真实 `GrabCut<PointXYZRGB>::initGraph()` production-detail 5-run B/A 为 `3.1292, 3.1280, 3.0998, 3.0944, 3.1982`，Evidence Doctor 为 `Errors=0, Warnings=0, Suggestions=0` | polygonal prism 的 color-capable small point-type gate；APMF 的 staging + scalar conflict update；已完成主题对 solver/state 主导路径的证据优先规则 | 仍不覆盖完整 `extract/refineOnce` wall time、n-link graph edge mutation、max-flow、non-organized KNN、`Scalar=double` 或自定义点型；PI5 后需要用户确认采纳 | 当前证据支持保留窄范围 `initGraph()` unknown terminal batch production patch；确认前不能写成 adopted production behavior，也不创建长期 `doc-rvv` 主题文档 | `test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/result.zh.md`；`segmentation/include/pcl/segmentation/impl/grabcut_segmentation.hpp`；`segmentation/src/grabcut_segmentation.cpp` |
+| GrabCut staging / n-link / GMM | `impl/grabcut_segmentation.hpp` | `GrabCut<PointT>::initCompute`、`fitGMMs`、`refineOnce`、`initGraph`、`computeBetaOrganized`、`computeNLinksOrganized`、`computeBetaNonOrganized`、`computeNLinksNonOrganized`；伴随 `src/grabcut_segmentation.cpp` 的 `buildGMMs`、`learnGMMs`、`GMM::probabilityDensity` | `production-detail + production-public + stop profile` | adopted production behavior：topic-local Phase 010/020/030 证明 GMM / terminal 路线为正向，Phase 060 真实 `GrabCut<PointXYZRGB>::initGraph()` production-detail 5-run B/A median `3.1280x`，Phase 070 真实 `setBackgroundPointsIndices()` + `extract()` production-public clean 5-run B/A median `1.112866x`；Phase 110 真实 `learnGMMs()` production-detail median `2.755010x`、接入后 public median `1.207907x`；Phase 120 接入后 profile median `1.290653x` 且 `learn_gmms` RVV 占比 `4.592618%` | polygonal prism 的 color-capable small point-type gate；APMF 的 staging + scalar conflict update；已完成主题对 solver/state 主导路径的证据优先规则 | 仍不覆盖 n-link graph edge mutation、max-flow、non-organized KNN、`Scalar=double` 或自定义点型性能；Phase 120 显示这些方向当前没有足够剩余热点或低风险生产价值 | 当前已保留窄范围 `initGraph()` unknown terminal batch 和 `learnGMMs()` assignment production patch；当前 topic 停止自动性能探索 | `doc-rvv/segmentation/grabcut_segmentation-RVV.zh.md`；`test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/result.zh.md`；`test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/result.zh.md`；`test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/result.zh.md`；`segmentation/include/pcl/segmentation/impl/grabcut_segmentation.hpp`；`segmentation/src/grabcut_segmentation.cpp` |
 | organized multi-plane prepass / projection | `impl/organized_multi_plane_segmentation.hpp` | `OrganizedMultiPlaneSegmentation::segment` 中 `plane_d[i]` dot prepass；`segment` / `segmentAndRefine` 中 boundary gather；`projectToPlaneFromViewpoint` | `partial-preprocess` | completed no-production：已完成 component ablation 与 production-shaped boundary/projection 诊断 | APMF / polygonal prism 的 xyz AoS bulk scan；polygonal prism 的 dot / FMA / mask 证据；wide-stride fallback 对 normal-heavy 点型的边界提醒 | Phase 010 `region_projected` median 0.89x，`region_gather_only` median 0.80x，均 5/5 退化 | 当前不建议接 production | `test-rvv/segmentation/organized_multi_plane_segmentation/` |
 
 ### 5.2 暂缓 / 不单独实施
@@ -139,8 +141,8 @@ closeout（生产收尾）文档。
 | 顺序 | 主题 | 主文件 | 推荐入口 / 第一 RVV 目标 | 依据模式 / 证据来源 | 状态 | 当前结论 / 下一步条件 |
 | ---: | --- | --- | --- | --- | --- | --- |
 | 1 | min-cut potentials | `impl/min_cut_segmentation.hpp` | `calculateUnaryPotential` foreground min-distance reduction；`calculateBinaryPotential` KNN 后 distance / `exp` component | 现成 `MinCutSegmentationTest`；APMF reduction/staging；polygonal prism indexed gather + arithmetic；graph/search 降级边界 | completed no-production | 已完成 topic-local component ablation 和 production-shaped timing。component 为 positive，但 buildGraph-shaped repeated 为 neutral 且 Evidence Doctor 报退化频率 Error；当前 potential batch 不建议接 production。 |
-| 2 | GrabCut staging / n-link / GMM | `impl/grabcut_segmentation.hpp` | `GrabCut<PointT>::initCompute`、`initGraph`、`computeBetaOrganized`、`computeNLinksOrganized`、`computeBetaNonOrganized`、`computeNLinksNonOrganized` | 模板入口层；organized dense scan；Color staging；后端 max-flow 稀释风险仍在 | PI5 pending user confirmation | 已建立 topic。当前 production patch 只覆盖 `initGraph()` unknown terminal batch，Phase 060 production-detail 证据通过；等待用户确认采纳或回滚。 |
-| 3 | GrabCut GMM / max-flow boundary | `src/grabcut_segmentation.cpp` | `buildGMMs`、`learnGMMs`、`GMM::probabilityDensity`；`BoykovKolmogorov::solve` 只作为边界记录 | 非模板后端层；GMM probability 有局部公式；max-flow 是 state-heavy 主风险 | PI5 pending user confirmation | GMM / terminal 路线已进入 production-detail helper；`BoykovKolmogorov::solve` 仍不作为 RVV 目标。 |
+| 2 | GrabCut staging / n-link / GMM | `impl/grabcut_segmentation.hpp` | `GrabCut<PointT>::initCompute`、`initGraph`、`computeBetaOrganized`、`computeNLinksOrganized`、`computeBetaNonOrganized`、`computeNLinksNonOrganized` | 模板入口层；organized dense scan；Color staging；后端 max-flow 稀释风险仍在 | adopted production behavior / topic stop | 已建立 topic。当前 production patch 覆盖 `initGraph()` unknown terminal batch；Phase 060 production-detail median `3.1280x`，Phase 070 production-public median `1.112866x`。Phase 120 profile 显示 n-link / color staging 不是当前高价值续作。 |
+| 3 | GrabCut GMM / max-flow boundary | `src/grabcut_segmentation.cpp` | `buildGMMs`、`learnGMMs`、`GMM::probabilityDensity`；`BoykovKolmogorov::solve` 只作为边界记录 | 非模板后端层；GMM probability 有局部公式；max-flow 是 state-heavy 主风险 | adopted production behavior for terminal helper and learnGMMs / solver scalar-only | GMM / terminal 路线和 `learnGMMs()` assignment 均已进入并采纳 production；Phase 120 显示 `learn_gmms` RVV profile 中位占比 `4.592618%`，不足以继续做 GaussianFitter 或 LMUL / ILP。`BoykovKolmogorov::solve` 仍不作为 RVV 目标。 |
 | 4 | organized multi-plane prepass / projection | `impl/organized_multi_plane_segmentation.hpp` | `plane_d` point-normal dot prepass、boundary gather、`projectToPlaneFromViewpoint` | xyz bulk scan / dot 模式；organized path；但 direct test 缺失，CCL/eigen/refine 稀释 | completed no-production | 已完成 topic-local component ablation 和 production-shaped boundary/projection 诊断。局部 projection component 为 positive，但 `region_projected` median 0.89x、`region_gather_only` median 0.80x，均被 Evidence Doctor 标为 5/5 退化；当前不建议接 production。 |
 
 ### 6.2 暂缓 / 不单独实施清单
@@ -163,7 +165,7 @@ closeout（生产收尾）文档。
 
 当前该主题已完成 no-production closeout。topic-local 证据显示 unary / binary component 分别为 positive，但 buildGraph-shaped repeated benchmark 只有 median `1.02x`，且 5 run 中 2 run 低于 1.0；Evidence Doctor 报 `ba_degradation_frequency` Error。因此 min-cut potential batch 不再是待启动主题，也不建议接入 production。
 
-GrabCut staging / n-link / GMM 已启动并推进到 PI5 用户确认点。当前不再有本复筛清单内“默认继续启动”的新主题；下一动作是用户确认是否保留 / 采纳 GrabCut production patch。organized multi-plane 已完成 no-production diagnostic closeout；其它 9 个主题当前均不建议单独启动。
+GrabCut staging / n-link / GMM 已启动并完成用户确认后的 production closeout，Phase 120 接入后 profile 已把当前 topic 的继续动作关闭。当前不再有本复筛清单内“默认继续启动”的新主题；GrabCut 后续若要继续优化，需要新的 profile、输入形态或用户新 scope 证明某个组件重新成为主成本，而不是直接扩展 production RVV。organized multi-plane 已完成 no-production diagnostic closeout；其它 9 个主题当前均不建议单独启动。
 
 ## 7. Closeout
 
@@ -171,8 +173,8 @@ GrabCut staging / n-link / GMM 已启动并推进到 PI5 用户确认点。当�
 - 复筛输入：函数评估队列第 7.2 节 13 个保留实施候选文件。
 - 补入候选：0。
 - 合并主题：1，GrabCut 头文件与源文件合并为一个函数级评估主题。
-- 当前执行状态：GrabCut 已建立 topic 并推进到 PI5 用户确认点；已完成 no-production closeout 2 个建议主题；暂缓 / 不单独实施 9 个主题，覆盖 9 个文件。
+- 当前执行状态：GrabCut 已建立 topic，完成 adopted production behavior closeout，并用 Phase 120 profile 停止当前 topic 自动性能探索；已完成 no-production closeout 2 个建议主题；暂缓 / 不单独实施 9 个主题，覆盖 9 个文件。
 - `min-cut potentials` 已完成 no-production closeout：主文件 `impl/min_cut_segmentation.hpp`，topic-local 证据位于 `test-rvv/segmentation/min_cut_segmentation/`。
 - `organized multi-plane prepass / projection` 已完成 no-production closeout：主文件 `impl/organized_multi_plane_segmentation.hpp`，topic-local 证据位于 `test-rvv/segmentation/organized_multi_plane_segmentation/`。当前不建议接入 production。
-- 下一动作不是启动新 topic，而是用户确认 GrabCut `initGraph()` unknown terminal batch production patch：确认采纳后进入 production closeout；若不采纳，需要明确授权后回滚。
+- 下一动作不是启动新 topic；当前清单内没有值得继续推进的高价值未阻塞主题。GrabCut 后续优化的恢复条件是新的 profile 或 component A/B 证明 n-link、color staging、GaussianFitter accumulation、non-organized KNN 或其它边界成为真实公开入口瓶颈。
 - 本轮没有发现需要补充到 `rvv-screening`、`rvv-test`、`rvv-workflow`、implementation 或 documentation skill 的通用规则。

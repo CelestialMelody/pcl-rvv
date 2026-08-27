@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut repeated board evidence manifest",
+    "evidence_role": "production-shaped diagnostic",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation repeated board evidence case=learn_gmms_full",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded",
+      "repeated_dir": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-board-20260827-clean-96x72"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": []
+}

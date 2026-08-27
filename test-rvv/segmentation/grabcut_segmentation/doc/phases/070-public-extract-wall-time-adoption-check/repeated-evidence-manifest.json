@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut repeated board evidence manifest",
+    "evidence_role": "production-public",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation repeated board evidence case=public_extract",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 3,
+      "warmup_iterations": 1,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded",
+      "repeated_dir": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "public_extract",
+      "case_kind": "production_direct",
+      "evidence_role": "production-public",
+      "point_type": "PointXYZRGB",
+      "row_source": "organized_image_grid_with_central_unknown_trimap",
+      "size": "96x72",
+      "group": "grabcut_component",
+      "run_count": 5,
+      "iterations": 3,
+      "warmup_iterations": 1,
+      "std_ms": 1598.154334,
+      "rvv_ms": 1426.363959,
+      "ba_values": [
+        1.1246868534633752,
+        1.1104520028300924,
+        1.112644613132786,
+        1.1134824335101678,
+        1.1128664125198917
+      ],
+      "baseline": {
+        "label": "reference",
+        "boundary": "production_public_extract",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "organized_image_grid_with_central_unknown_trimap",
+        "solve": true,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "9089139176994405943"
+        ],
+        "timer_boundary": "setBackgroundPointsIndices_plus_extract_full_refine_loop",
+        "gate": "organized_rgb_cloud_with_nonempty_background_and_unknown_sets",
+        "mask": "production_trimap_and_graphcut_state",
+        "reduction": "full_pipeline_terminal_helper_plus_scalar_nlinks_gmm_learn_and_maxflow",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": 1587.352542,
+        "rvv_ms": null,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run01_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run02_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run03_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run04_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run05_std.log"
+        ]
+      },
+      "candidate": {
+        "label": "rvv_candidate",
+        "boundary": "production_public_extract",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "organized_image_grid_with_central_unknown_trimap",
+        "solve": true,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "9089139176994405943"
+        ],
+        "timer_boundary": "setBackgroundPointsIndices_plus_extract_full_refine_loop",
+        "gate": "organized_rgb_cloud_with_nonempty_background_and_unknown_sets",
+        "mask": "production_trimap_and_graphcut_state",
+        "reduction": "full_pipeline_terminal_helper_plus_scalar_nlinks_gmm_learn_and_maxflow",
+        "asm_boundary": "pcl::GrabCut<PointXYZRGB>::extract via initGraphTerminalWeightsRVV",
+        "std_ms": null,
+        "rvv_ms": 1426.363959,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run01_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run02_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run03_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run04_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-board-20260827-clean-96x72/run05_rvv.log"
+        ]
+      },
+      "metadata": {
+        "width": 96,
+        "height": 72,
+        "decision_hint": "production_public_wall_time",
+        "notes": "该 case 构造 organized `PointXYZRGB` 点云，调用真实 `GrabCut<PointXYZRGB>::setBackgroundPointsIndices()` 和 `extract()`。它用于观察已采纳 terminal weight RVV helper 在完整 public wall-time（公开入口总耗时）中是否仍有可见收益；结果不能单独归因到 n-link、GMM learn 或 max-flow。",
+        "std_values_ms": [
+          1601.091959,
+          1598.154334,
+          1583.399265,
+          1601.263209,
+          1587.352542
+        ],
+        "rvv_values_ms": [
+          1423.589112,
+          1439.192626,
+          1423.095251,
+          1438.067778,
+          1426.363959
+        ],
+        "max_abs_error": 0.0,
+        "max_rel_error": 0.0,
+        "max_budget_ratio": 0.0
+      },
+      "requires_board_context": true
+    }
+  ]
+}

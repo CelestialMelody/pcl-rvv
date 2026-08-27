@@ -44,6 +44,18 @@
 #include <map>
 #include <algorithm>
 
+#ifdef __RVV10__
+#include <pcl/common/impl/rvv_math.hpp>
+
+#include <riscv_vector.h>
+
+#if defined(__GNUC__)
+#define PCL_GRABCUT_CPP_RVV_NOINLINE [[gnu::noinline]]
+#else
+#define PCL_GRABCUT_CPP_RVV_NOINLINE
+#endif
+#endif
+
 const int pcl::segmentation::grabcut::BoykovKolmogorov::TERMINAL = -1;
 
 pcl::segmentation::grabcut::BoykovKolmogorov::BoykovKolmogorov (std::size_t max_nodes)
@@ -668,6 +680,233 @@ pcl::segmentation::grabcut::GMM::probabilityDensity (std::size_t i, const Color 
   return (result);
 }
 
+namespace
+{
+  using pcl::Indices;
+  using pcl::segmentation::grabcut::Color;
+  using pcl::segmentation::grabcut::Gaussian;
+  using pcl::segmentation::grabcut::GaussianFitter;
+  using pcl::segmentation::grabcut::GMM;
+  using pcl::segmentation::grabcut::Image;
+  using pcl::segmentation::grabcut::SegmentationBackground;
+  using pcl::segmentation::grabcut::SegmentationForeground;
+  using pcl::segmentation::grabcut::SegmentationValue;
+
+  void
+  relearnGMMsFromComponentsStd (const Image& image,
+                                const Indices& indices,
+                                const std::vector<SegmentationValue>& hard_segmentation,
+                                const std::vector<std::size_t>& components,
+                                GMM& background_GMM,
+                                GMM& foreground_GMM)
+  {
+    const auto indices_size = static_cast<std::size_t> (indices.size ());
+
+    // Step 5: Relearn GMMs from new component assignments
+
+    // Set up Gaussian Fitters
+    std::vector<GaussianFitter> back_fitters (background_GMM.getK ());
+    std::vector<GaussianFitter> fore_fitters (foreground_GMM.getK ());
+
+    std::size_t fore_counter = 0, back_counter = 0;
+    for (std::size_t idx = 0; idx < indices_size; ++idx)
+    {
+      const Color &c = image [indices [idx]];
+
+      if (hard_segmentation[idx] == SegmentationForeground)
+      {
+        fore_fitters[components[idx]].add (c);
+        fore_counter++;
+      }
+      else
+      {
+        back_fitters[components[idx]].add (c);
+        back_counter++;
+      }
+    }
+
+    for (std::size_t i = 0; i < background_GMM.getK (); ++i)
+      back_fitters[i].fit (background_GMM[i], back_counter, false);
+
+    for (std::size_t i = 0; i < foreground_GMM.getK (); ++i)
+      fore_fitters[i].fit (foreground_GMM[i], fore_counter, false);
+
+    back_fitters.clear ();
+    fore_fitters.clear ();
+  }
+
+  void
+  learnGMMsStd (const Image& image,
+                const Indices& indices,
+                const std::vector<SegmentationValue>& hard_segmentation,
+                std::vector<std::size_t>& components,
+                GMM& background_GMM,
+                GMM& foreground_GMM)
+  {
+    const auto indices_size = static_cast<std::size_t> (indices.size ());
+    // Step 4: Assign each pixel to the component which maximizes its probability
+    for (std::size_t idx = 0; idx < indices_size; ++idx)
+    {
+      const Color &c = image[indices[idx]];
+
+      if (hard_segmentation[idx] == SegmentationForeground)
+      {
+        std::size_t k = 0;
+        float max = 0;
+
+        for (std::size_t i = 0; i < foreground_GMM.getK (); i++)
+        {
+          float p = foreground_GMM.probabilityDensity (i, c);
+          if (p > max)
+          {
+            k = i;
+            max = p;
+          }
+        }
+        components[idx] = k;
+      }
+      else
+      {
+        std::size_t k = 0;
+        float max = 0;
+
+        for (std::size_t i = 0; i < background_GMM.getK (); i++)
+        {
+          float p = background_GMM.probabilityDensity (i, c);
+          if (p > max)
+          {
+            k = i;
+            max = p;
+          }
+        }
+        components[idx] = k;
+      }
+    }
+
+    relearnGMMsFromComponentsStd (image,
+                                  indices,
+                                  hard_segmentation,
+                                  components,
+                                  background_GMM,
+                                  foreground_GMM);
+  }
+
+#ifdef __RVV10__
+  PCL_GRABCUT_CPP_RVV_NOINLINE void
+  assignGMMComponentsForGroupRVV (const GMM& gmm,
+                                  const Image& image,
+                                  const Indices& indices,
+                                  const std::vector<std::size_t>& positions,
+                                  std::vector<std::size_t>& components)
+  {
+    if (positions.empty ())
+      return;
+
+    std::vector<float> max_probability (positions.size (), 0.0f);
+    std::vector<std::size_t> group_components (positions.size (), 0);
+    const std::size_t scratch_lanes = __riscv_vsetvlmax_e32m2 ();
+    std::vector<float> r_buffer (scratch_lanes);
+    std::vector<float> g_buffer (scratch_lanes);
+    std::vector<float> b_buffer (scratch_lanes);
+    std::vector<float> probability_buffer (scratch_lanes);
+
+    for (std::size_t component = 0; component < gmm.getK (); ++component)
+    {
+      const Gaussian& gaussian = gmm[component];
+      if (gaussian.pi <= 0.0f || gaussian.determinant <= 0.0f)
+        continue;
+
+      const float inv_sqrt_det = 1.0f / std::sqrt (gaussian.determinant);
+      std::size_t offset = 0;
+      while (offset < positions.size ())
+      {
+        const std::size_t vl = __riscv_vsetvl_e32m2 (positions.size () - offset);
+        for (std::size_t lane = 0; lane < vl; ++lane)
+        {
+          const Color& color = image[indices[positions[offset + lane]]];
+          r_buffer[lane] = color.r - gaussian.mu.r;
+          g_buffer[lane] = color.g - gaussian.mu.g;
+          b_buffer[lane] = color.b - gaussian.mu.b;
+        }
+
+        const vfloat32m2_t r = __riscv_vle32_v_f32m2 (r_buffer.data (), vl);
+        const vfloat32m2_t g = __riscv_vle32_v_f32m2 (g_buffer.data (), vl);
+        const vfloat32m2_t b = __riscv_vle32_v_f32m2 (b_buffer.data (), vl);
+
+        vfloat32m2_t row0 = __riscv_vfmul_vf_f32m2 (r, gaussian.inverse (0, 0), vl);
+        row0 = __riscv_vfmacc_vf_f32m2 (row0, gaussian.inverse (1, 0), g, vl);
+        row0 = __riscv_vfmacc_vf_f32m2 (row0, gaussian.inverse (2, 0), b, vl);
+
+        vfloat32m2_t row1 = __riscv_vfmul_vf_f32m2 (r, gaussian.inverse (0, 1), vl);
+        row1 = __riscv_vfmacc_vf_f32m2 (row1, gaussian.inverse (1, 1), g, vl);
+        row1 = __riscv_vfmacc_vf_f32m2 (row1, gaussian.inverse (2, 1), b, vl);
+
+        vfloat32m2_t row2 = __riscv_vfmul_vf_f32m2 (r, gaussian.inverse (0, 2), vl);
+        row2 = __riscv_vfmacc_vf_f32m2 (row2, gaussian.inverse (1, 2), g, vl);
+        row2 = __riscv_vfmacc_vf_f32m2 (row2, gaussian.inverse (2, 2), b, vl);
+
+        vfloat32m2_t d = __riscv_vfmul_vv_f32m2 (r, row0, vl);
+        d = __riscv_vfmacc_vv_f32m2 (d, g, row1, vl);
+        d = __riscv_vfmacc_vv_f32m2 (d, b, row2, vl);
+        const vfloat32m2_t exponent = __riscv_vfmul_vf_f32m2 (d, -0.5f, vl);
+        const vfloat32m2_t exp_value = pcl::expf_RVV_f32m2 (exponent, vl);
+        const vfloat32m2_t value = __riscv_vfmul_vf_f32m2 (exp_value, inv_sqrt_det, vl);
+        __riscv_vse32_v_f32m2 (probability_buffer.data (), value, vl);
+
+        for (std::size_t lane = 0; lane < vl; ++lane)
+        {
+          const std::size_t group_index = offset + lane;
+          if (probability_buffer[lane] > max_probability[group_index])
+          {
+            group_components[group_index] = component;
+            max_probability[group_index] = probability_buffer[lane];
+          }
+        }
+        offset += vl;
+      }
+    }
+
+    for (std::size_t i = 0; i < positions.size (); ++i)
+      components[positions[i]] = group_components[i];
+  }
+
+  PCL_GRABCUT_CPP_RVV_NOINLINE bool
+  learnGMMsRVV (const Image& image,
+                const Indices& indices,
+                const std::vector<SegmentationValue>& hard_segmentation,
+                std::vector<std::size_t>& components,
+                GMM& background_GMM,
+                GMM& foreground_GMM)
+  {
+    const auto indices_size = static_cast<std::size_t> (indices.size ());
+    if (indices_size < 2)
+      return (false);
+
+    std::vector<std::size_t> foreground_positions;
+    std::vector<std::size_t> background_positions;
+    foreground_positions.reserve (indices_size);
+    background_positions.reserve (indices_size);
+    for (std::size_t idx = 0; idx < indices_size; ++idx)
+    {
+      if (hard_segmentation[idx] == SegmentationForeground)
+        foreground_positions.push_back (idx);
+      else
+        background_positions.push_back (idx);
+    }
+
+    assignGMMComponentsForGroupRVV (foreground_GMM, image, indices, foreground_positions, components);
+    assignGMMComponentsForGroupRVV (background_GMM, image, indices, background_positions, components);
+    relearnGMMsFromComponentsStd (image,
+                                  indices,
+                                  hard_segmentation,
+                                  components,
+                                  background_GMM,
+                                  foreground_GMM);
+    return (true);
+  }
+#endif
+} // namespace
+
 void
 pcl::segmentation::grabcut::buildGMMs (const Image& image,
                                        const Indices& indices,
@@ -791,75 +1030,10 @@ pcl::segmentation::grabcut::learnGMMs (const Image& image,
                                        std::vector<std::size_t>& components,
                                        GMM& background_GMM, GMM& foreground_GMM)
 {
-  const auto indices_size = static_cast<std::size_t> (indices.size ());
-  // Step 4: Assign each pixel to the component which maximizes its probability
-  for (std::size_t idx = 0; idx < indices_size; ++idx)
-  {
-    const Color &c = image[indices[idx]];
+#ifdef __RVV10__
+  if (learnGMMsRVV (image, indices, hard_segmentation, components, background_GMM, foreground_GMM))
+    return;
+#endif
 
-    if (hard_segmentation[idx] == SegmentationForeground)
-    {
-      std::size_t k = 0;
-      float max = 0;
-
-      for (std::size_t i = 0; i < foreground_GMM.getK (); i++)
-      {
-        float p = foreground_GMM.probabilityDensity (i, c);
-        if (p > max)
-        {
-          k = i;
-          max = p;
-        }
-      }
-      components[idx] = k;
-    }
-    else
-    {
-      std::size_t k = 0;
-      float max = 0;
-
-      for (std::size_t i = 0; i < background_GMM.getK (); i++)
-      {
-        float p = background_GMM.probabilityDensity (i, c);
-        if (p > max)
-        {
-          k = i;
-          max = p;
-        }
-      }
-      components[idx] = k;
-    }
-  }
-
-  // Step 5: Relearn GMMs from new component assignments
-
-  // Set up Gaussian Fitters
-  std::vector<GaussianFitter> back_fitters (background_GMM.getK ());
-  std::vector<GaussianFitter> fore_fitters (foreground_GMM.getK ());
-
-  std::size_t fore_counter = 0, back_counter = 0;
-  for (std::size_t idx = 0; idx < indices_size; ++idx)
-  {
-    const Color &c = image [indices [idx]];
-
-    if (hard_segmentation[idx] == SegmentationForeground)
-    {
-      fore_fitters[components[idx]].add (c);
-      fore_counter++;
-    }
-    else
-    {
-      back_fitters[components[idx]].add (c);
-      back_counter++;
-    }
-  }
-
-  for (std::size_t i = 0; i < background_GMM.getK (); ++i)
-    back_fitters[i].fit (background_GMM[i], back_counter, false);
-
-  for (std::size_t i = 0; i < foreground_GMM.getK (); ++i)
-    fore_fitters[i].fit (foreground_GMM[i], fore_counter, false);
-
-  back_fitters.clear ();
-  fore_fitters.clear ();
+  learnGMMsStd (image, indices, hard_segmentation, components, background_GMM, foreground_GMM);
 }

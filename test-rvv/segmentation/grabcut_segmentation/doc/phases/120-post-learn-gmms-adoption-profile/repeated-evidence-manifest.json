@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut repeated board evidence manifest",
+    "evidence_role": "diagnostic-profile",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation repeated board evidence case=public_extract_profile",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 3,
+      "warmup_iterations": 1,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded",
+      "repeated_dir": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "public_extract_profile",
+      "case_kind": "component_profile",
+      "evidence_role": "diagnostic-profile",
+      "point_type": "PointXYZRGB",
+      "row_source": "organized_image_grid_with_central_unknown_trimap",
+      "size": "96x72",
+      "group": "grabcut_profile",
+      "run_count": 5,
+      "iterations": 3,
+      "warmup_iterations": 1,
+      "std_ms": 1599.36395,
+      "rvv_ms": 1239.190001,
+      "ba_values": [
+        1.2323414753562318,
+        1.2906527237222276,
+        1.3216402100287319,
+        1.2930809445428677,
+        1.2843862439572147
+      ],
+      "baseline": {
+        "label": "reference",
+        "boundary": "test_only_public_shaped_profile_wrapper",
+        "wrapper": "GrabCutBenchAccess::runPublicExtractProfile",
+        "row_source": "organized_image_grid_with_central_unknown_trimap",
+        "solve": true,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "9089139176994405943"
+        ],
+        "timer_boundary": "split_setBackgroundPointsIndices_plus_extract_profile_components",
+        "gate": "organized_rgb_cloud_with_nonempty_background_and_unknown_sets",
+        "mask": "production_trimap_and_graphcut_state",
+        "reduction": "profile_only_component_timing_not_a_new_rvv_family",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": 1598.996779,
+        "rvv_ms": null,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run01_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run02_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run03_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run04_std.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run05_std.log"
+        ]
+      },
+      "candidate": {
+        "label": "rvv_candidate",
+        "boundary": "test_only_public_shaped_profile_wrapper",
+        "wrapper": "GrabCutBenchAccess::runPublicExtractProfile",
+        "row_source": "organized_image_grid_with_central_unknown_trimap",
+        "solve": true,
+        "checksum_policy": "output_quantized_exact",
+        "checksum": [
+          "9089139176994405943"
+        ],
+        "timer_boundary": "split_setBackgroundPointsIndices_plus_extract_profile_components",
+        "gate": "organized_rgb_cloud_with_nonempty_background_and_unknown_sets",
+        "mask": "production_trimap_and_graphcut_state",
+        "reduction": "profile_only_component_timing_not_a_new_rvv_family",
+        "asm_boundary": "test-only public-shaped profile wrapper via initGraphTerminalWeightsRVV",
+        "std_ms": null,
+        "rvv_ms": 1244.950097,
+        "source_log": [
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run01_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run02_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run03_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run04_rvv.log",
+          "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-board-20260827-clean-96x72/run05_rvv.log"
+        ]
+      },
+      "metadata": {
+        "width": 96,
+        "height": 72,
+        "decision_hint": "profile_before_new_production_family",
+        "notes": "该 case 使用测试专用子类拆分 public `setBackgroundPointsIndices()` + `extract()` 中的 initCompute、GMM build/learn、initGraph、graph solve 和 output cluster 组件。它只用于定位下一候选，不能替代 production-public 证据，也不能直接采纳新 RVV family。",
+        "std_values_ms": [
+          1596.387791,
+          1599.36395,
+          1621.925804,
+          1600.07826,
+          1598.996779
+        ],
+        "rvv_values_ms": [
+          1295.41026,
+          1239.190001,
+          1227.206763,
+          1237.415389,
+          1244.950097
+        ],
+        "max_abs_error": 0.0,
+        "max_rel_error": 0.0,
+        "max_budget_ratio": 0.0
+      },
+      "requires_board_context": true
+    }
+  ]
+}

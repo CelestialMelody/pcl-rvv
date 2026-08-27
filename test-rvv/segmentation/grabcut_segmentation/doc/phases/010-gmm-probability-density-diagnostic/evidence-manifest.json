@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut component diagnostic board manifest",
+    "evidence_role": "diagnostic",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/010-gmm-probability-density-diagnostic/evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation board component diagnostic case=gmm_probability",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "gmm_probability",
+      "case_kind": "component_ablation",
+      "evidence_role": "diagnostic",
+      "point_type": "bgr_float_sample",
+      "row_source": "synthetic_pixel_samples",
+      "size": "640x480",
+      "group": "grabcut_component",
+      "run_count": 1,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "std_ms": 22.013766,
+      "rvv_ms": 13.026312,
+      "ba_values": [
+        1.689946164347975
+      ],
+      "baseline": {
+        "label": "reference",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "synthetic_pixel_samples",
+        "solve": false,
+        "checksum_policy": "input_fingerprint_error_budget",
+        "checksum": "3844051551616150451",
+        "timer_boundary": "component_loop_only",
+        "gate": "finite_bgr_and_positive_covariance_inverse",
+        "mask": "finite_domain_exp_input",
+        "reduction": "per_pixel_min_probability_scalar_tail",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": 22.013766,
+        "rvv_ms": null,
+        "source_log": "test-rvv/segmentation/grabcut_segmentation/log/board/run_bench_std.log"
+      },
+      "candidate": {
+        "label": "rvv_candidate",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "synthetic_pixel_samples",
+        "solve": false,
+        "checksum_policy": "input_fingerprint_error_budget",
+        "checksum": "3844051551616150451",
+        "timer_boundary": "component_loop_only",
+        "gate": "finite_bgr_and_positive_covariance_inverse",
+        "mask": "finite_domain_exp_input",
+        "reduction": "per_pixel_min_probability_scalar_tail",
+        "asm_boundary": "grabcut_diag::computeGMMProbabilityCandidate",
+        "std_ms": null,
+        "rvv_ms": 13.026312,
+        "source_log": "test-rvv/segmentation/grabcut_segmentation/log/board/run_bench_rvv.log"
+      },
+      "metadata": {
+        "width": 640,
+        "height": 480,
+        "decision_hint": "positive_diagnostic",
+        "notes": "该 case 覆盖 GrabCut GMM probability density（高斯混合模型概率密度）批量计算的诊断 helper；checksum 使用输入指纹加误差预算，同构正确性由 gtest 的绝对 / 相对误差阈值承担。",
+        "max_abs_error": 2.384186e-07,
+        "max_rel_error": 2.700003e-07,
+        "error_budget_abs": 2e-05,
+        "error_budget_rel": 0.0002
+      },
+      "requires_board_context": true
+    }
+  ]
+}

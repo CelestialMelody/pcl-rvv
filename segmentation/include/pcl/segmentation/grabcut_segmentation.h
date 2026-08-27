@@ -428,6 +428,11 @@ namespace pcl
       /// Build the graph for GraphCut
       void
       initGraph ();
+#ifdef __RVV10__
+      /// Try RVV batching for unknown-trimap terminal weights; false means scalar fallback.
+      bool
+      initGraphTerminalWeightsRVV ();
+#endif
       /// Add an edge to the graph, graph must be oriented so we add the edge and its reverse
       void
       addEdge (vertex_descriptor v1, vertex_descriptor v2, float capacity, float rev_capacity);

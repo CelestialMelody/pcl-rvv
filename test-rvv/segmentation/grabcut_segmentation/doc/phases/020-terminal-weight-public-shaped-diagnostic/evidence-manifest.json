@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GrabCut component diagnostic board manifest",
+    "evidence_role": "diagnostic",
+    "summary_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/020-terminal-weight-public-shaped-diagnostic/evidence-manifest.json",
+    "label": "segmentation/grabcut_segmentation board component diagnostic case=terminal_weights",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "terminal_weights",
+      "case_kind": "production_shaped_diagnostic",
+      "evidence_role": "diagnostic",
+      "point_type": "bgr_float_sample",
+      "row_source": "synthetic_pixel_samples",
+      "size": "640x480",
+      "group": "grabcut_component",
+      "run_count": 1,
+      "iterations": 8,
+      "warmup_iterations": 2,
+      "std_ms": 254.974807,
+      "rvv_ms": 167.334151,
+      "ba_values": [
+        1.5237463809763496
+      ],
+      "baseline": {
+        "label": "reference",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "synthetic_pixel_samples",
+        "solve": false,
+        "checksum_policy": "input_fingerprint_error_budget",
+        "checksum": "17010230185081472886",
+        "timer_boundary": "terminal_weight_loop_only_no_graph_mutation",
+        "gate": "finite_bgr_positive_covariance_inverse_and_positive_mixture_probability",
+        "mask": "finite_domain_exp_input",
+        "reduction": "k5_pi_weighted_mixture_scalar_sum_plus_scalar_log",
+        "asm_boundary": "test_support_helper_or_scalar_reference",
+        "std_ms": 254.974807,
+        "rvv_ms": null,
+        "source_log": "test-rvv/segmentation/grabcut_segmentation/log/board/run_bench_std.log"
+      },
+      "candidate": {
+        "label": "rvv_candidate",
+        "boundary": "test_support_helper",
+        "wrapper": "grabcut_component_bench",
+        "row_source": "synthetic_pixel_samples",
+        "solve": false,
+        "checksum_policy": "input_fingerprint_error_budget",
+        "checksum": "17010230185081472886",
+        "timer_boundary": "terminal_weight_loop_only_no_graph_mutation",
+        "gate": "finite_bgr_positive_covariance_inverse_and_positive_mixture_probability",
+        "mask": "finite_domain_exp_input",
+        "reduction": "k5_pi_weighted_mixture_scalar_sum_plus_scalar_log",
+        "asm_boundary": "grabcut_diag::computeTerminalWeightsCandidate",
+        "std_ms": null,
+        "rvv_ms": 167.334151,
+        "source_log": "test-rvv/segmentation/grabcut_segmentation/log/board/run_bench_rvv.log"
+      },
+      "metadata": {
+        "width": 640,
+        "height": 480,
+        "decision_hint": "public_shaped_probe",
+        "notes": "该 case 复刻 GrabCut initGraph 中 unknown trimap 的 terminal weight（端点权重）公式：K=5 GMM probabilityDensity(c) 加权求和后执行 -log；不包含 setTerminalWeights、n-link graph edge mutation 或 max-flow 求解。",
+        "max_abs_error": 2.328306e-07,
+        "max_rel_error": 0.003508725,
+        "error_budget_abs": 5e-05,
+        "error_budget_rel": 0.0003
+      },
+      "requires_board_context": true
+    }
+  ]
+}

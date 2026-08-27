@@ -42,6 +42,17 @@
 #include <pcl/common/point_tests.h> // for pcl::isFinite
 #include <pcl/search/auto.h>
 
+#ifdef __RVV10__
+#include <pcl/common/impl/rvv_math.hpp>
+
+#include <riscv_vector.h>
+
+#if defined(__GNUC__)
+#define PCL_GRABCUT_RVV_NOINLINE [[gnu::noinline]]
+#else
+#define PCL_GRABCUT_RVV_NOINLINE
+#endif
+#endif
 
 namespace pcl
 {
@@ -261,6 +272,105 @@ GrabCut<PointT>::setTrimap (const PointIndicesConstPtr &indices, segmentation::g
         hard_segmentation_[index] = SegmentationBackground;
 }
 
+#ifdef __RVV10__
+template <typename PointT> PCL_GRABCUT_RVV_NOINLINE bool
+GrabCut<PointT>::initGraphTerminalWeightsRVV ()
+{
+  using namespace pcl::segmentation::grabcut;
+  const int number_of_indices = static_cast<int> (indices_->size ());
+  if (number_of_indices < 2)
+    return (false);
+
+  std::vector<std::size_t> point_indices;
+  std::vector<vertex_descriptor> graph_nodes;
+  point_indices.reserve (indices_->size ());
+  graph_nodes.reserve (indices_->size ());
+  for (int i_point = 0; i_point < number_of_indices; ++i_point)
+  {
+    const auto point_index = (*indices_) [i_point];
+    if (trimap_[point_index] == TrimapUnknown)
+    {
+      point_indices.push_back (static_cast<std::size_t> (point_index));
+      graph_nodes.push_back (graph_nodes_[i_point]);
+    }
+  }
+
+  if (point_indices.size () < 2)
+    return (false);
+
+  std::vector<float> background_probability (point_indices.size (), 0.0f);
+  std::vector<float> foreground_probability (point_indices.size (), 0.0f);
+  const std::size_t scratch_lanes = __riscv_vsetvlmax_e32m2 ();
+  std::vector<float> r_buffer (scratch_lanes);
+  std::vector<float> g_buffer (scratch_lanes);
+  std::vector<float> b_buffer (scratch_lanes);
+
+  const auto accumulate_probability =
+      [&](const GMM& gmm, std::vector<float>& probability)
+      {
+        for (std::size_t component = 0; component < gmm.getK (); ++component)
+        {
+          const Gaussian& G = gmm[component];
+          if (G.pi <= 0.0f || G.determinant <= 0.0f)
+            continue;
+
+          const float scale = G.pi / std::sqrt (G.determinant);
+          std::size_t offset = 0;
+          while (offset < point_indices.size ())
+          {
+            const std::size_t vl = __riscv_vsetvl_e32m2 (point_indices.size () - offset);
+            for (std::size_t lane = 0; lane < vl; ++lane)
+            {
+              const Color& color = (*image_)[point_indices[offset + lane]];
+              r_buffer[lane] = color.r - G.mu.r;
+              g_buffer[lane] = color.g - G.mu.g;
+              b_buffer[lane] = color.b - G.mu.b;
+            }
+
+            const vfloat32m2_t r = __riscv_vle32_v_f32m2 (r_buffer.data (), vl);
+            const vfloat32m2_t g = __riscv_vle32_v_f32m2 (g_buffer.data (), vl);
+            const vfloat32m2_t b = __riscv_vle32_v_f32m2 (b_buffer.data (), vl);
+
+            vfloat32m2_t row0 = __riscv_vfmul_vf_f32m2 (r, G.inverse (0, 0), vl);
+            row0 = __riscv_vfmacc_vf_f32m2 (row0, G.inverse (1, 0), g, vl);
+            row0 = __riscv_vfmacc_vf_f32m2 (row0, G.inverse (2, 0), b, vl);
+
+            vfloat32m2_t row1 = __riscv_vfmul_vf_f32m2 (r, G.inverse (0, 1), vl);
+            row1 = __riscv_vfmacc_vf_f32m2 (row1, G.inverse (1, 1), g, vl);
+            row1 = __riscv_vfmacc_vf_f32m2 (row1, G.inverse (2, 1), b, vl);
+
+            vfloat32m2_t row2 = __riscv_vfmul_vf_f32m2 (r, G.inverse (0, 2), vl);
+            row2 = __riscv_vfmacc_vf_f32m2 (row2, G.inverse (1, 2), g, vl);
+            row2 = __riscv_vfmacc_vf_f32m2 (row2, G.inverse (2, 2), b, vl);
+
+            vfloat32m2_t d = __riscv_vfmul_vv_f32m2 (r, row0, vl);
+            d = __riscv_vfmacc_vv_f32m2 (d, g, row1, vl);
+            d = __riscv_vfmacc_vv_f32m2 (d, b, row2, vl);
+            const vfloat32m2_t exponent = __riscv_vfmul_vf_f32m2 (d, -0.5f, vl);
+            const vfloat32m2_t exp_value = pcl::expf_RVV_f32m2 (exponent, vl);
+            const vfloat32m2_t weighted = __riscv_vfmul_vf_f32m2 (exp_value, scale, vl);
+            const vfloat32m2_t current =
+                __riscv_vle32_v_f32m2 (probability.data () + offset, vl);
+            __riscv_vse32_v_f32m2 (probability.data () + offset,
+                                   __riscv_vfadd_vv_f32m2 (current, weighted, vl),
+                                   vl);
+            offset += vl;
+          }
+        }
+      };
+
+  accumulate_probability (background_GMM_, background_probability);
+  accumulate_probability (foreground_GMM_, foreground_probability);
+
+  for (std::size_t i = 0; i < point_indices.size (); ++i)
+    setTerminalWeights (graph_nodes[i],
+                        static_cast<float> (-std::log (background_probability[i])),
+                        static_cast<float> (-std::log (foreground_probability[i])));
+
+  return (true);
+}
+#endif
+
 template <typename PointT> void
 GrabCut<PointT>::initGraph ()
 {
@@ -277,6 +387,12 @@ GrabCut<PointT>::initGraph ()
     ++start;
   }
 
+#ifdef __RVV10__
+  const bool rvv_terminal_weights_done = initGraphTerminalWeightsRVV ();
+#else
+  const bool rvv_terminal_weights_done = false;
+#endif
+
   // Set T-Link weights
   for (int i_point = 0; i_point < number_of_indices; ++i_point)
   {
@@ -287,6 +403,8 @@ GrabCut<PointT>::initGraph ()
     {
       case TrimapUnknown :
       {
+        if (rvv_terminal_weights_done)
+          continue;
         fore = static_cast<float> (-std::log (background_GMM_.probabilityDensity ((*image_)[point_index])));
         back = static_cast<float> (-std::log (foreground_GMM_.probabilityDensity ((*image_)[point_index])));
         break;
@@ -514,3 +632,6 @@ GrabCut<PointT>::extract (std::vector<pcl::PointIndices>& clusters)
 
 } // namespace pcl
 
+#ifdef __RVV10__
+#undef PCL_GRABCUT_RVV_NOINLINE
+#endif

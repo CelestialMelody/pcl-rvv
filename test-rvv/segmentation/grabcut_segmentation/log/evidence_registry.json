@@ -1,0 +1,796 @@
+{
+  "files": {
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "initgraph_no_solve",
+      "doc_refs": [],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787815106,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-144235",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787815106209314212,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.json",
+        "sha256": "sha256:49f0dc6df0eb620ca1c7c14412727ac2d53b6fa2f27407517a8ae1486fa4bbe0",
+        "size": 970
+      },
+      "target": "record_initgraph_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "initgraph_no_solve",
+      "doc_refs": [],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787815106,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-144235",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787815106209314212,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.md",
+        "sha256": "sha256:3a1f0e69089b375738ae64b4710e630431b8a964010edd8927425cb25ef6ee4c",
+        "size": 674
+      },
+      "target": "record_initgraph_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "initgraph_no_solve",
+      "doc_refs": [],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787815106,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-144235",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787815106176314977,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-manifest.json",
+        "sha256": "sha256:50230bb8d724d57c90543cf2f6237dbf5fbde12cc8ba7683411217ce69586280",
+        "size": 5998
+      },
+      "target": "record_initgraph_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "production_initgraph_terminal",
+      "doc_refs": [],
+      "evidence_role": "production-detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787816363,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-152529",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787816363582293272,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.json",
+        "sha256": "sha256:1a497e5020ca93f2fdaa056148c846edb54493bac275b4247b917461386ed477",
+        "size": 992
+      },
+      "target": "record_production_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "production_initgraph_terminal",
+      "doc_refs": [],
+      "evidence_role": "production-detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787816363,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-152529",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787816363582293272,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md",
+        "sha256": "sha256:2c6d37dc4da51fa375949cca05bf7bda7d6bc99ba67e62e243a20eb8b1e2b795",
+        "size": 678
+      },
+      "target": "record_production_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "production_initgraph_terminal",
+      "doc_refs": [],
+      "evidence_role": "production-detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787816363,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-152529",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787816363555291037,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json",
+        "sha256": "sha256:24c7e831818e92850a9ef3526af8d89250a9e2c8f3559a1f2501f4b4584707e8",
+        "size": 5953
+      },
+      "target": "record_production_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "doc_refs": [],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787822473,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787822472982739260,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.json",
+        "sha256": "sha256:dc44f723f36611b21152870888923b95a9aee42e9190b7e23bdb7ebd048b4607",
+        "size": 984
+      },
+      "target": "record_public_extract_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "doc_refs": [],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787822473,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787822472982739260,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "sha256": "sha256:9a2906937e88407a6a07fe31826d8684c7ffee5db0c4bb8473c81ce862457a2c",
+        "size": 679
+      },
+      "target": "record_public_extract_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "doc_refs": [],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787822473,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787822472948739910,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json",
+        "sha256": "sha256:6835a8dde89c64c0665e91226f8b1d3671fc7dfe10b02b33143a0de6ef22aa01",
+        "size": 6108
+      },
+      "target": "record_public_extract_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "public_extract_profile",
+      "doc_refs": [],
+      "evidence_role": "diagnostic-profile",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787836918,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787836918832278492,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.json",
+        "sha256": "sha256:e37362f94f8c25e1a2398238b1959ec72ae5babb3cb79ce7b93050fba559fc2c",
+        "size": 979
+      },
+      "target": "record_public_extract_profile_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "public_extract_profile",
+      "doc_refs": [],
+      "evidence_role": "diagnostic-profile",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787836918,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787836918832278492,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.md",
+        "sha256": "sha256:bc9b8ab3e7500864742a2bf19edefc50b3bc27cafea88267a0dadf465ad92524",
+        "size": 673
+      },
+      "target": "record_public_extract_profile_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "public_extract_profile",
+      "doc_refs": [],
+      "evidence_role": "diagnostic-profile",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787836918,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787836918805279622,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-manifest.json",
+        "sha256": "sha256:8ea390f1216e2714ae3ef030123e36f28b37991180cc9bac7b9fe5dbe092b438",
+        "size": 6062
+      },
+      "target": "record_public_extract_profile_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "learn_gmm_assignment",
+      "doc_refs": [],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787837702,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787837702897458339,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.json",
+        "sha256": "sha256:8d82707986bfa67bacfd8d2b9fec041557c97f4edbbd09d8acad49bed45bdee3",
+        "size": 987
+      },
+      "target": "record_learn_gmm_assignment_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "learn_gmm_assignment",
+      "doc_refs": [],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787837702,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787837702896458381,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.md",
+        "sha256": "sha256:fb779836cc3aa88d17f230da2fc4c66b7c36c4d05b505816f8ec63931a11023c",
+        "size": 674
+      },
+      "target": "record_learn_gmm_assignment_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "learn_gmm_assignment",
+      "doc_refs": [],
+      "evidence_role": "diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787837702,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787837702863459762,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-manifest.json",
+        "sha256": "sha256:07516065b4bc4351f2f07ea127b9b4234a8ee92a7090c947bfbaf108f91f952e",
+        "size": 6133
+      },
+      "target": "record_learn_gmm_assignment_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "learn_gmms_full",
+      "doc_refs": [],
+      "evidence_role": "production-shaped-diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787838825,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787838825618158696,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.json",
+        "sha256": "sha256:a4c829a169029ea975be337975241b2be60247132a9652348a1103fb7accdb39",
+        "size": 1006
+      },
+      "target": "record_learn_gmms_full_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "learn_gmms_full",
+      "doc_refs": [],
+      "evidence_role": "production-shaped-diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787838825,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787838825618158696,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.md",
+        "sha256": "sha256:2638285365b0fd237c0aeb3ae381a5269f4b0b81d6130b64a66a666009e68808",
+        "size": 695
+      },
+      "target": "record_learn_gmms_full_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "learn_gmms_full",
+      "doc_refs": [],
+      "evidence_role": "production-shaped-diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787838825,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787838825585168422,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-manifest.json",
+        "sha256": "sha256:630eea66aab0f4712c588b77fdb5386359e9bb4e8e1d8f1e79f3be8f7f63b9ee",
+        "size": 6263
+      },
+      "target": "record_learn_gmms_full_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "doc_refs": [],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787842140,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-manifest.json"
+      },
+      "run_label": "public-repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787842140808655432,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.json",
+        "sha256": "sha256:58b3a96420251b0f36f5019bd37ae0e0bb18e038029988a0e097b148cb319449",
+        "size": 996
+      },
+      "target": "record_production_learn_gmms_public_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "doc_refs": [],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787842140,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-manifest.json"
+      },
+      "run_label": "public-repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787842140808655432,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.md",
+        "sha256": "sha256:23e7db59f956470be1b7f57ceb3c8c2838898005ea56fa939a1f26b84c718eaf",
+        "size": 685
+      },
+      "target": "record_production_learn_gmms_public_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "doc_refs": [],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787842140,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-manifest.json"
+      },
+      "run_label": "public-repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787842140775655440,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-manifest.json",
+        "sha256": "sha256:ae6143e67695eb634af011f63db21c387fd616880bad2267175425c2375ed6ad",
+        "size": 6178
+      },
+      "target": "record_production_learn_gmms_public_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "production_learn_gmms",
+      "doc_refs": [],
+      "evidence_role": "production-detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787841496,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787841496462491711,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.json",
+        "sha256": "sha256:ce0aab503f06e29c60fe58197b4058356a21d2a5369ea9f460bc6eb8c94128b9",
+        "size": 989
+      },
+      "target": "record_production_learn_gmms_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "production_learn_gmms",
+      "doc_refs": [],
+      "evidence_role": "production-detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787841496,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787841496462491711,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.md",
+        "sha256": "sha256:52405d824bfc8a5e5ea21f19a5cbb87c8217b7676b6914d3d6b217f7af5bd6ef",
+        "size": 678
+      },
+      "target": "record_production_learn_gmms_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "production_learn_gmms",
+      "doc_refs": [],
+      "evidence_role": "production-detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787841496,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787841496429490648,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-manifest.json",
+        "sha256": "sha256:0b44e6dafbae66c60ff334e02f9702dca0a781ff575abcf357cd5568a1400365",
+        "size": 6035
+      },
+      "target": "record_production_learn_gmms_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "public_extract_profile",
+      "doc_refs": [],
+      "evidence_role": "diagnostic-profile",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787844800,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787844800307012557,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.json",
+        "sha256": "sha256:1fb84f91331f6deff89fac519d60743847dded5f3cf6b14f18cdc32930d54369",
+        "size": 979
+      },
+      "target": "record_post_learn_gmms_profile_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "public_extract_profile",
+      "doc_refs": [],
+      "evidence_role": "diagnostic-profile",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787844800,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787844800307012557,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.md",
+        "sha256": "sha256:dd0d2465873b5cd960ea0b71fbfa8ef7c9860c464f3b689fe4b3f9a11980dbe8",
+        "size": 673
+      },
+      "target": "record_post_learn_gmms_profile_repeated_evidence_state"
+    },
+    "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "public_extract_profile",
+      "doc_refs": [],
+      "evidence_role": "diagnostic-profile",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787844800,
+      "related": {
+        "doctor_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-manifest.json"
+      },
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787844800279013000,
+        "path": "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-manifest.json",
+        "sha256": "sha256:f390136b788a75ce8a8bd174c1700bc17393860179d41df1517f9afec9e3a8c7",
+        "size": 6059
+      },
+      "target": "record_post_learn_gmms_profile_repeated_evidence_state"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "initgraph_no_solve",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787814722,
+      "run_label": "repeated-board-20260827-144235",
+      "target": "record_initgraph_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "initgraph_no_solve",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/030-initgraph-no-solve-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787815106,
+      "run_label": "repeated-board-20260827-144235",
+      "target": "record_initgraph_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production_initgraph_terminal",
+      "evidence_role": "production-detail",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787815720,
+      "run_label": "repeated-board-20260827-152529",
+      "target": "record_production_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production_initgraph_terminal",
+      "evidence_role": "production-detail",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787815728,
+      "run_label": "repeated-board-20260827-152529",
+      "target": "record_production_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production_initgraph_terminal",
+      "evidence_role": "production-detail",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787816192,
+      "run_label": "repeated-board-20260827-152529",
+      "target": "record_production_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production_initgraph_terminal",
+      "evidence_role": "production-detail",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/060-production-initgraph-terminal-evidence/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787816363,
+      "run_label": "repeated-board-20260827-152529",
+      "target": "record_production_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787821145,
+      "run_label": "repeated-board-20260827-96x72",
+      "target": "record_public_extract_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787821478,
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "target": "record_public_extract_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787821833,
+      "run_label": "repeated-board-20260827-96x72",
+      "target": "record_public_extract_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787821955,
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "target": "record_public_extract_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/070-public-extract-wall-time-adoption-check/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787822473,
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "target": "record_public_extract_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public_extract_profile",
+      "evidence_role": "diagnostic-profile",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/080-public-extract-component-profile/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787836918,
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "target": "record_public_extract_profile_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "learn_gmm_assignment",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/090-learn-gmm-component-assignment-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787837702,
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "target": "record_learn_gmm_assignment_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "learn_gmms_full",
+      "evidence_role": "production-shaped-diagnostic",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/100-learn-gmms-full-production-shaped-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787838825,
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "target": "record_learn_gmms_full_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "production_learn_gmms",
+      "evidence_role": "production-detail",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787841496,
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "target": "record_production_learn_gmms_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public_extract",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/110-learn-gmms-production-integration-plan/public-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787842140,
+      "run_label": "public-repeated-board-20260827-clean-96x72",
+      "target": "record_production_learn_gmms_public_repeated_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "public_extract_profile",
+      "evidence_role": "diagnostic-profile",
+      "files": [
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.json",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-doctor.md",
+        "test-rvv/segmentation/grabcut_segmentation/doc/phases/120-post-learn-gmms-adoption-profile/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787844800,
+      "run_label": "repeated-board-20260827-clean-96x72",
+      "target": "record_post_learn_gmms_profile_repeated_evidence_state"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787844800
+}
