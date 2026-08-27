@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "RangeImageBorderExtractor score-generation component split production-shaped diagnostic repeated board summary",
+    "evidence_role": "production-shaped diagnostic",
+    "summary_path": "log/board/repeated_phase030_score_generation_component_split/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase030_score_generation_component_split/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase030_score_generation_component_split/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase030_score_generation_component_split/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase030_score_generation_component_split/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase030_score_generation_component_split/run_05/analyze_bench_compare.log"
+    ],
+    "label": "range_image_border_extractor_phase030_score_generation_component_split_repeated",
+    "analysis_script": "test-rvv/features/range_image_border_extractor/script/generate_range_image_border_extractor_evidence_manifest.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "dataset": "synthetic range_image_border_extractor score images; repeat=1; cases=320x240,641x481_tail,257x193_threshold_sign_mix,score_pipeline_641x481_four_images,range_image_score_generation_160x120,range_image_generation_plus_update_160x120,range_image_local_surface_160x120,range_image_border_scores_after_surface_160x120",
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "neutral"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "range_image_border_scores_after_surface_160x120",
+      "group": "range-image-border-production-shaped-score-generation",
+      "evidence_role": "production-shaped diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "not_applicable; score image is contiguous float buffer",
+      "size": "160x120 RangeImage fixture with local surface precomputed before timed extractBorderScoreImages",
+      "run_count": 5,
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 13.69588,
+      "rvv_ms": 13.67976,
+      "ba_values": [
+        1.0,
+        1.0,
+        1.01,
+        0.99,
+        1.0
+      ],
+      "std_ms_values": [
+        13.5611,
+        13.7673,
+        13.7315,
+        13.6757,
+        13.7438
+      ],
+      "rvv_ms_values": [
+        13.5664,
+        13.7556,
+        13.5957,
+        13.7538,
+        13.7273
+      ],
+      "run_paths": [
+        "log/board/repeated_phase030_score_generation_component_split/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase030_score_generation_component_split/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase030_score_generation_component_split/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase030_score_generation_component_split/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase030_score_generation_component_split/run_05/analyze_bench_compare.log"
+      ],
+      "binary_hash": "std=sha256:8975b89639168ee5c8be331502f15ffc728ff624989877b4d78f20753e8f4928; rvv=sha256:89157d71bbce705035be9aad4572d95e87ea76535cd4802a555ae13103d51077",
+      "baseline": {
+        "label": "Std build",
+        "checksum": "24039.1",
+        "binary_hash": "sha256:8975b89639168ee5c8be331502f15ffc728ff624989877b4d78f20753e8f4928",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/range_image_border_extractor/src/bench_range_image_border_extractor.cpp",
+        "row_source": "RangeImage fixture generated score images",
+        "solve": false,
+        "checksum_policy": "weighted output score checksum from every repeated update",
+        "timer_boundary": "RangeImageBorderExtractor extractBorderScoreImages only after precomputed local surface",
+        "gate": "width/height >= 3 interior RVV path; border rows and columns use scalar reference",
+        "mask": "minimum-border-probability gate plus opposite-sign neighbor-average gate",
+        "reduction": "fixed 8-neighbor local sum; no cross-lane vector reduction",
+        "asm_boundary": "updateScoresRVV in bench_range_image_border_extractor_rvv",
+        "rvv_instr_count": 1542
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "24039.1",
+        "binary_hash": "sha256:89157d71bbce705035be9aad4572d95e87ea76535cd4802a555ae13103d51077",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/range_image_border_extractor/src/bench_range_image_border_extractor.cpp",
+        "row_source": "RangeImage fixture generated score images",
+        "solve": false,
+        "checksum_policy": "weighted output score checksum from every repeated update",
+        "timer_boundary": "RangeImageBorderExtractor extractBorderScoreImages only after precomputed local surface",
+        "gate": "width/height >= 3 interior RVV path; border rows and columns use scalar reference",
+        "mask": "minimum-border-probability gate plus opposite-sign neighbor-average gate",
+        "reduction": "fixed 8-neighbor local sum; no cross-lane vector reduction",
+        "asm_boundary": "updateScoresRVV in bench_range_image_border_extractor_rvv",
+        "rvv_instr_count": 1542
+      },
+      "notes": "Production-shaped diagnostic component split. It isolates local surface extraction or border-score image generation to decide whether neighbor-score RVV is worth a follow-up candidate."
+    },
+    {
+      "name": "range_image_local_surface_160x120",
+      "group": "range-image-border-production-shaped-score-generation",
+      "evidence_role": "production-shaped diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "not_applicable; score image is contiguous float buffer",
+      "size": "160x120 RangeImage fixture with extractLocalSurfaceStructure only",
+      "run_count": 5,
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 129.133,
+      "rvv_ms": 128.8304,
+      "ba_values": [
+        0.99,
+        1.0,
+        1.01,
+        1.0,
+        1.0
+      ],
+      "std_ms_values": [
+        127.81,
+        130.394,
+        128.738,
+        129.224,
+        129.499
+      ],
+      "rvv_ms_values": [
+        128.52,
+        130.149,
+        127.915,
+        128.619,
+        128.949
+      ],
+      "run_paths": [
+        "log/board/repeated_phase030_score_generation_component_split/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase030_score_generation_component_split/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase030_score_generation_component_split/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase030_score_generation_component_split/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase030_score_generation_component_split/run_05/analyze_bench_compare.log"
+      ],
+      "binary_hash": "std=sha256:8975b89639168ee5c8be331502f15ffc728ff624989877b4d78f20753e8f4928; rvv=sha256:89157d71bbce705035be9aad4572d95e87ea76535cd4802a555ae13103d51077",
+      "baseline": {
+        "label": "Std build",
+        "checksum": "-26817.5",
+        "binary_hash": "sha256:8975b89639168ee5c8be331502f15ffc728ff624989877b4d78f20753e8f4928",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/range_image_border_extractor/src/bench_range_image_border_extractor.cpp",
+        "row_source": "RangeImage fixture generated score images",
+        "solve": false,
+        "checksum_policy": "weighted output score checksum from every repeated update",
+        "timer_boundary": "RangeImageBorderExtractor extractLocalSurfaceStructure only",
+        "gate": "width/height >= 3 interior RVV path; border rows and columns use scalar reference",
+        "mask": "minimum-border-probability gate plus opposite-sign neighbor-average gate",
+        "reduction": "fixed 8-neighbor local sum; no cross-lane vector reduction",
+        "asm_boundary": "updateScoresRVV in bench_range_image_border_extractor_rvv",
+        "rvv_instr_count": 1542
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "-26817.5",
+        "binary_hash": "sha256:89157d71bbce705035be9aad4572d95e87ea76535cd4802a555ae13103d51077",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/range_image_border_extractor/src/bench_range_image_border_extractor.cpp",
+        "row_source": "RangeImage fixture generated score images",
+        "solve": false,
+        "checksum_policy": "weighted output score checksum from every repeated update",
+        "timer_boundary": "RangeImageBorderExtractor extractLocalSurfaceStructure only",
+        "gate": "width/height >= 3 interior RVV path; border rows and columns use scalar reference",
+        "mask": "minimum-border-probability gate plus opposite-sign neighbor-average gate",
+        "reduction": "fixed 8-neighbor local sum; no cross-lane vector reduction",
+        "asm_boundary": "updateScoresRVV in bench_range_image_border_extractor_rvv",
+        "rvv_instr_count": 1542
+      },
+      "notes": "Production-shaped diagnostic component split. It isolates local surface extraction or border-score image generation to decide whether neighbor-score RVV is worth a follow-up candidate."
+    }
+  ]
+}
