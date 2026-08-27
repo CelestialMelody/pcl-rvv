@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "topic": "features/gasd",
+  "policy": {
+    "commit_boundary": "summary-only",
+    "raw_logs": "excluded",
+    "build_outputs": "excluded",
+    "qemu_logs": "excluded"
+  },
+  "evidence_sets": [
+    {
+      "phase": "000-current-state-and-gaps",
+      "run_label": "gasd_phase000_shape_copy_repeated",
+      "case_name": "candidate_shape_copy_rvv",
+      "evidence_role": "diagnostic",
+      "decision": "diagnostic-weak-positive",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase000_shape_copy/summary.md",
+        "sha256": "sha256:a292edfeaa0dc5e7e21d5f69130f4680beaef59cbf1d3f67ba08ec8c8d609742"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase000_shape_copy/evidence_doctor.md",
+        "sha256": "sha256:de87be838353c73e1fa4298bf633501c17271edc44edce6e256f1d0b8b243f83"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase000_shape_copy/evidence_manifest.json",
+        "sha256": "sha256:b76e286df630b3c2ffe504e803d62b8b3545663d299b5ff132c48202741d3634"
+      }
+    },
+    {
+      "phase": "010-shape-sample-projection-diagnostic",
+      "run_label": "gasd_phase010_shape_projection_repeated",
+      "case_name": "candidate_shape_projection_rvv",
+      "evidence_role": "diagnostic",
+      "decision": "diagnostic-positive",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase010_shape_projection_fast/summary.md",
+        "sha256": "sha256:0c125595cf3109f9eaf02e5da93cbcc2c042da03061644e5949a220ccc8c1898"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase010_shape_projection_fast/evidence_doctor.md",
+        "sha256": "sha256:63f6cdcbcb7487eeb5815301a19ea16d3d6dcbf15f45a838243f3b23fb3a6f24"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase010_shape_projection_fast/evidence_manifest.json",
+        "sha256": "sha256:9cb3a8f966f3568c0103a8559ecfdc7e6a273fefea1d3077a7d3541296e0ad3c"
+      }
+    },
+    {
+      "phase": "020-color-hue-diagnostic",
+      "run_label": "gasd_phase020_color_hue_repeated",
+      "case_name": "candidate_color_hue_rvv",
+      "evidence_role": "diagnostic",
+      "decision": "diagnostic-positive",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase020_color_hue/summary.md",
+        "sha256": "sha256:ba084a84fe08efb2d9f61a798f087d7fd58be7c2ecc93aca1f8191ffc45ad237"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase020_color_hue/evidence_doctor.md",
+        "sha256": "sha256:60860c2fa1264afef7a68a8747a5cb56ab283f3d41b708fd153eea5b956b34cc"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase020_color_hue/evidence_manifest.json",
+        "sha256": "sha256:b7f12e076f3c408b3e067416f6a93acac011bff099daff235816e9c13d8bdbd7"
+      }
+    },
+    {
+      "phase": "030-interpolation-ablation",
+      "run_label": "gasd_phase030_trilinear_interpolation_repeated",
+      "case_name": "candidate_trilinear_interpolation_rvv",
+      "evidence_role": "diagnostic",
+      "decision": "diagnostic-positive-with-warning",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase030_trilinear_interpolation/summary.md",
+        "sha256": "sha256:3f505a9bf4a962e69ac2c3c025f8794e8c3a1b6b3f6e5d196ec010ea469ac03a"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase030_trilinear_interpolation/evidence_doctor.md",
+        "sha256": "sha256:85567e5fa9792446b7662a3b07271657df61871ee661b464c1193713d4ff169f"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase030_trilinear_interpolation/evidence_manifest.json",
+        "sha256": "sha256:bcbb651dfa395ef3629a6e42279ff571d9ff233c3ce3799087a27a4969cf0b6a"
+      }
+    },
+    {
+      "phase": "040-histogram-write-probe",
+      "run_label": "gasd_phase040_histogram_write_probe_repeated",
+      "case_name": "candidate_trilinear_histogram_write_rvv",
+      "evidence_role": "diagnostic",
+      "decision": "diagnostic-weak-positive",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase040_histogram_write_probe/summary.md",
+        "sha256": "sha256:b3e53e3dcf14445014b9a7fcb03e066569d119a1996bd3a0fc665b48026f0c73"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase040_histogram_write_probe/evidence_doctor.md",
+        "sha256": "sha256:41f528cca5d615ebc1e81bb2f9dd3cd67caeca5dfcbbcbc6d8f40c1d63c4e70d"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase040_histogram_write_probe/evidence_manifest.json",
+        "sha256": "sha256:bd51539d2a9290c634c3f686ceefba2ca9de8b3f2333e960853fba5fe3a7fd51"
+      }
+    },
+    {
+      "phase": "050-eigen-backed-histogram-write-probe",
+      "run_label": "gasd_phase050_eigen_histogram_write_probe_repeated",
+      "case_name": "candidate_trilinear_eigen_histogram_write_rvv",
+      "evidence_role": "diagnostic",
+      "decision": "diagnostic-negative",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase050_eigen_histogram_write_probe/summary.md",
+        "sha256": "sha256:c802686bd7b187a1c14342969422c20bf45aae159ddefc48f0128fa28ea68dda"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase050_eigen_histogram_write_probe/evidence_doctor.md",
+        "sha256": "sha256:9b60e07d21050103ef3b13c65adbd0c27fa5a9be9e360439ef0ad148c05f35e1"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase050_eigen_histogram_write_probe/evidence_manifest.json",
+        "sha256": "sha256:12dad7385ae418ad474cfc4b6f6584f5a82c7792822da6137c5718a7dfdc3380"
+      }
+    },
+    {
+      "phase": "060-production-shaped-shape-combined-diagnostic",
+      "run_label": "gasd_phase060_shape_combined_repeated",
+      "case_name": "candidate_shape_combined_rvv",
+      "evidence_role": "production-shaped diagnostic",
+      "decision": "production-shaped-diagnostic-negative",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase060_shape_combined/summary.md",
+        "sha256": "sha256:1eb5d934de3c588d6be7a4b3b6b59fe3b7611ed475c0f5ab0f23c3a965536c0f"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase060_shape_combined/evidence_doctor.md",
+        "sha256": "sha256:ed9e5086584b74bd16129ef7dd1598835f8463b12988276bf3af78fae713cd03"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase060_shape_combined/evidence_manifest.json",
+        "sha256": "sha256:3d4ac9d5b78d9848659c771b348e55aa733b0da83721dff73820bacd77941605"
+      }
+    },
+    {
+      "phase": "080-public-compute-profile-audit",
+      "run_label": "gasd_phase080_public_shape_compute_repeated",
+      "case_name": "public_gasd_shape_compute",
+      "evidence_role": "production-public profile",
+      "decision": "profile-only build-level signal",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase080_public_shape_compute/summary.md",
+        "sha256": "sha256:17b1e855ffcbcafa0a21b84996389a266a8ff0cebfd96838c000b13bee918574"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase080_public_shape_compute/evidence_doctor.md",
+        "sha256": "sha256:4973f88bc71e48a14dca271a7ac909be52648917140402c295e23fa40a4599d4"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase080_public_shape_compute/evidence_manifest.json",
+        "sha256": "sha256:412082feb3c72b1cbdf3721061eee064403ed41df01edcb17a6da84e32f3c50c"
+      }
+    },
+    {
+      "phase": "080-public-compute-profile-audit",
+      "run_label": "gasd_phase080_public_color_compute_repeated",
+      "case_name": "public_gasd_color_compute",
+      "evidence_role": "production-public profile",
+      "decision": "profile-only build-level signal",
+      "summary": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase080_public_color_compute/summary.md",
+        "sha256": "sha256:3573e81029ed183479a1dd3cb6ab4644f6df7212b34b316d7fefbcc895de1e2f"
+      },
+      "doctor": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase080_public_color_compute/evidence_doctor.md",
+        "sha256": "sha256:27b311b9cc0894919e167b382ebba2d4c4f2e0f103a4090b1bd47090a1d6ce4b"
+      },
+      "manifest": {
+        "path": "test-rvv/features/gasd/log/board/repeated_phase080_public_color_compute/evidence_manifest.json",
+        "sha256": "sha256:9750299d486c2c103ebd0aa10fe858d7523f069a7b5465dfd90cd24a6cb0b366"
+      }
+    }
+  ],
+  "excluded_paths": [
+    "test-rvv/features/gasd/build/",
+    "test-rvv/features/gasd/log/qemu/",
+    "test-rvv/features/gasd/log/board/*/run_*/",
+    "test-rvv/features/gasd/log/board/phase060_shape_combined_board_test/run_test.log",
+    "test-rvv/features/gasd/log/board/repeated_phase010_shape_projection/",
+    "test-rvv/features/gasd/log/board/repeated_phase010_shape_projection_clean/"
+  ]
+}

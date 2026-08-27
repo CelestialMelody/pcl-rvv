@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GASD fixed-grid copy diagnostic repeated board summary",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/repeated_phase000_shape_copy/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase000_shape_copy/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase000_shape_copy/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase000_shape_copy/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase000_shape_copy/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase000_shape_copy/run_05/analyze_bench_compare.log"
+    ],
+    "label": "gasd_phase000_shape_copy_repeated",
+    "analysis_script": "test-rvv/features/gasd/script/generate_gasd_evidence_manifest.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "dataset": "synthetic gasd points=4096 shape_half_grid=6 color_half_grid=3 hists_size=16 repeat=256",
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "weak_positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "candidate_shape_copy_rvv",
+      "group": "gasd-shape-histogram-copy",
+      "evidence_role": "diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "PointXYZ -> GASDSignature512",
+      "size": "half-grid and hists-size from dataset line",
+      "run_count": 5,
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 93.47964,
+      "rvv_ms": 88.32384,
+      "ba_values": [
+        1.07,
+        1.05,
+        1.08,
+        1.05,
+        1.04
+      ],
+      "std_ms_values": [
+        94.6132,
+        92.8273,
+        94.3169,
+        92.7013,
+        92.9395
+      ],
+      "rvv_ms_values": [
+        88.2519,
+        88.2327,
+        87.6332,
+        88.1861,
+        89.3153
+      ],
+      "run_paths": [
+        "log/board/repeated_phase000_shape_copy/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase000_shape_copy/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase000_shape_copy/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase000_shape_copy/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase000_shape_copy/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic shape histogram grid",
+        "solve": false,
+        "checksum_policy": "quantized descriptor-copy checksum",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "shape fixed-grid contiguous histogram copy",
+        "gate": "fixed shape grid, finite float bins, no interpolation state",
+        "mask": "not_applicable; dense finite synthetic histogram",
+        "reduction": "not_applicable; contiguous copy",
+        "asm_boundary": "copyShapeHistogramsRVVToBuffer / copyColorHistogramsRVVToBuffer in bench_gasd_rvv",
+        "rvv_instr_count": 1409
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic shape histogram grid",
+        "solve": false,
+        "checksum_policy": "quantized descriptor-copy checksum",
+        "checksum": "see matching checksum lines in run_bench_std.log and run_bench_rvv.log",
+        "timer_boundary": "shape fixed-grid contiguous histogram copy",
+        "gate": "fixed shape grid, finite float bins, no interpolation state",
+        "mask": "not_applicable; dense finite synthetic histogram",
+        "reduction": "not_applicable; contiguous copy",
+        "asm_boundary": "copyShapeHistogramsRVVToBuffer / copyColorHistogramsRVVToBuffer in bench_gasd_rvv",
+        "rvv_instr_count": 1409
+      },
+      "notes": "Shape copy diagnostic. It screens the shared copy tail but does not include alignment, projection, interpolation or public compute dispatch."
+    }
+  ]
+}

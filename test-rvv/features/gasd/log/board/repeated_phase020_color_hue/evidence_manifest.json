@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GASD color hue diagnostic repeated board summary",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/repeated_phase020_color_hue/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase020_color_hue/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase020_color_hue/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase020_color_hue/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase020_color_hue/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase020_color_hue/run_05/analyze_bench_compare.log"
+    ],
+    "label": "gasd_phase020_color_hue_repeated",
+    "analysis_script": "test-rvv/features/gasd/script/generate_gasd_evidence_manifest.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "dataset": "synthetic gasd points=4096 shape_half_grid=4 color_half_grid=3 hists_size=16 repeat=256",
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "candidate_color_hue_rvv",
+      "group": "gasd-color-hue-projection",
+      "evidence_role": "diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "PointXYZRGBA -> hue/hbin staging buffers",
+      "size": "half-grid and hists-size from dataset line",
+      "run_count": 5,
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 66.57902,
+      "rvv_ms": 34.42256,
+      "ba_values": [
+        1.92,
+        1.91,
+        1.98,
+        1.96,
+        1.91
+      ],
+      "std_ms_values": [
+        66.6282,
+        66.7013,
+        67.11,
+        66.8019,
+        65.6537
+      ],
+      "rvv_ms_values": [
+        34.7415,
+        34.9554,
+        33.9204,
+        34.0521,
+        34.4434
+      ],
+      "run_paths": [
+        "log/board/repeated_phase020_color_hue/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase020_color_hue/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase020_color_hue/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase020_color_hue/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase020_color_hue/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "1.76271e+22",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic transformed color samples",
+        "solve": false,
+        "checksum_policy": "tolerance-aligned quantized color hue staging buffer checksum",
+        "timer_boundary": "color hue and hbin staging only",
+        "gate": "dense PointXYZRGBA samples with production RGB hue semantics, including grayscale diff==0 lanes",
+        "mask": "RGB max-channel masks and diff==0 grayscale mask",
+        "reduction": "not_applicable; per-sample hue/hbin staging only",
+        "asm_boundary": "projectColorHueRVVToBuffers in bench_gasd_rvv",
+        "rvv_instr_count": 1483
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "1.76271e+22",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic transformed color samples",
+        "solve": false,
+        "checksum_policy": "tolerance-aligned quantized color hue staging buffer checksum",
+        "timer_boundary": "color hue and hbin staging only",
+        "gate": "dense PointXYZRGBA samples with production RGB hue semantics, including grayscale diff==0 lanes",
+        "mask": "RGB max-channel masks and diff==0 grayscale mask",
+        "reduction": "not_applicable; per-sample hue/hbin staging only",
+        "asm_boundary": "projectColorHueRVVToBuffers in bench_gasd_rvv",
+        "rvv_instr_count": 1483
+      },
+      "notes": "Color hue diagnostic. It computes production-style hue and color histogram bin staging but does not write color histograms or run interpolation."
+    }
+  ]
+}

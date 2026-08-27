@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GASD trilinear interpolation diagnostic repeated board summary",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/repeated_phase030_trilinear_interpolation/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase030_trilinear_interpolation/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase030_trilinear_interpolation/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase030_trilinear_interpolation/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase030_trilinear_interpolation/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase030_trilinear_interpolation/run_05/analyze_bench_compare.log"
+    ],
+    "label": "gasd_phase030_trilinear_interpolation_repeated",
+    "analysis_script": "test-rvv/features/gasd/script/generate_gasd_evidence_manifest.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "dataset": "synthetic gasd points=4096 shape_half_grid=6 color_half_grid=3 hists_size=16 repeat=256",
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "candidate_trilinear_interpolation_rvv",
+      "group": "gasd-trilinear-interpolation-staging",
+      "evidence_role": "diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "PointXYZ projection staging -> trilinear index/weight buffers",
+      "size": "half-grid and hists-size from dataset line",
+      "run_count": 5,
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 226.3432,
+      "rvv_ms": 125.60000000000001,
+      "ba_values": [
+        1.95,
+        1.56,
+        1.63,
+        1.97,
+        2.03
+      ],
+      "std_ms_values": [
+        222.834,
+        225.137,
+        237.941,
+        223.72,
+        222.084
+      ],
+      "rvv_ms_values": [
+        114.298,
+        144.251,
+        146.33,
+        113.641,
+        109.48
+      ],
+      "run_paths": [
+        "log/board/repeated_phase030_trilinear_interpolation/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase030_trilinear_interpolation/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase030_trilinear_interpolation/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase030_trilinear_interpolation/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase030_trilinear_interpolation/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "8.7108e+20",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic transformed shape samples with precomputed projection staging",
+        "solve": false,
+        "checksum_policy": "tolerance-aligned quantized trilinear interpolation staging checksum",
+        "timer_boundary": "trilinear interpolation arithmetic/index staging only",
+        "gate": "INTERP_TRILINEAR arithmetic only; histogram writes and scatter are excluded from the timer boundary",
+        "mask": "not_applicable; dense finite synthetic samples",
+        "reduction": "not_applicable; per-sample index/weight staging only",
+        "asm_boundary": "computeTrilinearInterpolationRVVToBuffers in bench_gasd_rvv",
+        "rvv_instr_count": 1492
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "8.7108e+20",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic transformed shape samples with precomputed projection staging",
+        "solve": false,
+        "checksum_policy": "tolerance-aligned quantized trilinear interpolation staging checksum",
+        "timer_boundary": "trilinear interpolation arithmetic/index staging only",
+        "gate": "INTERP_TRILINEAR arithmetic only; histogram writes and scatter are excluded from the timer boundary",
+        "mask": "not_applicable; dense finite synthetic samples",
+        "reduction": "not_applicable; per-sample index/weight staging only",
+        "asm_boundary": "computeTrilinearInterpolationRVVToBuffers in bench_gasd_rvv",
+        "rvv_instr_count": 1492
+      },
+      "notes": "Trilinear interpolation diagnostic. It computes grid/histogram indices and eight spatial weights but does not update Eigen histogram bins."
+    }
+  ]
+}

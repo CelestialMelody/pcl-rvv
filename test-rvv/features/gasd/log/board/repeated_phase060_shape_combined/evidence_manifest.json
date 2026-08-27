@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GASD production-shaped shape combined diagnostic repeated board summary",
+    "evidence_role": "production-shaped diagnostic",
+    "summary_path": "log/board/repeated_phase060_shape_combined/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase060_shape_combined/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase060_shape_combined/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase060_shape_combined/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase060_shape_combined/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase060_shape_combined/run_05/analyze_bench_compare.log"
+    ],
+    "label": "gasd_phase060_shape_combined_repeated",
+    "analysis_script": "test-rvv/features/gasd/script/generate_gasd_evidence_manifest.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "dataset": "synthetic gasd points=4096 shape_half_grid=6 color_half_grid=3 hists_size=16 repeat=256",
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "negative"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "candidate_shape_combined_rvv",
+      "group": "gasd-shape-combined-production-shaped-diagnostic",
+      "evidence_role": "production-shaped diagnostic",
+      "case_kind": "production-shaped-diagnostic",
+      "point_type": "PointXYZ -> Eigen shape histogram grid -> descriptor buffer",
+      "size": "half-grid and hists-size from dataset line",
+      "run_count": 5,
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 508.7228,
+      "rvv_ms": 854.9822,
+      "ba_values": [
+        0.6,
+        0.59,
+        0.59,
+        0.59,
+        0.6
+      ],
+      "std_ms_values": [
+        513.831,
+        506.589,
+        506.519,
+        507.205,
+        509.47
+      ],
+      "rvv_ms_values": [
+        853.235,
+        853.17,
+        858.252,
+        858.595,
+        851.659
+      ],
+      "run_paths": [
+        "log/board/repeated_phase060_shape_combined/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase060_shape_combined/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase060_shape_combined/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase060_shape_combined/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase060_shape_combined/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "1.56728e+22",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic transformed-like shape samples",
+        "solve": false,
+        "checksum_policy": "tolerance-aligned quantized shape descriptor checksum with 1e3 scale",
+        "timer_boundary": "shape projection plus trilinear Eigen histogram accumulation plus shape descriptor copy",
+        "gate": "INTERP_TRILINEAR shape combined helper; alignment transform, indices and public compute dispatch excluded",
+        "mask": "not_applicable; dense finite synthetic samples",
+        "reduction": "scalar += accumulation into Eigen histogram bins; RVV is used for projection, trilinear staging and descriptor copy",
+        "asm_boundary": "computeShapeDescriptorTrilinearRVVStaged / projectShapeSamplesRVVToBuffers / computeTrilinearInterpolationRVVToBuffers / copyShapeHistogramsRVVToBuffer in bench_gasd_rvv",
+        "rvv_instr_count": 1517
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "1.56728e+22",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic transformed-like shape samples",
+        "solve": false,
+        "checksum_policy": "tolerance-aligned quantized shape descriptor checksum with 1e3 scale",
+        "timer_boundary": "shape projection plus trilinear Eigen histogram accumulation plus shape descriptor copy",
+        "gate": "INTERP_TRILINEAR shape combined helper; alignment transform, indices and public compute dispatch excluded",
+        "mask": "not_applicable; dense finite synthetic samples",
+        "reduction": "scalar += accumulation into Eigen histogram bins; RVV is used for projection, trilinear staging and descriptor copy",
+        "asm_boundary": "computeShapeDescriptorTrilinearRVVStaged / projectShapeSamplesRVVToBuffers / computeTrilinearInterpolationRVVToBuffers / copyShapeHistogramsRVVToBuffer in bench_gasd_rvv",
+        "rvv_instr_count": 1517
+      },
+      "notes": "Production-shaped shape combined diagnostic. It combines projection staging, trilinear Eigen histogram accumulation and descriptor copy in a test helper, but does not prove public compute dispatch."
+    }
+  ]
+}

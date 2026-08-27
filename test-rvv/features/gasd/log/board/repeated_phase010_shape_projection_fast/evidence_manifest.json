@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "GASD shape projection diagnostic fast repeated board summary",
+    "evidence_role": "diagnostic",
+    "summary_path": "log/board/repeated_phase010_shape_projection_fast/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase010_shape_projection_fast/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase010_shape_projection_fast/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase010_shape_projection_fast/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase010_shape_projection_fast/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase010_shape_projection_fast/run_05/analyze_bench_compare.log"
+    ],
+    "label": "gasd_phase010_shape_projection_fast_repeated",
+    "analysis_script": "test-rvv/features/gasd/script/generate_gasd_evidence_manifest.py",
+    "metadata": {
+      "device": "board via Makefile config",
+      "dataset": "synthetic gasd points=4096 shape_half_grid=6 color_half_grid=3 hists_size=16 repeat=256",
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "candidate_shape_projection_rvv",
+      "group": "gasd-shape-sample-projection",
+      "evidence_role": "diagnostic",
+      "case_kind": "component-ablation",
+      "point_type": "PointXYZ -> projection staging buffers",
+      "size": "half-grid and hists-size from dataset line",
+      "run_count": 5,
+      "iterations": 10,
+      "warmup_iterations": 2,
+      "build_comparison": true,
+      "std_ms": 87.4065,
+      "rvv_ms": 51.50154,
+      "ba_values": [
+        1.69,
+        1.71,
+        1.7,
+        1.69,
+        1.69
+      ],
+      "std_ms_values": [
+        87.1471,
+        87.9199,
+        87.6611,
+        87.0793,
+        87.2251
+      ],
+      "rvv_ms_values": [
+        51.5266,
+        51.4186,
+        51.4279,
+        51.6624,
+        51.4722
+      ],
+      "run_paths": [
+        "log/board/repeated_phase010_shape_projection_fast/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase010_shape_projection_fast/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase010_shape_projection_fast/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase010_shape_projection_fast/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase010_shape_projection_fast/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "2.79231e+22",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic transformed shape samples",
+        "solve": false,
+        "checksum_policy": "tolerance-aligned quantized shape projection staging buffer checksum",
+        "timer_boundary": "shape sample projection staging only",
+        "gate": "finite PointXYZ samples, production-like max_coord and distance normalization factor derived from the synthetic cloud",
+        "mask": "not_applicable; dense finite synthetic samples",
+        "reduction": "not_applicable; per-sample staging only",
+        "asm_boundary": "projectShapeSamplesRVVToBuffers in bench_gasd_rvv",
+        "rvv_instr_count": 1463
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "2.79231e+22",
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/features/gasd/src/bench_gasd.cpp",
+        "row_source": "synthetic transformed shape samples",
+        "solve": false,
+        "checksum_policy": "tolerance-aligned quantized shape projection staging buffer checksum",
+        "timer_boundary": "shape sample projection staging only",
+        "gate": "finite PointXYZ samples, production-like max_coord and distance normalization factor derived from the synthetic cloud",
+        "mask": "not_applicable; dense finite synthetic samples",
+        "reduction": "not_applicable; per-sample staging only",
+        "asm_boundary": "projectShapeSamplesRVVToBuffers in bench_gasd_rvv",
+        "rvv_instr_count": 1463
+      },
+      "notes": "Shape projection diagnostic. It computes normalized grid coordinates and distance histogram bins but does not write histograms or run interpolation."
+    }
+  ]
+}
