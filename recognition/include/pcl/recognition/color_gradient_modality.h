@@ -44,11 +44,87 @@
 #include <pcl/point_types.h>
 #include <pcl/recognition/point_types.h>
 #include <pcl/filters/convolution.h>
+#if defined(__RVV10__)
+#include <pcl/common/common.h>
+#include <riscv_vector.h>
+#endif
 
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <list>
+#include <vector>
 
 namespace pcl
 {
+  namespace detail
+  {
+    enum class ColorGradientModalityPathHook
+    {
+      None = 0,
+      Scalar = 1,
+      Rvv = 2,
+    };
+
+#if defined(PCL_RVV_CGM_TEST_HOOK)
+#define PCL_RVV_CGM_TEST_HOOK_ACTIVE 1
+    inline int&
+    colorGradientModalityLastTestHook ()
+    {
+      static int last_hook = static_cast<int> (ColorGradientModalityPathHook::None);
+      return (last_hook);
+    }
+
+    inline bool&
+    colorGradientModalityForceScalarTestHook ()
+    {
+      static bool force_scalar = false;
+      return (force_scalar);
+    }
+
+    extern "C" inline void
+    pcl_rvv_cgm_reset_test_hook ()
+    {
+      colorGradientModalityLastTestHook () =
+          static_cast<int> (ColorGradientModalityPathHook::None);
+      colorGradientModalityForceScalarTestHook () = false;
+    }
+
+    extern "C" inline int
+    pcl_rvv_cgm_last_test_hook ()
+    {
+      return (colorGradientModalityLastTestHook ());
+    }
+
+    extern "C" inline void
+    pcl_rvv_cgm_set_force_scalar_test_hook (const int enabled)
+    {
+      colorGradientModalityForceScalarTestHook () = enabled != 0;
+    }
+
+#endif
+
+    inline void
+    recordColorGradientModalityPath (const ColorGradientModalityPathHook path)
+    {
+#if defined(PCL_RVV_CGM_TEST_HOOK)
+      colorGradientModalityLastTestHook () = static_cast<int> (path);
+#else
+      (void)path;
+#endif
+    }
+
+    inline bool
+    forceColorGradientModalityScalarPath ()
+    {
+#if defined(PCL_RVV_CGM_TEST_HOOK)
+      return (colorGradientModalityForceScalarTestHook ());
+#else
+      return (false);
+#endif
+    }
+
+  } // namespace detail
 
   /** \brief Modality based on max-RGB gradients.
     * \author Stefan Holzer
@@ -230,6 +306,16 @@ namespace pcl
       void
       filterQuantizedColorGradients ();
 
+      /** \brief Runs the scalar post-Gaussian color-gradient pipeline. */
+      void
+      computeColorGradientPipelineStd ();
+
+#if defined(__RVV10__)
+      /** \brief Runs the RVV post-Gaussian color-gradient pipeline when its narrow gate is met. */
+      bool
+      computeColorGradientPipelineRVV (const typename pcl::PointCloud<pcl::RGB>::ConstPtr & cloud);
+#endif
+
       /** \brief Erodes a mask.
         * \param[in] mask_in the mask which will be eroded.
         * \param[out] mask_out the destination for the eroded mask.
@@ -333,6 +419,310 @@ computeGaussianKernel (const std::size_t kernel_size, const float sigma, std::ve
 template <typename PointInT>
 void
 pcl::ColorGradientModality<PointInT>::
+computeColorGradientPipelineStd ()
+{
+  detail::recordColorGradientModalityPath (detail::ColorGradientModalityPathHook::Scalar);
+
+  // extract color gradients
+  computeMaxColorGradientsSobel (smoothed_input_);
+
+  // quantize gradients
+  quantizeColorGradients ();
+
+  // filter quantized gradients to get only dominants one + thresholding
+  filterQuantizedColorGradients ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+#if defined(__RVV10__)
+template <typename PointInT>
+bool
+pcl::ColorGradientModality<PointInT>::
+computeColorGradientPipelineRVV (const typename pcl::PointCloud<pcl::RGB>::ConstPtr & cloud)
+{
+  const std::size_t width = cloud->width;
+  const std::size_t height = cloud->height;
+  if (width < 3 || height < 3)
+    return (false);
+
+  color_gradients_.resize (width*height);
+  color_gradients_.width = static_cast<std::uint32_t> (width);
+  color_gradients_.height = static_cast<std::uint32_t> (height);
+  quantized_color_gradients_.resize (width, height);
+  filtered_quantized_color_gradients_.resize (width, height);
+
+  constexpr float radians_to_degrees = 180.0f / (std::tanf (1.0f) * 2.0f);
+  constexpr float negative_half_pi_degrees = -1.57079632679489661923f * radians_to_degrees;
+  constexpr float angle_scale = 16.0f / 360.0f;
+  const pcl::RGB* cloud_points = &(*cloud)[0];
+  const auto* input_bytes = reinterpret_cast<const std::uint8_t*> (cloud_points);
+  const auto* first_point = reinterpret_cast<const std::uint8_t*> (&cloud_points[0]);
+  const std::ptrdiff_t b_offset =
+      reinterpret_cast<const std::uint8_t*> (&cloud_points[0].b) - first_point;
+  const std::ptrdiff_t g_offset =
+      reinterpret_cast<const std::uint8_t*> (&cloud_points[0].g) - first_point;
+  const std::ptrdiff_t r_offset =
+      reinterpret_cast<const std::uint8_t*> (&cloud_points[0].r) - first_point;
+  const std::ptrdiff_t point_stride = static_cast<std::ptrdiff_t> (sizeof (pcl::RGB));
+
+  const auto load_channel = [input_bytes, width, point_stride] (
+                                const std::size_t row_index,
+                                const std::size_t col_index,
+                                const std::ptrdiff_t channel_offset,
+                                const std::size_t vl)
+  {
+    const auto* ptr =
+        input_bytes + (row_index*width + col_index)*sizeof (pcl::RGB) + channel_offset;
+    const vuint8mf2_t u8 = __riscv_vlse8_v_u8mf2 (ptr, point_stride, vl);
+    const vuint16m1_t u16 = __riscv_vzext_vf2_u16m1 (u8, vl);
+    return __riscv_vreinterpret_v_u32m2_i32m2 (__riscv_vzext_vf2_u32m2 (u16, vl));
+  };
+
+  const auto sobel_dx = [] (const vint32m2_t p7,
+                            const vint32m2_t p4,
+                            const vint32m2_t p1,
+                            const vint32m2_t p9,
+                            const vint32m2_t p6,
+                            const vint32m2_t p3,
+                            const std::size_t vl)
+  {
+    const vint32m2_t right =
+        __riscv_vadd_vv_i32m2 (__riscv_vadd_vv_i32m2 (p9, __riscv_vmul_vx_i32m2 (p6, 2, vl), vl), p3, vl);
+    const vint32m2_t left =
+        __riscv_vadd_vv_i32m2 (__riscv_vadd_vv_i32m2 (p7, __riscv_vmul_vx_i32m2 (p4, 2, vl), vl), p1, vl);
+    return __riscv_vsub_vv_i32m2 (right, left, vl);
+  };
+
+  const auto sobel_dy = [] (const vint32m2_t p7,
+                            const vint32m2_t p8,
+                            const vint32m2_t p9,
+                            const vint32m2_t p1,
+                            const vint32m2_t p2,
+                            const vint32m2_t p3,
+                            const std::size_t vl)
+  {
+    const vint32m2_t down =
+        __riscv_vadd_vv_i32m2 (__riscv_vadd_vv_i32m2 (p1, __riscv_vmul_vx_i32m2 (p2, 2, vl), vl), p3, vl);
+    const vint32m2_t up =
+        __riscv_vadd_vv_i32m2 (__riscv_vadd_vv_i32m2 (p7, __riscv_vmul_vx_i32m2 (p8, 2, vl), vl), p9, vl);
+    return __riscv_vsub_vv_i32m2 (down, up, vl);
+  };
+
+  const auto sqr_magnitude = [] (const vint32m2_t dx, const vint32m2_t dy, const std::size_t vl)
+  {
+    return __riscv_vadd_vv_i32m2 (__riscv_vmul_vv_i32m2 (dx, dx, vl),
+                                  __riscv_vmul_vv_i32m2 (dy, dy, vl),
+                                  vl);
+  };
+
+  const std::size_t max_vl = __riscv_vsetvlmax_e32m2 ();
+  std::vector<float> magnitudes (max_vl);
+  std::vector<float> angles (max_vl);
+  std::vector<std::int32_t> quantized_values (max_vl);
+  for (std::size_t row_index = 1; row_index + 1 < height; ++row_index)
+  {
+    const std::size_t begin = row_index*width + 1;
+    const std::size_t count = width - 2;
+    for (std::size_t offset = 0; offset < count;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (count - offset);
+      const std::size_t index = begin + offset;
+      const std::size_t col_index = 1 + offset;
+
+      const auto compute_channel = [&] (const std::ptrdiff_t channel_offset,
+                                        vint32m2_t& dx,
+                                        vint32m2_t& dy,
+                                        vint32m2_t& sqr_mag)
+      {
+        const vint32m2_t p7 = load_channel (row_index - 1, col_index - 1, channel_offset, vl);
+        const vint32m2_t p8 = load_channel (row_index - 1, col_index, channel_offset, vl);
+        const vint32m2_t p9 = load_channel (row_index - 1, col_index + 1, channel_offset, vl);
+        const vint32m2_t p4 = load_channel (row_index, col_index - 1, channel_offset, vl);
+        const vint32m2_t p6 = load_channel (row_index, col_index + 1, channel_offset, vl);
+        const vint32m2_t p1 = load_channel (row_index + 1, col_index - 1, channel_offset, vl);
+        const vint32m2_t p2 = load_channel (row_index + 1, col_index, channel_offset, vl);
+        const vint32m2_t p3 = load_channel (row_index + 1, col_index + 1, channel_offset, vl);
+        dx = sobel_dx (p7, p4, p1, p9, p6, p3, vl);
+        dy = sobel_dy (p7, p8, p9, p1, p2, p3, vl);
+        sqr_mag = sqr_magnitude (dx, dy, vl);
+      };
+
+      vint32m2_t r_dx;
+      vint32m2_t r_dy;
+      vint32m2_t sqr_mag_r;
+      vint32m2_t g_dx;
+      vint32m2_t g_dy;
+      vint32m2_t sqr_mag_g;
+      vint32m2_t b_dx;
+      vint32m2_t b_dy;
+      vint32m2_t sqr_mag_b;
+      compute_channel (r_offset, r_dx, r_dy, sqr_mag_r);
+      compute_channel (g_offset, g_dx, g_dy, sqr_mag_g);
+      compute_channel (b_offset, b_dx, b_dy, sqr_mag_b);
+
+      const vbool16_t r_selected =
+          __riscv_vmand_mm_b16 (__riscv_vmsgt_vv_i32m2_b16 (sqr_mag_r, sqr_mag_g, vl),
+                                __riscv_vmsgt_vv_i32m2_b16 (sqr_mag_r, sqr_mag_b, vl),
+                                vl);
+      const vbool16_t g_selected =
+          __riscv_vmand_mm_b16 (__riscv_vmnot_m_b16 (r_selected, vl),
+                                __riscv_vmsgt_vv_i32m2_b16 (sqr_mag_g, sqr_mag_b, vl),
+                                vl);
+
+      vint32m2_t selected_dx = b_dx;
+      vint32m2_t selected_dy = b_dy;
+      vint32m2_t selected_sqr_mag = sqr_mag_b;
+      selected_dx = __riscv_vmerge_vvm_i32m2 (selected_dx, g_dx, g_selected, vl);
+      selected_dy = __riscv_vmerge_vvm_i32m2 (selected_dy, g_dy, g_selected, vl);
+      selected_sqr_mag = __riscv_vmerge_vvm_i32m2 (selected_sqr_mag, sqr_mag_g, g_selected, vl);
+      selected_dx = __riscv_vmerge_vvm_i32m2 (selected_dx, r_dx, r_selected, vl);
+      selected_dy = __riscv_vmerge_vvm_i32m2 (selected_dy, r_dy, r_selected, vl);
+      selected_sqr_mag = __riscv_vmerge_vvm_i32m2 (selected_sqr_mag, sqr_mag_r, r_selected, vl);
+
+      const vfloat32m2_t dx = __riscv_vfcvt_f_x_v_f32m2 (selected_dx, vl);
+      const vfloat32m2_t dy = __riscv_vfcvt_f_x_v_f32m2 (selected_dy, vl);
+      const vfloat32m2_t sqr_mag = __riscv_vfcvt_f_x_v_f32m2 (selected_sqr_mag, vl);
+      const vfloat32m2_t magnitude = __riscv_vfsqrt_v_f32m2 (sqr_mag, vl);
+      vfloat32m2_t angle = pcl::atan2_RVV_f32m2 (dy, dx, vl);
+      angle = __riscv_vfmul_vf_f32m2 (angle, radians_to_degrees, vl);
+      const vbool16_t negative_y_axis =
+          __riscv_vmand_mm_b16 (__riscv_vmfeq_vf_f32m2_b16 (dx, 0.0f, vl),
+                                __riscv_vmflt_vf_f32m2_b16 (dy, 0.0f, vl),
+                                vl);
+      angle = __riscv_vmerge_vvm_f32m2 (
+          angle, __riscv_vfmv_v_f_f32m2 (negative_half_pi_degrees, vl), negative_y_axis, vl);
+
+      const vbool16_t angle_lt_low = __riscv_vmflt_vf_f32m2_b16 (angle, -180.0f, vl);
+      angle = __riscv_vmerge_vvm_f32m2 (
+          angle, __riscv_vfadd_vf_f32m2 (angle, 360.0f, vl), angle_lt_low, vl);
+      const vbool16_t angle_ge_high = __riscv_vmfge_vf_f32m2_b16 (angle, 180.0f, vl);
+      angle = __riscv_vmerge_vvm_f32m2 (
+          angle, __riscv_vfsub_vf_f32m2 (angle, 360.0f, vl), angle_ge_high, vl);
+
+      vfloat32m2_t quantized_angle = __riscv_vfadd_vf_f32m2 (angle, 191.25f, vl);
+      quantized_angle = __riscv_vfmul_vf_f32m2 (quantized_angle, angle_scale, vl);
+      vint32m2_t quantized = __riscv_vfcvt_rtz_x_f_v_i32m2 (quantized_angle, vl);
+      quantized = __riscv_vand_vx_i32m2 (quantized, 7, vl);
+      quantized = __riscv_vadd_vx_i32m2 (quantized, 1, vl);
+
+      const vbool16_t below_threshold =
+          __riscv_vmflt_vf_f32m2_b16 (magnitude, gradient_magnitude_threshold_, vl);
+      quantized = __riscv_vmerge_vxm_i32m2 (quantized, 0, below_threshold, vl);
+
+      __riscv_vse32_v_f32m2 (magnitudes.data (), magnitude, vl);
+      __riscv_vse32_v_f32m2 (angles.data (), angle, vl);
+      __riscv_vse32_v_i32m2 (quantized_values.data (), quantized, vl);
+      for (std::size_t lane = 0; lane < vl; ++lane)
+      {
+        const std::size_t out_index = index + lane;
+        GradientXY gradient;
+        gradient.magnitude = magnitudes[lane];
+        gradient.angle = angles[lane];
+        gradient.x = static_cast<float> (1 + offset + lane);
+        gradient.y = static_cast<float> (row_index);
+        color_gradients_[out_index] = gradient;
+        quantized_color_gradients_.getData ()[out_index] =
+            static_cast<unsigned char> (quantized_values[lane]);
+      }
+
+      offset += vl;
+    }
+  }
+
+  const auto quantize_border_gradient = [this] (const std::size_t x, const std::size_t y)
+  {
+    if (color_gradients_ (x, y).magnitude < gradient_magnitude_threshold_)
+    {
+      quantized_color_gradients_ (x, y) = 0;
+      return;
+    }
+    const float angle = 11.25f + color_gradients_ (x, y).angle + 180.0f;
+    const int quantized_value = (static_cast<int> (angle * angle_scale)) & 7;
+    quantized_color_gradients_ (x, y) = static_cast<unsigned char> (quantized_value + 1);
+  };
+  for (std::size_t col_index = 0; col_index < width; ++col_index)
+  {
+    quantize_border_gradient (col_index, 0);
+    quantize_border_gradient (col_index, height - 1);
+  }
+  for (std::size_t row_index = 1; row_index + 1 < height; ++row_index)
+  {
+    quantize_border_gradient (0, row_index);
+    quantize_border_gradient (width - 1, row_index);
+  }
+
+  for (std::size_t row_index = 1; row_index + 1 < height; ++row_index)
+  {
+    const std::size_t count = width - 2;
+    for (std::size_t offset = 0; offset < count;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8m2 (count - offset);
+      const std::size_t col_index = 1 + offset;
+      const unsigned char* prev =
+          quantized_color_gradients_.getData () + (row_index-1)*width + col_index - 1;
+      const unsigned char* curr =
+          quantized_color_gradients_.getData () + row_index*width + col_index - 1;
+      const unsigned char* next =
+          quantized_color_gradients_.getData () + (row_index+1)*width + col_index - 1;
+
+      const vuint8m2_t p0 = __riscv_vle8_v_u8m2 (prev, vl);
+      const vuint8m2_t p1 = __riscv_vle8_v_u8m2 (prev + 1, vl);
+      const vuint8m2_t p2 = __riscv_vle8_v_u8m2 (prev + 2, vl);
+      const vuint8m2_t c0 = __riscv_vle8_v_u8m2 (curr, vl);
+      const vuint8m2_t c1 = __riscv_vle8_v_u8m2 (curr + 1, vl);
+      const vuint8m2_t c2 = __riscv_vle8_v_u8m2 (curr + 2, vl);
+      const vuint8m2_t n0 = __riscv_vle8_v_u8m2 (next, vl);
+      const vuint8m2_t n1 = __riscv_vle8_v_u8m2 (next + 1, vl);
+      const vuint8m2_t n2 = __riscv_vle8_v_u8m2 (next + 2, vl);
+
+      vuint8m2_t max_count = __riscv_vmv_v_x_u8m2 (0, vl);
+      vuint8m2_t output_bits = __riscv_vmv_v_x_u8m2 (0, vl);
+
+      for (int bin = 1; bin <= 8; ++bin)
+      {
+        vuint8m2_t bin_count = __riscv_vmv_v_x_u8m2 (0, vl);
+        const auto add_match = [bin, vl] (const vuint8m2_t values, const vuint8m2_t counts)
+        {
+          const vbool4_t match =
+              __riscv_vmseq_vx_u8m2_b4 (values, static_cast<unsigned long> (bin), vl);
+          const vuint8m2_t incremented = __riscv_vadd_vx_u8m2 (counts, 1, vl);
+          return __riscv_vmerge_vvm_u8m2 (counts, incremented, match, vl);
+        };
+        bin_count = add_match (p0, bin_count);
+        bin_count = add_match (p1, bin_count);
+        bin_count = add_match (p2, bin_count);
+        bin_count = add_match (c0, bin_count);
+        bin_count = add_match (c1, bin_count);
+        bin_count = add_match (c2, bin_count);
+        bin_count = add_match (n0, bin_count);
+        bin_count = add_match (n1, bin_count);
+        bin_count = add_match (n2, bin_count);
+
+        const vbool4_t new_max = __riscv_vmsgtu_vv_u8m2_b4 (bin_count, max_count, vl);
+        max_count = __riscv_vmerge_vvm_u8m2 (max_count, bin_count, new_max, vl);
+        output_bits = __riscv_vmerge_vxm_u8m2 (
+            output_bits, static_cast<unsigned long> (1u << (bin - 1)), new_max, vl);
+      }
+
+      const vbool4_t below_threshold = __riscv_vmsltu_vx_u8m2_b4 (max_count, 5, vl);
+      output_bits = __riscv_vmerge_vxm_u8m2 (output_bits, 0, below_threshold, vl);
+      __riscv_vse8_v_u8m2 (
+          filtered_quantized_color_gradients_.getData () + row_index*width + col_index,
+          output_bits,
+          vl);
+      offset += vl;
+    }
+  }
+
+  detail::recordColorGradientModalityPath (detail::ColorGradientModalityPathHook::Rvv);
+  return (true);
+}
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT>
+void
+pcl::ColorGradientModality<PointInT>::
 processInputData ()
 {
   // compute gaussian kernel values
@@ -371,14 +761,13 @@ processInputData ()
   convolution.setBordersPolicy(pcl::filters::Convolution<pcl::RGB, pcl::RGB>::BORDERS_POLICY_DUPLICATE);
   convolution.convolve (*smoothed_input_);
 
-  // extract color gradients
-  computeMaxColorGradientsSobel (smoothed_input_);
-
-  // quantize gradients
-  quantizeColorGradients ();
-
-  // filter quantized gradients to get only dominants one + thresholding
-  filterQuantizedColorGradients ();
+  bool used_rvv_pipeline = false;
+#if defined(__RVV10__)
+  if (!detail::forceColorGradientModalityScalarPath ())
+    used_rvv_pipeline = computeColorGradientPipelineRVV (smoothed_input_);
+#endif
+  if (!used_rvv_pipeline)
+    computeColorGradientPipelineStd ();
 
   // spread filtered quantized gradients
   //spreadFilteredQunatizedColorGradients ();
