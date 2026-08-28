@@ -267,6 +267,18 @@ namespace pcl
       using SampleConsensusModel<PointT>::sample_size_;
       using SampleConsensusModel<PointT>::model_size_;
 
+      void
+      getDistancesToModelStandard (const Eigen::VectorXf &model_coefficients,
+                                   std::vector<double> &distances,
+                                   std::size_t i = 0) const;
+
+      std::size_t
+      selectWithinDistanceStandard (const Eigen::VectorXf &model_coefficients,
+                                    const double threshold,
+                                    Indices &inliers,
+                                    std::size_t i = 0,
+                                    std::size_t current_count = 0);
+
       /** This implementation uses no SIMD instructions. It is not intended for normal use.
         * See countWithinDistance which automatically uses the fastest implementation.
         */
@@ -302,6 +314,15 @@ namespace pcl
       countWithinDistanceRVV (const Eigen::VectorXf &model_coefficients,
                               const double threshold,
                               std::size_t i = 0) const;
+
+      void
+      getDistancesToModelRVV (const Eigen::VectorXf &model_coefficients,
+                              std::vector<double> &distances) const;
+
+      std::size_t
+      selectWithinDistanceRVV (const Eigen::VectorXf &model_coefficients,
+                               const double threshold,
+                               Indices &inliers);
 #endif
 
 #define PCLAT(POS) ((*input_)[(*indices_)[(POS)]])

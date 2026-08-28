@@ -47,6 +47,63 @@
 #include <pcl/common/concatenate.h>
 #include <pcl/rvv_point_load.h>
 
+#if defined (__RVV10__)
+namespace pcl {
+namespace detail {
+
+inline bool
+sacModelPlaneRVVIndicesMayBeIdentity (const pcl::index_t* indices_ptr,
+                                      const std::size_t start,
+                                      const std::size_t total_n)
+{
+  return start >= total_n ||
+         (indices_ptr[start] == static_cast<pcl::index_t> (start) &&
+          indices_ptr[total_n - 1] == static_cast<pcl::index_t> (total_n - 1));
+}
+
+inline bool
+sacModelPlaneRVVIndicesAreIdentityChunk (const vuint32m2_t& v_idx,
+                                         const std::size_t start,
+                                         const std::size_t vl)
+{
+  const vuint32m2_t v_expected =
+      __riscv_vadd_vx_u32m2 (__riscv_vid_v_u32m2 (vl),
+                             static_cast<uint32_t> (start),
+                             vl);
+  const vbool16_t v_mismatch = __riscv_vmsne_vv_u32m2_b16 (v_idx, v_expected, vl);
+  return __riscv_vcpop_m_b16 (v_mismatch, vl) == 0;
+}
+
+template <typename PointT, typename Layout>
+inline void
+sacModelPlaneRVVLoadXYZ (const uint8_t* points_base,
+                         const vuint32m2_t& v_idx,
+                         const bool indices_may_be_identity,
+                         const std::size_t start,
+                         const std::size_t vl,
+                         vfloat32m2_t& v_px,
+                         vfloat32m2_t& v_py,
+                         vfloat32m2_t& v_pz)
+{
+  if (indices_may_be_identity &&
+      sacModelPlaneRVVIndicesAreIdentityChunk (v_idx, start, vl))
+  {
+    pcl::rvv_load::strided_load3_f32m2<
+        sizeof (PointT), Layout::kX, Layout::kY, Layout::kZ>(
+        points_base + start * sizeof (PointT), vl, v_px, v_py, v_pz);
+    return;
+  }
+
+  const vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT> (v_idx, vl);
+  pcl::rvv_load::indexed_load3_fields_f32m2<
+      PointT, Layout::kX, Layout::kY, Layout::kZ>(
+      points_base, v_off_pt, vl, v_px, v_py, v_pz);
+}
+
+} // namespace detail
+} // namespace pcl
+#endif
+
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
 pcl::SampleConsensusModelPlane<PointT>::isSampleGood (const Indices &samples) const
@@ -132,15 +189,32 @@ pcl::SampleConsensusModelPlane<PointT>::getDistancesToModel (
 
   distances.resize (indices_->size ());
 
+#if defined (__RVV10__)
+  if constexpr (pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    {
+      getDistancesToModelRVV (model_coefficients, distances);
+      return;
+    }
+  }
+#endif
+
+  getDistancesToModelStandard (model_coefficients, distances);
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::SampleConsensusModelPlane<PointT>::getDistancesToModelStandard (
+      const Eigen::VectorXf &model_coefficients, std::vector<double> &distances, std::size_t i) const
+{
+  distances.resize (indices_->size ());
+
   // Iterate through the 3d points and calculate the distances from them to the plane
-  for (std::size_t i = 0; i < indices_->size (); ++i)
+  for (; i < indices_->size (); ++i)
   {
     // Calculate the distance from the point to the plane normal as the dot product
     // D = (P-A).N/|N|
-    /*distances[i] = std::abs (model_coefficients[0] * (*input_)[(*indices_)[i]].x +
-                         model_coefficients[1] * (*input_)[(*indices_)[i]].y +
-                         model_coefficients[2] * (*input_)[(*indices_)[i]].z +
-                         model_coefficients[3]);*/
     Eigen::Vector4f pt ((*input_)[(*indices_)[i]].x,
                         (*input_)[(*indices_)[i]].y,
                         (*input_)[(*indices_)[i]].z,
@@ -163,11 +237,44 @@ pcl::SampleConsensusModelPlane<PointT>::selectWithinDistance (
 
   inliers.clear ();
   error_sqr_dists_.clear ();
-  inliers.reserve (indices_->size ());
-  error_sqr_dists_.reserve (indices_->size ());
+  inliers.resize (indices_->size ());
+  error_sqr_dists_.resize (indices_->size ());
+
+  std::size_t nr_p = 0;
+
+#if defined (__RVV10__)
+  if constexpr (pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    {
+      nr_p = selectWithinDistanceRVV (model_coefficients, threshold, inliers);
+      inliers.resize (nr_p);
+      error_sqr_dists_.resize (nr_p);
+      return;
+    }
+  }
+#endif
+
+  nr_p = selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+  inliers.resize (nr_p);
+  error_sqr_dists_.resize (nr_p);
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> std::size_t
+pcl::SampleConsensusModelPlane<PointT>::selectWithinDistanceStandard (
+      const Eigen::VectorXf &model_coefficients, const double threshold,
+      Indices &inliers, std::size_t i, std::size_t current_count)
+{
+  const std::size_t remaining_count = (i < indices_->size ()) ? (indices_->size () - i) : 0;
+  const std::size_t required_output_size = current_count + remaining_count;
+  if (inliers.size () < required_output_size)
+    inliers.resize (required_output_size);
+  if (error_sqr_dists_.size () < required_output_size)
+    error_sqr_dists_.resize (required_output_size);
 
   // Iterate through the 3d points and calculate the distances from them to the plane
-  for (std::size_t i = 0; i < indices_->size (); ++i)
+  for (; i < indices_->size (); ++i)
   {
     // Calculate the distance from the point to the plane normal as the dot product
     // D = (P-A).N/|N|
@@ -176,15 +283,18 @@ pcl::SampleConsensusModelPlane<PointT>::selectWithinDistance (
                         (*input_)[(*indices_)[i]].z,
                         1.0f);
 
-    float distance = std::abs (model_coefficients.dot (pt));
+    const float distance = std::abs (model_coefficients.dot (pt));
 
     if (distance < threshold)
     {
       // Returns the indices of the points whose distances are smaller than the threshold
-      inliers.push_back ((*indices_)[i]);
-      error_sqr_dists_.push_back (static_cast<double> (distance));
+      inliers[current_count] = (*indices_)[i];
+      error_sqr_dists_[current_count] = static_cast<double> (distance);
+      ++current_count;
     }
   }
+
+  return current_count;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -203,10 +313,12 @@ pcl::SampleConsensusModelPlane<PointT>::countWithinDistance (
 #elif defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
   return countWithinDistanceSSE (model_coefficients, threshold);
 #elif defined (__RVV10__)
-  if constexpr (pcl::rvv::RVVXYZFloatLayout<PointT>::value)
-    return countWithinDistanceRVV (model_coefficients, threshold);
-  else
-    return countWithinDistanceStandard (model_coefficients, threshold);
+  if constexpr (pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+      return countWithinDistanceRVV (model_coefficients, threshold);
+  }
+  return countWithinDistanceStandard (model_coefficients, threshold);
 #else
   return countWithinDistanceStandard (model_coefficients, threshold);
 #endif
@@ -319,6 +431,9 @@ template <typename PointT> std::size_t
 pcl::SampleConsensusModelPlane<PointT>::countWithinDistanceRVV (
       const Eigen::VectorXf &model_coefficients, const double threshold, std::size_t i) const
 {
+  if (input_->points.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    return countWithinDistanceStandard (model_coefficients, threshold, i);
+
   std::size_t nr_p = 0;
   const std::size_t total_n = indices_->size();
 
@@ -338,7 +453,9 @@ pcl::SampleConsensusModelPlane<PointT>::countWithinDistanceRVV (
   // We use reinterpret_cast<const uint8_t*> to enable precise byte-level
   // pointer arithmetic (base + offset) later.
   const uint8_t* points_base = reinterpret_cast<const uint8_t*>(input_->points.data());
-  using Layout = pcl::rvv::RVVXYZFloatLayout<PointT>;
+  const bool indices_may_be_identity =
+      pcl::detail::sacModelPlaneRVVIndicesMayBeIdentity (indices_ptr, i, total_n);
+  using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
 
   // Loop through all points. Unlike AVX, we don't need a separate scalar loop
   // for the "tail" because vsetvl handles arbitrary lengths automatically.
@@ -358,16 +475,11 @@ pcl::SampleConsensusModelPlane<PointT>::countWithinDistanceRVV (
     const vfloat32m2_t v_c = __riscv_vfmv_v_f_f32m2(c, vl);
     const vfloat32m2_t v_d = __riscv_vfmv_v_f_f32m2(d, vl);
 
-    // Compute byte offset for each point: offset = index * sizeof(PointT)
-    const vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
-
-    // Use 3x unordered indexed loads (vluxei32) for X, Y, Z from non-contiguous memory.
     vfloat32m2_t v_px;
     vfloat32m2_t v_py;
     vfloat32m2_t v_pz;
-    pcl::rvv_load::indexed_load3_fields_f32m2<
-        PointT, Layout::kX, Layout::kY, Layout::kZ>(
-        points_base, v_off_pt, vl, v_px, v_py, v_pz);
+    pcl::detail::sacModelPlaneRVVLoadXYZ<PointT, Layout> (
+        points_base, v_idx, indices_may_be_identity, i, vl, v_px, v_py, v_pz);
 
     // Calculate |ax + by + cz + d|.
     // We call the pure math kernel 'distRVV' defined in the base class.
@@ -380,6 +492,125 @@ pcl::SampleConsensusModelPlane<PointT>::countWithinDistanceRVV (
     // Count the number of set bits (1s) in the mask directly.
     // Equivalent to AVX's complex movemask or vector accumulation, but done in one instruction.
     nr_p += __riscv_vcpop_m_b16(v_mask, vl);
+
+    i += vl;
+  }
+
+  return nr_p;
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::SampleConsensusModelPlane<PointT>::getDistancesToModelRVV (
+      const Eigen::VectorXf &model_coefficients, std::vector<double> &distances) const
+{
+  if (input_->points.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+  {
+    getDistancesToModelStandard (model_coefficients, distances);
+    return;
+  }
+
+  distances.resize (indices_->size ());
+
+  const std::size_t total_n = indices_->size ();
+  const pcl::index_t* indices_ptr = indices_->data ();
+  const uint8_t* points_base = reinterpret_cast<const uint8_t*>(input_->points.data ());
+  double* distances_out_ptr = distances.data ();
+
+  using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+  const float a = model_coefficients[0];
+  const float b = model_coefficients[1];
+  const float c = model_coefficients[2];
+  const float d = model_coefficients[3];
+
+  for (std::size_t i = 0; i < total_n; )
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+    const vuint32m2_t v_idx =
+        __riscv_vle32_v_u32m2 (reinterpret_cast<const uint32_t*>(indices_ptr + i), vl);
+    vfloat32m2_t v_px;
+    vfloat32m2_t v_py;
+    vfloat32m2_t v_pz;
+    pcl::detail::sacModelPlaneRVVLoadXYZ<PointT, Layout> (
+        points_base, v_idx, false, i, vl, v_px, v_py, v_pz);
+
+    const vfloat32m2_t v_dist = distRVV_f32m2 (
+        v_px, v_py, v_pz,
+        __riscv_vfmv_v_f_f32m2 (a, vl),
+        __riscv_vfmv_v_f_f32m2 (b, vl),
+        __riscv_vfmv_v_f_f32m2 (c, vl),
+        __riscv_vfmv_v_f_f32m2 (d, vl),
+        vl);
+    const vfloat64m4_t v_dist_double = __riscv_vfwcvt_f_f_v_f64m4 (v_dist, vl);
+    __riscv_vse64_v_f64m4 (distances_out_ptr + i, v_dist_double, vl);
+
+    i += vl;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> std::size_t
+pcl::SampleConsensusModelPlane<PointT>::selectWithinDistanceRVV (
+      const Eigen::VectorXf &model_coefficients, const double threshold, Indices &inliers)
+{
+  if (input_->points.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    return selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+
+  const std::size_t total_n = indices_->size ();
+  if (inliers.size () < total_n)
+    inliers.resize (total_n);
+  if (error_sqr_dists_.size () < total_n)
+    error_sqr_dists_.resize (total_n);
+
+  const pcl::index_t* indices_ptr = indices_->data ();
+  const uint8_t* points_base = reinterpret_cast<const uint8_t*>(input_->points.data ());
+  pcl::index_t* inliers_out_ptr = inliers.data ();
+  double* dists_out_ptr = error_sqr_dists_.data ();
+  const bool indices_may_be_identity =
+      pcl::detail::sacModelPlaneRVVIndicesMayBeIdentity (indices_ptr, 0, total_n);
+
+  using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+  const float a = model_coefficients[0];
+  const float b = model_coefficients[1];
+  const float c = model_coefficients[2];
+  const float d = model_coefficients[3];
+  const float th = static_cast<float> (threshold);
+
+  std::size_t nr_p = 0;
+  for (std::size_t i = 0; i < total_n; )
+  {
+    const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+    const vuint32m2_t v_idx =
+        __riscv_vle32_v_u32m2 (reinterpret_cast<const uint32_t*>(indices_ptr + i), vl);
+    vfloat32m2_t v_px;
+    vfloat32m2_t v_py;
+    vfloat32m2_t v_pz;
+    pcl::detail::sacModelPlaneRVVLoadXYZ<PointT, Layout> (
+        points_base, v_idx, indices_may_be_identity, i, vl, v_px, v_py, v_pz);
+
+    const vfloat32m2_t v_dist = distRVV_f32m2 (
+        v_px, v_py, v_pz,
+        __riscv_vfmv_v_f_f32m2 (a, vl),
+        __riscv_vfmv_v_f_f32m2 (b, vl),
+        __riscv_vfmv_v_f_f32m2 (c, vl),
+        __riscv_vfmv_v_f_f32m2 (d, vl),
+        vl);
+    const vbool16_t v_mask = __riscv_vmflt_vf_f32m2_b16 (v_dist, th, vl);
+    const std::size_t active_count = __riscv_vcpop_m_b16 (v_mask, vl);
+
+    if (active_count > 0)
+    {
+      const vuint32m2_t v_idx_compressed = __riscv_vcompress_vm_u32m2 (v_idx, v_mask, vl);
+      __riscv_vse32_v_u32m2 (
+          reinterpret_cast<uint32_t*>(inliers_out_ptr + nr_p), v_idx_compressed, active_count);
+
+      const vfloat32m2_t v_dist_compressed = __riscv_vcompress_vm_f32m2 (v_dist, v_mask, vl);
+      const vfloat64m4_t v_dist_double =
+          __riscv_vfwcvt_f_f_v_f64m4 (v_dist_compressed, active_count);
+      __riscv_vse64_v_f64m4 (dists_out_ptr + nr_p, v_dist_double, active_count);
+
+      nr_p += active_count;
+    }
 
     i += vl;
   }
