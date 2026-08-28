@@ -1,0 +1,717 @@
+{
+  "files": {
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887810,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887810879984772,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.json",
+        "sha256": "sha256:654db68d923fe55e0173f1ef630b7614c23e1278283f57c13ff8423743cb6d9f",
+        "size": 4672
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887810,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887810879984772,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.md",
+        "sha256": "sha256:5e1b2be062e36f527debdd42edda0de17ba5264ffd4e2dcc9c7b4a183bc462ee",
+        "size": 4096
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887810,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887810852978605,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-manifest.json",
+        "sha256": "sha256:847f2bdbfee51604763821a7ae3436095f5b128cef408de67079f0d69f797531",
+        "size": 11600
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase020-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887810,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase020-production-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887810882985458,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.json",
+        "sha256": "sha256:9ef920e80019e2748c30500f5cef89ffe981dc69163634acbf975377c60959fe",
+        "size": 2916
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase020-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887810,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase020-production-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887810881985229,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.md",
+        "sha256": "sha256:732eeec53a840ad9005920ea54e5aa71c056fe59a156f152f508a1462de771c6",
+        "size": 2573
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase020-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887810,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase020-production-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887810853978833,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-manifest.json",
+        "sha256": "sha256:9cf06a3c3f7c9cd635df3f07af25facaa2796c865647e51aef8e979de34317d2",
+        "size": 11612
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase040-vcompress-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/plan.zh.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/result.zh.md"
+      ],
+      "evidence_role": "production_detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787846237,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase040-vcompress-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787846237615241290,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.json",
+        "sha256": "sha256:c58c5250188c4b3076fe4ed5c3076aac25b7edcd4776dca064abfce157ca1fc4",
+        "size": 7164
+      },
+      "target": "run_vcompress_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase040-vcompress-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/plan.zh.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/result.zh.md"
+      ],
+      "evidence_role": "production_detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787846237,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase040-vcompress-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787846237615241290,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.md",
+        "sha256": "sha256:ca183e7429e58bdfdea27fd05486183730ed696b0ace4acf488aa2c2ff040566",
+        "size": 6365
+      },
+      "target": "run_vcompress_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase040-vcompress-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/plan.zh.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/result.zh.md"
+      ],
+      "evidence_role": "production_detail",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787846237,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase040-vcompress-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787846237580241811,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-manifest.json",
+        "sha256": "sha256:0d957c0d621abccb9e1a16f818ada305073094b77abd01214f06348a7d1b97fd",
+        "size": 16028
+      },
+      "target": "run_vcompress_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase045-production-vcompress-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902053,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase045-production-vcompress-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902053969605578,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.json",
+        "sha256": "sha256:1c8f8f7540173292608b30c08d62b21f82ee686be2cd13adc4fe5262d3c7d295",
+        "size": 3731
+      },
+      "target": "run_production_vcompress_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase045-production-vcompress-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902053,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase045-production-vcompress-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902053968605630,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.md",
+        "sha256": "sha256:ad625dde794d3f28c4584e48c1321ca09d4e0a4900515d710d068853845a5803",
+        "size": 3265
+      },
+      "target": "run_production_vcompress_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase045-production-vcompress-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902053,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase045-production-vcompress-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902053934607390,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-manifest.json",
+        "sha256": "sha256:312f069c07e18b74d6ea78e0e20d15608520583d792be2f0cd0898a89d4d84a6",
+        "size": 11593
+      },
+      "target": "run_production_vcompress_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase050-point-type-xyzi-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902205,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase050-point-type-xyzi-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902205722193621,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.json",
+        "sha256": "sha256:381533edf664c068450e5c8ca4be922dd4944e515c27c0c21250396f247f1673",
+        "size": 3697
+      },
+      "target": "run_point_type_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase050-point-type-xyzi-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902205,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase050-point-type-xyzi-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902205722193621,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.md",
+        "sha256": "sha256:9b3b972ec941d49d558d9ecb83313f554c02f78e571f0e31e9dc3c35dbcc665e",
+        "size": 3221
+      },
+      "target": "run_point_type_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase050-point-type-xyzi-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902205,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase050-point-type-xyzi-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902205693194961,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json",
+        "sha256": "sha256:254d822fee5de220c7605c4cd4e145874abab29b150f72c1af053eee8daf0c07",
+        "size": 11569
+      },
+      "target": "run_point_type_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgb-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902357,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase060-point-type-xyzrgb-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902357274517426,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.json",
+        "sha256": "sha256:3dab63fa14bf588fe41336ce0d71aae5866cb98e9253e3eecd914997ac8e96c8",
+        "size": 3721
+      },
+      "target": "run_rgb_point_type_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgb-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902357,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase060-point-type-xyzrgb-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902357274517426,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.md",
+        "sha256": "sha256:4f105e7b8fde812ca26eabf8531a304ed4fffe48df5e276260b0ce78e2cbf885",
+        "size": 3245
+      },
+      "target": "run_rgb_point_type_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgb-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902357,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase060-point-type-xyzrgb-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902357244518689,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-manifest.json",
+        "sha256": "sha256:51e37142bb6c89300d3c7146de87ecad9b28cbe40a701dbc9f2b6215cc9f6fa0",
+        "size": 11626
+      },
+      "target": "run_rgb_point_type_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgba-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902508,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase060-point-type-xyzrgba-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902508770382804,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.json",
+        "sha256": "sha256:9fdd2f320b17add7b83afdd13dd78299643897e5544d385a81a5b75feb930472",
+        "size": 5599
+      },
+      "target": "run_rgba_point_type_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgba-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902508,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase060-point-type-xyzrgba-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902508770382804,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.md",
+        "sha256": "sha256:38b4e572450ef0f1164860c8122b56ce6d5f60ba4a289cef41a59d50216fec79",
+        "size": 4899
+      },
+      "target": "run_rgba_point_type_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgba-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_sphere-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787902508,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-manifest.json"
+      },
+      "run_label": "sphere-phase060-point-type-xyzrgba-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787902508740383975,
+        "path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-manifest.json",
+        "sha256": "sha256:56043fde39eedde4a8cb403bb16a44cad800dcb59705a30d40be7c9beb3dc367",
+        "size": 11648
+      },
+      "target": "run_rgba_point_type_board_evidence_doctor"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase000-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787841686,
+      "run_label": "sphere-phase000-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase000-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787841801,
+      "run_label": "sphere-phase000-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787843592,
+      "run_label": "sphere-phase020-production-select-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase040-vcompress-repeated",
+      "evidence_role": "production_detail",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787846237,
+      "run_label": "sphere-phase040-vcompress-repeated-board",
+      "target": "run_vcompress_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase045-production-vcompress-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787846738,
+      "run_label": "sphere-phase045-production-vcompress-select-repeated-board",
+      "target": "run_production_vcompress_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase045-production-vcompress-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787887373,
+      "run_label": "sphere-phase045-production-vcompress-select-repeated-board",
+      "target": "run_production_vcompress_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase000-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/000-sphere-select-distance-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787887810,
+      "run_label": "sphere-phase000-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/020-select-production-integration-plan/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787887810,
+      "run_label": "sphere-phase020-production-select-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase050-point-type-xyzi-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787894827,
+      "run_label": "sphere-phase050-point-type-xyzi-repeated-board",
+      "target": "run_point_type_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase050-point-type-xyzi-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787894924,
+      "run_label": "sphere-phase050-point-type-xyzi-repeated-board",
+      "target": "run_point_type_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgb-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787896744,
+      "run_label": "sphere-phase060-point-type-xyzrgb-repeated-board",
+      "target": "run_rgb_point_type_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgba-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787896745,
+      "run_label": "sphere-phase060-point-type-xyzrgba-repeated-board",
+      "target": "run_rgba_point_type_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase045-production-vcompress-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/045-select-vcompress-production-integration/production-vcompress-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787902053,
+      "run_label": "sphere-phase045-production-vcompress-select-repeated-board",
+      "target": "run_production_vcompress_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase050-point-type-xyzi-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787902205,
+      "run_label": "sphere-phase050-point-type-xyzi-repeated-board",
+      "target": "run_point_type_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgb-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgb-point-type-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787902357,
+      "run_label": "sphere-phase060-point-type-xyzrgb-repeated-board",
+      "target": "run_rgb_point_type_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "sphere-select-distance-phase060-point-type-xyzrgba-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_sphere/doc/phases/060-point-type-rgb-rgba-expansion/rgba-point-type-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787902508,
+      "run_label": "sphere-phase060-point-type-xyzrgba-repeated-board",
+      "target": "run_rgba_point_type_board_evidence_doctor"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787902508
+}

@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_sphere Phase 040 vcompress repeated board summary",
+    "evidence_role": "production_detail",
+    "summary_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/040-select-vcompress-ablation/vcompress-repeated-evidence-manifest.json",
+    "label": "5-run board repeated summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_sphere/script/generate_sphere_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "result": {
+    "errors": 2,
+    "warnings": 4,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "ERROR",
+      "signal": "ba_degradation_frequency",
+      "case": "sac_model_sphere public getDistancesToModel PointXYZ 65536",
+      "observed_pattern": "B/A values=0.996x, 1.03x, 1x, 0.996x, 0.998x；3/5 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    },
+    {
+      "severity": "ERROR",
+      "signal": "ba_degradation_frequency",
+      "case": "sac_model_sphere diagnostic candidate getDistancesToModel PointXYZ 65536",
+      "observed_pattern": "B/A values=0.787x, 0.786x, 0.8x, 0.767x, 0.78x；5/5 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "contract_mismatch",
+      "case": "sac_model_sphere vcompress select vs current production select PointXYZ 65536",
+      "observed_pattern": "字段 'boundary' 不一致：baseline='public_overload', candidate='test_helper'。",
+      "why_suspicious": "A/B 两侧边界不一致时，数值差异可能来自 wrapper、row source、solve 或计时口径，而不是候选本身。",
+      "possible_non_bug_explanations": "可能这是有意设计的 cross-check，用于了解真实 public overload 与 helper 的差异。",
+      "possible_bug_or_evidence_issues": "也可能是表名或 summary 角色错误，把 mixed-boundary 数据当成 strict A/B。",
+      "recommended_checks": "若有意混合边界，重命名为 mixed-boundary cross-check 并降级结论；若不是，按同边界重跑。",
+      "conclusion_policy": "strict A/B 下该项阻塞严格性能结论；diagnostic 下必须显式解释并避免外推到 production。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "contract_mismatch",
+      "case": "sac_model_sphere vcompress select vs current production select PointXYZ 65536",
+      "observed_pattern": "字段 'wrapper' 不一致：baseline='SampleConsensusModelSphereBench::selectWithinDistance public entry', candidate='SampleConsensusModelSphereBench::selectWithinDistanceVCompressCandidate'。",
+      "why_suspicious": "A/B 两侧边界不一致时，数值差异可能来自 wrapper、row source、solve 或计时口径，而不是候选本身。",
+      "possible_non_bug_explanations": "可能这是有意设计的 cross-check，用于了解真实 public overload 与 helper 的差异。",
+      "possible_bug_or_evidence_issues": "也可能是表名或 summary 角色错误，把 mixed-boundary 数据当成 strict A/B。",
+      "recommended_checks": "若有意混合边界，重命名为 mixed-boundary cross-check 并降级结论；若不是，按同边界重跑。",
+      "conclusion_policy": "strict A/B 下该项阻塞严格性能结论；diagnostic 下必须显式解释并避免外推到 production。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "contract_mismatch",
+      "case": "sac_model_sphere vcompress select vs current production select PointXYZ 65536",
+      "observed_pattern": "字段 'timer_boundary' 不一致：baseline='selectWithinDistance_public_entry_only', candidate='selectWithinDistance_vcompress_candidate_only'。",
+      "why_suspicious": "A/B 两侧边界不一致时，数值差异可能来自 wrapper、row source、solve 或计时口径，而不是候选本身。",
+      "possible_non_bug_explanations": "可能这是有意设计的 cross-check，用于了解真实 public overload 与 helper 的差异。",
+      "possible_bug_or_evidence_issues": "也可能是表名或 summary 角色错误，把 mixed-boundary 数据当成 strict A/B。",
+      "recommended_checks": "若有意混合边界，重命名为 mixed-boundary cross-check 并降级结论；若不是，按同边界重跑。",
+      "conclusion_policy": "strict A/B 下该项阻塞严格性能结论；diagnostic 下必须显式解释并避免外推到 production。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "contract_mismatch",
+      "case": "sac_model_sphere vcompress select vs current production select PointXYZ 65536",
+      "observed_pattern": "字段 'reduction' 不一致：baseline='ordered_inlier_and_error_distance_write', candidate='vcompress_ordered_inlier_and_error_distance_write'。",
+      "why_suspicious": "A/B 两侧边界不一致时，数值差异可能来自 wrapper、row source、solve 或计时口径，而不是候选本身。",
+      "possible_non_bug_explanations": "可能这是有意设计的 cross-check，用于了解真实 public overload 与 helper 的差异。",
+      "possible_bug_or_evidence_issues": "也可能是表名或 summary 角色错误，把 mixed-boundary 数据当成 strict A/B。",
+      "recommended_checks": "若有意混合边界，重命名为 mixed-boundary cross-check 并降级结论；若不是，按同边界重跑。",
+      "conclusion_policy": "strict A/B 下该项阻塞严格性能结论；diagnostic 下必须显式解释并避免外推到 production。"
+    }
+  ]
+}

@@ -43,6 +43,8 @@
 
 #include <pcl/sample_consensus/sac_model_sphere.h>
 #include <pcl/rvv_point_load.h>
+#include <cstdint>
+#include <type_traits>
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
@@ -210,6 +212,28 @@ pcl::SampleConsensusModelSphere<PointT>::selectWithinDistance (
     return;
   }
 
+#if defined (__RVV10__)
+  if constexpr (pcl::rvv::RVVXYZFloatLayout<PointT>::value)
+  {
+    if constexpr (sizeof (pcl::index_t) == sizeof (std::int32_t) &&
+                  std::is_signed_v<pcl::index_t>)
+    {
+      if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+      {
+        selectWithinDistanceRVV (model_coefficients, threshold, inliers);
+        return;
+      }
+    }
+  }
+#endif
+  selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::SampleConsensusModelSphere<PointT>::selectWithinDistanceStandard (
+      const Eigen::VectorXf &model_coefficients, const double threshold, Indices &inliers)
+{
   inliers.clear ();
   error_sqr_dists_.clear ();
   inliers.reserve (indices_->size ());
@@ -366,7 +390,7 @@ pcl::SampleConsensusModelSphere<PointT>::countWithinDistanceAVX (
 #endif
 
 //////////////////////////////////////////////////////////////////
-#if defined(__RVV10__)
+#if defined (__RVV10__)
 template <typename PointT> std::size_t
 pcl::SampleConsensusModelSphere<PointT>::countWithinDistanceRVV (
     const Eigen::VectorXf &model_coefficients, const double threshold, std::size_t i) const
@@ -431,6 +455,92 @@ pcl::SampleConsensusModelSphere<PointT>::countWithinDistanceRVV (
   // RVV is Vector Length Agnostic, and there are no remaining points that need to be processed using countWithinDistanceStandard.
 
   return nr_p;
+}
+#endif // ifdef __RVV10__
+
+//////////////////////////////////////////////////////////////////////////
+#if defined (__RVV10__)
+template <typename PointT> void
+pcl::SampleConsensusModelSphere<PointT>::selectWithinDistanceRVV (
+    const Eigen::VectorXf &model_coefficients, const double threshold, Indices &inliers)
+{
+  if constexpr (sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                !std::is_signed_v<pcl::index_t>)
+  {
+    selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+    return;
+  }
+  else
+  {
+    const std::size_t total_n = indices_->size ();
+    inliers.resize (total_n);
+    error_sqr_dists_.resize (total_n);
+
+    const float xc = model_coefficients[0];
+    const float yc = model_coefficients[1];
+    const float zc = model_coefficients[2];
+    const float r  = model_coefficients[3];
+    const float sqr_inner_radius = (r <= threshold)
+                                    ? 0.0f
+                                    : static_cast<float> ((r - threshold) * (r - threshold));
+    const float sqr_outer_radius = static_cast<float> ((r + threshold) * (r + threshold));
+
+    const std::uint8_t* const points_base = reinterpret_cast<const std::uint8_t*> (input_->points.data ());
+    const pcl::index_t* const indices_ptr = indices_->data ();
+    using Layout = pcl::rvv::RVVXYZFloatLayout<PointT>;
+    std::vector<float> compressed_sqr_distances (__riscv_vsetvlmax_e32m2 ());
+
+    std::size_t nr_p = 0;
+    for (std::size_t i = 0; i < total_n; )
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+      const vint32m2_t v_idx_i32 =
+          __riscv_vle32_v_i32m2 (reinterpret_cast<const std::int32_t*> (indices_ptr + i), vl);
+      const vuint32m2_t v_idx = __riscv_vreinterpret_v_i32m2_u32m2 (v_idx_i32);
+      const vuint32m2_t v_off = pcl::rvv_load::byte_offsets_u32m2<PointT> (v_idx, vl);
+
+      vfloat32m2_t v_px;
+      vfloat32m2_t v_py;
+      vfloat32m2_t v_pz;
+      pcl::rvv_load::indexed_load3_fields_f32m2<
+          PointT, Layout::kX, Layout::kY, Layout::kZ>(
+          points_base, v_off, vl, v_px, v_py, v_pz);
+
+      const vfloat32m2_t v_xc = __riscv_vfmv_v_f_f32m2 (xc, vl);
+      const vfloat32m2_t v_yc = __riscv_vfmv_v_f_f32m2 (yc, vl);
+      const vfloat32m2_t v_zc = __riscv_vfmv_v_f_f32m2 (zc, vl);
+      const vfloat32m2_t v_sqr_dist = sqr_distRVV_f32m2 (v_px, v_py, v_pz, v_xc, v_yc, v_zc, vl);
+      const vbool16_t mask_inner = __riscv_vmfge_vf_f32m2_b16 (v_sqr_dist, sqr_inner_radius, vl);
+      const vbool16_t mask_outer = __riscv_vmfle_vf_f32m2_b16 (v_sqr_dist, sqr_outer_radius, vl);
+      const vbool16_t inliers_mask = __riscv_vmand_mm_b16 (mask_inner, mask_outer, vl);
+      const std::size_t active_count = __riscv_vcpop_m_b16 (inliers_mask, vl);
+
+      if (active_count > 0)
+      {
+        const vuint32m2_t compressed_idx =
+            __riscv_vcompress_vm_u32m2 (v_idx, inliers_mask, vl);
+        const vint32m2_t compressed_idx_i32 =
+            __riscv_vreinterpret_v_u32m2_i32m2 (compressed_idx);
+        __riscv_vse32_v_i32m2 (
+            reinterpret_cast<std::int32_t*> (inliers.data () + nr_p), compressed_idx_i32, active_count);
+
+        const vfloat32m2_t compressed_sqr =
+            __riscv_vcompress_vm_f32m2 (v_sqr_dist, inliers_mask, vl);
+        __riscv_vse32_v_f32m2 (compressed_sqr_distances.data (), compressed_sqr, active_count);
+
+        // `vcompress` preserves lane order; the scalar tail keeps exact sqrt error distances.
+        for (std::size_t lane = 0; lane < active_count; ++lane)
+          error_sqr_dists_[nr_p + lane] =
+              static_cast<double> (std::abs (std::sqrt (compressed_sqr_distances[lane]) - r));
+        nr_p += active_count;
+      }
+
+      i += vl;
+    }
+
+    inliers.resize (nr_p);
+    error_sqr_dists_.resize (nr_p);
+  }
 }
 #endif // ifdef __RVV10__
 

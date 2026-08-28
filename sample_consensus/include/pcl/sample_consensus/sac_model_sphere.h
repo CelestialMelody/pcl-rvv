@@ -247,6 +247,14 @@ namespace pcl
       isSampleGood(const Indices &samples) const override;
 
       /** This implementation uses no SIMD instructions. It is not intended for normal use.
+        * See selectWithinDistance which automatically uses the fastest implementation.
+        */
+      void
+      selectWithinDistanceStandard (const Eigen::VectorXf &model_coefficients,
+                                    const double threshold,
+                                    Indices &inliers);
+
+      /** This implementation uses no SIMD instructions. It is not intended for normal use.
         * See countWithinDistance which automatically uses the fastest implementation.
         */
       std::size_t
@@ -282,6 +290,14 @@ namespace pcl
       countWithinDistanceRVV (const Eigen::VectorXf &model_coefficients,
                               const double threshold,
                               std::size_t i = 0) const;
+
+      /** This implementation uses RISC-V Vector (RVV) instructions. It is not intended for normal use.
+        * See selectWithinDistance which automatically uses the fastest implementation.
+        */
+      void
+      selectWithinDistanceRVV (const Eigen::VectorXf &model_coefficients,
+                               const double threshold,
+                               Indices &inliers);
 #endif
 
     private:

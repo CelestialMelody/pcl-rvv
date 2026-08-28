@@ -1,0 +1,353 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_sphere Phase 050 PointXYZI repeated board summary",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/sample_consensus/sac_model_sphere/doc/phases/050-point-type-expansion/point-type-repeated-evidence-manifest.json",
+    "label": "5-run board repeated summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_sphere/script/generate_sphere_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_sphere public selectWithinDistance PointXYZI 65536",
+      "case_kind": "production-public",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZI",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.5901,
+        1.6317,
+        1.4672,
+        1.5316,
+        1.5947
+      ],
+      "std_ms_values": [
+        2.044294,
+        2.05323,
+        2.046556,
+        2.115164,
+        2.051278
+      ],
+      "rvv_ms_values": [
+        1.285621,
+        1.258334,
+        1.394885,
+        1.381007,
+        1.286294
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelSphereBench::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "sphere_shell_inner_outer_inclusive",
+        "reduction": "ordered_inlier_and_error_distance_write",
+        "checksum": "0",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 2.062104
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelSphereBench::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "sphere_shell_inner_outer_inclusive",
+        "reduction": "ordered_inlier_and_error_distance_write",
+        "checksum": "0",
+        "asm_boundary": "selectWithinDistanceRVV",
+        "rvv_instr_count": 27,
+        "rvv_ms": 1.321228
+      }
+    },
+    {
+      "name": "sac_model_sphere countWithinDistance PointXYZI 65536",
+      "case_kind": "production-public",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZI",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        2.0494,
+        2.0012,
+        1.8124,
+        1.8499,
+        1.9977
+      ],
+      "std_ms_values": [
+        1.48634,
+        1.490073,
+        1.485953,
+        1.489875,
+        1.487625
+      ],
+      "rvv_ms_values": [
+        0.72524,
+        0.744585,
+        0.819891,
+        0.80539,
+        0.744687
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelSphereBench::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "sphere_shell_inner_outer_inclusive",
+        "reduction": "inlier_count",
+        "checksum": "0",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 1.487973
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelSphereBench::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "sphere_shell_inner_outer_inclusive",
+        "reduction": "inlier_count",
+        "checksum": "0",
+        "asm_boundary": "countWithinDistanceRVV",
+        "rvv_instr_count": 19,
+        "rvv_ms": 0.767959
+      }
+    },
+    {
+      "name": "sac_model_sphere public getDistancesToModel PointXYZI 65536",
+      "case_kind": "public-entry baseline",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZI",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.0048,
+        0.9872,
+        1.0225,
+        1.01,
+        1.0105
+      ],
+      "std_ms_values": [
+        2.00612,
+        1.966071,
+        2.01072,
+        2.001926,
+        1.973547
+      ],
+      "rvv_ms_values": [
+        1.99651,
+        1.991634,
+        1.966565,
+        1.982011,
+        1.952985
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelSphereBench::getDistancesToModel public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "none_all_indices",
+        "reduction": "dense_distance_store_per_index",
+        "checksum": "0",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 1.991677
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelSphereBench::getDistancesToModel public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "none_all_indices",
+        "reduction": "dense_distance_store_per_index",
+        "checksum": "0",
+        "asm_boundary": "getDistancesToModel",
+        "rvv_instr_count": 0,
+        "rvv_ms": 1.977941
+      }
+    },
+    {
+      "name": "sac_model_sphere diagnostic candidate selectWithinDistance PointXYZI 65536",
+      "case_kind": "test-only candidate",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZI",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.2993,
+        1.3144,
+        1.3152,
+        1.4099,
+        1.3327
+      ],
+      "std_ms_values": [
+        2.040645,
+        2.047894,
+        2.057556,
+        2.194207,
+        2.051508
+      ],
+      "rvv_ms_values": [
+        1.570618,
+        1.558094,
+        1.564411,
+        1.556242,
+        1.539404
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelSphereBench::selectWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_candidate_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "sphere_shell_inner_outer_inclusive",
+        "reduction": "ordered_inlier_and_error_distance_write",
+        "checksum": "0",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 2.078362
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelSphereBench::selectWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_candidate_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "sphere_shell_inner_outer_inclusive",
+        "reduction": "ordered_inlier_and_error_distance_write",
+        "checksum": "0",
+        "asm_boundary": "selectWithinDistanceCandidateRVV",
+        "rvv_instr_count": 0,
+        "rvv_ms": 1.557754
+      }
+    },
+    {
+      "name": "sac_model_sphere diagnostic candidate getDistancesToModel PointXYZI 65536",
+      "case_kind": "test-only candidate",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZI",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        0.7214,
+        0.7149,
+        0.7094,
+        0.7008,
+        0.7274
+      ],
+      "std_ms_values": [
+        2.00954,
+        1.954728,
+        2.030004,
+        1.971844,
+        1.973258
+      ],
+      "rvv_ms_values": [
+        2.785797,
+        2.734285,
+        2.861456,
+        2.813648,
+        2.712585
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelSphereBench::getDistancesToModelCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "getDistancesToModel_candidate_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "none_all_indices",
+        "reduction": "dense_distance_store_per_index",
+        "checksum": "0",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 1.987875
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelSphereBench::getDistancesToModelCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "getDistancesToModel_candidate_only",
+        "gate": "PointXYZI_registered_single_float_xyz_aos_u32_offset",
+        "mask": "none_all_indices",
+        "reduction": "dense_distance_store_per_index",
+        "checksum": "0",
+        "asm_boundary": "getDistancesToModelCandidateRVV",
+        "rvv_instr_count": 0,
+        "rvv_ms": 2.781554
+      }
+    }
+  ]
+}
