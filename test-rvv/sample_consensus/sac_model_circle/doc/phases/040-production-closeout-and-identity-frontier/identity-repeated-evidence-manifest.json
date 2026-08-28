@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_circle Phase 040 identity-index RVV-vs-RVV repeated board summary",
+    "evidence_role": "strict_ab",
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-manifest.json",
+    "label": "5-run board repeated identity RVV-vs-RVV summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle/script/generate_circle_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": true,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_circle public selectWithinDistance PointXYZ 65536 identity gather-only RVV vs identity-strided RVV",
+      "case_kind": "production-detail",
+      "evidence_role": "strict_ab",
+      "build_comparison": "rvv_vs_rvv_repeated",
+      "decision_question": "RVV-family-selection",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "layout": "identity indices",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        0.9914,
+        0.991,
+        0.9921,
+        0.9943,
+        0.9872
+      ],
+      "baseline_ms_values": [
+        1.683143,
+        1.68439,
+        1.684316,
+        1.680825,
+        1.674589
+      ],
+      "candidate_ms_values": [
+        1.697711,
+        1.699771,
+        1.697767,
+        1.690536,
+        1.696338
+      ],
+      "baseline": {
+        "label": "RVV gather-only baseline",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::selectWithinDistance public entry",
+        "row_source": "direct_indexed_identity_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_hash",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "reduction": "vcompress_ordered_inlier_and_error_distance_write",
+        "implementation_family": "gather_only_rvv",
+        "candidate_switch": "PCL_RVV_CIRCLE_DISABLE_IDENTITY_STRIDED",
+        "checksum": "2671091326290763598",
+        "asm_boundary": "selectWithinDistanceRVV",
+        "rvv_instr_count": 23,
+        "rvv_ms": 1.681453
+      },
+      "candidate": {
+        "label": "RVV identity-strided candidate",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::selectWithinDistance public entry",
+        "row_source": "direct_indexed_identity_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_hash",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "reduction": "vcompress_ordered_inlier_and_error_distance_write",
+        "implementation_family": "identity_strided_or_gather_rvv",
+        "candidate_switch": "default_production_rvv",
+        "checksum": "2671091326290763598",
+        "asm_boundary": "selectWithinDistanceRVV",
+        "rvv_instr_count": 29,
+        "rvv_ms": 1.696425
+      }
+    },
+    {
+      "name": "sac_model_circle public countWithinDistance PointXYZ 65536 identity gather-only RVV vs identity-strided RVV",
+      "case_kind": "production-detail",
+      "evidence_role": "strict_ab",
+      "build_comparison": "rvv_vs_rvv_repeated",
+      "decision_question": "RVV-family-selection",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "layout": "identity indices",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        0.9793,
+        0.9679,
+        0.9715,
+        0.9678,
+        0.9698
+      ],
+      "baseline_ms_values": [
+        0.343658,
+        0.34102,
+        0.341832,
+        0.341707,
+        0.342968
+      ],
+      "candidate_ms_values": [
+        0.350915,
+        0.352346,
+        0.351854,
+        0.353089,
+        0.353634
+      ],
+      "baseline": {
+        "label": "RVV gather-only baseline",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::countWithinDistance public entry",
+        "row_source": "direct_indexed_identity_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_hash",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "reduction": "inlier_count",
+        "implementation_family": "gather_only_rvv",
+        "candidate_switch": "PCL_RVV_CIRCLE_DISABLE_IDENTITY_STRIDED",
+        "checksum": "2671091326290763598",
+        "asm_boundary": "countWithinDistanceRVV",
+        "rvv_instr_count": 15,
+        "rvv_ms": 0.342237
+      },
+      "candidate": {
+        "label": "RVV identity-strided candidate",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::countWithinDistance public entry",
+        "row_source": "direct_indexed_identity_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_hash",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "reduction": "inlier_count",
+        "implementation_family": "identity_strided_or_gather_rvv",
+        "candidate_switch": "default_production_rvv",
+        "checksum": "2671091326290763598",
+        "asm_boundary": "countWithinDistanceRVV",
+        "rvv_instr_count": 38,
+        "rvv_ms": 0.352368
+      }
+    }
+  ]
+}

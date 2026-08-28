@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_circle Phase 020 getDistances diagnostic repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-manifest.json",
+    "label": "5-run board repeated getDistances diagnostic summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle/script/generate_circle_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_circle getDistancesToModel public vs test-only RVV candidate PointXYZ 65536",
+      "case_kind": "production_shaped",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "rvv_binary_public_vs_test_helper_repeated",
+      "allowed_contract_mismatches": [
+        "boundary",
+        "wrapper",
+        "timer_boundary",
+        "reduction"
+      ],
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        0.6597,
+        0.6528,
+        0.6552,
+        0.6629,
+        0.659
+      ],
+      "public_ms_values": [
+        2.227566,
+        2.215559,
+        2.209252,
+        2.246668,
+        2.264949
+      ],
+      "candidate_ms_values": [
+        3.376711,
+        3.393894,
+        3.372058,
+        3.38931,
+        3.437005
+      ],
+      "diagnostic_to_production_mismatch_audit": {
+        "evidence_role": "production_shaped_diagnostic",
+        "ab_boundary": "public overload companion vs test-only helper in one RVV binary",
+        "decision_question": "whether this helper shape is worth a later bounded production probe",
+        "can_extrapolate_to_production": "no_direct_extrapolation",
+        "baseline_mismatch_risk": "yes_public_wrapper_vs_test_helper",
+        "clean_adoption_requires": "production direct public Std/RVV after explicit user approval"
+      },
+      "baseline": {
+        "label": "RVV build public getDistancesToModel",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_bench_checksum_plus_getdistances_gtest",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::getDistancesToModel public entry",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "mask": "none_all_indices_written",
+        "reduction": "scalar_sqrt_dense_double_store",
+        "checksum": "4498953259150515597",
+        "asm_boundary": "getDistancesToModel",
+        "rvv_instr_count": 76,
+        "rvv_ms": 2.232799
+      },
+      "candidate": {
+        "label": "RVV build test-only getDistancesToModel candidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_bench_checksum_plus_getdistances_gtest",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelCircleBench::getDistancesToModelCandidate",
+        "timer_boundary": "getDistancesToModel_candidate_entry_only",
+        "mask": "none_all_indices_written",
+        "reduction": "rvv_sqr_distance_then_scalar_sqrt_dense_double_store",
+        "checksum": "4498953259150515597",
+        "asm_boundary": "getDistancesToModelScalarSqrtCandidateRVV",
+        "rvv_instr_count": 13,
+        "rvv_ms": 3.393796
+      }
+    }
+  ]
+}

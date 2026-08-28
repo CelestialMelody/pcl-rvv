@@ -46,6 +46,9 @@
 #include <pcl/common/concatenate.h>
 #include <pcl/rvv_point_load.h>
 
+#include <cstdint>
+#include <type_traits>
+
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
 pcl::SampleConsensusModelCircle2D<PointT>::isSampleGood(const Indices &samples) const
@@ -169,6 +172,29 @@ pcl::SampleConsensusModelCircle2D<PointT>::getDistancesToModel (const Eigen::Vec
     distances.clear ();
     return;
   }
+
+#if defined (__RVV10__)
+  if constexpr (pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::x>::value &&
+                pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::y>::value)
+  {
+    if constexpr (sizeof (pcl::index_t) == sizeof (std::int32_t) &&
+                  std::is_signed_v<pcl::index_t>)
+    {
+      if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+      {
+        getDistancesToModelRVV (model_coefficients, distances);
+        return;
+      }
+    }
+  }
+#endif
+  getDistancesToModelStandard (model_coefficients, distances);
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::SampleConsensusModelCircle2D<PointT>::getDistancesToModelStandard (const Eigen::VectorXf &model_coefficients, std::vector<double> &distances) const
+{
   distances.resize (indices_->size ());
 
   // Iterate through the 3d points and calculate the distances from them to the circle
@@ -196,6 +222,31 @@ pcl::SampleConsensusModelCircle2D<PointT>::selectWithinDistance (
     inliers.clear ();
     return;
   }
+
+#if defined (__RVV10__)
+  if constexpr (pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::x>::value &&
+                pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::y>::value)
+  {
+    if constexpr (sizeof (pcl::index_t) == sizeof (std::int32_t) &&
+                  std::is_signed_v<pcl::index_t>)
+    {
+      if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+      {
+        selectWithinDistanceRVV (model_coefficients, threshold, inliers);
+        return;
+      }
+    }
+  }
+#endif
+  selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::SampleConsensusModelCircle2D<PointT>::selectWithinDistanceStandard (
+    const Eigen::VectorXf &model_coefficients, const double threshold,
+    Indices &inliers)
+{
   inliers.clear ();
   error_sqr_dists_.clear ();
   inliers.reserve (indices_->size ());
@@ -238,9 +289,15 @@ pcl::SampleConsensusModelCircle2D<PointT>::countWithinDistance (
 #elif defined (__RVV10__)
   if constexpr (pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::x>::value &&
                 pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::y>::value)
-    return countWithinDistanceRVV (model_coefficients, threshold);
-  else
-    return countWithinDistanceStandard (model_coefficients, threshold);
+  {
+    if constexpr (sizeof (pcl::index_t) == sizeof (std::int32_t) &&
+                  std::is_signed_v<pcl::index_t>)
+    {
+      if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+        return countWithinDistanceRVV (model_coefficients, threshold);
+    }
+  }
+  return countWithinDistanceStandard (model_coefficients, threshold);
 #else
   return countWithinDistanceStandard (model_coefficients, threshold);
 #endif
@@ -355,7 +412,7 @@ pcl::SampleConsensusModelCircle2D<PointT>::countWithinDistanceAVX (
 #endif
 
 //////////////////////////////////////////////////////////////////
-#if defined(__RVV10__)
+#if defined (__RVV10__)
 template <typename PointT> std::size_t
 pcl::SampleConsensusModelCircle2D<PointT>::countWithinDistanceRVV (
     const Eigen::VectorXf &model_coefficients, const double threshold, std::size_t i) const
@@ -419,6 +476,161 @@ pcl::SampleConsensusModelCircle2D<PointT>::countWithinDistanceRVV (
   // RVV is Vector Length Agnostic, and there are no remaining points that need to be processed using countWithinDistanceStandard.
 
   return nr_p;
+}
+#endif // __RVV10__
+
+//////////////////////////////////////////////////////////////////////////
+#if defined (__RVV10__)
+template <typename PointT> void
+pcl::SampleConsensusModelCircle2D<PointT>::getDistancesToModelRVV (
+    const Eigen::VectorXf &model_coefficients,
+    std::vector<double> &distances) const
+{
+  if constexpr (!pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::x>::value ||
+                !pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::y>::value ||
+                sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                !std::is_signed_v<pcl::index_t>)
+  {
+    getDistancesToModelStandard (model_coefficients, distances);
+    return;
+  }
+  else
+  {
+    if (input_->points.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    {
+      getDistancesToModelStandard (model_coefficients, distances);
+      return;
+    }
+
+    distances.resize (indices_->size ());
+    const float a = model_coefficients[0];
+    const float b = model_coefficients[1];
+    const float r = model_coefficients[2];
+    const std::uint8_t* const points_base =
+        reinterpret_cast<const std::uint8_t*> (input_->points.data ());
+    const pcl::index_t* const indices_ptr = indices_->data ();
+    double* const distances_ptr = distances.data ();
+
+    for (std::size_t i = 0; i < indices_->size (); )
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (indices_->size () - i);
+      const vuint32m2_t v_idx =
+          __riscv_vle32_v_u32m2 (reinterpret_cast<const std::uint32_t*> (indices_ptr + i), vl);
+      const vuint32m2_t v_off = pcl::rvv_load::byte_offsets_u32m2<PointT> (v_idx, vl);
+      const vfloat32m2_t v_px =
+          pcl::rvv_load::indexed_load_field_f32m2<PointT, pcl::fields::x> (
+              points_base, v_off, vl);
+      const vfloat32m2_t v_py =
+          pcl::rvv_load::indexed_load_field_f32m2<PointT, pcl::fields::y> (
+              points_base, v_off, vl);
+      const vfloat32m2_t v_a = __riscv_vfmv_v_f_f32m2 (a, vl);
+      const vfloat32m2_t v_b = __riscv_vfmv_v_f_f32m2 (b, vl);
+      const vfloat32m2_t v_sqr_dist = sqr_distRVV_f32m2 (v_px, v_py, v_a, v_b, vl);
+      const vfloat32m2_t v_dist = __riscv_vfsqrt_v_f32m2 (v_sqr_dist, vl);
+      vfloat32m2_t v_circle_dist = __riscv_vfsub_vf_f32m2 (v_dist, r, vl);
+      v_circle_dist = __riscv_vfsgnjx_vv_f32m2 (v_circle_dist, v_circle_dist, vl);
+      const vfloat64m4_t v_circle_dist_d =
+          __riscv_vfwcvt_f_f_v_f64m4 (v_circle_dist, vl);
+      __riscv_vse64_v_f64m4 (distances_ptr + i, v_circle_dist_d, vl);
+
+      i += vl;
+    }
+  }
+}
+#endif // __RVV10__
+
+//////////////////////////////////////////////////////////////////////////
+#if defined (__RVV10__)
+template <typename PointT> void
+pcl::SampleConsensusModelCircle2D<PointT>::selectWithinDistanceRVV (
+    const Eigen::VectorXf &model_coefficients, const double threshold,
+    Indices &inliers)
+{
+  if constexpr (!pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::x>::value ||
+                !pcl::rvv::RVVFloatFieldLayout<PointT, pcl::fields::y>::value ||
+                sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                !std::is_signed_v<pcl::index_t>)
+  {
+    selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+    return;
+  }
+  else
+  {
+    if (input_->points.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    {
+      selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+      return;
+    }
+
+    const std::size_t total_n = indices_->size ();
+    inliers.resize (total_n);
+    error_sqr_dists_.resize (total_n);
+
+    const float a = model_coefficients[0];
+    const float b = model_coefficients[1];
+    const float r = model_coefficients[2];
+    const float threshold_f = static_cast<float> (threshold);
+    const float sqr_inner_radius = (r <= threshold_f)
+                                    ? 0.0f
+                                    : (r - threshold_f) * (r - threshold_f);
+    const float sqr_outer_radius = (r + threshold_f) * (r + threshold_f);
+
+    const std::uint8_t* const points_base =
+        reinterpret_cast<const std::uint8_t*> (input_->points.data ());
+    const pcl::index_t* const indices_ptr = indices_->data ();
+    double* const error_ptr = error_sqr_dists_.data ();
+
+    std::size_t nr_p = 0;
+    for (std::size_t i = 0; i < total_n; )
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+      const vuint32m2_t v_idx =
+          __riscv_vle32_v_u32m2 (
+              reinterpret_cast<const std::uint32_t*> (indices_ptr + i), vl);
+      const vuint32m2_t v_off = pcl::rvv_load::byte_offsets_u32m2<PointT> (v_idx, vl);
+      const vfloat32m2_t v_px =
+          pcl::rvv_load::indexed_load_field_f32m2<PointT, pcl::fields::x> (
+              points_base, v_off, vl);
+      const vfloat32m2_t v_py =
+          pcl::rvv_load::indexed_load_field_f32m2<PointT, pcl::fields::y> (
+              points_base, v_off, vl);
+      const vfloat32m2_t v_a = __riscv_vfmv_v_f_f32m2 (a, vl);
+      const vfloat32m2_t v_b = __riscv_vfmv_v_f_f32m2 (b, vl);
+      const vfloat32m2_t v_sqr_dist = sqr_distRVV_f32m2 (v_px, v_py, v_a, v_b, vl);
+
+      const vbool16_t mask_inner = __riscv_vmfge_vf_f32m2_b16 (v_sqr_dist, sqr_inner_radius, vl);
+      const vbool16_t mask_outer = __riscv_vmfle_vf_f32m2_b16 (v_sqr_dist, sqr_outer_radius, vl);
+      const vbool16_t inliers_mask = __riscv_vmand_mm_b16 (mask_inner, mask_outer, vl);
+      const std::size_t active_count = __riscv_vcpop_m_b16 (inliers_mask, vl);
+
+      if (active_count > 0)
+      {
+        const vuint32m2_t compressed_idx =
+            __riscv_vcompress_vm_u32m2 (v_idx, inliers_mask, vl);
+        const vint32m2_t compressed_idx_i32 =
+            __riscv_vreinterpret_v_u32m2_i32m2 (compressed_idx);
+        __riscv_vse32_v_i32m2 (
+            reinterpret_cast<std::int32_t*> (inliers.data () + nr_p),
+            compressed_idx_i32,
+            active_count);
+
+        const vfloat32m2_t compressed_sqr =
+            __riscv_vcompress_vm_f32m2 (v_sqr_dist, inliers_mask, vl);
+        const vfloat32m2_t v_dist = __riscv_vfsqrt_v_f32m2 (compressed_sqr, active_count);
+        vfloat32m2_t v_circle_dist = __riscv_vfsub_vf_f32m2 (v_dist, r, active_count);
+        v_circle_dist = __riscv_vfsgnjx_vv_f32m2 (v_circle_dist, v_circle_dist, active_count);
+        const vfloat64m4_t v_circle_dist_d =
+            __riscv_vfwcvt_f_f_v_f64m4 (v_circle_dist, active_count);
+        __riscv_vse64_v_f64m4 (error_ptr + nr_p, v_circle_dist_d, active_count);
+        nr_p += active_count;
+      }
+
+      i += vl;
+    }
+
+    inliers.resize (nr_p);
+    error_sqr_dists_.resize (nr_p);
+  }
 }
 #endif // __RVV10__
 

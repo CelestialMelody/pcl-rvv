@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_circle Phase 080 select error-tail RVV-vs-RVV repeated board summary",
+    "evidence_role": "strict_ab",
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-manifest.json",
+    "label": "5-run board repeated select full-RVV error tail RVV-vs-RVV summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle/script/generate_circle_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": true,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_circle selectWithinDistance adopted RVV vs test-only full-RVV error tail PointXYZ 65536",
+      "case_kind": "production-detail",
+      "evidence_role": "strict_ab",
+      "build_comparison": "rvv_vs_rvv_repeated",
+      "decision_question": "RVV-family-selection",
+      "allowed_contract_mismatches": [
+        "boundary",
+        "wrapper",
+        "timer_boundary",
+        "reduction"
+      ],
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "layout": "shuffled adjacent pairs",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.5774,
+        1.6127,
+        1.6138,
+        1.6078,
+        1.6059
+      ],
+      "baseline_ms_values": [
+        1.659483,
+        1.674537,
+        1.680773,
+        1.667802,
+        1.681749
+      ],
+      "candidate_ms_values": [
+        1.05203,
+        1.038358,
+        1.04153,
+        1.037304,
+        1.04726
+      ],
+      "baseline": {
+        "label": "RVV build public selectWithinDistance adopted baseline",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_bench_checksum_plus_select_gtest",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::selectWithinDistance public entry",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "reduction": "vcompress_ordered_inlier_write_then_scalar_exact_error_sqrt",
+        "checksum": "11299951231741519623",
+        "asm_boundary": "selectWithinDistanceRVV",
+        "rvv_instr_count": 23,
+        "rvv_ms": 1.672869
+      },
+      "candidate": {
+        "label": "RVV build test-only select full-RVV error tail candidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_bench_checksum_plus_select_gtest",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelCircleBench::selectWithinDistanceFullRVVErrorTailCandidate",
+        "timer_boundary": "selectWithinDistance_full_rvv_error_tail_candidate_entry_only",
+        "reduction": "vcompress_ordered_inlier_write_then_vfsqrt_vfwcvt_dense_active_error_store",
+        "checksum": "11299951231741519623",
+        "asm_boundary": "selectWithinDistanceFullRVVErrorTail",
+        "rvv_instr_count": 24,
+        "rvv_ms": 1.043296
+      }
+    }
+  ]
+}

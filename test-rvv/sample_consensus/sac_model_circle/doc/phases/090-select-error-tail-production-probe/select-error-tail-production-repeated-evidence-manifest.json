@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_circle Phase 090 select error-tail production repeated board summary",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json",
+    "label": "5-run board repeated summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle/script/generate_circle_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_circle public selectWithinDistance PointXYZ 65536",
+      "case_kind": "production-public",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        2.5412,
+        2.6515,
+        2.57,
+        2.677,
+        2.5357
+      ],
+      "std_ms_values": [
+        2.655116,
+        2.803896,
+        2.681682,
+        2.806671,
+        2.663478
+      ],
+      "rvv_ms_values": [
+        1.044829,
+        1.057461,
+        1.043452,
+        1.048433,
+        1.050375
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_hash",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "reduction": "ordered_inlier_and_error_distance_output",
+        "implementation_family": "standard_scalar_shell_and_error_sqrt",
+        "checksum": "2133435400977669312",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 2.722169
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_hash",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "reduction": "ordered_inlier_and_error_distance_output",
+        "implementation_family": "rvv_gather_shell_vcompress_then_vfsqrt_vfwcvt_vse64_error_store",
+        "checksum": "2133435400977669312",
+        "asm_boundary": "selectWithinDistanceRVV",
+        "rvv_instr_count": 24,
+        "rvv_ms": 1.04891
+      }
+    },
+    {
+      "name": "sac_model_circle countWithinDistance PointXYZ 65536",
+      "case_kind": "production-public",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.3982,
+        1.3975,
+        1.3909,
+        1.4073,
+        1.4022
+      ],
+      "std_ms_values": [
+        0.477693,
+        0.47798,
+        0.482761,
+        0.479894,
+        0.479801
+      ],
+      "rvv_ms_values": [
+        0.341654,
+        0.342031,
+        0.347074,
+        0.340995,
+        0.342188
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_hash",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "reduction": "inlier_count",
+        "implementation_family": "standard_scalar",
+        "checksum": "22220",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 0.479626
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_hash",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "circle_shell_inner_outer_inclusive",
+        "reduction": "inlier_count",
+        "implementation_family": "production_rvv",
+        "checksum": "22220",
+        "asm_boundary": "countWithinDistanceRVV",
+        "rvv_instr_count": 15,
+        "rvv_ms": 0.342788
+      }
+    }
+  ]
+}

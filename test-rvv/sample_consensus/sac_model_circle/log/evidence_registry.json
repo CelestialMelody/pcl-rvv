@@ -1,0 +1,673 @@
+{
+  "files": {
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "circle-select-distance-phase000-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787884905,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase000-production-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787884905095788102,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.json",
+        "sha256": "sha256:18a78b05e13d2935150aea1020fb68ad6f9f40ddedb7105153a921c7a24098b4",
+        "size": 935
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "circle-select-distance-phase000-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787884905,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase000-production-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787884905094788144,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.md",
+        "sha256": "sha256:4be66763cd9321ac832eeee5543fecc8fd57601cbb8675b511e5aac84ce2f8cb",
+        "size": 717
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "circle-select-distance-phase000-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787884905,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase000-production-select-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787884905061789553,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-manifest.json",
+        "sha256": "sha256:47ecc5f6208c805d099444a0f2b57c570810699d828359fd61c74f2e24a46fb5",
+        "size": 5306
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase020-diagnostic-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787898806,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase020-getdistances-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787898806650494136,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.json",
+        "sha256": "sha256:83235410429332ebbcd103951306c428c90d067b6f13180fb692084abd0a2d25",
+        "size": 2947
+      },
+      "target": "run_getdistances_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase020-diagnostic-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787898806,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase020-getdistances-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787898806650494136,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.md",
+        "sha256": "sha256:d64e98530a4c81614182de9027fd76011ed049f0f360890178c7164605c57991",
+        "size": 2570
+      },
+      "target": "run_getdistances_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase020-diagnostic-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787898806,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase020-getdistances-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787898806623494815,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-manifest.json",
+        "sha256": "sha256:55a879e5f723b466c7055e683080dbab50aa59ce5d7f7d77659da92321b1b406",
+        "size": 4095
+      },
+      "target": "run_getdistances_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "circle-phase040-identity-rvv-ab-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/result.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787890609,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase040-identity-rvv-ab-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787890609800883328,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.json",
+        "sha256": "sha256:c2ae1069fdb36ded2957b9ae6f38a80841b41d7ae63bea3a490b8b7efbec25ee",
+        "size": 3027
+      },
+      "target": "run_identity_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "circle-phase040-identity-rvv-ab-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/result.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787890609,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase040-identity-rvv-ab-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787890609800883328,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.md",
+        "sha256": "sha256:68583534022369d8f0ff03613bfba602164f4c6c8f49539e1ac070fc7d73d93f",
+        "size": 2664
+      },
+      "target": "run_identity_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "circle-phase040-identity-rvv-ab-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/result.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787890609,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase040-identity-rvv-ab-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787890609764882867,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-manifest.json",
+        "sha256": "sha256:507ea54f967cb24c0bf32032f935bdab8a57477b7aae599e75e915cd73088fbe",
+        "size": 6219
+      },
+      "target": "run_identity_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase050-full-rvv-diagnostic-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787896640,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase050-getdistances-full-rvv-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787896640877319395,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.json",
+        "sha256": "sha256:3dc5eb3834d2a5e12c75e4071abab2a03fbf0c87352e878394188729f03568cc",
+        "size": 985
+      },
+      "target": "run_getdistances_full_rvv_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase050-full-rvv-diagnostic-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787896640,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase050-getdistances-full-rvv-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787896640877319395,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.md",
+        "sha256": "sha256:d662db31217e8029da3b930eca3abc5ab077a9d9c98180afaa5ae2b6e9042710",
+        "size": 743
+      },
+      "target": "run_getdistances_full_rvv_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase050-full-rvv-diagnostic-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787896640,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase050-getdistances-full-rvv-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787896640846320062,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-manifest.json",
+        "sha256": "sha256:eb81de8cbe12bfc6c3092809092ac77529a3f3f8b969310b2a4c4f34b377f199",
+        "size": 4130
+      },
+      "target": "run_getdistances_full_rvv_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase060-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787897992,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase060-getdistances-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787897992223680227,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.json",
+        "sha256": "sha256:63833d3ceeb0fb06e8ac09a68fac0c711fe413a0fa3e8cf124f4fa5eafc84d43",
+        "size": 968
+      },
+      "target": "run_getdistances_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase060-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787897992,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase060-getdistances-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787897992223680227,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.md",
+        "sha256": "sha256:58fafb92879020fe23c920a4df0d27c5d0785215e3f8aea1e03f749797c29c17",
+        "size": 726
+      },
+      "target": "run_getdistances_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase060-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787897992,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase060-getdistances-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787897992194681023,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json",
+        "sha256": "sha256:a82d1465447c6c36926ad652c572a175dfbc93e8de5688e6d37c55f2ee5472ba",
+        "size": 4266
+      },
+      "target": "run_getdistances_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "circle-phase080-select-error-tail-rvv-ab-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/result.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787903448,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase080-select-error-tail-rvv-ab-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787903448334546175,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.json",
+        "sha256": "sha256:6713a2a72f9a45b09fdeff52f33709d50805957e4ef80624a3405c0a6f500f3e",
+        "size": 972
+      },
+      "target": "run_select_error_tail_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "circle-phase080-select-error-tail-rvv-ab-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/result.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787903448,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase080-select-error-tail-rvv-ab-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787903448334546175,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.md",
+        "sha256": "sha256:828737fa4d9b2eceb175e35beae08249053260fdcce8293bf31474dce9516a84",
+        "size": 716
+      },
+      "target": "run_select_error_tail_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "circle-phase080-select-error-tail-rvv-ab-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/result.zh.md"
+      ],
+      "evidence_role": "strict_ab",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787903448,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase080-select-error-tail-rvv-ab-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787903448301549143,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-manifest.json",
+        "sha256": "sha256:38187a18096b7d4a0b9145bd9d7ce52a89e26eaa657cbaeadfbac687ee3d5fbd",
+        "size": 3745
+      },
+      "target": "run_select_error_tail_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "circle-phase090-select-error-tail-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787904644,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase090-select-error-tail-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787904644553612063,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.json",
+        "sha256": "sha256:3acaea097c8d3fa8160bf7a3042e30ab8067c693513f6bc59caa232180e4f4e6",
+        "size": 959
+      },
+      "target": "run_select_error_tail_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "circle-phase090-select-error-tail-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787904644,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase090-select-error-tail-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787904644553612063,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "sha256": "sha256:76bfc6e9e4117ad0c20229e9c89f096907a531938934851107f8d93e3353bb82",
+        "size": 741
+      },
+      "target": "run_select_error_tail_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "circle-phase090-select-error-tail-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787904644,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json"
+      },
+      "run_label": "circle-phase090-select-error-tail-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787904644523613629,
+        "path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json",
+        "sha256": "sha256:ca521f364b4f3eb063f9c7d94935b5ce265f5e717d728406ac9aac8e781a100c",
+        "size": 5556
+      },
+      "target": "run_select_error_tail_production_board_evidence_doctor"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "circle-select-distance-phase000-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/000-circle-select-distance-production/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787884905,
+      "run_label": "circle-phase000-production-select-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase020-diagnostic-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787886120,
+      "run_label": "circle-phase020-getdistances-repeated-board",
+      "target": "run_getdistances_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-phase040-identity-rvv-ab-repeated",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787890544,
+      "run_label": "circle-phase040-identity-rvv-ab-repeated-board",
+      "target": "run_identity_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-phase040-identity-rvv-ab-repeated",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/040-production-closeout-and-identity-frontier/identity-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787890609,
+      "run_label": "circle-phase040-identity-rvv-ab-repeated-board",
+      "target": "run_identity_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase050-full-rvv-diagnostic-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/050-getdistances-vfsqrt-full-rvv/getdistances-full-rvv-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787896640,
+      "run_label": "circle-phase050-getdistances-full-rvv-repeated-board",
+      "target": "run_getdistances_full_rvv_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase060-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787897286,
+      "run_label": "circle-phase060-getdistances-production-repeated-board",
+      "target": "run_getdistances_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase060-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787897992,
+      "run_label": "circle-phase060-getdistances-production-repeated-board",
+      "target": "run_getdistances_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-getdistances-phase020-diagnostic-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/020-circle-getdistances-ablation/getdistances-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787898806,
+      "run_label": "circle-phase020-getdistances-repeated-board",
+      "target": "run_getdistances_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-phase080-select-error-tail-rvv-ab-repeated",
+      "evidence_role": "strict_ab",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/080-select-compressed-error-tail/select-error-tail-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787903448,
+      "run_label": "circle-phase080-select-error-tail-rvv-ab-repeated-board",
+      "target": "run_select_error_tail_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-phase090-select-error-tail-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787904235,
+      "run_label": "circle-phase090-select-error-tail-production-repeated-board",
+      "target": "run_select_error_tail_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-phase090-select-error-tail-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787904308,
+      "run_label": "circle-phase090-select-error-tail-production-repeated-board",
+      "target": "run_select_error_tail_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-phase090-select-error-tail-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787904425,
+      "run_label": "circle-phase090-select-error-tail-production-repeated-board",
+      "target": "run_select_error_tail_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-phase090-select-error-tail-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787904579,
+      "run_label": "circle-phase090-select-error-tail-production-repeated-board",
+      "target": "run_select_error_tail_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "circle-phase090-select-error-tail-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_circle/doc/phases/090-select-error-tail-production-probe/select-error-tail-production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787904644,
+      "run_label": "circle-phase090-select-error-tail-production-repeated-board",
+      "target": "run_select_error_tail_production_board_evidence_doctor"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787904644
+}

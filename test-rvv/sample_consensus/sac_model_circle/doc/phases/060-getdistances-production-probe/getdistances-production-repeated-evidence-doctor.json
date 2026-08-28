@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_circle Phase 060 getDistances production repeated board summary",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json",
+    "label": "5-run board repeated getDistances production summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle/script/generate_circle_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": []
+}

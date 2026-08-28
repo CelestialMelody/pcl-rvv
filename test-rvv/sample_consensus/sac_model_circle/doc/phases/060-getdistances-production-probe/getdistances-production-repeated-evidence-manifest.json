@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_circle Phase 060 getDistances production repeated board summary",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle/doc/phases/060-getdistances-production-probe/getdistances-production-repeated-evidence-manifest.json",
+    "label": "5-run board repeated getDistances production summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle/script/generate_circle_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_circle production getDistancesToModel PointXYZ 65536",
+      "case_kind": "production-public",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv_repeated",
+      "decision_question": "production-adoption-after-probe",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.4697,
+        1.4737,
+        1.4962,
+        1.4755,
+        1.4687
+      ],
+      "std_ms_values": [
+        2.20066,
+        2.199176,
+        2.231477,
+        2.200658,
+        2.211778
+      ],
+      "rvv_ms_values": [
+        1.497394,
+        1.492253,
+        1.491387,
+        1.491463,
+        1.505921
+      ],
+      "correctness_gate": {
+        "qemu_target": "make -C test-rvv/sample_consensus/sac_model_circle run_test_compare",
+        "board_target": "make -C test-rvv/sample_consensus/sac_model_circle run_board_circle_getdistances_production_test",
+        "gtest_filter": "SampleConsensusModelCircle2D.PublicGetDistancesMatchesStandardAndDirectRVV",
+        "tolerance": "1e-6 absolute distance tolerance",
+        "bitwise_checksum_required": false
+      },
+      "raw_output_checksums": {
+        "policy": "The raw getDistances output hashes are kept for audit only. Std uses scalar sqrt/double conversion while RVV uses f32 vfsqrt followed by vfwcvt/vse64, so bitwise equality is not the correctness gate.",
+        "std_public_getDistancesToModel": "13773555566871062090",
+        "rvv_public_getDistancesToModel": "11299951231741505995"
+      },
+      "baseline": {
+        "label": "Std build public getDistancesToModel",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::getDistancesToModel public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "tolerance_gtest_public_standard_direct_rvv",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "none_all_indices_written",
+        "reduction": "dense_distance_vector_output",
+        "implementation_family": "scalar_sqrt_dense_double_store",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 2.20875
+      },
+      "candidate": {
+        "label": "RVV build public getDistancesToModel",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCircle2D::getDistancesToModel public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "tolerance_gtest_public_standard_direct_rvv",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xy_aos_u32_offset",
+        "mask": "none_all_indices_written",
+        "reduction": "dense_distance_vector_output",
+        "implementation_family": "rvv_sqr_distance_vfsqrt_vfabs_vfwcvt_dense_double_store",
+        "asm_boundary": "getDistancesToModelRVV",
+        "rvv_instr_count": 16,
+        "rvv_ms": 1.495684
+      }
+    }
+  ]
+}
