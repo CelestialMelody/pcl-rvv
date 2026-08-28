@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_normal_sphere Phase 000 board smoke manifest",
+    "label": "normal-sphere-phase000-board-smoke",
+    "evidence_role": "production_shaped_diagnostic",
+    "ab_boundary": "board Std build fallback vs board RVV build candidate for the same test-only helper.",
+    "conclusion_policy": "候选行的速度信号足够远离 1.0 阈值，可用于 Phase 000 是否进入下一阶段的诊断判断；production 接入仍需要 PI1-PI5。",
+    "summary_path": "test-rvv/sample_consensus/sac_model_normal_sphere/doc/phases/000-normal-sphere-count-select-diagnostic/board-evidence-summary.md",
+    "manifest_path": "test-rvv/sample_consensus/sac_model_normal_sphere/doc/phases/000-normal-sphere-count-select-diagnostic/board-evidence-manifest.json",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 1,
+      "taskset": "not_recorded_by_board_smoke",
+      "governor": "not_recorded_by_board_smoke",
+      "freq": "not_recorded_by_board_smoke",
+      "temperature": "not_recorded_by_board_smoke",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:433f84c5409c4050197d6eacc681afe6d8a7c4a36753fd85a929c058d98a501b"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 6,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZ diagnostic candidate selectWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZ diagnostic candidate countWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZ diagnostic candidate getDistancesToModel",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZI diagnostic candidate selectWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZI diagnostic candidate countWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZI diagnostic candidate getDistancesToModel",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    }
+  ]
+}

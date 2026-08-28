@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_normal_sphere Phase 030 RGB/RGBA point-type expansion manifest",
+    "label": "normal-sphere-phase030-rgb-rgba-smoke",
+    "evidence_role": "production_shaped_diagnostic",
+    "ab_boundary": "board Std build fallback vs board RVV build test-only candidates for RGB/RGBA source layouts.",
+    "conclusion_policy": "Phase 030 只判断 RGB/RGBA source layout 是否能加入测试专用候选范围；即使正向，也不能替代 production direct（真实生产路径证据）。",
+    "summary_path": "test-rvv/sample_consensus/sac_model_normal_sphere/doc/phases/030-rgb-rgba-point-type-expansion/board-evidence-summary.md",
+    "manifest_path": "test-rvv/sample_consensus/sac_model_normal_sphere/doc/phases/030-rgb-rgba-point-type-expansion/board-evidence-manifest.json",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 1,
+      "taskset": "not_recorded_by_board_smoke",
+      "governor": "not_recorded_by_board_smoke",
+      "freq": "not_recorded_by_board_smoke",
+      "temperature": "not_recorded_by_board_smoke",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:c76554c107e5ea0ab48a648e8b16dccd53337f166a1883e0c9e44c6ca3d95061"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 8,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZRGB diagnostic candidate selectWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZRGB diagnostic candidate vcompress selectWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZRGB diagnostic candidate countWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZRGB diagnostic candidate getDistancesToModel",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZRGBA diagnostic candidate selectWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZRGBA diagnostic candidate vcompress selectWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZRGBA diagnostic candidate countWithinDistance",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "low_run_count",
+      "case": "PointXYZRGBA diagnostic candidate getDistancesToModel",
+      "observed_pattern": "只解析到 1 个 repeated value。",
+      "why_suspicious": "run 数过低时，无法判断异常频率和稳定性。",
+      "possible_non_bug_explanations": "可能当前只是 quick board check。",
+      "possible_bug_or_evidence_issues": "也可能 raw logs 缺失或 summary parser 只读到部分行。",
+      "recommended_checks": "正式 board summary 至少使用 5-run；接近阈值或方向不稳时扩大到 20-run / 50-run。",
+      "conclusion_policy": "低 run count 只能支撑初筛，不能支撑强 production performance 结论。"
+    }
+  ]
+}

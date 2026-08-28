@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_normal_sphere Phase 060 production public integration manifest",
+    "label": "normal-sphere-phase060-production-public",
+    "evidence_role": "production_public",
+    "ab_boundary": "board Std build public overload vs board RVV build public overload after production dispatch integration.",
+    "conclusion_policy": "Phase 060 使用接入后的真实 public entry Std/RVV 板卡对比；若 correctness、asm 和 Evidence Doctor 无 Error 且速度桶为正向，可支撑本阶段生产采纳判断。",
+    "summary_path": "test-rvv/sample_consensus/sac_model_normal_sphere/doc/phases/060-production-integration-execution/board-evidence-summary.md",
+    "manifest_path": "test-rvv/sample_consensus/sac_model_normal_sphere/doc/phases/060-production-integration-execution/board-evidence-manifest.json",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "run_count_by_point_type": {
+        "PointXYZ": 5,
+        "PointXYZI": 5,
+        "PointXYZRGB": 5,
+        "PointXYZRGBA": 5
+      },
+      "taskset": "not_recorded_by_board_smoke",
+      "governor": "not_recorded_by_board_smoke",
+      "freq": "not_recorded_by_board_smoke",
+      "temperature": "not_recorded_by_board_smoke",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:8876591d0a73446fa3e7379664380c6db4de39c57d47b3a38b155a6eb51e7398"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": []
+}
