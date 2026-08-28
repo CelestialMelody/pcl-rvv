@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle3d/script/generate_circle3d_board_evidence_manifest.py",
+    "evidence_role": "production-public",
+    "label": "10-run board repeated circle3d select production public summary",
+    "metadata": {
+      "binary_hash": "not_recorded",
+      "device": "Milkv-Jupiter",
+      "freq": "not_recorded",
+      "governor": "not_recorded",
+      "iterations": 200,
+      "run_count": 10,
+      "taskset": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": 20
+    },
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle3d/doc/phases/010-selectwithin-production-probe/select-production-repeated-evidence-manifest.json",
+    "title": "sac_model_circle3d Phase 010 selectWithinDistance production repeated board summary"
+  },
+  "result": {
+    "errors": 1,
+    "warnings": 1,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "ERROR",
+      "signal": "ba_degradation_frequency",
+      "case": "sac_model_circle3d selectWithinDistance production public Std/RVV PointXYZ 65536",
+      "observed_pattern": "B/A values=1.06x, 0.907x, 1.04x, 0.992x, 1.28x, 1.07x, 1.01x, 0.966x, 0.843x, 0.587x；5/10 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "long_tail_or_variance",
+      "case": "sac_model_circle3d selectWithinDistance production public Std/RVV PointXYZ 65536",
+      "observed_pattern": "min=0.587x, median=0.999x, max=1.28x，max/min=2.19。",
+      "why_suspicious": "长尾说明单一均值不足以描述稳定性，异常值可能改变接入判断。",
+      "possible_non_bug_explanations": "可能是板卡温度、频率、调度、缓存状态或 run 顺序导致。",
+      "possible_bug_or_evidence_issues": "也可能是候选存在数据相关分支、fallback、spill/reload 或内存带宽拐点。",
+      "recommended_checks": "查看 per-iteration trace、温度 / governor / freq / taskset；必要时扩大到 20-run 或 50-run。",
+      "conclusion_policy": "可以继续分析，但 summary 必须保留 min/median/max 和长尾解释，不能先验剔除异常。"
+    }
+  ]
+}

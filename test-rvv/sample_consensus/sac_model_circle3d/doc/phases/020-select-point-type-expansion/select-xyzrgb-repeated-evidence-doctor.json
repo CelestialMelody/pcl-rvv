@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle3d/script/generate_circle3d_board_evidence_manifest.py",
+    "evidence_role": "production-public",
+    "label": "5-run board repeated circle3d select production public summary",
+    "metadata": {
+      "binary_hash": "not_recorded",
+      "device": "Milkv-Jupiter",
+      "freq": "not_recorded",
+      "governor": "not_recorded",
+      "iterations": 200,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": 20
+    },
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle3d/doc/phases/020-select-point-type-expansion/select-xyzrgb-repeated-evidence-manifest.json",
+    "title": "sac_model_circle3d Phase 020 PointXYZRGB select production repeated board summary"
+  },
+  "result": {
+    "errors": 1,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "ERROR",
+      "signal": "ba_degradation_frequency",
+      "case": "sac_model_circle3d selectWithinDistance production public Std/RVV PointXYZRGB 65536",
+      "observed_pattern": "B/A values=0.888x, 0.888x, 0.892x, 0.886x, 0.887x；5/5 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    }
+  ]
+}

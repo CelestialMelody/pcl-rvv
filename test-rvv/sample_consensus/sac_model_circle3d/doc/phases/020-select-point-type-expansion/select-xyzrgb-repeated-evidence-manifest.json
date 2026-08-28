@@ -1,0 +1,109 @@
+{
+  "checks": {
+    "strict_ab": true,
+    "thresholds": {
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15,
+      "min_repeated_runs": 5
+    }
+  },
+  "comparisons": [
+    {
+      "allowed_contract_mismatches": [
+        "gate",
+        "reduction"
+      ],
+      "ba_values": [
+        0.8881899069995516,
+        0.887927577160236,
+        0.892198365178038,
+        0.8860360996436552,
+        0.8870485527270288
+      ],
+      "baseline": {
+        "asm_boundary": "not_applicable_std_build",
+        "boundary": "public_overload",
+        "checksum": "3.99061e+08",
+        "checksum_policy": "bench_checksum_plus_gtest_tolerance",
+        "gate": "not_applicable_std_build",
+        "label": "Std build public selectWithinDistance",
+        "mask": "circle3d_projection_squared_distance_less_than_threshold",
+        "reduction": "scalar_eigen_projection",
+        "row_source": "direct_indexed_indices",
+        "rvv_instr_count": 0,
+        "rvv_ms": 21.19802,
+        "solve": false,
+        "timer_boundary": "public selectWithinDistance_public_entry_only",
+        "wrapper": "SampleConsensusModelCircle3D::selectWithinDistance"
+      },
+      "build_comparison": "std_vs_rvv_public_repeated",
+      "candidate": {
+        "asm_boundary": "selectWithinDistanceRVVCircle3D",
+        "boundary": "public_overload",
+        "checksum": "3.99061e+08",
+        "checksum_policy": "bench_checksum_plus_gtest_tolerance",
+        "gate": "pre_narrowing_RVVXYZAoSFloatLayout_PointT_signed_i32_index_u32_offset_non_degenerate_projection",
+        "label": "RVV build public selectWithinDistance",
+        "mask": "circle3d_projection_squared_distance_less_than_threshold",
+        "reduction": "rvv_projection_radius_sqrt_vcompress_error_store",
+        "row_source": "direct_indexed_indices",
+        "rvv_instr_count": 31,
+        "rvv_ms": 23.86446,
+        "solve": false,
+        "timer_boundary": "public selectWithinDistance_public_entry_only",
+        "wrapper": "SampleConsensusModelCircle3D::selectWithinDistance"
+      },
+      "candidate_ms_values": [
+        23.8601,
+        23.9372,
+        23.5989,
+        24.0778,
+        23.8483
+      ],
+      "case_kind": "production_public",
+      "diagnostic_to_production_mismatch_audit": {
+        "ab_boundary": "Std binary public overload vs RVV binary public overload",
+        "baseline_mismatch_risk": "low_same_public_wrapper_and_timer_boundary",
+        "can_extrapolate_to_production": "yes_for_current_public_boundary_only",
+        "clean_adoption_requires": "no existing RVV family in this public boundary; future RVV families need production-detail A/B",
+        "decision_question": "whether the production selectWithinDistance RVV dispatch is worth keeping",
+        "evidence_role": "production-public"
+      },
+      "evidence_role": "production-public",
+      "iterations": 200,
+      "name": "sac_model_circle3d selectWithinDistance production public Std/RVV PointXYZRGB 65536",
+      "point_type": "PointXYZRGB",
+      "public_ms_values": [
+        21.1923,
+        21.2545,
+        21.0549,
+        21.3338,
+        21.1546
+      ],
+      "run_count": 5,
+      "size": 65536,
+      "warmup_iterations": 20
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle3d/script/generate_circle3d_board_evidence_manifest.py",
+    "evidence_role": "production-public",
+    "label": "5-run board repeated circle3d select production public summary",
+    "metadata": {
+      "binary_hash": "not_recorded",
+      "device": "Milkv-Jupiter",
+      "freq": "not_recorded",
+      "governor": "not_recorded",
+      "iterations": 200,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": 20
+    },
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle3d/doc/phases/020-select-point-type-expansion/select-xyzrgb-repeated-evidence-manifest.json",
+    "title": "sac_model_circle3d Phase 020 PointXYZRGB select production repeated board summary"
+  }
+}

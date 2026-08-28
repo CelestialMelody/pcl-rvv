@@ -1,0 +1,189 @@
+{
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15,
+      "min_repeated_runs": 5
+    }
+  },
+  "comparisons": [
+    {
+      "allowed_contract_mismatches": [
+        "boundary",
+        "wrapper",
+        "timer_boundary",
+        "reduction"
+      ],
+      "ba_values": [
+        0.5697290525436636,
+        0.5729126463398945,
+        0.5712652722088287,
+        0.5724866467357992,
+        0.5700982215938687
+      ],
+      "baseline": {
+        "asm_boundary": "not_applicable_no_production_rvv_dispatch",
+        "boundary": "public_overload",
+        "checksum": "not_recorded",
+        "checksum_policy": "bench_checksum_plus_gtest_tolerance",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "label": "RVV build public countWithinDistance",
+        "mask": "circle3d_projection_squared_distance_less_than_threshold",
+        "reduction": "scalar_eigen_projection",
+        "row_source": "direct_indexed_indices",
+        "rvv_instr_count": 0,
+        "rvv_ms": 9.121276,
+        "solve": false,
+        "timer_boundary": "public countWithinDistance_public_entry_only",
+        "wrapper": "SampleConsensusModelCircle3D::public countWithinDistance"
+      },
+      "build_comparison": "rvv_binary_public_vs_test_helper_repeated",
+      "candidate": {
+        "asm_boundary": "countWithinDistanceProjectionRVV",
+        "boundary": "test_helper",
+        "checksum": "not_recorded",
+        "checksum_policy": "bench_checksum_plus_gtest_tolerance",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "label": "RVV build candidate count projection",
+        "mask": "circle3d_projection_squared_distance_less_than_threshold",
+        "reduction": "rvv_projection_radius_sqrt_mask_popcount",
+        "row_source": "direct_indexed_indices",
+        "rvv_instr_count": 27,
+        "rvv_ms": 15.966339999999999,
+        "solve": false,
+        "timer_boundary": "candidate count projection_test_helper_only",
+        "wrapper": "SampleConsensusModelCircle3DAccess::countWithinDistanceProjectionRVV"
+      },
+      "candidate_ms_values": [
+        16.2836,
+        15.546,
+        15.8867,
+        15.9886,
+        16.1268
+      ],
+      "case_kind": "component_ablation",
+      "diagnostic_to_production_mismatch_audit": {
+        "ab_boundary": "public overload companion vs test-only helper in one RVV binary",
+        "baseline_mismatch_risk": "yes_public_wrapper_vs_test_helper",
+        "can_extrapolate_to_production": "no_direct_extrapolation",
+        "clean_adoption_requires": "production direct public Std/RVV after explicit user approval",
+        "decision_question": "whether projection RVV candidate is worth a bounded production probe",
+        "evidence_role": "component_ablation"
+      },
+      "evidence_role": "component_ablation",
+      "iterations": 200,
+      "name": "sac_model_circle3d countWithinDistance public vs projection candidate PointXYZ 65536",
+      "point_type": "PointXYZ",
+      "public_ms_values": [
+        9.27724,
+        8.9065,
+        9.07552,
+        9.15326,
+        9.19386
+      ],
+      "run_count": 5,
+      "size": 65536,
+      "warmup_iterations": 20
+    },
+    {
+      "allowed_contract_mismatches": [
+        "boundary",
+        "wrapper",
+        "timer_boundary",
+        "reduction"
+      ],
+      "ba_values": [
+        1.1150075037518759,
+        1.1441226536354898,
+        1.1278837792214436,
+        1.1341979391433192,
+        1.1257767696414738
+      ],
+      "baseline": {
+        "asm_boundary": "not_applicable_no_production_rvv_dispatch",
+        "boundary": "public_overload",
+        "checksum": "not_recorded",
+        "checksum_policy": "bench_checksum_plus_gtest_tolerance",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "label": "RVV build public selectWithinDistance",
+        "mask": "circle3d_projection_squared_distance_less_than_threshold",
+        "reduction": "scalar_eigen_projection",
+        "row_source": "direct_indexed_indices",
+        "rvv_instr_count": 0,
+        "rvv_ms": 19.99928,
+        "solve": false,
+        "timer_boundary": "public selectWithinDistance_public_entry_only",
+        "wrapper": "SampleConsensusModelCircle3D::public selectWithinDistance"
+      },
+      "build_comparison": "rvv_binary_public_vs_test_helper_repeated",
+      "candidate": {
+        "asm_boundary": "selectWithinDistanceProjectionRVV",
+        "boundary": "test_helper",
+        "checksum": "not_recorded",
+        "checksum_policy": "bench_checksum_plus_gtest_tolerance",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "label": "RVV build candidate select projection",
+        "mask": "circle3d_projection_squared_distance_less_than_threshold",
+        "reduction": "rvv_projection_radius_sqrt_vcompress_error_store",
+        "row_source": "direct_indexed_indices",
+        "rvv_instr_count": 33,
+        "rvv_ms": 17.70986,
+        "solve": false,
+        "timer_boundary": "candidate select projection_test_helper_only",
+        "wrapper": "SampleConsensusModelCircle3DAccess::selectWithinDistanceProjectionRVV"
+      },
+      "candidate_ms_values": [
+        17.991,
+        17.2714,
+        17.5941,
+        17.7499,
+        17.9429
+      ],
+      "case_kind": "component_ablation",
+      "diagnostic_to_production_mismatch_audit": {
+        "ab_boundary": "public overload companion vs test-only helper in one RVV binary",
+        "baseline_mismatch_risk": "yes_public_wrapper_vs_test_helper",
+        "can_extrapolate_to_production": "no_direct_extrapolation",
+        "clean_adoption_requires": "production direct public Std/RVV after explicit user approval",
+        "decision_question": "whether projection RVV candidate is worth a bounded production probe",
+        "evidence_role": "component_ablation"
+      },
+      "evidence_role": "component_ablation",
+      "iterations": 200,
+      "name": "sac_model_circle3d selectWithinDistance public vs projection candidate PointXYZ 65536",
+      "point_type": "PointXYZ",
+      "public_ms_values": [
+        20.0601,
+        19.7606,
+        19.8441,
+        20.1319,
+        20.1997
+      ],
+      "run_count": 5,
+      "size": 65536,
+      "warmup_iterations": 20
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "analysis_script": "test-rvv/sample_consensus/sac_model_circle3d/script/generate_circle3d_board_evidence_manifest.py",
+    "evidence_role": "component_ablation",
+    "label": "5-run board repeated circle3d projection component summary",
+    "metadata": {
+      "binary_hash": "not_recorded",
+      "device": "Milkv-Jupiter",
+      "freq": "not_recorded",
+      "governor": "not_recorded",
+      "iterations": 200,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": 20
+    },
+    "summary_path": "test-rvv/sample_consensus/sac_model_circle3d/doc/phases/000-circle3d-projection-component-ablation/projection-repeated-evidence-manifest.json",
+    "title": "sac_model_circle3d Phase 000 projection component repeated board summary"
+  }
+}
