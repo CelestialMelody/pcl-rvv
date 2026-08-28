@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "CGM RGB stencil production direct repeated board summary",
+    "evidence_role": "production_direct",
+    "summary_path": "log/board/repeated_phase050_rgb_stencil_production_direct/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase050_rgb_stencil_production_direct/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase050_rgb_stencil_production_direct/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase050_rgb_stencil_production_direct/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase050_rgb_stencil_production_direct/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase050_rgb_stencil_production_direct/run_05/analyze_bench_compare.log"
+    ],
+    "label": "cgm_phase050_rgb_stencil_production_direct_repeated",
+    "analysis_script": "test-rvv/recognition/color_gradient_modality/script/generate_cgm_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "dataset": "synthetic CGM diagnostic workloads; case label defines exact input shape",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "production_process_320x240",
+      "group": "cgm-production-public-color-gradient-process",
+      "evidence_role": "production_direct",
+      "case_kind": "production_direct",
+      "point_type": "pcl::PointXYZRGB",
+      "size": "320x240 organized PointXYZRGB cloud through ColorGradientModality::processInputData",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 48.1502,
+      "rvv_ms": 29.49544,
+      "ba_values": [
+        1.62,
+        1.62,
+        1.64,
+        1.61,
+        1.68
+      ],
+      "std_ms_values": [
+        48.2489,
+        48.4126,
+        47.6865,
+        48.0159,
+        48.3871
+      ],
+      "rvv_ms_values": [
+        29.8268,
+        29.8757,
+        29.0207,
+        29.8731,
+        28.8809
+      ],
+      "run_paths": [
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "5189351474172833280",
+        "std_ms": 48.1502,
+        "rvv_ms": 48.1502,
+        "boundary": "public_overload",
+        "wrapper": "ColorGradientModality<PointXYZRGB>::processInputData via src/bench_cgm.cpp",
+        "row_source": "organized_pointxyzrgb_public_entry",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over production quantized map and spreaded quantized map; GradientXY floating angles are covered by tolerant correctness tests",
+        "timer_boundary": "processInputData includes RGB copy, Gaussian convolution, post-Gaussian Std/RVV color-gradient chain and spread; excludes feature extraction",
+        "gate": "organized PointXYZRGB cloud, width>=3, height>=3, __RVV10__ candidate build dispatches after Gaussian output to pcl::RGB",
+        "mask": "production gradient_magnitude_threshold predicate followed by production 3x3 dominant-bin filter and spread mask behavior",
+        "reduction": "scalar Gaussian and spread around an RVV post-Gaussian RGB byte stride-load Sobel stencil, max-channel selection, per-lane sqrt/atan2/angle quantize plus lane-wise dominant filter",
+        "asm_boundary": "ColorGradientModality<PointXYZRGB>::computeColorGradientPipelineRVV / inlined production helper in bench_cgm_rvv",
+        "rvv_instr_count": 3963
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "5189351474172833280",
+        "std_ms": 48.1502,
+        "rvv_ms": 29.49544,
+        "boundary": "public_overload",
+        "wrapper": "ColorGradientModality<PointXYZRGB>::processInputData via src/bench_cgm.cpp",
+        "row_source": "organized_pointxyzrgb_public_entry",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over production quantized map and spreaded quantized map; GradientXY floating angles are covered by tolerant correctness tests",
+        "timer_boundary": "processInputData includes RGB copy, Gaussian convolution, post-Gaussian Std/RVV color-gradient chain and spread; excludes feature extraction",
+        "gate": "organized PointXYZRGB cloud, width>=3, height>=3, __RVV10__ candidate build dispatches after Gaussian output to pcl::RGB",
+        "mask": "production gradient_magnitude_threshold predicate followed by production 3x3 dominant-bin filter and spread mask behavior",
+        "reduction": "scalar Gaussian and spread around an RVV post-Gaussian RGB byte stride-load Sobel stencil, max-channel selection, per-lane sqrt/atan2/angle quantize plus lane-wise dominant filter",
+        "asm_boundary": "ColorGradientModality<PointXYZRGB>::computeColorGradientPipelineRVV / inlined production helper in bench_cgm_rvv",
+        "rvv_instr_count": 3963
+      },
+      "notes": "Phase 050 production direct evidence. It calls the public ColorGradientModality<PointXYZRGB>::processInputData entry; feature extraction remains outside this timer boundary."
+    },
+    {
+      "name": "production_process_641x481_tail",
+      "group": "cgm-production-public-color-gradient-process",
+      "evidence_role": "production_direct",
+      "case_kind": "production_direct",
+      "point_type": "pcl::PointXYZRGB",
+      "size": "641x481 organized PointXYZRGB cloud through ColorGradientModality::processInputData with RVV tail lanes",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 202.315,
+      "rvv_ms": 126.06098,
+      "ba_values": [
+        1.59,
+        1.6,
+        1.59,
+        1.58,
+        1.66
+      ],
+      "std_ms_values": [
+        202.1243,
+        201.3651,
+        203.405,
+        201.7817,
+        202.8989
+      ],
+      "rvv_ms_values": [
+        127.0154,
+        125.8096,
+        127.576,
+        127.5562,
+        122.3477
+      ],
+      "run_paths": [
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase050_rgb_stencil_production_direct/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "2369217414544299322",
+        "std_ms": 202.315,
+        "rvv_ms": 202.315,
+        "boundary": "public_overload",
+        "wrapper": "ColorGradientModality<PointXYZRGB>::processInputData via src/bench_cgm.cpp",
+        "row_source": "organized_pointxyzrgb_public_entry",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over production quantized map and spreaded quantized map; GradientXY floating angles are covered by tolerant correctness tests",
+        "timer_boundary": "processInputData includes RGB copy, Gaussian convolution, post-Gaussian Std/RVV color-gradient chain and spread; excludes feature extraction",
+        "gate": "organized PointXYZRGB cloud, width>=3, height>=3, __RVV10__ candidate build dispatches after Gaussian output to pcl::RGB",
+        "mask": "production gradient_magnitude_threshold predicate followed by production 3x3 dominant-bin filter and spread mask behavior",
+        "reduction": "scalar Gaussian and spread around an RVV post-Gaussian RGB byte stride-load Sobel stencil, max-channel selection, per-lane sqrt/atan2/angle quantize plus lane-wise dominant filter",
+        "asm_boundary": "ColorGradientModality<PointXYZRGB>::computeColorGradientPipelineRVV / inlined production helper in bench_cgm_rvv",
+        "rvv_instr_count": 3963
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "2369217414544299322",
+        "std_ms": 202.315,
+        "rvv_ms": 126.06098,
+        "boundary": "public_overload",
+        "wrapper": "ColorGradientModality<PointXYZRGB>::processInputData via src/bench_cgm.cpp",
+        "row_source": "organized_pointxyzrgb_public_entry",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over production quantized map and spreaded quantized map; GradientXY floating angles are covered by tolerant correctness tests",
+        "timer_boundary": "processInputData includes RGB copy, Gaussian convolution, post-Gaussian Std/RVV color-gradient chain and spread; excludes feature extraction",
+        "gate": "organized PointXYZRGB cloud, width>=3, height>=3, __RVV10__ candidate build dispatches after Gaussian output to pcl::RGB",
+        "mask": "production gradient_magnitude_threshold predicate followed by production 3x3 dominant-bin filter and spread mask behavior",
+        "reduction": "scalar Gaussian and spread around an RVV post-Gaussian RGB byte stride-load Sobel stencil, max-channel selection, per-lane sqrt/atan2/angle quantize plus lane-wise dominant filter",
+        "asm_boundary": "ColorGradientModality<PointXYZRGB>::computeColorGradientPipelineRVV / inlined production helper in bench_cgm_rvv",
+        "rvv_instr_count": 3963
+      },
+      "notes": "Phase 050 production direct evidence. It calls the public ColorGradientModality<PointXYZRGB>::processInputData entry; feature extraction remains outside this timer boundary."
+    }
+  ]
+}

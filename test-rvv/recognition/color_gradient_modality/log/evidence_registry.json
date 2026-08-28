@@ -1,0 +1,790 @@
+{
+  "files": {
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter sobel_quantize_320x240,sobel_quantize_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-cgm-scaffold/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787916961,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/summary.md"
+      },
+      "run_label": "cgm_phase000_sobel_quantize_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787916961740982681,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.json",
+        "sha256": "sha256:d79635b448815bf569a55abf3455235c56fb658f67686ed1d34719ae9ea37317",
+        "size": 4639
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter sobel_quantize_320x240,sobel_quantize_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-cgm-scaffold/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787916961,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/summary.md"
+      },
+      "run_label": "cgm_phase000_sobel_quantize_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787916961739982671,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.md",
+        "sha256": "sha256:c568b0ee477b6115b4310434f0265ba8931879a0a904b1262216b04171337c55",
+        "size": 3617
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter sobel_quantize_320x240,sobel_quantize_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-cgm-scaffold/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787916961,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/summary.md"
+      },
+      "run_label": "cgm_phase000_sobel_quantize_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787916961712982416,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_manifest.json",
+        "sha256": "sha256:2c9c4fad828a660468af161a5fa25223f5d9c5a5aeb3ba96ba68861051617fcc",
+        "size": 8503
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter sobel_quantize_320x240,sobel_quantize_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-cgm-scaffold/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787916961,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/summary.md"
+      },
+      "run_label": "cgm_phase000_sobel_quantize_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787916961711982407,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/summary.md",
+        "sha256": "sha256:518029125a3bf0b83fb37b637057a5d2c9d1157fb48efbd02ebf6d76022a16dd",
+        "size": 943
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter filter_dominant_320x240 --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/010-dominant-filter-rvv/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787917071,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md"
+      },
+      "run_label": "cgm_phase010_dominant_filter_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917071065921871,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.json",
+        "sha256": "sha256:3653ab75a0614ac26b76ea98b4bb1129c8c928b97a884a1162d64e85d2245f67",
+        "size": 2976
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter filter_dominant_320x240 --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/010-dominant-filter-rvv/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787917071,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md"
+      },
+      "run_label": "cgm_phase010_dominant_filter_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917071065921871,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md",
+        "sha256": "sha256:c0bf27d5087e4ddf4ceccd0c45015dcf4749e491f36e0fe0a5e70d025c9c0905",
+        "size": 2178
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter filter_dominant_320x240 --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/010-dominant-filter-rvv/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787917071,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md"
+      },
+      "run_label": "cgm_phase010_dominant_filter_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917071029921591,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json",
+        "sha256": "sha256:c380485598ccfd77fe426ec4b71ce2be7c1c0f357b4706893a45949dc0c640f9",
+        "size": 5063
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter filter_dominant_320x240 --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/010-dominant-filter-rvv/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787917071,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md"
+      },
+      "run_label": "cgm_phase010_dominant_filter_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917071029921591,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md",
+        "sha256": "sha256:4deb5d7c8708c6aba6e3887dfec62826070954f4348c07f06e0645919bd6e5e8",
+        "size": 817
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/020-full-chain-production-shaped-diagnostic/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787917435,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/summary.md"
+      },
+      "run_label": "cgm_phase020_full_chain_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917435919848344,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.json",
+        "sha256": "sha256:ea35f32f9acf125fb6571f91506118da527197d2c253ed2fc500dd0d5e489442",
+        "size": 4591
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/020-full-chain-production-shaped-diagnostic/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787917435,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/summary.md"
+      },
+      "run_label": "cgm_phase020_full_chain_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917435919848344,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.md",
+        "sha256": "sha256:ba6128905d8502ef456f0cb927f3431fef5ecd281fda5fcc5f3699188e9fb859",
+        "size": 3593
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/020-full-chain-production-shaped-diagnostic/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787917435,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/summary.md"
+      },
+      "run_label": "cgm_phase020_full_chain_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917435891849521,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_manifest.json",
+        "sha256": "sha256:d038ee4879223df85c915bbe0b235adaccc83ae72c458fe5b35a6709c2db87a4",
+        "size": 8973
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/020-full-chain-production-shaped-diagnostic/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787917435,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/summary.md"
+      },
+      "run_label": "cgm_phase020_full_chain_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917435891849521,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/summary.md",
+        "sha256": "sha256:09ee8d7403c1b12659a3702cfd9b6f02682401e3482c48f27ab2408febbae2e9",
+        "size": 947
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/030-production-integration-plan/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787921814,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/summary.md"
+      },
+      "run_label": "cgm_phase030_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787921814052473128,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.json",
+        "sha256": "sha256:fbf38d848faa01a35de8f12efe6deb94d4396490e9b8f5fc82505575d3783389",
+        "size": 4639
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/030-production-integration-plan/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787921814,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/summary.md"
+      },
+      "run_label": "cgm_phase030_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787921814052473128,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.md",
+        "sha256": "sha256:1d451203a2ca7b5112b00090cddff4e45e73b5f0cc57afdbd62cfaafbd2f867e",
+        "size": 3599
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/030-production-integration-plan/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787921814,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/summary.md"
+      },
+      "run_label": "cgm_phase030_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787921814024475633,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_manifest.json",
+        "sha256": "sha256:bd4f4c3724caa187b457d80ece10425537e3de4d9b93d979c6fbdfedac6b0c13",
+        "size": 9799
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/030-production-integration-plan/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787921814,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/summary.md"
+      },
+      "run_label": "cgm_phase030_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787921814023475722,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/summary.md",
+        "sha256": "sha256:a2b5872525e3b856412acea65f0f5eebbb008de9a3e0d94e1e51af50183fd30d",
+        "size": 1105
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail,full_chain_stencil_320x240,full_chain_stencil_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/040-rgb-stencil-rvv-ablation/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787925529,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/summary.md"
+      },
+      "run_label": "cgm_phase040_rgb_stencil_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787925529292540885,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.json",
+        "sha256": "sha256:818d64ff4a368bd4800fd7246ecdc5b616dc84aee5119183878739ca5299c64a",
+        "size": 7935
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail,full_chain_stencil_320x240,full_chain_stencil_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/040-rgb-stencil-rvv-ablation/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787925529,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/summary.md"
+      },
+      "run_label": "cgm_phase040_rgb_stencil_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787925529292540885,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.md",
+        "sha256": "sha256:d1325895f4c095146f55aaa7517a3861a5f99ce260f69923a598b7b395a74a2c",
+        "size": 6471
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail,full_chain_stencil_320x240,full_chain_stencil_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/040-rgb-stencil-rvv-ablation/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787925529,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/summary.md"
+      },
+      "run_label": "cgm_phase040_rgb_stencil_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787925529258541236,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_manifest.json",
+        "sha256": "sha256:b16090f7405e4f210d7cc486c30f5ce22980d57461ba69f6ad3d2c0862d664f6",
+        "size": 17106
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail,full_chain_stencil_320x240,full_chain_stencil_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/040-rgb-stencil-rvv-ablation/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787925529,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/summary.md"
+      },
+      "run_label": "cgm_phase040_rgb_stencil_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787925529258541236,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/summary.md",
+        "sha256": "sha256:9852dfaf3ea6f2615d73ac65e1b90f9f896330d0213267e686d8eee4b38c464a",
+        "size": 1246
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/050-rgb-stencil-production-integration/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787926214,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md"
+      },
+      "run_label": "cgm_phase050_rgb_stencil_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787926214353830205,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.json",
+        "sha256": "sha256:e50971cdb96432ba478df4ec511205792638dc815a422acdfa39eb9079c2a93e",
+        "size": 4735
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/050-rgb-stencil-production-integration/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787926214,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md"
+      },
+      "run_label": "cgm_phase050_rgb_stencil_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787926214352830261,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md",
+        "sha256": "sha256:ab3e32dae0e7644baed6f088e8b1d6d64810868db1a8e99816e4da67a31601e4",
+        "size": 3623
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/050-rgb-stencil-production-integration/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787926214,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md"
+      },
+      "run_label": "cgm_phase050_rgb_stencil_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787926214324831824,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json",
+        "sha256": "sha256:5f1d5b0150cfe361bec2272b4683c3f9ebb756b0e6558ed3f40c938a7efaf18f",
+        "size": 10240
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/050-rgb-stencil-production-integration/result.zh.md",
+        "doc/color_gradient_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787926214,
+      "related": {
+        "doctor_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md"
+      },
+      "run_label": "cgm_phase050_rgb_stencil_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787926214324831824,
+        "path": "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md",
+        "sha256": "sha256:9ae8d6e371ca63e1b94e882e3621949bc356a8b963ef03942fbaef83e78a4bce",
+        "size": 1216
+      },
+      "target": "board_repeated"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/summary.md"
+      ],
+      "recorded_at_epoch": 1787916057,
+      "run_label": "cgm_phase000_sobel_quantize_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter filter_dominant_320x240 --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md"
+      ],
+      "recorded_at_epoch": 1787916587,
+      "run_label": "cgm_phase010_dominant_filter_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter filter_dominant_320x240 --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md"
+      ],
+      "recorded_at_epoch": 1787916652,
+      "run_label": "cgm_phase010_dominant_filter_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter sobel_quantize_320x240,sobel_quantize_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase000_sobel_quantize/summary.md"
+      ],
+      "recorded_at_epoch": 1787916961,
+      "run_label": "cgm_phase000_sobel_quantize_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter filter_dominant_320x240 --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase010_dominant_filter/summary.md"
+      ],
+      "recorded_at_epoch": 1787917071,
+      "run_label": "cgm_phase010_dominant_filter_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase020_full_chain/summary.md"
+      ],
+      "recorded_at_epoch": 1787917435,
+      "run_label": "cgm_phase020_full_chain_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787921315,
+      "run_label": "cgm_phase030_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase030_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787921814,
+      "run_label": "cgm_phase030_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail,full_chain_stencil_320x240,full_chain_stencil_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/summary.md"
+      ],
+      "recorded_at_epoch": 1787925411,
+      "run_label": "cgm_phase040_rgb_stencil_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter full_chain_320x240,full_chain_641x481_tail,full_chain_stencil_320x240,full_chain_stencil_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase040_rgb_stencil/summary.md"
+      ],
+      "recorded_at_epoch": 1787925529,
+      "run_label": "cgm_phase040_rgb_stencil_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787926084,
+      "run_label": "cgm_phase050_rgb_stencil_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787926177,
+      "run_label": "cgm_phase050_rgb_stencil_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/color_gradient_modality/log/board/repeated_phase050_rgb_stencil_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787926214,
+      "run_label": "cgm_phase050_rgb_stencil_production_direct_repeated",
+      "target": "board_repeated"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787926214
+}

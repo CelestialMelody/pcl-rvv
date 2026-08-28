@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "CGM Sobel+quantize production-shaped diagnostic repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "log/board/repeated_phase000_sobel_quantize/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase000_sobel_quantize/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase000_sobel_quantize/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase000_sobel_quantize/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase000_sobel_quantize/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase000_sobel_quantize/run_05/analyze_bench_compare.log"
+    ],
+    "label": "cgm_phase000_sobel_quantize_repeated",
+    "analysis_script": "test-rvv/recognition/color_gradient_modality/script/generate_cgm_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "dataset": "synthetic CGM diagnostic workloads; case label defines exact input shape",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "sobel_quantize_320x240",
+      "group": "cgm-sobel-quantize-production-shaped-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production_shaped_diagnostic",
+      "point_type": "pcl::RGB",
+      "size": "320x240 organized RGB image",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 19.95964,
+      "rvv_ms": 8.98624,
+      "ba_values": [
+        2.24,
+        2.23,
+        2.22,
+        2.28,
+        2.13
+      ],
+      "std_ms_values": [
+        20.1157,
+        19.9468,
+        19.8792,
+        20.0215,
+        19.835
+      ],
+      "rvv_ms_values": [
+        8.9765,
+        8.9254,
+        8.9574,
+        8.7743,
+        9.2976
+      ],
+      "run_paths": [
+        "log/board/repeated_phase000_sobel_quantize/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase000_sobel_quantize/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase000_sobel_quantize/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase000_sobel_quantize/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase000_sobel_quantize/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "3118309285021054092",
+        "std_ms": 19.95964,
+        "rvv_ms": 19.95964,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over quantized bin and magnitude scaled by 1000",
+        "timer_boundary": "computeSobelQuantizedCandidate, Sobel max-channel selection plus magnitude/angle quantize for inner pixels",
+        "gate": "organized pcl::RGB image, width>=3, height>=3, borders are zero-filled",
+        "mask": "magnitude_threshold predicate; border pixels excluded from timed inner-pixel rows",
+        "reduction": "no cross-lane reduction; scalar Sobel staging and RVV per-lane sqrt/atan2/angle quantize",
+        "asm_boundary": "computeSobelQuantizedCandidate / inlined RVV math in bench_cgm_rvv",
+        "rvv_instr_count": 1594
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "3118309285021054092",
+        "std_ms": 19.95964,
+        "rvv_ms": 8.98624,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over quantized bin and magnitude scaled by 1000",
+        "timer_boundary": "computeSobelQuantizedCandidate, Sobel max-channel selection plus magnitude/angle quantize for inner pixels",
+        "gate": "organized pcl::RGB image, width>=3, height>=3, borders are zero-filled",
+        "mask": "magnitude_threshold predicate; border pixels excluded from timed inner-pixel rows",
+        "reduction": "no cross-lane reduction; scalar Sobel staging and RVV per-lane sqrt/atan2/angle quantize",
+        "asm_boundary": "computeSobelQuantizedCandidate / inlined RVV math in bench_cgm_rvv",
+        "rvv_instr_count": 1594
+      },
+      "notes": "Phase 000 production-shaped diagnostic. It does not call ColorGradientModality::processInputData and does not include Gaussian smoothing, dominant filter, spread or feature extraction."
+    },
+    {
+      "name": "sobel_quantize_641x481_tail",
+      "group": "cgm-sobel-quantize-production-shaped-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production_shaped_diagnostic",
+      "point_type": "pcl::RGB",
+      "size": "641x481 organized RGB image with RVV tail lanes",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 79.69404,
+      "rvv_ms": 32.84064,
+      "ba_values": [
+        2.45,
+        2.43,
+        2.42,
+        2.44,
+        2.4
+      ],
+      "std_ms_values": [
+        80.2461,
+        79.67,
+        79.659,
+        79.7656,
+        79.1295
+      ],
+      "rvv_ms_values": [
+        32.7804,
+        32.7506,
+        32.9443,
+        32.7116,
+        33.0163
+      ],
+      "run_paths": [
+        "log/board/repeated_phase000_sobel_quantize/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase000_sobel_quantize/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase000_sobel_quantize/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase000_sobel_quantize/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase000_sobel_quantize/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "10554169072401616548",
+        "std_ms": 79.69404,
+        "rvv_ms": 79.69404,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over quantized bin and magnitude scaled by 1000",
+        "timer_boundary": "computeSobelQuantizedCandidate, Sobel max-channel selection plus magnitude/angle quantize for inner pixels",
+        "gate": "organized pcl::RGB image, width>=3, height>=3, borders are zero-filled",
+        "mask": "magnitude_threshold predicate; border pixels excluded from timed inner-pixel rows",
+        "reduction": "no cross-lane reduction; scalar Sobel staging and RVV per-lane sqrt/atan2/angle quantize",
+        "asm_boundary": "computeSobelQuantizedCandidate / inlined RVV math in bench_cgm_rvv",
+        "rvv_instr_count": 1594
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "10554169072401616548",
+        "std_ms": 79.69404,
+        "rvv_ms": 32.84064,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over quantized bin and magnitude scaled by 1000",
+        "timer_boundary": "computeSobelQuantizedCandidate, Sobel max-channel selection plus magnitude/angle quantize for inner pixels",
+        "gate": "organized pcl::RGB image, width>=3, height>=3, borders are zero-filled",
+        "mask": "magnitude_threshold predicate; border pixels excluded from timed inner-pixel rows",
+        "reduction": "no cross-lane reduction; scalar Sobel staging and RVV per-lane sqrt/atan2/angle quantize",
+        "asm_boundary": "computeSobelQuantizedCandidate / inlined RVV math in bench_cgm_rvv",
+        "rvv_instr_count": 1594
+      },
+      "notes": "Phase 000 production-shaped diagnostic. It does not call ColorGradientModality::processInputData and does not include Gaussian smoothing, dominant filter, spread or feature extraction."
+    }
+  ]
+}

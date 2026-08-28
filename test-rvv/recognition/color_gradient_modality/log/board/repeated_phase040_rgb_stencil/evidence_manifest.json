@@ -1,0 +1,351 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "CGM RGB stencil RVV ablation repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "log/board/repeated_phase040_rgb_stencil/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase040_rgb_stencil/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase040_rgb_stencil/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase040_rgb_stencil/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase040_rgb_stencil/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase040_rgb_stencil/run_05/analyze_bench_compare.log"
+    ],
+    "label": "cgm_phase040_rgb_stencil_repeated",
+    "analysis_script": "test-rvv/recognition/color_gradient_modality/script/generate_cgm_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "dataset": "synthetic CGM diagnostic workloads; case label defines exact input shape",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "full_chain_320x240",
+      "group": "cgm-full-sobel-quantize-filter-production-shaped-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production_shaped_diagnostic",
+      "point_type": "pcl::RGB",
+      "size": "320x240 organized RGB image through Sobel+quantize+filter",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 24.27046,
+      "rvv_ms": 10.5819,
+      "ba_values": [
+        2.35,
+        2.34,
+        2.11,
+        2.32,
+        2.36
+      ],
+      "std_ms_values": [
+        24.4025,
+        24.5706,
+        23.5085,
+        24.4738,
+        24.3969
+      ],
+      "rvv_ms_values": [
+        10.3733,
+        10.4932,
+        11.1318,
+        10.5657,
+        10.3455
+      ],
+      "run_paths": [
+        "log/board/repeated_phase040_rgb_stencil/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "18061343419196392793",
+        "std_ms": 24.27046,
+        "rvv_ms": 24.27046,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels_to_quantized_filter_map",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "computeSobelQuantizedFilteredCandidate, Sobel max-channel selection, magnitude/angle quantize, quantized-map extraction and 3x3 dominant-bin filter",
+        "gate": "organized pcl::RGB image, width>=3, height>=3, borders are zero-filled at each subchain boundary",
+        "mask": "magnitude_threshold predicate followed by 3x3 bin equality masks for directions 1..8",
+        "reduction": "scalar Sobel staging, RVV per-lane sqrt/atan2/angle quantize, then lane-wise dominant filter equality count",
+        "asm_boundary": "computeSobelQuantizedFilteredCandidate / inlined RVV math and byte filter in bench_cgm_rvv",
+        "rvv_instr_count": 4036
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "18061343419196392793",
+        "std_ms": 24.27046,
+        "rvv_ms": 10.5819,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels_to_quantized_filter_map",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "computeSobelQuantizedFilteredCandidate, Sobel max-channel selection, magnitude/angle quantize, quantized-map extraction and 3x3 dominant-bin filter",
+        "gate": "organized pcl::RGB image, width>=3, height>=3, borders are zero-filled at each subchain boundary",
+        "mask": "magnitude_threshold predicate followed by 3x3 bin equality masks for directions 1..8",
+        "reduction": "scalar Sobel staging, RVV per-lane sqrt/atan2/angle quantize, then lane-wise dominant filter equality count",
+        "asm_boundary": "computeSobelQuantizedFilteredCandidate / inlined RVV math and byte filter in bench_cgm_rvv",
+        "rvv_instr_count": 4036
+      },
+      "notes": "Phase 020 production-shaped diagnostic. It does not call ColorGradientModality::processInputData and does not include Gaussian smoothing, spread or feature extraction."
+    },
+    {
+      "name": "full_chain_641x481_tail",
+      "group": "cgm-full-sobel-quantize-filter-production-shaped-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production_shaped_diagnostic",
+      "point_type": "pcl::RGB",
+      "size": "641x481 organized RGB image through Sobel+quantize+filter with RVV tail lanes",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 97.5301,
+      "rvv_ms": 39.55384,
+      "ba_values": [
+        2.47,
+        2.49,
+        2.42,
+        2.47,
+        2.48
+      ],
+      "std_ms_values": [
+        97.9289,
+        98.51,
+        95.1782,
+        97.7546,
+        98.2788
+      ],
+      "rvv_ms_values": [
+        39.6494,
+        39.5992,
+        39.3502,
+        39.5419,
+        39.6285
+      ],
+      "run_paths": [
+        "log/board/repeated_phase040_rgb_stencil/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "11024222116537967177",
+        "std_ms": 97.5301,
+        "rvv_ms": 97.5301,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels_to_quantized_filter_map",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "computeSobelQuantizedFilteredCandidate, Sobel max-channel selection, magnitude/angle quantize, quantized-map extraction and 3x3 dominant-bin filter",
+        "gate": "organized pcl::RGB image, width>=3, height>=3, borders are zero-filled at each subchain boundary",
+        "mask": "magnitude_threshold predicate followed by 3x3 bin equality masks for directions 1..8",
+        "reduction": "scalar Sobel staging, RVV per-lane sqrt/atan2/angle quantize, then lane-wise dominant filter equality count",
+        "asm_boundary": "computeSobelQuantizedFilteredCandidate / inlined RVV math and byte filter in bench_cgm_rvv",
+        "rvv_instr_count": 4036
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "11024222116537967177",
+        "std_ms": 97.5301,
+        "rvv_ms": 39.55384,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels_to_quantized_filter_map",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "computeSobelQuantizedFilteredCandidate, Sobel max-channel selection, magnitude/angle quantize, quantized-map extraction and 3x3 dominant-bin filter",
+        "gate": "organized pcl::RGB image, width>=3, height>=3, borders are zero-filled at each subchain boundary",
+        "mask": "magnitude_threshold predicate followed by 3x3 bin equality masks for directions 1..8",
+        "reduction": "scalar Sobel staging, RVV per-lane sqrt/atan2/angle quantize, then lane-wise dominant filter equality count",
+        "asm_boundary": "computeSobelQuantizedFilteredCandidate / inlined RVV math and byte filter in bench_cgm_rvv",
+        "rvv_instr_count": 4036
+      },
+      "notes": "Phase 020 production-shaped diagnostic. It does not call ColorGradientModality::processInputData and does not include Gaussian smoothing, spread or feature extraction."
+    },
+    {
+      "name": "full_chain_stencil_320x240",
+      "group": "cgm-full-rgb-stencil-quantize-filter-production-shaped-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production_shaped_diagnostic",
+      "point_type": "pcl::RGB",
+      "size": "320x240 organized RGB image through RGB Sobel-stencil RVV, quantize and filter",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 24.20952,
+      "rvv_ms": 4.80458,
+      "ba_values": [
+        5.05,
+        5.04,
+        4.98,
+        5.1,
+        5.03
+      ],
+      "std_ms_values": [
+        24.0796,
+        24.4022,
+        23.6356,
+        24.5182,
+        24.412
+      ],
+      "rvv_ms_values": [
+        4.7684,
+        4.8427,
+        4.7492,
+        4.8059,
+        4.8567
+      ],
+      "run_paths": [
+        "log/board/repeated_phase040_rgb_stencil/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "18061343419196392793",
+        "std_ms": 24.20952,
+        "rvv_ms": 24.20952,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels_to_quantized_filter_map",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "computeSobelQuantizedStencilCandidate, RGB byte stride-load Sobel stencil, max-channel selection, magnitude/angle quantize and 3x3 dominant-bin filter",
+        "gate": "organized pcl::RGB image, B/G/R/A 4-byte point stride, width>=3, height>=3, borders are zero-filled at each subchain boundary",
+        "mask": "magnitude_threshold predicate followed by 3x3 bin equality masks for directions 1..8",
+        "reduction": "RVV stride byte loads, widened integer Sobel arithmetic, lane-wise max-channel selection, per-lane sqrt/atan2/angle quantize, then lane-wise dominant filter equality count",
+        "asm_boundary": "computeSobelQuantizedStencilCandidate / inlined RVV stride-load Sobel math and byte filter in bench_cgm_rvv",
+        "rvv_instr_count": 4036
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "18061343419196392793",
+        "std_ms": 24.20952,
+        "rvv_ms": 4.80458,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels_to_quantized_filter_map",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "computeSobelQuantizedStencilCandidate, RGB byte stride-load Sobel stencil, max-channel selection, magnitude/angle quantize and 3x3 dominant-bin filter",
+        "gate": "organized pcl::RGB image, B/G/R/A 4-byte point stride, width>=3, height>=3, borders are zero-filled at each subchain boundary",
+        "mask": "magnitude_threshold predicate followed by 3x3 bin equality masks for directions 1..8",
+        "reduction": "RVV stride byte loads, widened integer Sobel arithmetic, lane-wise max-channel selection, per-lane sqrt/atan2/angle quantize, then lane-wise dominant filter equality count",
+        "asm_boundary": "computeSobelQuantizedStencilCandidate / inlined RVV stride-load Sobel math and byte filter in bench_cgm_rvv",
+        "rvv_instr_count": 4036
+      },
+      "notes": "Phase 040 production-shaped diagnostic. It does not call ColorGradientModality::processInputData and is a candidate-family A/B against the current full-chain diagnostic, not an adopted production path."
+    },
+    {
+      "name": "full_chain_stencil_641x481_tail",
+      "group": "cgm-full-rgb-stencil-quantize-filter-production-shaped-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production_shaped_diagnostic",
+      "point_type": "pcl::RGB",
+      "size": "641x481 organized RGB image through RGB Sobel-stencil RVV, quantize and filter with RVV tail lanes",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 97.34906,
+      "rvv_ms": 20.57734,
+      "ba_values": [
+        4.66,
+        4.67,
+        4.81,
+        4.68,
+        4.84
+      ],
+      "std_ms_values": [
+        97.5477,
+        97.6759,
+        95.521,
+        97.8085,
+        98.1922
+      ],
+      "rvv_ms_values": [
+        20.9289,
+        20.9336,
+        19.8613,
+        20.8932,
+        20.2697
+      ],
+      "run_paths": [
+        "log/board/repeated_phase040_rgb_stencil/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase040_rgb_stencil/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "11024222116537967177",
+        "std_ms": 97.34906,
+        "rvv_ms": 97.34906,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels_to_quantized_filter_map",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "computeSobelQuantizedStencilCandidate, RGB byte stride-load Sobel stencil, max-channel selection, magnitude/angle quantize and 3x3 dominant-bin filter",
+        "gate": "organized pcl::RGB image, B/G/R/A 4-byte point stride, width>=3, height>=3, borders are zero-filled at each subchain boundary",
+        "mask": "magnitude_threshold predicate followed by 3x3 bin equality masks for directions 1..8",
+        "reduction": "RVV stride byte loads, widened integer Sobel arithmetic, lane-wise max-channel selection, per-lane sqrt/atan2/angle quantize, then lane-wise dominant filter equality count",
+        "asm_boundary": "computeSobelQuantizedStencilCandidate / inlined RVV stride-load Sobel math and byte filter in bench_cgm_rvv",
+        "rvv_instr_count": 4036
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "11024222116537967177",
+        "std_ms": 97.34906,
+        "rvv_ms": 20.57734,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_rgb_image_inner_pixels_to_quantized_filter_map",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "computeSobelQuantizedStencilCandidate, RGB byte stride-load Sobel stencil, max-channel selection, magnitude/angle quantize and 3x3 dominant-bin filter",
+        "gate": "organized pcl::RGB image, B/G/R/A 4-byte point stride, width>=3, height>=3, borders are zero-filled at each subchain boundary",
+        "mask": "magnitude_threshold predicate followed by 3x3 bin equality masks for directions 1..8",
+        "reduction": "RVV stride byte loads, widened integer Sobel arithmetic, lane-wise max-channel selection, per-lane sqrt/atan2/angle quantize, then lane-wise dominant filter equality count",
+        "asm_boundary": "computeSobelQuantizedStencilCandidate / inlined RVV stride-load Sobel math and byte filter in bench_cgm_rvv",
+        "rvv_instr_count": 4036
+      },
+      "notes": "Phase 040 production-shaped diagnostic. It does not call ColorGradientModality::processInputData and is a candidate-family A/B against the current full-chain diagnostic, not an adopted production path."
+    }
+  ]
+}

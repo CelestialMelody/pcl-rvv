@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "CGM dominant filter production-shaped diagnostic repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "log/board/repeated_phase010_dominant_filter/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase010_dominant_filter/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase010_dominant_filter/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase010_dominant_filter/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase010_dominant_filter/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase010_dominant_filter/run_05/analyze_bench_compare.log"
+    ],
+    "label": "cgm_phase010_dominant_filter_repeated",
+    "analysis_script": "test-rvv/recognition/color_gradient_modality/script/generate_cgm_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "dataset": "synthetic CGM diagnostic workloads; case label defines exact input shape",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "filter_dominant_320x240",
+      "group": "cgm-dominant-filter-production-shaped-diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production_shaped_diagnostic",
+      "point_type": "pcl::RGB",
+      "size": "320x240 quantized map",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 4.39836,
+      "rvv_ms": 1.26228,
+      "ba_values": [
+        3.49,
+        3.48,
+        3.47,
+        3.51,
+        3.47
+      ],
+      "std_ms_values": [
+        4.4057,
+        4.3909,
+        4.3882,
+        4.4232,
+        4.3838
+      ],
+      "rvv_ms_values": [
+        1.2626,
+        1.2632,
+        1.2644,
+        1.2596,
+        1.2616
+      ],
+      "run_paths": [
+        "log/board/repeated_phase010_dominant_filter/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase010_dominant_filter/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase010_dominant_filter/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase010_dominant_filter/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase010_dominant_filter/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "5318654772487904455",
+        "std_ms": 4.39836,
+        "rvv_ms": 4.39836,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_quantized_gradient_map_inner_pixels",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "filterQuantizedGradientsCandidate, 3x3 dominant-bin count plus >=5 threshold for inner pixels",
+        "gate": "organized uint8_t quantized map values 0..8, width>=3, height>=3, borders are zero-filled",
+        "mask": "3x3 bin equality masks for directions 1..8; zero bin participates only as non-direction background",
+        "reduction": "lane-wise 9-neighbor equality count per direction; strict greater-than preserves production tie-break",
+        "asm_boundary": "filterQuantizedGradientsCandidate / inlined RVV byte compare and store in bench_cgm_rvv",
+        "rvv_instr_count": 1594
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "5318654772487904455",
+        "std_ms": 4.39836,
+        "rvv_ms": 1.26228,
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/color_gradient_modality/src/bench_cgm.cpp",
+        "row_source": "organized_quantized_gradient_map_inner_pixels",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered one-hot uint8_t map",
+        "timer_boundary": "filterQuantizedGradientsCandidate, 3x3 dominant-bin count plus >=5 threshold for inner pixels",
+        "gate": "organized uint8_t quantized map values 0..8, width>=3, height>=3, borders are zero-filled",
+        "mask": "3x3 bin equality masks for directions 1..8; zero bin participates only as non-direction background",
+        "reduction": "lane-wise 9-neighbor equality count per direction; strict greater-than preserves production tie-break",
+        "asm_boundary": "filterQuantizedGradientsCandidate / inlined RVV byte compare and store in bench_cgm_rvv",
+        "rvv_instr_count": 1594
+      },
+      "notes": "Phase 010 production-shaped diagnostic. It does not call ColorGradientModality::processInputData and does not include Sobel, quantize, spread or feature extraction."
+    }
+  ]
+}
