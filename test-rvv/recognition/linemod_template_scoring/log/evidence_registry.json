@@ -1,0 +1,1550 @@
+{
+  "files": {
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787916005,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md"
+      },
+      "run_label": "phase000-score-accumulation-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787916005817851358,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.json",
+        "sha256": "sha256:4f36145a0e3f55dbc57c230a04bb10a41f22816e1110e006431fecbc5dbc76c2",
+        "size": 2185
+      },
+      "target": "record_score_accumulation_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787916005,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md"
+      },
+      "run_label": "phase000-score-accumulation-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787916005817851358,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md",
+        "sha256": "sha256:2da30d412b06ec8e5330780fcf060b288df4370911117ebc0f08cdf96e44c17b",
+        "size": 1570
+      },
+      "target": "record_score_accumulation_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787916005,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md"
+      },
+      "run_label": "phase000-score-accumulation-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787916005779849183,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json",
+        "sha256": "sha256:4d9f42ec7a5229fd52f0f8b321bea6ec2a60168b8db0a21883b6b750f70a8675",
+        "size": 4586
+      },
+      "target": "record_score_accumulation_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787916005,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md"
+      },
+      "run_label": "phase000-score-accumulation-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787916005779849183,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md",
+        "sha256": "sha256:ebe0517ccb8a9f83e0190357ff425c4a81e42baba1c3ddfd2b547dbc8f08b797",
+        "size": 1433
+      },
+      "target": "record_score_accumulation_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787917213,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md"
+      },
+      "run_label": "phase010-score-scan-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917213818904953,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.json",
+        "sha256": "sha256:7c43e61b7cf48697439b25990bdabcbf1e724ff01d0517f0018c2e427b1765b1",
+        "size": 4211
+      },
+      "target": "record_score_scan_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787917213,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md"
+      },
+      "run_label": "phase010-score-scan-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917213818904953,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.md",
+        "sha256": "sha256:8e68662cd02872933a5ae7abff273261e4a1733afd7fc249af75f25f259009d7",
+        "size": 3386
+      },
+      "target": "record_score_scan_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787917213,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md"
+      },
+      "run_label": "phase010-score-scan-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917213781904728,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-manifest.json",
+        "sha256": "sha256:cd6c0400a77993b1d94b62add5f77004a6b3a7bf5aaf1e1dda29a3f2c8bf2899",
+        "size": 14974
+      },
+      "target": "record_score_scan_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787917213,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md"
+      },
+      "run_label": "phase010-score-scan-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917213781904728,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md",
+        "sha256": "sha256:bb15c0538b502a01622d16be5e23571dfa6df7db97ecb9067584872fb9893c87",
+        "size": 4442
+      },
+      "target": "record_score_scan_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,accumulation_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787917230,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-summary.md"
+      },
+      "run_label": "phase020-accumulation-ablation-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917230111002473,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.json",
+        "sha256": "sha256:131f92d80b9882401f67a9eb62ccfd3b9ba28f31fddb3fd0a195b511a0658772",
+        "size": 2289
+      },
+      "target": "record_accumulation_ablation_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,accumulation_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787917230,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-summary.md"
+      },
+      "run_label": "phase020-accumulation-ablation-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917230111002473,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.md",
+        "sha256": "sha256:2150a8e46fff6e6e0ced8371ff99d727b3331efa4a060f5c5153671e0e8153e5",
+        "size": 1673
+      },
+      "target": "record_accumulation_ablation_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,accumulation_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787917230,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-summary.md"
+      },
+      "run_label": "phase020-accumulation-ablation-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917230075002260,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-manifest.json",
+        "sha256": "sha256:3b6e525ee0bcf78bd8d4689e7677259678d7d652cbbe9cbe5236796c70855fae",
+        "size": 5153
+      },
+      "target": "record_accumulation_ablation_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,accumulation_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787917230,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-summary.md"
+      },
+      "run_label": "phase020-accumulation-ablation-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787917230075002260,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-summary.md",
+        "sha256": "sha256:41535585e36002aa83e90486cc89b10b97a5c7ab2737c20a6a9c6c7bd86351b3",
+        "size": 2053
+      },
+      "target": "record_accumulation_ablation_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,energy_map_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787919413,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md"
+      },
+      "run_label": "phase030-energy-map-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787919413622563287,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.json",
+        "sha256": "sha256:3a450ae28223c5e0f2cc2bc04e18c3743b442977549ff793e7deb9027223ed2d",
+        "size": 2266
+      },
+      "target": "record_energy_map_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,energy_map_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787919413,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md"
+      },
+      "run_label": "phase030-energy-map-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787919413622563287,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.md",
+        "sha256": "sha256:1d72e083dceb28b15f75c5371fe717176c121a13e6d60cb676ce9376668a6250",
+        "size": 1650
+      },
+      "target": "record_energy_map_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,energy_map_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787919413,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md"
+      },
+      "run_label": "phase030-energy-map-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787919413586563539,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-manifest.json",
+        "sha256": "sha256:d8861c32a11562a268af76965383dc43e35d40b1447fb58fe508cd1fd87d210f",
+        "size": 5659
+      },
+      "target": "record_energy_map_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,energy_map_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787919413,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md"
+      },
+      "run_label": "phase030-energy-map-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787919413586563539,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md",
+        "sha256": "sha256:ef0b9b325afe5af1811cd9841ac579cb2e06a0651cd2a7554d5a6d1554ffd4b2",
+        "size": 2476
+      },
+      "target": "record_energy_map_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,linearized_map_copy_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787919376,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-summary.md"
+      },
+      "run_label": "phase040-linearized-map-copy-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787919376333825734,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.json",
+        "sha256": "sha256:856e806a5a4252c038f98373332712b28fca0d8c1722cefbf7f52ca53fc3b157",
+        "size": 1296
+      },
+      "target": "record_linearized_map_copy_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,linearized_map_copy_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787919376,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-summary.md"
+      },
+      "run_label": "phase040-linearized-map-copy-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787919376333825734,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.md",
+        "sha256": "sha256:4f5c05389907ff72e56c75d737a5f5bf7ce0ccce23c12ad40b26a87312d440b2",
+        "size": 697
+      },
+      "target": "record_linearized_map_copy_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,linearized_map_copy_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787919376,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-summary.md"
+      },
+      "run_label": "phase040-linearized-map-copy-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787919376296825996,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-manifest.json",
+        "sha256": "sha256:b2b18dcc8c88b63c0c748ddd9690109426201c073cdabc00425910c58471a559",
+        "size": 5976
+      },
+      "target": "record_linearized_map_copy_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,linearized_map_copy_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787919376,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-summary.md"
+      },
+      "run_label": "phase040-linearized-map-copy-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787919376297825988,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-summary.md",
+        "sha256": "sha256:a03bb52fade0a695fcc3eec1090730f172ec5fe264e9eb57cd76f3a70dcae80d",
+        "size": 2583
+      },
+      "target": "record_linearized_map_copy_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,full_chain_linearized_copy_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787921177,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-summary.md"
+      },
+      "run_label": "phase050-full-chain-split-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787921177896884681,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.json",
+        "sha256": "sha256:8de362e88c4066edef1bc98fece29197a24e5ecdb840d1c1ad032eff1eb95a43",
+        "size": 1306
+      },
+      "target": "record_full_chain_split_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,full_chain_linearized_copy_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787921177,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-summary.md"
+      },
+      "run_label": "phase050-full-chain-split-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787921177896884681,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.md",
+        "sha256": "sha256:17cdb19d25f38b5a0123eb3c41f88fce13c641ffcb7dcf82894bd260f33b1b60",
+        "size": 710
+      },
+      "target": "record_full_chain_split_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,full_chain_linearized_copy_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787921177,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-summary.md"
+      },
+      "run_label": "phase050-full-chain-split-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787921177861885031,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-manifest.json",
+        "sha256": "sha256:0c9badf1a2f930997e84ad803cbab370eb2bef33894d9a669510ecadad6742a6",
+        "size": 12339
+      },
+      "target": "record_full_chain_split_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,full_chain_linearized_copy_only=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787921177,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-summary.md"
+      },
+      "run_label": "phase050-full-chain-split-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787921177861885031,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-summary.md",
+        "sha256": "sha256:85ff14df9032b4b20e7a727f64ba35022b075c7cb4d1c2d414d04fe507eca146",
+        "size": 4327
+      },
+      "target": "record_full_chain_split_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/testing-overview.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/result.zh.md",
+        "doc-rvv/recognition/linemod_template_scoring-RVV.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787927355,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md"
+      },
+      "run_label": "phase070-production-direct-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787927355010224874,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.json",
+        "sha256": "sha256:f6e9db99866c32184fea65090cfd43aeced9c94db2998129aa2530ecf08c321a",
+        "size": 1269
+      },
+      "target": "record_production_direct_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/testing-overview.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/result.zh.md",
+        "doc-rvv/recognition/linemod_template_scoring-RVV.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787927355,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md"
+      },
+      "run_label": "phase070-production-direct-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787927355010224874,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md",
+        "sha256": "sha256:88d6d2b01dfb9163b9ca8af1c1431b93e47a62575d0210ffa4349001034e17f1",
+        "size": 683
+      },
+      "target": "record_production_direct_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/testing-overview.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/result.zh.md",
+        "doc-rvv/recognition/linemod_template_scoring-RVV.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787927355,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md"
+      },
+      "run_label": "phase070-production-direct-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787927354973226067,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json",
+        "sha256": "sha256:f71a3e9c060346f746d177cd46fa9c2842f848a774bd4b7d604ae99b6c4c8f1c",
+        "size": 12267
+      },
+      "target": "record_production_direct_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/testing-overview.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/result.zh.md",
+        "doc-rvv/recognition/linemod_template_scoring-RVV.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787927355,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md"
+      },
+      "run_label": "phase070-production-direct-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787927354974226035,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md",
+        "sha256": "sha256:28d8be5fcfcadda265aeb7d963b428250a6dd0befb8f6b9718300e32ca4483ee",
+        "size": 4455
+      },
+      "target": "record_production_direct_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1,semi_scale=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/testing-overview.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/result.zh.md",
+        "doc-rvv/recognition/linemod_template_scoring-RVV.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787928543,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md"
+      },
+      "run_label": "phase080-semi-scale-production-direct-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787928543635236386,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.json",
+        "sha256": "sha256:d28d47b90a28ea82226ae479a8189a4aef81a3f5dafb4e9d6c1c0d4932460351",
+        "size": 1298
+      },
+      "target": "record_semiscale_production_direct_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1,semi_scale=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/testing-overview.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/result.zh.md",
+        "doc-rvv/recognition/linemod_template_scoring-RVV.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787928543,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md"
+      },
+      "run_label": "phase080-semi-scale-production-direct-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787928543635236386,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.md",
+        "sha256": "sha256:355c0dcf1386144be642247e8a3a3daae2d27aec6e815557d257e9b2951c5f8b",
+        "size": 701
+      },
+      "target": "record_semiscale_production_direct_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1,semi_scale=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/testing-overview.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/result.zh.md",
+        "doc-rvv/recognition/linemod_template_scoring-RVV.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787928543,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md"
+      },
+      "run_label": "phase080-semi-scale-production-direct-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787928543590236554,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-manifest.json",
+        "sha256": "sha256:fdf858c86006e840af056fb736d488030081d1da38a60596e3a4405fb6a5e7e1",
+        "size": 7026
+      },
+      "target": "record_semiscale_production_direct_evidence_state"
+    },
+    "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1,semi_scale=1",
+      "doc_refs": [
+        "test-rvv/recognition/linemod_template_scoring/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/linemod_template_scoring-evaluation.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/testing-overview.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/README.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/060-pi1-production-integration-plan/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/result.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/plan.zh.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/result.zh.md",
+        "doc-rvv/recognition/linemod_template_scoring-RVV.zh.md",
+        "doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787928543,
+      "related": {
+        "doctor_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-manifest.json",
+        "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md"
+      },
+      "run_label": "phase080-semi-scale-production-direct-repeated-20260828",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787928543590236554,
+        "path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md",
+        "sha256": "sha256:d4e7ae69564e3020394c4445b794ba88285314ec734c65e5c52ef7e6351dad45",
+        "size": 2847
+      },
+      "target": "record_semiscale_production_direct_evidence_state"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787915577,
+      "run_label": "phase000-score-accumulation-repeated-20260828",
+      "target": "record_score_accumulation_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787915715,
+      "run_label": "phase000-score-accumulation-repeated-20260828",
+      "target": "record_score_accumulation_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787916005,
+      "run_label": "phase000-score-accumulation-repeated-20260828",
+      "target": "record_score_accumulation_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787916644,
+      "run_label": "phase010-score-scan-repeated-20260828",
+      "target": "record_score_scan_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,accumulation_only=1",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787916933,
+      "run_label": "phase020-accumulation-ablation-repeated-20260828",
+      "target": "record_accumulation_ablation_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787917213,
+      "run_label": "phase010-score-scan-repeated-20260828",
+      "target": "record_score_scan_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,accumulation_only=1",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/020-accumulation-bench-boundary-ablation/accumulation-ablation-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787917230,
+      "run_label": "phase020-accumulation-ablation-repeated-20260828",
+      "target": "record_accumulation_ablation_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,energy_map_only=1",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787918455,
+      "run_label": "phase030-energy-map-repeated-20260828",
+      "target": "record_energy_map_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,linearized_map_copy_only=1",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787919376,
+      "run_label": "phase040-linearized-map-copy-repeated-20260828",
+      "target": "record_linearized_map_copy_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,energy_map_only=1",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787919413,
+      "run_label": "phase030-energy-map-repeated-20260828",
+      "target": "record_energy_map_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,full_chain_linearized_copy_only=1",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787920374,
+      "run_label": "phase050-full-chain-split-repeated-20260828",
+      "target": "record_full_chain_split_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,full_chain_linearized_copy_only=1",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/050-full-chain-timing-and-production-eligibility/full-chain-split-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787921177,
+      "run_label": "phase050-full-chain-split-repeated-20260828",
+      "target": "record_full_chain_split_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787926009,
+      "run_label": "phase070-production-direct-repeated-20260828",
+      "target": "record_production_direct_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787926362,
+      "run_label": "phase070-production-direct-repeated-20260828",
+      "target": "record_production_direct_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/070-production-integration-loop/production-direct-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787927355,
+      "run_label": "phase070-production-direct-repeated-20260828",
+      "target": "record_production_direct_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1,semi_scale=1",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787928346,
+      "run_label": "phase080-semi-scale-production-direct-repeated-20260828",
+      "target": "record_semiscale_production_direct_evidence_state"
+    },
+    {
+      "backend": "board",
+      "case_filter": "mem_size=4096,nr_maps=96,iterations=200,production_direct=1,semi_scale=1",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-doctor.md",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-evidence-manifest.json",
+        "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787928543,
+      "run_label": "phase080-semi-scale-production-direct-repeated-20260828",
+      "target": "record_semiscale_production_direct_evidence_state"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787928543
+}

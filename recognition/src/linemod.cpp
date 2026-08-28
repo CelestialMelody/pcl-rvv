@@ -43,9 +43,103 @@
 #include <emmintrin.h>
 #endif
 
+#if defined(__RVV10__) && defined(__riscv_vector)
+#include <riscv_vector.h>
+#endif
+
 #include <fstream>
 
 //#define LINEMOD_USE_SEPARATE_ENERGY_MAPS
+
+namespace
+{
+
+#if defined(__GNUC__) || defined(__clang__)
+#define PCL_LINEMOD_NOINLINE __attribute__ ((noinline))
+#else
+#define PCL_LINEMOD_NOINLINE
+#endif
+
+PCL_LINEMOD_NOINLINE void
+linearizeEnergyMapStd (const unsigned char * energy_map,
+                       const std::size_t width,
+                       const std::size_t height,
+                       const std::size_t step_size,
+                       pcl::LinearizedMaps & maps)
+{
+  const std::size_t lin_width = width / step_size;
+  const std::size_t lin_height = height / step_size;
+  for (std::size_t map_row = 0; map_row < step_size; ++map_row)
+  {
+    for (std::size_t map_col = 0; map_col < step_size; ++map_col)
+    {
+      unsigned char * linearized_map = maps (map_col, map_row);
+      for (std::size_t row_index = 0; row_index < lin_height; ++row_index)
+      {
+        const std::size_t source_row = row_index * step_size + map_row;
+        for (std::size_t col_index = 0; col_index < lin_width; ++col_index)
+        {
+          const std::size_t source_col = col_index * step_size + map_col;
+          linearized_map[row_index * lin_width + col_index] =
+              energy_map[source_row * width + source_col];
+        }
+      }
+    }
+  }
+}
+
+#if defined(__RVV10__) && defined(__riscv_vector)
+PCL_LINEMOD_NOINLINE void
+linearizeEnergyMapRVV (const unsigned char * energy_map,
+                       const std::size_t width,
+                       const std::size_t height,
+                       const std::size_t step_size,
+                       pcl::LinearizedMaps & maps)
+{
+  const std::size_t lin_width = width / step_size;
+  const std::size_t lin_height = height / step_size;
+  const auto stride_bytes = static_cast<std::ptrdiff_t> (step_size);
+  for (std::size_t map_row = 0; map_row < step_size; ++map_row)
+  {
+    for (std::size_t map_col = 0; map_col < step_size; ++map_col)
+    {
+      unsigned char * linearized_map = maps (map_col, map_row);
+      for (std::size_t row_index = 0; row_index < lin_height; ++row_index)
+      {
+        const unsigned char * source_row =
+            energy_map + (row_index * step_size + map_row) * width + map_col;
+        unsigned char * target_row = linearized_map + row_index * lin_width;
+        for (std::size_t col_index = 0; col_index < lin_width;)
+        {
+          const std::size_t vl = __riscv_vsetvl_e8m1 (lin_width - col_index);
+          const vuint8m1_t values =
+              __riscv_vlse8_v_u8m1 (source_row + col_index * step_size, stride_bytes, vl);
+          __riscv_vse8_v_u8m1 (target_row + col_index, values, vl);
+          col_index += vl;
+        }
+      }
+    }
+  }
+}
+#endif
+
+void
+linearizeEnergyMap (const unsigned char * energy_map,
+                    const std::size_t width,
+                    const std::size_t height,
+                    const std::size_t step_size,
+                    pcl::LinearizedMaps & maps)
+{
+#if defined(__RVV10__) && defined(__riscv_vector)
+  linearizeEnergyMapRVV (energy_map, width, height, step_size, maps);
+#else
+  linearizeEnergyMapStd (energy_map, width, height, step_size, maps);
+#endif
+}
+
+#undef PCL_LINEMOD_NOINLINE
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 pcl::LINEMOD::LINEMOD () = default;
@@ -174,27 +268,7 @@ pcl::LINEMOD::matchTemplates (const std::vector<QuantizableModality*> & modaliti
 
       LinearizedMaps maps;
       maps.initialize (width, height, step_size);
-      for (std::size_t map_row = 0; map_row < step_size; ++map_row)
-      {
-        for (std::size_t map_col = 0; map_col < step_size; ++map_col)
-        {
-          unsigned char * linearized_map = maps (map_col, map_row);
-
-          // copy data from energy maps
-          const std::size_t lin_width = width/step_size;
-          const std::size_t lin_height = height/step_size;
-          for (std::size_t row_index = 0; row_index < lin_height; ++row_index)
-          {
-            for (std::size_t col_index = 0; col_index < lin_width; ++col_index)
-            {
-              const std::size_t tmp_col_index = col_index*step_size + map_col;
-              const std::size_t tmp_row_index = row_index*step_size + map_row;
-
-              linearized_map[row_index*lin_width + col_index] = energy_map[tmp_row_index*width + tmp_col_index];
-            }
-          }
-        }
-      }
+      linearizeEnergyMap (energy_map, width, height, step_size, maps);
 
       linearized_maps.push_back (maps);
     }
@@ -471,16 +545,15 @@ pcl::LINEMOD::detectTemplates (const std::vector<QuantizableModality*> & modalit
       maps_2.initialize (width, height, step_size);
       maps_3.initialize (width, height, step_size);
 #endif
+#ifdef LINEMOD_USE_SEPARATE_ENERGY_MAPS
       for (std::size_t map_row = 0; map_row < step_size; ++map_row)
       {
         for (std::size_t map_col = 0; map_col < step_size; ++map_col)
         {
           unsigned char * linearized_map = maps (map_col, map_row);
-#ifdef LINEMOD_USE_SEPARATE_ENERGY_MAPS
           unsigned char * linearized_map_1 = maps_1 (map_col, map_row);
           unsigned char * linearized_map_2 = maps_2 (map_col, map_row);
           unsigned char * linearized_map_3 = maps_3 (map_col, map_row);
-#endif
 
           // copy data from energy maps
           const std::size_t lin_width = width/step_size;
@@ -493,15 +566,16 @@ pcl::LINEMOD::detectTemplates (const std::vector<QuantizableModality*> & modalit
               const std::size_t tmp_row_index = row_index*step_size + map_row;
 
               linearized_map[row_index*lin_width + col_index] = energy_map[tmp_row_index*width + tmp_col_index];
-#ifdef LINEMOD_USE_SEPARATE_ENERGY_MAPS
               linearized_map_1[row_index*lin_width + col_index] = energy_map_1[tmp_row_index*width + tmp_col_index];
               linearized_map_2[row_index*lin_width + col_index] = energy_map_2[tmp_row_index*width + tmp_col_index];
               linearized_map_3[row_index*lin_width + col_index] = energy_map_3[tmp_row_index*width + tmp_col_index];
-#endif
             }
           }
         }
       }
+#else
+      linearizeEnergyMap (energy_map, width, height, step_size, maps);
+#endif
 
       linearized_maps.push_back (maps);
 #ifdef LINEMOD_USE_SEPARATE_ENERGY_MAPS
@@ -935,6 +1009,7 @@ pcl::LINEMOD::detectTemplatesSemiScaleInvariant (
       maps_2.initialize (width, height, step_size);
       maps_3.initialize (width, height, step_size);
 #endif
+#ifdef LINEMOD_USE_SEPARATE_ENERGY_MAPS
       for (std::size_t map_row = 0; map_row < step_size; ++map_row)
       {
         for (std::size_t map_col = 0; map_col < step_size; ++map_col)
@@ -966,6 +1041,9 @@ pcl::LINEMOD::detectTemplatesSemiScaleInvariant (
           }
         }
       }
+#else
+      linearizeEnergyMap (energy_map, width, height, step_size, maps);
+#endif
 
       linearized_maps.push_back (maps);
 #ifdef LINEMOD_USE_SEPARATE_ENERGY_MAPS

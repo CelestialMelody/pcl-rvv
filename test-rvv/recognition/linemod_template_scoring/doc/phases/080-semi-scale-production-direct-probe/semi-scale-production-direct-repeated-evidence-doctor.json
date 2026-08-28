@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "LINEMOD template scoring repeated board summary",
+    "evidence_role": "production-public",
+    "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/080-semi-scale-production-direct-probe/semi-scale-production-direct-repeated-summary.md",
+    "label": "production-public repeated board summary",
+    "analysis_script": "test-rvv/recognition/linemod_template_scoring/script/generate_linemod_template_scoring_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:a11ed5192759f85aacab784a2af65b0326152e6974a53fcd453a8f1fd6cf2f36",
+      "decision_bucket": "positive",
+      "rerun_budget": "5-run initial budget; no extra rerun unless bucket changes or doctor errors",
+      "summary_generated_from": "test-rvv/recognition/linemod_template_scoring/log/board/repeated-20260828-phase080-semi-scale-production-direct-warmup5"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": []
+}

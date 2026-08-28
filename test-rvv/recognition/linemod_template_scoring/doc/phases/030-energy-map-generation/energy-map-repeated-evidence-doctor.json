@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "LINEMOD template scoring repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/030-energy-map-generation/energy-map-repeated-summary.md",
+    "label": "production-shaped diagnostic repeated board summary",
+    "analysis_script": "test-rvv/recognition/linemod_template_scoring/script/generate_linemod_template_scoring_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:bcc0d88f6649e08bfba24b71f494027206f7ed5b7b92791bead68b721938a5ae",
+      "decision_bucket": "negative",
+      "rerun_budget": "5-run initial budget; no extra rerun unless bucket changes or doctor errors",
+      "summary_generated_from": "test-rvv/recognition/linemod_template_scoring/log/board/repeated-20260828-phase030-energy-map-generation-warmup5"
+    }
+  },
+  "result": {
+    "errors": 1,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "ERROR",
+      "signal": "ba_degradation_frequency",
+      "case": "LINEMOD energy map generation mem_size=4096 nr_maps=96",
+      "observed_pattern": "B/A values=0.963x, 0.962x, 0.947x, 0.954x, 0.952x；5/5 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    }
+  ]
+}

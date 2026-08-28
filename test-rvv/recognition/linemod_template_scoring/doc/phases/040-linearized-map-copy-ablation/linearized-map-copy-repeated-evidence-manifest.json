@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "LINEMOD template scoring repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/040-linearized-map-copy-ablation/linearized-map-copy-repeated-summary.md",
+    "label": "production-shaped diagnostic repeated board summary",
+    "analysis_script": "test-rvv/recognition/linemod_template_scoring/script/generate_linemod_template_scoring_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:c9513a6a03c8b4ae3fc79f7b8c1056be74c4fc125a94bd370750020a8f9200b5",
+      "decision_bucket": "positive",
+      "rerun_budget": "5-run initial budget; no extra rerun unless bucket changes or doctor errors",
+      "summary_generated_from": "test-rvv/recognition/linemod_template_scoring/log/board/repeated-20260828-phase040-linearized-map-copy-warmup5"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "LINEMOD linearized map copy mem_size=4096 nr_maps=96",
+      "group": "linemod-linearized-map-copy",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production-shaped",
+      "point_type": "not_applicable_energy_map_byte",
+      "size": 4096,
+      "run_count": 5,
+      "requires_board_context": true,
+      "metadata": {
+        "decision_bucket": "positive",
+        "boundary_note": "只覆盖 synthetic single-bin energy map 到 64 个 step=8 linearized offset maps；不覆盖 EnergyMaps / LinearizedMaps 对象分配、getOffsetMap 后续读取、score accumulation、NMS 或真实 production dispatch。"
+      },
+      "baseline": {
+        "label": "std",
+        "boundary": "test_helper",
+        "wrapper": "linemod_template_scoring_bench",
+        "row_source": "energy_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "linearized_maps_fnv1a",
+        "timer_boundary": "single_energy_map_to_64_linearized_offset_maps",
+        "gate": "detectTemplates_step8_offset_copy_semantics_tail_included",
+        "mask": "not_applicable_copy_only",
+        "reduction": "not_applicable_strided_copy",
+        "asm_boundary": "scalar_or_compiler_generated_std_build",
+        "std_ms": 2.2719099999999997,
+        "rvv_ms": 2.2719099999999997,
+        "checksum": "12986699280141894531",
+        "max_value": 0,
+        "max_index": 0,
+        "energy_checksum": "2092149027815752579",
+        "linearized_checksum": "18079035698387387267"
+      },
+      "candidate": {
+        "label": "rvv",
+        "boundary": "test_helper",
+        "wrapper": "linemod_template_scoring_bench",
+        "row_source": "energy_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "linearized_maps_fnv1a",
+        "timer_boundary": "single_energy_map_to_64_linearized_offset_maps",
+        "gate": "detectTemplates_step8_offset_copy_semantics_tail_included",
+        "mask": "not_applicable_copy_only",
+        "reduction": "not_applicable_strided_copy",
+        "asm_boundary": "linemod template scoring bench helper or inlined candidate; required RVV mnemonics present",
+        "rvv_instr_count": 47,
+        "rvv_mnemonics": {
+          "vle8.v": 2,
+          "vse8.v": 5
+        },
+        "std_ms": 1.05179,
+        "rvv_ms": 1.05179,
+        "checksum": "12986699280141894531",
+        "max_value": 0,
+        "max_index": 0,
+        "energy_checksum": "2092149027815752579",
+        "linearized_checksum": "18079035698387387267"
+      },
+      "ba_values": [
+        2.160041453141787,
+        2.1505519195076683,
+        2.266081988976948,
+        2.221624986413983,
+        2.0327679894615507
+      ],
+      "repeated_runs": [
+        {
+          "run_label": "run-01",
+          "std_us": 2271.91,
+          "rvv_us": 1051.79,
+          "speedup": 2.160041453141787,
+          "checksum": "12986699280141894531",
+          "max_value": 0,
+          "max_index": 0,
+          "energy_checksum": "2092149027815752579",
+          "linearized_checksum": "18079035698387387267"
+        },
+        {
+          "run_label": "run-02",
+          "std_us": 2201.52,
+          "rvv_us": 1023.7,
+          "speedup": 2.1505519195076683,
+          "checksum": "12986699280141894531",
+          "max_value": 0,
+          "max_index": 0,
+          "energy_checksum": "2092149027815752579",
+          "linearized_checksum": "18079035698387387267"
+        },
+        {
+          "run_label": "run-03",
+          "std_us": 2253.12,
+          "rvv_us": 994.28,
+          "speedup": 2.266081988976948,
+          "checksum": "12986699280141894531",
+          "max_value": 0,
+          "max_index": 0,
+          "energy_checksum": "2092149027815752579",
+          "linearized_checksum": "18079035698387387267"
+        },
+        {
+          "run_label": "run-04",
+          "std_us": 2248.44,
+          "rvv_us": 1012.07,
+          "speedup": 2.221624986413983,
+          "checksum": "12986699280141894531",
+          "max_value": 0,
+          "max_index": 0,
+          "energy_checksum": "2092149027815752579",
+          "linearized_checksum": "18079035698387387267"
+        },
+        {
+          "run_label": "run-05",
+          "std_us": 2222.1,
+          "rvv_us": 1093.14,
+          "speedup": 2.0327679894615507,
+          "checksum": "12986699280141894531",
+          "max_value": 0,
+          "max_index": 0,
+          "energy_checksum": "2092149027815752579",
+          "linearized_checksum": "18079035698387387267"
+        }
+      ]
+    }
+  ]
+}

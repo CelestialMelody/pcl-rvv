@@ -1,0 +1,425 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "LINEMOD template scoring repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md",
+    "label": "production-shaped diagnostic repeated board summary",
+    "analysis_script": "test-rvv/recognition/linemod_template_scoring/script/generate_linemod_template_scoring_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:5e1c6206be90fc10a831a6af0fed04ed2a9cd5c7bc7cbfd185ca801a6d07891c",
+      "decision_bucket": "negative",
+      "rerun_budget": "5-run initial budget; no extra rerun unless bucket changes or doctor errors",
+      "summary_generated_from": "test-rvv/recognition/linemod_template_scoring/log/board/repeated-20260828-phase010-score-scan-warmup5"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "LINEMOD score accumulation mem_size=4096 nr_maps=96",
+      "group": "linemod-score-accumulation",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production-shaped",
+      "point_type": "not_applicable_byte_score_map",
+      "size": 4096,
+      "run_count": 5,
+      "requires_board_context": true,
+      "metadata": {
+        "decision_bucket": "negative",
+        "boundary_note": "只覆盖 u8 linearized score maps 到 u16 score_sums 的累加核。"
+      },
+      "baseline": {
+        "label": "std",
+        "boundary": "test_helper",
+        "wrapper": "linemod_template_scoring_bench",
+        "row_source": "linearized_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "score_sums_fnv1a",
+        "timer_boundary": "score_accumulation_helper_only_no_energy_or_detection",
+        "gate": "already_linearized_maps_mem_size_tail_included",
+        "mask": "not_applicable_no_finite_mask",
+        "reduction": "u8_maps_widened_to_u16_score_sums",
+        "asm_boundary": "scalar_or_compiler_generated_std_build",
+        "std_ms": 0.19454400000000002,
+        "rvv_ms": 0.19454400000000002,
+        "checksum": "9840709576022462159",
+        "max_value": 194,
+        "max_index": 4,
+        "count_above_threshold": 1638,
+        "index_checksum": "3938728128246843911"
+      },
+      "candidate": {
+        "label": "rvv",
+        "boundary": "test_helper",
+        "wrapper": "linemod_template_scoring_bench",
+        "row_source": "linearized_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "score_sums_fnv1a",
+        "timer_boundary": "score_accumulation_helper_only_no_energy_or_detection",
+        "gate": "already_linearized_maps_mem_size_tail_included",
+        "mask": "not_applicable_no_finite_mask",
+        "reduction": "u8_maps_widened_to_u16_score_sums",
+        "asm_boundary": "linemod template scoring bench helper or inlined candidate; required RVV mnemonics present",
+        "rvv_instr_count": 75,
+        "rvv_mnemonics": {
+          "vle8.v": 8,
+          "vle16.v": 6,
+          "vzext.vf2": 5,
+          "vadd.vv": 5,
+          "vse16.v": 5,
+          "vmsgtu.vx": 1,
+          "vcpop.m": 1
+        },
+        "std_ms": 0.23169900000000002,
+        "rvv_ms": 0.23169900000000002,
+        "checksum": "9840709576022462159",
+        "max_value": 194,
+        "max_index": 4,
+        "count_above_threshold": 1638,
+        "index_checksum": "3938728128246843911"
+      },
+      "ba_values": [
+        0.8396410860642471,
+        0.8586186259118231,
+        0.844276222302374,
+        0.8391450584187112,
+        0.8421265650908046
+      ],
+      "repeated_runs": [
+        {
+          "run_label": "run-01",
+          "std_us": 194.544,
+          "rvv_us": 231.699,
+          "speedup": 0.8396410860642471,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-02",
+          "std_us": 197.982,
+          "rvv_us": 230.582,
+          "speedup": 0.8586186259118231,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-03",
+          "std_us": 194.284,
+          "rvv_us": 230.119,
+          "speedup": 0.844276222302374,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-04",
+          "std_us": 194.852,
+          "rvv_us": 232.203,
+          "speedup": 0.8391450584187112,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-05",
+          "std_us": 193.503,
+          "rvv_us": 229.779,
+          "speedup": 0.8421265650908046,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        }
+      ]
+    },
+    {
+      "name": "LINEMOD score scan mem_size=4096 nr_maps=96",
+      "group": "linemod-score-scan",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production-shaped",
+      "point_type": "not_applicable_score_sum_stream",
+      "size": 4096,
+      "run_count": 5,
+      "requires_board_context": true,
+      "metadata": {
+        "decision_bucket": "negative",
+        "boundary_note": "覆盖 threshold count、max 最早位置和候选 index 保序写入，不覆盖 NMS 或 detection 对象构造。"
+      },
+      "baseline": {
+        "label": "std",
+        "boundary": "test_helper",
+        "wrapper": "linemod_template_scoring_bench",
+        "row_source": "linearized_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "score_scan_summary_and_order_fnv1a",
+        "timer_boundary": "score_scan_threshold_count_max_and_candidate_index_sink",
+        "gate": "strict_greater_threshold_and_earliest_max_tie_break",
+        "mask": "u16_score_greater_than_raw_threshold",
+        "reduction": "threshold_count_vector_mask_plus_scalar_ordered_index_append",
+        "asm_boundary": "scalar_or_compiler_generated_std_build",
+        "std_ms": 0.0169029,
+        "rvv_ms": 0.0169029,
+        "checksum": "9840709576022462159",
+        "max_value": 194,
+        "max_index": 4,
+        "count_above_threshold": 1638,
+        "index_checksum": "3938728128246843911"
+      },
+      "candidate": {
+        "label": "rvv",
+        "boundary": "test_helper",
+        "wrapper": "linemod_template_scoring_bench",
+        "row_source": "linearized_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "score_scan_summary_and_order_fnv1a",
+        "timer_boundary": "score_scan_threshold_count_max_and_candidate_index_sink",
+        "gate": "strict_greater_threshold_and_earliest_max_tie_break",
+        "mask": "u16_score_greater_than_raw_threshold",
+        "reduction": "threshold_count_vector_mask_plus_scalar_ordered_index_append",
+        "asm_boundary": "linemod template scoring bench helper or inlined candidate; required RVV mnemonics present",
+        "rvv_instr_count": 75,
+        "rvv_mnemonics": {
+          "vle8.v": 8,
+          "vle16.v": 6,
+          "vzext.vf2": 5,
+          "vadd.vv": 5,
+          "vse16.v": 5,
+          "vmsgtu.vx": 1,
+          "vcpop.m": 1
+        },
+        "std_ms": 0.0284102,
+        "rvv_ms": 0.0284102,
+        "checksum": "9840709576022462159",
+        "max_value": 194,
+        "max_index": 4,
+        "count_above_threshold": 1638,
+        "index_checksum": "3938728128246843911"
+      },
+      "ba_values": [
+        0.5949588528063864,
+        0.6027302452700937,
+        0.5963162366944853,
+        0.6047441298720562,
+        0.6006536316394379
+      ],
+      "repeated_runs": [
+        {
+          "run_label": "run-01",
+          "std_us": 16.9029,
+          "rvv_us": 28.4102,
+          "speedup": 0.5949588528063864,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-02",
+          "std_us": 17.0692,
+          "rvv_us": 28.3198,
+          "speedup": 0.6027302452700937,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-03",
+          "std_us": 16.9129,
+          "rvv_us": 28.3623,
+          "speedup": 0.5963162366944853,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-04",
+          "std_us": 17.1246,
+          "rvv_us": 28.3171,
+          "speedup": 0.6047441298720562,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-05",
+          "std_us": 17.0373,
+          "rvv_us": 28.3646,
+          "speedup": 0.6006536316394379,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        }
+      ]
+    },
+    {
+      "name": "LINEMOD accumulate+scan mem_size=4096 nr_maps=96",
+      "group": "linemod-accumulate-and-scan",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production-shaped",
+      "point_type": "not_applicable_byte_score_map_to_score_sum_stream",
+      "size": 4096,
+      "run_count": 5,
+      "requires_board_context": true,
+      "metadata": {
+        "decision_bucket": "negative",
+        "boundary_note": "覆盖累加后立刻扫描的组合成本，不覆盖 energy map、linearized copy、NMS 或真实 production dispatch。"
+      },
+      "baseline": {
+        "label": "std",
+        "boundary": "test_helper",
+        "wrapper": "linemod_template_scoring_bench",
+        "row_source": "linearized_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "score_sums_and_scan_summary_fnv1a",
+        "timer_boundary": "score_accumulation_then_score_scan_no_energy_or_nms",
+        "gate": "already_linearized_maps_then_strict_threshold_scan",
+        "mask": "scan_threshold_mask_after_accumulation",
+        "reduction": "u8_to_u16_accumulation_followed_by_threshold_count_and_ordered_index_append",
+        "asm_boundary": "scalar_or_compiler_generated_std_build",
+        "std_ms": 0.208777,
+        "rvv_ms": 0.208777,
+        "checksum": "9840709576022462159",
+        "max_value": 194,
+        "max_index": 4,
+        "count_above_threshold": 1638,
+        "index_checksum": "3938728128246843911"
+      },
+      "candidate": {
+        "label": "rvv",
+        "boundary": "test_helper",
+        "wrapper": "linemod_template_scoring_bench",
+        "row_source": "linearized_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "score_sums_and_scan_summary_fnv1a",
+        "timer_boundary": "score_accumulation_then_score_scan_no_energy_or_nms",
+        "gate": "already_linearized_maps_then_strict_threshold_scan",
+        "mask": "scan_threshold_mask_after_accumulation",
+        "reduction": "u8_to_u16_accumulation_followed_by_threshold_count_and_ordered_index_append",
+        "asm_boundary": "linemod template scoring bench helper or inlined candidate; required RVV mnemonics present",
+        "rvv_instr_count": 75,
+        "rvv_mnemonics": {
+          "vle8.v": 8,
+          "vle16.v": 6,
+          "vzext.vf2": 5,
+          "vadd.vv": 5,
+          "vse16.v": 5,
+          "vmsgtu.vx": 1,
+          "vcpop.m": 1
+        },
+        "std_ms": 0.239491,
+        "rvv_ms": 0.239491,
+        "checksum": "9840709576022462159",
+        "max_value": 194,
+        "max_index": 4,
+        "count_above_threshold": 1638,
+        "index_checksum": "3938728128246843911"
+      },
+      "ba_values": [
+        0.8717530095076641,
+        0.8776153817235517,
+        0.8789035797055538,
+        0.9628815188152301,
+        0.9005920914418991
+      ],
+      "repeated_runs": [
+        {
+          "run_label": "run-01",
+          "std_us": 208.777,
+          "rvv_us": 239.491,
+          "speedup": 0.8717530095076641,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-02",
+          "std_us": 210.102,
+          "rvv_us": 239.401,
+          "speedup": 0.8776153817235517,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-03",
+          "std_us": 210.856,
+          "rvv_us": 239.908,
+          "speedup": 0.8789035797055538,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-04",
+          "std_us": 229.446,
+          "rvv_us": 238.291,
+          "speedup": 0.9628815188152301,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        },
+        {
+          "run_label": "run-05",
+          "std_us": 210.055,
+          "rvv_us": 233.241,
+          "speedup": 0.9005920914418991,
+          "checksum": "9840709576022462159",
+          "max_value": 194,
+          "max_index": 4,
+          "count_above_threshold": 1638,
+          "index_checksum": "3938728128246843911"
+        }
+      ]
+    }
+  ]
+}

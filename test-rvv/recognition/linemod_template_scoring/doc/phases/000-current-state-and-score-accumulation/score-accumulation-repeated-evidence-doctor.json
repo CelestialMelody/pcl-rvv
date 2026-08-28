@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "LINEMOD score accumulation repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md",
+    "label": "production-shaped diagnostic repeated board summary",
+    "analysis_script": "test-rvv/recognition/linemod_template_scoring/script/generate_linemod_template_scoring_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:b2cd53055b12ad0a1390b27f73ee97e0568af3934a7dca4636e722ef2d2287ba",
+      "decision_bucket": "positive",
+      "rerun_budget": "5-run initial budget; no extra rerun unless bucket changes or doctor errors",
+      "summary_generated_from": "test-rvv/recognition/linemod_template_scoring/log/board/repeated-20260828-phase000-score-accumulation-warmup5"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 1,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "WARNING",
+      "signal": "long_tail_or_variance",
+      "case": "LINEMOD score accumulation mem_size=4096 nr_maps=96",
+      "observed_pattern": "min=1.29x, median=1.4x, max=1.96x，max/min=1.52。",
+      "why_suspicious": "长尾说明单一均值不足以描述稳定性，异常值可能改变接入判断。",
+      "possible_non_bug_explanations": "可能是板卡温度、频率、调度、缓存状态或 run 顺序导致。",
+      "possible_bug_or_evidence_issues": "也可能是候选存在数据相关分支、fallback、spill/reload 或内存带宽拐点。",
+      "recommended_checks": "查看 per-iteration trace、温度 / governor / freq / taskset；必要时扩大到 20-run 或 50-run。",
+      "conclusion_policy": "可以继续分析，但 summary 必须保留 min/median/max 和长尾解释，不能先验剔除异常。"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "LINEMOD template scoring repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/010-threshold-scan-and-detection-order/score-scan-repeated-summary.md",
+    "label": "production-shaped diagnostic repeated board summary",
+    "analysis_script": "test-rvv/recognition/linemod_template_scoring/script/generate_linemod_template_scoring_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:5e1c6206be90fc10a831a6af0fed04ed2a9cd5c7bc7cbfd185ca801a6d07891c",
+      "decision_bucket": "negative",
+      "rerun_budget": "5-run initial budget; no extra rerun unless bucket changes or doctor errors",
+      "summary_generated_from": "test-rvv/recognition/linemod_template_scoring/log/board/repeated-20260828-phase010-score-scan-warmup5"
+    }
+  },
+  "result": {
+    "errors": 3,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "ERROR",
+      "signal": "ba_degradation_frequency",
+      "case": "LINEMOD score accumulation mem_size=4096 nr_maps=96",
+      "observed_pattern": "B/A values=0.84x, 0.859x, 0.844x, 0.839x, 0.842x；5/5 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    },
+    {
+      "severity": "ERROR",
+      "signal": "ba_degradation_frequency",
+      "case": "LINEMOD score scan mem_size=4096 nr_maps=96",
+      "observed_pattern": "B/A values=0.595x, 0.603x, 0.596x, 0.605x, 0.601x；5/5 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    },
+    {
+      "severity": "ERROR",
+      "signal": "ba_degradation_frequency",
+      "case": "LINEMOD accumulate+scan mem_size=4096 nr_maps=96",
+      "observed_pattern": "B/A values=0.872x, 0.878x, 0.879x, 0.963x, 0.901x；5/5 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    }
+  ]
+}

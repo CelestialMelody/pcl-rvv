@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "LINEMOD score accumulation repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/recognition/linemod_template_scoring/doc/phases/000-current-state-and-score-accumulation/score-accumulation-repeated-summary.md",
+    "label": "production-shaped diagnostic repeated board summary",
+    "analysis_script": "test-rvv/recognition/linemod_template_scoring/script/generate_linemod_template_scoring_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:b2cd53055b12ad0a1390b27f73ee97e0568af3934a7dca4636e722ef2d2287ba",
+      "decision_bucket": "positive",
+      "rerun_budget": "5-run initial budget; no extra rerun unless bucket changes or doctor errors",
+      "summary_generated_from": "test-rvv/recognition/linemod_template_scoring/log/board/repeated-20260828-phase000-score-accumulation-warmup5"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "LINEMOD score accumulation mem_size=4096 nr_maps=96",
+      "group": "linemod-score-accumulation",
+      "evidence_role": "production_shaped_diagnostic",
+      "case_kind": "production-shaped",
+      "point_type": "not_applicable_byte_score_map",
+      "size": 4096,
+      "run_count": 5,
+      "requires_board_context": true,
+      "baseline": {
+        "label": "std",
+        "boundary": "test_helper",
+        "wrapper": "linemod_score_accumulation_bench",
+        "row_source": "linearized_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "score_sums_fnv1a",
+        "checksum": "9840709576022462159",
+        "timer_boundary": "score_accumulation_helper_only_no_energy_or_detection",
+        "gate": "already_linearized_maps_mem_size_tail_included",
+        "mask": "not_applicable_no_finite_mask",
+        "reduction": "u8_maps_widened_to_u16_score_sums",
+        "asm_boundary": "scalar_or_compiler_generated_std_build",
+        "std_ms": 0.389759,
+        "rvv_ms": 0.389759
+      },
+      "candidate": {
+        "label": "rvv",
+        "boundary": "test_helper",
+        "wrapper": "linemod_score_accumulation_bench",
+        "row_source": "linearized_map_byte_stream",
+        "solve": false,
+        "checksum_policy": "score_sums_fnv1a",
+        "checksum": "9840709576022462159",
+        "timer_boundary": "score_accumulation_helper_only_no_energy_or_detection",
+        "gate": "already_linearized_maps_mem_size_tail_included",
+        "mask": "not_applicable_no_finite_mask",
+        "reduction": "u8_maps_widened_to_u16_score_sums",
+        "asm_boundary": "accumulateScoreMapsRVV or inlined bench helper; required RVV mnemonics present",
+        "rvv_instr_count": 50,
+        "rvv_mnemonics": {
+          "vle8.v": 4,
+          "vzext.vf2": 2,
+          "vadd.vv": 2,
+          "vse16.v": 2
+        },
+        "std_ms": 0.228749,
+        "rvv_ms": 0.228749
+      },
+      "ba_values": [
+        1.703871929494774,
+        1.2865395470260352,
+        1.9566282332040492,
+        1.404100118766951,
+        1.2868394969273806
+      ],
+      "repeated_runs": [
+        {
+          "run_label": "run-01",
+          "std_us": 389.759,
+          "rvv_us": 228.749,
+          "speedup": 1.703871929494774,
+          "checksum": "9840709576022462159"
+        },
+        {
+          "run_label": "run-02",
+          "std_us": 291.746,
+          "rvv_us": 226.768,
+          "speedup": 1.2865395470260352,
+          "checksum": "9840709576022462159"
+        },
+        {
+          "run_label": "run-03",
+          "std_us": 444.949,
+          "rvv_us": 227.406,
+          "speedup": 1.9566282332040492,
+          "checksum": "9840709576022462159"
+        },
+        {
+          "run_label": "run-04",
+          "std_us": 316.838,
+          "rvv_us": 225.652,
+          "speedup": 1.404100118766951,
+          "checksum": "9840709576022462159"
+        },
+        {
+          "run_label": "run-05",
+          "std_us": 292.119,
+          "rvv_us": 227.005,
+          "speedup": 1.2868394969273806,
+          "checksum": "9840709576022462159"
+        }
+      ]
+    }
+  ]
+}
