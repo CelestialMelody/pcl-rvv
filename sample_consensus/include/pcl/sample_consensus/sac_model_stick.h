@@ -193,6 +193,40 @@ namespace pcl
       using SampleConsensusModel<PointT>::sample_size_;
       using SampleConsensusModel<PointT>::model_size_;
 
+      /** \brief Scalar fallback preserving the original getDistancesToModel semantics. */
+      void
+      getDistancesToModelStandard (const Eigen::VectorXf &model_coefficients,
+                                   std::vector<double> &distances) const;
+
+      /** \brief Scalar fallback preserving the original selectWithinDistance semantics. */
+      void
+      selectWithinDistanceStandard (const Eigen::VectorXf &model_coefficients,
+                                    const double threshold,
+                                    Indices &inliers);
+
+      /** \brief Scalar fallback preserving the original countWithinDistance semantics. */
+      std::size_t
+      countWithinDistanceStandard (const Eigen::VectorXf &model_coefficients,
+                                   const double threshold) const;
+
+#if defined (__RVV10__)
+      /** \brief RVV path for xyz AoS direct-indexed inputs; callers keep Standard fallback. */
+      void
+      getDistancesToModelRVV (const Eigen::VectorXf &model_coefficients,
+                              std::vector<double> &distances) const;
+
+      /** \brief RVV path for xyz AoS direct-indexed inputs; callers keep Standard fallback. */
+      void
+      selectWithinDistanceRVV (const Eigen::VectorXf &model_coefficients,
+                               const double threshold,
+                               Indices &inliers);
+
+      /** \brief RVV path for xyz AoS direct-indexed inputs; callers keep Standard fallback. */
+      std::size_t
+      countWithinDistanceRVV (const Eigen::VectorXf &model_coefficients,
+                              const double threshold) const;
+#endif
+
       /** \brief Check if a sample of indices results in a good sample of points
         * indices.
         * \param[in] samples the resultant index samples

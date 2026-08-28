@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_stick Phase 000 repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-manifest.json",
+    "label": "5-run board repeated summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_stick/script/generate_stick_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_stick public countWithinDistance PointXYZ 65536",
+      "case_kind": "public-entry baseline",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.0151,
+        0.9996,
+        1.0043,
+        1.0083,
+        1.0113
+      ],
+      "std_ms_values": [
+        1.766935,
+        1.738414,
+        1.746477,
+        1.7547,
+        1.759985
+      ],
+      "rvv_ms_values": [
+        1.740628,
+        1.739192,
+        1.739014,
+        1.740333,
+        1.740355
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelStickDiagnostic::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "stick_inner_outer_threshold_band",
+        "reduction": "nr_i_minus_nr_o_saturating_zero",
+        "checksum": "0",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 1.753302
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelStickDiagnostic::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "stick_inner_outer_threshold_band",
+        "reduction": "nr_i_minus_nr_o_saturating_zero",
+        "checksum": "0",
+        "asm_boundary": "countWithinDistance",
+        "rvv_instr_count": 36,
+        "rvv_ms": 1.739904
+      }
+    },
+    {
+      "name": "sac_model_stick diagnostic candidate countWithinDistance PointXYZ 65536",
+      "case_kind": "test-only candidate",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        4.2169,
+        4.1429,
+        4.1482,
+        4.1767,
+        4.1889
+      ],
+      "std_ms_values": [
+        1.752654,
+        1.737772,
+        1.74197,
+        1.753166,
+        1.756931
+      ],
+      "rvv_ms_values": [
+        0.41563,
+        0.419461,
+        0.419929,
+        0.419746,
+        0.419423
+      ],
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelStickDiagnostic::countWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_candidate_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "stick_inner_outer_threshold_band",
+        "reduction": "nr_i_minus_nr_o_saturating_zero",
+        "checksum": "0",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 1.748499
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelStickDiagnostic::countWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_candidate_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "stick_inner_outer_threshold_band",
+        "reduction": "nr_i_minus_nr_o_saturating_zero",
+        "checksum": "0",
+        "asm_boundary": "countWithinDistanceCandidateRVV",
+        "rvv_instr_count": 27,
+        "rvv_ms": 0.418838
+      }
+    }
+  ]
+}

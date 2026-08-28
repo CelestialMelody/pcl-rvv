@@ -45,6 +45,16 @@
 #include <pcl/common/centroid.h>
 #include <pcl/common/concatenate.h>
 #include <pcl/common/eigen.h> // for eigen33
+#include <pcl/rvv_point_load.h>
+
+#include <cstdint>
+#include <type_traits>
+
+#if defined (__GNUC__)
+#define PCL_RVV_STICK_NOINLINE __attribute__((noinline))
+#else
+#define PCL_RVV_STICK_NOINLINE
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> bool
@@ -114,6 +124,28 @@ pcl::SampleConsensusModelStick<PointT>::getDistancesToModel (
     return;
   }
 
+  // RVV 只接管 traits-gated xyz AoS + 32-bit index 的 direct-indexed 热循环。
+#if defined (__RVV10__)
+  if constexpr (pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value &&
+                sizeof (pcl::index_t) == sizeof (std::int32_t) &&
+                std::is_signed_v<pcl::index_t>)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    {
+      getDistancesToModelRVV (model_coefficients, distances);
+      return;
+    }
+  }
+#endif
+
+  getDistancesToModelStandard (model_coefficients, distances);
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::SampleConsensusModelStick<PointT>::getDistancesToModelStandard (
+      const Eigen::VectorXf &model_coefficients, std::vector<double> &distances) const
+{
   float sqr_threshold = static_cast<float> (radius_max_ * radius_max_);
   distances.resize (indices_->size ());
 
@@ -142,6 +174,101 @@ pcl::SampleConsensusModelStick<PointT>::getDistancesToModel (
   }
 }
 
+#if defined (__RVV10__)
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> PCL_RVV_STICK_NOINLINE void
+pcl::SampleConsensusModelStick<PointT>::getDistancesToModelRVV (
+      const Eigen::VectorXf &model_coefficients, std::vector<double> &distances) const
+{
+  if constexpr (!pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value ||
+                sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                !std::is_signed_v<pcl::index_t>)
+  {
+    getDistancesToModelStandard (model_coefficients, distances);
+    return;
+  }
+  else
+  {
+    if (input_->points.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    {
+      getDistancesToModelStandard (model_coefficients, distances);
+      return;
+    }
+
+    const std::size_t total_n = indices_->size ();
+    distances.resize (total_n);
+
+    const float px = model_coefficients[0];
+    const float py = model_coefficients[1];
+    const float pz = model_coefficients[2];
+    Eigen::Vector3f line_dir (model_coefficients[3],
+                              model_coefficients[4],
+                              model_coefficients[5]);
+    line_dir.normalize ();
+    const float dx_line = line_dir.x ();
+    const float dy_line = line_dir.y ();
+    const float dz_line = line_dir.z ();
+    const float sqr_threshold = static_cast<float> (radius_max_ * radius_max_);
+
+    const std::uint8_t* const points_base =
+        reinterpret_cast<const std::uint8_t*> (input_->points.data ());
+    const pcl::index_t* const indices_ptr = indices_->data ();
+    using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+
+    for (std::size_t i = 0; i < total_n; )
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+      const vuint32m2_t idx =
+          __riscv_vle32_v_u32m2 (reinterpret_cast<const std::uint32_t*> (indices_ptr + i), vl);
+      const vuint32m2_t offsets = pcl::rvv_load::byte_offsets_u32m2<PointT> (idx, vl);
+      vfloat32m2_t x_vec;
+      vfloat32m2_t y_vec;
+      vfloat32m2_t z_vec;
+      pcl::rvv_load::indexed_load3_f32m2<PointT, Layout::kX, Layout::kY, Layout::kZ> (
+          points_base, offsets, vl, x_vec, y_vec, z_vec);
+
+      const vfloat32m2_t px_vec = __riscv_vfmv_v_f_f32m2 (px, vl);
+      const vfloat32m2_t py_vec = __riscv_vfmv_v_f_f32m2 (py, vl);
+      const vfloat32m2_t pz_vec = __riscv_vfmv_v_f_f32m2 (pz, vl);
+      const vfloat32m2_t vx = __riscv_vfsub_vv_f32m2 (px_vec, x_vec, vl);
+      const vfloat32m2_t vy = __riscv_vfsub_vv_f32m2 (py_vec, y_vec, vl);
+      const vfloat32m2_t vz = __riscv_vfsub_vv_f32m2 (pz_vec, z_vec, vl);
+
+      const vfloat32m2_t cross_x =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vy, dz_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vz, dy_line, vl),
+                                  vl);
+      const vfloat32m2_t cross_y =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vz, dx_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vx, dz_line, vl),
+                                  vl);
+      const vfloat32m2_t cross_z =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vx, dy_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vy, dx_line, vl),
+                                  vl);
+      const vfloat32m2_t sqr =
+          __riscv_vfmacc_vv_f32m2 (
+              __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (cross_x, cross_x, vl),
+                                        cross_y,
+                                        cross_y,
+                                        vl),
+              cross_z,
+              cross_z,
+              vl);
+      const vfloat32m2_t dist = __riscv_vfsqrt_v_f32m2 (sqr, vl);
+      const vbool16_t inner_mask = __riscv_vmflt_vf_f32m2_b16 (sqr, sqr_threshold, vl);
+      const vfloat32m2_t penalized = __riscv_vfmul_vf_f32m2 (dist, 2.0f, vl);
+      const vfloat32m2_t final_dist =
+          __riscv_vmerge_vvm_f32m2 (penalized, dist, inner_mask, vl);
+      const vfloat64m4_t final_dist_d = __riscv_vfwcvt_f_f_v_f64m4 (final_dist, vl);
+      __riscv_vse64_v_f64m4 (distances.data () + i, final_dist_d, vl);
+
+      i += vl;
+    }
+  }
+}
+#endif
+
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
 pcl::SampleConsensusModelStick<PointT>::selectWithinDistance (
@@ -154,6 +281,27 @@ pcl::SampleConsensusModelStick<PointT>::selectWithinDistance (
     return;
   }
 
+#if defined (__RVV10__)
+  if constexpr (pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value &&
+                sizeof (pcl::index_t) == sizeof (std::int32_t) &&
+                std::is_signed_v<pcl::index_t>)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    {
+      selectWithinDistanceRVV (model_coefficients, threshold, inliers);
+      return;
+    }
+  }
+#endif
+
+  selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+}
+
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> void
+pcl::SampleConsensusModelStick<PointT>::selectWithinDistanceStandard (
+      const Eigen::VectorXf &model_coefficients, const double threshold, Indices &inliers)
+{
   float sqr_threshold = static_cast<float> (threshold * threshold);
 
   inliers.clear ();
@@ -192,6 +340,124 @@ pcl::SampleConsensusModelStick<PointT>::selectWithinDistance (
   }
 }
 
+#if defined (__RVV10__)
+//////////////////////////////////////////////////////////////////////////
+template <typename PointT> PCL_RVV_STICK_NOINLINE void
+pcl::SampleConsensusModelStick<PointT>::selectWithinDistanceRVV (
+      const Eigen::VectorXf &model_coefficients, const double threshold, Indices &inliers)
+{
+  if constexpr (!pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value ||
+                sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                !std::is_signed_v<pcl::index_t>)
+  {
+    selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+    return;
+  }
+  else
+  {
+    if (input_->points.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+    {
+      selectWithinDistanceStandard (model_coefficients, threshold, inliers);
+      return;
+    }
+
+    const std::size_t total_n = indices_->size ();
+    inliers.resize (total_n);
+    error_sqr_dists_.resize (total_n);
+
+    const float px = model_coefficients[0];
+    const float py = model_coefficients[1];
+    const float pz = model_coefficients[2];
+    Eigen::Vector3f line_dir (model_coefficients[3] - model_coefficients[0],
+                              model_coefficients[4] - model_coefficients[1],
+                              model_coefficients[5] - model_coefficients[2]);
+    line_dir.normalize ();
+    const float dx_line = line_dir.x ();
+    const float dy_line = line_dir.y ();
+    const float dz_line = line_dir.z ();
+    const float sqr_threshold = static_cast<float> (threshold * threshold);
+
+    const std::uint8_t* const points_base =
+        reinterpret_cast<const std::uint8_t*> (input_->points.data ());
+    const pcl::index_t* const indices_ptr = indices_->data ();
+    using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+    std::vector<float> compressed_sqr_distances (__riscv_vsetvlmax_e32m2 ());
+
+    std::size_t nr_p = 0;
+    for (std::size_t i = 0; i < total_n; )
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+      const vuint32m2_t idx =
+          __riscv_vle32_v_u32m2 (reinterpret_cast<const std::uint32_t*> (indices_ptr + i), vl);
+      const vuint32m2_t offsets = pcl::rvv_load::byte_offsets_u32m2<PointT> (idx, vl);
+      vfloat32m2_t x_vec;
+      vfloat32m2_t y_vec;
+      vfloat32m2_t z_vec;
+      pcl::rvv_load::indexed_load3_f32m2<PointT, Layout::kX, Layout::kY, Layout::kZ> (
+          points_base, offsets, vl, x_vec, y_vec, z_vec);
+
+      const vfloat32m2_t px_vec = __riscv_vfmv_v_f_f32m2 (px, vl);
+      const vfloat32m2_t py_vec = __riscv_vfmv_v_f_f32m2 (py, vl);
+      const vfloat32m2_t pz_vec = __riscv_vfmv_v_f_f32m2 (pz, vl);
+      const vfloat32m2_t vx = __riscv_vfsub_vv_f32m2 (x_vec, px_vec, vl);
+      const vfloat32m2_t vy = __riscv_vfsub_vv_f32m2 (y_vec, py_vec, vl);
+      const vfloat32m2_t vz = __riscv_vfsub_vv_f32m2 (z_vec, pz_vec, vl);
+
+      const vfloat32m2_t cross_x =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vy, dz_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vz, dy_line, vl),
+                                  vl);
+      const vfloat32m2_t cross_y =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vz, dx_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vx, dz_line, vl),
+                                  vl);
+      const vfloat32m2_t cross_z =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vx, dy_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vy, dx_line, vl),
+                                  vl);
+      const vfloat32m2_t sqr =
+          __riscv_vfmacc_vv_f32m2 (
+              __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (cross_x, cross_x, vl),
+                                        cross_y,
+                                        cross_y,
+                                        vl),
+              cross_z,
+              cross_z,
+              vl);
+      const vbool16_t inlier_mask = __riscv_vmflt_vf_f32m2_b16 (sqr, sqr_threshold, vl);
+      const std::size_t active_count = __riscv_vcpop_m_b16 (inlier_mask, vl);
+
+      if (active_count > 0)
+      {
+        const vuint32m2_t compressed_idx =
+            __riscv_vcompress_vm_u32m2 (idx, inlier_mask, vl);
+        const vint32m2_t compressed_idx_i32 =
+            __riscv_vreinterpret_v_u32m2_i32m2 (compressed_idx);
+        __riscv_vse32_v_i32m2 (
+            reinterpret_cast<std::int32_t*> (inliers.data () + nr_p),
+            compressed_idx_i32,
+            active_count);
+
+        const vfloat32m2_t compressed_sqr =
+            __riscv_vcompress_vm_f32m2 (sqr, inlier_mask, vl);
+        __riscv_vse32_v_f32m2 (compressed_sqr_distances.data (), compressed_sqr, active_count);
+
+        // `vcompress` preserves lane order; the scalar tail only widens float squared distances to double.
+        for (std::size_t lane = 0; lane < active_count; ++lane)
+          error_sqr_dists_[nr_p + lane] =
+              static_cast<double> (compressed_sqr_distances[lane]);
+        nr_p += active_count;
+      }
+
+      i += vl;
+    }
+
+    inliers.resize (nr_p);
+    error_sqr_dists_.resize (nr_p);
+  }
+}
+#endif
+
 ///////////////////////////////////////////////////////////////////////////
 template <typename PointT> std::size_t
 pcl::SampleConsensusModelStick<PointT>::countWithinDistance (
@@ -204,6 +470,24 @@ pcl::SampleConsensusModelStick<PointT>::countWithinDistance (
     return (0);
   }
 
+#if defined (__RVV10__)
+  if constexpr (pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value &&
+                sizeof (pcl::index_t) == sizeof (std::int32_t) &&
+                std::is_signed_v<pcl::index_t>)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+      return countWithinDistanceRVV (model_coefficients, threshold);
+  }
+#endif
+
+  return countWithinDistanceStandard (model_coefficients, threshold);
+}
+
+///////////////////////////////////////////////////////////////////////////
+template <typename PointT> std::size_t
+pcl::SampleConsensusModelStick<PointT>::countWithinDistanceStandard (
+      const Eigen::VectorXf &model_coefficients, const double threshold) const
+{
   float sqr_threshold = static_cast<float> (threshold * threshold);
 
   std::size_t nr_i = 0, nr_o = 0;
@@ -243,6 +527,99 @@ pcl::SampleConsensusModelStick<PointT>::countWithinDistance (
 
   return (nr_i <= nr_o ? 0 : nr_i - nr_o);
 }
+
+#if defined (__RVV10__)
+///////////////////////////////////////////////////////////////////////////
+template <typename PointT> PCL_RVV_STICK_NOINLINE std::size_t
+pcl::SampleConsensusModelStick<PointT>::countWithinDistanceRVV (
+      const Eigen::VectorXf &model_coefficients, const double threshold) const
+{
+  if constexpr (!pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value ||
+                sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                !std::is_signed_v<pcl::index_t>)
+  {
+    return countWithinDistanceStandard (model_coefficients, threshold);
+  }
+  else
+  {
+    if (input_->points.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> ())
+      return countWithinDistanceStandard (model_coefficients, threshold);
+
+    const std::size_t total_n = indices_->size ();
+    const float px = model_coefficients[0];
+    const float py = model_coefficients[1];
+    const float pz = model_coefficients[2];
+    Eigen::Vector3f line_dir (model_coefficients[3] - model_coefficients[0],
+                              model_coefficients[4] - model_coefficients[1],
+                              model_coefficients[5] - model_coefficients[2]);
+    line_dir.normalize ();
+    const float dx_line = line_dir.x ();
+    const float dy_line = line_dir.y ();
+    const float dz_line = line_dir.z ();
+    const float sqr_threshold = static_cast<float> (threshold * threshold);
+    const float outer_sqr_threshold = 4.0f * sqr_threshold;
+
+    const std::uint8_t* const points_base =
+        reinterpret_cast<const std::uint8_t*> (input_->points.data ());
+    const pcl::index_t* const indices_ptr = indices_->data ();
+    using Layout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+
+    std::size_t nr_i = 0;
+    std::size_t nr_o = 0;
+    for (std::size_t i = 0; i < total_n; )
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+      const vuint32m2_t idx =
+          __riscv_vle32_v_u32m2 (reinterpret_cast<const std::uint32_t*> (indices_ptr + i), vl);
+      const vuint32m2_t offsets = pcl::rvv_load::byte_offsets_u32m2<PointT> (idx, vl);
+      vfloat32m2_t x_vec;
+      vfloat32m2_t y_vec;
+      vfloat32m2_t z_vec;
+      pcl::rvv_load::indexed_load3_f32m2<PointT, Layout::kX, Layout::kY, Layout::kZ> (
+          points_base, offsets, vl, x_vec, y_vec, z_vec);
+
+      const vfloat32m2_t px_vec = __riscv_vfmv_v_f_f32m2 (px, vl);
+      const vfloat32m2_t py_vec = __riscv_vfmv_v_f_f32m2 (py, vl);
+      const vfloat32m2_t pz_vec = __riscv_vfmv_v_f_f32m2 (pz, vl);
+      const vfloat32m2_t vx = __riscv_vfsub_vv_f32m2 (x_vec, px_vec, vl);
+      const vfloat32m2_t vy = __riscv_vfsub_vv_f32m2 (y_vec, py_vec, vl);
+      const vfloat32m2_t vz = __riscv_vfsub_vv_f32m2 (z_vec, pz_vec, vl);
+
+      const vfloat32m2_t cross_x =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vy, dz_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vz, dy_line, vl),
+                                  vl);
+      const vfloat32m2_t cross_y =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vz, dx_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vx, dz_line, vl),
+                                  vl);
+      const vfloat32m2_t cross_z =
+          __riscv_vfsub_vv_f32m2 (__riscv_vfmul_vf_f32m2 (vx, dy_line, vl),
+                                  __riscv_vfmul_vf_f32m2 (vy, dx_line, vl),
+                                  vl);
+      const vfloat32m2_t sqr =
+          __riscv_vfmacc_vv_f32m2 (
+              __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (cross_x, cross_x, vl),
+                                        cross_y,
+                                        cross_y,
+                                        vl),
+              cross_z,
+              cross_z,
+              vl);
+
+      const vbool16_t inner_mask = __riscv_vmflt_vf_f32m2_b16 (sqr, sqr_threshold, vl);
+      const vbool16_t outer_upper_mask =
+          __riscv_vmflt_vf_f32m2_b16 (sqr, outer_sqr_threshold, vl);
+      const vbool16_t outer_band_mask = __riscv_vmandn_mm_b16 (outer_upper_mask, inner_mask, vl);
+      nr_i += __riscv_vcpop_m_b16 (inner_mask, vl);
+      nr_o += __riscv_vcpop_m_b16 (outer_band_mask, vl);
+      i += vl;
+    }
+
+    return (nr_i <= nr_o ? 0 : nr_i - nr_o);
+  }
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 template <typename PointT> void
@@ -405,5 +782,6 @@ pcl::SampleConsensusModelStick<PointT>::doSamplesVerifyModel (
 
 #define PCL_INSTANTIATE_SampleConsensusModelStick(T) template class PCL_EXPORTS pcl::SampleConsensusModelStick<T>;
 
-#endif    // PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_STICK_H_
+#undef PCL_RVV_STICK_NOINLINE
 
+#endif    // PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_STICK_H_

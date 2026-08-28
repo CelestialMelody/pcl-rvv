@@ -1,0 +1,444 @@
+{
+  "files": {
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "stick-count-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787885577,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787885577702481130,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.json",
+        "sha256": "sha256:56fcbaf40edbfa5bc3f5bc41b20a751358723a31412037d347e23d87f21b949f",
+        "size": 2676
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "stick-count-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787885577,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787885577702481130,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.md",
+        "sha256": "sha256:cce984895ab03d72f341698ffd74d260fe21083ea43ea15af2ca982c1ebe9b06",
+        "size": 2320
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "stick-count-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787885577,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787885577667482590,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-manifest.json",
+        "sha256": "sha256:94eb386e5c6a2e807a551a86c6a956d99a7d24886b77d192245e949048a9a008",
+        "size": 5279
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "stick-select-phase020-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787886558,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase020-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787886558407789103,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.json",
+        "sha256": "sha256:e6ccd33a9be82740415ec3a8e91e50100c8611f35a28279e84fc49a6d66d5748",
+        "size": 2677
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "stick-select-phase020-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787886558,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase020-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787886558407789103,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.md",
+        "sha256": "sha256:85a18c2c60e050a7232b4bbcdf03807ac73558b18ca014d4ac261f5b5ac2dc4d",
+        "size": 2321
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "stick-select-phase020-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787886558,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase020-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787886558380790220,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-manifest.json",
+        "sha256": "sha256:77c9a7133a657f2a37337c57a093f93bf760f032e7122aff32af2326ee040516",
+        "size": 5306
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "stick-getdistances-phase040-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887506,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase040-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887506330587822,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.json",
+        "sha256": "sha256:47f12126b6ff354afe1782f9f0818c76b000bf0b0ab6a1c1d089c7234b3ae81f",
+        "size": 1890
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "stick-getdistances-phase040-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887506,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase040-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887506330587822,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.md",
+        "sha256": "sha256:9e65505aa316211dde1a87db6350d54643aa0e4bfd1bd02d4c3adc2e5c5e39a0",
+        "size": 1659
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "stick-getdistances-phase040-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787887506,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase040-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787887506303588939,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-manifest.json",
+        "sha256": "sha256:41253f7f698ceff3bdcd5646cfad91dd9da6abc159fb4e703eeb26e965ab66bf",
+        "size": 5331
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "stick-phase080-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787894769,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase080-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787894769868995686,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.json",
+        "sha256": "sha256:78a1e31b80cf09f1343a786d910deb79f28fd06ae69c9e75f8ffce4b17eadbd2",
+        "size": 913
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "stick-phase080-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787894769,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase080-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787894769868995686,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.md",
+        "sha256": "sha256:de10906cbc7343d20ae71858d6125796ced311515e094deceac8be9cd7caaf97",
+        "size": 697
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "stick-phase080-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787894769,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "stick-phase080-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787894769839996023,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-manifest.json",
+        "sha256": "sha256:39a24d1e62fab05e25304b26da3d9bf5edf55ada1ce3f148b14f5bdd572ddef3",
+        "size": 7394
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "stick-phase100-getdistances-vector-writeback",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787898798,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-manifest.json"
+      },
+      "run_label": "stick-phase100-vector-writeback-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787898798039710693,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.json",
+        "sha256": "sha256:01225954efb2fcdd2df4ecdd3393a67ccb3b1f476073fb316c3e857231faaa29",
+        "size": 923
+      },
+      "target": "run_vector_writeback_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "stick-phase100-getdistances-vector-writeback",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787898798,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-manifest.json"
+      },
+      "run_label": "stick-phase100-vector-writeback-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787898798039710693,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.md",
+        "sha256": "sha256:7efb0fbf4f9452c10fbbd1fe72ae9f4101858d676414d1c53912a444830cf3c9",
+        "size": 707
+      },
+      "target": "run_vector_writeback_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "stick-phase100-getdistances-vector-writeback",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787898798,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-manifest.json"
+      },
+      "run_label": "stick-phase100-vector-writeback-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787898798012711372,
+        "path": "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-manifest.json",
+        "sha256": "sha256:5c6527e62a4909c7ce6ad1969fee9d45af27f423aeaaba253a4da6f37cc65c83",
+        "size": 3170
+      },
+      "target": "run_vector_writeback_board_evidence_doctor"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "stick-count-phase000-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787885201,
+      "run_label": "stick-phase000-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "stick-count-phase000-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/000-stick-count-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787885577,
+      "run_label": "stick-phase000-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "stick-select-phase020-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787886495,
+      "run_label": "stick-phase020-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "stick-select-phase020-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/020-stick-select-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787886558,
+      "run_label": "stick-phase020-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "stick-getdistances-phase040-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/040-stick-getdistances-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787887506,
+      "run_label": "stick-phase040-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "stick-phase080-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/080-stick-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787894769,
+      "run_label": "stick-phase080-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "stick-phase100-getdistances-vector-writeback",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_stick/doc/phases/100-stick-getdistances-vector-writeback/vector-writeback-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787898798,
+      "run_label": "stick-phase100-vector-writeback-board",
+      "target": "run_vector_writeback_board_evidence_doctor"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787898798
+}
