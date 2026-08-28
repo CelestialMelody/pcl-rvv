@@ -39,12 +39,15 @@
 #include <chrono>
 #include <iostream>
 #include <iomanip> // For std::setw, std::setprecision
+#include <type_traits>
 
 #include <pcl/test/gtest.h>
 
 #include <pcl/pcl_tests.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl/register_point_struct.h>
+#include <pcl/rvv_point_traits.h>
 #include <pcl/common/utils.h>
 
 #include <pcl/sample_consensus/msac.h>
@@ -63,6 +66,84 @@ using namespace pcl::io;
 using SampleConsensusModelPlanePtr = SampleConsensusModelPlane<PointXYZ>::Ptr;
 using SampleConsensusModelNormalPlanePtr = SampleConsensusModelNormalPlane<PointXYZ, Normal>::Ptr;
 using SampleConsensusModelNormalParallelPlanePtr = SampleConsensusModelNormalParallelPlane<PointXYZ, Normal>::Ptr;
+
+struct NormalWithDoubleCurvature
+{
+  float normal_x = 0.0f;
+  float normal_y = 0.0f;
+  float normal_z = 1.0f;
+  double curvature = 0.0;
+};
+
+POINT_CLOUD_REGISTER_POINT_STRUCT (NormalWithDoubleCurvature,
+    (float, normal_x, normal_x)
+    (float, normal_y, normal_y)
+    (float, normal_z, normal_z)
+    (double, curvature, curvature)
+)
+
+struct NonAoSRegisteredNormal
+{
+  float normal_x = 0.0f;
+  float normal_y = 0.0f;
+  float normal_z = 1.0f;
+  float curvature = 0.0f;
+
+private:
+  int non_standard_layout_marker_ = 0;
+};
+
+#if defined (__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+POINT_CLOUD_REGISTER_POINT_STRUCT (NonAoSRegisteredNormal,
+    (float, normal_x, normal_x)
+    (float, normal_y, normal_y)
+    (float, normal_z, normal_z)
+    (float, curvature, curvature)
+)
+#if defined (__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
+struct NonAoSRegisteredXYZ
+{
+  PCL_ADD_POINT4D;
+
+private:
+  int non_standard_layout_marker_ = 0;
+
+public:
+  PCL_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+#if defined (__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+POINT_CLOUD_REGISTER_POINT_STRUCT (NonAoSRegisteredXYZ,
+    (float, x, x)
+    (float, y, y)
+    (float, z, z)
+)
+#if defined (__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
+static_assert(pcl::rvv::RVVXYZFloatLayout<NonAoSRegisteredXYZ>::value);
+static_assert(!std::is_standard_layout_v<NonAoSRegisteredXYZ>);
+static_assert(!pcl::rvv::RVVXYZAoSFloatLayout<NonAoSRegisteredXYZ>::value);
+static_assert(pcl::rvv::RVVXYZAoSFloatLayout<pcl::PointXYZI>::value);
+static_assert(pcl::rvv::RVVXYZAoSFloatLayout<pcl::PointXYZINormal>::value);
+static_assert(pcl::rvv::RVVNormalFloatLayout<NonAoSRegisteredNormal>::value);
+static_assert(pcl::rvv::RVVFloatFieldLayout<NonAoSRegisteredNormal, pcl::fields::curvature>::value);
+static_assert(!std::is_standard_layout_v<NonAoSRegisteredNormal>);
+#if defined (__RVV10__)
+static_assert(pcl::detail::NormalPlaneRVVNormalAoSLayout<pcl::PointNormal>::value);
+static_assert(pcl::detail::NormalPlaneRVVNormalAoSLayout<pcl::PointXYZINormal>::value);
+static_assert(!pcl::detail::NormalPlaneRVVNormalAoSLayout<NonAoSRegisteredNormal>::value);
+#endif
 
 PointCloud<PointXYZ>::Ptr cloud_ (new PointCloud<PointXYZ> ());
 PointCloud<Normal>::Ptr normals_ (new PointCloud<Normal> ());
@@ -583,6 +664,9 @@ class SampleConsensusModelNormalPlaneTest : private SampleConsensusModelNormalPl
     using SampleConsensusModelNormalPlane<PointT, PointNT>::SampleConsensusModelNormalPlane;
     using SampleConsensusModelNormalPlane<PointT, PointNT>::setNormalDistanceWeight;
     using SampleConsensusModelNormalPlane<PointT, PointNT>::setInputNormals;
+    using SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistance;
+    using SampleConsensusModelNormalPlane<PointT, PointNT>::countWithinDistance;
+    using SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModel;
     using SampleConsensusModelNormalPlane<PointT, PointNT>::countWithinDistanceStandard;
     using SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceStandard;
     using SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModelStandard;
@@ -600,6 +684,610 @@ class SampleConsensusModelNormalPlaneTest : private SampleConsensusModelNormalPl
     using SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModelRVV;
 #endif
 };
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForSupportedLayout)
+{
+  // 公开入口（public entry）必须保持和直接 RVV helper 一致；这里把法线权重设为 0，
+  // 让测试只验证 dispatch / 写回形状，不把 acos 近似误差混入这个验收条件。
+  constexpr std::size_t nr_points = 6;
+  PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
+  PointCloud<Normal>::Ptr normals (new PointCloud<Normal>);
+  cloud->resize (nr_points);
+  normals->resize (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    (*cloud)[idx].x = static_cast<float> (idx);
+    (*cloud)[idx].y = 0.0f;
+    (*cloud)[idx].z = 0.015f * static_cast<float> (idx);
+    (*normals)[idx].normal_x = 0.0f;
+    (*normals)[idx].normal_y = 0.0f;
+    (*normals)[idx].normal_z = 1.0f;
+    (*normals)[idx].curvature = 0.0f;
+  }
+
+  pcl::Indices indices = {5, 3, 1, 0, 2, 4};
+  Eigen::VectorXf model_coefficients (4);
+  model_coefficients << 0.0f, 0.0f, 1.0f, 0.0f;
+
+  SampleConsensusModelNormalPlaneTest<PointXYZ, Normal> model (cloud);
+  model.setInputNormals (normals);
+  model.setIndices (std::make_shared<std::vector<int>> (indices));
+  model.setNormalDistanceWeight (0.0);
+
+  pcl::Indices public_inliers;
+  model.selectWithinDistance (model_coefficients, 0.05, public_inliers);
+  const std::vector<double> public_errors = model.error_sqr_dists_;
+  const std::size_t public_count = model.countWithinDistance (model_coefficients, 0.05);
+  std::vector<double> public_distances;
+  model.getDistancesToModel (model_coefficients, public_distances);
+
+#if defined (__RVV10__)
+  pcl::Indices rvv_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t rvv_count =
+      model.selectWithinDistanceRVV (model_coefficients, 0.05, rvv_inliers);
+  rvv_inliers.resize (rvv_count);
+  model.error_sqr_dists_.resize (rvv_count);
+  const std::vector<double> rvv_errors = model.error_sqr_dists_;
+
+  std::vector<double> rvv_distances;
+  model.getDistancesToModelRVV (model_coefficients, rvv_distances);
+  ASSERT_EQ (rvv_count, model.countWithinDistanceRVV (model_coefficients, 0.05));
+#else
+  pcl::Indices rvv_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t rvv_count =
+      model.selectWithinDistanceStandard (model_coefficients, 0.05, rvv_inliers);
+  rvv_inliers.resize (rvv_count);
+  model.error_sqr_dists_.resize (rvv_count);
+  const std::vector<double> rvv_errors = model.error_sqr_dists_;
+
+  std::vector<double> rvv_distances;
+  model.getDistancesToModelStandard (model_coefficients, rvv_distances);
+  ASSERT_EQ (rvv_count, model.countWithinDistanceStandard (model_coefficients, 0.05));
+#endif
+
+  ASSERT_EQ (rvv_count, public_count);
+  ASSERT_EQ (rvv_inliers, public_inliers);
+  ASSERT_EQ (rvv_errors.size (), public_errors.size ());
+  for (std::size_t idx = 0; idx < public_errors.size (); ++idx)
+    EXPECT_NEAR (rvv_errors[idx], public_errors[idx], 1e-6);
+
+  ASSERT_EQ (rvv_distances.size (), public_distances.size ());
+  for (std::size_t idx = 0; idx < public_distances.size (); ++idx)
+    EXPECT_NEAR (rvv_distances[idx], public_distances[idx], 1e-6);
+}
+
+template <typename PointT>
+void runNormalPlanePublicEntriesMatchDirectRVVForAoSSource()
+{
+  // 本 helper 验证 source 点类型扩展边界。normal-plane 只从 source 读取
+  // x/y/z，额外字段例如 intensity 或 source normal 不参与输出语义；
+  // 因此满足 RVVXYZAoSFloatLayout（AoS 字节偏移布局 gate）的代表点型
+  // 应该和 PointXYZ 一样命中公开入口 RVV 分流。
+  constexpr std::size_t nr_points = 7;
+  typename PointCloud<PointT>::Ptr cloud (new PointCloud<PointT>);
+  PointCloud<Normal>::Ptr normals (new PointCloud<Normal>);
+  cloud->resize (nr_points);
+  normals->resize (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    (*cloud)[idx].x = static_cast<float> (idx);
+    (*cloud)[idx].y = 0.125f * static_cast<float> (idx);
+    (*cloud)[idx].z = 0.01f * static_cast<float> (idx);
+    (*normals)[idx].normal_x = 0.0f;
+    (*normals)[idx].normal_y = 0.0f;
+    (*normals)[idx].normal_z = 1.0f;
+    (*normals)[idx].curvature = 0.0f;
+  }
+
+  pcl::Indices indices = {6, 0, 3, 1, 5, 2, 4};
+  Eigen::VectorXf model_coefficients (4);
+  model_coefficients << 0.0f, 0.0f, 1.0f, 0.0f;
+
+  SampleConsensusModelNormalPlaneTest<PointT, Normal> model (cloud);
+  model.setInputNormals (normals);
+  model.setIndices (std::make_shared<std::vector<int>> (indices));
+  model.setNormalDistanceWeight (0.0);
+
+  pcl::Indices public_inliers;
+  model.selectWithinDistance (model_coefficients, 0.04, public_inliers);
+  const std::vector<double> public_errors = model.error_sqr_dists_;
+  const std::size_t public_count = model.countWithinDistance (model_coefficients, 0.04);
+  std::vector<double> public_distances;
+  model.getDistancesToModel (model_coefficients, public_distances);
+
+#if defined (__RVV10__)
+  pcl::Indices direct_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t direct_count =
+      model.selectWithinDistanceRVV (model_coefficients, 0.04, direct_inliers);
+  direct_inliers.resize (direct_count);
+  model.error_sqr_dists_.resize (direct_count);
+  const std::vector<double> direct_errors = model.error_sqr_dists_;
+
+  std::vector<double> direct_distances;
+  model.getDistancesToModelRVV (model_coefficients, direct_distances);
+  ASSERT_EQ (direct_count, model.countWithinDistanceRVV (model_coefficients, 0.04));
+#else
+  pcl::Indices direct_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t direct_count =
+      model.selectWithinDistanceStandard (model_coefficients, 0.04, direct_inliers);
+  direct_inliers.resize (direct_count);
+  model.error_sqr_dists_.resize (direct_count);
+  const std::vector<double> direct_errors = model.error_sqr_dists_;
+
+  std::vector<double> direct_distances;
+  model.getDistancesToModelStandard (model_coefficients, direct_distances);
+  ASSERT_EQ (direct_count, model.countWithinDistanceStandard (model_coefficients, 0.04));
+#endif
+
+  ASSERT_EQ (direct_count, public_count);
+  ASSERT_EQ (direct_inliers, public_inliers);
+  ASSERT_EQ (direct_errors.size (), public_errors.size ());
+  for (std::size_t idx = 0; idx < public_errors.size (); ++idx)
+    EXPECT_NEAR (direct_errors[idx], public_errors[idx], 1e-6);
+
+  ASSERT_EQ (direct_distances.size (), public_distances.size ());
+  for (std::size_t idx = 0; idx < public_distances.size (); ++idx)
+    EXPECT_NEAR (direct_distances[idx], public_distances[idx], 1e-6);
+}
+
+template <typename PointNT>
+typename PointCloud<PointNT>::Ptr
+makeNormalPlaneNormalCloud(const std::size_t nr_points)
+{
+  typename PointCloud<PointNT>::Ptr normals (new PointCloud<PointNT>);
+  normals->resize (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    auto& normal = (*normals)[idx];
+    if constexpr (pcl::traits::has_xyz<PointNT>::value)
+    {
+      normal.x = 0.01f * static_cast<float> (idx);
+      normal.y = -0.02f * static_cast<float> (idx);
+      normal.z = 0.5f + 0.005f * static_cast<float> (idx);
+    }
+    if constexpr (std::is_same_v<PointNT, pcl::PointXYZINormal>)
+      normal.intensity = 0.25f * static_cast<float> (idx + 1);
+
+    normal.normal_x = 0.0f;
+    normal.normal_y = 0.1f * static_cast<float> (idx % 3);
+    normal.normal_z = 1.0f;
+    normal.curvature = 0.02f * static_cast<float> (idx % 5);
+  }
+
+  return normals;
+}
+
+template <typename PointT>
+typename PointCloud<PointT>::Ptr
+makeNormalPlaneSourceCloud(const std::size_t nr_points)
+{
+  typename PointCloud<PointT>::Ptr cloud (new PointCloud<PointT>);
+  cloud->resize (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    auto& point = (*cloud)[idx];
+    point.x = 0.15f * static_cast<float> (idx);
+    point.y = 0.025f * static_cast<float> ((idx + 1) % 4);
+    point.z = 0.0125f * static_cast<float> (idx);
+
+    if constexpr (std::is_same_v<PointT, pcl::PointXYZI>)
+    {
+      point.intensity = 0.125f * static_cast<float> (idx + 3);
+    }
+    else if constexpr (std::is_same_v<PointT, pcl::PointXYZINormal>)
+    {
+      point.intensity = 0.125f * static_cast<float> (idx + 3);
+      point.normal_x = 0.0f;
+      point.normal_y = 0.0f;
+      point.normal_z = 1.0f;
+      point.curvature = 0.01f * static_cast<float> (idx % 5);
+    }
+  }
+
+  return cloud;
+}
+
+template <typename PointNT>
+void runNormalPlanePublicEntriesMatchDirectRVVForAoSNormal()
+{
+  // 本 helper 验证 normal layout expansion（法线布局扩展）：PointNT 只作为
+  // normal cloud 使用，production RVV 只读取 normal_x/y/z/curvature。额外
+  // xyz 或 intensity 字段不参与当前距离输出语义，但会改变 sizeof(PointNT)
+  // 和字段偏移，因此需要 public entry（公开入口）和 direct RVV helper 对拍。
+  constexpr std::size_t nr_points = 8;
+  PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
+  cloud->resize (nr_points);
+  auto normals = makeNormalPlaneNormalCloud<PointNT> (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    (*cloud)[idx].x = 0.2f * static_cast<float> (idx);
+    (*cloud)[idx].y = 0.05f * static_cast<float> (idx % 4);
+    (*cloud)[idx].z = 0.01f * static_cast<float> (idx);
+  }
+
+  pcl::Indices indices = {7, 0, 4, 2, 6, 1, 5, 3};
+  Eigen::VectorXf model_coefficients (4);
+  model_coefficients << 0.0f, 0.0f, 1.0f, 0.0f;
+
+  SampleConsensusModelNormalPlaneTest<PointXYZ, PointNT> model (cloud);
+  model.setInputNormals (normals);
+  model.setIndices (std::make_shared<std::vector<int>> (indices));
+  model.setNormalDistanceWeight (0.2);
+
+  pcl::Indices public_inliers;
+  model.selectWithinDistance (model_coefficients, 0.08, public_inliers);
+  const std::vector<double> public_errors = model.error_sqr_dists_;
+  const std::size_t public_count = model.countWithinDistance (model_coefficients, 0.08);
+  std::vector<double> public_distances;
+  model.getDistancesToModel (model_coefficients, public_distances);
+
+#if defined (__RVV10__)
+  pcl::Indices direct_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t direct_count =
+      model.selectWithinDistanceRVV (model_coefficients, 0.08, direct_inliers);
+  direct_inliers.resize (direct_count);
+  model.error_sqr_dists_.resize (direct_count);
+  const std::vector<double> direct_errors = model.error_sqr_dists_;
+
+  std::vector<double> direct_distances;
+  model.getDistancesToModelRVV (model_coefficients, direct_distances);
+  ASSERT_EQ (direct_count, model.countWithinDistanceRVV (model_coefficients, 0.08));
+#else
+  pcl::Indices direct_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t direct_count =
+      model.selectWithinDistanceStandard (model_coefficients, 0.08, direct_inliers);
+  direct_inliers.resize (direct_count);
+  model.error_sqr_dists_.resize (direct_count);
+  const std::vector<double> direct_errors = model.error_sqr_dists_;
+
+  std::vector<double> direct_distances;
+  model.getDistancesToModelStandard (model_coefficients, direct_distances);
+  ASSERT_EQ (direct_count, model.countWithinDistanceStandard (model_coefficients, 0.08));
+#endif
+
+  ASSERT_EQ (direct_count, public_count);
+  ASSERT_EQ (direct_inliers, public_inliers);
+  ASSERT_EQ (direct_errors.size (), public_errors.size ());
+  for (std::size_t idx = 0; idx < public_errors.size (); ++idx)
+    EXPECT_NEAR (direct_errors[idx], public_errors[idx], 1e-6);
+
+  ASSERT_EQ (direct_distances.size (), public_distances.size ());
+  for (std::size_t idx = 0; idx < public_distances.size (); ++idx)
+    EXPECT_NEAR (direct_distances[idx], public_distances[idx], 1e-6);
+}
+
+template <typename PointT, typename PointNT>
+void runNormalPlanePublicEntriesMatchDirectRVVForAoSSourceAndNormal()
+{
+  // 本 helper 验证 source × normal cross-product（source 与 normal 点型交叉组合）。
+  // production gate 必须分别使用 PointT 的 xyz byte offset 和 PointNT 的
+  // normal/curvature byte offset；这个测试防止两侧代表点型各自通过后，
+  // 组合实例仍隐藏模板实例化或字段偏移风险。
+  constexpr std::size_t nr_points = 9;
+  auto cloud = makeNormalPlaneSourceCloud<PointT> (nr_points);
+  auto normals = makeNormalPlaneNormalCloud<PointNT> (nr_points);
+
+  pcl::Indices indices = {8, 1, 6, 3, 0, 7, 2, 5, 4};
+  Eigen::VectorXf model_coefficients (4);
+  model_coefficients << 0.0f, 0.0f, 1.0f, 0.0f;
+
+  SampleConsensusModelNormalPlaneTest<PointT, PointNT> model (cloud);
+  model.setInputNormals (normals);
+  model.setIndices (std::make_shared<std::vector<int>> (indices));
+  model.setNormalDistanceWeight (0.2);
+
+  pcl::Indices public_inliers;
+  model.selectWithinDistance (model_coefficients, 0.08, public_inliers);
+  const std::vector<double> public_errors = model.error_sqr_dists_;
+  const std::size_t public_count = model.countWithinDistance (model_coefficients, 0.08);
+  std::vector<double> public_distances;
+  model.getDistancesToModel (model_coefficients, public_distances);
+
+#if defined (__RVV10__)
+  pcl::Indices direct_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t direct_count =
+      model.selectWithinDistanceRVV (model_coefficients, 0.08, direct_inliers);
+  direct_inliers.resize (direct_count);
+  model.error_sqr_dists_.resize (direct_count);
+  const std::vector<double> direct_errors = model.error_sqr_dists_;
+
+  std::vector<double> direct_distances;
+  model.getDistancesToModelRVV (model_coefficients, direct_distances);
+  ASSERT_EQ (direct_count, model.countWithinDistanceRVV (model_coefficients, 0.08));
+#else
+  pcl::Indices direct_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t direct_count =
+      model.selectWithinDistanceStandard (model_coefficients, 0.08, direct_inliers);
+  direct_inliers.resize (direct_count);
+  model.error_sqr_dists_.resize (direct_count);
+  const std::vector<double> direct_errors = model.error_sqr_dists_;
+
+  std::vector<double> direct_distances;
+  model.getDistancesToModelStandard (model_coefficients, direct_distances);
+  ASSERT_EQ (direct_count, model.countWithinDistanceStandard (model_coefficients, 0.08));
+#endif
+
+  ASSERT_EQ (direct_count, public_count);
+  ASSERT_EQ (direct_inliers, public_inliers);
+  ASSERT_EQ (direct_errors.size (), public_errors.size ());
+  for (std::size_t idx = 0; idx < public_errors.size (); ++idx)
+    EXPECT_NEAR (direct_errors[idx], public_errors[idx], 1e-6);
+
+  ASSERT_EQ (direct_distances.size (), public_distances.size ());
+  for (std::size_t idx = 0; idx < public_distances.size (); ++idx)
+    EXPECT_NEAR (direct_distances[idx], public_distances[idx], 1e-6);
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForPointXYZISource)
+{
+  runNormalPlanePublicEntriesMatchDirectRVVForAoSSource<PointXYZI> ();
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForPointXYZINormalSource)
+{
+  runNormalPlanePublicEntriesMatchDirectRVVForAoSSource<PointXYZINormal> ();
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForPointNormalNormalLayout)
+{
+  runNormalPlanePublicEntriesMatchDirectRVVForAoSNormal<PointNormal> ();
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForPointXYZINormalNormalLayout)
+{
+  runNormalPlanePublicEntriesMatchDirectRVVForAoSNormal<PointXYZINormal> ();
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForPointXYZIAndPointNormal)
+{
+  runNormalPlanePublicEntriesMatchDirectRVVForAoSSourceAndNormal<PointXYZI, PointNormal> ();
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForPointXYZIAndPointXYZINormal)
+{
+  runNormalPlanePublicEntriesMatchDirectRVVForAoSSourceAndNormal<PointXYZI, PointXYZINormal> ();
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForPointXYZINormalAndPointNormal)
+{
+  runNormalPlanePublicEntriesMatchDirectRVVForAoSSourceAndNormal<PointXYZINormal, PointNormal> ();
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesMatchDirectRVVForPointXYZINormalAndPointXYZINormal)
+{
+  runNormalPlanePublicEntriesMatchDirectRVVForAoSSourceAndNormal<PointXYZINormal, PointXYZINormal> ();
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesFallbackForNonAoSRegisteredXYZSource)
+{
+  // 这个 source 类型通过 PCL traits 注册了单 float x/y/z，但不是 standard-layout。
+  // RVV byte-offset gather 不能安全读取它；公开入口必须在 RVV build 下丢弃
+  // RVV helper 分支并回到 Standard helper。
+  constexpr std::size_t nr_points = 5;
+  PointCloud<NonAoSRegisteredXYZ>::Ptr cloud (new PointCloud<NonAoSRegisteredXYZ>);
+  PointCloud<Normal>::Ptr normals (new PointCloud<Normal>);
+  cloud->resize (nr_points);
+  normals->resize (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    (*cloud)[idx].x = 0.1f * static_cast<float> (idx);
+    (*cloud)[idx].y = 0.0f;
+    (*cloud)[idx].z = 0.01f * static_cast<float> (idx);
+    (*normals)[idx].normal_x = 0.0f;
+    (*normals)[idx].normal_y = 0.0f;
+    (*normals)[idx].normal_z = 1.0f;
+    (*normals)[idx].curvature = 0.0f;
+  }
+
+  pcl::Indices indices = {4, 1, 3, 0, 2};
+  Eigen::VectorXf model_coefficients (4);
+  model_coefficients << 0.0f, 0.0f, 1.0f, 0.0f;
+
+  SampleConsensusModelNormalPlaneTest<NonAoSRegisteredXYZ, Normal> model (cloud);
+  model.setInputNormals (normals);
+  model.setIndices (std::make_shared<std::vector<int>> (indices));
+  model.setNormalDistanceWeight (0.0);
+
+  pcl::Indices public_inliers;
+  model.selectWithinDistance (model_coefficients, 0.03, public_inliers);
+  const std::vector<double> public_errors = model.error_sqr_dists_;
+  const std::size_t public_count = model.countWithinDistance (model_coefficients, 0.03);
+  std::vector<double> public_distances;
+  model.getDistancesToModel (model_coefficients, public_distances);
+
+  pcl::Indices standard_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t standard_count =
+      model.selectWithinDistanceStandard (model_coefficients, 0.03, standard_inliers);
+  standard_inliers.resize (standard_count);
+  model.error_sqr_dists_.resize (standard_count);
+  const std::vector<double> standard_errors = model.error_sqr_dists_;
+
+  std::vector<double> standard_distances;
+  model.getDistancesToModelStandard (model_coefficients, standard_distances);
+
+  ASSERT_EQ (standard_count, public_count);
+  ASSERT_EQ (standard_count, model.countWithinDistanceStandard (model_coefficients, 0.03));
+  ASSERT_EQ (standard_inliers, public_inliers);
+  ASSERT_EQ (standard_errors, public_errors);
+  ASSERT_EQ (standard_distances, public_distances);
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesFallbackForNonAoSRegisteredNormalLayout)
+{
+  // 这个 normal 类型注册了单 float normal_x/y/z/curvature，但不是
+  // standard-layout。它隔离验证 normal layout gate：字段语义满足还不够，
+  // byte-offset gather（按字节偏移离散加载）还必须有 AoS 布局前提。
+  constexpr std::size_t nr_points = 6;
+  PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
+  auto normals = makeNormalPlaneNormalCloud<NonAoSRegisteredNormal> (nr_points);
+  cloud->resize (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    (*cloud)[idx].x = 0.125f * static_cast<float> (idx);
+    (*cloud)[idx].y = 0.0f;
+    (*cloud)[idx].z = 0.015f * static_cast<float> (idx);
+  }
+
+  pcl::Indices indices = {5, 1, 4, 0, 3, 2};
+  Eigen::VectorXf model_coefficients (4);
+  model_coefficients << 0.0f, 0.0f, 1.0f, 0.0f;
+
+  SampleConsensusModelNormalPlaneTest<PointXYZ, NonAoSRegisteredNormal> model (cloud);
+  model.setInputNormals (normals);
+  model.setIndices (std::make_shared<std::vector<int>> (indices));
+  model.setNormalDistanceWeight (0.2);
+
+  pcl::Indices public_inliers;
+  model.selectWithinDistance (model_coefficients, 0.08, public_inliers);
+  const std::vector<double> public_errors = model.error_sqr_dists_;
+  const std::size_t public_count = model.countWithinDistance (model_coefficients, 0.08);
+  std::vector<double> public_distances;
+  model.getDistancesToModel (model_coefficients, public_distances);
+
+  pcl::Indices standard_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t standard_count =
+      model.selectWithinDistanceStandard (model_coefficients, 0.08, standard_inliers);
+  standard_inliers.resize (standard_count);
+  model.error_sqr_dists_.resize (standard_count);
+  const std::vector<double> standard_errors = model.error_sqr_dists_;
+
+  std::vector<double> standard_distances;
+  model.getDistancesToModelStandard (model_coefficients, standard_distances);
+
+  ASSERT_EQ (standard_count, public_count);
+  ASSERT_EQ (standard_count, model.countWithinDistanceStandard (model_coefficients, 0.08));
+  ASSERT_EQ (standard_inliers, public_inliers);
+  ASSERT_EQ (standard_errors, public_errors);
+  ASSERT_EQ (standard_distances, public_distances);
+}
+
+TEST (SampleConsensusModelNormalPlane, PublicEntriesFallbackForUnregisteredNormalLayout)
+{
+  // 这个测试使用未注册 PCL curvature field（曲率字段）的 normal 类型。
+  // 在 RVV 构建下公开入口必须走 scalar fallback（标量回退），同时仍保持
+  // select/count/getDistances 三个公开 API 的输出一致。
+  constexpr std::size_t nr_points = 5;
+  PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
+  PointCloud<NormalWithDoubleCurvature>::Ptr normals (new PointCloud<NormalWithDoubleCurvature>);
+  cloud->resize (nr_points);
+  normals->resize (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    (*cloud)[idx].x = 0.25f * static_cast<float> (idx);
+    (*cloud)[idx].y = 0.0f;
+    (*cloud)[idx].z = 0.01f * static_cast<float> (idx);
+    (*normals)[idx].normal_x = 0.0f;
+    (*normals)[idx].normal_y = 0.0f;
+    (*normals)[idx].normal_z = 1.0f;
+    (*normals)[idx].curvature = 0.0;
+  }
+
+  pcl::Indices indices = {4, 0, 3, 1, 2};
+  Eigen::VectorXf model_coefficients (4);
+  model_coefficients << 0.0f, 0.0f, 1.0f, 0.0f;
+
+  SampleConsensusModelNormalPlaneTest<PointXYZ, NormalWithDoubleCurvature> model (cloud);
+  model.setInputNormals (normals);
+  model.setIndices (std::make_shared<std::vector<int>> (indices));
+  model.setNormalDistanceWeight (0.0);
+
+  pcl::Indices public_inliers;
+  model.selectWithinDistance (model_coefficients, 0.03, public_inliers);
+  const std::vector<double> public_errors = model.error_sqr_dists_;
+  const std::size_t public_count = model.countWithinDistance (model_coefficients, 0.03);
+  std::vector<double> public_distances;
+  model.getDistancesToModel (model_coefficients, public_distances);
+
+  pcl::Indices standard_inliers;
+  model.error_sqr_dists_.clear ();
+  const std::size_t standard_count =
+      model.selectWithinDistanceStandard (model_coefficients, 0.03, standard_inliers);
+  standard_inliers.resize (standard_count);
+  model.error_sqr_dists_.resize (standard_count);
+  const std::vector<double> standard_errors = model.error_sqr_dists_;
+
+  std::vector<double> standard_distances;
+  model.getDistancesToModelStandard (model_coefficients, standard_distances);
+
+  ASSERT_EQ (standard_count, public_count);
+  ASSERT_EQ (standard_count, model.countWithinDistanceStandard (model_coefficients, 0.03));
+  ASSERT_EQ (standard_inliers, public_inliers);
+  ASSERT_EQ (standard_errors, public_errors);
+  ASSERT_EQ (standard_distances, public_distances);
+}
+
+TEST (SampleConsensusModelNormalPlane, SelectHelperResizesEmptyOutputBuffers)
+{
+  // 本测试覆盖 protected helper 的缓冲区合同：直接调用 helper 时，即使
+  // inliers / error_sqr_dists_ 为空，也不能依赖调用方先按 indices 数量 resize。
+  // 这能防止 public entry（公开入口）之外的尾段复用或测试用 wrapper 写越界。
+  constexpr std::size_t nr_points = 4;
+
+  PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
+  PointCloud<Normal>::Ptr normals (new PointCloud<Normal>);
+  cloud->resize (nr_points);
+  normals->resize (nr_points);
+
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+  {
+    (*cloud)[idx].x = static_cast<float> (idx);
+    (*cloud)[idx].y = 0.0f;
+    (*cloud)[idx].z = 0.01f * static_cast<float> (idx);
+
+    (*normals)[idx].normal_x = 0.0f;
+    (*normals)[idx].normal_y = 0.0f;
+    (*normals)[idx].normal_z = 1.0f;
+    (*normals)[idx].curvature = 0.0f;
+  }
+
+  pcl::Indices indices;
+  for (std::size_t idx = 0; idx < nr_points; ++idx)
+    indices.push_back (static_cast<int> (idx));
+
+  Eigen::VectorXf model_coefficients (4);
+  model_coefficients << 0.0f, 0.0f, 1.0f, 0.0f;
+
+  SampleConsensusModelNormalPlaneTest<PointXYZ, Normal> model (cloud);
+  model.setInputNormals (normals);
+  model.setIndices (std::make_shared<std::vector<int>> (indices));
+  model.setNormalDistanceWeight (0.0);
+
+  pcl::Indices inliers_standard;
+  model.error_sqr_dists_.clear ();
+  const std::size_t count_standard =
+      model.selectWithinDistanceStandard (model_coefficients, 0.2, inliers_standard);
+  ASSERT_EQ (nr_points, count_standard);
+  ASSERT_EQ (nr_points, inliers_standard.size ());
+  ASSERT_EQ (nr_points, model.error_sqr_dists_.size ());
+
+#if defined (__RVV10__)
+  pcl::Indices inliers_rvv;
+  model.error_sqr_dists_.clear ();
+  const std::size_t count_rvv =
+      model.selectWithinDistanceRVV (model_coefficients, 0.2, inliers_rvv);
+  ASSERT_EQ (nr_points, count_rvv);
+  ASSERT_EQ (nr_points, inliers_rvv.size ());
+  ASSERT_EQ (nr_points, model.error_sqr_dists_.size ());
+#endif
+}
 
 TEST (SampleConsensusModelNormalPlane, SIMD_selectWithinDistance)
 {
@@ -1177,4 +1865,3 @@ main (int argc, char** argv)
   testing::InitGoogleTest (&argc, argv);
   return (RUN_ALL_TESTS ());
 }
-

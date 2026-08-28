@@ -1,0 +1,183 @@
+{
+  "checks": {
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ],
+    "strict_ab": false,
+    "thresholds": {
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15,
+      "min_repeated_runs": 1
+    }
+  },
+  "comparisons": [
+    {
+      "ba_values": [
+        9.79
+      ],
+      "baseline": {
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "boundary": "protected_helper_hot_path",
+        "checksum_policy": "gtest_public_and_helper_equivalence",
+        "gate": "PointXYZ_Normal_float_layout",
+        "label": "Std build",
+        "mask": "weighted_distance_less_than_threshold",
+        "reduction": "ordered_inlier_and_error_distance_write",
+        "row_source": "ordered_indices_over_indices_",
+        "rvv_instr_count": 0,
+        "solve": false,
+        "std_ms": 0.6845,
+        "timer_boundary": "selectWithinDistance_helper_loop",
+        "wrapper": "SampleConsensusModelNormalPlaneBench::benchSelectWithinDistance"
+      },
+      "build_comparison": "std_vs_rvv",
+      "candidate": {
+        "asm_boundary": "SampleConsensusModelNormalPlane<PointXYZ, Normal>::selectWithinDistanceRVV",
+        "boundary": "protected_helper_hot_path",
+        "checksum_policy": "gtest_public_and_helper_equivalence",
+        "gate": "PointXYZ_Normal_float_layout",
+        "label": "RVV build",
+        "mask": "weighted_distance_less_than_threshold",
+        "reduction": "ordered_inlier_and_error_distance_write",
+        "row_source": "ordered_indices_over_indices_",
+        "rvv_instr_count": 56,
+        "rvv_ms": 0.0699,
+        "solve": false,
+        "timer_boundary": "selectWithinDistance_helper_loop",
+        "wrapper": "SampleConsensusModelNormalPlaneBench::benchSelectWithinDistance"
+      },
+      "case_kind": "production_shaped_diagnostic",
+      "evidence_role": "diagnostic",
+      "group": "existing_f32m2_normal_plane_helper",
+      "name": "normal-plane selectWithinDistance PointXYZ Normal 3283",
+      "point_type": "PointXYZ + Normal",
+      "run_count": 1,
+      "size": 3283
+    },
+    {
+      "ba_values": [
+        11.52
+      ],
+      "baseline": {
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "boundary": "protected_helper_hot_path",
+        "checksum_policy": "gtest_helper_equivalence",
+        "gate": "PointXYZ_Normal_float_layout",
+        "label": "Std build",
+        "mask": "weighted_distance_less_than_threshold",
+        "reduction": "inlier_count",
+        "row_source": "ordered_indices_over_indices_",
+        "rvv_instr_count": 0,
+        "solve": false,
+        "std_ms": 0.6797,
+        "timer_boundary": "countWithinDistance_helper_loop",
+        "wrapper": "SampleConsensusModelNormalPlaneBench::benchCountWithinDistance"
+      },
+      "build_comparison": "std_vs_rvv",
+      "candidate": {
+        "asm_boundary": "SampleConsensusModelNormalPlane<PointXYZ, Normal>::countWithinDistanceRVV",
+        "boundary": "protected_helper_hot_path",
+        "checksum_policy": "gtest_helper_equivalence",
+        "gate": "PointXYZ_Normal_float_layout",
+        "label": "RVV build",
+        "mask": "weighted_distance_less_than_threshold",
+        "reduction": "inlier_count",
+        "row_source": "ordered_indices_over_indices_",
+        "rvv_instr_count": 68,
+        "rvv_ms": 0.059,
+        "solve": false,
+        "timer_boundary": "countWithinDistance_helper_loop",
+        "wrapper": "SampleConsensusModelNormalPlaneBench::benchCountWithinDistance"
+      },
+      "case_kind": "production_shaped_diagnostic",
+      "evidence_role": "diagnostic",
+      "group": "existing_f32m2_normal_plane_helper",
+      "name": "normal-plane countWithinDistance PointXYZ Normal 3283",
+      "point_type": "PointXYZ + Normal",
+      "run_count": 1,
+      "size": 3283
+    },
+    {
+      "ba_values": [
+        10.52
+      ],
+      "baseline": {
+        "asm_boundary": "std_non_rvv_path_not_attributed",
+        "boundary": "protected_helper_hot_path",
+        "checksum_policy": "gtest_helper_equivalence",
+        "gate": "PointXYZ_Normal_float_layout",
+        "label": "Std build",
+        "mask": "none_all_indices",
+        "reduction": "distance_store_per_index",
+        "row_source": "ordered_indices_over_indices_",
+        "rvv_instr_count": 0,
+        "solve": false,
+        "std_ms": 0.7702,
+        "timer_boundary": "getDistancesToModel_helper_loop",
+        "wrapper": "SampleConsensusModelNormalPlaneBench::benchGetDistancesToModel"
+      },
+      "build_comparison": "std_vs_rvv",
+      "candidate": {
+        "asm_boundary": "SampleConsensusModelNormalPlane<PointXYZ, Normal>::getDistancesToModelRVV",
+        "boundary": "protected_helper_hot_path",
+        "checksum_policy": "gtest_helper_equivalence",
+        "gate": "PointXYZ_Normal_float_layout",
+        "label": "RVV build",
+        "mask": "none_all_indices",
+        "reduction": "distance_store_per_index",
+        "row_source": "ordered_indices_over_indices_",
+        "rvv_instr_count": 53,
+        "rvv_ms": 0.0732,
+        "solve": false,
+        "timer_boundary": "getDistancesToModel_helper_loop",
+        "wrapper": "SampleConsensusModelNormalPlaneBench::benchGetDistancesToModel"
+      },
+      "case_kind": "production_shaped_diagnostic",
+      "evidence_role": "diagnostic",
+      "group": "existing_f32m2_normal_plane_helper",
+      "name": "normal-plane getDistancesToModel PointXYZ Normal 3283",
+      "point_type": "PointXYZ + Normal",
+      "run_count": 1,
+      "size": 3283
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "evidence_role": "diagnostic",
+    "label": "SampleConsensusModelNormalPlane protected-helper hot path board compare",
+    "metadata": {
+      "binary_hash": "not_recorded",
+      "device": "Milkv-Jupiter",
+      "freq": "not_recorded",
+      "governor": "not_recorded",
+      "iterations": 50,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": "not_recorded"
+    },
+    "source_boundary_note": "Board benchmark calls the normal-plane protected helpers through a same-wrapper bench class, so it is hot-path performance evidence. Public-entry RVV dispatch and fallback are covered by QEMU/board unit tests in this phase.",
+    "source_paths": {
+      "asm_full": "test-rvv/sample_consensus/plane_models/build/asm/riscv/bench_sac_normal_plane_rvv.full.asm",
+      "asm_rvv": "test-rvv/sample_consensus/plane_models/build/asm/riscv/bench_sac_normal_plane_rvv.asm",
+      "board_compare": "test-rvv/sample_consensus/plane_models/log/board/analyze_bench_compare.log",
+      "board_rvv": "test-rvv/sample_consensus/plane_models/log/board/run_bench_rvv.log",
+      "board_std": "test-rvv/sample_consensus/plane_models/log/board/run_bench_std.log",
+      "board_test": "test-rvv/sample_consensus/plane_models/log/board/run_test.log",
+      "qemu_rvv": "test-rvv/sample_consensus/plane_models/log/qemu/run_test_rvv.log",
+      "qemu_std": "test-rvv/sample_consensus/plane_models/log/qemu/run_test_std.log"
+    },
+    "summary_path": "test-rvv/sample_consensus/plane_models/log/board/analyze_bench_compare.log",
+    "title": "sample_consensus normal-plane public-boundary phase board manifest"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "evidence_role": "diagnostic",
+    "label": "SampleConsensusModelNormalPlane protected-helper hot path board compare",
+    "metadata": {
+      "binary_hash": "not_recorded",
+      "device": "Milkv-Jupiter",
+      "freq": "not_recorded",
+      "governor": "not_recorded",
+      "iterations": 50,
+      "run_count": 1,
+      "taskset": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "warmup_iterations": "not_recorded"
+    },
+    "source_boundary_note": "Board benchmark calls the normal-plane protected helpers through a same-wrapper bench class, so it is hot-path performance evidence. Public-entry RVV dispatch and fallback are covered by QEMU/board unit tests in this phase.",
+    "source_paths": {
+      "asm_full": "test-rvv/sample_consensus/plane_models/build/asm/riscv/bench_sac_normal_plane_rvv.full.asm",
+      "asm_rvv": "test-rvv/sample_consensus/plane_models/build/asm/riscv/bench_sac_normal_plane_rvv.asm",
+      "board_compare": "test-rvv/sample_consensus/plane_models/log/board/analyze_bench_compare.log",
+      "board_rvv": "test-rvv/sample_consensus/plane_models/log/board/run_bench_rvv.log",
+      "board_std": "test-rvv/sample_consensus/plane_models/log/board/run_bench_std.log",
+      "board_test": "test-rvv/sample_consensus/plane_models/log/board/run_test.log",
+      "qemu_rvv": "test-rvv/sample_consensus/plane_models/log/qemu/run_test_rvv.log",
+      "qemu_std": "test-rvv/sample_consensus/plane_models/log/qemu/run_test_std.log"
+    },
+    "summary_path": "test-rvv/sample_consensus/plane_models/log/board/analyze_bench_compare.log",
+    "title": "sample_consensus normal-plane public-boundary phase board manifest"
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": []
+}

@@ -1,0 +1,16 @@
+# plane_models 阶段索引
+
+本目录是 `test-rvv/sample_consensus/plane_models` 下 normal-plane RVV 收敛工作的阶段入口。历史测试资产同时覆盖 plane 和 normal-plane；当前 phase 只关闭 `sac_model_normal_plane.hpp` 的公开入口、fallback、证据和文档边界。
+
+| phase | 状态 | 作用 | plan | result |
+| --- | --- | --- | --- | --- |
+| 000-normal-plane-current-state-and-public-entry-boundary | positive / closed | 复核已有 normal-plane RVV 三入口，补公开入口和 fallback 证据，刷新阶段矩阵。 | `000-normal-plane-current-state-and-public-entry-boundary/plan.zh.md` | `000-normal-plane-current-state-and-public-entry-boundary/result.zh.md` |
+| 010-normal-plane-test-support-structure | positive / closed | 收敛 topic-local source layout、board fixture 参数和 doc-suite role 文档。 | `010-normal-plane-test-support-structure/plan.zh.md` | `010-normal-plane-test-support-structure/result.zh.md` |
+| 020-normal-plane-evidence-registry-target-alias | positive / closed | 补 topic-local manifest wrapper、Evidence Doctor / registry alias 和 summary artifact freshness check。 | `020-normal-plane-evidence-registry-target-alias/plan.zh.md` | `020-normal-plane-evidence-registry-target-alias/result.zh.md` |
+| 030-normal-plane-repeated-board-summary | positive-stable / closed | 补 5-run repeated board summary、repeated manifest / doctor 和 registry。 | `030-normal-plane-repeated-board-summary/plan.zh.md` | `030-normal-plane-repeated-board-summary/result.zh.md` |
+| 040-normal-plane-aospoint-gate-expansion | representative AoS correctness / closed | 收紧 public dispatch 为 source AoS byte-offset gate，补 `PointXYZI` / `PointXYZINormal` 代表点型和 non-AoS source fallback。 | `040-normal-plane-aospoint-gate-expansion/plan.zh.md` | `040-normal-plane-aospoint-gate-expansion/result.zh.md` |
+| 050-normal-plane-representative-aos-source-performance | positive-stable / closed | 补 `PointXYZI` / `PointXYZINormal` 代表性 source 点型的 5-run protected helper board performance、manifest、Evidence Doctor 和 registry。 | `050-normal-plane-representative-aos-source-performance/plan.zh.md` | `050-normal-plane-representative-aos-source-performance/result.zh.md` |
+| 060-normal-plane-normal-layout-expansion | representative normal correctness / closed | 补 `PointNormal` / `PointXYZINormal` normal cloud public-vs-direct RVV correctness 和 non-AoS registered normal fallback。 | `060-normal-plane-normal-layout-expansion/plan.zh.md` | `060-normal-plane-normal-layout-expansion/result.zh.md` |
+| 070-normal-plane-cross-point-type-layout | representative cross correctness / closed | 补 `PointXYZI` / `PointXYZINormal` source 与 `PointNormal` / `PointXYZINormal` normal cloud 的 4 个代表性交叉 public-vs-direct RVV tests。 | `070-normal-plane-cross-point-type-layout/plan.zh.md` | `070-normal-plane-cross-point-type-layout/result.zh.md` |
+
+默认恢复动作：运行 `run_normal_plane_public_tests`、`run_test_compare`、`run_board_normal_plane_public_tests`、`evidence_status`、`repeated_evidence_status` 和 `phase050_evidence_status` 复核 public dispatch / fallback 与 summary freshness。phase 030 已生成 `PointXYZ + Normal` 5-run summary，Evidence Doctor 为 Errors=0、Warnings=0、Suggestions=0；phase 050 已生成代表性 source 5-run summary，Evidence Doctor 为 Errors=0、Warnings=5、Suggestions=0，Warnings 已在 result 中解释。若继续扩大范围，下一阶段需要先选择更多 PCL normal-like 点型、public-overload performance probe 或 `Scalar=double` helper family。

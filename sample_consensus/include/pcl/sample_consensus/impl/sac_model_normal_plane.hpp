@@ -45,6 +45,42 @@
 #include <pcl/common/common.h> // for getAngle3D
 #include <pcl/rvv_point_load.h>
 
+#if defined (__RVV10__)
+namespace pcl
+{
+  namespace detail
+  {
+    template <typename PointNT,
+              bool HasRequiredFields = pcl::rvv::RVVNormalFloatLayout<PointNT>::value &&
+                                       pcl::rvv::RVVFloatFieldLayout<PointNT, pcl::fields::curvature>::value>
+    struct NormalPlaneRVVNormalAoSLayout : std::false_type {};
+
+    template <typename PointNT>
+    struct NormalPlaneRVVNormalAoSLayout<PointNT, true>
+    {
+      static constexpr std::size_t kNormalX = pcl::rvv::RVVNormalFloatLayout<PointNT>::kNormalX;
+      static constexpr std::size_t kNormalY = pcl::rvv::RVVNormalFloatLayout<PointNT>::kNormalY;
+      static constexpr std::size_t kNormalZ = pcl::rvv::RVVNormalFloatLayout<PointNT>::kNormalZ;
+      static constexpr std::size_t kCurvature =
+          pcl::traits::offset<PointNT, pcl::fields::curvature>::value;
+
+      static constexpr bool value =
+          std::is_standard_layout_v<PointNT> &&
+          sizeof(PointNT) % alignof(float) == 0 &&
+          kNormalX % alignof(float) == 0 &&
+          kNormalY % alignof(float) == 0 &&
+          kNormalZ % alignof(float) == 0 &&
+          kCurvature % alignof(float) == 0;
+    };
+
+    template <typename PointT, typename PointNT>
+    inline constexpr bool kNormalPlaneRVVLayoutCompatible =
+        pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value &&
+        NormalPlaneRVVNormalAoSLayout<PointNT>::value;
+  } // namespace detail
+} // namespace pcl
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT, typename PointNT> void
 pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistance (
@@ -64,83 +100,69 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistance (
     return;
   }
 
-  // --- 内存预分配的关键步骤 ---
+  // RVV helper 需要定址写回压缩后的 inlier 和 distance；Standard helper 复用同一缓冲区合同。
   inliers.clear();
   error_sqr_dists_.clear();
-  // 注意：使用 resize 而不是 reserve，以便我们可以直接通过指针写入
   inliers.resize(indices_->size());
   error_sqr_dists_.resize(indices_->size());
 
-  std::size_t nr_p = 0; // 记录实际内点数量
+  std::size_t nr_p = 0;
 
 #if defined (__RVV10__)
-  if constexpr (pcl::rvv::RVVXYZFloatLayout<PointT>::value &&
-                pcl::rvv::RVVNormalFloatLayout<PointNT>::value &&
-                pcl::rvv::RVVFloatFieldLayout<PointNT, pcl::fields::curvature>::value)
-    nr_p = selectWithinDistanceRVV(model_coefficients, threshold, inliers);
+  if constexpr (pcl::detail::kNormalPlaneRVVLayoutCompatible<PointT, PointNT>)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> () &&
+        normals_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointNT> ())
+      nr_p = selectWithinDistanceRVV(model_coefficients, threshold, inliers);
+    else
+      nr_p = selectWithinDistanceStandard(model_coefficients, threshold, inliers, 0, 0);
+  }
   else
+  {
     nr_p = selectWithinDistanceStandard(model_coefficients, threshold, inliers, 0, 0);
+  }
 #else
   // 调用标准版本
   nr_p = selectWithinDistanceStandard(model_coefficients, threshold, inliers, 0, 0);
 #endif
 
-  // --- 收缩内存 ---
-  // 将容器大小调整为实际内点数量
   inliers.resize(nr_p);
   error_sqr_dists_.resize(nr_p);
 }
 
-// Standard 实现 (支持 offset，用于处理 RVV 剩下的尾部，或者纯标量运行)
 template <typename PointT, typename PointNT> std::size_t
 pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceStandard (
       const Eigen::VectorXf &model_coefficients, const double threshold,
       Indices &inliers, std::size_t i, std::size_t current_count)
 {
-  // 预处理系数 coeff
+  const std::size_t remaining_count = (i < indices_->size ()) ? (indices_->size () - i) : 0;
+  const std::size_t required_output_size = current_count + remaining_count;
+  if (inliers.size () < required_output_size)
+    inliers.resize (required_output_size);
+  if (error_sqr_dists_.size () < required_output_size)
+    error_sqr_dists_.resize (required_output_size);
+
   Eigen::Vector4f coeff = model_coefficients;
   coeff[3] = 0.0f;
 
-  // 遍历每一个点（使用索引数组 indices_）
   for (; i < indices_->size (); ++i)
   {
-    // 双重间接寻址：
-    // indices_[i] -> 获取点在原始云中的真实 ID (Real ID)
-    // (*input_)[Real ID] -> 获取具体的坐标点 PointT
-    // (*normals_)[Real ID] -> 获取对应的法线点 PointNT
     const PointT  &pt = (*input_)[(*indices_)[i]];
     const PointNT &nt = (*normals_)[(*indices_)[i]];
 
-    // 计算欧氏距离 (Euclidean Distance)
-    // 公式：D_geom = |ax + by + cz + d|
-    // coeff.dot(p) 计算 ax + by + cz
-    // model_coefficients[3] 是 d
     Eigen::Vector4f p (pt.x, pt.y, pt.z, 0.0f);
-    // 注意：这里定义的 n 只是为了给 getAngle3D 传参，实际上 NormalPlane 需要更高效的计算
     Eigen::Vector4f n (nt.normal_x, nt.normal_y, nt.normal_z, 0.0f);
     double d_euclid = std::abs (coeff.dot (p) + model_coefficients[3]);
 
-    // 计算角度差异 (Angular Distance)
-    // 计算点法线 n 与平面法线 coeff 的夹角 (弧度)
-    // getAngle3D 内部通常计算 acos(dot(n1, n2))
     double d_normal = std::abs (getAngle3D (n, coeff));
-    // 处理钝角情况：我们只关心锐角差异。如果夹角 > 90度 (PI/2)，说明法线反向了，取补角
-    // 实际上 PCL 这里写的 min(d, PI-d) 是为了把范围限制在 [0, PI/2]
     d_normal = (std::min) (d_normal, M_PI - d_normal);
 
-    // 计算权重
-    // 基于曲率 (curvature) 的权重。
-    // 如果曲率小（平坦表面），权重高，更多参考法线距离；
-    // 如果曲率大（噪点或边缘），权重低，更多参考欧氏距离。
     double weight = normal_distance_weight_ * (1.0 - nt.curvature);
 
-    // 综合距离计算
-    // 线性插值混合两种距离
     double distance = std::abs (weight * d_normal + (1.0 - weight) * d_euclid);
 
     if (distance < threshold)
     {
-      // 直接写入预分配的内存
       inliers[current_count] = (*indices_)[i];
       error_sqr_dists_[current_count] = distance;
       current_count++;
@@ -163,10 +185,9 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceRVV (
       const Eigen::VectorXf &model_coefficients, const double threshold, Indices &inliers)
 {
   std::size_t i = 0;
-  std::size_t nr_p = 0; // 全局内点计数器，也作为写入内存的 Offset
+  std::size_t nr_p = 0;
   const std::size_t total_n = indices_->size();
 
-  // 1. 系数提取与广播准备 (与 countWithinDistanceRVV 一致)
   const float a = model_coefficients[0];
   const float b = model_coefficients[1];
   const float c = model_coefficients[2];
@@ -177,24 +198,23 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceRVV (
   const pcl::index_t* indices_ptr = indices_->data();
   const uint8_t* points_base = reinterpret_cast<const uint8_t*>(input_->points.data());
   const uint8_t* normals_base = reinterpret_cast<const uint8_t*>(normals_->points.data());
-  using PointLayout = pcl::rvv::RVVXYZFloatLayout<PointT>;
+  using PointLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
 
-  // 2. 获取输出数组的原始指针 (因为我们已经 resize 过了，直接写内存是安全的)
+  if (inliers.size () < total_n)
+    inliers.resize (total_n);
+  if (error_sqr_dists_.size () < total_n)
+    error_sqr_dists_.resize (total_n);
+
   int* inliers_out_ptr = inliers.data();
   double* dists_out_ptr = error_sqr_dists_.data();
 
-  // VLA Loop
   for (; i < total_n; ) {
-    // 动态设定向量长度
     const size_t vl = __riscv_vsetvl_e32m2(total_n - i);
 
-    // --- A. 加载索引 ---
     const vuint32m2_t v_idx = __riscv_vle32_v_u32m2((const uint32_t*)(indices_ptr + i), vl);
     const vuint32m2_t v_off_pt = pcl::rvv_load::byte_offsets_u32m2<PointT>(v_idx, vl);
     const vuint32m2_t v_off_norm = pcl::rvv_load::byte_offsets_u32m2<PointNT>(v_idx, vl);
 
-    // --- B. 加载数据 (Gather Load) ---
-    // 加载 PointT (x, y, z)
     vfloat32m2_t v_px;
     vfloat32m2_t v_py;
     vfloat32m2_t v_pz;
@@ -202,7 +222,6 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceRVV (
         PointT, PointLayout::kX, PointLayout::kY, PointLayout::kZ>(
         points_base, v_off_pt, vl, v_px, v_py, v_pz);
 
-    // 加载 PointNT (nx, ny, nz) 与曲率。
     const vfloat32m2_t v_nx =
         pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::normal_x>(
             normals_base, v_off_norm, vl);
@@ -216,50 +235,32 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceRVV (
         pcl::rvv_load::indexed_load_field_f32m2<PointNT, pcl::fields::curvature>(
             normals_base, v_off_norm, vl);
 
-    // --- C. 计算距离 (全程 Float) ---
-    // 广播系数
     const vfloat32m2_t v_a = __riscv_vfmv_v_f_f32m2(a, vl);
     const vfloat32m2_t v_b = __riscv_vfmv_v_f_f32m2(b, vl);
     const vfloat32m2_t v_c = __riscv_vfmv_v_f_f32m2(c, vl);
     const vfloat32m2_t v_d = __riscv_vfmv_v_f_f32m2(d, vl);
 
-    // Math Kernels
     const vfloat32m2_t v_d_euc = pcl::SampleConsensusModelPlane<PointT>::distRVV_f32m2(v_px, v_py, v_pz, v_a, v_b, v_c, v_d, vl);
     const vfloat32m2_t v_d_norm = pcl::getAcuteAngle3DRVV_f32m2(v_nx, v_ny, v_nz, v_a, v_b, v_c, vl);
 
-    // Weight Calculation
     const vfloat32m2_t v_w = __riscv_vfmul_vf_f32m2(
                           __riscv_vfrsub_vf_f32m2(v_curv, 1.0f, vl), w_scalar, vl);
 
-    // Final Distance
     vfloat32m2_t v_dist = __riscv_vfmacc_vv_f32m2(
                             __riscv_vfmul_vv_f32m2(v_w, v_d_norm, vl),
                             __riscv_vfrsub_vf_f32m2(v_w, 1.0f, vl), v_d_euc, vl);
     v_dist = __riscv_vfsgnjx_vv_f32m2(v_dist, v_dist, vl); // abs(dist)
 
-    // --- D. 筛选与存储 (Select & Store) ---
-
-    // 1. 生成 Mask
     const vbool16_t v_mask = __riscv_vmflt_vf_f32m2_b16(v_dist, th, vl);
-
-    // 2. 统计有效数量
     long active_count = __riscv_vcpop_m_b16(v_mask, vl);
 
     if (active_count > 0) {
-      // 1. 存储 Inliers (uint32_t)
-      // m2 类型的索引压缩后依然是 m2
       vuint32m2_t v_idx_compressed = __riscv_vcompress_vm_u32m2(v_idx, v_mask, vl);
       __riscv_vse32_v_u32m2((uint32_t*)(inliers_out_ptr + nr_p), v_idx_compressed, active_count);
 
-      // 2. 存储 Distances (float -> double)
-      // a. 在 m2 级别进行压缩
       vfloat32m2_t v_dist_compressed = __riscv_vcompress_vm_f32m2(v_dist, v_mask, vl);
 
-      // b. 由 m2 宽化为 m4。
-      // 这是 RVV 硬件定义的 SEW*2 必须对应 LMUL*2 的要求
       vfloat64m4_t v_dist_double = __riscv_vfwcvt_f_f_v_f64m4(v_dist_compressed, active_count);
-
-      // c. 使用 vse64 直接写回 double 数组
       __riscv_vse64_v_f64m4(dists_out_ptr + nr_p, v_dist_double, active_count);
 
       nr_p += active_count;
@@ -268,7 +269,6 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::selectWithinDistanceRVV (
     i += vl;
   }
 
-  // 返回内点总数
   return nr_p;
 }
 #endif
@@ -293,12 +293,13 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::countWithinDistance (
 #elif defined (__SSE__) && defined (__SSE2__) && defined (__SSE4_1__)
   return countWithinDistanceSSE (model_coefficients, threshold);
 #elif defined (__RVV10__)
-  if constexpr (pcl::rvv::RVVXYZFloatLayout<PointT>::value &&
-                pcl::rvv::RVVNormalFloatLayout<PointNT>::value &&
-                pcl::rvv::RVVFloatFieldLayout<PointNT, pcl::fields::curvature>::value)
-    return countWithinDistanceRVV (model_coefficients, threshold);
-  else
-    return countWithinDistanceStandard (model_coefficients, threshold);
+  if constexpr (pcl::detail::kNormalPlaneRVVLayoutCompatible<PointT, PointNT>)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> () &&
+        normals_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointNT> ())
+      return countWithinDistanceRVV (model_coefficients, threshold);
+  }
+  return countWithinDistanceStandard (model_coefficients, threshold);
 #else
   return countWithinDistanceStandard (model_coefficients, threshold);
 #endif
@@ -494,7 +495,7 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::countWithinDistanceRVV (
   // pointer arithmetic later (base + offset).
   const uint8_t* points_base = reinterpret_cast<const uint8_t*>(input_->points.data());
   const uint8_t* normals_base = reinterpret_cast<const uint8_t*>(normals_->points.data());
-  using PointLayout = pcl::rvv::RVVXYZFloatLayout<PointT>;
+  using PointLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
 
   // Loop through all points using RVV strip-mining.
   for (; i < total_n; ) {
@@ -598,12 +599,16 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModel (
   distances.resize (indices_->size ());
 
 #if defined (__RVV10__)
-  if constexpr (pcl::rvv::RVVXYZFloatLayout<PointT>::value &&
-                pcl::rvv::RVVNormalFloatLayout<PointNT>::value &&
-                pcl::rvv::RVVFloatFieldLayout<PointNT, pcl::fields::curvature>::value)
-    getDistancesToModelRVV(model_coefficients, distances);
-  else
-    getDistancesToModelStandard(model_coefficients, distances, 0);
+  if constexpr (pcl::detail::kNormalPlaneRVVLayoutCompatible<PointT, PointNT>)
+  {
+    if (input_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> () &&
+        normals_->points.size () <= pcl::rvv::rvvMaxU32ByteOffsetElements<PointNT> ())
+    {
+      getDistancesToModelRVV(model_coefficients, distances);
+      return;
+    }
+  }
+  getDistancesToModelStandard(model_coefficients, distances, 0);
 #else
   // 标准版本
   getDistancesToModelStandard(model_coefficients, distances, 0);
@@ -664,7 +669,7 @@ pcl::SampleConsensusModelNormalPlane<PointT, PointNT>::getDistancesToModelRVV (
   const uint8_t* points_base = reinterpret_cast<const uint8_t*>(input_->points.data());
   const uint8_t* normals_base = reinterpret_cast<const uint8_t*>(normals_->points.data());
   const uint8_t* indices_base = reinterpret_cast<const uint8_t*>(indices_->data());
-  using PointLayout = pcl::rvv::RVVXYZFloatLayout<PointT>;
+  using PointLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
 
   // 输出指针 (直接写入 vector<double>)
   double* dists_out_ptr = distances.data();
