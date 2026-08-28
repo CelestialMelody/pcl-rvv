@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_line Phase 010 select repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/sample_consensus/sac_model_line/doc/phases/010-line-select-diagnostic/repeated-evidence-manifest.json",
+    "label": "5-run board repeated summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_line/script/generate_line_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_line public selectWithinDistance PointXYZ 65536",
+      "case_kind": "production-public-companion",
+      "evidence_role": "summary_only_unknown",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 0,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [],
+      "std_ms_values": [
+        2.432603,
+        2.540895,
+        2.427102,
+        2.44265,
+        2.432548
+      ],
+      "rvv_ms_values": [
+        2.430919,
+        2.525602,
+        2.422224,
+        2.436156,
+        2.429479
+      ],
+      "comparison_note": "public companion only; production source has no line RVV dispatch",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLineDiagnostic::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "ordered_inliers_and_error_sqr_dists",
+        "diagnostic_note": "checksum covers current item output contract",
+        "checksum": "14813616928510738316",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 2.45516
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLineDiagnostic::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "ordered_inliers_and_error_sqr_dists",
+        "diagnostic_note": "checksum covers current item output contract",
+        "checksum": "14813616928510738316",
+        "asm_boundary": "not_applicable_no_production_rvv_dispatch",
+        "rvv_instr_count": 0,
+        "rvv_ms": 2.448876
+      }
+    },
+    {
+      "name": "sac_model_line diagnostic candidate selectWithinDistance PointXYZ 65536",
+      "case_kind": "test-only candidate",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        3.0647,
+        3.1409,
+        3.0622,
+        3.101,
+        3.1434
+      ],
+      "std_ms_values": [
+        2.429564,
+        2.551637,
+        2.438498,
+        2.445974,
+        2.467626
+      ],
+      "rvv_ms_values": [
+        0.792752,
+        0.812388,
+        0.796315,
+        0.788763,
+        0.785014
+      ],
+      "comparison_note": "diagnostic candidate Std/RVV repeated board comparison",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelLineDiagnostic::selectWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_candidate_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "vcompress_ordered_inliers_and_error_sqr_dists",
+        "diagnostic_note": "checksum covers current item output contract",
+        "checksum": "14813616928510738316",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 2.46666
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelLineDiagnostic::selectWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_candidate_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "vcompress_ordered_inliers_and_error_sqr_dists",
+        "diagnostic_note": "checksum covers current item output contract",
+        "checksum": "14813616928510738316",
+        "asm_boundary": "selectWithinDistanceCandidateRVV",
+        "rvv_instr_count": 33,
+        "rvv_ms": 0.795046
+      }
+    }
+  ]
+}

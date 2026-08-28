@@ -189,6 +189,52 @@ namespace pcl
         */
       bool
       isSampleGood (const Indices &samples) const override;
+
+      /** This implementation uses no SIMD instructions. It is not intended for normal use.
+        * See getDistancesToModel which automatically uses the fastest implementation.
+        */
+      void
+      getDistancesToModelStandard (const Eigen::VectorXf &model_coefficients,
+                                   std::vector<double> &distances) const;
+
+      /** This implementation uses no SIMD instructions. It is not intended for normal use.
+        * See selectWithinDistance which automatically uses the fastest implementation.
+        */
+      void
+      selectWithinDistanceStandard (const Eigen::VectorXf &model_coefficients,
+                                    const double threshold,
+                                    Indices &inliers);
+
+      /** This implementation uses no SIMD instructions. It is not intended for normal use.
+        * See countWithinDistance which automatically uses the fastest implementation.
+        */
+      std::size_t
+      countWithinDistanceStandard (const Eigen::VectorXf &model_coefficients,
+                                   const double threshold) const;
+
+#if defined (__RVV10__)
+      /** This implementation uses RISC-V Vector (RVV) instructions. It is not intended for normal use.
+        * See getDistancesToModel which automatically uses the fastest implementation.
+        */
+      void
+      getDistancesToModelRVV (const Eigen::VectorXf &model_coefficients,
+                              std::vector<double> &distances) const;
+
+      /** This implementation uses RISC-V Vector (RVV) instructions. It is not intended for normal use.
+        * See selectWithinDistance which automatically uses the fastest implementation.
+        */
+      void
+      selectWithinDistanceRVV (const Eigen::VectorXf &model_coefficients,
+                               const double threshold,
+                               Indices &inliers);
+
+      /** This implementation uses RISC-V Vector (RVV) instructions. It is not intended for normal use.
+        * See countWithinDistance which automatically uses the fastest implementation.
+        */
+      std::size_t
+      countWithinDistanceRVV (const Eigen::VectorXf &model_coefficients,
+                              const double threshold) const;
+#endif
   };
 }
 

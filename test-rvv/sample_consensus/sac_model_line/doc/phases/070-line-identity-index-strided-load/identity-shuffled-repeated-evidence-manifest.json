@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_line Phase 070 shuffled-index RVV-vs-RVV repeated board summary",
+    "evidence_role": "strict_ab",
+    "summary_path": "test-rvv/sample_consensus/sac_model_line/doc/phases/070-line-identity-index-strided-load/identity-shuffled-repeated-evidence-manifest.json",
+    "label": "5-run board repeated shuffled RVV-vs-RVV non-regression summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_line/script/generate_line_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": true,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_line public countWithinDistance PointXYZ 65536 identity-shuffled gather-only RVV vs identity-strided RVV",
+      "case_kind": "production-detail-non-regression",
+      "evidence_role": "strict_ab",
+      "build_comparison": "rvv_vs_rvv_repeated",
+      "decision_question": "RVV-family-selection",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "layout": "shuffled adjacent pairs",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.0136,
+        1.0037,
+        0.9999,
+        1.0048,
+        0.9934
+      ],
+      "baseline_ms_values": [
+        0.372356,
+        0.369988,
+        0.369832,
+        0.370184,
+        0.368973
+      ],
+      "candidate_ms_values": [
+        0.367345,
+        0.368636,
+        0.369879,
+        0.368405,
+        0.371437
+      ],
+      "baseline": {
+        "label": "RVV gather-only baseline",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::countWithinDistance public entry",
+        "row_source": "direct_indexed_shuffled_adjacent_pairs",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "inlier_count",
+        "implementation_family": "gather_only_rvv",
+        "candidate_switch": "PCL_RVV_LINE_DISABLE_IDENTITY_STRIDED",
+        "checksum": "28228",
+        "asm_boundary": "countWithinDistanceRVV",
+        "rvv_instr_count": 0,
+        "rvv_ms": 0.370267
+      },
+      "candidate": {
+        "label": "RVV identity-strided candidate",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::countWithinDistance public entry",
+        "row_source": "direct_indexed_shuffled_adjacent_pairs",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "inlier_count",
+        "implementation_family": "identity_strided_or_gather_rvv",
+        "candidate_switch": "default_production_rvv",
+        "checksum": "28228",
+        "asm_boundary": "countWithinDistanceRVV",
+        "rvv_instr_count": 53,
+        "rvv_ms": 0.36914
+      }
+    },
+    {
+      "name": "sac_model_line public selectWithinDistance PointXYZ 65536 identity-shuffled gather-only RVV vs identity-strided RVV",
+      "case_kind": "production-detail-non-regression",
+      "evidence_role": "strict_ab",
+      "build_comparison": "rvv_vs_rvv_repeated",
+      "decision_question": "RVV-family-selection",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "layout": "shuffled adjacent pairs",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        0.9836,
+        0.9982,
+        1.0077,
+        1.0213,
+        1.009
+      ],
+      "baseline_ms_values": [
+        0.736392,
+        0.731572,
+        0.752891,
+        0.747351,
+        0.753986
+      ],
+      "candidate_ms_values": [
+        0.74867,
+        0.732905,
+        0.74715,
+        0.731748,
+        0.747264
+      ],
+      "baseline": {
+        "label": "RVV gather-only baseline",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::selectWithinDistance public entry",
+        "row_source": "direct_indexed_shuffled_adjacent_pairs",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "ordered_inliers_and_error_sqr_dists",
+        "implementation_family": "gather_only_rvv",
+        "candidate_switch": "PCL_RVV_LINE_DISABLE_IDENTITY_STRIDED",
+        "checksum": "14813616928510738316",
+        "asm_boundary": "selectWithinDistanceRVV",
+        "rvv_instr_count": 0,
+        "rvv_ms": 0.744438
+      },
+      "candidate": {
+        "label": "RVV identity-strided candidate",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::selectWithinDistance public entry",
+        "row_source": "direct_indexed_shuffled_adjacent_pairs",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "ordered_inliers_and_error_sqr_dists",
+        "implementation_family": "identity_strided_or_gather_rvv",
+        "candidate_switch": "default_production_rvv",
+        "checksum": "14813616928510738316",
+        "asm_boundary": "selectWithinDistanceRVV",
+        "rvv_instr_count": 0,
+        "rvv_ms": 0.741547
+      }
+    },
+    {
+      "name": "sac_model_line public getDistancesToModel PointXYZ 65536 identity-shuffled gather-only RVV vs identity-strided RVV",
+      "case_kind": "production-detail-non-regression",
+      "evidence_role": "strict_ab",
+      "build_comparison": "rvv_vs_rvv_repeated",
+      "decision_question": "RVV-family-selection",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "layout": "shuffled adjacent pairs",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.0133,
+        0.9916,
+        0.9959,
+        1.0,
+        0.9918
+      ],
+      "baseline_ms_values": [
+        0.547181,
+        0.543665,
+        0.546456,
+        0.546905,
+        0.542102
+      ],
+      "candidate_ms_values": [
+        0.540008,
+        0.548251,
+        0.548684,
+        0.546917,
+        0.546581
+      ],
+      "baseline": {
+        "label": "RVV gather-only baseline",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::getDistancesToModel public entry",
+        "row_source": "direct_indexed_shuffled_adjacent_pairs",
+        "solve": false,
+        "checksum_policy": "dense_distance_vector_size_only_numeric_tolerance_owned_by_gtest",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "not_applicable_dense_distance_output",
+        "reduction": "sqrt_dense_double_distance_vector",
+        "implementation_family": "gather_only_rvv",
+        "candidate_switch": "PCL_RVV_LINE_DISABLE_IDENTITY_STRIDED",
+        "checksum": "65740",
+        "asm_boundary": "getDistancesToModelRVV",
+        "rvv_instr_count": 0,
+        "rvv_ms": 0.545262
+      },
+      "candidate": {
+        "label": "RVV identity-strided candidate",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::getDistancesToModel public entry",
+        "row_source": "direct_indexed_shuffled_adjacent_pairs",
+        "solve": false,
+        "checksum_policy": "dense_distance_vector_size_only_numeric_tolerance_owned_by_gtest",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "not_applicable_dense_distance_output",
+        "reduction": "sqrt_dense_double_distance_vector",
+        "implementation_family": "identity_strided_or_gather_rvv",
+        "candidate_switch": "default_production_rvv",
+        "checksum": "65740",
+        "asm_boundary": "getDistancesToModelRVV",
+        "rvv_instr_count": 55,
+        "rvv_ms": 0.546088
+      }
+    }
+  ]
+}

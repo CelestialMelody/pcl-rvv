@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_line Phase 050 production vfwcvt/vse64 repeated board summary",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/sample_consensus/sac_model_line/doc/phases/050-line-get-distances-vse64-store/production-repeated-evidence-manifest.json",
+    "label": "5-run board repeated summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_line/script/generate_line_board_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_line public countWithinDistance PointXYZ 65536",
+      "case_kind": "production-public",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        4.7791,
+        4.8269,
+        4.8269,
+        4.7463,
+        4.7793
+      ],
+      "std_ms_values": [
+        1.771629,
+        1.794288,
+        1.769398,
+        1.778904,
+        1.771459
+      ],
+      "rvv_ms_values": [
+        0.370703,
+        0.371725,
+        0.36657,
+        0.3748,
+        0.370651
+      ],
+      "comparison_note": "diagnostic candidate Std/RVV repeated board comparison",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "inlier_count",
+        "diagnostic_note": "checksum covers current item output contract",
+        "checksum": "28228",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 1.777136
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "inlier_count",
+        "diagnostic_note": "checksum covers current item output contract",
+        "checksum": "28228",
+        "asm_boundary": "countWithinDistanceRVV",
+        "rvv_instr_count": 21,
+        "rvv_ms": 0.37089
+      }
+    },
+    {
+      "name": "sac_model_line public selectWithinDistance PointXYZ 65536",
+      "case_kind": "production-public",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        3.0786,
+        3.2815,
+        3.0318,
+        3.1014,
+        3.1593
+      ],
+      "std_ms_values": [
+        2.445039,
+        2.579306,
+        2.463669,
+        2.442224,
+        2.453727
+      ],
+      "rvv_ms_values": [
+        0.79421,
+        0.786012,
+        0.812621,
+        0.78747,
+        0.776663
+      ],
+      "comparison_note": "diagnostic candidate Std/RVV repeated board comparison",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "ordered_inliers_and_error_sqr_dists",
+        "diagnostic_note": "checksum covers current item output contract",
+        "checksum": "14813616928510738316",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 2.476793
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "line_cross3_sqr_distance_strict_less_than_threshold",
+        "reduction": "ordered_inliers_and_error_sqr_dists",
+        "diagnostic_note": "checksum covers current item output contract",
+        "checksum": "14813616928510738316",
+        "asm_boundary": "selectWithinDistanceRVV",
+        "rvv_instr_count": 33,
+        "rvv_ms": 0.791395
+      }
+    },
+    {
+      "name": "sac_model_line public getDistancesToModel PointXYZ 65536",
+      "case_kind": "production-public",
+      "evidence_role": "production_direct",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ",
+      "size": 65536,
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        4.2728,
+        4.0365,
+        4.2292,
+        4.0338,
+        4.2237
+      ],
+      "std_ms_values": [
+        2.315454,
+        2.229765,
+        2.311912,
+        2.227378,
+        2.318519
+      ],
+      "rvv_ms_values": [
+        0.541909,
+        0.552403,
+        0.546649,
+        0.552183,
+        0.548937
+      ],
+      "comparison_note": "diagnostic candidate Std/RVV repeated board comparison",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::getDistancesToModel public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "dense_distance_vector_size_only_numeric_tolerance_owned_by_gtest",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "not_applicable_dense_distance_output",
+        "reduction": "sqrt_dense_double_distance_vector",
+        "diagnostic_note": "getDistances checksum records dense distance vector size only; gtest owns numerical tolerance",
+        "checksum": "65740",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 2.280606
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelLine::getDistancesToModel public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "dense_distance_vector_size_only_numeric_tolerance_owned_by_gtest",
+        "timer_boundary": "getDistancesToModel_public_entry_only",
+        "gate": "PointXYZ_registered_single_float_xyz_aos_u32_offset",
+        "mask": "not_applicable_dense_distance_output",
+        "reduction": "sqrt_dense_double_distance_vector",
+        "diagnostic_note": "getDistances checksum records dense distance vector size only; gtest owns numerical tolerance",
+        "checksum": "65740",
+        "asm_boundary": "getDistancesToModelRVV",
+        "rvv_instr_count": 22,
+        "rvv_ms": 0.548416
+      }
+    }
+  ]
+}
