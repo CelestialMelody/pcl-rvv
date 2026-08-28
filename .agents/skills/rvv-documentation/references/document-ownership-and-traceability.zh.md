@@ -32,11 +32,11 @@
 | 真实 production（生产源码）补丁、dispatch（分流逻辑）、public API（公开接口）和维护解释 | production 源码 + production 长期主题文档 | evaluation 记录 production decision（生产接入判断）；Handoff 列 production diff | evaluation 复述生产实现长文；output summary 解释生产维护边界 |
 | reviewer 恢复动作、dirty isolation（脏工作区隔离）、提交边界和下一轮动作 | Handoff Packet、work log（工作日志）或 CURRENT_STATUS（当前状态入口） | evaluation / 适用的 production 长期主题文档只保留稳定后续方向 | production 长期主题文档写成当前待办清单；长期文档依赖聊天上下文 |
 | screening（筛选）队列、模块级优先级和 topic 状态 | `artifact_layout.screening_root_template` 解析目录或配置解析出的状态表 | Handoff 和 closeout 引用状态同步结果 | production 长期主题文档复制模块队列表 |
-| 通用 workflow、reviewer 或文档规则 | `.agents/skills/`、`.agents/knowledge/` 和 `agent_asset_feedback` | Handoff 说明建议更新位置 | topic 文档写成通用 agent 规则 |
+| 通用 workflow、reviewer 或文档规则 | `.agents/skills/`、`.agents/knowledge/` 和 Handoff 的 `instruction_feedback` | Handoff 说明建议更新位置 | topic 文档写成通用 agent instructions（agent 指令体系）规则 |
 
 用户或 reviewer 对工作流程、停止条件、文档拆分、测试支撑结构、恢复方式或 reviewer 可读性的反馈，
-默认先进入 agent asset audit（代理资产审计）。若反馈暴露的是可跨 topic 复用的规则缺口，worker / reviewer
-应在 Handoff 的 `agent_asset_feedback` 中写明建议更新的 skill/reference；获得 workflow improvement
+默认先进入 instruction feedback audit（指令反馈审计）。若反馈暴露的是可跨 topic 复用的 instruction gap（指令缺口），worker / reviewer
+应在 Handoff 的 `instruction_feedback` 中写明建议更新的 skill/reference；获得 workflow improvement
 授权后，先更新 `.agents/`，不要只把它记成当前 topic follow-up。
 
 复杂 topic 可以把测试和证据说明拆成多份 topic-local 文档。推荐分工：

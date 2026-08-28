@@ -155,7 +155,7 @@ caller-shaped smoke now has a sanity gate and batch RVV path.
 
 如果某个英文词已经出现在函数名、benchmark case 名或反汇编指令里，可以保留英文原词，但附近要用一句话说明它在当前 topic 中的具体含义和证据边界。
 
-不要在新 agent asset 或新 topic closeout 中使用带 only 后缀的 diagnostic 标签。
+不要在新的 agent instructions（agent 指令体系）或新 topic closeout 中使用带 only 后缀的 diagnostic 标签。
 诊断已经是 RVV 证据链的必要层级；真正需要表达的是是否已经接入 production（生产源码）
 以及证据能覆盖到哪里。未接 production 时写“未接 production 的诊断结论”；作为阶段性策略时写
 `diagnostic`（诊断）。历史文档中保留的旧词，应在回头完善该 topic 时按上述语义改写。
@@ -290,4 +290,4 @@ base RangeImage 输入域尚未闭合。base RangeImage 的 angle_x 会除以 co
 - 是否区分局部片段、入口形态、生产路径、QEMU、板卡。
 - 未闭合项是否逐条说明“是什么、为什么没闭合、做了有什么用、当前是否必须做”。
 - 文档是否让读者不看对话也能恢复证据链。
-- 最终回复、reviewer 报告、Handoff Packet 和 `agent_asset_feedback` 是否按 `rvv-documentation/references/writing-style.md` 执行触发词检查；如需保留命中词，是否写清技术原因。
+- 最终回复、reviewer 报告、Handoff Packet 和 `instruction_feedback` 是否按 `rvv-documentation/references/writing-style.md` 执行触发词检查；如需保留命中词，是否写清技术原因。

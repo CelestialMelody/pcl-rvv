@@ -50,7 +50,7 @@
 - 主观或夸张修饰：`坚定`、`彻底`、`完美`、`极致`、`极其`、`双刃剑`、`里程碑`、`史诗级`。
 - 比喻词和修辞性双引号：命中后检查是否提供了技术信息。没有技术信息时删除或改成具体条件。
 
-禁用词扫描用于普通技术文档、workflow 文档、Handoff Packet、worker / reviewer 最终回复和 `agent_asset_feedback`。不要扫描本文件自身；本文件需要保留示例词。
+禁用词扫描用于普通技术文档、workflow 文档、Handoff Packet、worker / reviewer 最终回复和 `instruction_feedback`。不要扫描本文件自身；本文件需要保留示例词。
 
 ## 推荐写法
 
