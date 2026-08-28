@@ -34,7 +34,7 @@
 | 3 | `filters` | `modules/filters-file-candidate-screening.zh.md` | `filters/filters-function-evaluation-queue.zh.md`，`filters/filters-retained-candidate-rescreen.zh.md` |
 | 4 | `io` | `modules/io-file-candidate-screening.zh.md` | 待二轮 |
 | 5 | `features` | `modules/features-file-candidate-screening.zh.md` | 待二轮 |
-| 6 | `segmentation` | `modules/segmentation-file-candidate-screening.zh.md` | 待二轮 |
+| 6 | `segmentation` | `modules/segmentation-file-candidate-screening.zh.md` | `segmentation/segmentation-function-evaluation-queue.zh.md`，`segmentation/segmentation-retained-candidate-rescreen.zh.md`；当前无待启动主题，模块优化收束 |
 | 7 | `sample_consensus` | `modules/sample_consensus-file-candidate-screening.zh.md` | 已有部分 RVV 主题，后续按模块情况复筛 |
 | 8 | `recognition` | `modules/recognition-file-candidate-screening.zh.md` | 待二轮 |
 | 9 | `keypoints` | `modules/keypoints-file-candidate-screening.zh.md` | 待二轮 |
