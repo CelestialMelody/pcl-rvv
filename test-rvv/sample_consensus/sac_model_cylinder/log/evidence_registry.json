@@ -1,0 +1,285 @@
+{
+  "files": {
+    "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787918737,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "cylinder-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787918737749847380,
+        "path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.json",
+        "sha256": "sha256:70cd64c640883ac207f5b20c8f2f25e01515ea37df52bdc9c6fe03e7e637d255",
+        "size": 1839
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787918737,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "cylinder-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787918737749847380,
+        "path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.md",
+        "sha256": "sha256:fed772d087e49b668a420e8d1fa010b1b80d2846c0ef77d916cd44442a63f3a1",
+        "size": 1604
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase000-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787918737,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-manifest.json"
+      },
+      "run_label": "cylinder-phase000-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787918737721847634,
+        "path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-manifest.json",
+        "sha256": "sha256:ed873dbdfdf045d0384eadaa7dc16bacf3c821e046be6261265f08448123ea31",
+        "size": 10436
+      },
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json": {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-getdistances-pointtypes-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/result.zh.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/030-cylinder-getdistances-dense-output/result.zh.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/040-cylinder-point-type-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_cylinder-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787927487,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787927487258005248,
+        "path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "sha256": "sha256:b05e4a77073a64d242b9a37b2c08ca5757690a44b958454920dd6a4add512559",
+        "size": 961
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md": {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-getdistances-pointtypes-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/result.zh.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/030-cylinder-getdistances-dense-output/result.zh.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/040-cylinder-point-type-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_cylinder-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787927487,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787927487258005248,
+        "path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "sha256": "sha256:2916ee6a1747bafc981bcfbe398ea266a873294345232158fac9d067e59c0b92",
+        "size": 744
+      },
+      "target": "run_production_board_evidence_doctor"
+    },
+    "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json": {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-getdistances-pointtypes-production-repeated",
+      "doc_refs": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/result.zh.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/030-cylinder-getdistances-dense-output/result.zh.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/040-cylinder-point-type-expansion/result.zh.md",
+        "doc-rvv/sample_consensus/sac_model_cylinder-RVV.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "recorded",
+      "recorded_at_epoch": 1787927487,
+      "related": {
+        "doctor_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "manifest_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      },
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787927487221006417,
+        "path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json",
+        "sha256": "sha256:b4f70ab4aba833e4ea8ea6ae714211e38100f70d9e93442f1cf3b4d48279c9da",
+        "size": 28588
+      },
+      "target": "run_production_board_evidence_doctor"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase000-repeated",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787918737,
+      "run_label": "cylinder-phase000-repeated-board",
+      "target": "run_repeated_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787921975,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787922348,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787922672,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787923247,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787923797,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787924240,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-getdistances-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787925385,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-getdistances-phase020-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787926434,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    },
+    {
+      "backend": "board",
+      "case_filter": "cylinder-count-select-getdistances-pointtypes-production-repeated",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.json",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-doctor.md",
+        "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/020-cylinder-production-integration/production-repeated-evidence-manifest.json"
+      ],
+      "recorded_at_epoch": 1787927487,
+      "run_label": "cylinder-phase020-production-repeated-board",
+      "target": "run_production_board_evidence_doctor"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787927487
+}

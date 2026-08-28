@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_cylinder Phase 000 count/select repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-manifest.json",
+    "label": "5-run board repeated summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_cylinder/script/generate_cylinder_board_evidence_manifest.py",
+    "metadata": {
+      "device": "RVV board",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "thresholds": {
+      "min_repeated_runs": 5,
+      "ba_degrade_threshold": 1.0,
+      "high_degrade_fraction": 0.2,
+      "long_tail_ratio": 1.15
+    }
+  },
+  "comparisons": [
+    {
+      "name": "sac_model_cylinder public countWithinDistance PointXYZ+Normal 65536",
+      "case_kind": "production-public-companion",
+      "evidence_role": "summary_only_unknown",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ+Normal",
+      "size": 65536,
+      "layout": "shuffled adjacent pairs",
+      "run_count": 0,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [],
+      "std_ms_values": [
+        12.017136,
+        11.733075,
+        11.749929,
+        11.720153,
+        11.840592
+      ],
+      "rvv_ms_values": [
+        11.846735,
+        11.867687,
+        11.740709,
+        11.707518,
+        11.727168
+      ],
+      "comparison_note": "public companion only; production source has no cylinder RVV dispatch",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCylinderDiagnostic::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_Normal_registered_float_xyz_normal_aos_u32_offset",
+        "mask": "weighted_euclid_early_gate_then_normal_angle_threshold",
+        "reduction": "inlier_count",
+        "checksum": "41164",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 11.812177
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCylinderDiagnostic::countWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_public_entry_only",
+        "gate": "PointXYZ_Normal_registered_float_xyz_normal_aos_u32_offset",
+        "mask": "weighted_euclid_early_gate_then_normal_angle_threshold",
+        "reduction": "inlier_count",
+        "checksum": "41164",
+        "asm_boundary": "not_applicable_no_production_rvv_dispatch",
+        "rvv_instr_count": 0,
+        "rvv_ms": 11.777963
+      }
+    },
+    {
+      "name": "sac_model_cylinder diagnostic candidate countWithinDistance PointXYZ+Normal 65536",
+      "case_kind": "test-only candidate",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ+Normal",
+      "size": 65536,
+      "layout": "shuffled adjacent pairs",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        7.8264,
+        6.7823,
+        7.3962,
+        7.2172,
+        6.7523
+      ],
+      "std_ms_values": [
+        15.665308,
+        15.393304,
+        15.407894,
+        15.375349,
+        15.409082
+      ],
+      "rvv_ms_values": [
+        2.001608,
+        2.269616,
+        2.083208,
+        2.130366,
+        2.282041
+      ],
+      "comparison_note": "diagnostic candidate Std/RVV repeated board comparison",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelCylinderDiagnostic::countWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_candidate_only",
+        "gate": "PointXYZ_Normal_registered_float_xyz_normal_aos_u32_offset",
+        "mask": "rvv_weighted_euclid_early_gate_then_normal_angle_threshold",
+        "reduction": "rvv_mask_popcount_inlier_count",
+        "checksum": "41164",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 15.450187
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelCylinderDiagnostic::countWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "countWithinDistance_candidate_only",
+        "gate": "PointXYZ_Normal_registered_float_xyz_normal_aos_u32_offset",
+        "mask": "rvv_weighted_euclid_early_gate_then_normal_angle_threshold",
+        "reduction": "rvv_mask_popcount_inlier_count",
+        "checksum": "41164",
+        "asm_boundary": "countWithinDistanceCandidateRVV",
+        "rvv_instr_count": 74,
+        "rvv_ms": 2.153368
+      }
+    },
+    {
+      "name": "sac_model_cylinder public selectWithinDistance PointXYZ+Normal 65536",
+      "case_kind": "production-public-companion",
+      "evidence_role": "summary_only_unknown",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ+Normal",
+      "size": 65536,
+      "layout": "shuffled adjacent pairs",
+      "run_count": 0,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [],
+      "std_ms_values": [
+        12.919119,
+        12.674937,
+        12.695109,
+        12.629022,
+        12.67183
+      ],
+      "rvv_ms_values": [
+        12.94393,
+        12.817144,
+        12.642239,
+        12.624345,
+        12.634404
+      ],
+      "comparison_note": "public companion only; production source has no cylinder RVV dispatch",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCylinderDiagnostic::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_Normal_registered_float_xyz_normal_aos_u32_offset",
+        "mask": "weighted_euclid_early_gate_then_normal_angle_threshold",
+        "reduction": "ordered_inliers_and_error_sqr_dists",
+        "checksum": "5168917350774937783",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 12.718003
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "public_overload",
+        "wrapper": "SampleConsensusModelCylinderDiagnostic::selectWithinDistance public entry",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_public_entry_only",
+        "gate": "PointXYZ_Normal_registered_float_xyz_normal_aos_u32_offset",
+        "mask": "weighted_euclid_early_gate_then_normal_angle_threshold",
+        "reduction": "ordered_inliers_and_error_sqr_dists",
+        "checksum": "5168917350774937783",
+        "asm_boundary": "not_applicable_no_production_rvv_dispatch",
+        "rvv_instr_count": 0,
+        "rvv_ms": 12.732412
+      }
+    },
+    {
+      "name": "sac_model_cylinder diagnostic candidate selectWithinDistance PointXYZ+Normal 65536",
+      "case_kind": "test-only candidate",
+      "evidence_role": "production_shaped_diagnostic",
+      "build_comparison": "std_vs_rvv_repeated",
+      "point_type": "PointXYZ+Normal",
+      "size": 65536,
+      "layout": "shuffled adjacent pairs",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        5.9817,
+        6.24,
+        6.3282,
+        6.3174,
+        6.3777
+      ],
+      "std_ms_values": [
+        17.099608,
+        16.760405,
+        16.785913,
+        16.795168,
+        16.810005
+      ],
+      "rvv_ms_values": [
+        2.858643,
+        2.685967,
+        2.652572,
+        2.658569,
+        2.635731
+      ],
+      "comparison_note": "diagnostic candidate Std/RVV repeated board comparison",
+      "baseline": {
+        "label": "Std build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelCylinderDiagnostic::selectWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_candidate_only",
+        "gate": "PointXYZ_Normal_registered_float_xyz_normal_aos_u32_offset",
+        "mask": "rvv_weighted_euclid_early_gate_then_normal_angle_threshold",
+        "reduction": "vcompress_ordered_inliers_and_error_sqr_dists",
+        "checksum": "5168917350774937783",
+        "asm_boundary": "std_build_no_rvv",
+        "rvv_instr_count": 0,
+        "std_ms": 16.85022
+      },
+      "candidate": {
+        "label": "RVV build",
+        "boundary": "test_helper",
+        "wrapper": "SampleConsensusModelCylinderDiagnostic::selectWithinDistanceCandidate",
+        "row_source": "direct_indexed_indices",
+        "solve": false,
+        "checksum_policy": "aggregate_entry_output_size_checksum",
+        "timer_boundary": "selectWithinDistance_candidate_only",
+        "gate": "PointXYZ_Normal_registered_float_xyz_normal_aos_u32_offset",
+        "mask": "rvv_weighted_euclid_early_gate_then_normal_angle_threshold",
+        "reduction": "vcompress_ordered_inliers_and_error_sqr_dists",
+        "checksum": "5168917350774937783",
+        "asm_boundary": "selectWithinDistanceCandidateRVV",
+        "rvv_instr_count": 82,
+        "rvv_ms": 2.698296
+      }
+    }
+  ]
+}

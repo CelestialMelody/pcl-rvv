@@ -44,6 +44,570 @@
 #include <pcl/sample_consensus/sac_model_cylinder.h>
 #include <pcl/common/common.h> // for getAngle3D
 #include <pcl/common/concatenate.h>
+#include <pcl/rvv_point_load.h>
+
+#include <cstdint>
+#include <type_traits>
+
+#if defined (__GNUC__)
+#define PCL_RVV_CYLINDER_NOINLINE __attribute__((noinline))
+#else
+#define PCL_RVV_CYLINDER_NOINLINE
+#endif
+
+#if defined (__RVV10__)
+namespace pcl
+{
+  namespace detail
+  {
+    template <typename PointNT,
+              bool HasRequiredFields = pcl::rvv::RVVNormalFloatLayout<PointNT>::value>
+    struct CylinderRVVNormalAoSLayout : std::false_type {};
+
+    template <typename PointNT>
+    struct CylinderRVVNormalAoSLayout<PointNT, true>
+    {
+      using Pod = typename pcl::traits::POD<PointNT>::type;
+
+      static constexpr std::size_t kNormalX = pcl::rvv::RVVNormalFloatLayout<PointNT>::kNormalX;
+      static constexpr std::size_t kNormalY = pcl::rvv::RVVNormalFloatLayout<PointNT>::kNormalY;
+      static constexpr std::size_t kNormalZ = pcl::rvv::RVVNormalFloatLayout<PointNT>::kNormalZ;
+
+      static constexpr bool value =
+          std::is_standard_layout_v<Pod> &&
+          sizeof(PointNT) == sizeof(Pod) &&
+          sizeof(PointNT) % alignof(float) == 0 &&
+          kNormalX % alignof(float) == 0 &&
+          kNormalY % alignof(float) == 0 &&
+          kNormalZ % alignof(float) == 0;
+    };
+
+    template <typename PointT, typename PointNT>
+    inline constexpr bool kCylinderRVVLayoutCompatible =
+        pcl::rvv::RVVXYZAoSFloatLayout<PointT>::value &&
+        CylinderRVVNormalAoSLayout<PointNT>::value;
+  } // namespace detail
+} // namespace pcl
+#endif
+
+namespace pcl
+{
+  namespace detail
+  {
+    template <typename PointT, typename PointNT>
+    struct CylinderDistanceTerms
+    {
+      double weighted_euclid = 0.0;
+      double final_distance = 0.0;
+    };
+
+    template <typename PointT>
+    inline double
+    computeCylinderWeightedEuclidStandard (const PointT& point,
+                                           const Eigen::Vector3f& line_pt,
+                                           const Eigen::Vector3f& line_dir,
+                                           const float radius,
+                                           const double normal_distance_weight,
+                                           Eigen::Vector3f& dir)
+    {
+      const Eigen::Vector3f pt (point.x, point.y, point.z);
+      const Eigen::Vector3f diff = pt - line_pt;
+      dir = diff - diff.dot (line_dir) * line_dir;
+      return ((1.0 - normal_distance_weight) * std::abs (dir.norm () - radius));
+    }
+
+    template <typename PointNT>
+    inline double
+    computeCylinderFinalDistanceStandard (const PointNT& normal,
+                                          const Eigen::Vector3f& dir,
+                                          const double weighted_euclid,
+                                          const double normal_distance_weight)
+    {
+      const Eigen::Vector3f n (normal.normal_x, normal.normal_y, normal.normal_z);
+      double d_normal = std::abs (pcl::getAngle3D (n, dir));
+      d_normal = (std::min) (d_normal, M_PI - d_normal);
+      return (std::abs (normal_distance_weight * d_normal + weighted_euclid));
+    }
+
+    template <typename PointT, typename PointNT>
+    inline std::size_t
+    countWithinDistanceStandardCylinder (const pcl::PointCloud<PointT>& input,
+                                         const pcl::PointCloud<PointNT>& normals,
+                                         const pcl::Indices& indices,
+                                         const Eigen::VectorXf& model_coefficients,
+                                         const double threshold,
+                                         const double normal_distance_weight)
+    {
+      std::size_t nr_p = 0;
+
+      Eigen::Vector3f line_pt  (model_coefficients[0], model_coefficients[1], model_coefficients[2]);
+      Eigen::Vector3f line_dir (model_coefficients[3], model_coefficients[4], model_coefficients[5]);
+      line_dir.normalize ();
+      const float radius = model_coefficients[6];
+
+      for (std::size_t i = 0; i < indices.size (); ++i)
+      {
+        const pcl::index_t index = indices[i];
+        Eigen::Vector3f dir;
+        const double weighted_euclid = computeCylinderWeightedEuclidStandard (
+            input[index], line_pt, line_dir, radius, normal_distance_weight, dir);
+        if (weighted_euclid > threshold)
+          continue;
+        const double distance = computeCylinderFinalDistanceStandard (
+            normals[index], dir, weighted_euclid, normal_distance_weight);
+        if (distance < threshold)
+          nr_p++;
+      }
+      return (nr_p);
+    }
+
+    template <typename PointT, typename PointNT>
+    inline void
+    selectWithinDistanceStandardCylinder (const pcl::PointCloud<PointT>& input,
+                                          const pcl::PointCloud<PointNT>& normals,
+                                          const pcl::Indices& indices,
+                                          const Eigen::VectorXf& model_coefficients,
+                                          const double threshold,
+                                          const double normal_distance_weight,
+                                          pcl::Indices& inliers,
+                                          std::vector<double>& error_sqr_dists)
+    {
+      inliers.clear ();
+      error_sqr_dists.clear ();
+      inliers.reserve (indices.size ());
+      error_sqr_dists.reserve (indices.size ());
+
+      Eigen::Vector3f line_pt  (model_coefficients[0], model_coefficients[1], model_coefficients[2]);
+      Eigen::Vector3f line_dir (model_coefficients[3], model_coefficients[4], model_coefficients[5]);
+      line_dir.normalize ();
+      const float radius = model_coefficients[6];
+
+      for (std::size_t i = 0; i < indices.size (); ++i)
+      {
+        const pcl::index_t index = indices[i];
+        Eigen::Vector3f dir;
+        const double weighted_euclid = computeCylinderWeightedEuclidStandard (
+            input[index], line_pt, line_dir, radius, normal_distance_weight, dir);
+        if (weighted_euclid > threshold)
+          continue;
+        const double distance = computeCylinderFinalDistanceStandard (
+            normals[index], dir, weighted_euclid, normal_distance_weight);
+        if (distance < threshold)
+        {
+          inliers.push_back (index);
+          error_sqr_dists.push_back (distance);
+        }
+      }
+    }
+
+    template <typename PointT, typename PointNT>
+    inline void
+    getDistancesToModelStandardCylinder (const pcl::PointCloud<PointT>& input,
+                                         const pcl::PointCloud<PointNT>& normals,
+                                         const pcl::Indices& indices,
+                                         const Eigen::VectorXf& model_coefficients,
+                                         const double normal_distance_weight,
+                                         std::vector<double>& distances)
+    {
+      distances.resize (indices.size ());
+
+      Eigen::Vector3f line_pt  (model_coefficients[0], model_coefficients[1], model_coefficients[2]);
+      Eigen::Vector3f line_dir (model_coefficients[3], model_coefficients[4], model_coefficients[5]);
+      line_dir.normalize ();
+      const float radius = model_coefficients[6];
+
+      for (std::size_t i = 0; i < indices.size (); ++i)
+      {
+        const pcl::index_t index = indices[i];
+        Eigen::Vector3f dir;
+        const double weighted_euclid = computeCylinderWeightedEuclidStandard (
+            input[index], line_pt, line_dir, radius, normal_distance_weight, dir);
+        distances[i] = computeCylinderFinalDistanceStandard (
+            normals[index], dir, weighted_euclid, normal_distance_weight);
+      }
+    }
+
+#if defined (__RVV10__)
+    inline void
+    computeCylinderDistanceTermsRVV (const vfloat32m2_t& x_vec,
+                                     const vfloat32m2_t& y_vec,
+                                     const vfloat32m2_t& z_vec,
+                                     const vfloat32m2_t& nx_vec,
+                                     const vfloat32m2_t& ny_vec,
+                                     const vfloat32m2_t& nz_vec,
+                                     const float px,
+                                     const float py,
+                                     const float pz,
+                                     const float dx_line,
+                                     const float dy_line,
+                                     const float dz_line,
+                                     const float radius,
+                                     const float euclid_weight,
+                                     const float normal_weight,
+                                     const float threshold,
+                                     const std::size_t vl,
+                                     vfloat32m2_t& distance,
+                                     vbool16_t& euclid_mask)
+    {
+      const vfloat32m2_t diff_x = __riscv_vfsub_vf_f32m2 (x_vec, px, vl);
+      const vfloat32m2_t diff_y = __riscv_vfsub_vf_f32m2 (y_vec, py, vl);
+      const vfloat32m2_t diff_z = __riscv_vfsub_vf_f32m2 (z_vec, pz, vl);
+      const vfloat32m2_t dot =
+          __riscv_vfmacc_vf_f32m2 (
+              __riscv_vfmacc_vf_f32m2 (__riscv_vfmul_vf_f32m2 (diff_x, dx_line, vl),
+                                       dy_line,
+                                       diff_y,
+                                       vl),
+              dz_line,
+              diff_z,
+              vl);
+
+      const vfloat32m2_t dir_x = __riscv_vfsub_vv_f32m2 (
+          diff_x, __riscv_vfmul_vf_f32m2 (dot, dx_line, vl), vl);
+      const vfloat32m2_t dir_y = __riscv_vfsub_vv_f32m2 (
+          diff_y, __riscv_vfmul_vf_f32m2 (dot, dy_line, vl), vl);
+      const vfloat32m2_t dir_z = __riscv_vfsub_vv_f32m2 (
+          diff_z, __riscv_vfmul_vf_f32m2 (dot, dz_line, vl), vl);
+
+      const vfloat32m2_t dir_sqr =
+          __riscv_vfmacc_vv_f32m2 (
+              __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (dir_x, dir_x, vl),
+                                       dir_y,
+                                       dir_y,
+                                       vl),
+              dir_z,
+              dir_z,
+              vl);
+      const vfloat32m2_t dir_norm = __riscv_vfsqrt_v_f32m2 (dir_sqr, vl);
+      vfloat32m2_t radial_delta = __riscv_vfsub_vf_f32m2 (dir_norm, radius, vl);
+      radial_delta = __riscv_vfsgnjx_vv_f32m2 (radial_delta, radial_delta, vl);
+      const vfloat32m2_t weighted_euclid =
+          __riscv_vfmul_vf_f32m2 (radial_delta, euclid_weight, vl);
+      euclid_mask = __riscv_vmfle_vf_f32m2_b16 (weighted_euclid, threshold, vl);
+
+      const vfloat32m2_t normal_sqr =
+          __riscv_vfmacc_vv_f32m2 (
+              __riscv_vfmacc_vv_f32m2 (__riscv_vfmul_vv_f32m2 (nx_vec, nx_vec, vl),
+                                       ny_vec,
+                                       ny_vec,
+                                       vl),
+              nz_vec,
+              nz_vec,
+              vl);
+      const vfloat32m2_t normal_norm = __riscv_vfsqrt_v_f32m2 (normal_sqr, vl);
+      const vfloat32m2_t inv_dir_norm = __riscv_vfrdiv_vf_f32m2 (dir_norm, 1.0f, vl);
+      const vfloat32m2_t inv_normal_norm = __riscv_vfrdiv_vf_f32m2 (normal_norm, 1.0f, vl);
+
+      const vfloat32m2_t dir_unit_x = __riscv_vfmul_vv_f32m2 (dir_x, inv_dir_norm, vl);
+      const vfloat32m2_t dir_unit_y = __riscv_vfmul_vv_f32m2 (dir_y, inv_dir_norm, vl);
+      const vfloat32m2_t dir_unit_z = __riscv_vfmul_vv_f32m2 (dir_z, inv_dir_norm, vl);
+      const vfloat32m2_t normal_unit_x = __riscv_vfmul_vv_f32m2 (nx_vec, inv_normal_norm, vl);
+      const vfloat32m2_t normal_unit_y = __riscv_vfmul_vv_f32m2 (ny_vec, inv_normal_norm, vl);
+      const vfloat32m2_t normal_unit_z = __riscv_vfmul_vv_f32m2 (nz_vec, inv_normal_norm, vl);
+
+      const vfloat32m2_t d_normal =
+          pcl::getAcuteAngle3DRVV_f32m2 (normal_unit_x,
+                                         normal_unit_y,
+                                         normal_unit_z,
+                                         dir_unit_x,
+                                         dir_unit_y,
+                                         dir_unit_z,
+                                         vl);
+
+      distance = __riscv_vfmacc_vf_f32m2 (weighted_euclid, normal_weight, d_normal, vl);
+      distance = __riscv_vfsgnjx_vv_f32m2 (distance, distance, vl);
+    }
+
+    template <typename PointT, typename PointNT>
+    PCL_RVV_CYLINDER_NOINLINE bool
+    countWithinDistanceRVVCylinder (const pcl::PointCloud<PointT>& input,
+                                    const pcl::PointCloud<PointNT>& normals,
+                                    const pcl::Indices& indices,
+                                    const Eigen::VectorXf& model_coefficients,
+                                    const double threshold,
+                                    const double normal_distance_weight,
+                                    std::size_t& nr_p)
+    {
+      if constexpr (!pcl::detail::kCylinderRVVLayoutCompatible<PointT, PointNT> ||
+                    sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                    !std::is_signed_v<pcl::index_t>)
+      {
+        return false;
+      }
+      else
+      {
+        if (input.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> () ||
+            normals.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointNT> () ||
+            normals.size () < input.size ())
+          return false;
+
+        const std::size_t total_n = indices.size ();
+        const float px = model_coefficients[0];
+        const float py = model_coefficients[1];
+        const float pz = model_coefficients[2];
+        Eigen::Vector3f line_dir (model_coefficients[3],
+                                  model_coefficients[4],
+                                  model_coefficients[5]);
+        line_dir.normalize ();
+        const float dx_line = line_dir.x ();
+        const float dy_line = line_dir.y ();
+        const float dz_line = line_dir.z ();
+        const float radius = model_coefficients[6];
+        const float threshold_f = static_cast<float> (threshold);
+        const float normal_weight = static_cast<float> (normal_distance_weight);
+        const float euclid_weight = 1.0f - normal_weight;
+
+        const std::uint8_t* const points_base =
+            reinterpret_cast<const std::uint8_t*> (input.points.data ());
+        const std::uint8_t* const normals_base =
+            reinterpret_cast<const std::uint8_t*> (normals.points.data ());
+        const pcl::index_t* const indices_ptr = indices.data ();
+        using PointLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+        using NormalLayout = pcl::detail::CylinderRVVNormalAoSLayout<PointNT>;
+
+        nr_p = 0;
+        for (std::size_t i = 0; i < total_n; )
+        {
+          const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+          const vuint32m2_t idx =
+              __riscv_vle32_v_u32m2 (reinterpret_cast<const std::uint32_t*> (indices_ptr + i), vl);
+          const vuint32m2_t point_offsets = pcl::rvv_load::byte_offsets_u32m2<PointT> (idx, vl);
+          const vuint32m2_t normal_offsets = pcl::rvv_load::byte_offsets_u32m2<PointNT> (idx, vl);
+
+          vfloat32m2_t x_vec;
+          vfloat32m2_t y_vec;
+          vfloat32m2_t z_vec;
+          pcl::rvv_load::indexed_load3_f32m2<PointT, PointLayout::kX, PointLayout::kY, PointLayout::kZ> (
+              points_base, point_offsets, vl, x_vec, y_vec, z_vec);
+
+          vfloat32m2_t nx_vec;
+          vfloat32m2_t ny_vec;
+          vfloat32m2_t nz_vec;
+          pcl::rvv_load::indexed_load3_fields_f32m2<
+              PointNT, NormalLayout::kNormalX, NormalLayout::kNormalY, NormalLayout::kNormalZ> (
+              normals_base, normal_offsets, vl, nx_vec, ny_vec, nz_vec);
+
+          vfloat32m2_t distance;
+          vbool16_t euclid_mask;
+          computeCylinderDistanceTermsRVV (x_vec, y_vec, z_vec,
+                                           nx_vec, ny_vec, nz_vec,
+                                           px, py, pz,
+                                           dx_line, dy_line, dz_line,
+                                           radius, euclid_weight, normal_weight,
+                                           threshold_f, vl, distance, euclid_mask);
+          const vbool16_t distance_mask = __riscv_vmflt_vf_f32m2_b16 (distance, threshold_f, vl);
+          const vbool16_t inlier_mask = __riscv_vmand_mm_b16 (euclid_mask, distance_mask, vl);
+          nr_p += __riscv_vcpop_m_b16 (inlier_mask, vl);
+          i += vl;
+        }
+        return true;
+      }
+    }
+
+    template <typename PointT, typename PointNT>
+    PCL_RVV_CYLINDER_NOINLINE bool
+    selectWithinDistanceRVVCylinder (const pcl::PointCloud<PointT>& input,
+                                     const pcl::PointCloud<PointNT>& normals,
+                                     const pcl::Indices& indices,
+                                     const Eigen::VectorXf& model_coefficients,
+                                     const double threshold,
+                                     const double normal_distance_weight,
+                                     pcl::Indices& inliers,
+                                     std::vector<double>& error_sqr_dists)
+    {
+      if constexpr (!pcl::detail::kCylinderRVVLayoutCompatible<PointT, PointNT> ||
+                    sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                    !std::is_signed_v<pcl::index_t>)
+      {
+        return false;
+      }
+      else
+      {
+        if (input.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> () ||
+            normals.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointNT> () ||
+            normals.size () < input.size ())
+          return false;
+
+        const std::size_t total_n = indices.size ();
+        inliers.resize (total_n);
+        error_sqr_dists.resize (total_n);
+
+        const float px = model_coefficients[0];
+        const float py = model_coefficients[1];
+        const float pz = model_coefficients[2];
+        Eigen::Vector3f line_dir (model_coefficients[3],
+                                  model_coefficients[4],
+                                  model_coefficients[5]);
+        line_dir.normalize ();
+        const float dx_line = line_dir.x ();
+        const float dy_line = line_dir.y ();
+        const float dz_line = line_dir.z ();
+        const float radius = model_coefficients[6];
+        const float threshold_f = static_cast<float> (threshold);
+        const float normal_weight = static_cast<float> (normal_distance_weight);
+        const float euclid_weight = 1.0f - normal_weight;
+
+        const std::uint8_t* const points_base =
+            reinterpret_cast<const std::uint8_t*> (input.points.data ());
+        const std::uint8_t* const normals_base =
+            reinterpret_cast<const std::uint8_t*> (normals.points.data ());
+        const pcl::index_t* const indices_ptr = indices.data ();
+        using PointLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+        using NormalLayout = pcl::detail::CylinderRVVNormalAoSLayout<PointNT>;
+
+        std::size_t nr_p = 0;
+        for (std::size_t i = 0; i < total_n; )
+        {
+          const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+          const vuint32m2_t idx =
+              __riscv_vle32_v_u32m2 (reinterpret_cast<const std::uint32_t*> (indices_ptr + i), vl);
+          const vuint32m2_t point_offsets = pcl::rvv_load::byte_offsets_u32m2<PointT> (idx, vl);
+          const vuint32m2_t normal_offsets = pcl::rvv_load::byte_offsets_u32m2<PointNT> (idx, vl);
+
+          vfloat32m2_t x_vec;
+          vfloat32m2_t y_vec;
+          vfloat32m2_t z_vec;
+          pcl::rvv_load::indexed_load3_f32m2<PointT, PointLayout::kX, PointLayout::kY, PointLayout::kZ> (
+              points_base, point_offsets, vl, x_vec, y_vec, z_vec);
+
+          vfloat32m2_t nx_vec;
+          vfloat32m2_t ny_vec;
+          vfloat32m2_t nz_vec;
+          pcl::rvv_load::indexed_load3_fields_f32m2<
+              PointNT, NormalLayout::kNormalX, NormalLayout::kNormalY, NormalLayout::kNormalZ> (
+              normals_base, normal_offsets, vl, nx_vec, ny_vec, nz_vec);
+
+          vfloat32m2_t distance;
+          vbool16_t euclid_mask;
+          computeCylinderDistanceTermsRVV (x_vec, y_vec, z_vec,
+                                           nx_vec, ny_vec, nz_vec,
+                                           px, py, pz,
+                                           dx_line, dy_line, dz_line,
+                                           radius, euclid_weight, normal_weight,
+                                           threshold_f, vl, distance, euclid_mask);
+          const vbool16_t distance_mask = __riscv_vmflt_vf_f32m2_b16 (distance, threshold_f, vl);
+          const vbool16_t inlier_mask = __riscv_vmand_mm_b16 (euclid_mask, distance_mask, vl);
+          const std::size_t active_count = __riscv_vcpop_m_b16 (inlier_mask, vl);
+
+          if (active_count > 0)
+          {
+            const vuint32m2_t compressed_idx =
+                __riscv_vcompress_vm_u32m2 (idx, inlier_mask, vl);
+            const vint32m2_t compressed_idx_i32 =
+                __riscv_vreinterpret_v_u32m2_i32m2 (compressed_idx);
+            __riscv_vse32_v_i32m2 (
+                reinterpret_cast<std::int32_t*> (inliers.data () + nr_p),
+                compressed_idx_i32,
+                active_count);
+
+            const vfloat32m2_t compressed_distance =
+                __riscv_vcompress_vm_f32m2 (distance, inlier_mask, vl);
+            const vfloat64m4_t distance64 =
+                __riscv_vfwcvt_f_f_v_f64m4 (compressed_distance, active_count);
+            __riscv_vse64_v_f64m4 (error_sqr_dists.data () + nr_p,
+                                   distance64,
+                                   active_count);
+            nr_p += active_count;
+          }
+
+          i += vl;
+        }
+
+        inliers.resize (nr_p);
+        error_sqr_dists.resize (nr_p);
+        return true;
+      }
+    }
+
+    template <typename PointT, typename PointNT>
+    PCL_RVV_CYLINDER_NOINLINE bool
+    getDistancesToModelRVVCylinder (const pcl::PointCloud<PointT>& input,
+                                    const pcl::PointCloud<PointNT>& normals,
+                                    const pcl::Indices& indices,
+                                    const Eigen::VectorXf& model_coefficients,
+                                    const double normal_distance_weight,
+                                    std::vector<double>& distances)
+    {
+      if constexpr (!pcl::detail::kCylinderRVVLayoutCompatible<PointT, PointNT> ||
+                    sizeof (pcl::index_t) != sizeof (std::int32_t) ||
+                    !std::is_signed_v<pcl::index_t>)
+      {
+        return false;
+      }
+      else
+      {
+        if (input.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointT> () ||
+            normals.size () > pcl::rvv::rvvMaxU32ByteOffsetElements<PointNT> () ||
+            normals.size () < input.size ())
+          return false;
+
+        const std::size_t total_n = indices.size ();
+        distances.resize (total_n);
+
+        const float px = model_coefficients[0];
+        const float py = model_coefficients[1];
+        const float pz = model_coefficients[2];
+        Eigen::Vector3f line_dir (model_coefficients[3],
+                                  model_coefficients[4],
+                                  model_coefficients[5]);
+        line_dir.normalize ();
+        const float dx_line = line_dir.x ();
+        const float dy_line = line_dir.y ();
+        const float dz_line = line_dir.z ();
+        const float radius = model_coefficients[6];
+        const float normal_weight = static_cast<float> (normal_distance_weight);
+        const float euclid_weight = 1.0f - normal_weight;
+
+        const std::uint8_t* const points_base =
+            reinterpret_cast<const std::uint8_t*> (input.points.data ());
+        const std::uint8_t* const normals_base =
+            reinterpret_cast<const std::uint8_t*> (normals.points.data ());
+        const pcl::index_t* const indices_ptr = indices.data ();
+        using PointLayout = pcl::rvv::RVVXYZAoSFloatLayout<PointT>;
+        using NormalLayout = pcl::detail::CylinderRVVNormalAoSLayout<PointNT>;
+
+        for (std::size_t i = 0; i < total_n; )
+        {
+          const std::size_t vl = __riscv_vsetvl_e32m2 (total_n - i);
+          const vuint32m2_t idx =
+              __riscv_vle32_v_u32m2 (reinterpret_cast<const std::uint32_t*> (indices_ptr + i), vl);
+          const vuint32m2_t point_offsets = pcl::rvv_load::byte_offsets_u32m2<PointT> (idx, vl);
+          const vuint32m2_t normal_offsets = pcl::rvv_load::byte_offsets_u32m2<PointNT> (idx, vl);
+
+          vfloat32m2_t x_vec;
+          vfloat32m2_t y_vec;
+          vfloat32m2_t z_vec;
+          pcl::rvv_load::indexed_load3_f32m2<PointT, PointLayout::kX, PointLayout::kY, PointLayout::kZ> (
+              points_base, point_offsets, vl, x_vec, y_vec, z_vec);
+
+          vfloat32m2_t nx_vec;
+          vfloat32m2_t ny_vec;
+          vfloat32m2_t nz_vec;
+          pcl::rvv_load::indexed_load3_fields_f32m2<
+              PointNT, NormalLayout::kNormalX, NormalLayout::kNormalY, NormalLayout::kNormalZ> (
+              normals_base, normal_offsets, vl, nx_vec, ny_vec, nz_vec);
+
+          vfloat32m2_t distance;
+          vbool16_t euclid_mask;
+          computeCylinderDistanceTermsRVV (x_vec, y_vec, z_vec,
+                                           nx_vec, ny_vec, nz_vec,
+                                           px, py, pz,
+                                           dx_line, dy_line, dz_line,
+                                           radius, euclid_weight, normal_weight,
+                                           std::numeric_limits<float>::infinity (),
+                                           vl, distance, euclid_mask);
+          (void) euclid_mask;
+
+          const vfloat64m4_t distance64 = __riscv_vfwcvt_f_f_v_f64m4 (distance, vl);
+          __riscv_vse64_v_f64m4 (distances.data () + i, distance64, vl);
+          i += vl;
+        }
+        return true;
+      }
+    }
+#endif
+  } // namespace detail
+} // namespace pcl
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT, typename PointNT> bool
@@ -151,31 +715,26 @@ pcl::SampleConsensusModelCylinder<PointT, PointNT>::getDistancesToModel (
     return;
   }
 
-  distances.resize (indices_->size ());
-
-  Eigen::Vector3f line_pt  (model_coefficients[0], model_coefficients[1], model_coefficients[2]);
-  Eigen::Vector3f line_dir (model_coefficients[3], model_coefficients[4], model_coefficients[5]);
-  line_dir.normalize ();
-  // Iterate through the 3d points and calculate the distances from them to the cylinder
-  for (std::size_t i = 0; i < indices_->size (); ++i)
+#if defined (__RVV10__)
+  if (pcl::detail::getDistancesToModelRVVCylinder<PointT, PointNT> (
+          *input_,
+          *normals_,
+          *indices_,
+          model_coefficients,
+          normal_distance_weight_,
+          distances))
   {
-    // Approximate the distance from the point to the cylinder as the difference between
-    // dist(point,cylinder_axis) and cylinder radius
-    // @note need to revise this.
-    Eigen::Vector3f pt ((*input_)[(*indices_)[i]].x, (*input_)[(*indices_)[i]].y, (*input_)[(*indices_)[i]].z);
-
-    Eigen::Vector3f diff = pt - line_pt;
-    // Calculate the vector from the cylinder axis to the point
-    Eigen::Vector3f dir = diff - (diff.dot (line_dir)) * line_dir;
-    const double weighted_euclid_dist = (1.0 - normal_distance_weight_) * std::abs (dir.norm () - model_coefficients[6]);
-
-    // Calculate the angular distance between the point normal and the (dir=pt_proj->pt) vector
-    Eigen::Vector3f n  ((*normals_)[(*indices_)[i]].normal[0], (*normals_)[(*indices_)[i]].normal[1], (*normals_)[(*indices_)[i]].normal[2]);
-    double d_normal = std::abs (getAngle3D (n, dir));
-    d_normal = (std::min) (d_normal, M_PI - d_normal);
-
-    distances[i] = std::abs (normal_distance_weight_ * d_normal + weighted_euclid_dist);
+    return;
   }
+#endif
+
+  pcl::detail::getDistancesToModelStandardCylinder<PointT, PointNT> (
+      *input_,
+      *normals_,
+      *indices_,
+      model_coefficients,
+      normal_distance_weight_,
+      distances);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,40 +749,30 @@ pcl::SampleConsensusModelCylinder<PointT, PointNT>::selectWithinDistance (
     return;
   }
 
-  inliers.clear ();
-  error_sqr_dists_.clear ();
-  inliers.reserve (indices_->size ());
-  error_sqr_dists_.reserve (indices_->size ());
-
-  Eigen::Vector3f line_pt  (model_coefficients[0], model_coefficients[1], model_coefficients[2]);
-  Eigen::Vector3f line_dir (model_coefficients[3], model_coefficients[4], model_coefficients[5]);
-  line_dir.normalize ();
-  // Iterate through the 3d points and calculate the distances from them to the cylinder
-  for (std::size_t i = 0; i < indices_->size (); ++i)
+#if defined (__RVV10__)
+  if (pcl::detail::selectWithinDistanceRVVCylinder<PointT, PointNT> (
+          *input_,
+          *normals_,
+          *indices_,
+          model_coefficients,
+          threshold,
+          normal_distance_weight_,
+          inliers,
+          error_sqr_dists_))
   {
-    // Approximate the distance from the point to the cylinder as the difference between
-    // dist(point,cylinder_axis) and cylinder radius
-    Eigen::Vector3f pt ((*input_)[(*indices_)[i]].x, (*input_)[(*indices_)[i]].y, (*input_)[(*indices_)[i]].z);
-    Eigen::Vector3f diff = pt - line_pt;
-    // Calculate the vector from the cylinder axis to the point
-    Eigen::Vector3f dir = diff - (diff.dot (line_dir)) * line_dir;
-    const double weighted_euclid_dist = (1.0 - normal_distance_weight_) * std::abs (dir.norm () - model_coefficients[6]);
-    if (weighted_euclid_dist > threshold) // Early termination: cannot be an inlier
-      continue;
-
-    // Calculate the angular distance between the point normal and the (dir=pt_proj->pt) vector
-    Eigen::Vector3f n  ((*normals_)[(*indices_)[i]].normal[0], (*normals_)[(*indices_)[i]].normal[1], (*normals_)[(*indices_)[i]].normal[2]);
-    double d_normal = std::abs (getAngle3D (n, dir));
-    d_normal = (std::min) (d_normal, M_PI - d_normal);
-
-    double distance = std::abs (normal_distance_weight_ * d_normal + weighted_euclid_dist);
-    if (distance < threshold)
-    {
-      // Returns the indices of the points whose distances are smaller than the threshold
-      inliers.push_back ((*indices_)[i]);
-      error_sqr_dists_.push_back (distance);
-    }
+    return;
   }
+#endif
+
+  pcl::detail::selectWithinDistanceStandardCylinder<PointT, PointNT> (
+      *input_,
+      *normals_,
+      *indices_,
+      model_coefficients,
+      threshold,
+      normal_distance_weight_,
+      inliers,
+      error_sqr_dists_);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -235,33 +784,28 @@ pcl::SampleConsensusModelCylinder<PointT, PointNT>::countWithinDistance (
   if (!isModelValid (model_coefficients))
     return (0);
 
+#if defined (__RVV10__)
   std::size_t nr_p = 0;
-
-  Eigen::Vector3f line_pt  (model_coefficients[0], model_coefficients[1], model_coefficients[2]);
-  Eigen::Vector3f line_dir (model_coefficients[3], model_coefficients[4], model_coefficients[5]);
-  line_dir.normalize ();
-  // Iterate through the 3d points and calculate the distances from them to the cylinder
-  for (std::size_t i = 0; i < indices_->size (); ++i)
+  if (pcl::detail::countWithinDistanceRVVCylinder<PointT, PointNT> (
+          *input_,
+          *normals_,
+          *indices_,
+          model_coefficients,
+          threshold,
+          normal_distance_weight_,
+          nr_p))
   {
-    // Approximate the distance from the point to the cylinder as the difference between
-    // dist(point,cylinder_axis) and cylinder radius
-    Eigen::Vector3f pt ((*input_)[(*indices_)[i]].x, (*input_)[(*indices_)[i]].y, (*input_)[(*indices_)[i]].z);
-    Eigen::Vector3f diff = pt - line_pt;
-    // Calculate the vector from the cylinder axis to the point
-    Eigen::Vector3f dir = diff - (diff.dot (line_dir)) * line_dir;
-    const double weighted_euclid_dist = (1.0 - normal_distance_weight_) * std::abs (dir.norm () - model_coefficients[6]);
-    if (weighted_euclid_dist > threshold) // Early termination: cannot be an inlier
-      continue;
-
-    // Calculate the angular distance between the point normal and the (dir=pt_proj->pt) vector
-    Eigen::Vector3f n  ((*normals_)[(*indices_)[i]].normal[0], (*normals_)[(*indices_)[i]].normal[1], (*normals_)[(*indices_)[i]].normal[2]);
-    double d_normal = std::abs (getAngle3D (n, dir));
-    d_normal = (std::min) (d_normal, M_PI - d_normal);
-
-    if (std::abs (normal_distance_weight_ * d_normal + weighted_euclid_dist) < threshold)
-      nr_p++;
+    return (nr_p);
   }
-  return (nr_p);
+#endif
+
+  return (pcl::detail::countWithinDistanceStandardCylinder<PointT, PointNT> (
+      *input_,
+      *normals_,
+      *indices_,
+      model_coefficients,
+      threshold,
+      normal_distance_weight_));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -490,5 +1034,6 @@ pcl::SampleConsensusModelCylinder<PointT, PointNT>::isModelValid (const Eigen::V
 
 #define PCL_INSTANTIATE_SampleConsensusModelCylinder(PointT, PointNT)	template class PCL_EXPORTS pcl::SampleConsensusModelCylinder<PointT, PointNT>;
 
-#endif    // PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_CYLINDER_H_
+#undef PCL_RVV_CYLINDER_NOINLINE
 
+#endif    // PCL_SAMPLE_CONSENSUS_IMPL_SAC_MODEL_CYLINDER_H_

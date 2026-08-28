@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "sac_model_cylinder Phase 000 count/select repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/sample_consensus/sac_model_cylinder/doc/phases/000-cylinder-count-select-diagnostic/repeated-evidence-manifest.json",
+    "label": "5-run board repeated summary",
+    "analysis_script": "test-rvv/sample_consensus/sac_model_cylinder/script/generate_cylinder_board_evidence_manifest.py",
+    "metadata": {
+      "device": "RVV board",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 1,
+    "suggestions": 0
+  },
+  "issues": [
+    {
+      "severity": "WARNING",
+      "signal": "long_tail_or_variance",
+      "case": "sac_model_cylinder diagnostic candidate countWithinDistance PointXYZ+Normal 65536",
+      "observed_pattern": "min=6.75x, median=7.22x, max=7.83x，max/min=1.16。",
+      "why_suspicious": "长尾说明单一均值不足以描述稳定性，异常值可能改变接入判断。",
+      "possible_non_bug_explanations": "可能是板卡温度、频率、调度、缓存状态或 run 顺序导致。",
+      "possible_bug_or_evidence_issues": "也可能是候选存在数据相关分支、fallback、spill/reload 或内存带宽拐点。",
+      "recommended_checks": "查看 per-iteration trace、温度 / governor / freq / taskset；必要时扩大到 20-run 或 50-run。",
+      "conclusion_policy": "可以继续分析，但 summary 必须保留 min/median/max 和长尾解释，不能先验剔除异常。"
+    }
+  ]
+}
