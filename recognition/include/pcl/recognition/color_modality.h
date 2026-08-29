@@ -44,14 +44,85 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/recognition/point_types.h>
+#if defined(__RVV10__)
+#include <riscv_vector.h>
+#endif
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <list>
+#include <type_traits>
 #include <vector>
 
 namespace pcl
 {
+  namespace detail
+  {
+    enum class ColorModalityPathHook
+    {
+      None = 0,
+      Scalar = 1,
+      Rvv = 2,
+    };
+
+#if defined(PCL_RVV_CM_TEST_HOOK)
+#define PCL_RVV_CM_TEST_HOOK_ACTIVE 1
+    inline int&
+    colorModalityLastTestHook ()
+    {
+      static int last_hook = static_cast<int> (ColorModalityPathHook::None);
+      return (last_hook);
+    }
+
+    inline bool&
+    colorModalityForceScalarTestHook ()
+    {
+      static bool force_scalar = false;
+      return (force_scalar);
+    }
+
+    extern "C" inline void
+    pcl_rvv_cm_reset_test_hook ()
+    {
+      colorModalityLastTestHook () =
+          static_cast<int> (ColorModalityPathHook::None);
+      colorModalityForceScalarTestHook () = false;
+    }
+
+    extern "C" inline int
+    pcl_rvv_cm_last_test_hook ()
+    {
+      return (colorModalityLastTestHook ());
+    }
+
+    extern "C" inline void
+    pcl_rvv_cm_set_force_scalar_test_hook (const int enabled)
+    {
+      colorModalityForceScalarTestHook () = enabled != 0;
+    }
+#endif
+
+    inline void
+    recordColorModalityPath (const ColorModalityPathHook path)
+    {
+#if defined(PCL_RVV_CM_TEST_HOOK)
+      colorModalityLastTestHook () = static_cast<int> (path);
+#else
+      (void)path;
+#endif
+    }
+
+    inline bool
+    forceColorModalityScalarPath ()
+    {
+#if defined(PCL_RVV_CM_TEST_HOOK)
+      return (colorModalityForceScalarTestHook ());
+#else
+      return (false);
+#endif
+    }
+  } // namespace detail
 
   // --------------------------------------------------------------------------
 
@@ -121,6 +192,17 @@ namespace pcl
       void
       filterQuantizedColors ();
 
+      void
+      processInputDataStd ();
+
+#if defined(__RVV10__)
+      bool
+      quantizeColorsRVV ();
+
+      bool
+      filterQuantizedColorsRVV ();
+#endif
+
       static inline int
       quantizeColorOnRGBExtrema (const float r,
                                  const float g,
@@ -152,6 +234,32 @@ template <typename PointInT>
 void
 pcl::ColorModality<PointInT>::processInputData ()
 {
+  bool used_rvv_filter = false;
+#if defined(__RVV10__)
+  if (!detail::forceColorModalityScalarPath ())
+  {
+    const bool used_rvv_quantize = quantizeColorsRVV ();
+    if (!used_rvv_quantize)
+      quantizeColors ();
+    used_rvv_filter = filterQuantizedColorsRVV ();
+    if (used_rvv_filter)
+    {
+      const int spreading_size = 8;
+      pcl::QuantizedMap::spreadQuantizedMap (filtered_quantized_colors_,
+                                             spreaded_filtered_quantized_colors_, spreading_size);
+      detail::recordColorModalityPath (detail::ColorModalityPathHook::Rvv);
+    }
+  }
+#endif
+  if (!used_rvv_filter)
+    processInputDataStd ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT>
+void
+pcl::ColorModality<PointInT>::processInputDataStd ()
+{
   // quantize gradients
   quantizeColors ();
 
@@ -163,6 +271,7 @@ pcl::ColorModality<PointInT>::processInputData ()
   const int spreading_size = 8;
   pcl::QuantizedMap::spreadQuantizedMap (filtered_quantized_colors_,
                                          spreaded_filtered_quantized_colors_, spreading_size);
+  detail::recordColorModalityPath (detail::ColorModalityPathHook::Scalar);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -423,6 +532,180 @@ pcl::ColorModality<PointInT>::filterQuantizedColors ()
     }
   }
 }
+
+#if defined(__RVV10__)
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT>
+bool
+pcl::ColorModality<PointInT>::quantizeColorsRVV ()
+{
+  if constexpr (!std::is_same_v<PointInT, pcl::PointXYZRGB>)
+  {
+    return (false);
+  }
+  else
+  {
+    const std::size_t width = input_->width;
+    const std::size_t height = input_->height;
+    const std::size_t total = width * height;
+    if (total == 0)
+      return (false);
+
+    quantized_colors_.resize (width, height);
+
+    const auto* input_data = input_->points.data ();
+    const auto* base = reinterpret_cast<const std::uint8_t*> (input_data);
+    const ptrdiff_t point_stride = static_cast<ptrdiff_t> (sizeof (pcl::PointXYZRGB));
+    const auto* r_base = base + offsetof (pcl::PointXYZRGB, r);
+    const auto* g_base = base + offsetof (pcl::PointXYZRGB, g);
+    const auto* b_base = base + offsetof (pcl::PointXYZRGB, b);
+    auto* output = quantized_colors_.getData ();
+
+    const auto load_byte_as_u32 = [](const std::uint8_t* ptr,
+                                     const ptrdiff_t stride,
+                                     const std::size_t vl) {
+      const vuint8mf2_t u8 = __riscv_vlse8_v_u8mf2 (ptr, stride, vl);
+      const vuint16m1_t u16 = __riscv_vzext_vf2_u16m1 (u8, vl);
+      return __riscv_vzext_vf2_u32m2 (u16, vl);
+    };
+
+    for (std::size_t index = 0; index < total;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (total - index);
+      const vuint32m2_t r = load_byte_as_u32 (r_base + index * point_stride, point_stride, vl);
+      const vuint32m2_t g = load_byte_as_u32 (g_base + index * point_stride, point_stride, vl);
+      const vuint32m2_t b = load_byte_as_u32 (b_base + index * point_stride, point_stride, vl);
+      const vuint32m2_t max_byte = __riscv_vmv_v_x_u32m2 (255, vl);
+      const vuint32m2_t r_inv = __riscv_vsub_vv_u32m2 (max_byte, r, vl);
+      const vuint32m2_t g_inv = __riscv_vsub_vv_u32m2 (max_byte, g, vl);
+      const vuint32m2_t b_inv = __riscv_vsub_vv_u32m2 (max_byte, b, vl);
+
+      const vuint32m2_t r2 = __riscv_vmul_vv_u32m2 (r, r, vl);
+      const vuint32m2_t g2 = __riscv_vmul_vv_u32m2 (g, g, vl);
+      const vuint32m2_t b2 = __riscv_vmul_vv_u32m2 (b, b, vl);
+      const vuint32m2_t ri2 = __riscv_vmul_vv_u32m2 (r_inv, r_inv, vl);
+      const vuint32m2_t gi2 = __riscv_vmul_vv_u32m2 (g_inv, g_inv, vl);
+      const vuint32m2_t bi2 = __riscv_vmul_vv_u32m2 (b_inv, b_inv, vl);
+
+      const auto sum3 = [vl](const vuint32m2_t a, const vuint32m2_t b_value, const vuint32m2_t c) {
+        return __riscv_vadd_vv_u32m2 (__riscv_vadd_vv_u32m2 (a, b_value, vl), c, vl);
+      };
+      const auto scaled2 = [vl](const vuint32m2_t value) {
+        return __riscv_vsll_vx_u32m2 (value, 1, vl);
+      };
+
+      const vuint32m2_t d0 = __riscv_vsll_vx_u32m2 (sum3 (r2, g2, b2), 2, vl);
+      const vuint32m2_t d1 = scaled2 (sum3 (r2, g2, bi2));
+      const vuint32m2_t d2 = scaled2 (sum3 (r2, gi2, b2));
+      const vuint32m2_t d3 = scaled2 (sum3 (r2, gi2, bi2));
+      const vuint32m2_t d4 = scaled2 (sum3 (ri2, g2, b2));
+      const vuint32m2_t d5 = scaled2 (sum3 (ri2, g2, bi2));
+      const vuint32m2_t d6 = scaled2 (sum3 (ri2, gi2, b2));
+      const vuint32m2_t d7_sum = sum3 (ri2, gi2, bi2);
+      const vuint32m2_t d7 = __riscv_vadd_vv_u32m2 (scaled2 (d7_sum), d7_sum, vl);
+
+      vuint32m2_t min_dist = d0;
+      vuint8mf2_t bins = __riscv_vmv_v_x_u8mf2 (0, vl);
+      const auto update_min = [vl](const vuint32m2_t candidate,
+                                   vuint32m2_t current_min,
+                                   vuint8mf2_t current_bins,
+                                   const unsigned long bin,
+                                   vuint8mf2_t& next_bins) {
+        const vbool16_t take = __riscv_vmsltu_vv_u32m2_b16 (candidate, current_min, vl);
+        next_bins = __riscv_vmerge_vxm_u8mf2 (current_bins, bin, take, vl);
+        return __riscv_vmerge_vvm_u32m2 (current_min, candidate, take, vl);
+      };
+      min_dist = update_min (d1, min_dist, bins, 1, bins);
+      min_dist = update_min (d2, min_dist, bins, 2, bins);
+      min_dist = update_min (d3, min_dist, bins, 3, bins);
+      min_dist = update_min (d4, min_dist, bins, 4, bins);
+      min_dist = update_min (d5, min_dist, bins, 5, bins);
+      min_dist = update_min (d6, min_dist, bins, 6, bins);
+      min_dist = update_min (d7, min_dist, bins, 7, bins);
+      (void)min_dist;
+
+      __riscv_vse8_v_u8mf2 (output + index, bins, vl);
+      index += vl;
+    }
+    return (true);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT>
+bool
+pcl::ColorModality<PointInT>::filterQuantizedColorsRVV ()
+{
+  const std::size_t width = input_->width;
+  const std::size_t height = input_->height;
+  if (width < 3 || height < 3)
+    return (false);
+
+  filtered_quantized_colors_.resize (width, height);
+
+  for (std::size_t row_index = 1; row_index < height-1; ++row_index)
+  {
+    const std::size_t count = width - 2;
+    for (std::size_t offset = 0; offset < count;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8m2 (count - offset);
+      const std::size_t col_index = 1 + offset;
+      const unsigned char * previous_row =
+          quantized_colors_.getData () + (row_index-1)*width + col_index - 1;
+      const unsigned char * current_row =
+          quantized_colors_.getData () + row_index*width + col_index - 1;
+      const unsigned char * next_row =
+          quantized_colors_.getData () + (row_index+1)*width + col_index - 1;
+
+      const vuint8m2_t p0 = __riscv_vle8_v_u8m2 (previous_row, vl);
+      const vuint8m2_t p1 = __riscv_vle8_v_u8m2 (previous_row + 1, vl);
+      const vuint8m2_t p2 = __riscv_vle8_v_u8m2 (previous_row + 2, vl);
+      const vuint8m2_t c0 = __riscv_vle8_v_u8m2 (current_row, vl);
+      const vuint8m2_t c1 = __riscv_vle8_v_u8m2 (current_row + 1, vl);
+      const vuint8m2_t c2 = __riscv_vle8_v_u8m2 (current_row + 2, vl);
+      const vuint8m2_t n0 = __riscv_vle8_v_u8m2 (next_row, vl);
+      const vuint8m2_t n1 = __riscv_vle8_v_u8m2 (next_row + 1, vl);
+      const vuint8m2_t n2 = __riscv_vle8_v_u8m2 (next_row + 2, vl);
+
+      vuint8m2_t max_count = __riscv_vmv_v_x_u8m2 (0, vl);
+      vuint8m2_t output_bits = __riscv_vmv_v_x_u8m2 (0, vl);
+      for (int bin = 0; bin < 8; ++bin)
+      {
+        vuint8m2_t bin_count = __riscv_vmv_v_x_u8m2 (0, vl);
+        const auto add_match = [&](const vuint8m2_t values, vuint8m2_t counts)
+        {
+          const vbool4_t match =
+              __riscv_vmseq_vx_u8m2_b4 (values, static_cast<unsigned long> (bin), vl);
+          const vuint8m2_t incremented = __riscv_vadd_vx_u8m2 (counts, 1, vl);
+          return __riscv_vmerge_vvm_u8m2 (counts, incremented, match, vl);
+        };
+        bin_count = add_match (p0, bin_count);
+        bin_count = add_match (p1, bin_count);
+        bin_count = add_match (p2, bin_count);
+        bin_count = add_match (c0, bin_count);
+        bin_count = add_match (c1, bin_count);
+        bin_count = add_match (c2, bin_count);
+        bin_count = add_match (n0, bin_count);
+        bin_count = add_match (n1, bin_count);
+        bin_count = add_match (n2, bin_count);
+
+        const vbool4_t new_max = __riscv_vmsgtu_vv_u8m2_b4 (bin_count, max_count, vl);
+        max_count = __riscv_vmerge_vvm_u8m2 (max_count, bin_count, new_max, vl);
+        output_bits = __riscv_vmerge_vxm_u8m2 (
+            output_bits, static_cast<unsigned long> (1u << bin), new_max, vl);
+      }
+
+      __riscv_vse8_v_u8m2 (
+          filtered_quantized_colors_.getData () + row_index*width + col_index,
+          output_bits,
+          vl);
+      offset += vl;
+    }
+  }
+
+  return (true);
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT>
