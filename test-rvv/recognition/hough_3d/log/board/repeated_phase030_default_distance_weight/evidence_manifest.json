@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Hough3D Phase 030 Default Distance Weight Board Summary",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/summary.md",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 30,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "use_interpolation": true,
+      "use_distance_weight": false,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "name": "hough_3d_default_distance_weight_hough_voting",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "group": "hough_3d_phase030_default_distance_weight",
+      "point_type": "PointXYZ-style / float / AoS",
+      "size": "vote_count=65536",
+      "run_count": 5,
+      "iterations": 30,
+      "warmup_iterations": 3,
+      "ba_values": [
+        1.002396,
+        1.007944,
+        1.005323,
+        0.997056,
+        1.00589
+      ],
+      "std_ms": 623.756316,
+      "rvv_ms": 620.604731,
+      "baseline": {
+        "boundary": "production_direct",
+        "wrapper": "test-rvv/recognition/hough_3d/src/bench_hough_3d.cpp",
+        "row_source": "correspondence_pair_synthetic_vote_generation",
+        "solve": "not_applicable",
+        "checksum_policy": "FNV-style checksum over generated scene vote coordinates",
+        "timer_boundary": "Hough3DGrouping::houghVoting production boundary with use_interpolation=true and use_distance_weight=false; includes scene vote generation, HoughSpace construction, and voteInt scatter; excludes findMaxima and RANSAC filtering.",
+        "gate": "PointXYZ / ReferenceFrame production instantiation; RVV build must hit the houghVoting vote-generation RVV path; distance weighting disabled to match the class default.",
+        "mask": "not_applicable_no_invalid_lane_filter_in_phase000",
+        "reduction": "scene vote xyz generation with scalar min/max finalization",
+        "asm_boundary": "pcl::Hough3DGrouping<pcl::PointXYZ, pcl::PointXYZ, pcl::ReferenceFrame, pcl::ReferenceFrame>::houghVoting",
+        "point_type": "PointXYZ-style / float / AoS",
+        "size": "vote_count=65536",
+        "checksum": "8587619939972507824"
+      },
+      "candidate": {
+        "boundary": "production_direct",
+        "wrapper": "test-rvv/recognition/hough_3d/src/bench_hough_3d.cpp",
+        "row_source": "correspondence_pair_synthetic_vote_generation",
+        "solve": "not_applicable",
+        "checksum_policy": "FNV-style checksum over generated scene vote coordinates",
+        "timer_boundary": "Hough3DGrouping::houghVoting production boundary with use_interpolation=true and use_distance_weight=false; includes scene vote generation, HoughSpace construction, and voteInt scatter; excludes findMaxima and RANSAC filtering.",
+        "gate": "PointXYZ / ReferenceFrame production instantiation; RVV build must hit the houghVoting vote-generation RVV path; distance weighting disabled to match the class default.",
+        "mask": "not_applicable_no_invalid_lane_filter_in_phase000",
+        "reduction": "scene vote xyz generation with scalar min/max finalization",
+        "asm_boundary": "pcl::Hough3DGrouping<pcl::PointXYZ, pcl::PointXYZ, pcl::ReferenceFrame, pcl::ReferenceFrame>::houghVoting",
+        "point_type": "PointXYZ-style / float / AoS",
+        "size": "vote_count=65536",
+        "checksum": "8587619939972507824",
+        "rvv_instr_count": 15557
+      },
+      "requires_board_context": true,
+      "notes": "Default-distance-weight row checks the class default use_distance_weight=false boundary so phase 010's non-default weighted result is not over-generalized."
+    }
+  ]
+}

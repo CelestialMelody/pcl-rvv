@@ -1,0 +1,672 @@
+{
+  "files": {
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "65536 200 5 0.03 10 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787990485,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md"
+      },
+      "run_label": "hough_3d_phase000_vote_generation_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787990485207589201,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.json",
+        "sha256": "sha256:77a5e8fe28ef7a6faf311d8cb6fbc96dffe905ed713887667b9c466bfb09f63b",
+        "size": 745
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "65536 200 5 0.03 10 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787990485,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md"
+      },
+      "run_label": "hough_3d_phase000_vote_generation_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787990485207589201,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.md",
+        "sha256": "sha256:c944022e402421339532cac38efac8ce533295470440ca1788925dd1a672ba12",
+        "size": 691
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "65536 200 5 0.03 10 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787990485,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md"
+      },
+      "run_label": "hough_3d_phase000_vote_generation_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787990485171590099,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_manifest.json",
+        "sha256": "sha256:2ec4b67c2953c57f66fc813d1affe9f9329a9588c693c241f726fc82af4a9b4c",
+        "size": 3385
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md": {
+      "backend": "board",
+      "case_filter": "65536 200 5 0.03 10 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787990485,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md"
+      },
+      "run_label": "hough_3d_phase000_vote_generation_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787990485170590124,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md",
+        "sha256": "sha256:f9edc87460fc9100df5f60bd14b88d055246198cd71b6616847db0959ee066ed",
+        "size": 781
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787993589,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "hough_3d_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787993589106804500,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "sha256": "sha256:80eb7807495a23fbbcad89fcf5763968dda9627a3e2649718534dd29c560d22f",
+        "size": 1660
+      },
+      "target": "board_production_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787993589,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "hough_3d_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787993589106804500,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "sha256": "sha256:bc5a5a4117a8eda667b504c1ee7ecac5907b9c3bc01f84a0054e5433e1750206",
+        "size": 1592
+      },
+      "target": "board_production_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787993589,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "hough_3d_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787993589068805834,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "sha256": "sha256:9ef671d9bf491bc6a2d1efc41549377cf7c1b3f86050d4ed7dd5c68786a4be7e",
+        "size": 3645
+      },
+      "target": "board_production_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/summary.md": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787993589,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "hough_3d_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787993589068805834,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/summary.md",
+        "sha256": "sha256:eedd2b7edefcf5d43ed41837a1073d9a6c5dc6e05292ca6c2c74cd7f22c7c5dc",
+        "size": 953
+      },
+      "target": "board_production_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 0 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787995397,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/summary.md"
+      },
+      "run_label": "hough_3d_phase020_no_interpolation_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787995397078601054,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.json",
+        "sha256": "sha256:eeaafd18107be185423fbbb620770b2b8ffc7fab0fd83c061485c2ffe942d69e",
+        "size": 2267
+      },
+      "target": "board_phase020_no_interpolation_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 0 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787995397,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/summary.md"
+      },
+      "run_label": "hough_3d_phase020_no_interpolation_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787995397078601054,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.md",
+        "sha256": "sha256:c91467df2f0afa973905fe1225892021018bea080cde5f02e23a8d69e9d8593d",
+        "size": 2005
+      },
+      "target": "board_phase020_no_interpolation_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 0 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787995397,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/summary.md"
+      },
+      "run_label": "hough_3d_phase020_no_interpolation_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787995397039601927,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_manifest.json",
+        "sha256": "sha256:7604abccdbdff5897395d8a9202ed836e135ae9681488b1a921085528cf414f6",
+        "size": 3808
+      },
+      "target": "board_phase020_no_interpolation_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/summary.md": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 0 1",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787995397,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/summary.md"
+      },
+      "run_label": "hough_3d_phase020_no_interpolation_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787995397039601927,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/summary.md",
+        "sha256": "sha256:1937972bc8b8412665d10868e24842f0ef9dbd8debfd9bd115ee63269a0c223f",
+        "size": 932
+      },
+      "target": "board_phase020_no_interpolation_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 1 0",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/030-default-distance-weight-production-direct/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/030-default-distance-weight-production-direct/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787997539,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/summary.md"
+      },
+      "run_label": "hough_3d_phase030_default_distance_weight_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787997539761912646,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.json",
+        "sha256": "sha256:5ac60dd1fac498a313a4a2124a6048d433c6401b5cb509acf89949eefdb76fc2",
+        "size": 2539
+      },
+      "target": "board_phase030_default_distance_weight_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 1 0",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/030-default-distance-weight-production-direct/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/030-default-distance-weight-production-direct/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787997539,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/summary.md"
+      },
+      "run_label": "hough_3d_phase030_default_distance_weight_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787997539761912646,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.md",
+        "sha256": "sha256:c59adbd4b9cff3155eef8c439fb08c09366f18df298a1a2a455cf2490acfb54a",
+        "size": 2277
+      },
+      "target": "board_phase030_default_distance_weight_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 1 0",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/030-default-distance-weight-production-direct/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/030-default-distance-weight-production-direct/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787997539,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/summary.md"
+      },
+      "run_label": "hough_3d_phase030_default_distance_weight_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787997539723910817,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_manifest.json",
+        "sha256": "sha256:7dae430ccb34c1eb08baafc2f4d98f25841d0b17cc9a70673edde6b5937f47c0",
+        "size": 3954
+      },
+      "target": "board_phase030_default_distance_weight_repeated"
+    },
+    "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/summary.md": {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 1 0",
+      "doc_refs": [
+        "test-rvv/recognition/hough_3d/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/hough_3d-evaluation.zh.md",
+        "test-rvv/recognition/hough_3d/doc/testing-overview.zh.md",
+        "test-rvv/recognition/hough_3d/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/hough_3d/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/hough_3d/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/hough_3d/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/README.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/000-current-state-and-vote-generation-diagnostic/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/010-production-direct-vote-generation-probe/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/020-accumulator-scatter-audit/result.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/030-default-distance-weight-production-direct/plan.zh.md",
+        "test-rvv/recognition/hough_3d/doc/phases/030-default-distance-weight-production-direct/result.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787997539,
+      "related": {
+        "doctor_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/summary.md"
+      },
+      "run_label": "hough_3d_phase030_default_distance_weight_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787997539723910817,
+        "path": "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/summary.md",
+        "sha256": "sha256:1aeb655f7c4fd551e6fad217d837190ce4ac4cfc5a95e727539bc54f32427707",
+        "size": 966
+      },
+      "target": "board_phase030_default_distance_weight_repeated"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "65536 200 5 0.03 10 1",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.json",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_doctor.md",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/evidence_manifest.json",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787990485,
+      "run_label": "hough_3d_phase000_vote_generation_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787993589,
+      "run_label": "hough_3d_phase010_production_direct_repeated",
+      "target": "board_production_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 0 1",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.json",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_doctor.md",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/evidence_manifest.json",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase020_no_interpolation/summary.md"
+      ],
+      "recorded_at_epoch": 1787995397,
+      "run_label": "hough_3d_phase020_no_interpolation_repeated",
+      "target": "board_phase020_no_interpolation_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 30 3 0.03 10 1 1 0",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.json",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_doctor.md",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/evidence_manifest.json",
+        "test-rvv/recognition/hough_3d/log/board/repeated_phase030_default_distance_weight/summary.md"
+      ],
+      "recorded_at_epoch": 1787997539,
+      "run_label": "hough_3d_phase030_default_distance_weight_repeated",
+      "target": "board_phase030_default_distance_weight_repeated"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787997539
+}

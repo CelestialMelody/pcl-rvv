@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Hough3D vote-generation production-shaped diagnostic repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "name": "hough_3d_vote_generation_candidate",
+      "case_kind": "production_shaped_diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "group": "hough_3d_phase000_vote_generation",
+      "point_type": "PointXYZ-style / float / AoS",
+      "size": "vote_count=65536",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.090765,
+        1.072308,
+        1.052788,
+        1.093181,
+        1.076056
+      ],
+      "std_ms": 5.2196620000000005,
+      "rvv_ms": 4.860058,
+      "baseline": {
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/hough_3d/src/bench_hough_3d.cpp",
+        "row_source": "correspondence_pair_synthetic_vote_generation",
+        "solve": "not_applicable",
+        "checksum_policy": "FNV-style checksum over generated scene vote coordinates",
+        "timer_boundary": "Hough3D vote generation helper only; excludes HoughSpace accumulator scatter and findMaxima",
+        "gate": "synthetic PointXYZ-style float AoS vote inputs; RVV build must report RvvVoteGeneration",
+        "mask": "not_applicable_no_invalid_lane_filter_in_phase000",
+        "reduction": "scene vote xyz generation with scalar min/max finalization inside helper",
+        "asm_boundary": "pcl::test::hough_3d_rvv::computeSceneVotesCandidate",
+        "point_type": "PointXYZ-style / float / AoS",
+        "size": "vote_count=65536",
+        "checksum": "8587619939972507824"
+      },
+      "candidate": {
+        "boundary": "test_helper",
+        "wrapper": "test-rvv/recognition/hough_3d/src/bench_hough_3d.cpp",
+        "row_source": "correspondence_pair_synthetic_vote_generation",
+        "solve": "not_applicable",
+        "checksum_policy": "FNV-style checksum over generated scene vote coordinates",
+        "timer_boundary": "Hough3D vote generation helper only; excludes HoughSpace accumulator scatter and findMaxima",
+        "gate": "synthetic PointXYZ-style float AoS vote inputs; RVV build must report RvvVoteGeneration",
+        "mask": "not_applicable_no_invalid_lane_filter_in_phase000",
+        "reduction": "scene vote xyz generation with scalar min/max finalization inside helper",
+        "asm_boundary": "pcl::test::hough_3d_rvv::computeSceneVotesCandidate",
+        "point_type": "PointXYZ-style / float / AoS",
+        "size": "vote_count=65536",
+        "checksum": "8587619939972507824",
+        "rvv_instr_count": 137
+      },
+      "requires_board_context": true,
+      "notes": "Candidate row compares Std build scalar fallback with RVV build vote-generation candidate. It does not include Hough accumulator scatter."
+    }
+  ]
+}

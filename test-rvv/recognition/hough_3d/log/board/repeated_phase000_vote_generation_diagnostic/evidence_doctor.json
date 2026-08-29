@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Hough3D vote-generation production-shaped diagnostic repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase000_vote_generation_diagnostic/summary.md",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 0,
+    "suggestions": 0
+  },
+  "issues": []
+}

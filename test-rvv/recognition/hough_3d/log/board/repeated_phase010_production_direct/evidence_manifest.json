@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Hough3D Phase 010 Production Direct Board Summary",
+    "evidence_role": "production_direct",
+    "summary_path": "test-rvv/recognition/hough_3d/log/board/repeated_phase010_production_direct/summary.md",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "iterations": 30,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "taskset": "not_recorded",
+      "governor": "not_recorded",
+      "freq": "not_recorded",
+      "temperature": "not_recorded",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "not_recorded"
+    }
+  },
+  "checks": {
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "name": "hough_3d_production_hough_voting",
+      "case_kind": "production_direct",
+      "evidence_role": "production_direct",
+      "group": "hough_3d_phase010_production_direct",
+      "point_type": "PointXYZ-style / float / AoS",
+      "size": "vote_count=65536",
+      "run_count": 5,
+      "iterations": 30,
+      "warmup_iterations": 3,
+      "ba_values": [
+        0.98776,
+        0.993167,
+        0.995809,
+        0.994586,
+        0.995852
+      ],
+      "std_ms": 617.175735,
+      "rvv_ms": 620.5242430000001,
+      "baseline": {
+        "boundary": "production_direct",
+        "wrapper": "test-rvv/recognition/hough_3d/src/bench_hough_3d.cpp",
+        "row_source": "correspondence_pair_synthetic_vote_generation",
+        "solve": "not_applicable",
+        "checksum_policy": "FNV-style checksum over generated scene vote coordinates",
+        "timer_boundary": "Hough3DGrouping::houghVoting production boundary; includes scene vote generation, HoughSpace construction, and voteInt scatter; excludes findMaxima and RANSAC filtering.",
+        "gate": "PointXYZ / ReferenceFrame production instantiation; RVV build must hit the houghVoting vote-generation RVV path.",
+        "mask": "not_applicable_no_invalid_lane_filter_in_phase000",
+        "reduction": "scene vote xyz generation with scalar min/max finalization",
+        "asm_boundary": "pcl::Hough3DGrouping<pcl::PointXYZ, pcl::PointXYZ, pcl::ReferenceFrame, pcl::ReferenceFrame>::houghVoting",
+        "point_type": "PointXYZ-style / float / AoS",
+        "size": "vote_count=65536",
+        "checksum": "8587619939972507824"
+      },
+      "candidate": {
+        "boundary": "production_direct",
+        "wrapper": "test-rvv/recognition/hough_3d/src/bench_hough_3d.cpp",
+        "row_source": "correspondence_pair_synthetic_vote_generation",
+        "solve": "not_applicable",
+        "checksum_policy": "FNV-style checksum over generated scene vote coordinates",
+        "timer_boundary": "Hough3DGrouping::houghVoting production boundary; includes scene vote generation, HoughSpace construction, and voteInt scatter; excludes findMaxima and RANSAC filtering.",
+        "gate": "PointXYZ / ReferenceFrame production instantiation; RVV build must hit the houghVoting vote-generation RVV path.",
+        "mask": "not_applicable_no_invalid_lane_filter_in_phase000",
+        "reduction": "scene vote xyz generation with scalar min/max finalization",
+        "asm_boundary": "pcl::Hough3DGrouping<pcl::PointXYZ, pcl::PointXYZ, pcl::ReferenceFrame, pcl::ReferenceFrame>::houghVoting",
+        "point_type": "PointXYZ-style / float / AoS",
+        "size": "vote_count=65536",
+        "checksum": "8587619939972507824",
+        "rvv_instr_count": 15770
+      },
+      "requires_board_context": true,
+      "notes": "Production row compares Std build scalar houghVoting with RVV build houghVoting after the vote-generation RVV patch; accumulator scatter remains scalar in both builds."
+    }
+  ]
+}
