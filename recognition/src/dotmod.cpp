@@ -4,7 +4,7 @@
  *  Point Cloud Library (PCL) - www.pointclouds.org
  *  Copyright (c) 2010-2011, Willow Garage, Inc.
  *
- *  All rights reserved. 
+ *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -37,7 +37,49 @@
 
 #include <pcl/recognition/dotmod.h>
 
+#if defined(__RVV10__) && defined(__riscv_vector)
+#include <riscv_vector.h>
+#endif
+
+#include <algorithm>
 #include <fstream>
+
+
+#if defined(__RVV10__) && defined(__riscv_vector)
+namespace
+{
+
+__attribute__((noinline)) std::size_t
+dotmodScoreWindowDirectRVV (const unsigned char* image_data,
+                            const std::size_t image_width,
+                            const std::size_t window_x,
+                            const std::size_t window_y,
+                            const std::size_t window_width,
+                            const std::size_t window_height,
+                            const unsigned char* template_data)
+{
+  std::size_t score = 0;
+  for (std::size_t row_index = 0; row_index < window_height; ++row_index)
+  {
+    const unsigned char* image_row = image_data + (window_y + row_index) * image_width + window_x;
+    const unsigned char* template_row = template_data + row_index * window_width;
+    std::size_t col_index = 0;
+    while (col_index < window_width)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8m8 (window_width - col_index);
+      const vuint8m8_t image_values = __riscv_vle8_v_u8m8 (image_row + col_index, vl);
+      const vuint8m8_t template_values = __riscv_vle8_v_u8m8 (template_row + col_index, vl);
+      const vuint8m8_t hits = __riscv_vand_vv_u8m8 (image_values, template_values, vl);
+      const vbool1_t hit_mask = __riscv_vmsne_vx_u8m8_b1 (hits, 0, vl);
+      score += __riscv_vcpop_m_b1 (hit_mask, vl);
+      col_index += vl;
+    }
+  }
+  return (score);
+}
+
+} // namespace
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +96,7 @@ pcl::DOTMOD::
 ~DOTMOD() = default;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-size_t 
+size_t
 pcl::DOTMOD::
 createAndAddTemplate (const std::vector<pcl::DOTModality*> & modalities,
                       const std::vector<pcl::MaskMap*> & masks,
@@ -107,7 +149,7 @@ createAndAddTemplate (const std::vector<pcl::DOTModality*> & modalities,
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
 pcl::DOTMOD::
-detectTemplates (const std::vector<DOTModality*> & modalities, 
+detectTemplates (const std::vector<DOTModality*> & modalities,
                  const float template_response_threshold,
                  std::vector<DOTMODDetection> & detections,
                  const std::size_t bin_size ) const
@@ -126,8 +168,8 @@ detectTemplates (const std::vector<DOTModality*> & modalities,
   }
 
   //std::cerr << "1" << std::endl;
-  
-  
+
+
   const std::size_t width = maps[0].getWidth ();
   const std::size_t height = maps[0].getHeight ();
   const std::size_t nr_templates = templates_.size ();
@@ -147,25 +189,42 @@ detectTemplates (const std::vector<DOTModality*> & modalities,
   //std::cerr << "2" << std::endl;
 
   float best_response = 0.0f;
+  std::vector<float> responses (nr_templates, 0.0f);
   for (std::size_t row_index = 0; row_index < (height - nr_template_vertical_bins); ++row_index)
   {
     for (std::size_t col_index = 0; col_index < (width - nr_template_horizontal_bins); ++col_index)
     {
-      std::vector<float> responses (nr_templates, 0.0f);
+      std::fill (responses.begin (), responses.end (), 0.0f);
 
       for (std::size_t modality_index = 0; modality_index < nr_modalities; ++modality_index)
       {
+#if defined(__RVV10__) && defined(__riscv_vector)
+        const unsigned char * image_data = maps[modality_index].getData ();
+        const std::size_t image_width = maps[modality_index].getWidth ();
+#else
         const QuantizedMap map = maps[modality_index].getSubMap (col_index, row_index, nr_template_horizontal_bins, nr_template_vertical_bins);
 
         const unsigned char * image_data = map.getData ();
+#endif
         for (std::size_t template_index = 0; template_index < nr_templates; ++template_index)
         {
           const unsigned char * template_data = templates_[template_index].modalities[modality_index].features.data();
+#if defined(__RVV10__) && defined(__riscv_vector)
+          responses[template_index] += static_cast<float> (
+              dotmodScoreWindowDirectRVV (image_data,
+                                          image_width,
+                                          col_index,
+                                          row_index,
+                                          nr_template_horizontal_bins,
+                                          nr_template_vertical_bins,
+                                          template_data));
+#else
           for (std::size_t data_index = 0; data_index < (nr_template_horizontal_bins*nr_template_vertical_bins); ++data_index)
           {
             if ((image_data[data_index] & template_data[data_index]) != 0)
               responses[template_index] += 1.0f;
           }
+#endif
         }
       }
 
@@ -193,7 +252,7 @@ detectTemplates (const std::vector<DOTModality*> & modalities,
   }
 
   //std::cerr << "best_response: " << best_response << std::endl;
-  
+
   //std::cerr << "<< detectTemplates (...)" << std::endl;
 }
 
