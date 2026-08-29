@@ -6,7 +6,7 @@
 
 - 第一轮文件候选筛选文档：`doc-rvv/library-screening/modules/recognition-file-candidate-screening.zh.md`
 - 第二轮函数评估队列：`doc-rvv/library-screening/recognition/recognition-function-evaluation-queue.zh.md`
-- 已完成主题文档：`doc-rvv/recognition/linemod_template_scoring-RVV.zh.md`、`doc-rvv/recognition/color_gradient_modality-RVV.zh.md`、`doc-rvv/recognition/surface_normal_modality-RVV.zh.md`、`doc-rvv/recognition/dotmod_template_matching-RVV.zh.md`、`doc-rvv/recognition/color_gradient_dot_modality-RVV.zh.md`、`doc-rvv/recognition/occlusion_reasoning-RVV.zh.md`、`doc-rvv/recognition/quantizable_modality-RVV.zh.md`
+- 已完成主题文档：`doc-rvv/recognition/linemod_template_scoring-RVV.zh.md`、`doc-rvv/recognition/color_gradient_modality-RVV.zh.md`、`doc-rvv/recognition/surface_normal_modality-RVV.zh.md`、`doc-rvv/recognition/dotmod_template_matching-RVV.zh.md`、`doc-rvv/recognition/color_gradient_dot_modality-RVV.zh.md`、`doc-rvv/recognition/occlusion_reasoning-RVV.zh.md`、`doc-rvv/recognition/quantizable_modality-RVV.zh.md`、`doc-rvv/recognition/color_modality-RVV.zh.md`
 
 复筛原因：第二轮建议队列中的 7 个 recognition 主题均已进入 `已采纳 / topic closeout` 状态，下一步不应回到第一轮全量筛选，而应使用已完成主题的真实性能、回退边界和可复用模式，复筛第二轮保留队列中的 9 个文件。
 
@@ -75,11 +75,11 @@
 
 | 顺序 | 主题 | 主文件 | 推荐入口 / 第一 RVV 目标 | 依据模式 / 证据来源 | 状态 | 当前结论 / 下一步条件 |
 | ---: | --- | --- | --- | --- | --- | --- |
-| 1 | Color modality follow-on | `recognition/include/pcl/recognition/color_modality.h` | `processInputData()` 中 `quantizeColors` / `filterQuantizedColors` / shared spread | organized pixel preprocessing；已完成 modality 主题 | 待启动 | 先做函数级评估，确认 public entry 主成本覆盖。 |
+| 1 | Color modality follow-on | `recognition/include/pcl/recognition/color_modality.h` | `processInputData()` 中 `quantizeColors` / `filterQuantizedColors` / shared spread | organized pixel preprocessing；已完成 modality 主题 | 已采纳 / topic closeout | 已接入 `ColorModality<PointXYZRGB>::processInputData()` 的 RGB extrema quantize + 3x3 dominant filter production RVV；Phase 040 board summary median `2.490x` / `2.410x`，`0/5` 退化，checksum 一致。正式文档为 `doc-rvv/recognition/color_modality-RVV.zh.md`；本地统计记录为 `tmp/rvv-topic-stats/3/recognition-color-modality-stats.zh.md`。 |
 | 2 | Quantized map spread helper | `recognition/src/quantizable_modality.cpp` | `QuantizedMap::spreadQuantizedMap()` 横向 / 纵向 OR window | byte-map / window helper；surface-normal default spread 已正向 | 已采纳 / topic closeout | 已接入公共 helper production path：`__RVV10__` 构建下默认 `spreading_size == 8` 且尺寸足够时走 `spreadQuantizedMapRVV()`，其它情况回退 `spreadQuantizedMapStd()`。5-run board summary 中 `shared_spread_320x240` median `4.670x`、`shared_spread_641x481_tail` median `4.770x`，均 `0/5` 退化，checksum 一致，Evidence Doctor `Errors=0 / Warnings=0 / Suggestions=4`。正式文档为 `doc-rvv/recognition/quantizable_modality-RVV.zh.md`；caller 端到端收益需另开 public-entry topic。 |
 | 3 | Geometric consistency ablation | `recognition/include/pcl/recognition/impl/cg/geometric_consistency.hpp` | `clusterCorrespondences()` pairwise consistency predicate | projection/mask 类规则几何经验；源码 O(n^2) 子核 | 待启动 | 先做 component ablation，不直接承诺 production。 |
-| 4 | Hough vote-generation diagnostic | `recognition/include/pcl/recognition/impl/cg/hough_3d.hpp` | `houghVoting()` vote generation + min/max reduction | scatter / diagnostic 边界；源码中 vote generation 与 accumulator 可拆 | 待启动 | 先隔离 vote generation，避免把 accumulator scatter 当作 RVV 主目标。 |
-| 5 | ISM profile-gated evaluation | `recognition/include/pcl/recognition/impl/implicit_shape_model.hpp` | `calculateSigmas` / `calculateWeights` / `shiftMean` 子核 | profile prerequisite；源码中 search / KMeans 风险高 | 待启动 | 只有 profile 证明子核热点时继续。 |
+| 4 | Hough vote-generation diagnostic | `recognition/include/pcl/recognition/impl/cg/hough_3d.hpp` | `houghVoting()` vote generation + min/max reduction | scatter / diagnostic 边界；源码中 vote generation 与 accumulator 可拆 | 已完成 / topic closeout | 已完成 `vote generation`、`production direct`、`no-interpolation` 和 `default distance weight` 四个 phase 的收口；当前 production patch 保留为 attempted、未采纳，`doc-rvv/recognition/hough_3d-RVV.zh.md` 未创建；本地统计记录为 `tmp/rvv-topic-stats/3/recognition-hough_3d-stats.zh.md`。 |
+| 5 | ISM profile-gated evaluation | `recognition/include/pcl/recognition/impl/implicit_shape_model.hpp` | `findObjects()` descriptor nearest cluster assignment；`calculateSigmas` / density 子核保留后续候选 | profile prerequisite -> production direct narrow adoption | 已采纳 / topic closeout | 已接入 `findObjects()` 公开入口中的 descriptor-to-cluster 最近邻分配：`__RVV10__` 构建下走 RVV helper；`FeatureSize=153` 只是本轮代表性证据，不是生产门禁。Phase 020 production direct board summary 中 `public_find_objects_descriptor_assignment` median `1.060x`、min `1.040x`、max `1.070x`、`0/5` 退化，checksum `semantic:public_votes=494:votes_match=True:peak_density_match=True:peak_fingerprint_match=True`，Evidence Doctor `Errors=0 / Warnings=0 / Suggestions=2`。正式文档为 `doc-rvv/recognition/implicit_shape_model-RVV.zh.md`；`trainISM()`、sigma、density、其它 `FeatureSize` / 点型扩展需另建 phase。 |
 
 暂缓文件不进入执行清单：`face_detection/rf_face_utils.h`、`impl/linemod/line_rgbd.hpp`、`quantized_map.h`、`src/cg/hough_3d.cpp`。它们仍可作为后续 topic 的背景或支撑文件，但不静默合并为其它文件的优化任务。
 
@@ -87,7 +87,10 @@
 
 - 筛选文档位置：`doc-rvv/library-screening/recognition/recognition-retained-candidate-rescreen.zh.md`
 - 保留候选复筛结果：`建议启动函数级评估 5`，`暂缓 / 不单独实施 4`
-- 第一条未完成主题：`Color modality follow-on`
-- 后续执行更新：`Quantized map spread helper` 已完成 production-detail RVV 接入和 topic closeout；当前 production 源码、测试资产、长期文档和板卡证据分别位于 `recognition/src/quantizable_modality.cpp`、`test-rvv/recognition/quantizable_modality/`、`doc-rvv/recognition/quantizable_modality-RVV.zh.md` 和 `test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md`。
+- 第一条未完成主题：`Geometric consistency ablation`
+- Hough vote-generation diagnostic 已完成 no-production closeout；当前 production patch 保留，未创建长期 `doc-rvv` 文档，本地统计记录为 `tmp/rvv-topic-stats/3/recognition-hough_3d-stats.zh.md`。
+- 后续执行更新：`Color modality follow-on` 已完成 production RVV 接入和 topic closeout；当前 production 源码、测试资产、长期文档和板卡证据分别位于 `recognition/include/pcl/recognition/color_modality.h`、`test-rvv/recognition/color_modality/`、`doc-rvv/recognition/color_modality-RVV.zh.md` 和 `test-rvv/recognition/color_modality/log/board/repeated_phase040_quantize_filter_rvv/summary.md`；本地统计记录为 `tmp/rvv-topic-stats/3/recognition-color-modality-stats.zh.md`。
+- 后续执行更新：`Quantized map spread helper` 已完成 production-detail RVV 接入和 topic closeout；当前 production 源码、测试资产、长期文档和板卡证据分别位于 `recognition/src/quantizable_modality.cpp`、`test-rvv/recognition/quantizable_modality/`、`doc-rvv/recognition/quantizable_modality-RVV.zh.md` 和 `test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md`；本地统计记录为 `tmp/rvv-topic-stats/3/recognition-quantizable-modality-stats.zh.md`。
+- 后续执行更新：`ISM profile-gated evaluation` 已完成 `findObjects()` descriptor assignment 的窄范围 production 接入和 topic closeout；当前 production 源码、测试资产、长期文档和板卡证据分别位于 `recognition/include/pcl/recognition/impl/implicit_shape_model.hpp`、`test-rvv/recognition/implicit_shape_model/`、`doc-rvv/recognition/implicit_shape_model-RVV.zh.md` 和 `test-rvv/recognition/implicit_shape_model/log/board/repeated_phase020_public_entry_findobjects_production_direct/summary.md`。
 - 复筛轮本身没有修改 production 源码，没有创建 `test-rvv` topic，没有运行板卡 bench，没有提交 commit；单 topic 执行状态以后续 topic 文档为准。
 - 未发现需要补充到 `rvv-workflow`、`rvv-test`、`rvv-implementation` 或 `rvv-documentation` skill 的通用规则

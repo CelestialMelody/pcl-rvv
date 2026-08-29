@@ -48,6 +48,113 @@
 
 #include <pcl/memory.h>  // for dynamic_pointer_cast
 
+#if defined(__RVV10__)
+#include <riscv_vector.h>
+#endif
+
+namespace pcl
+{
+  namespace ism
+  {
+    namespace detail
+    {
+#if defined(__RVV10__)
+      inline float
+      sumF32m2 (const vfloat32m2_t values, const std::size_t vl)
+      {
+        const vfloat32m1_t zero = __riscv_vfmv_s_f_f32m1 (0.0f, 1);
+        const vfloat32m1_t reduced = __riscv_vfredusum_vs_f32m2_f32m1 (values, zero, vl);
+        return __riscv_vfmv_f_s_f32m1_f32 (reduced);
+      }
+#endif
+
+      template <typename DescriptorVectorT, typename CentersMatrixT>
+      inline unsigned int
+      findNearestClusterIndexStd (const DescriptorVectorT& curr_descriptor,
+                                  const CentersMatrixT& clusters_centers,
+                                  const unsigned int number_of_clusters)
+      {
+        if (number_of_clusters == 0)
+          return (0);
+
+        const auto dimensions = static_cast<unsigned int> (curr_descriptor.size ());
+        unsigned int min_dist_idx = 0;
+        float best_dist = std::numeric_limits<float>::max ();
+        for (unsigned int i_clust_cent = 0; i_clust_cent < number_of_clusters; ++i_clust_cent)
+        {
+          float curr_dist = 0.0f;
+          for (unsigned int i_dim = 0; i_dim < dimensions; ++i_dim)
+          {
+            const float diff = curr_descriptor (i_dim) - clusters_centers (i_clust_cent, i_dim);
+            curr_dist += diff * diff;
+          }
+          if (curr_dist < best_dist)
+          {
+            min_dist_idx = i_clust_cent;
+            best_dist = curr_dist;
+          }
+        }
+        return (min_dist_idx);
+      }
+
+#if defined(__RVV10__)
+      template <typename DescriptorVectorT, typename CentersMatrixT>
+      inline unsigned int
+      findNearestClusterIndexRVV (const DescriptorVectorT& curr_descriptor,
+                                  const CentersMatrixT& clusters_centers,
+                                  const unsigned int number_of_clusters)
+      {
+        if (number_of_clusters == 0)
+          return (0);
+
+        const auto dimensions = static_cast<unsigned int> (curr_descriptor.size ());
+        const auto outer_stride = clusters_centers.outerStride ();
+        const auto row_stride_bytes = static_cast<std::ptrdiff_t> (outer_stride) *
+                                      static_cast<std::ptrdiff_t> (sizeof (float));
+        const float* descriptor = curr_descriptor.data ();
+        unsigned int min_dist_idx = 0;
+        float best_dist = std::numeric_limits<float>::max ();
+
+        for (unsigned int i_clust_cent = 0; i_clust_cent < number_of_clusters; ++i_clust_cent)
+        {
+          const float* center = clusters_centers.data () + i_clust_cent;
+          float curr_dist = 0.0f;
+          for (unsigned int i_dim = 0; i_dim < dimensions;)
+          {
+            const std::size_t vl = __riscv_vsetvl_e32m2 (dimensions - i_dim);
+            const vfloat32m2_t lhs = __riscv_vle32_v_f32m2 (descriptor + i_dim, vl);
+            const vfloat32m2_t rhs = __riscv_vlse32_v_f32m2 (center + i_dim * outer_stride, row_stride_bytes, vl);
+            const vfloat32m2_t diff = __riscv_vfsub_vv_f32m2 (lhs, rhs, vl);
+            const vfloat32m2_t squared = __riscv_vfmul_vv_f32m2 (diff, diff, vl);
+            curr_dist += sumF32m2 (squared, vl);
+            i_dim += vl;
+          }
+          if (curr_dist < best_dist)
+          {
+            min_dist_idx = i_clust_cent;
+            best_dist = curr_dist;
+          }
+        }
+        return (min_dist_idx);
+      }
+#endif
+
+      template <int FeatureSize, typename DescriptorVectorT, typename CentersMatrixT>
+      inline unsigned int
+      findNearestClusterIndex (const DescriptorVectorT& curr_descriptor,
+                               const CentersMatrixT& clusters_centers,
+                               const unsigned int number_of_clusters)
+      {
+#if defined(__RVV10__)
+        return findNearestClusterIndexRVV (curr_descriptor, clusters_centers, number_of_clusters);
+#else
+        return findNearestClusterIndexStd (curr_descriptor, clusters_centers, number_of_clusters);
+#endif
+      }
+    } // namespace detail
+  } // namespace ism
+} // namespace pcl
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointT>
 pcl::features::ISMVoteList<PointT>::ISMVoteList() = default;
@@ -753,24 +860,8 @@ pcl::ism::ImplicitShapeModelEstimation<FeatureSize, PointT, NormalT>::findObject
     if (descriptor_sum < std::numeric_limits<float>::epsilon ())
       continue;
 
-    unsigned int min_dist_idx = 0;
-    Eigen::VectorXf clusters_center (FeatureSize);
-    for (int i_dim = 0; i_dim < FeatureSize; i_dim++)
-      clusters_center (i_dim) = model->clusters_centers_ (min_dist_idx, i_dim);
-
-    float best_dist = computeDistance (curr_descriptor, clusters_center);
-    for (unsigned int i_clust_cent = 0; i_clust_cent < number_of_clusters_; i_clust_cent++)
-    {
-      for (int i_dim = 0; i_dim < FeatureSize; i_dim++)
-        clusters_center (i_dim) = model->clusters_centers_ (i_clust_cent, i_dim);
-      float curr_dist = computeDistance (clusters_center, curr_descriptor);
-      if (curr_dist < best_dist)
-      {
-        min_dist_idx = i_clust_cent;
-        best_dist = curr_dist;
-      }
-    }
-    min_dist_inds[i_point] = min_dist_idx;
+    min_dist_inds[i_point] =
+        pcl::ism::detail::findNearestClusterIndex<FeatureSize> (curr_descriptor, model->clusters_centers_, number_of_clusters_);
   }//next keypoint
 
   for (std::size_t i_point = 0; i_point < n_key_points; i_point++)
