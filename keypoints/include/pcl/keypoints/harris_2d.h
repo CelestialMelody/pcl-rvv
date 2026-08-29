@@ -145,6 +145,10 @@ namespace pcl
       responseLowe (PointCloudOut &output) const;
       void 
       responseTomasi (PointCloudOut &output) const;
+#if defined(__RVV10__) && defined(__riscv_vector)
+      void
+      responseRVV (PointCloudOut &output, ResponseMethod method) const;
+#endif
 //      void refineCorners (PointCloudOut &corners) const;
       /** \brief calculates the upper triangular part of unnormalized 
         * covariance matrix over intensities given by the 2D coordinates 
