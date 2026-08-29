@@ -1,0 +1,150 @@
+{
+  "files": {
+    "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter shared_spread_320x240,shared_spread_641x481_tail --iterations 50 --warmup-iterations 5",
+      "doc_refs": [
+        "doc/phases/000-shared-spread-rvv/result.zh.md",
+        "doc/quantizable_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_detail",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787990828,
+      "related": {
+        "doctor_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md"
+      },
+      "run_label": "qm_phase000_shared_spread_rvv_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787990828790261820,
+        "path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.json",
+        "sha256": "sha256:42182d45bbae503060632abff6c502872e71576297897d6876c8b7844e769596",
+        "size": 4654
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter shared_spread_320x240,shared_spread_641x481_tail --iterations 50 --warmup-iterations 5",
+      "doc_refs": [
+        "doc/phases/000-shared-spread-rvv/result.zh.md",
+        "doc/quantizable_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_detail",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787990828,
+      "related": {
+        "doctor_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md"
+      },
+      "run_label": "qm_phase000_shared_spread_rvv_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787990828790261820,
+        "path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md",
+        "sha256": "sha256:4b97f877b2531938e8606e9a0dffdc2801593005ce5e767ecb590492f85f701c",
+        "size": 3613
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter shared_spread_320x240,shared_spread_641x481_tail --iterations 50 --warmup-iterations 5",
+      "doc_refs": [
+        "doc/phases/000-shared-spread-rvv/result.zh.md",
+        "doc/quantizable_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_detail",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787990828,
+      "related": {
+        "doctor_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md"
+      },
+      "run_label": "qm_phase000_shared_spread_rvv_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787990828755262649,
+        "path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json",
+        "sha256": "sha256:cda8b52906bbe7fc04b98a754eec3c49fe6b53732bbca2db2f0b878b48cb7131",
+        "size": 7905
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter shared_spread_320x240,shared_spread_641x481_tail --iterations 50 --warmup-iterations 5",
+      "doc_refs": [
+        "doc/phases/000-shared-spread-rvv/result.zh.md",
+        "doc/quantizable_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_detail",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787990828,
+      "related": {
+        "doctor_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md"
+      },
+      "run_label": "qm_phase000_shared_spread_rvv_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787990828755262649,
+        "path": "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md",
+        "sha256": "sha256:eccfa64ac7751dc180c7e01b3b3a439ea8ab9bbfb1a9b0ece7299bdaeb731706",
+        "size": 999
+      },
+      "target": "board_repeated"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "--case-filter shared_spread_320x240,shared_spread_641x481_tail --iterations 50 --warmup-iterations 5",
+      "evidence_role": "production_detail",
+      "files": [
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.json",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md"
+      ],
+      "recorded_at_epoch": 1787990417,
+      "run_label": "qm_phase000_shared_spread_rvv_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter shared_spread_320x240,shared_spread_641x481_tail --iterations 50 --warmup-iterations 5",
+      "evidence_role": "production_detail",
+      "files": [
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.json",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md"
+      ],
+      "recorded_at_epoch": 1787990695,
+      "run_label": "qm_phase000_shared_spread_rvv_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter shared_spread_320x240,shared_spread_641x481_tail --iterations 50 --warmup-iterations 5",
+      "evidence_role": "production_detail",
+      "files": [
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.json",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_doctor.md",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/evidence_manifest.json",
+        "test-rvv/recognition/quantizable_modality/log/board/repeated_phase000_shared_spread_rvv/summary.md"
+      ],
+      "recorded_at_epoch": 1787990828,
+      "run_label": "qm_phase000_shared_spread_rvv_repeated",
+      "target": "board_repeated"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787990828
+}
