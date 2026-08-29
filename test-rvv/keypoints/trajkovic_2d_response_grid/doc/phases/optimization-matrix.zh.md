@@ -1,0 +1,9 @@
+# Trajkovic 2D Response Grid Optimization Matrix
+
+| candidate family | row source policy | point type / Scalar / layout | scope and entry | correctness / fallback target | bench / ablation target | board evidence | asm boundary | Evidence Doctor | decision | unblocked next action |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| response-grid-rvv | organized grid internal pixels | `PointXYZI` / float intensity / AoS / `window_size == 3` | production public `compute()` / EIGHT_CORNERS | passed `run_test_compare` | board repeated production bench | positive：1.725x / 1.442x mean B/A | passed `check_production_rvv_asm`，RVV 指令内联到 `detectKeypoints()` | Errors=0 / Warnings=0 / Suggestions=0 | adopted | none for this frozen scope |
+| fallback-scalar | organized grid | FOUR_CORNERS、非 RVV 构建、非 `PointXYZI`、非默认 accessor、非 3x3 window | production public `compute()` | passed fallback/control cases | fallback control in board summary | checksum match，near 1x control | not_applicable | not_applicable | adopted as scalar fallback | none for this frozen scope |
+| nms-scalar-tail | sorted full indices | `PointXYZI` | production public `compute()` | public keypoint/output 对拍通过 | included in production bench | EIGHT_CORNERS end-to-end still positive | scalar tail | not_applicable | adopted as scalar tail | no current need to RVV 化 |
+| point-type-expansion | organized grid internal pixels | non-`PointXYZI` intensity point types / layout | production public `compute()` | not_run | not_run | not_run | not_run | not_run | deferred outside current frozen scope | new phase only if wider point-type scope is requested |
+| larger-window-support | organized grid internal pixels | `window_size > 3` | production public `compute()` | not_run | not_run | not_run | not_run | not_run | deferred outside current frozen scope | new phase only if larger-window workload is requested |
