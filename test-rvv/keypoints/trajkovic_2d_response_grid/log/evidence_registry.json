@@ -1,0 +1,138 @@
+{
+  "files": {
+    "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "four_corners_320x240,eight_corners_320x240,four_corners_641x481_tail,eight_corners_641x481_tail",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-response-grid-production-probe/result.zh.md",
+        "doc/trajkovic_2d_response_grid-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/trajkovic_2d_response_grid-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787999997,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md"
+      },
+      "run_label": "board-trajkovic-2d-response-grid-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787999997331511388,
+        "path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md",
+        "sha256": "sha256:2107b0fde8c3ad2b563d7f9bff037bb0182f21b7d3c37fc3da64d6a972337ee8",
+        "size": 568
+      },
+      "target": "collect_board_trajkovic_2d_repeated"
+    },
+    "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "four_corners_320x240,eight_corners_320x240,four_corners_641x481_tail,eight_corners_641x481_tail",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-response-grid-production-probe/result.zh.md",
+        "doc/trajkovic_2d_response_grid-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/trajkovic_2d_response_grid-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787999997,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md"
+      },
+      "run_label": "board-trajkovic-2d-response-grid-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787999997293510977,
+        "path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json",
+        "sha256": "sha256:86c1988de03f174a95808e4888aaa0b47cd33e86a0ca94d20bc1ba7ad487c438",
+        "size": 10157
+      },
+      "target": "collect_board_trajkovic_2d_repeated"
+    },
+    "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md": {
+      "backend": "board",
+      "case_filter": "four_corners_320x240,eight_corners_320x240,four_corners_641x481_tail,eight_corners_641x481_tail",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-response-grid-production-probe/result.zh.md",
+        "doc/trajkovic_2d_response_grid-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/trajkovic_2d_response_grid-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787999997,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md"
+      },
+      "run_label": "board-trajkovic-2d-response-grid-phase000",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787999997293510977,
+        "path": "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md",
+        "sha256": "sha256:59448cd7fe7ed398bff0e004fd8a7ea4a9cdeceb9eaec6f047f92f9acc621c11",
+        "size": 806
+      },
+      "target": "collect_board_trajkovic_2d_repeated"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "four_corners_320x240,eight_corners_320x240,four_corners_641x481_tail,eight_corners_641x481_tail",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md",
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json",
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787997855,
+      "run_label": "board-trajkovic-2d-response-grid-phase000",
+      "target": "collect_board_trajkovic_2d_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "four_corners_320x240,eight_corners_320x240,four_corners_641x481_tail,eight_corners_641x481_tail",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md",
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json",
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787999627,
+      "run_label": "board-trajkovic-2d-response-grid-phase000",
+      "target": "collect_board_trajkovic_2d_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "four_corners_320x240,eight_corners_320x240,four_corners_641x481_tail,eight_corners_641x481_tail",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md",
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json",
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787999789,
+      "run_label": "board-trajkovic-2d-response-grid-phase000",
+      "target": "collect_board_trajkovic_2d_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "four_corners_320x240,eight_corners_320x240,four_corners_641x481_tail,eight_corners_641x481_tail",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_doctor.md",
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/evidence_manifest.json",
+        "test-rvv/keypoints/trajkovic_2d_response_grid/log/board/repeated-summary.md"
+      ],
+      "recorded_at_epoch": 1787999997,
+      "run_label": "board-trajkovic-2d-response-grid-phase000",
+      "target": "collect_board_trajkovic_2d_repeated"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787999997
+}
