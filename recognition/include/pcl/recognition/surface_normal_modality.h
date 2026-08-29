@@ -44,17 +44,92 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/features/linear_least_squares_normal.h>
+#if defined(__RVV10__)
+#include <pcl/rvv_point_traits.h>
+#include <riscv_vector.h>
+#endif
 
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 // #include <iostream>
 #include <limits>
 #include <list>
+#include <type_traits>
 #include <vector>
 
 namespace pcl
 {
+  namespace detail
+  {
+    enum class SurfaceNormalModalityPathHook
+    {
+      None = 0,
+      Scalar = 1,
+      Rvv = 2,
+      FilterRvv = 3,
+      SpreadRvv = 4,
+    };
+
+#if defined(PCL_RVV_SNM_TEST_HOOK)
+#define PCL_RVV_SNM_TEST_HOOK_ACTIVE 1
+    inline int&
+    surfaceNormalModalityLastTestHook ()
+    {
+      static int last_hook = static_cast<int> (SurfaceNormalModalityPathHook::None);
+      return (last_hook);
+    }
+
+    inline bool&
+    surfaceNormalModalityForceScalarTestHook ()
+    {
+      static bool force_scalar = false;
+      return (force_scalar);
+    }
+
+    extern "C" inline void
+    pcl_rvv_snm_reset_test_hook ()
+    {
+      surfaceNormalModalityLastTestHook () =
+          static_cast<int> (SurfaceNormalModalityPathHook::None);
+      surfaceNormalModalityForceScalarTestHook () = false;
+    }
+
+    extern "C" inline int
+    pcl_rvv_snm_last_test_hook ()
+    {
+      return (surfaceNormalModalityLastTestHook ());
+    }
+
+    extern "C" inline void
+    pcl_rvv_snm_set_force_scalar_test_hook (const int enabled)
+    {
+      surfaceNormalModalityForceScalarTestHook () = enabled != 0;
+    }
+#endif
+
+    inline void
+    recordSurfaceNormalModalityPath (const SurfaceNormalModalityPathHook path)
+    {
+#if defined(PCL_RVV_SNM_TEST_HOOK)
+      surfaceNormalModalityLastTestHook () = static_cast<int> (path);
+#else
+      (void)path;
+#endif
+    }
+
+    inline bool
+    forceSurfaceNormalModalityScalarPath ()
+    {
+#if defined(PCL_RVV_SNM_TEST_HOOK)
+      return (surfaceNormalModalityForceScalarTestHook ());
+#else
+      return (false);
+#endif
+    }
+
+  } // namespace detail
 
   /** \brief Map that stores orientations.
     * \author Stefan Holzer
@@ -81,7 +156,7 @@ namespace pcl
         return height_;
       }
 
-      /** \brief Resizes the map to the specific width and height and initializes 
+      /** \brief Resizes the map to the specific width and height and initializes
         *        all new elements with the specified value.
         * \param[in] width the width of the resized map.
         * \param[in] height the height of the resized map.
@@ -96,7 +171,7 @@ namespace pcl
         map_.resize (width*height, value);
       }
 
-      /** \brief Operator to access elements of the map. 
+      /** \brief Operator to access elements of the map.
         * \param[in] col_index the column index of the element to access.
         * \param[in] row_index the row index of the element to access.
         */
@@ -106,7 +181,7 @@ namespace pcl
         return map_[row_index * width_ + col_index];
       }
 
-      /** \brief Operator to access elements of the map. 
+      /** \brief Operator to access elements of the map.
         * \param[in] col_index the column index of the element to access.
         * \param[in] row_index the row index of the element to access.
         */
@@ -123,7 +198,7 @@ namespace pcl
       std::size_t height_{0};
       /** \brief Storage for the data of the map. */
       std::vector<float> map_;
-  
+
   };
 
   /** \brief Look-up-table for fast surface normal quantization.
@@ -159,9 +234,9 @@ namespace pcl
     QuantizedNormalLookUpTable () = default;
 
     /** \brief Destructor. */
-    ~QuantizedNormalLookUpTable () 
-    { 
-      delete[] lut; 
+    ~QuantizedNormalLookUpTable ()
+    {
+      delete[] lut;
     }
 
     /** \brief Initializes the LUT.
@@ -169,7 +244,7 @@ namespace pcl
       * \param[in] range_y_arg the range of the LUT in y-direction.
       * \param[in] range_z_arg the range of the LUT in z-direction.
       */
-    void 
+    void
     initializeLUT (const int range_x_arg, const int range_y_arg, const int range_z_arg)
     {
       range_x = range_x_arg;
@@ -190,7 +265,7 @@ namespace pcl
 
       constexpr int nr_normals = 8;
 	    pcl::PointCloud<PointXYZ>::VectorType ref_normals (nr_normals);
-      
+
       constexpr float normal0_angle = 40.0f * 3.14f / 180.0f;
       ref_normals[0].x = std::cos (normal0_angle);
       ref_normals[0].y = 0.0f;
@@ -227,8 +302,8 @@ namespace pcl
         {
           for (int x_index = 0; x_index < size_x; ++x_index)
           {
-            PointXYZ normal (static_cast<float> (x_index - range_x/2), 
-                             static_cast<float> (y_index - range_y/2), 
+            PointXYZ normal (static_cast<float> (x_index - range_x/2),
+                             static_cast<float> (y_index - range_y/2),
                              static_cast<float> (z_index - range_z));
             const float length = std::sqrt (normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
             const float inv_length = 1.0f / (length + 0.00001f);
@@ -263,9 +338,9 @@ namespace pcl
     /** \brief Operator to access an element in the LUT.
       * \param[in] x the x-component of the normal.
       * \param[in] y the y-component of the normal.
-      * \param[in] z the z-component of the normal. 
+      * \param[in] z the z-component of the normal.
       */
-    inline unsigned char 
+    inline unsigned char
     operator() (const float x, const float y, const float z) const
     {
       const auto x_index = static_cast<std::size_t> (x * static_cast<float> (offset_x) + static_cast<float> (offset_x));
@@ -278,9 +353,9 @@ namespace pcl
     }
 
     /** \brief Operator to access an element in the LUT.
-      * \param[in] index the index of the element. 
+      * \param[in] index the index of the element.
       */
-    inline unsigned char 
+    inline unsigned char
     operator() (const int index) const
     {
       return (lut[index]);
@@ -311,16 +386,16 @@ namespace pcl
 
         /** \brief Quantized value. */
         unsigned char bin_index{0};
-    
+
         /** \brief x-position of the feature. */
         std::size_t x{0};
         /** \brief y-position of the feature. */
-        std::size_t y{0};	
+        std::size_t y{0};
 
-        /** \brief Compares two candidates based on their distance to the next different quantized value. 
-          * \param[in] rhs the candidate to compare with. 
+        /** \brief Compares two candidates based on their distance to the next different quantized value.
+          * \param[in] rhs the candidate to compare with.
           */
-        bool 
+        bool
         operator< (const Candidate & rhs) const
         {
           return (distance > rhs.distance);
@@ -369,16 +444,16 @@ namespace pcl
 
       /** \brief Returns a reference to the internal quantized map. */
       inline QuantizedMap &
-      getQuantizedMap () override 
-      { 
-        return (filtered_quantized_surface_normals_); 
+      getQuantizedMap () override
+      {
+        return (filtered_quantized_surface_normals_);
       }
 
       /** \brief Returns a reference to the internal spread quantized map. */
       inline QuantizedMap &
-      getSpreadedQuantizedMap () override 
-      { 
-        return (spreaded_quantized_surface_normals_); 
+      getSpreadedQuantizedMap () override
+      {
+        return (spreaded_quantized_surface_normals_);
       }
 
       /** \brief Returns a reference to the orientation map. */
@@ -389,32 +464,32 @@ namespace pcl
       }
 
       /** \brief Extracts features from this modality within the specified mask.
-        * \param[in] mask defines the areas where features are searched in. 
-        * \param[in] nr_features defines the number of features to be extracted 
+        * \param[in] mask defines the areas where features are searched in.
+        * \param[in] nr_features defines the number of features to be extracted
         *            (might be less if not sufficient information is present in the modality).
         * \param[in] modality_index the index which is stored in the extracted features.
         * \param[out] features the destination for the extracted features.
         */
-      void 
+      void
       extractFeatures (const MaskMap & mask, std::size_t nr_features, std::size_t modality_index,
                        std::vector<QuantizedMultiModFeature> & features) const override;
 
       /** \brief Extracts all possible features from the modality within the specified mask.
-        * \param[in] mask defines the areas where features are searched in. 
+        * \param[in] mask defines the areas where features are searched in.
         * \param[in] nr_features IGNORED (TODO: remove this parameter).
         * \param[in] modality_index the index which is stored in the extracted features.
         * \param[out] features the destination for the extracted features.
         */
-      void 
+      void
       extractAllFeatures (const MaskMap & mask, std::size_t nr_features, std::size_t modality_index,
                           std::vector<QuantizedMultiModFeature> & features) const override;
 
       /** \brief Provide a pointer to the input dataset (overwrites the PCLBase::setInputCloud method)
         * \param[in] cloud the const boost shared pointer to a PointCloud message
         */
-      void 
-      setInputCloud (const typename PointCloudIn::ConstPtr & cloud) override 
-      { 
+      void
+      setInputCloud (const typename PointCloudIn::ConstPtr & cloud) override
+      {
         input_ = cloud;
       }
 
@@ -422,7 +497,7 @@ namespace pcl
       virtual void
       processInputData ();
 
-      /** \brief Processes the input data assuming that everything up to filtering is already done/available 
+      /** \brief Processes the input data assuming that everything up to filtering is already done/available
         *        (so only spreading is performed). */
       virtual void
       processInputDataFromFiltered ();
@@ -441,6 +516,16 @@ namespace pcl
       void
       computeAndQuantizeSurfaceNormals2 ();
 
+      /** \brief Computes and quantizes the surface normals with the scalar path. */
+      void
+      computeAndQuantizeSurfaceNormals2Std ();
+
+#if defined(__RVV10__)
+      /** \brief Computes and quantizes the surface normals with the RVV path. */
+      bool
+      computeAndQuantizeSurfaceNormals2RVV ();
+#endif
+
       /** \brief Quantizes the surface normals. */
       void
       quantizeSurfaceNormals ();
@@ -449,9 +534,33 @@ namespace pcl
       void
       filterQuantizedSurfaceNormals ();
 
-      /** \brief Computes a distance map from the supplied input mask. 
+      /** \brief Filters the quantized surface normals with the scalar path. */
+      void
+      filterQuantizedSurfaceNormalsStd ();
+
+#if defined(__RVV10__)
+      /** \brief Filters the quantized surface normals with the RVV path. */
+      bool
+      filterQuantizedSurfaceNormalsRVV ();
+#endif
+
+      /** \brief Spreads the filtered quantized surface normals. */
+      void
+      spreadFilteredQuantizedSurfaceNormals ();
+
+      /** \brief Spreads the filtered quantized surface normals with the scalar path. */
+      void
+      spreadFilteredQuantizedSurfaceNormalsStd ();
+
+#if defined(__RVV10__)
+      /** \brief Spreads the filtered quantized surface normals with the RVV path. */
+      bool
+      spreadFilteredQuantizedSurfaceNormalsRVV ();
+#endif
+
+      /** \brief Computes a distance map from the supplied input mask.
         * \param[in] input the mask for which a distance map will be computed.
-        * \param[out] output the destination for the distance map. 
+        * \param[out] output the destination for the distance map.
         */
       void
       computeDistanceMap (const MaskMap & input, DistanceMap & output) const;
@@ -512,10 +621,7 @@ pcl::SurfaceNormalModality<PointInT>::processInputData ()
   // filter quantized surface normals
   filterQuantizedSurfaceNormals ();
 
-  // spread quantized surface normals
-  pcl::QuantizedMap::spreadQuantizedMap (filtered_quantized_surface_normals_,
-                                         spreaded_quantized_surface_normals_,
-                                         spreading_size_);
+  spreadFilteredQuantizedSurfaceNormals ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -523,9 +629,7 @@ template <typename PointInT> void
 pcl::SurfaceNormalModality<PointInT>::processInputDataFromFiltered ()
 {
   // spread quantized surface normals
-  pcl::QuantizedMap::spreadQuantizedMap (filtered_quantized_surface_normals_,
-                                         spreaded_quantized_surface_normals_,
-                                         spreading_size_);
+  spreadFilteredQuantizedSurfaceNormalsStd ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -568,13 +672,13 @@ pcl::SurfaceNormalModality<PointInT>::computeAndQuantizeSurfaceNormals ()
 
   // we compute the normals as follows:
   // ----------------------------------
-  // 
+  //
   // for the depth-gradient you can make the following first-order Taylor approximation:
   //   D(x + dx) - D(x) = dx^T \Delta D + h.o.t.
-  //     
+  //
   // build linear system by stacking up equation for 8 neighbor points:
   //   Y = X \Delta D
-  // 
+  //
   // => \Delta D = (X^T X)^{-1} X^T Y
   // => \Delta D = (A)^{-1} b
 
@@ -588,7 +692,7 @@ pcl::SurfaceNormalModality<PointInT>::computeAndQuantizeSurfaceNormals ()
       const float py = (*input_)[index].y;
       const float pz = (*input_)[index].z;
 
-      if (std::isnan(px) || pz > 2.0f) 
+      if (std::isnan(px) || pz > 2.0f)
       {
         surface_normals_[index].normal_x = bad_point;
         surface_normals_[index].normal_y = bad_point;
@@ -710,8 +814,10 @@ static void accumBilateral(long delta, long i, long j, long * A, long * b, int t
  * \todo Should also need camera model, or at least focal lengths? Replace distance_threshold with mask?
  */
 template <typename PointInT> void
-pcl::SurfaceNormalModality<PointInT>::computeAndQuantizeSurfaceNormals2 ()
+pcl::SurfaceNormalModality<PointInT>::computeAndQuantizeSurfaceNormals2Std ()
 {
+  detail::recordSurfaceNormalModalityPath (detail::SurfaceNormalModalityPathHook::Scalar);
+
   const int width = input_->width;
   const int height = input_->height;
 
@@ -946,6 +1052,218 @@ pcl::SurfaceNormalModality<PointInT>::computeAndQuantizeSurfaceNormals2 ()
   delete[] lp_normals;
 }
 
+#if defined(__RVV10__)
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT> bool
+pcl::SurfaceNormalModality<PointInT>::computeAndQuantizeSurfaceNormals2RVV ()
+{
+  const int width = input_->width;
+  const int height = input_->height;
+  if (width < 12 || height < 12)
+    return (false);
+
+  std::vector<unsigned short> lp_depth (static_cast<std::size_t> (width) *
+                                        static_cast<std::size_t> (height), 0);
+  std::vector<unsigned char> lp_normals (static_cast<std::size_t> (width) *
+                                         static_cast<std::size_t> (height), 0);
+
+  surface_normal_orientations_.resize (width, height, 0.0f);
+
+  for (int row_index = 0; row_index < height; ++row_index)
+  {
+    for (int col_index = 0; col_index < width; ++col_index)
+    {
+      const float value = (*input_)[row_index * width + col_index].z;
+      if (std::isfinite (value))
+        lp_depth[row_index * width + col_index] = static_cast<unsigned short> (value * 1000.0f);
+    }
+  }
+
+  const int l_W = width;
+  constexpr int l_r = 5;
+  const int offsets_i[] = {-l_r, 0, l_r, -l_r, l_r, -l_r, 0, l_r};
+  const int offsets_j[] = {-l_r, -l_r, -l_r, 0, 0, l_r, l_r, l_r};
+  const int offsets[] = { offsets_i[0] + offsets_j[0] * l_W,
+                          offsets_i[1] + offsets_j[1] * l_W,
+                          offsets_i[2] + offsets_j[2] * l_W,
+                          offsets_i[3] + offsets_j[3] * l_W,
+                          offsets_i[4] + offsets_j[4] * l_W,
+                          offsets_i[5] + offsets_j[5] * l_W,
+                          offsets_i[6] + offsets_j[6] * l_W,
+                          offsets_i[7] + offsets_j[7] * l_W };
+
+  const std::size_t max_vl = __riscv_vsetvlmax_e32m2 ();
+  std::vector<std::int32_t> center_depth (max_vl);
+  std::vector<std::int32_t> det_values (max_vl);
+  std::vector<std::int32_t> ddx_values (max_vl);
+  std::vector<std::int32_t> ddy_values (max_vl);
+
+  const auto load_depth_i32 = [] (const std::uint16_t* ptr, const std::size_t vl)
+  {
+    const vuint16m1_t u16 = __riscv_vle16_v_u16m1 (ptr, vl);
+    return __riscv_vreinterpret_v_u32m2_i32m2 (__riscv_vzext_vf2_u32m2 (u16, vl));
+  };
+
+  const auto add_neighbor = [] (const vint32m2_t neighbor,
+                                const vint32m2_t center,
+                                const int i,
+                                const int j,
+                                vint32m2_t a0,
+                                vint32m2_t a1,
+                                vint32m2_t a3,
+                                vint32m2_t b0,
+                                vint32m2_t b1,
+                                const std::size_t vl,
+                                vint32m2_t& out_a0,
+                                vint32m2_t& out_a1,
+                                vint32m2_t& out_a3,
+                                vint32m2_t& out_b0,
+                                vint32m2_t& out_b1)
+  {
+    const vint32m2_t delta = __riscv_vsub_vv_i32m2 (neighbor, center, vl);
+    const vint32m2_t abs_delta = __riscv_vmax_vv_i32m2 (delta, __riscv_vneg_v_i32m2 (delta, vl), vl);
+    const vbool16_t keep = __riscv_vmslt_vx_i32m2_b16 (abs_delta, 50, vl);
+    const vint32m2_t zero = __riscv_vmv_v_x_i32m2 (0, vl);
+    const vint32m2_t kept_delta = __riscv_vmerge_vvm_i32m2 (zero, delta, keep, vl);
+    const vint32m2_t fi = __riscv_vmerge_vxm_i32m2 (zero, i, keep, vl);
+    const vint32m2_t fj = __riscv_vmerge_vxm_i32m2 (zero, j, keep, vl);
+
+    out_a0 = __riscv_vadd_vv_i32m2 (a0, __riscv_vmul_vx_i32m2 (fi, i, vl), vl);
+    out_a1 = __riscv_vadd_vv_i32m2 (a1, __riscv_vmul_vx_i32m2 (fi, j, vl), vl);
+    out_a3 = __riscv_vadd_vv_i32m2 (a3, __riscv_vmul_vx_i32m2 (fj, j, vl), vl);
+    out_b0 = __riscv_vadd_vv_i32m2 (b0, __riscv_vmul_vx_i32m2 (kept_delta, i, vl), vl);
+    out_b1 = __riscv_vadd_vv_i32m2 (b1, __riscv_vmul_vx_i32m2 (kept_delta, j, vl), vl);
+  };
+
+  constexpr int distance_threshold = 2000;
+  for (int l_y = l_r; l_y < height - l_r - 1; ++l_y)
+  {
+    const std::size_t count = static_cast<std::size_t> (width - 2 * l_r - 1);
+    for (std::size_t offset = 0; offset < count;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e32m2 (count - offset);
+      const std::size_t x = static_cast<std::size_t> (l_r) + offset;
+      const auto* line = lp_depth.data () + static_cast<std::size_t> (l_y) * width + x;
+
+      const vint32m2_t d = load_depth_i32 (line, vl);
+      vint32m2_t a0 = __riscv_vmv_v_x_i32m2 (0, vl);
+      vint32m2_t a1 = __riscv_vmv_v_x_i32m2 (0, vl);
+      vint32m2_t a3 = __riscv_vmv_v_x_i32m2 (0, vl);
+      vint32m2_t b0 = __riscv_vmv_v_x_i32m2 (0, vl);
+      vint32m2_t b1 = __riscv_vmv_v_x_i32m2 (0, vl);
+
+      for (int k = 0; k < 8; ++k)
+      {
+        const vint32m2_t neighbor = load_depth_i32 (line + offsets[k], vl);
+        vint32m2_t next_a0;
+        vint32m2_t next_a1;
+        vint32m2_t next_a3;
+        vint32m2_t next_b0;
+        vint32m2_t next_b1;
+        add_neighbor (neighbor,
+                      d,
+                      offsets_i[k],
+                      offsets_j[k],
+                      a0,
+                      a1,
+                      a3,
+                      b0,
+                      b1,
+                      vl,
+                      next_a0,
+                      next_a1,
+                      next_a3,
+                      next_b0,
+                      next_b1);
+        a0 = next_a0;
+        a1 = next_a1;
+        a3 = next_a3;
+        b0 = next_b0;
+        b1 = next_b1;
+      }
+
+      const vint32m2_t det =
+          __riscv_vsub_vv_i32m2 (__riscv_vmul_vv_i32m2 (a0, a3, vl),
+                                 __riscv_vmul_vv_i32m2 (a1, a1, vl),
+                                 vl);
+      const vint32m2_t ddx =
+          __riscv_vsub_vv_i32m2 (__riscv_vmul_vv_i32m2 (a3, b0, vl),
+                                 __riscv_vmul_vv_i32m2 (a1, b1, vl),
+                                 vl);
+      const vint32m2_t ddy =
+          __riscv_vadd_vv_i32m2 (__riscv_vneg_v_i32m2 (__riscv_vmul_vv_i32m2 (a1, b0, vl), vl),
+                                 __riscv_vmul_vv_i32m2 (a0, b1, vl),
+                                 vl);
+
+      __riscv_vse32_v_i32m2 (center_depth.data (), d, vl);
+      __riscv_vse32_v_i32m2 (det_values.data (), det, vl);
+      __riscv_vse32_v_i32m2 (ddx_values.data (), ddx, vl);
+      __riscv_vse32_v_i32m2 (ddy_values.data (), ddy, vl);
+
+      for (std::size_t lane = 0; lane < vl; ++lane)
+      {
+        const long depth = center_depth[lane];
+        if (depth < distance_threshold)
+        {
+          float nx = static_cast<float> (1150L * static_cast<long> (ddx_values[lane]));
+          float ny = static_cast<float> (1150L * static_cast<long> (ddy_values[lane]));
+          float nz = static_cast<float> (-static_cast<long> (det_values[lane]) * depth);
+          const float length = std::sqrt (nx * nx + ny * ny + nz * nz);
+          if (length > 0.0f)
+          {
+            const float inv_length = 1.0f / length;
+            nx *= inv_length;
+            ny *= inv_length;
+            nz *= inv_length;
+            (void)nz;
+
+            float angle = 11.25f + std::atan2 (ny, nx) * 180.0f / 3.14f;
+            if (angle < 0.0f)
+              angle += 360.0f;
+            if (angle >= 360.0f)
+              angle -= 360.0f;
+            const int bin_index = static_cast<int> (angle * 8.0f / 360.0f + 1.0f);
+            lp_normals[static_cast<std::size_t> (l_y) * width + x + lane] =
+                static_cast<unsigned char> ((bin_index < 1) ? 1 : (8 < bin_index) ? 8 : bin_index);
+            surface_normal_orientations_ (static_cast<std::size_t> (x + lane), static_cast<std::size_t> (l_y)) = angle;
+          }
+        }
+      }
+
+      offset += vl;
+    }
+  }
+
+  quantized_surface_normals_.resize (width, height);
+  for (int row_index = 0; row_index < height; ++row_index)
+  {
+    for (int col_index = 0; col_index < width; ++col_index)
+      quantized_surface_normals_ (col_index, row_index) = lp_normals[row_index * width + col_index];
+  }
+
+  detail::recordSurfaceNormalModalityPath (detail::SurfaceNormalModalityPathHook::Rvv);
+  return (true);
+}
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT> void
+pcl::SurfaceNormalModality<PointInT>::computeAndQuantizeSurfaceNormals2 ()
+{
+#if defined(__RVV10__)
+  bool used_rvv_pipeline = false;
+  if (!detail::forceSurfaceNormalModalityScalarPath ())
+  {
+    if constexpr (pcl::rvv::RVVFloatFieldLayout<PointInT, pcl::fields::z>::value)
+      used_rvv_pipeline = computeAndQuantizeSurfaceNormals2RVV ();
+  }
+  if (!used_rvv_pipeline)
+    computeAndQuantizeSurfaceNormals2Std ();
+#else
+  computeAndQuantizeSurfaceNormals2Std ();
+#endif
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT> void
@@ -994,7 +1312,7 @@ pcl::SurfaceNormalModality<PointInT>::extractFeatures (const MaskMap & mask,
         //const unsigned char quantized_value = quantized_surface_normals_ (row_index, col_index);
         const unsigned char quantized_value = filtered_quantized_surface_normals_ (col_index, row_index);
 
-        if (quantized_value == 0) 
+        if (quantized_value == 0)
           continue;
         const int dist_map_index = map[quantized_value];
 
@@ -1146,7 +1464,7 @@ pcl::SurfaceNormalModality<PointInT>::extractFeatures (const MaskMap & mask,
           list2.push_back (*iter1);
         }
 
-        //if (list2.size () == nr_features) 
+        //if (list2.size () == nr_features)
         //{
         //  feature_selection_finished = true;
         //  break;
@@ -1264,7 +1582,7 @@ pcl::SurfaceNormalModality<PointInT>::extractAllFeatures (
         //const unsigned char quantized_value = quantized_surface_normals_ (row_index, col_index);
         const unsigned char quantized_value = filtered_quantized_surface_normals_ (col_index, row_index);
 
-        if (quantized_value == 0) 
+        if (quantized_value == 0)
           continue;
         const int dist_map_index = map[quantized_value];
 
@@ -1391,6 +1709,21 @@ pcl::SurfaceNormalModality<PointInT>::quantizeSurfaceNormals ()
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT> void
 pcl::SurfaceNormalModality<PointInT>::filterQuantizedSurfaceNormals ()
+{
+#if defined(__RVV10__)
+  bool used_rvv_pipeline = false;
+  if (!detail::forceSurfaceNormalModalityScalarPath ())
+    used_rvv_pipeline = filterQuantizedSurfaceNormalsRVV ();
+  if (!used_rvv_pipeline)
+    filterQuantizedSurfaceNormalsStd ();
+#else
+  filterQuantizedSurfaceNormalsStd ();
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT> void
+pcl::SurfaceNormalModality<PointInT>::filterQuantizedSurfaceNormalsStd ()
 {
   const int width = input_->width;
   const int height = input_->height;
@@ -1559,6 +1892,218 @@ pcl::SurfaceNormalModality<PointInT>::filterQuantizedSurfaceNormals ()
   //  }
   //}
 }
+
+#if defined(__RVV10__)
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT> bool
+pcl::SurfaceNormalModality<PointInT>::filterQuantizedSurfaceNormalsRVV ()
+{
+  const int width = input_->width;
+  const int height = input_->height;
+  if (width < 12 || height < 12)
+    return (false);
+
+  filtered_quantized_surface_normals_.resize (width, height);
+  const auto* input_data = quantized_surface_normals_.getData ();
+  auto* output_data = filtered_quantized_surface_normals_.getData ();
+
+  for (int row_index = 2; row_index < height - 2; ++row_index)
+  {
+    const std::size_t count = static_cast<std::size_t> (width - 4);
+    for (std::size_t offset = 0; offset < count;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8m2 (count - offset);
+      const std::size_t col_index = 2 + offset;
+      const auto* row_m2 =
+          input_data + static_cast<std::size_t> (row_index - 2) * width + col_index - 2;
+      const auto* row_m1 =
+          input_data + static_cast<std::size_t> (row_index - 1) * width + col_index - 2;
+      const auto* row_0 =
+          input_data + static_cast<std::size_t> (row_index) * width + col_index - 2;
+      const auto* row_p1 =
+          input_data + static_cast<std::size_t> (row_index + 1) * width + col_index - 2;
+      const auto* row_p2 =
+          input_data + static_cast<std::size_t> (row_index + 2) * width + col_index - 2;
+
+      const vuint8m2_t r00 = __riscv_vle8_v_u8m2 (row_m2, vl);
+      const vuint8m2_t r01 = __riscv_vle8_v_u8m2 (row_m2 + 1, vl);
+      const vuint8m2_t r02 = __riscv_vle8_v_u8m2 (row_m2 + 2, vl);
+      const vuint8m2_t r03 = __riscv_vle8_v_u8m2 (row_m2 + 3, vl);
+      const vuint8m2_t r04 = __riscv_vle8_v_u8m2 (row_m2 + 4, vl);
+      const vuint8m2_t r10 = __riscv_vle8_v_u8m2 (row_m1, vl);
+      const vuint8m2_t r11 = __riscv_vle8_v_u8m2 (row_m1 + 1, vl);
+      const vuint8m2_t r12 = __riscv_vle8_v_u8m2 (row_m1 + 2, vl);
+      const vuint8m2_t r13 = __riscv_vle8_v_u8m2 (row_m1 + 3, vl);
+      const vuint8m2_t r14 = __riscv_vle8_v_u8m2 (row_m1 + 4, vl);
+      const vuint8m2_t r20 = __riscv_vle8_v_u8m2 (row_0, vl);
+      const vuint8m2_t r21 = __riscv_vle8_v_u8m2 (row_0 + 1, vl);
+      const vuint8m2_t r22 = __riscv_vle8_v_u8m2 (row_0 + 2, vl);
+      const vuint8m2_t r23 = __riscv_vle8_v_u8m2 (row_0 + 3, vl);
+      const vuint8m2_t r24 = __riscv_vle8_v_u8m2 (row_0 + 4, vl);
+      const vuint8m2_t r30 = __riscv_vle8_v_u8m2 (row_p1, vl);
+      const vuint8m2_t r31 = __riscv_vle8_v_u8m2 (row_p1 + 1, vl);
+      const vuint8m2_t r32 = __riscv_vle8_v_u8m2 (row_p1 + 2, vl);
+      const vuint8m2_t r33 = __riscv_vle8_v_u8m2 (row_p1 + 3, vl);
+      const vuint8m2_t r34 = __riscv_vle8_v_u8m2 (row_p1 + 4, vl);
+      const vuint8m2_t r40 = __riscv_vle8_v_u8m2 (row_p2, vl);
+      const vuint8m2_t r41 = __riscv_vle8_v_u8m2 (row_p2 + 1, vl);
+      const vuint8m2_t r42 = __riscv_vle8_v_u8m2 (row_p2 + 2, vl);
+      const vuint8m2_t r43 = __riscv_vle8_v_u8m2 (row_p2 + 3, vl);
+      const vuint8m2_t r44 = __riscv_vle8_v_u8m2 (row_p2 + 4, vl);
+
+      vuint8m2_t max_count = __riscv_vmv_v_x_u8m2 (0, vl);
+      vuint8m2_t output_bits = __riscv_vmv_v_x_u8m2 (0, vl);
+
+      for (int bin = 1; bin <= 8; ++bin)
+      {
+        vuint8m2_t bin_count = __riscv_vmv_v_x_u8m2 (0, vl);
+        const auto add_match = [bin, vl] (const vuint8m2_t values, const vuint8m2_t counts)
+        {
+          const vbool4_t match =
+              __riscv_vmseq_vx_u8m2_b4 (values, static_cast<unsigned long> (bin), vl);
+          const vuint8m2_t incremented = __riscv_vadd_vx_u8m2 (counts, 1, vl);
+          return __riscv_vmerge_vvm_u8m2 (counts, incremented, match, vl);
+        };
+
+        bin_count = add_match (r00, bin_count);
+        bin_count = add_match (r01, bin_count);
+        bin_count = add_match (r02, bin_count);
+        bin_count = add_match (r03, bin_count);
+        bin_count = add_match (r04, bin_count);
+        bin_count = add_match (r10, bin_count);
+        bin_count = add_match (r11, bin_count);
+        bin_count = add_match (r12, bin_count);
+        bin_count = add_match (r13, bin_count);
+        bin_count = add_match (r14, bin_count);
+        bin_count = add_match (r20, bin_count);
+        bin_count = add_match (r21, bin_count);
+        bin_count = add_match (r22, bin_count);
+        bin_count = add_match (r23, bin_count);
+        bin_count = add_match (r24, bin_count);
+        bin_count = add_match (r30, bin_count);
+        bin_count = add_match (r31, bin_count);
+        bin_count = add_match (r32, bin_count);
+        bin_count = add_match (r33, bin_count);
+        bin_count = add_match (r34, bin_count);
+        bin_count = add_match (r40, bin_count);
+        bin_count = add_match (r41, bin_count);
+        bin_count = add_match (r42, bin_count);
+        bin_count = add_match (r43, bin_count);
+        bin_count = add_match (r44, bin_count);
+
+        const vbool4_t new_max = __riscv_vmsgtu_vv_u8m2_b4 (bin_count, max_count, vl);
+        max_count = __riscv_vmerge_vvm_u8m2 (max_count, bin_count, new_max, vl);
+        output_bits = __riscv_vmerge_vxm_u8m2 (
+            output_bits, static_cast<unsigned long> (1u << (bin - 1)), new_max, vl);
+      }
+
+      __riscv_vse8_v_u8m2 (
+          output_data + static_cast<std::size_t> (row_index) * width + col_index,
+          output_bits,
+          vl);
+      offset += vl;
+    }
+  }
+
+  detail::recordSurfaceNormalModalityPath (detail::SurfaceNormalModalityPathHook::FilterRvv);
+  return (true);
+}
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT> void
+pcl::SurfaceNormalModality<PointInT>::spreadFilteredQuantizedSurfaceNormals ()
+{
+#if defined(__RVV10__)
+  bool used_rvv_pipeline = false;
+  if (!detail::forceSurfaceNormalModalityScalarPath ())
+    used_rvv_pipeline = spreadFilteredQuantizedSurfaceNormalsRVV ();
+  if (!used_rvv_pipeline)
+    spreadFilteredQuantizedSurfaceNormalsStd ();
+#else
+  spreadFilteredQuantizedSurfaceNormalsStd ();
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT> void
+pcl::SurfaceNormalModality<PointInT>::spreadFilteredQuantizedSurfaceNormalsStd ()
+{
+  pcl::QuantizedMap::spreadQuantizedMap (filtered_quantized_surface_normals_,
+                                         spreaded_quantized_surface_normals_,
+                                         spreading_size_);
+}
+
+#if defined(__RVV10__)
+//////////////////////////////////////////////////////////////////////////////////////////////
+template <typename PointInT> bool
+pcl::SurfaceNormalModality<PointInT>::spreadFilteredQuantizedSurfaceNormalsRVV ()
+{
+  if (spreading_size_ != 8)
+    return (false);
+
+  const std::size_t width = filtered_quantized_surface_normals_.getWidth ();
+  const std::size_t height = filtered_quantized_surface_normals_.getHeight ();
+  if (width <= spreading_size_ + 1 || height <= spreading_size_ + 1)
+    return (false);
+
+  constexpr std::size_t spread = 8;
+  constexpr std::size_t half_spread = spread / 2;
+  pcl::QuantizedMap tmp_map (width, height);
+  spreaded_quantized_surface_normals_.resize (width, height);
+
+  const auto* input_data = filtered_quantized_surface_normals_.getData ();
+  auto* tmp_data = tmp_map.getData ();
+  auto* output_data = spreaded_quantized_surface_normals_.getData ();
+  const std::size_t active_width = width - spread - 1;
+  const std::size_t active_height = height - spread - 1;
+
+  for (std::size_t row_index = 0; row_index < active_height; ++row_index)
+  {
+    for (std::size_t col_index = 0; col_index < active_width;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8m2 (active_width - col_index);
+      const auto* input_row = input_data + row_index * width + col_index;
+      vuint8m2_t value = __riscv_vle8_v_u8m2 (input_row, vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (input_row + 1, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (input_row + 2, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (input_row + 3, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (input_row + 4, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (input_row + 5, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (input_row + 6, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (input_row + 7, vl), vl);
+      __riscv_vse8_v_u8m2 (tmp_data + (col_index + half_spread) + row_index * width,
+                            value,
+                            vl);
+      col_index += vl;
+    }
+  }
+
+  for (std::size_t row_index = 0; row_index < active_height; ++row_index)
+  {
+    for (std::size_t col_index = 0; col_index < active_width;)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8m2 (active_width - col_index);
+      const auto* tmp_row = tmp_data + row_index * width + col_index;
+      vuint8m2_t value = __riscv_vle8_v_u8m2 (tmp_row, vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (tmp_row + width, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (tmp_row + 2 * width, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (tmp_row + 3 * width, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (tmp_row + 4 * width, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (tmp_row + 5 * width, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (tmp_row + 6 * width, vl), vl);
+      value = __riscv_vor_vv_u8m2 (value, __riscv_vle8_v_u8m2 (tmp_row + 7 * width, vl), vl);
+      __riscv_vse8_v_u8m2 (output_data + col_index + (row_index + half_spread) * width,
+                            value,
+                            vl);
+      col_index += vl;
+    }
+  }
+
+  detail::recordSurfaceNormalModalityPath (detail::SurfaceNormalModalityPathHook::SpreadRvv);
+  return (true);
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename PointInT> void
