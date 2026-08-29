@@ -5,8 +5,8 @@
 `recognition/include/pcl/recognition/impl/implicit_shape_model.hpp` 已有一个窄范围 adopted production
 behavior（已采纳生产行为）：`ImplicitShapeModelEstimation::findObjects()` 中 descriptor-to-cluster
 nearest assignment（描述子到聚类中心最近邻分配）在 `__RVV10__` 构建下走 RVV（RISC-V Vector，
-可变长度向量扩展）helper，非 RVV 构建走 Std helper。当前 `153` 只是本轮证据里使用的代表性
-`FeatureSize`，不是生产分流门禁。
+可变长度向量扩展）helper，非 RVV 构建走 Std helper。当前 board 证据只覆盖当前代表性 public-entry
+fixture，不把任何特定 `FeatureSize` 写成生产分流门禁。
 
 当前采纳范围只覆盖 `findObjects()` 公开入口的 nearest cluster assignment。`trainISM()`、
 `calculateSigmas()`、`calculateWeights()`、vote density（投票密度）、其它 `FeatureSize`、其它点型
@@ -46,7 +46,7 @@ nearest assignment（描述子到聚类中心最近邻分配）在 `__RVV10__` �
 | Std helper | adopted | 保存原标量语义，避免非 RVV build 行为漂移 | `run_test_compare` | helper 位置为 internal `detail` free helper |
 | `trainISM()` | not_now | 训练路径有 KMeans、feature estimator 和对象状态，当前无 production direct 证据 | roadmap | 需另建 phase |
 | sigma / density | deferred | 只有局部 diagnostic positive，未闭合入口和数学语义 | Phase 000 result | 需 profile / math audit |
-| 泛型扩展 | deferred | 当前板卡证据覆盖 `FeatureSize=153`、`PointXYZ` / `Normal` fixture | Phase 020 result | 其它组合需重跑 production direct |
+| 泛型扩展 | deferred | 当前板卡证据覆盖代表性 public-entry fixture、`PointXYZ` / `Normal` | Phase 020 result | 其它组合需重跑 production direct |
 
 RVV helper 的 chunk 内部流程是：
 
@@ -62,7 +62,7 @@ RVV helper 的 chunk 内部流程是：
 | 范围 | 状态 | 证据 | 下一步 |
 | --- | --- | --- | --- |
 | `findObjects()` descriptor nearest cluster assignment | adopted | Phase 020 production direct summary | 当前关闭 |
-| `FeatureSize=153` + `PointXYZ` / `Normal` public-entry fixture | validated | upstream test + board repeated | 当前关闭 |
+| 当前代表性 `PointXYZ` / `Normal` public-entry fixture | validated | upstream test + board repeated | 当前关闭 |
 | 非 RVV 构建 | scalar fallback | Std build correctness | 当前关闭 |
 | `trainISM()` | scalar / not optimized | production source 未修改 | 另建 profile phase |
 | `calculateSigmas()` | deferred | Phase 000 diagnostic positive only | trainISM-shaped profile 后再评估 |
