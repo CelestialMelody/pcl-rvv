@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Occlusion reasoning public inline filter production-direct repeated board summary",
+    "evidence_role": "production-public",
+    "summary_path": "log/board/repeated_phase020_inline_filter_production_direct/summary.md",
+    "metadata": {
+      "run_count": 5,
+      "expected_runs": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:95bd779e0441b632dac9dd7f8dacb7952271ba5abc4ffd0cbe749df2871cb9f7",
+      "dataset": "public inline occlusion filter; scene=150x150; model_points=65536; PointXYZ/float/AoS"
+    }
+  },
+  "checks": {
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "name": "public_inline_filter_visible_points",
+      "case_kind": "production_direct",
+      "evidence_role": "production-public",
+      "point_type": "PointXYZ / float / AoS",
+      "size": "public inline occlusion filter; scene=150x150; model_points=65536; PointXYZ/float/AoS",
+      "group": "phase020_inline_filter_production_direct",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.26,
+        1.25,
+        1.25,
+        1.24,
+        1.25
+      ],
+      "decision_bucket": "positive",
+      "baseline": {
+        "boundary": "public_entry",
+        "wrapper": "pcl::occlusion_reasoning::filter(scene, model, f, threshold)",
+        "implementation": "occlusionReasoningFilterStd",
+        "row_source": "organized_scene_depth_plus_model_point_stream",
+        "solve": "none",
+        "checksum_policy": "filtered_cloud_xyz_fnv1a",
+        "timer_boundary": "production_public_inline_filter_includes_copyPointCloud_excludes_scene_model_setup",
+        "gate": "same projection bounds and depth predicate",
+        "mask": "projection bounds plus finite depth predicate",
+        "reduction": "ordered indices append",
+        "checksum": "15352718410989236219",
+        "asm_boundary": "scalar reference build",
+        "std_ms": 6.0287,
+        "rvv_ms": 4.8339,
+        "log_path": "log/board/repeated_phase020_inline_filter_production_direct"
+      },
+      "candidate": {
+        "boundary": "public_entry",
+        "wrapper": "pcl::occlusion_reasoning::filter(scene, model, f, threshold)",
+        "implementation": "occlusionReasoningFilterRVV",
+        "row_source": "organized_scene_depth_plus_model_point_stream",
+        "solve": "none",
+        "checksum_policy": "filtered_cloud_xyz_fnv1a",
+        "timer_boundary": "production_public_inline_filter_includes_copyPointCloud_excludes_scene_model_setup",
+        "gate": "same projection bounds and depth predicate",
+        "mask": "projection bounds plus finite depth predicate",
+        "reduction": "ordered indices append",
+        "checksum": "15352718410989236219",
+        "asm_boundary": "build/asm/riscv/bench_occlusion_reasoning_public_inline_rvv.asm",
+        "rvv_ms": 4.8339,
+        "std_ms": 6.0287,
+        "log_path": "log/board/repeated_phase020_inline_filter_production_direct",
+        "notes": "__RVV10__ build vectorizes xyz projection and integer pixel computation; lane-order scalar depth append preserves filter output order."
+      }
+    }
+  ]
+}

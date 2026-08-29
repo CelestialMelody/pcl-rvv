@@ -1,0 +1,724 @@
+{
+  "files": {
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "doc/occlusion_reasoning-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787975788,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase000_filter_diagnostic_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787975788063773006,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.json",
+        "sha256": "sha256:a28b7424976cc1f64d05c974519f41147233dbc6f7b7b8fb10ab9839b08e630d",
+        "size": 1641
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "doc/occlusion_reasoning-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787975788,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase000_filter_diagnostic_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787975788063773006,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.md",
+        "sha256": "sha256:1cb6204a01030c5067022c5021bc5d8afba0ab31ba6f832b01c3772d54397432",
+        "size": 1508
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "doc/occlusion_reasoning-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787975788,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase000_filter_diagnostic_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787975788030772249,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_manifest.json",
+        "sha256": "sha256:8d29183445b90be2f42ba7bedea5948868c823262af1cd89e8420a2958f02cda",
+        "size": 3152
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/summary.md": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "doc/occlusion_reasoning-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787975788,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase000_filter_diagnostic_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787975788030772249,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/summary.md",
+        "sha256": "sha256:9c5d2eae65036f61c10f3893932861e9ef48f76ca3840a6196cd2a4612d2ebbc",
+        "size": 1081
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-gaps/result.zh.md",
+        "doc/occlusion_reasoning-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787976091,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase000_projection_mask_compress_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787976091325683794,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.json",
+        "sha256": "sha256:512d5db068907607662fcc228646d51061ec2733664efc6ab26051fbfd6457ce",
+        "size": 1648
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-gaps/result.zh.md",
+        "doc/occlusion_reasoning-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787976091,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase000_projection_mask_compress_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787976091325683794,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "sha256": "sha256:3c193977926c617b5d33283e163a3fca626aaf5e3d256cb67f866b66a061425f",
+        "size": 1515
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-gaps/result.zh.md",
+        "doc/occlusion_reasoning-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787976091,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase000_projection_mask_compress_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787976091291683433,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "sha256": "sha256:725894a74877bbe7118f6ea822afe4fe29d21c01cce898e2cd55c5da99f316d4",
+        "size": 3171
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-gaps/result.zh.md",
+        "doc/occlusion_reasoning-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787976091,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase000_projection_mask_compress_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787976091291683433,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md",
+        "sha256": "sha256:3d347ad2a97a523a97e0798868a41a9e2b2eb141df8a818b3102d271f2728164",
+        "size": 1088
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "test-rvv/recognition/occlusion_reasoning/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/occlusion_reasoning-evaluation.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/testing-overview.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/result.zh.md",
+        "doc-rvv/recognition/occlusion_reasoning-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787980982,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787980982571712454,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "sha256": "sha256:93f7b226917d04717d25727d32187e783d834290b4fcabda1a2e9535fc25a384",
+        "size": 1643
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "test-rvv/recognition/occlusion_reasoning/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/occlusion_reasoning-evaluation.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/testing-overview.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/result.zh.md",
+        "doc-rvv/recognition/occlusion_reasoning-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787980982,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787980982571712454,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "sha256": "sha256:f3f1b3f4ae3557f4b6d45794a9d8c91692387872e7cd48baa3ab78c193102247",
+        "size": 1499
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "test-rvv/recognition/occlusion_reasoning/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/occlusion_reasoning-evaluation.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/testing-overview.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/result.zh.md",
+        "doc-rvv/recognition/occlusion_reasoning-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787980982,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787980982538715724,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "sha256": "sha256:6f56f8ab4508a288e36f2865fd72f3d6d0d776a2a1b8343ed7737105d050248f",
+        "size": 3147
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "test-rvv/recognition/occlusion_reasoning/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/occlusion_reasoning-evaluation.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/testing-overview.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/result.zh.md",
+        "doc-rvv/recognition/occlusion_reasoning-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787980982,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787980982538715724,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md",
+        "sha256": "sha256:d85d5ee196cad818bb87df2975877e5f70b11c96ea84f3a7cbe3c67cec6d506a",
+        "size": 1091
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "test-rvv/recognition/occlusion_reasoning/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/occlusion_reasoning-evaluation.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/testing-overview.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/result.zh.md",
+        "doc-rvv/recognition/occlusion_reasoning-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787981078,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase020_inline_filter_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787981078930741725,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.json",
+        "sha256": "sha256:4a5dee28c7c654b34904fdd703d16d6d37cdd145bfbefba8aa7b59ebe5a2ae78",
+        "size": 1639
+      },
+      "target": "inline_board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "test-rvv/recognition/occlusion_reasoning/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/occlusion_reasoning-evaluation.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/testing-overview.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/result.zh.md",
+        "doc-rvv/recognition/occlusion_reasoning-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787981078,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase020_inline_filter_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787981078930741725,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md",
+        "sha256": "sha256:90a29599471aee6685e0e18d924354b5416b14ddee56715f432753b85d289967",
+        "size": 1508
+      },
+      "target": "inline_board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "test-rvv/recognition/occlusion_reasoning/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/occlusion_reasoning-evaluation.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/testing-overview.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/result.zh.md",
+        "doc-rvv/recognition/occlusion_reasoning-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787981078,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase020_inline_filter_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787981078895744788,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json",
+        "sha256": "sha256:25a3b833d293f582126cf3f163adcaf2e7b430f757baa7b43f9f2267dc9d161f",
+        "size": 3252
+      },
+      "target": "inline_board_repeated"
+    },
+    "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md": {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "doc_refs": [
+        "test-rvv/recognition/occlusion_reasoning/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/occlusion_reasoning-evaluation.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/testing-overview.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/correctness-tests.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/benchmark-and-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-evidence.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/test-support-code-map.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/optimization-roadmap.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/README.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/optimization-matrix.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/000-current-state-and-filter-diagnostic/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/010-production-integration/result.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/plan.zh.md",
+        "test-rvv/recognition/occlusion_reasoning/doc/phases/020-inline-filter-production-integration/result.zh.md",
+        "doc-rvv/recognition/occlusion_reasoning-RVV.zh.md"
+      ],
+      "evidence_role": "production-public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787981078,
+      "related": {
+        "doctor_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md"
+      },
+      "run_label": "occlusion_reasoning_phase020_inline_filter_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787981078895744788,
+        "path": "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md",
+        "sha256": "sha256:2bb7c7ce0d79fde1a41ebd7fc0a13e46abb7d61e2715974cb8d60e37c70aeb39",
+        "size": 1113
+      },
+      "target": "inline_board_repeated"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "6 5 200 5 1.0 0.25",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md"
+      ],
+      "recorded_at_epoch": 1787974710,
+      "run_label": "occlusion_reasoning_phase000_projection_mask_compress_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "6 5 200 5 1.0 0.25",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md"
+      ],
+      "recorded_at_epoch": 1787974806,
+      "run_label": "occlusion_reasoning_phase000_projection_mask_compress_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787975045,
+      "run_label": "occlusion_reasoning_phase000_filter_diagnostic_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_filter_diagnostic/summary.md"
+      ],
+      "recorded_at_epoch": 1787975788,
+      "run_label": "occlusion_reasoning_phase000_filter_diagnostic_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md"
+      ],
+      "recorded_at_epoch": 1787975838,
+      "run_label": "occlusion_reasoning_phase000_projection_mask_compress_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase000_projection_mask_compress/summary.md"
+      ],
+      "recorded_at_epoch": 1787976091,
+      "run_label": "occlusion_reasoning_phase000_projection_mask_compress_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787977043,
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787977086,
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787977162,
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787978550,
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787979987,
+      "run_label": "occlusion_reasoning_phase020_inline_filter_production_direct_repeated",
+      "target": "inline_board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787980976,
+      "run_label": "occlusion_reasoning_phase020_inline_filter_production_direct_repeated",
+      "target": "inline_board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase010_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787980982,
+      "run_label": "occlusion_reasoning_phase010_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "65536 150 150 200 5",
+      "evidence_role": "production-public",
+      "files": [
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/occlusion_reasoning/log/board/repeated_phase020_inline_filter_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787981078,
+      "run_label": "occlusion_reasoning_phase020_inline_filter_production_direct_repeated",
+      "target": "inline_board_repeated"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787981078
+}

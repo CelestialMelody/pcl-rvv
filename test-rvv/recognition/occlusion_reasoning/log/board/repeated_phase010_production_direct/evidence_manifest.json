@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Occlusion reasoning ZBuffering production-direct repeated board summary",
+    "evidence_role": "production-public",
+    "summary_path": "log/board/repeated_phase010_production_direct/summary.md",
+    "metadata": {
+      "run_count": 5,
+      "expected_runs": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:67f481d9b147ecccb32ffad6849ec1fc26ef37575a17a6baa20ea5e97c17d5ce",
+      "dataset": "production direct ZBuffering filter indices; scene=150x150; model_points=65536; PointXYZ/float/AoS"
+    }
+  },
+  "checks": {
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "name": "production_filter_indices_projection_mask_compress",
+      "case_kind": "production_direct",
+      "evidence_role": "production-public",
+      "point_type": "PointXYZ / float / AoS",
+      "size": "production direct ZBuffering filter indices; scene=150x150; model_points=65536; PointXYZ/float/AoS",
+      "group": "phase010_production_filter",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.27,
+        1.27,
+        1.27,
+        1.26,
+        1.27
+      ],
+      "decision_bucket": "positive",
+      "baseline": {
+        "boundary": "public_entry",
+        "wrapper": "ZBuffering::filter(model, indices, thres)",
+        "implementation": "zBufferingFilterStd",
+        "row_source": "model_point_stream_plus_member_depth_buffer",
+        "solve": "none",
+        "checksum_policy": "kept_indices_fnv1a",
+        "timer_boundary": "production_public_filter_indices_after_computeDepthMap_setup_excludes_copyPointCloud",
+        "gate": "same projection bounds and depth predicate",
+        "mask": "projection bounds plus finite depth predicate",
+        "reduction": "ordered indices append",
+        "checksum": "13446965672972001487",
+        "asm_boundary": "scalar reference build",
+        "std_ms": 3.2752,
+        "rvv_ms": 2.5771,
+        "log_path": "log/board/repeated_phase010_production_direct"
+      },
+      "candidate": {
+        "boundary": "public_entry",
+        "wrapper": "ZBuffering::filter(model, indices, thres)",
+        "implementation": "zBufferingFilterRVV",
+        "row_source": "model_point_stream_plus_member_depth_buffer",
+        "solve": "none",
+        "checksum_policy": "kept_indices_fnv1a",
+        "timer_boundary": "production_public_filter_indices_after_computeDepthMap_setup_excludes_copyPointCloud",
+        "gate": "same projection bounds and depth predicate",
+        "mask": "projection bounds plus finite depth predicate",
+        "reduction": "ordered indices append",
+        "checksum": "13446965672972001487",
+        "asm_boundary": "build/asm/riscv/bench_occlusion_reasoning_rvv.asm",
+        "rvv_ms": 2.5771,
+        "std_ms": 3.2752,
+        "log_path": "log/board/repeated_phase010_production_direct",
+        "notes": "__RVV10__ build vectorizes xyz projection and integer pixel computation; lane-order scalar depth append preserves filter output order."
+      }
+    }
+  ]
+}

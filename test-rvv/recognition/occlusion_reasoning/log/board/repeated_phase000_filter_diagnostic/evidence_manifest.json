@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "Occlusion reasoning ZBuffering filter diagnostic repeated board summary",
+    "evidence_role": "production_shaped_diagnostic",
+    "summary_path": "log/board/repeated_phase000_filter_diagnostic/summary.md",
+    "metadata": {
+      "run_count": 5,
+      "expected_runs": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "binary_hash": "sha256:c6fe7fc5a84d9ed2045be963b5775d2694c478f1df77d0ddfac3e3adc48816d3",
+      "dataset": "production-shaped filter indices; scene=150x150; model_points=65536; PointXYZ/float/AoS"
+    }
+  },
+  "checks": {
+    "strict_ab": false
+  },
+  "comparisons": [
+    {
+      "name": "phase000_filter_indices_projection_mask_compress",
+      "case_kind": "production_shaped_diagnostic",
+      "evidence_role": "production_shaped_diagnostic",
+      "point_type": "ProjectionPoint / PointXYZ-like xyz fields",
+      "size": "production-shaped filter indices; scene=150x150; model_points=65536; PointXYZ/float/AoS",
+      "group": "phase000_projection_filter",
+      "run_count": 5,
+      "iterations": 200,
+      "warmup_iterations": 5,
+      "ba_values": [
+        1.91,
+        1.94,
+        1.93,
+        1.93,
+        1.92
+      ],
+      "decision_bucket": "positive",
+      "baseline": {
+        "boundary": "test_support_helper",
+        "wrapper": "bench_occlusion_reasoning filter-index callsite",
+        "implementation": "filterIndicesScalarReference",
+        "row_source": "model_point_stream_plus_raw_depth_buffer",
+        "solve": "none",
+        "checksum_policy": "kept_indices_fnv1a",
+        "timer_boundary": "filter_indices_without_computeDepthMap_or_copyPointCloud",
+        "gate": "same projection bounds and depth predicate",
+        "mask": "projection bounds plus finite depth predicate",
+        "reduction": "ordered indices append",
+        "checksum": "13446965672972001487",
+        "asm_boundary": "scalar reference build",
+        "std_ms": 4.9488,
+        "rvv_ms": 4.9488,
+        "log_path": "log/board/repeated_phase000_filter_diagnostic"
+      },
+      "candidate": {
+        "boundary": "test_support_helper",
+        "wrapper": "bench_occlusion_reasoning filter-index callsite",
+        "implementation": "filterIndicesCandidate",
+        "row_source": "model_point_stream_plus_raw_depth_buffer",
+        "solve": "none",
+        "checksum_policy": "kept_indices_fnv1a",
+        "timer_boundary": "filter_indices_without_computeDepthMap_or_copyPointCloud",
+        "gate": "same projection bounds and depth predicate",
+        "mask": "projection bounds plus finite depth predicate",
+        "reduction": "ordered indices append",
+        "checksum": "13446965672972001487",
+        "asm_boundary": "build/asm/riscv/bench_occlusion_reasoning_rvv.asm",
+        "rvv_ms": 2.5635,
+        "std_ms": 2.5635,
+        "log_path": "log/board/repeated_phase000_filter_diagnostic",
+        "notes": "__RVV10__ build vectorizes xyz projection and integer pixel computation; lane-order scalar depth append preserves filter output order."
+      }
+    }
+  ]
+}
