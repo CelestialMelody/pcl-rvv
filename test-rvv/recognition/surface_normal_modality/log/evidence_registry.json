@@ -1,0 +1,492 @@
+{
+  "files": {
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-snm-scaffold/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787974058,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/summary.md"
+      },
+      "run_label": "snm_phase000_depth_quantize_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787974058603105373,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.json",
+        "sha256": "sha256:8adfd556096a1cfbb0c6ec3a4326e02816ad4014322e56f7fc1f4aaedb263f1e",
+        "size": 4632
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-snm-scaffold/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787974058,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/summary.md"
+      },
+      "run_label": "snm_phase000_depth_quantize_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787974058603105373,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.md",
+        "sha256": "sha256:83c1e5e6304137915e43e78f9701a99bc3cfedfdf6fe2c6cdb26029fc6f9a701",
+        "size": 3627
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-snm-scaffold/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787974058,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/summary.md"
+      },
+      "run_label": "snm_phase000_depth_quantize_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787974058567106628,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_manifest.json",
+        "sha256": "sha256:697fc01b56b90af446a53f787892829553806b73dbae6e002aa36a162ea4be7b",
+        "size": 9183
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-snm-scaffold/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_shaped_diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787974058,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/summary.md"
+      },
+      "run_label": "snm_phase000_depth_quantize_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787974058567106628,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/summary.md",
+        "sha256": "sha256:c7ef4d3bc21ebc10432c2d9a8750d66247bbae113ff9293c1da11511f85b0317",
+        "size": 1064
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787975635,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "snm_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787975635296571347,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "sha256": "sha256:cf877839d4bd67d6d18cb50b8b2f5e4ec7072c2fda80c86babafdc51709b997f",
+        "size": 4622
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787975635,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "snm_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787975635296571347,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "sha256": "sha256:f0573864412b203290931a9a257baefa10a6210df17a5f148957e724793233cf",
+        "size": 3599
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787975635,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "snm_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787975635260570176,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "sha256": "sha256:8715a0ae0eb48913460707a5322558e963d6e001c4c1b27f92678f9353dabcda",
+        "size": 9931
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787975635,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/summary.md"
+      },
+      "run_label": "snm_phase010_production_direct_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787975635260570176,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/summary.md",
+        "sha256": "sha256:f041f511185372eaadca196a323098cf964a9cfcb3ae444263f3ced5d2affd6c",
+        "size": 1093
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/020-filter-5x5-rvv/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787977003,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/summary.md"
+      },
+      "run_label": "snm_phase020_filter_5x5_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787977003665315461,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.json",
+        "sha256": "sha256:b0435985f9c9df868be95e4d154bfc74d37a791a2620a5537e13d53ec232bb55",
+        "size": 4579
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/020-filter-5x5-rvv/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787977003,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/summary.md"
+      },
+      "run_label": "snm_phase020_filter_5x5_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787977003665315461,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.md",
+        "sha256": "sha256:1f7fdb02745786b4cc38829de633eab60c6f15bce1fd938c9203a79d83518776",
+        "size": 3603
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/020-filter-5x5-rvv/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787977003,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/summary.md"
+      },
+      "run_label": "snm_phase020_filter_5x5_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787977003639319509,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_manifest.json",
+        "sha256": "sha256:94da311c1d59be698409e72742b04ed4ccb063a314f821596026093255903f3d",
+        "size": 10290
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/020-filter-5x5-rvv/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787977003,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/summary.md"
+      },
+      "run_label": "snm_phase020_filter_5x5_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787977003639319509,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/summary.md",
+        "sha256": "sha256:63648075564d459b34ba2a9b576b29fc8372833fc791a6921fabbd2cf658f776",
+        "size": 1118
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/030-spread-quantized-map-rvv/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787978086,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/summary.md"
+      },
+      "run_label": "snm_phase030_spread_rvv_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787978086169050247,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.json",
+        "sha256": "sha256:6b88a92208c160d3b77c2123f62eec911940b99da3982e6631fb2b8cb3cc64fa",
+        "size": 4579
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/030-spread-quantized-map-rvv/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787978086,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/summary.md"
+      },
+      "run_label": "snm_phase030_spread_rvv_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787978086169050247,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.md",
+        "sha256": "sha256:19d57167f65ca6f2f5374a70116a9a2512f57a523aa67444d22267c24a883b6b",
+        "size": 3603
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/030-spread-quantized-map-rvv/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787978086,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/summary.md"
+      },
+      "run_label": "snm_phase030_spread_rvv_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787978086135051888,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_manifest.json",
+        "sha256": "sha256:c9884e7d951db3e140c0a7e9ed63af767366d14da083149875596ad1313bafb5",
+        "size": 10288
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "doc_refs": [
+        "doc/phases/030-spread-quantized-map-rvv/result.zh.md",
+        "doc/surface_normal_modality-evaluation.zh.md"
+      ],
+      "evidence_role": "production_direct",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1787978086,
+      "related": {
+        "doctor_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.md",
+        "manifest_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_manifest.json",
+        "summary_path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/summary.md"
+      },
+      "run_label": "snm_phase030_spread_rvv_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1787978086134051937,
+        "path": "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/summary.md",
+        "sha256": "sha256:b64107bdedb83c2b40fdfc60b0917596c7a050549bc449e359e55ddc0898e901",
+        "size": 1118
+      },
+      "target": "board_repeated"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_shaped_diagnostic",
+      "files": [
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_doctor.md",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/evidence_manifest.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase000_depth_quantize/summary.md"
+      ],
+      "recorded_at_epoch": 1787974058,
+      "run_label": "snm_phase000_depth_quantize_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787975546,
+      "run_label": "snm_phase010_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_doctor.md",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/evidence_manifest.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase010_production_direct/summary.md"
+      ],
+      "recorded_at_epoch": 1787975635,
+      "run_label": "snm_phase010_production_direct_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.md",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_manifest.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/summary.md"
+      ],
+      "recorded_at_epoch": 1787976871,
+      "run_label": "snm_phase020_filter_5x5_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_doctor.md",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/evidence_manifest.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase020_filter_5x5/summary.md"
+      ],
+      "recorded_at_epoch": 1787977003,
+      "run_label": "snm_phase020_filter_5x5_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter production_process_320x240,production_process_641x481_tail --iterations 20 --warmup-iterations 3",
+      "evidence_role": "production_direct",
+      "files": [
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_doctor.md",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/evidence_manifest.json",
+        "test-rvv/recognition/surface_normal_modality/log/board/repeated_phase030_spread_rvv/summary.md"
+      ],
+      "recorded_at_epoch": 1787978086,
+      "run_label": "snm_phase030_spread_rvv_repeated",
+      "target": "board_repeated"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1787978086
+}

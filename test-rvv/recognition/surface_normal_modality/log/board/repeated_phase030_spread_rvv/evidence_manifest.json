@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "title": "SNM spread RVV production direct repeated board summary",
+    "evidence_role": "production_direct",
+    "summary_path": "log/board/repeated_phase030_spread_rvv/summary.md",
+    "summary_paths": [
+      "log/board/repeated_phase030_spread_rvv/run_01/analyze_bench_compare.log",
+      "log/board/repeated_phase030_spread_rvv/run_02/analyze_bench_compare.log",
+      "log/board/repeated_phase030_spread_rvv/run_03/analyze_bench_compare.log",
+      "log/board/repeated_phase030_spread_rvv/run_04/analyze_bench_compare.log",
+      "log/board/repeated_phase030_spread_rvv/run_05/analyze_bench_compare.log"
+    ],
+    "label": "snm_phase030_spread_rvv_repeated",
+    "analysis_script": "test-rvv/recognition/surface_normal_modality/script/generate_snm_evidence_manifest.py",
+    "metadata": {
+      "device": "Milkv-Jupiter",
+      "vlen": "see SoC / ELF (board)",
+      "dataset": "surface_normal_modality depth-to-normal diagnostic",
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "run_count": 5,
+      "expected_runs": 5,
+      "decision_bucket": "positive"
+    }
+  },
+  "checks": {
+    "strict_ab": false,
+    "equal_fields": [
+      "boundary",
+      "wrapper",
+      "row_source",
+      "solve",
+      "checksum_policy",
+      "timer_boundary",
+      "gate",
+      "mask",
+      "reduction"
+    ]
+  },
+  "comparisons": [
+    {
+      "name": "production_process_320x240",
+      "group": "snm-production-public-depth-modality-process",
+      "evidence_role": "production_direct",
+      "case_kind": "production_direct",
+      "point_type": "pcl::PointXYZRGBA",
+      "size": "320x240 organized PointXYZRGBA cloud through SurfaceNormalModality::processInputData",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 37.42732,
+      "rvv_ms": 23.047060000000002,
+      "ba_values": [
+        1.64,
+        1.62,
+        1.62,
+        1.62,
+        1.62
+      ],
+      "std_ms_values": [
+        37.6697,
+        37.3259,
+        37.406,
+        37.3952,
+        37.3398
+      ],
+      "rvv_ms_values": [
+        23.0125,
+        23.0893,
+        23.0593,
+        23.0314,
+        23.0428
+      ],
+      "run_paths": [
+        "log/board/repeated_phase030_spread_rvv/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase030_spread_rvv/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase030_spread_rvv/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase030_spread_rvv/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase030_spread_rvv/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "8310550563110131653",
+        "std_ms": 37.42732,
+        "rvv_ms": 37.42732,
+        "boundary": "public_overload",
+        "wrapper": "SurfaceNormalModality<PointXYZRGBA>::processInputData via src/bench_snm.cpp",
+        "row_source": "organized_pointxyzrgba_public_entry",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered quantized map, spreaded quantized map and orientation map scaled by 1000",
+        "timer_boundary": "processInputData includes depth millimeter conversion, 8-neighbor normal solve, angle quantize, 5x5 histogram filter and spread; excludes extractFeatures",
+        "gate": "organized PointXYZRGBA cloud, width>=12, height>=12, __RVV10__ candidate build dispatches depth-to-normal/quantize subchain and falls back otherwise",
+        "mask": "production depth<2000 predicate plus abs(neighbor-depth)<50 bilateral predicate; downstream filter/spread use existing scalar masks",
+        "reduction": "RVV per-lane 8-neighbor integer accumulation for det/ddx/ddy, scalar per-lane sqrt/atan2/angle quantize, current production patch may additionally dispatch the 5x5 filter to RVV; spread remains scalar",
+        "asm_boundary": "SurfaceNormalModality<PointXYZRGBA>::computeAndQuantizeSurfaceNormals2RVV and filterQuantizedSurfaceNormals / inlined production helpers in bench_snm_rvv",
+        "rvv_instr_count": 843
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "8310550563110131653",
+        "std_ms": 37.42732,
+        "rvv_ms": 23.047060000000002,
+        "boundary": "public_overload",
+        "wrapper": "SurfaceNormalModality<PointXYZRGBA>::processInputData via src/bench_snm.cpp",
+        "row_source": "organized_pointxyzrgba_public_entry",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered quantized map, spreaded quantized map and orientation map scaled by 1000",
+        "timer_boundary": "processInputData includes depth millimeter conversion, 8-neighbor normal solve, angle quantize, 5x5 histogram filter and spread; excludes extractFeatures",
+        "gate": "organized PointXYZRGBA cloud, width>=12, height>=12, __RVV10__ candidate build dispatches depth-to-normal/quantize subchain and falls back otherwise",
+        "mask": "production depth<2000 predicate plus abs(neighbor-depth)<50 bilateral predicate; downstream filter/spread use existing scalar masks",
+        "reduction": "RVV per-lane 8-neighbor integer accumulation for det/ddx/ddy, scalar per-lane sqrt/atan2/angle quantize, current production patch may additionally dispatch the 5x5 filter to RVV; spread remains scalar",
+        "asm_boundary": "SurfaceNormalModality<PointXYZRGBA>::computeAndQuantizeSurfaceNormals2RVV and filterQuantizedSurfaceNormals / inlined production helpers in bench_snm_rvv",
+        "rvv_instr_count": 843
+      },
+      "notes": "Production direct evidence for the current surface_normal_modality patch. It calls the public SurfaceNormalModality<PointXYZRGBA>::processInputData entry; extractFeatures remains outside this timer boundary."
+    },
+    {
+      "name": "production_process_641x481_tail",
+      "group": "snm-production-public-depth-modality-process",
+      "evidence_role": "production_direct",
+      "case_kind": "production_direct",
+      "point_type": "pcl::PointXYZRGBA",
+      "size": "641x481 organized PointXYZRGBA cloud through SurfaceNormalModality::processInputData with RVV tail lanes",
+      "run_count": 5,
+      "iterations": 20,
+      "warmup_iterations": 3,
+      "build_comparison": true,
+      "std_ms": 149.82964,
+      "rvv_ms": 91.46602,
+      "ba_values": [
+        1.65,
+        1.64,
+        1.63,
+        1.64,
+        1.63
+      ],
+      "std_ms_values": [
+        150.6595,
+        149.5819,
+        149.6996,
+        149.7129,
+        149.4943
+      ],
+      "rvv_ms_values": [
+        91.4499,
+        91.418,
+        91.5796,
+        91.3783,
+        91.5043
+      ],
+      "run_paths": [
+        "log/board/repeated_phase030_spread_rvv/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase030_spread_rvv/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase030_spread_rvv/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase030_spread_rvv/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase030_spread_rvv/run_05/analyze_bench_compare.log"
+      ],
+      "baseline": {
+        "label": "Std build",
+        "checksum": "9348151494320869059",
+        "std_ms": 149.82964,
+        "rvv_ms": 149.82964,
+        "boundary": "public_overload",
+        "wrapper": "SurfaceNormalModality<PointXYZRGBA>::processInputData via src/bench_snm.cpp",
+        "row_source": "organized_pointxyzrgba_public_entry",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered quantized map, spreaded quantized map and orientation map scaled by 1000",
+        "timer_boundary": "processInputData includes depth millimeter conversion, 8-neighbor normal solve, angle quantize, 5x5 histogram filter and spread; excludes extractFeatures",
+        "gate": "organized PointXYZRGBA cloud, width>=12, height>=12, __RVV10__ candidate build dispatches depth-to-normal/quantize subchain and falls back otherwise",
+        "mask": "production depth<2000 predicate plus abs(neighbor-depth)<50 bilateral predicate; downstream filter/spread use existing scalar masks",
+        "reduction": "RVV per-lane 8-neighbor integer accumulation for det/ddx/ddy, scalar per-lane sqrt/atan2/angle quantize, current production patch may additionally dispatch the 5x5 filter to RVV; spread remains scalar",
+        "asm_boundary": "SurfaceNormalModality<PointXYZRGBA>::computeAndQuantizeSurfaceNormals2RVV and filterQuantizedSurfaceNormals / inlined production helpers in bench_snm_rvv",
+        "rvv_instr_count": 843
+      },
+      "candidate": {
+        "label": "RVV build",
+        "checksum": "9348151494320869059",
+        "std_ms": 149.82964,
+        "rvv_ms": 91.46602,
+        "boundary": "public_overload",
+        "wrapper": "SurfaceNormalModality<PointXYZRGBA>::processInputData via src/bench_snm.cpp",
+        "row_source": "organized_pointxyzrgba_public_entry",
+        "solve": false,
+        "checksum_policy": "FNV-style checksum over filtered quantized map, spreaded quantized map and orientation map scaled by 1000",
+        "timer_boundary": "processInputData includes depth millimeter conversion, 8-neighbor normal solve, angle quantize, 5x5 histogram filter and spread; excludes extractFeatures",
+        "gate": "organized PointXYZRGBA cloud, width>=12, height>=12, __RVV10__ candidate build dispatches depth-to-normal/quantize subchain and falls back otherwise",
+        "mask": "production depth<2000 predicate plus abs(neighbor-depth)<50 bilateral predicate; downstream filter/spread use existing scalar masks",
+        "reduction": "RVV per-lane 8-neighbor integer accumulation for det/ddx/ddy, scalar per-lane sqrt/atan2/angle quantize, current production patch may additionally dispatch the 5x5 filter to RVV; spread remains scalar",
+        "asm_boundary": "SurfaceNormalModality<PointXYZRGBA>::computeAndQuantizeSurfaceNormals2RVV and filterQuantizedSurfaceNormals / inlined production helpers in bench_snm_rvv",
+        "rvv_instr_count": 843
+      },
+      "notes": "Production direct evidence for the current surface_normal_modality patch. It calls the public SurfaceNormalModality<PointXYZRGBA>::processInputData entry; extractFeatures remains outside this timer boundary."
+    }
+  ]
+}
