@@ -47,9 +47,96 @@
 #include <tmmintrin.h>
 #include <emmintrin.h>
 #endif
+#if defined(__RVV10__) && defined(__riscv_vector)
+#include <riscv_vector.h>
+#endif
 
 const int pcl::keypoints::brisk::Layer::CommonParams::HALFSAMPLE = 0;
 const int pcl::keypoints::brisk::Layer::CommonParams::TWOTHIRDSAMPLE = 1;
+
+namespace
+{
+inline void
+halfsamplePortable(const std::vector<unsigned char>& srcimg,
+                   const int srcwidth,
+                   const int srcheight,
+                   std::vector<unsigned char>& dstimg,
+                   const int dstwidth,
+                   const int dstheight)
+{
+  pcl::utils::ignore(srcheight);
+  dstimg.assign(static_cast<std::size_t>(dstwidth) * static_cast<std::size_t>(dstheight), 0);
+
+  for (int row = 0; row < dstheight; ++row)
+  {
+    const std::size_t src_row0 = static_cast<std::size_t>(row * 2) * srcwidth;
+    const std::size_t src_row1 = static_cast<std::size_t>(row * 2 + 1) * srcwidth;
+    for (int col = 0; col < dstwidth; ++col)
+    {
+      const int src_col = col * 2;
+      const int a = srcimg[src_row0 + src_col + 0];
+      const int b = srcimg[src_row0 + src_col + 1];
+      const int c = srcimg[src_row1 + src_col + 0];
+      const int d = srcimg[src_row1 + src_col + 1];
+      dstimg[static_cast<std::size_t>(row) * dstwidth + col] =
+          static_cast<unsigned char>((a + b + c + d) / 4);
+    }
+  }
+}
+
+inline void
+twothirdsamplePortable(const std::vector<unsigned char>& srcimg,
+                       const int srcwidth,
+                       const int srcheight,
+                       std::vector<unsigned char>& dstimg,
+                       const int dstwidth,
+                       const int dstheight)
+{
+  dstimg.assign(static_cast<std::size_t>(dstwidth) * static_cast<std::size_t>(dstheight), 0);
+
+  for (int row = 0; row + 2 < srcheight; row += 3)
+  {
+    const int dst_row = (row / 3) * 2;
+    for (int col = 0; col + 2 < srcwidth; col += 3)
+    {
+      const int dst_col = (col / 3) * 2;
+      const std::size_t a = static_cast<std::size_t>(row) * srcwidth + col;
+      const std::size_t b = static_cast<std::size_t>(row + 1) * srcwidth + col;
+      const std::size_t c = static_cast<std::size_t>(row + 2) * srcwidth + col;
+      const int A1 = srcimg[a + 0];
+      const int A2 = srcimg[a + 1];
+      const int A3 = srcimg[a + 2];
+      const int B1 = srcimg[b + 0];
+      const int B2 = srcimg[b + 1];
+      const int B3 = srcimg[b + 2];
+      const int C1 = srcimg[c + 0];
+      const int C2 = srcimg[c + 1];
+      const int C3 = srcimg[c + 2];
+      const std::size_t out = static_cast<std::size_t>(dst_row) * dstwidth + dst_col;
+      dstimg[out + 0] = static_cast<unsigned char>((4 * A1 + 2 * (A2 + B1) + B2) / 9);
+      dstimg[out + 1] = static_cast<unsigned char>((4 * A3 + 2 * (A2 + B3) + B2) / 9);
+      dstimg[out + dstwidth + 0] =
+          static_cast<unsigned char>((4 * C1 + 2 * (C2 + B1) + B2) / 9);
+      dstimg[out + dstwidth + 1] =
+          static_cast<unsigned char>((4 * C3 + 2 * (C2 + B3) + B2) / 9);
+    }
+  }
+}
+
+#if defined(__RVV10__) && defined(__riscv_vector)
+inline vuint16m2_t
+brisk_div_u16m2(const vuint16m2_t value, const unsigned int divisor, const std::size_t vl)
+{
+  return __riscv_vdivu_vx_u16m2(value, divisor, vl);
+}
+
+inline vuint8m1_t
+brisk_narrow_u16m2_to_u8m1(const vuint16m2_t value, const std::size_t vl)
+{
+  return __riscv_vncvt_x_x_w_u8m1(value, vl);
+}
+#endif
+} // namespace
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // construct telling the octaves number:
@@ -1696,8 +1783,36 @@ pcl::keypoints::brisk::Layer::halfsample (
     }
   }
 #else
-  pcl::utils::ignore(srcimg, srcwidth, srcheight, dstimg, dstwidth);
-  PCL_ERROR("brisk without SSSE3 support not implemented\n");
+#if defined(__RVV10__) && defined(__riscv_vector)
+  dstimg.assign(static_cast<std::size_t>(dstwidth) * static_cast<std::size_t>(dstheight), 0);
+  for (int row = 0; row < dstheight; ++row)
+  {
+    const unsigned char* upper = srcimg.data() + static_cast<std::size_t>(row * 2) * srcwidth;
+    const unsigned char* lower = upper + srcwidth;
+    unsigned char* out = dstimg.data() + static_cast<std::size_t>(row) * dstwidth;
+    int col = 0;
+    while (col < dstwidth)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8m1(static_cast<std::size_t>(dstwidth - col));
+      const std::size_t src_off = static_cast<std::size_t>(col) * 2;
+      const vuint8m1_t upper_even = __riscv_vlse8_v_u8m1(upper + src_off, 2, vl);
+      const vuint8m1_t upper_odd = __riscv_vlse8_v_u8m1(upper + src_off + 1, 2, vl);
+      const vuint8m1_t lower_even = __riscv_vlse8_v_u8m1(lower + src_off, 2, vl);
+      const vuint8m1_t lower_odd = __riscv_vlse8_v_u8m1(lower + src_off + 1, 2, vl);
+      vuint16m2_t sum =
+          __riscv_vadd_vv_u16m2(__riscv_vzext_vf2_u16m2(upper_even, vl),
+                                __riscv_vzext_vf2_u16m2(upper_odd, vl), vl);
+      sum = __riscv_vadd_vv_u16m2(sum, __riscv_vzext_vf2_u16m2(lower_even, vl), vl);
+      sum = __riscv_vadd_vv_u16m2(sum, __riscv_vzext_vf2_u16m2(lower_odd, vl), vl);
+      const vuint8m1_t result =
+          brisk_narrow_u16m2_to_u8m1(brisk_div_u16m2(sum, 4, vl), vl);
+      __riscv_vse8_v_u8m1(out + col, result, vl);
+      col += static_cast<int>(vl);
+    }
+  }
+#else
+  halfsamplePortable(srcimg, srcwidth, srcheight, dstimg, dstwidth, dstheight);
+#endif
 #endif
 }
 
@@ -1806,8 +1921,80 @@ pcl::keypoints::brisk::Layer::twothirdsample (
     p_dest2 = p_dest1 + dstwidth;
   }
 #else
-  pcl::utils::ignore(srcimg, srcwidth, srcheight, dstimg, dstwidth);
-  PCL_ERROR("brisk without SSSE3 support not implemented\n");
+#if defined(__RVV10__) && defined(__riscv_vector)
+  dstimg.assign(static_cast<std::size_t>(dstwidth) * static_cast<std::size_t>(dstheight), 0);
+  const int groups_per_row = srcwidth / 3;
+  for (int row = 0; row + 2 < srcheight; row += 3)
+  {
+    const unsigned char* first = srcimg.data() + static_cast<std::size_t>(row) * srcwidth;
+    const unsigned char* second = first + srcwidth;
+    const unsigned char* third = second + srcwidth;
+    unsigned char* upper_out = dstimg.data() + static_cast<std::size_t>((row / 3) * 2) * dstwidth;
+    unsigned char* lower_out = upper_out + dstwidth;
+
+    int group = 0;
+    while (group < groups_per_row)
+    {
+      const std::size_t vl = __riscv_vsetvl_e8m1(static_cast<std::size_t>(groups_per_row - group));
+      const std::size_t src_off = static_cast<std::size_t>(group) * 3;
+      const std::size_t dst_off = static_cast<std::size_t>(group) * 2;
+
+      const vuint16m2_t a1 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(first + src_off + 0, 3, vl), vl);
+      const vuint16m2_t a2 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(first + src_off + 1, 3, vl), vl);
+      const vuint16m2_t a3 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(first + src_off + 2, 3, vl), vl);
+      const vuint16m2_t b1 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(second + src_off + 0, 3, vl), vl);
+      const vuint16m2_t b2 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(second + src_off + 1, 3, vl), vl);
+      const vuint16m2_t b3 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(second + src_off + 2, 3, vl), vl);
+      const vuint16m2_t c1 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(third + src_off + 0, 3, vl), vl);
+      const vuint16m2_t c2 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(third + src_off + 1, 3, vl), vl);
+      const vuint16m2_t c3 =
+          __riscv_vzext_vf2_u16m2(__riscv_vlse8_v_u8m1(third + src_off + 2, 3, vl), vl);
+
+      vuint16m2_t upper_left = __riscv_vsll_vx_u16m2(a1, 2, vl);
+      upper_left = __riscv_vadd_vv_u16m2(upper_left, __riscv_vsll_vx_u16m2(a2, 1, vl), vl);
+      upper_left = __riscv_vadd_vv_u16m2(upper_left, __riscv_vsll_vx_u16m2(b1, 1, vl), vl);
+      upper_left = __riscv_vadd_vv_u16m2(upper_left, b2, vl);
+
+      vuint16m2_t upper_right = __riscv_vsll_vx_u16m2(a3, 2, vl);
+      upper_right = __riscv_vadd_vv_u16m2(upper_right, __riscv_vsll_vx_u16m2(a2, 1, vl), vl);
+      upper_right = __riscv_vadd_vv_u16m2(upper_right, __riscv_vsll_vx_u16m2(b3, 1, vl), vl);
+      upper_right = __riscv_vadd_vv_u16m2(upper_right, b2, vl);
+
+      vuint16m2_t lower_left = __riscv_vsll_vx_u16m2(c1, 2, vl);
+      lower_left = __riscv_vadd_vv_u16m2(lower_left, __riscv_vsll_vx_u16m2(c2, 1, vl), vl);
+      lower_left = __riscv_vadd_vv_u16m2(lower_left, __riscv_vsll_vx_u16m2(b1, 1, vl), vl);
+      lower_left = __riscv_vadd_vv_u16m2(lower_left, b2, vl);
+
+      vuint16m2_t lower_right = __riscv_vsll_vx_u16m2(c3, 2, vl);
+      lower_right = __riscv_vadd_vv_u16m2(lower_right, __riscv_vsll_vx_u16m2(c2, 1, vl), vl);
+      lower_right = __riscv_vadd_vv_u16m2(lower_right, __riscv_vsll_vx_u16m2(b3, 1, vl), vl);
+      lower_right = __riscv_vadd_vv_u16m2(lower_right, b2, vl);
+
+      __riscv_vsse8_v_u8m1(upper_out + dst_off + 0, 2,
+                           brisk_narrow_u16m2_to_u8m1(brisk_div_u16m2(upper_left, 9, vl), vl),
+                           vl);
+      __riscv_vsse8_v_u8m1(upper_out + dst_off + 1, 2,
+                           brisk_narrow_u16m2_to_u8m1(brisk_div_u16m2(upper_right, 9, vl), vl),
+                           vl);
+      __riscv_vsse8_v_u8m1(lower_out + dst_off + 0, 2,
+                           brisk_narrow_u16m2_to_u8m1(brisk_div_u16m2(lower_left, 9, vl), vl),
+                           vl);
+      __riscv_vsse8_v_u8m1(lower_out + dst_off + 1, 2,
+                           brisk_narrow_u16m2_to_u8m1(brisk_div_u16m2(lower_right, 9, vl), vl),
+                           vl);
+      group += static_cast<int>(vl);
+    }
+  }
+#else
+  twothirdsamplePortable(srcimg, srcwidth, srcheight, dstimg, dstwidth, dstheight);
+#endif
 #endif
 }
-
