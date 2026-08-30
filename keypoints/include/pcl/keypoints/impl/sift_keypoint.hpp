@@ -40,6 +40,10 @@
 
 #include <pcl/keypoints/sift_keypoint.h>
 #include <pcl/common/io.h>
+#if defined(__RVV10__) && defined(__riscv_vector)
+#include <pcl/common/impl/rvv_math.hpp>
+#include <riscv_vector.h>
+#endif
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/search/auto.h> // for autoSelectMethod
 
@@ -225,26 +229,63 @@ void pcl::SIFTKeypoint<PointInT, PointOutT>::computeScaleSpace (
     //   regardless of the configurable search method specified by the user, so we directly employ tree.radiusSearch 
     //   here instead of using searchForNeighbors.
 
+#if defined(__RVV10__) && defined(__riscv_vector)
+    std::vector<float> nn_values (nn_indices.size ());
+    std::vector<float> nn_weights (nn_indices.size ());
+    for (std::size_t i_neighbor = 0; i_neighbor < nn_indices.size (); ++i_neighbor)
+      nn_values[i_neighbor] = getFieldValue_ (input[nn_indices[i_neighbor]]);
+#endif
+
     // For each scale, compute the Gaussian "filter response" at the current point
     float filter_response = 0.0f;
     for (std::size_t i_scale = 0; i_scale < scales.size (); ++i_scale)
     {
       float sigma_sqr = powf (scales[i_scale], 2.0f);
+      const float cutoff_sqr = 9.0f * sigma_sqr;
+      const float exponent_scale = -0.5f / sigma_sqr;
 
       float numerator = 0.0f;
       float denominator = 0.0f;
+#if defined(__RVV10__) && defined(__riscv_vector)
+      std::size_t active_count = 0;
+      for (std::size_t i_neighbor = 0; i_neighbor < nn_indices.size ();)
+      {
+        const std::size_t vl = __riscv_vsetvl_e32m2 (nn_indices.size () - i_neighbor);
+        const vfloat32m2_t dist = __riscv_vle32_v_f32m2 (nn_dist.data () + i_neighbor, vl);
+        const vbool16_t outside = __riscv_vmfgt_vf_f32m2_b16 (dist, cutoff_sqr, vl);
+        const long first_outside = __riscv_vfirst_m_b16 (outside, vl);
+        if (first_outside == 0)
+          break;
+        const std::size_t active_vl =
+            first_outside > 0 ? static_cast<std::size_t> (first_outside) : vl;
+        const vfloat32m2_t exponent = __riscv_vfmul_vf_f32m2 (dist, exponent_scale, active_vl);
+        const vfloat32m2_t weights = pcl::expf_RVV_f32m2 (exponent, active_vl);
+        __riscv_vse32_v_f32m2 (nn_weights.data () + i_neighbor, weights, active_vl);
+        active_count += active_vl;
+        if (first_outside > 0)
+          break;
+        i_neighbor += active_vl;
+      }
+      for (std::size_t active_neighbor = 0; active_neighbor < active_count; ++active_neighbor)
+      {
+        const float w = nn_weights[active_neighbor];
+        numerator += nn_values[active_neighbor] * w;
+        denominator += w;
+      }
+#else
       for (std::size_t i_neighbor = 0; i_neighbor < nn_indices.size (); ++i_neighbor)
       {
         const float &value = getFieldValue_ (input[nn_indices[i_neighbor]]);
         const float &dist_sqr = nn_dist[i_neighbor];
-        if (dist_sqr <= 9*sigma_sqr)
+        if (dist_sqr <= cutoff_sqr)
         {
-          float w = std::exp (-0.5f * dist_sqr / sigma_sqr);
+          float w = std::exp (dist_sqr * exponent_scale);
           numerator += value * w;
           denominator += w;
         }
         else break; // i.e. if dist > 3 standard deviations, then terminate early
       }
+#endif
       float previous_filter_response = filter_response;
       filter_response = numerator / denominator;
 
@@ -323,4 +364,3 @@ pcl::SIFTKeypoint<PointInT, PointOutT>::findScaleSpaceExtrema (
 #define PCL_INSTANTIATE_SIFTKeypoint(T,U) template class PCL_EXPORTS pcl::SIFTKeypoint<T,U>;
 
 #endif // #ifndef PCL_SIFT_KEYPOINT_IMPL_H_
-
