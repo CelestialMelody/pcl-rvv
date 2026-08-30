@@ -1,0 +1,492 @@
+{
+  "files": {
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-scatter-diagnostic/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788060559,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/summary.md"
+      },
+      "run_label": "iss_3d_phase000_scatter_f64_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788060559282680749,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.json",
+        "sha256": "sha256:2173efc9b4d54220c57b3cb4aa9a026a7fcd583331536ae24c142111ca313208",
+        "size": 8328
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-scatter-diagnostic/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788060559,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/summary.md"
+      },
+      "run_label": "iss_3d_phase000_scatter_f64_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788060559282680749,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.md",
+        "sha256": "sha256:334ce47c4928e8ff62888d2c5cd65e64960747bdb5bbb1b944296583e4bcf783",
+        "size": 7396
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-scatter-diagnostic/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788060559,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/summary.md"
+      },
+      "run_label": "iss_3d_phase000_scatter_f64_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788060559255681167,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_manifest.json",
+        "sha256": "sha256:5938aab4ddcace5c91128b476ad439c768df32d04d997dd4ee03c2c50234b3a4",
+        "size": 6931
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-scatter-diagnostic/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788060559,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/summary.md"
+      },
+      "run_label": "iss_3d_phase000_scatter_f64_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788060559255681167,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/summary.md",
+        "sha256": "sha256:87a5583544fe1e0ad5c7bcdfdef2fcb8b40baad3ecfecd350894c7aa737e9ad8",
+        "size": 795
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-scatter-diagnostic/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788060652,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/summary.md"
+      },
+      "run_label": "iss_3d_phase000_scatter_f64_rerun1",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788060652918216049,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.json",
+        "sha256": "sha256:d760d096decb26d62d2dd73f2bd853068a290dae45005c2b990d19318d2a0fc6",
+        "size": 6546
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-scatter-diagnostic/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788060652,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/summary.md"
+      },
+      "run_label": "iss_3d_phase000_scatter_f64_rerun1",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788060652918216049,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.md",
+        "sha256": "sha256:6cf525fed1512d697d7432d4be93b28f14c9ed0415e5c99282731e841f3ce7c6",
+        "size": 5840
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-scatter-diagnostic/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788060652,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/summary.md"
+      },
+      "run_label": "iss_3d_phase000_scatter_f64_rerun1",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788060652884216586,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_manifest.json",
+        "sha256": "sha256:654bddbde301180a12c9d30c037dff4aa4ae4d8a9fdfc18a258e1cf7b68d6127",
+        "size": 7034
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-scatter-diagnostic/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788060652,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/summary.md"
+      },
+      "run_label": "iss_3d_phase000_scatter_f64_rerun1",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788060652884216586,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/summary.md",
+        "sha256": "sha256:65a4ade1e94371ab6481fa11cf8e3457cd30bf15913be747eb8190f351ec9019",
+        "size": 800
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788061649,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/summary.md"
+      },
+      "run_label": "iss_3d_phase010_production_public_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788061649921940399,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.json",
+        "sha256": "sha256:869d59eacbbd6bebb35828aebb304708c8c23d04b5ffb09cc0a9f0c75d7d8696",
+        "size": 3996
+      },
+      "target": "board_repeated_production"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788061649,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/summary.md"
+      },
+      "run_label": "iss_3d_phase010_production_public_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788061649921940399,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.md",
+        "sha256": "sha256:45b57fd952939f0ff4d91a0270faf8725331d6b9de1985e02eaea5b1f17723d1",
+        "size": 3630
+      },
+      "target": "board_repeated_production"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788061649,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/summary.md"
+      },
+      "run_label": "iss_3d_phase010_production_public_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788061649893940832,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_manifest.json",
+        "sha256": "sha256:e95068e4c925521c6f69006b28ffa4ff7137620e19077ca50a63a9500f92995e",
+        "size": 2700
+      },
+      "target": "board_repeated_production"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/summary.md": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788061649,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/summary.md"
+      },
+      "run_label": "iss_3d_phase010_production_public_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788061649893940832,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/summary.md",
+        "sha256": "sha256:1feacf5c61f348f4a0ad95b3ab8a6afed69a6e061da15df1675a5d8f56535c89",
+        "size": 556
+      },
+      "target": "board_repeated_production"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788062536,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md"
+      },
+      "run_label": "iss_3d_phase010_production_public_reduction_shape",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788062535978596036,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.json",
+        "sha256": "sha256:752a3b183bce2ca56047a89e7c8b101b4ba695196d4a5fe5d84a5632dacff497",
+        "size": 3077
+      },
+      "target": "board_repeated_production"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788062536,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md"
+      },
+      "run_label": "iss_3d_phase010_production_public_reduction_shape",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788062535978596036,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md",
+        "sha256": "sha256:2ec1778e3c4470089b1b85a96ccea1106d21c0d0b7dab2314b9a59b82c721104",
+        "size": 2822
+      },
+      "target": "board_repeated_production"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788062536,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md"
+      },
+      "run_label": "iss_3d_phase010_production_public_reduction_shape",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788062535943596617,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json",
+        "sha256": "sha256:6a85c57198a7c44b652c17c48aa28ba361187088a1e2e9a6833003d88d44f425",
+        "size": 2806
+      },
+      "target": "board_repeated_production"
+    },
+    "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "doc_refs": [
+        "doc/phases/010-production-integration/result.zh.md",
+        "doc/iss_3d-evaluation.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788062536,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md"
+      },
+      "run_label": "iss_3d_phase010_production_public_reduction_shape",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788062535943596617,
+        "path": "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md",
+        "sha256": "sha256:29d40d74708ce4215442562cbf2eaac87d32e40b947a86a936a92ea669a52c3a",
+        "size": 566
+      },
+      "target": "board_repeated_production"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_doctor.md",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/evidence_manifest.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64/summary.md"
+      ],
+      "recorded_at_epoch": 1788060559,
+      "run_label": "iss_3d_phase000_scatter_f64_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 20 --warmup 3 --points 8192 --neighbors 256",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_doctor.md",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/evidence_manifest.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase000_scatter_f64_rerun1/summary.md"
+      ],
+      "recorded_at_epoch": 1788060652,
+      "run_label": "iss_3d_phase000_scatter_f64_rerun1",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_doctor.md",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/evidence_manifest.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public/summary.md"
+      ],
+      "recorded_at_epoch": 1788061649,
+      "run_label": "iss_3d_phase010_production_public_repeated",
+      "target": "board_repeated_production"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md"
+      ],
+      "recorded_at_epoch": 1788062414,
+      "run_label": "iss_3d_phase010_production_public_reduction_shape",
+      "target": "board_repeated_production"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md"
+      ],
+      "recorded_at_epoch": 1788062496,
+      "run_label": "iss_3d_phase010_production_public_reduction_shape",
+      "target": "board_repeated_production"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_iss_3d_grid_4096 --iterations 5 --warmup 1 --points 4096 --neighbors 256",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_doctor.md",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/evidence_manifest.json",
+        "test-rvv/keypoints/iss_3d/log/board/repeated_phase010_production_public_reduction_shape/summary.md"
+      ],
+      "recorded_at_epoch": 1788062536,
+      "run_label": "iss_3d_phase010_production_public_reduction_shape",
+      "target": "board_repeated_production"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1788062536
+}

@@ -1,0 +1,58 @@
+{
+  "comparisons": [
+    {
+      "asm_boundary": "keypoints/include/pcl/keypoints/impl/iss_3d.hpp / computeISSScatterMatrixRVV",
+      "ba_values": [
+        1.0210663961568331,
+        1.0092413017771618,
+        0.9963766191704467,
+        1.0049019953051592,
+        0.9959583048600895
+      ],
+      "boundary": "public_compute",
+      "case_kind": "production_public",
+      "checksum_equal": true,
+      "checksum_policy": "FNV-1a over public output xyz values quantized at 1e-5 tolerance plus keypoint indices",
+      "evidence_role": "production_public",
+      "gate": "RVV scatter is gated by xyz AoS traits, 32-bit byte offset range and neighbor_count >= 16",
+      "group": "iss_3d_scatter_f64",
+      "iterations": 5,
+      "mask": "no finite mask in this diagnostic; synthetic inputs are finite and neighbor indices are valid",
+      "name": "public_iss_3d_grid_4096",
+      "notes": "Production public benchmark; use it to decide whether the bounded scatter patch is worth adopting.",
+      "point_type": "pcl::PointXYZ",
+      "reduction": "six double covariance accumulators reduced with RVV vector reduction",
+      "row_source": "indexed_neighbor_list",
+      "run_count": 5,
+      "rvv_checksum": "0",
+      "rvv_instr_count": 609,
+      "rvv_ms": 232.1467316,
+      "size": "4096 synthetic PointXYZ grid points, public ISSKeypoint3D::compute() with KdTree search",
+      "solve": false,
+      "source_logs": [
+        "log/board/repeated_phase010_production_public/run_01/analyze_bench_compare.log",
+        "log/board/repeated_phase010_production_public/run_02/analyze_bench_compare.log",
+        "log/board/repeated_phase010_production_public/run_03/analyze_bench_compare.log",
+        "log/board/repeated_phase010_production_public/run_04/analyze_bench_compare.log",
+        "log/board/repeated_phase010_production_public/run_05/analyze_bench_compare.log"
+      ],
+      "std_checksum": "0",
+      "std_ms": 233.4171736,
+      "timer_boundary": "public compute(); includes KdTree radius search, scatter matrix, Eigen EVD, NMS and output construction",
+      "warmup_iterations": 1,
+      "wrapper": "keypoints/include/pcl/keypoints/impl/iss_3d.hpp"
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "asm_path": "build/asm/riscv/bench_iss_3d_rvv.asm",
+    "asm_sha256": "8088a53cc7958b8902ba293c6d773a4f8ea308a9ce7e157b4727f504af45ffd4",
+    "collected_runs": 5,
+    "decision_bucket": "neutral",
+    "evidence_role": "production_public",
+    "expected_runs": 5,
+    "run_label": "iss_3d_phase010_production_public_repeated",
+    "summary_path": "log/board/repeated_phase010_production_public/summary.md",
+    "title": "ISS 3D production public repeated board summary"
+  }
+}

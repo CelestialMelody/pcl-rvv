@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "asm_path": "build/asm/riscv/bench_iss_3d_rvv.asm",
+    "asm_sha256": "097027855c65ff511d479a0081375d1b1abdae605e4eecd87b1244650da80f24",
+    "collected_runs": 5,
+    "decision_bucket": "unstable",
+    "evidence_role": "diagnostic",
+    "expected_runs": 5,
+    "run_label": "iss_3d_phase000_scatter_f64_repeated",
+    "summary_path": "log/board/repeated_phase000_scatter_f64/summary.md",
+    "title": "ISS 3D scatter f64 diagnostic repeated board summary"
+  },
+  "result": {
+    "errors": 0,
+    "warnings": 3,
+    "suggestions": 6
+  },
+  "issues": [
+    {
+      "severity": "SUGGESTION",
+      "signal": "environment_metadata_missing",
+      "case": "scatter_contiguous_256",
+      "observed_pattern": "缺少环境字段：device, taskset, governor, freq, temperature",
+      "why_suspicious": "环境字段缺失不会必然推翻结果，但会削弱对长尾、run-to-run 反转和异常值的解释能力。",
+      "possible_non_bug_explanations": "可能当前板卡环境固定，worker 没有重复记录。",
+      "possible_bug_or_evidence_issues": "也可能温度、governor、频率或绑核变化影响了异常点。",
+      "recommended_checks": "下次采集记录 taskset、governor、freq、temperature、device / VLEN；必要时把环境摘要写入 board summary。",
+      "conclusion_policy": "若没有其它异常，可继续，但 Handoff 应说明环境 metadata 边界。"
+    },
+    {
+      "severity": "SUGGESTION",
+      "signal": "binary_identity_missing",
+      "case": "scatter_contiguous_256",
+      "observed_pattern": "缺少 binary_hash 或等价二进制身份字段。",
+      "why_suspicious": "没有二进制身份时，难以排除旧 binary、旧日志或不同编译选项混入。",
+      "possible_non_bug_explanations": "可能当前 summary 的命令已经足够复现。",
+      "possible_bug_or_evidence_issues": "也可能 raw log 来自不同 build，尤其是多轮远端板卡采集。",
+      "recommended_checks": "在 repeated board summary 或 manifest 中记录 binary hash / git tree / build label；发现冲突时清理旧日志后重跑。",
+      "conclusion_policy": "不是单独阻塞项，但遇到方向反转或长尾时应优先补齐。"
+    },
+    {
+      "severity": "SUGGESTION",
+      "signal": "environment_metadata_missing",
+      "case": "scatter_indexed_256",
+      "observed_pattern": "缺少环境字段：device, taskset, governor, freq, temperature",
+      "why_suspicious": "环境字段缺失不会必然推翻结果，但会削弱对长尾、run-to-run 反转和异常值的解释能力。",
+      "possible_non_bug_explanations": "可能当前板卡环境固定，worker 没有重复记录。",
+      "possible_bug_or_evidence_issues": "也可能温度、governor、频率或绑核变化影响了异常点。",
+      "recommended_checks": "下次采集记录 taskset、governor、freq、temperature、device / VLEN；必要时把环境摘要写入 board summary。",
+      "conclusion_policy": "若没有其它异常，可继续，但 Handoff 应说明环境 metadata 边界。"
+    },
+    {
+      "severity": "SUGGESTION",
+      "signal": "binary_identity_missing",
+      "case": "scatter_indexed_256",
+      "observed_pattern": "缺少 binary_hash 或等价二进制身份字段。",
+      "why_suspicious": "没有二进制身份时，难以排除旧 binary、旧日志或不同编译选项混入。",
+      "possible_non_bug_explanations": "可能当前 summary 的命令已经足够复现。",
+      "possible_bug_or_evidence_issues": "也可能 raw log 来自不同 build，尤其是多轮远端板卡采集。",
+      "recommended_checks": "在 repeated board summary 或 manifest 中记录 binary hash / git tree / build label；发现冲突时清理旧日志后重跑。",
+      "conclusion_policy": "不是单独阻塞项，但遇到方向反转或长尾时应优先补齐。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "ba_degradation_frequency",
+      "case": "scatter_indexed_256",
+      "observed_pattern": "B/A values=0.691x, 1.63x, 1.68x, 1.67x, 1.62x；1/5 低于 1。",
+      "why_suspicious": "平均或 median 正向不能掩盖退化频率；高频退化说明候选不稳定或 case 分布被少数值主导。",
+      "possible_non_bug_explanations": "可能是测量噪声、温度 / 频率波动、输入局部性变化或 run 数不足。",
+      "possible_bug_or_evidence_issues": "也可能是候选在某些点型、规模、row source、mask 或 reduction 路径上真实退化。",
+      "recommended_checks": "报告退化频率；必要时扩大 runs，按 point type / size / row source 分组，检查 trace 和 asm attribution。",
+      "conclusion_policy": "退化频率未解释前，不能只写 median / mean 正向；若高于阈值，production 结论应降级或阻塞。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "long_tail_or_variance",
+      "case": "scatter_indexed_256",
+      "observed_pattern": "min=0.691x, median=1.63x, max=1.68x，max/min=2.44。",
+      "why_suspicious": "长尾说明单一均值不足以描述稳定性，异常值可能改变接入判断。",
+      "possible_non_bug_explanations": "可能是板卡温度、频率、调度、缓存状态或 run 顺序导致。",
+      "possible_bug_or_evidence_issues": "也可能是候选存在数据相关分支、fallback、spill/reload 或内存带宽拐点。",
+      "recommended_checks": "查看 per-iteration trace、温度 / governor / freq / taskset；必要时扩大到 20-run 或 50-run。",
+      "conclusion_policy": "可以继续分析，但 summary 必须保留 min/median/max 和长尾解释，不能先验剔除异常。"
+    },
+    {
+      "severity": "SUGGESTION",
+      "signal": "environment_metadata_missing",
+      "case": "scatter_indexed_tail_73",
+      "observed_pattern": "缺少环境字段：device, taskset, governor, freq, temperature",
+      "why_suspicious": "环境字段缺失不会必然推翻结果，但会削弱对长尾、run-to-run 反转和异常值的解释能力。",
+      "possible_non_bug_explanations": "可能当前板卡环境固定，worker 没有重复记录。",
+      "possible_bug_or_evidence_issues": "也可能温度、governor、频率或绑核变化影响了异常点。",
+      "recommended_checks": "下次采集记录 taskset、governor、freq、temperature、device / VLEN；必要时把环境摘要写入 board summary。",
+      "conclusion_policy": "若没有其它异常，可继续，但 Handoff 应说明环境 metadata 边界。"
+    },
+    {
+      "severity": "SUGGESTION",
+      "signal": "binary_identity_missing",
+      "case": "scatter_indexed_tail_73",
+      "observed_pattern": "缺少 binary_hash 或等价二进制身份字段。",
+      "why_suspicious": "没有二进制身份时，难以排除旧 binary、旧日志或不同编译选项混入。",
+      "possible_non_bug_explanations": "可能当前 summary 的命令已经足够复现。",
+      "possible_bug_or_evidence_issues": "也可能 raw log 来自不同 build，尤其是多轮远端板卡采集。",
+      "recommended_checks": "在 repeated board summary 或 manifest 中记录 binary hash / git tree / build label；发现冲突时清理旧日志后重跑。",
+      "conclusion_policy": "不是单独阻塞项，但遇到方向反转或长尾时应优先补齐。"
+    },
+    {
+      "severity": "WARNING",
+      "signal": "group_outlier",
+      "case": "scatter_indexed_tail_73",
+      "observed_pattern": "group=iss_3d_scatter_f64 的组内 median=1.63x；当前 case median=1.23x，偏离 24.6%。",
+      "why_suspicious": "同组 point type / size / row source 中单个 case 明显偏离，说明结论可能不应按组整体外推。",
+      "possible_non_bug_explanations": "可能是点型 layout、AoS stride、字段 offset、缓存局部性或测量噪声不同。",
+      "possible_bug_or_evidence_issues": "也可能是该 case 的 gate、mask、fallback、row source 或 asm boundary 与其它 case 不同。",
+      "recommended_checks": "按 point type / size / row source 分开报告；检查 metadata、trace 和 asm attribution，必要时收窄 production gate。",
+      "conclusion_policy": "未解释前，不能把其它 case 的收益直接继承到该 case。"
+    }
+  ]
+}
