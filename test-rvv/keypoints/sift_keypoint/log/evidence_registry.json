@@ -1,0 +1,378 @@
+{
+  "files": {
+    "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.json": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 1 --warmup-iterations 0 --emit-public-trace",
+      "doc_refs": [
+        "doc/phases/010-production-full-gaussian-rvv/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/sift_keypoint-RVV.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788070665,
+      "related": {
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.md"
+      },
+      "run_label": "sift_keypoint_phase010_public_compute_public_trace",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788070665600828422,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.json",
+        "sha256": "sha256:e965aca17dabe1e780a43ab46864a377b7d0b089ab11d6c4e576aac7c69633a2",
+        "size": 547
+      },
+      "target": "compare_public_trace"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.md": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 1 --warmup-iterations 0 --emit-public-trace",
+      "doc_refs": [
+        "doc/phases/010-production-full-gaussian-rvv/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/sift_keypoint-RVV.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788070665,
+      "related": {
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.md"
+      },
+      "run_label": "sift_keypoint_phase010_public_compute_public_trace",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788070665600828422,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.md",
+        "sha256": "sha256:4aaf99f45f2d6dac6403458e15675d19376349fad392019071ad8e36d8bb6792",
+        "size": 515
+      },
+      "target": "compare_public_trace"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 50 --warmup-iterations 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-gaps/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788061323,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/summary.md"
+      },
+      "run_label": "sift_keypoint_phase000_scale_space_profile_prerequisite_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788061323098815266,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.json",
+        "sha256": "sha256:35f02a8f59d1219a4667c7da8a6e27b862005e379a2b155209e9033c2cb79d0a",
+        "size": 5188
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 50 --warmup-iterations 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-gaps/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788061323,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/summary.md"
+      },
+      "run_label": "sift_keypoint_phase000_scale_space_profile_prerequisite_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788061323097815280,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.md",
+        "sha256": "sha256:7282c8870fbe996ae0d4af1e576123996f7e4427721d2ec2ffe1c77877f40a39",
+        "size": 5033
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 50 --warmup-iterations 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-gaps/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788061323,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/summary.md"
+      },
+      "run_label": "sift_keypoint_phase000_scale_space_profile_prerequisite_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788061323071815650,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_manifest.json",
+        "sha256": "sha256:ce87f91ac5a2af59efe6f491c2fd3b597805517c0b8bf9a2c9dc4173b7069fdc",
+        "size": 7522
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/summary.md": {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 50 --warmup-iterations 5",
+      "doc_refs": [
+        "doc/phases/000-current-state-and-gaps/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md"
+      ],
+      "evidence_role": "diagnostic",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788061323,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/summary.md"
+      },
+      "run_label": "sift_keypoint_phase000_scale_space_profile_prerequisite_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788061323070815664,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/summary.md",
+        "sha256": "sha256:50e9360d13f480b6f3912914ce10c3b707c0debe6fdb3d8f5e155c45daf36965",
+        "size": 787
+      },
+      "target": "board_repeated"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.json": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 5 --warmup-iterations 1",
+      "doc_refs": [
+        "doc/phases/010-production-full-gaussian-rvv/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/sift_keypoint-RVV.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788070058,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md"
+      },
+      "run_label": "sift_keypoint_phase010_public_compute_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788070058306174844,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.json",
+        "sha256": "sha256:d651ea1c6e1508d7b22c48212d11ae9363c1c4bbe2c253e4479a2359d547e70d",
+        "size": 1820
+      },
+      "target": "board_repeated_public"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 5 --warmup-iterations 1",
+      "doc_refs": [
+        "doc/phases/010-production-full-gaussian-rvv/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/sift_keypoint-RVV.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788070058,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md"
+      },
+      "run_label": "sift_keypoint_phase010_public_compute_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788070058305174873,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "sha256": "sha256:4aade82fb82a29902dd6356dd3ff2c1b1d0f85870261e8f25992a3051a4e622d",
+        "size": 2114
+      },
+      "target": "board_repeated_public"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 5 --warmup-iterations 1",
+      "doc_refs": [
+        "doc/phases/010-production-full-gaussian-rvv/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/sift_keypoint-RVV.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788070058,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md"
+      },
+      "run_label": "sift_keypoint_phase010_public_compute_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788070058270175861,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "sha256": "sha256:5b88fbd76f944297c20be46ad4c45354abcf3fd84675dc8ece8bb8a43c4b1d23",
+        "size": 3500
+      },
+      "target": "board_repeated_public"
+    },
+    "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md": {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 5 --warmup-iterations 1",
+      "doc_refs": [
+        "doc/phases/010-production-full-gaussian-rvv/result.zh.md",
+        "doc/sift_keypoint-evaluation.zh.md",
+        "../../../doc-rvv/keypoints/sift_keypoint-RVV.zh.md"
+      ],
+      "evidence_role": "production_public",
+      "freshness_state": "fresh",
+      "recorded_at_epoch": 1788070058,
+      "related": {
+        "doctor_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "manifest_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "summary_path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md"
+      },
+      "run_label": "sift_keypoint_phase010_public_compute_repeated",
+      "state": {
+        "exists": true,
+        "mtime_ns": 1788070058270175861,
+        "path": "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md",
+        "sha256": "sha256:1540eff8fa6cc99f8394747655b754497ddad9a5cb055852b72ef795cfd9d419",
+        "size": 498
+      },
+      "target": "board_repeated_public"
+    }
+  },
+  "runs": [
+    {
+      "backend": "board",
+      "case_filter": "--case-filter all --iterations 50 --warmup-iterations 5",
+      "evidence_role": "diagnostic",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_doctor.md",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/evidence_manifest.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase000_scale_space_profile_prerequisite/summary.md"
+      ],
+      "recorded_at_epoch": 1788061323,
+      "run_label": "sift_keypoint_phase000_scale_space_profile_prerequisite_repeated",
+      "target": "board_repeated"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 3 --warmup-iterations 1",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md"
+      ],
+      "recorded_at_epoch": 1788064625,
+      "run_label": "sift_keypoint_phase010_public_compute_repeated",
+      "target": "board_repeated_public"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 5 --warmup-iterations 1",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md"
+      ],
+      "recorded_at_epoch": 1788066771,
+      "run_label": "sift_keypoint_phase010_public_compute_repeated",
+      "target": "board_repeated_public"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 5 --warmup-iterations 1",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md"
+      ],
+      "recorded_at_epoch": 1788067456,
+      "run_label": "sift_keypoint_phase010_public_compute_repeated",
+      "target": "board_repeated_public"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 1 --warmup-iterations 0 --emit-public-trace",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.md"
+      ],
+      "recorded_at_epoch": 1788068092,
+      "run_label": "sift_keypoint_phase010_public_compute_public_trace",
+      "target": "compare_public_trace"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 5 --warmup-iterations 1",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_doctor.md",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/evidence_manifest.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/repeated_phase010_public_compute/summary.md"
+      ],
+      "recorded_at_epoch": 1788070058,
+      "run_label": "sift_keypoint_phase010_public_compute_repeated",
+      "target": "board_repeated_public"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 1 --warmup-iterations 0 --emit-public-trace",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.md"
+      ],
+      "recorded_at_epoch": 1788070084,
+      "run_label": "sift_keypoint_phase010_public_compute_public_trace",
+      "target": "compare_public_trace"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 1 --warmup-iterations 0 --emit-public-trace",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.md"
+      ],
+      "recorded_at_epoch": 1788070533,
+      "run_label": "sift_keypoint_phase010_public_compute_public_trace",
+      "target": "compare_public_trace"
+    },
+    {
+      "backend": "board",
+      "case_filter": "--mode public --case-filter public_sift_keypoint_320x240 --iterations 1 --warmup-iterations 0 --emit-public-trace",
+      "evidence_role": "production_public",
+      "files": [
+        "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.json",
+        "test-rvv/keypoints/sift_keypoint/log/board/public_trace_phase010_public_compute/public_trace_compare.md"
+      ],
+      "recorded_at_epoch": 1788070665,
+      "run_label": "sift_keypoint_phase010_public_compute_public_trace",
+      "target": "compare_public_trace"
+    }
+  ],
+  "schema_version": 1,
+  "updated_at_epoch": 1788070665
+}

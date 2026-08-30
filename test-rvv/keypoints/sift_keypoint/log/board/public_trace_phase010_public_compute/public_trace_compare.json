@@ -1,0 +1,24 @@
+{
+  "case": "public_sift_keypoint_320x240",
+  "compared_points": 116,
+  "first_mismatches": [],
+  "first_rvv_only_points": [],
+  "first_std_only_points": [],
+  "in_order_mismatch_count": 0,
+  "max_abs_diff": {
+    "scale": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0
+  },
+  "quantized_multiset_common": 116,
+  "quantized_multiset_rvv_only": 0,
+  "quantized_multiset_std_only": 0,
+  "rvv_count": 116,
+  "rvv_emitted": 116,
+  "rvv_emitted_points": 116,
+  "std_count": 116,
+  "std_emitted": 116,
+  "std_emitted_points": 116,
+  "tolerance": 1e-05
+}

@@ -1,0 +1,70 @@
+{
+  "ab_boundary": "public_entry",
+  "asm_boundary": "sift_keypoint production candidate / rvv computeScaleSpace",
+  "asm_rvv_line_count": 1324,
+  "baseline_asm_boundary": "scalar public compute fallback; no production dispatch expected",
+  "binary_hashes": {
+    "rvv": "sha256:f5638d8e97e1899ea21fc22e4bec4cc0bc65e29141beec38a193a0d94284505c",
+    "std": "sha256:b38bf8e1a157dc4f3143376bd79be31e1490813a15bef2b92c6aa6e27f14dfd0"
+  },
+  "case_kind": "production_public",
+  "collected_runs": 5,
+  "comparisons": [
+    {
+      "below_one": 0,
+      "case_kind": "production_public",
+      "checksum_rvv": "7852739974438353910",
+      "checksum_std": "7852739974438353910",
+      "decision_bucket": "positive",
+      "evidence_role": "production_public",
+      "group": "sift_public_compute",
+      "iterations": 5,
+      "keypoints": 116,
+      "metadata": {
+        "asm_boundary": "keypoints/include/pcl/keypoints/impl/sift_keypoint.hpp computeScaleSpace RVV helper",
+        "boundary": "public SIFTKeypoint::compute() / organized cloud",
+        "checksum": "7852739974438353910",
+        "checksum_policy": "public output checksum, warm-up excluded from final timed average",
+        "gate": "__RVV10__ and __riscv_vector build uses RVV helper inside computeScaleSpace; non-RVV build keeps scalar path",
+        "mask": "organized cloud inputs are finite; RVV lane mask only trims the tail chunk inside computeScaleSpace",
+        "reduction": "Gaussian weights, numerator / denominator reductions and DoG subtraction",
+        "row_source": "organized dense public cloud",
+        "rvv_ms": 9842.9676482,
+        "solve": false,
+        "timer_boundary": "public SIFTKeypoint::compute() on organized dense input; includes downsample, radiusSearch, scale-space, extrema and output assembly",
+        "wrapper": "test-rvv/keypoints/sift_keypoint/src/bench_sift_keypoint.cpp"
+      },
+      "name": "public_sift_keypoint_320x240",
+      "point_type": "PointXYZI organized cloud",
+      "row_source": "organized dense public cloud",
+      "run_count": 5,
+      "rvv_chunks": 0,
+      "rvv_ms": 9842.9676482,
+      "size": "320x240 organized synthetic cloud",
+      "speedup_max": 1.3098321272487536,
+      "speedup_median": 1.30857195778425,
+      "speedup_min": 1.304152874797401,
+      "speedup_p10": 1.3043495309374773,
+      "speedup_p90": 1.3093603164780387,
+      "std_ms": 12866.393476,
+      "warmup_iterations": 1
+    }
+  ],
+  "evidence_role": "production_public",
+  "expected_runs": 5,
+  "notes": "Production public compute evidence after RVV scale-space patch; public API unchanged.",
+  "point_type": "PointXYZI organized cloud",
+  "run_label": "sift_keypoint_phase010_public_compute_repeated",
+  "schema_version": 1,
+  "summary_output": "log/board/repeated_phase010_public_compute/summary.md",
+  "summary_paths": [
+    "log/board/repeated_phase010_public_compute/run_01/analyze_bench_compare.log",
+    "log/board/repeated_phase010_public_compute/run_02/analyze_bench_compare.log",
+    "log/board/repeated_phase010_public_compute/run_03/analyze_bench_compare.log",
+    "log/board/repeated_phase010_public_compute/run_04/analyze_bench_compare.log",
+    "log/board/repeated_phase010_public_compute/run_05/analyze_bench_compare.log"
+  ],
+  "summary_role": "production_public",
+  "timer_boundary": "public SIFTKeypoint::compute() on organized dense input; includes downsample, radiusSearch, scale-space, extrema and output assembly",
+  "title": "SIFT public compute repeated board summary"
+}
